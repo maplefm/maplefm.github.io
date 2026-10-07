@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guild FM Prices</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}html{color-scheme:light}body{margin:0}[hidden]{display:none!important}
+/* Layout: one ledger. A quiet header line with scan facts, a control row, then a single dense price table. */
+:root {
+  --bg: #f3f5f4; --panel: #ffffff; --line: #d9dfdc; --fg: #1b2421; --muted: #5d6b66;
+  --meso: #a8740f; --meso-soft: #f4e8cc; --sold: #b2452f; --row: #f7f9f8;
+  --display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121816; --panel: #1a2220; --line: #2c3834; --fg: #e6ece9; --muted: #93a39d;
+  --meso: #e2b24a; --meso-soft: #3a2f14; --sold: #ee8168; --row: #1f2926; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121816; --panel: #1a2220; --line: #2c3834; --fg: #e6ece9; --muted: #93a39d;
+  --meso: #e2b24a; --meso-soft: #3a2f14; --sold: #ee8168; --row: #1f2926; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.45; padding-inline: 16px; padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin-inline: auto; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.1; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 65ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--muted); font-size: 0.9rem; }
+.facts b { color: var(--fg); font-family: var(--mono); font-weight: 500; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.controls input[type="search"], .controls select { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.controls input[type="search"] { flex: 1 1 200px; }
+.controls label.check { display: flex; gap: 7px; align-items: center; color: var(--muted); font-size: 0.92rem; }
+:focus-visible { outline: 2px solid var(--meso); outline-offset: 2px; }
+.scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; }
+thead th { font-size: 0.72rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); }
+thead button { all: unset; cursor: pointer; }
+thead button:hover, thead button[aria-sort] { color: var(--fg); }
+thead button[aria-sort="descending"]::after { content: " \2193"; }
+thead button[aria-sort="ascending"]::after { content: " \2191"; }
+tbody tr:nth-child(even) { background: var(--row); }
+tbody td { border-top: 1px solid var(--line); font-family: var(--mono); font-size: 0.9rem; }
+tbody td:first-child { font-family: var(--body); font-weight: 500; font-size: 0.95rem; }
+td.rate { color: var(--meso); font-weight: 500; }
+td.rate span { background: var(--meso-soft); padding: 2px 7px; border-radius: 4px; }
+td .sold { color: var(--sold); }
+tr.thin td:first-child { font-weight: 400; color: var(--muted); }
+.note { color: var(--muted); font-size: 0.9rem; margin: 0; max-width: 70ch; }
+.empty { padding: 34px 20px; text-align: center; color: var(--muted); }
+.empty strong { display: block; color: var(--fg); font-family: var(--display); font-size: 1.15rem; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Guild FM Prices</h1>
+    <p class="sub">Going rates in the MapleStory Classic Free Market, built from shop scans. The going rate is the median asking price per unit. An item shows up once it has been seen in at least 5 listings. Updated after each scan.</p>
+  </header>
+
+  <div class="facts" id="facts"></div>
+
+  <div class="controls">
+    <input type="search" id="q" placeholder="Search items" aria-label="Search items">
+    <select id="win" aria-label="Time window">
+      <option value="7">Last 7 days</option>
+      <option value="0">Latest scan only</option>
+      <option value="30">Last 30 days</option>
+      <option value="9999">All scans</option>
+    </select>
+    <label class="check"><input type="checkbox" id="thin"> Show items seen fewer than 5 times</label>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <thead><tr>
+        <th><button data-k="item">Item</button></th>
+        <th><button data-k="med">Going rate</button></th>
+        <th><button data-k="lo">Low</button></th>
+        <th><button data-k="hi">High</button></th>
+        <th><button data-k="n">Listings</button></th>
+        <th><button data-k="sold">Sold out</button></th>
+        <th><button data-k="last">Last seen</button></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty"><strong>Loading scans</strong>Prices appear here after the first Free Market scan is logged.</div>
+  </div>
+
+  <p class="note" id="note"></p>
+</div>
+
+<script id="scan-data" type="application/json">[{"at":"2026-10-07T17:36:00-04:00","rows":[{"s":"EvilPatrick","i":"Garnet Ore","p":2666,"q":1},{"s":"EvilPatrick","i":"Bronze Ore","p":400,"q":1},{"s":"EvilPatrick","i":"Iron Ore","p":400,"q":1},{"s":"EvilPatrick","i":"Silver Ore","p":400,"q":1},{"s":"EvilPatrick","i":"Fragment of Magic","p":888,"q":1},{"s":"EvilPatrick","i":"Squishy Liquid","p":50,"q":1},{"s":"FlyingSofa","i":"Cat Suit","p":5555,"q":1},{"s":"FlyingSofa","i":"White Jeans","p":4999,"q":1},{"s":"FlyingSofa","i":"Black Enamel Shoes","p":4999,"q":1},{"s":"FlyingSofa","i":"Orange Baseball Jacket","p":5999,"q":1},{"s":"FlyingSofa","i":"Tourist T","p":5999,"q":1},{"s":"FlyingSofa","i":"Bronze Ingot","p":2000,"q":1},{"s":"Isokaas","i":"Cat Hat","p":3999,"q":1,"so":true},{"s":"Isokaas","i":"Cat Hat","p":3999,"q":1},{"s":"Isokaas","i":"Blue Bucket Hat","p":3999,"q":1,"so":true},{"s":"Isokaas","i":"Patissier Hat","p":3999,"q":1},{"s":"Isokaas","i":"Beret","p":3999,"q":1},{"s":"Isokaas","i":"Reggae Hat","p":15999,"q":1},{"s":"Isokaas","i":"Yellow Spatula","p":5999,"q":1},{"s":"Isokaas","i":"Yellow Spatula","p":5999,"q":1},{"s":"Isokaas","i":"Blue Watch","p":2999,"q":1,"so":true},{"s":"Isokaas","i":"Red Trainer Pants","p":4999,"q":1},{"s":"Isokaas","i":"Yellow Rainbow Sneaks","p":3999,"q":1,"so":true},{"s":"Isokaas","i":"Toga","p":5999,"q":1,"so":true},{"s":"Dharc","i":"Bronze Ore","p":399,"q":1},{"s":"Dharc","i":"Iron Ore","p":449,"q":1},{"s":"Dharc","i":"Diamond Ore","p":599,"q":1},{"s":"Dharc","i":"Sapphire Ore","p":299,"q":1},{"s":"Dharc","i":"Aquamarine Ore","p":299,"q":1,"so":true},{"s":"Dharc","i":"Mithril Ore","p":299,"q":1},{"s":"Dharc","i":"Emerald Ore","p":699,"q":1},{"s":"Dharc","i":"Silver Ore","p":299,"q":1},{"s":"Dharc","i":"Orihalcon Ore","p":299,"q":1},{"s":"Dharc","i":"Iron Ingot","p":2499,"q":1},{"s":"Dharc","i":"Bronze Ingot","p":999,"q":1},{"s":"Dharc","i":"Opal Ore","p":599,"q":1},{"s":"Nolppo","i":"Slime Bubble","p":250,"q":1},{"s":"Nolppo","i":"Mushroom Spore","p":50,"q":1},{"s":"Nolppo","i":"Squishy Liquid","p":200,"q":1},{"s":"Nolppo","i":"Leather","p":500,"q":1},{"s":"Nolppo","i":"Orihalcon Ore","p":750,"q":1},{"s":"Nolppo","i":"Mithril Ore","p":750,"q":1},{"s":"Twinkie","i":"Kitty Chat Ring","p":8999,"q":1},{"s":"Twinkie","i":"Red Sailor Shirt","p":4499,"q":1,"so":true},{"s":"Twinkie","i":"Beetle Long Sleeve","p":3499,"q":1},{"s":"Twinkie","i":"Butterfly Skirt","p":3499,"q":1},{"s":"Twinkie","i":"Ripped Jeans","p":6999,"q":1},{"s":"Twinkie","i":"Toga","p":12999,"q":1},{"s":"luckmama","i":"Double Axe","p":3500,"q":1},{"s":"luckmama","i":"Orange Mushroom Cap","p":88,"q":1},{"s":"luckmama","i":"Slime Bubble","p":222,"q":1},{"s":"luckmama","i":"Snail Shell","p":66,"q":1},{"s":"luckmama","i":"Squishy Liquid","p":77,"q":1},{"s":"luckmama","i":"Mushroom Spore","p":88,"q":1},{"s":"r00na","i":"Bronze Ore","p":288,"q":1,"so":true},{"s":"r00na","i":"Silver Ore","p":288,"q":1,"so":true},{"s":"r00na","i":"Opal Ore","p":388,"q":1},{"s":"r00na","i":"Mithril Ore","p":348,"q":1},{"s":"r00na","i":"Orihalcon Ore","p":288,"q":1},{"s":"r00na","i":"Gold Ore","p":348,"q":1},{"s":"r00na","i":"Topaz Ore","p":288,"q":1},{"s":"r00na","i":"Aquamarine Ore","p":288,"q":1,"so":true},{"s":"r00na","i":"Pig's Ribbon","p":88,"q":1},{"s":"r00na","i":"Pig's Head","p":238,"q":1},{"s":"r00na","i":"Stiff Feather","p":148,"q":1},{"s":"r00na","i":"Leather","p":308,"q":1},{"s":"ValarMv","i":"Blue Wizardry Hat","p":2999,"q":1,"so":true},{"s":"ValarMv","i":"Sandblasted Jeans","p":2999,"q":1},{"s":"ValarMv","i":"Red Sailor Shirt","p":4499,"q":1},{"s":"ValarMv","i":"Garnet Ore","p":4499,"q":1},{"s":"ValarMv","i":"Slime Bubble","p":398,"q":1},{"s":"ValarMv","i":"Squishy Liquid","p":128,"q":1},{"s":"LOADING","i":"Gold Kitty Slippers","p":7000,"q":1,"so":true},{"s":"LOADING","i":"Gold Kitty Slippers","p":7000,"q":1},{"s":"LOADING","i":"Lined Hip-Hop Pants","p":4000,"q":1,"so":true},{"s":"LOADING","i":"Blue Bucket Hat","p":4000,"q":1,"so":true},{"s":"LOADING","i":"White Ribboned Sailor D (name cut off)","p":4000,"q":1,"so":true},{"s":"LOADING","i":"Meshcap","p":4000,"q":1},{"s":"ShiromiYui","i":"Purple Dorothy Dress","p":18888,"q":1},{"s":"ShiromiYui","i":"Splash Choco Boy","p":200000,"q":1},{"s":"ShiromiYui","i":"Butterfly Skirt","p":18888,"q":1},{"s":"ShiromiYui","i":"Meshcap","p":18888,"q":1},{"s":"ShiromiYui","i":"Blue Cap","p":18888,"q":1},{"s":"ShiromiYui","i":"Yellow Rainbow Sneaks","p":18888,"q":1},{"s":"ShiromiYui","i":"Cherub's Bow","p":28888,"q":1},{"s":"ShiromiYui","i":"Arrows for Bows","p":1,"q":1,"so":true},{"s":"ShiromiYui","i":"Arrows for Crossbows","p":1,"q":1},{"s":"ShiromiYui","i":"Beige Nitty","p":2000,"q":1,"so":true},{"s":"ShiromiYui","i":"Iron Ingot","p":3000,"q":1},{"s":"ShiromiYui","i":"Bronze Ingot","p":2888,"q":1},{"s":"Ghos","i":"Fish Spear","p":25000,"q":1},{"s":"Ghos","i":"Slime Bubble","p":128,"q":1},{"s":"Ghos","i":"Garnet Ore","p":1100,"q":1,"so":true},{"s":"Ghos","i":"Orihalcon Ore","p":299,"q":1},{"s":"Ghos","i":"Iron Ore","p":299,"q":1,"so":true},{"s":"Ghos","i":"Sapphire Ore","p":299,"q":1},{"s":"Ghos","i":"Mithril Ore","p":500,"q":1},{"s":"Ghos","i":"Gold Ore","p":500,"q":1},{"s":"Ghos","i":"Bronze Ore","p":299,"q":1},{"s":"Ghos","i":"Leather","p":300,"q":1},{"s":"Ghos","i":"Silver Ore","p":299,"q":1},{"s":"Ghos","i":"Emerald Ore","p":299,"q":1},{"s":"Girro","i":"Blue Training Shirt","p":1800,"q":1,"so":true},{"s":"Girro","i":"Metal Axe","p":2000,"q":1},{"s":"Girro","i":"Sapphire Ore","p":2000,"q":1},{"s":"Girro","i":"Orihalcon Ore","p":2500,"q":1},{"s":"Girro","i":"Silver Ore","p":450,"q":1},{"s":"Girro","i":"Green Mushroom Cap","p":25,"q":1},{"s":"Girro","i":"Squishy Liquid","p":15,"q":1},{"s":"Girro","i":"Gold Ore","p":50000,"q":1},{"s":"Girro","i":"Topaz Ore","p":4000,"q":1},{"s":"Foreign","i":"Orange Toy Hammer","p":25000,"q":1},{"s":"Foreign","i":"Yellow Spatula","p":20000,"q":1},{"s":"Foreign","i":"Blue Watch","p":20000,"q":1},{"s":"Foreign","i":"Purple Dorothy Dress","p":5000,"q":1},{"s":"Foreign","i":"Butterfly Skirt","p":5000,"q":1},{"s":"Foreign","i":"Red Sailor Skirt","p":5000,"q":1},{"s":"Goosert","i":"Selective 5-slot Coupon","p":6000,"q":1},{"s":"Goosert","i":"Patissier Hat","p":1000,"q":1},{"s":"Goosert","i":"Bunny Earmuffs","p":4000,"q":1},{"s":"Goosert","i":"Orange Baseball Jacket","p":3000,"q":1},{"s":"Goosert","i":"Blue Bucket Hat","p":1500,"q":1},{"s":"Goosert","i":"Tourist T","p":5000,"q":1},{"s":"Goosert","i":"Red Sailor Shirt","p":2000,"q":1},{"s":"Goosert","i":"Red Sailor Skirt","p":2000,"q":1},{"s":"Goosert","i":"Ripped Jeans","p":5000,"q":1},{"s":"Lagolas","i":"Black Knucklevest Pants","p":19999,"q":1},{"s":"Lagolas","i":"Dagger Attack Scroll: Inter (name cut off)","p":99999,"q":1},{"s":"Lagolas","i":"Hat Accuracy Scroll: Lesser","p":9999,"q":1},{"s":"Lagolas","i":"Leather","p":499,"q":1},{"s":"Lagolas","i":"Slime Bubble","p":499,"q":1},{"s":"Lagolas","i":"Iron Ore","p":499,"q":1},{"s":"Lagolas","i":"Silver Ore","p":499,"q":1},{"s":"Lagolas","i":"Mithril Ore","p":699,"q":1},{"s":"Lagolas","i":"Bronze Ore","p":449,"q":1},{"s":"Lagolas","i":"Amethyst Ore","p":999,"q":1},{"s":"Lagolas","i":"Gold Ore","p":1199,"q":1},{"s":"Lagolas","i":"Arrows for Crossbows","p":1,"q":1},{"s":"Maphisto","i":"Bronze Ore","p":599,"q":1},{"s":"Maphisto","i":"Bronze Ingot","p":2999,"q":1},{"s":"Maphisto","i":"Iron Ingot","p":3499,"q":1},{"s":"Maphisto","i":"Pig's Head","p":999,"q":1},{"s":"Maphisto","i":"Leather","p":399,"q":1},{"s":"AfterImage","i":"Iron Ingot","p":3000,"q":1,"so":true},{"s":"AfterImage","i":"Bronze Ingot","p":3000,"q":1},{"s":"AfterImage","i":"Orihalcon Ore","p":600,"q":1},{"s":"AfterImage","i":"Mithril Ore","p":600,"q":1,"so":true},{"s":"AfterImage","i":"Slime Bubble","p":350,"q":1},{"s":"AfterImage","i":"Silver Ore","p":600,"q":1},{"s":"AfterImage","i":"Stiff Feather","p":350,"q":1,"so":true},{"s":"Kouhai","i":"Blue Cap","p":4999,"q":1,"so":true},{"s":"Kouhai","i":"Kitty Chat Ring","p":3999,"q":1,"so":true},{"s":"Kouhai","i":"Red Sailor Shirt","p":7999,"q":1},{"s":"Kouhai","i":"Yellow Rainbow Sneaks","p":2999,"q":1},{"s":"Kouhai","i":"Patissier Hat","p":2499,"q":1,"so":true},{"s":"Kouhai","i":"Patissier Uniform","p":2499,"q":1,"so":true},{"s":"Kouhai","i":"Reggae Hat","p":4599,"q":1},{"s":"Kouhai","i":"Pink Bunny Sweater","p":12999,"q":1,"so":true},{"s":"Kouhai","i":"Gold Kitty Slippers","p":4999,"q":1,"so":true},{"s":"Kouhai","i":"Blue Bucket Hat","p":5999,"q":1},{"s":"Mickeys","i":"Splash Choco Girl","p":200000,"q":1},{"s":"Mickeys","i":"Hat Accuracy Scroll: Lesser","p":8000,"q":1},{"s":"Mickeys","i":"Bottomwear DEF Scroll (tier cut off)","p":6000,"q":1},{"s":"Mickeys","i":"Shoes Jump Scroll: Great (name cut off)","p":15000,"q":1},{"s":"Mickeys","i":"Pet Equip Speed Scroll (tier cut off)","p":10000,"q":1},{"s":"Mickeys","i":"Earring LUK Scroll: Inter (name cut off)","p":20000,"q":1},{"s":"Facade","i":"Selective 5-slot Coupon","p":7299,"q":1},{"s":"Facade","i":"Mystery Hair Coupon","p":7999,"q":1,"so":true},{"s":"Facade","i":"Mystery Face Coupon","p":4999,"q":1,"so":true},{"s":"Facade","i":"Garnet Ore","p":1749,"q":1,"so":true},{"s":"Facade","i":"Iron Ore","p":449,"q":1},{"s":"Facade","i":"Bronze Ore","p":333,"q":1},{"s":"Bendysama","i":"Orange Mushroom Balloon","p":13999,"q":1},{"s":"Bendysama","i":"Toga","p":7499,"q":1},{"s":"Bendysama","i":"Kitty Chat Ring","p":6999,"q":1},{"s":"Bendysama","i":"Sailor Outfit","p":4999,"q":1},{"s":"Bendysama","i":"Cat Hat","p":4999,"q":1},{"s":"Bendysama","i":"Bronze Ore","p":750,"q":1},{"s":"Bendysama","i":"Iron Ore","p":1200,"q":1},{"s":"bl33d","i":"Bunny Ears","p":10000,"q":1,"so":true},{"s":"bl33d","i":"Dollish Pink","p":7500,"q":1,"so":true},{"s":"bl33d","i":"Cat Hat","p":3500,"q":1},{"s":"bl33d","i":"Cat Suit","p":4000,"q":1},{"s":"bl33d","i":"Gold Kitty Slippers","p":3000,"q":1,"so":true},{"s":"bl33d","i":"Orange Mushroom Balloon","p":5000,"q":1,"so":true},{"s":"bl33d","i":"Toga","p":5000,"q":1},{"s":"bl33d","i":"Kitty Chat Ring","p":8000,"q":1},{"s":"NoWaifu","i":"Red Trainer Pants","p":4000,"q":1},{"s":"NoWaifu","i":"Purple Dorothy Dress","p":4000,"q":1},{"s":"NoWaifu","i":"Blue Watch","p":4000,"q":1,"so":true},{"s":"NoWaifu","i":"Meshcap","p":5000,"q":1},{"s":"NoWaifu","i":"Red Trainer Jacket","p":4000,"q":1},{"s":"NoWaifu","i":"Bunny Ears","p":15000,"q":1},{"s":"Cyduck","i":"Black Sunglasses","p":13000,"q":1},{"s":"Cyduck","i":"Red Check Rider","p":9999,"q":1,"so":true},{"s":"Cyduck","i":"Silver Ore","p":300,"q":1},{"s":"Cyduck","i":"Orihalcon Ore","p":300,"q":1},{"s":"Cyduck","i":"Gold Ore","p":300,"q":1},{"s":"Cyduck","i":"Sapphire Ore","p":300,"q":1},{"s":"Cyduck","i":"Firewood","p":85,"q":1},{"s":"Cyduck","i":"Leather","p":200,"q":1},{"s":"Cyduck","i":"Mithril Ore","p":300,"q":1,"so":true},{"s":"Cyduck","i":"Arrows for Crossbows","p":2,"q":1},{"s":"Cyduck","i":"Arrows for Bows","p":2,"q":1},{"s":"Cyduck","i":"Pig's Head","p":450,"q":1},{"s":"Aglaia","i":"Silver Ore","p":499,"q":1},{"s":"Aglaia","i":"Orihalcon Ore","p":399,"q":1},{"s":"Aglaia","i":"Gold Ore","p":1111,"q":1},{"s":"Aglaia","i":"Bronze Ore","p":399,"q":1},{"s":"Aglaia","i":"Leaf","p":50,"q":1},{"s":"Aglaia","i":"Slime Bubble","p":399,"q":1},{"s":"desperate","i":"Meshcap","p":5000,"q":1},{"s":"desperate","i":"Meshcap","p":5000,"q":1},{"s":"desperate","i":"Patissier Uniform","p":5000,"q":1},{"s":"desperate","i":"Kitty Chat Ring","p":10000,"q":1},{"s":"Huffy","i":"Red Trainer Pants","p":3999,"q":1},{"s":"Huffy","i":"White Jeans","p":3999,"q":1,"so":true},{"s":"Huffy","i":"White Jeans","p":3999,"q":1,"so":true},{"s":"Huffy","i":"Orange Hooded Shirt","p":3999,"q":1,"so":true},{"s":"Huffy","i":"Butterfly Skirt","p":3999,"q":1,"so":true},{"s":"Huffy","i":"Cat Suit","p":3499,"q":1,"so":true},{"s":"Huffy","i":"Kitty Chat Ring","p":4499,"q":1,"so":true},{"s":"Huffy","i":"White Hooded Vest","p":6999,"q":1,"so":true},{"s":"Huffy","i":"Hat Accuracy Scroll: Great (name cut off)","p":14999,"q":1},{"s":"Huffy","i":"Set of Match Cards","p":1999,"q":1,"so":true},{"s":"Huffy","i":"Slime & Mushroom Omok (name cut off)","p":1999,"q":1,"so":true},{"s":"Huffy","i":"Orange Mushroom Cap","p":20,"q":1},{"s":"DivineSmite","i":"Baby Angel Wings","p":21000,"q":1},{"s":"DivineSmite","i":"Angel Wand","p":21000,"q":1},{"s":"DivineSmite","i":"Slime Slippers","p":21000,"q":1},{"s":"DivineSmite","i":"Kitty Chat Ring","p":11000,"q":1},{"s":"DivineSmite","i":"Cat Suit","p":5999,"q":1},{"s":"DivineSmite","i":"Cat Hat","p":5999,"q":1},{"s":"DivineSmite","i":"Ripped Jeans","p":5999,"q":1},{"s":"DivineSmite","i":"Red Sailor Shirt","p":5999,"q":1},{"s":"DivineSmite","i":"Orange Baseball Jacket","p":4999,"q":1},{"s":"DivineSmite","i":"Blue Watch","p":4999,"q":1,"so":true},{"s":"FirePowah","i":"Blue Qi Pao","p":3000,"q":1},{"s":"FirePowah","i":"Wooden Buckler","p":2000,"q":1},{"s":"FirePowah","i":"Bronze Ingot","p":1500,"q":1},{"s":"FirePowah","i":"Orihalcon Ore","p":999,"q":1},{"s":"FirePowah","i":"Bronze Ore","p":500,"q":1},{"s":"FirePowah","i":"Silver Ore","p":500,"q":1},{"s":"FirePowah","i":"Iron Ore","p":500,"q":1,"so":true},{"s":"FirePowah","i":"Mithril Ore","p":800,"q":1},{"s":"FirePowah","i":"Gold Ore","p":999,"q":1},{"s":"FirePowah","i":"Iron Ingot","p":1500,"q":1,"so":true},{"s":"FirePowah","i":"Leaf","p":100,"q":1},{"s":"FirePowah","i":"Slime Bubble","p":150,"q":1,"so":true},{"s":"harpie","i":"Cat Hat","p":3999,"q":1,"so":true},{"s":"harpie","i":"Blue Bucket Hat","p":3999,"q":1,"so":true},{"s":"harpie","i":"Blue Bucket Hat","p":3999,"q":1,"so":true},{"s":"harpie","i":"Meshcap","p":3999,"q":1,"so":true},{"s":"harpie","i":"Beret","p":3999,"q":1,"so":true},{"s":"harpie","i":"Slime Earrings","p":9999,"q":1,"so":true},{"s":"harpie","i":"Ripped Jeans","p":3999,"q":1,"so":true},{"s":"harpie","i":"Yellow Rainbow Sneaks","p":3499,"q":1,"so":true},{"s":"harpie","i":"Kitty Chat Ring","p":11999,"q":1},{"s":"harpie","i":"Cherub's Bow","p":7999,"q":1,"so":true},{"s":"harpie","i":"Blue Watch","p":3499,"q":1,"so":true},{"s":"harpie","i":"Red Trainer Pants","p":3999,"q":1},{"s":"Ghostly","i":"Patissier Uniform","p":9999,"q":1},{"s":"Ghostly","i":"Patissier Uniform","p":9999,"q":1},{"s":"Ghostly","i":"Pig's Head","p":800,"q":1},{"s":"Ghostly","i":"Iron Ore","p":500,"q":1,"so":true},{"s":"Ghostly","i":"Orihalcon Ore","p":500,"q":1},{"s":"Ghostly","i":"Silver Ore","p":500,"q":1},{"s":"Ghostly","i":"Bronze Ore","p":500,"q":1,"so":true},{"s":"Ghostly","i":"Orange Mushroom Cap","p":50,"q":1},{"s":"Ghostly","i":"Green Mushroom Cap","p":50,"q":1},{"s":"Ghostly","i":"Mithril Ore","p":999,"q":1},{"s":"Ghostly","i":"Leaf","p":100,"q":1},{"s":"Ghostly","i":"Squishy Liquid","p":50,"q":1},{"s":"TwoThirtyTwo","i":"Pan Lid","p":49999,"q":1},{"s":"TwoThirtyTwo","i":"Composite Bow","p":5499,"q":1,"so":true},{"s":"TwoThirtyTwo","i":"Green Feather Hat","p":1499,"q":1},{"s":"TwoThirtyTwo","i":"Green Armine Skirt","p":999,"q":1},{"s":"TwoThirtyTwo","i":"Brown Hard Leather Boots","p":799,"q":1,"so":true},{"s":"TwoThirtyTwo","i":"Arrows for Crossbows","p":600,"q":1000},{"s":"EmberOnyx","i":"Arrows for Crossbows","p":1,"q":1},{"s":"EmberOnyx","i":"Arrows for Bows","p":1,"q":1,"so":true},{"s":"EmberOnyx","i":"Stiff Feather","p":99,"q":1,"so":true},{"s":"EmberOnyx","i":"Orange Mushroom Cap","p":10,"q":1},{"s":"EmberOnyx","i":"Bronze Ore","p":250,"q":1,"so":true},{"s":"EmberOnyx","i":"Pig's Head","p":399,"q":1,"so":true},{"s":"mittuns","i":"Beret","p":7000,"q":1},{"s":"mittuns","i":"Dollish Pink","p":15000,"q":1,"so":true},{"s":"mittuns","i":"White Hooded Vest","p":5000,"q":1,"so":true},{"s":"mittuns","i":"Kitty Chat Ring","p":7000,"q":1},{"s":"mittuns","i":"Orange Toy Hammer","p":15000,"q":1},{"s":"mittuns","i":"Baby Angel Wings","p":10000,"q":1,"so":true},{"s":"mittuns","i":"Yellow Spatula","p":7000,"q":1},{"s":"mittuns","i":"Rainbow Knit","p":10000,"q":1},{"s":"mittuns","i":"Red Sailor Shirt","p":10000,"q":1},{"s":"mittuns","i":"Tourist T","p":7000,"q":1},{"s":"mittuns","i":"Blue Cap","p":10000,"q":1},{"s":"mittuns","i":"Blue Cap","p":10000,"q":1},{"s":"Joswi","i":"Slime Slippers","p":21999,"q":1},{"s":"Joswi","i":"Rainbow Knit","p":9999,"q":1},{"s":"Joswi","i":"Ripped Jeans","p":9999,"q":1},{"s":"Joswi","i":"Lined Hip-Hop Pants","p":9999,"q":1},{"s":"Joswi","i":"Tourist T","p":9999,"q":1},{"s":"Joswi","i":"Cat Suit","p":4999,"q":1},{"s":"Joswi","i":"Iron Ore","p":500,"q":1,"so":true},{"s":"Joswi","i":"Silver Ore","p":500,"q":1,"so":true},{"s":"Joswi","i":"Diamond Ore","p":1000,"q":1},{"s":"Choo","i":"Cat Suit","p":3999,"q":1},{"s":"Choo","i":"Wooden Buckler","p":2599,"q":1},{"s":"Choo","i":"Arrows for Bows","p":2,"q":1},{"s":"Choo","i":"Arrows for Crossbows","p":2,"q":1},{"s":"Choo","i":"Bronze Ore","p":250,"q":1,"so":true},{"s":"Choo","i":"Iron Ore","p":500,"q":1,"so":true},{"s":"Choo","i":"Silver Ore","p":300,"q":1},{"s":"Choo","i":"Orihalcon Ore","p":250,"q":1},{"s":"Choo","i":"Slime Bubble","p":250,"q":1},{"s":"Choo","i":"Leaf","p":250,"q":1},{"s":"Choo","i":"Green Mushroom Cap","p":50,"q":1},{"s":"Choo","i":"Slime & Mushroom Omok (name cut off)","p":1999,"q":1,"so":true},{"s":"StarsRain","i":"Chocolate Label Ring","p":44999,"q":1},{"s":"StarsRain","i":"Pink Allstar","p":2999,"q":1},{"s":"StarsRain","i":"Gold Kitty Slippers","p":7999,"q":1},{"s":"StarsRain","i":"Squishy Liquid","p":55,"q":1},{"s":"StarsRain","i":"Tree Branch","p":55,"q":1},{"s":"StarsRain","i":"Leaf","p":55,"q":1},{"s":"Timmeh","i":"Pig's Head","p":850,"q":1},{"s":"Timmeh","i":"Tree Branch","p":30,"q":1},{"s":"Timmeh","i":"Octopus Leg","p":50,"q":1,"so":true},{"s":"Timmeh","i":"Wooden Staff","p":1500,"q":1,"so":true},{"s":"Timmeh","i":"Triangular Zamadar","p":1500,"q":1},{"s":"Timmeh","i":"Red Bandana","p":1000,"q":1,"so":true},{"s":"Maxxing","i":"Pure Water","p":1399,"q":1},{"s":"Maxxing","i":"Emerald Staff","p":2999,"q":1},{"s":"Maxxing","i":"Work Gloves","p":2499,"q":1},{"s":"Maxxing","i":"Blue Qi Pao Pants","p":2799,"q":1},{"s":"Maxxing","i":"Orange Mushroom Cap","p":19,"q":1},{"s":"Maxxing","i":"Bronze Ore","p":299,"q":1},{"s":"Maxxing","i":"Orihalcon Ore","p":699,"q":1},{"s":"Maxxing","i":"Emerald Ore","p":799,"q":1},{"s":"Maxxing","i":"Sapphire Ore","p":899,"q":1},{"s":"Maxxing","i":"Adamantium Ore","p":699,"q":1},{"s":"Maxxing","i":"Garnet Ore","p":2499,"q":1,"so":true},{"s":"Maxxing","i":"Aquamarine Ore","p":799,"q":1},{"s":"LaoLiBABA","i":"Iron Ore","p":700,"q":1},{"s":"LaoLiBABA","i":"Emerald Ore","p":700,"q":1},{"s":"LaoLiBABA","i":"Slime Bubble","p":300,"q":1},{"s":"LaoLiBABA","i":"Green Mushroom Cap","p":300,"q":1},{"s":"LaoLiBABA","i":"Fragment of Magic","p":700,"q":1},{"s":"LaoLiBABA","i":"Silver Ore","p":500,"q":1},{"s":"Yancie","i":"Hat Accuracy Scroll: Lesser","p":11999,"q":1},{"s":"Yancie","i":"Bronze Ore","p":499,"q":1},{"s":"Yancie","i":"Mithril Ore","p":499,"q":1},{"s":"Yancie","i":"Aquamarine Ore","p":799,"q":1,"so":true},{"s":"Yancie","i":"Orihalcon Ore","p":249,"q":1},{"s":"Yancie","i":"Squishy Liquid","p":24,"q":1},{"s":"Yancie","i":"Topaz Ore","p":449,"q":1},{"s":"Yancie","i":"Gold Ore","p":449,"q":1},{"s":"Yancie","i":"Emerald Ore","p":249,"q":1,"so":true},{"s":"Yancie","i":"Sapphire Ore","p":249,"q":1,"so":true},{"s":"Yancie","i":"Silver Ore","p":249,"q":1},{"s":"Yancie","i":"Mithril Pole Arm","p":26000,"q":1,"so":true},{"s":"GloomyPirate","i":"Mithril Ore","p":500,"q":1},{"s":"GloomyPirate","i":"Fragment of Magic","p":1000,"q":1},{"s":"GloomyPirate","i":"Octopus Leg","p":30,"q":1,"so":true},{"s":"GloomyPirate","i":"Green Mushroom Cap","p":30,"q":1},{"s":"GloomyPirate","i":"Animal Fur Bundle","p":400,"q":1},{"s":"GloomyPirate","i":"Leather","p":400,"q":1},{"s":"biso","i":"Cherub's Bow","p":10000,"q":1},{"s":"biso","i":"Orange Baseball Jacket","p":4000,"q":1},{"s":"biso","i":"Lined Hip-Hop Pants","p":5000,"q":1},{"s":"biso","i":"Red Trainer Pants","p":3000,"q":1},{"s":"biso","i":"Kitty Chat Ring","p":6000,"q":1},{"s":"biso","i":"Blue Bucket Hat","p":7000,"q":1},{"s":"biso","i":"Patissier Uniform","p":4000,"q":1},{"s":"biso","i":"Fork on a Stick","p":8000,"q":1},{"s":"Chinatown","i":"Slime Bubble","p":500,"q":1,"so":true},{"s":"Chinatown","i":"Patissier Uniform","p":9999,"q":1},{"s":"Chinatown","i":"Squishy Liquid","p":50,"q":1},{"s":"Chinatown","i":"Iron Ore","p":999,"q":1},{"s":"Chinatown","i":"Fruit Knife","p":1000,"q":1},{"s":"Chinatown","i":"Wooden Staff","p":1000,"q":1,"so":true},{"s":"Chinatown","i":"Mushroom Spore","p":50,"q":1},{"s":"Chinatown","i":"Red Snail Shell","p":50,"q":1},{"s":"Chinatown","i":"Blue Snail Shell","p":40,"q":1},{"s":"Chinatown","i":"Bronze Ore","p":500,"q":1},{"s":"Chinatown","i":"Tree Branch","p":50,"q":1,"so":true},{"s":"manbo","i":"Pig's Head","p":530,"q":1},{"s":"manbo","i":"Cherub's Bow","p":9999,"q":1},{"s":"manbo","i":"Orange Baseball Jacket","p":3499,"q":1,"so":true},{"s":"manbo","i":"Fragment of Magic","p":899,"q":1},{"s":"manbo","i":"Bronze Ore","p":500,"q":1},{"s":"Stizzy","i":"Fragment of Magic","p":1199,"q":1},{"s":"Stizzy","i":"Kitty Chat Ring","p":7999,"q":1},{"s":"Stizzy","i":"Chocolate Chat Ring","p":15999,"q":1},{"s":"Stizzy","i":"Pig's Head","p":999,"q":1},{"s":"Stizzy","i":"Adamantium Ore","p":1499,"q":1},{"s":"Stizzy","i":"Mithril Ore","p":1399,"q":1},{"s":"Majora","i":"Set of Match Cards","p":4999,"q":1},{"s":"Majora","i":"Garnet","p":3599,"q":1},{"s":"Majora","i":"Iron Ore","p":599,"q":1,"so":true},{"s":"Majora","i":"Bronze Ore","p":499,"q":1},{"s":"Majora","i":"Beige Plain Robe","p":7999,"q":1},{"s":"Majora","i":"Tree Branch","p":99,"q":1},{"s":"Majora","i":"Fragment of Magic","p":799,"q":1},{"s":"Majora","i":"Bronze Ingot","p":799,"q":1,"so":true},{"s":"Majora","i":"Iron Ingot","p":799,"q":1,"so":true},{"s":"Majora","i":"Animal Fur Bundle","p":699,"q":1},{"s":"Grim","i":"Bunny Ears","p":9990,"q":1},{"s":"Grim","i":"White Jeans","p":7990,"q":1},{"s":"Grim","i":"White Ribboned Sailor Dr (name cut off)","p":6990,"q":1},{"s":"Grim","i":"Lined Hip-Hop Pants","p":6990,"q":1},{"s":"Grim","i":"White Hooded Vest","p":4990,"q":1},{"s":"Grim","i":"Yellow Spatula","p":5990,"q":1}]}]</script>
+<script>
+(function () {
+  var MIN = 5;
+  var scans = [], sortK = "n", sortDir = -1;
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Math.round(n).toLocaleString("en-US"); };
+  var day = function (t) { return new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
+
+  function median(a) { a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+
+  function compute() {
+    var ordered = scans.filter(function (s) { return Array.isArray(s.rows); })
+      .sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });
+    if (!ordered.length) return { items: [], scans: 0, listings: 0, shops: 0, latest: null };
+    var latest = Date.parse(ordered[0].at), win = +$("win").value;
+    var used = ordered.filter(function (s, i) { return win === 0 ? i === 0 : latest - Date.parse(s.at) <= win * 864e5; });
+    // A listing still sitting in a shop gets re-seen every scan. Count it once, from the newest scan that saw it.
+    var seenOlder = {}, items = {}, shops = {}, listings = 0;
+    used.forEach(function (s) {
+      var t = Date.parse(s.at), mine = {};
+      s.rows.forEach(function (r) {
+        var key = r.s + "|" + r.i + "|" + r.p + "|" + (r.q || 1);
+        if (seenOlder[key]) return;
+        mine[key] = 1;
+        var it = items[r.i] || (items[r.i] = { item: r.i, prices: [], sold: 0, last: 0 });
+        it.prices.push(r.p / (r.q || 1));
+        if (r.so) it.sold++;
+        if (t > it.last) it.last = t;
+        shops[r.s] = 1; listings++;
+      });
+      Object.keys(mine).forEach(function (k) { seenOlder[k] = 1; });
+    });
+    var list = Object.keys(items).map(function (k) {
+      var it = items[k];
+      return { item: it.item, n: it.prices.length, med: median(it.prices), lo: Math.min.apply(null, it.prices), hi: Math.max.apply(null, it.prices), sold: it.sold, last: it.last };
+    });
+    return { items: list, scans: used.length, total: ordered.length, listings: listings, shops: Object.keys(shops).length, latest: latest };
+  }
+
+  function render() {
+    var d = compute(), q = $("q").value.trim().toLowerCase(), showThin = $("thin").checked;
+    var tb = $("rows"); tb.textContent = "";
+    $("facts").textContent = "";
+    if (!d.scans) { $("empty").hidden = false; $("note").textContent = ""; return; }
+    [["Last scan", day(d.latest)], ["Scans in view", d.scans], ["Listings", fmt(d.listings)], ["Shops", d.shops]].forEach(function (f) {
+      var s = document.createElement("span"), b = document.createElement("b");
+      s.textContent = f[0] + " "; b.textContent = f[1]; s.appendChild(b); $("facts").appendChild(s);
+    });
+    var ready = d.items.filter(function (i) { return i.n >= MIN; }).length;
+    var shown = d.items.filter(function (i) { return (showThin || i.n >= MIN) && (!q || i.item.toLowerCase().indexOf(q) > -1); });
+    shown.sort(function (a, b) {
+      var x = a[sortK], y = b[sortK];
+      if (sortK === "item") return sortDir * x.localeCompare(y);
+      return sortDir * (x - y) || a.item.localeCompare(b.item);
+    });
+    shown.forEach(function (i) {
+      var tr = document.createElement("tr"); if (i.n < MIN) tr.className = "thin";
+      var cell = function (txt, cls) { var td = document.createElement("td"); if (cls) td.className = cls; td.textContent = txt; tr.appendChild(td); return td; };
+      cell(i.item);
+      var r = cell("", "rate"), sp = document.createElement("span"); sp.textContent = fmt(i.med); r.appendChild(sp);
+      cell(fmt(i.lo)); cell(fmt(i.hi)); cell(i.n);
+      var so = cell(""); var ss = document.createElement("span"); if (i.sold) ss.className = "sold"; ss.textContent = i.sold ? i.sold + " of " + i.n : "0"; so.appendChild(ss);
+      cell(day(i.last));
+      tb.appendChild(tr);
+    });
+    $("empty").hidden = shown.length > 0;
+    if (!shown.length) $("empty").innerHTML = "<strong>No items match</strong>Clear the search or widen the time window.";
+    $("note").textContent = ready + " items have 5 or more listings in this window. " + (d.items.length - ready) + " more are logged and waiting on more sightings. Sold out counts listings that were greyed out in the shop, which means someone paid that price.";
+    document.querySelectorAll("thead button").forEach(function (b) {
+      if (b.dataset.k === sortK) b.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort");
+    });
+  }
+
+  document.querySelectorAll("thead button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (sortK === b.dataset.k) sortDir = -sortDir; else { sortK = b.dataset.k; sortDir = sortK === "item" ? 1 : -1; }
+      render();
+    });
+  });
+  ["q", "win", "thin"].forEach(function (id) { $(id).addEventListener("input", render); });
+
+  function fail(title, msg) { $("empty").hidden = false; $("empty").innerHTML = ""; var s = document.createElement("strong"); s.textContent = title; $("empty").appendChild(s); $("empty").appendChild(document.createTextNode(msg)); }
+
+  try { scans = JSON.parse(document.getElementById("scan-data").textContent); } catch (e) { scans = []; }
+  if (!scans.length) fail("No scans yet", "Prices appear here after the first Free Market scan is logged.");
+  render();
+})();
+</script>
+</body>
+</html>
