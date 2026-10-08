@@ -298,8 +298,8 @@ td.best .hot { font-weight: 700; }
   });
   if (location.hash === "#deals") showTab("deals");
 
-  // Live alert: anything still for sale at 30% or more under the going rate.
-  var HOT = 0.3, seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
+  // Live alert: anything still for sale at 50% or more under the going rate.
+  var HOT = 0.5, seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
   function renderAlert(d) {
     var hot = d.items.filter(function (i) { return i.n >= MIN && i.best && i.deal >= HOT; })
       .sort(function (a, b) { return b.deal - a.deal; });
@@ -308,7 +308,7 @@ td.best .hot { font-weight: 700; }
     seenDeals = keys;
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
-    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " 30% or more under the going rate";
+    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " 50% or more under the going rate";
     $("alert-list").textContent = hot.slice(0, 3).map(function (i) {
       return i.item + " " + fmt(i.best.u) + " (" + Math.round(i.deal * 100) + "% under, " + i.best.s + (i.best.c ? " CH " + i.best.c : "") + (i.best.r ? " " + i.best.r : "") + ")";
     }).join("  |  ") + (hot.length > 3 ? "  |  +" + (hot.length - 3) + " more" : "");
