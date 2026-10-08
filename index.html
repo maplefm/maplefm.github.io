@@ -57,6 +57,12 @@ tr.thin td:first-child { font-weight: 400; color: var(--muted); }
 .empty strong { display: block; color: var(--fg); font-family: var(--display); font-size: 1.15rem; margin-bottom: 4px; }
 td.best small { display: block; color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
 td.best .hot { font-weight: 700; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); }
+.tabs button { all: unset; cursor: pointer; padding: 8px 14px; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--meso); }
+.tabs button:focus-visible { outline: 2px solid var(--meso); outline-offset: 2px; }
+#deals-view td.pct { color: var(--meso); font-weight: 600; }
+#deals-view td.l { text-align: left; }
 </style>
 </head>
 <body>
@@ -67,6 +73,11 @@ td.best .hot { font-weight: 700; }
   </header>
 
   <div class="facts" id="facts"></div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-prices" aria-selected="true">Prices</button>
+    <button role="tab" id="tab-deals" aria-selected="false">Best deals</button>
+  </div>
 
   <div class="controls">
     <input type="search" id="q" placeholder="Search items" aria-label="Search items">
@@ -79,7 +90,25 @@ td.best .hot { font-weight: 700; }
     <label class="check"><input type="checkbox" id="thin"> Show items seen fewer than 5 times</label>
   </div>
 
-  <div class="scroll">
+  <div class="scroll" id="deals-view" hidden>
+    <table>
+      <thead><tr>
+        <th><button data-d="item">Item</button></th>
+        <th><button data-d="pct">Under going rate</button></th>
+        <th><button data-d="u">Cheapest</button></th>
+        <th><button data-d="med">Going rate</button></th>
+        <th><button data-d="profit">Gap per unit</button></th>
+        <th><button data-d="s">Seller</button></th>
+        <th><button data-d="c">Channel</button></th>
+        <th><button data-d="r">Room</button></th>
+        <th><button data-d="t">Seen</button></th>
+      </tr></thead>
+      <tbody id="deal-rows"></tbody>
+    </table>
+    <div class="empty" id="deal-empty" hidden><strong>No deals in view</strong>Nothing unsold has been seen under its going rate in the last day.</div>
+  </div>
+
+  <div class="scroll" id="prices-view">
     <table>
       <thead><tr>
         <th><button data-k="item">Item</button></th>
@@ -184,21 +213,67 @@ td.best .hot { font-weight: 700; }
       cell(day(i.last));
       tb.appendChild(tr);
     });
+    renderDeals(d, q);
     $("empty").hidden = shown.length > 0;
     if (!shown.length) $("empty").innerHTML = "<strong>No items match</strong>Clear the search or widen the time window.";
     $("note").textContent = ready + " items have 5 or more listings in this window. " + (d.items.length - ready) + " more are logged and waiting on more sightings. Sold of listed counts listings that were greyed out in the shop, which means someone paid that price. Top buy offer is the highest price someone offered in chat, with the number of offers in brackets. Cheapest now is the lowest unsold listing seen in the last day, with the seller, the channel when it was recorded, the room and the time it was seen. It may be gone by the time you get there.";
-    document.querySelectorAll("thead button").forEach(function (b) {
+    document.querySelectorAll("thead button[data-k]").forEach(function (b) {
       if (b.dataset.k === sortK) b.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort");
     });
   }
 
-  document.querySelectorAll("thead button").forEach(function (b) {
+  document.querySelectorAll("thead button[data-k]").forEach(function (b) {
     b.addEventListener("click", function () {
       if (sortK === b.dataset.k) sortDir = -sortDir; else { sortK = b.dataset.k; sortDir = sortK === "item" ? 1 : -1; }
       render();
     });
   });
   ["q", "win", "thin"].forEach(function (id) { $(id).addEventListener("input", render); });
+
+  var tab = "prices", dK = "pct", dDir = -1;
+  function renderDeals(d, q) {
+    var tb = $("deal-rows"); tb.textContent = "";
+    // Only items with enough listings for the going rate to mean something.
+    var list = d.items.filter(function (i) { return i.n >= MIN && i.best && i.deal > 0 && (!q || i.item.toLowerCase().indexOf(q) > -1); })
+      .map(function (i) { return { item: i.item, pct: i.deal, u: i.best.u, med: i.med, profit: i.med - i.best.u, s: i.best.s, c: i.best.c || 0, r: i.best.r || "", t: i.best.t }; });
+    list.sort(function (a, b) {
+      var x = a[dK], y = b[dK];
+      if (typeof x === "string") return dDir * x.localeCompare(y) || b.pct - a.pct;
+      return dDir * (x - y) || a.item.localeCompare(b.item);
+    });
+    list.forEach(function (i) {
+      var tr = document.createElement("tr");
+      var cell = function (txt, cls) { var td = document.createElement("td"); if (cls) td.className = cls; td.textContent = txt; tr.appendChild(td); return td; };
+      var nc = cell(""), box = document.createElement("span"), nm = document.createElement("span");
+      box.className = "ic"; nm.textContent = i.item;
+      if (ICONS[i.item]) { var im = new Image(); im.alt = ""; im.loading = "lazy"; im.onerror = function () { this.remove(); }; im.src = typeof ICONS[i.item] === "string" ? ICONS[i.item] : "https://maplestory.io/api/GMS/83/item/" + ICONS[i.item] + "/icon"; box.appendChild(im); }
+      var w = document.createElement("div"); w.className = "nm"; w.appendChild(box); w.appendChild(nm); nc.appendChild(w);
+      cell(Math.round(i.pct * 100) + "%", "pct"); cell(fmt(i.u)); cell(fmt(i.med)); cell(fmt(i.profit));
+      cell(i.s, "l"); cell(i.c ? "CH " + i.c : ""); cell(i.r);
+      cell(new Date(i.t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
+      tb.appendChild(tr);
+    });
+    $("deal-empty").hidden = list.length > 0;
+    document.querySelectorAll("thead button[data-d]").forEach(function (b) {
+      if (b.dataset.d === dK) b.setAttribute("aria-sort", dDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort");
+    });
+  }
+  function showTab(t) {
+    tab = t;
+    $("prices-view").hidden = t !== "prices"; $("deals-view").hidden = t !== "deals";
+    $("tab-prices").setAttribute("aria-selected", t === "prices"); $("tab-deals").setAttribute("aria-selected", t === "deals");
+    $("thin").closest("label").hidden = t === "deals";
+    try { history.replaceState(null, "", t === "deals" ? "#deals" : "#"); } catch (e) {}
+  }
+  $("tab-prices").addEventListener("click", function () { showTab("prices"); });
+  $("tab-deals").addEventListener("click", function () { showTab("deals"); });
+  document.querySelectorAll("thead button[data-d]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (dK === b.dataset.d) dDir = -dDir; else { dK = b.dataset.d; dDir = (dK === "item" || dK === "s" || dK === "r") ? 1 : -1; }
+      render();
+    });
+  });
+  if (location.hash === "#deals") showTab("deals");
 
   function fail(title, msg) { $("empty").hidden = false; $("empty").innerHTML = ""; var s = document.createElement("strong"); s.textContent = title; $("empty").appendChild(s); $("empty").appendChild(document.createTextNode(msg)); }
 
