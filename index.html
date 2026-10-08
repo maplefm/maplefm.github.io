@@ -298,19 +298,24 @@ td.best .hot { font-weight: 700; }
   });
   if (location.hash === "#deals") showTab("deals");
 
-  // Live alert: anything still for sale at 50% or more under the going rate.
+  // Live alert: a listing seen in the last hour at 50% or more under what the item has sold for.
   var HOT = 0.5, seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
   function renderAlert(d) {
-    var hot = d.items.filter(function (i) { return i.n >= MIN && i.best && i.deal >= HOT; })
-      .sort(function (a, b) { return b.deal - a.deal; });
+    // Measured against what the item actually sells for, and only listings seen in the last hour.
+    var now = Date.now();
+    var hot = d.items.filter(function (i) {
+      if (!(i.n >= MIN && i.best && i.sold >= 2 && i.soldAt > 0 && now - i.best.t <= 36e5)) return false;
+      i.vsSold = 1 - i.best.u / i.soldAt;
+      return i.vsSold >= HOT;
+    }).sort(function (a, b) { return b.vsSold - a.vsSold; });
     var keys = {}; hot.forEach(function (i) { keys[i.item + "|" + i.best.s + "|" + i.best.u + "|" + i.best.t] = 1; });
     var fresh = seenDeals && armed ? Object.keys(keys).filter(function (k) { return !seenDeals[k]; }) : [];
     seenDeals = keys;
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
-    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " 50% or more under the going rate";
+    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " 50% or more under what it sells for, seen in the last hour";
     $("alert-list").textContent = hot.slice(0, 3).map(function (i) {
-      return i.item + " " + fmt(i.best.u) + " (" + Math.round(i.deal * 100) + "% under, " + i.best.s + (i.best.c ? " CH " + i.best.c : "") + (i.best.r ? " " + i.best.r : "") + ")";
+      return i.item + " " + fmt(i.best.u) + " (" + Math.round(i.vsSold * 100) + "% under sold price of " + fmt(i.soldAt) + ", " + i.best.s + (i.best.c ? " CH " + i.best.c : "") + (i.best.r ? " " + i.best.r : "") + ")";
     }).join("  |  ") + (hot.length > 3 ? "  |  +" + (hot.length - 3) + " more" : "");
     if (fresh.length) ping(fresh.length);
   }
