@@ -134,8 +134,8 @@ td.best .hot { font-weight: 700; }
 <script>
 (function () {
   var MIN = 5;
-  // Guild members' own characters. Their listings still count toward prices but never show as a deal.
-  var OWN = ["maya"];
+  // Guild members' own characters. Their listings and chat posts are left out entirely.
+  var OWN = ["maya", "injure"];
   var ICONS = {}; try { ICONS = JSON.parse(document.getElementById("icon-ids").textContent); } catch (e) {}
   var scans = [], sortK = "n", sortDir = -1;
   var $ = function (id) { return document.getElementById(id); };
@@ -155,6 +155,7 @@ td.best .hot { font-weight: 700; }
     used.forEach(function (s) {
       var t = Date.parse(s.at), mine = {};
       s.rows.forEach(function (r) {
+        if (OWN.indexOf(String(r.s).toLowerCase()) > -1) return;
         var key = r.s + "|" + r.i + "|" + r.p + "|" + (r.q || 1) + "|" + (r.k || "");
         if (seenOlder[key]) return;
         mine[key] = 1;
@@ -165,7 +166,7 @@ td.best .hot { font-weight: 700; }
         else {
           // Cheapest listing still for sale, from sightings in the last day only so it is worth walking to.
           var seen = r.t ? r.t * 1000 : t, u = r.p / (r.q || 1);
-          if (latest - seen <= 864e5 && OWN.indexOf(String(r.s).toLowerCase()) < 0 && (!it.best || u < it.best.u)) it.best = { u: u, s: r.s, r: r.r || (/chat/.test(s.src || "") ? "chat" : ""), t: seen, q: r.q || 1, c: r.c || 0 };
+          if (latest - seen <= 864e5 && (!it.best || u < it.best.u)) it.best = { u: u, s: r.s, r: r.r || (/chat/.test(s.src || "") ? "chat" : ""), t: seen, q: r.q || 1, c: r.c || 0 };
         }
         if (t > it.last) it.last = t;
         shops[r.s] = 1; listings++;
