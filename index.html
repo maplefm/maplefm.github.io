@@ -134,7 +134,7 @@ td.best .hot { font-weight: 700; }
         else {
           // Cheapest listing still for sale, from sightings in the last day only so it is worth walking to.
           var seen = r.t ? r.t * 1000 : t, u = r.p / (r.q || 1);
-          if (latest - seen <= 864e5 && (!it.best || u < it.best.u)) it.best = { u: u, s: r.s, r: r.r || (/chat/.test(s.src || "") ? "chat" : ""), t: seen, q: r.q || 1 };
+          if (latest - seen <= 864e5 && (!it.best || u < it.best.u)) it.best = { u: u, s: r.s, r: r.r || (/chat/.test(s.src || "") ? "chat" : ""), t: seen, q: r.q || 1, c: r.c || 0 };
         }
         if (t > it.last) it.last = t;
         shops[r.s] = 1; listings++;
@@ -176,7 +176,7 @@ td.best .hot { font-weight: 700; }
       var bc = cell("", "best");
       if (i.best) {
         var b1 = document.createElement("span"); b1.textContent = fmt(i.best.u) + (i.deal >= 0.1 ? "  " + Math.round(i.deal * 100) + "% under" : ""); if (i.deal >= 0.25) b1.className = "hot";
-        var b2 = document.createElement("small"); b2.textContent = i.best.s + (i.best.r ? ", " + i.best.r : "") + ", " + new Date(i.best.t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+        var b2 = document.createElement("small"); b2.textContent = i.best.s + (i.best.c ? ", CH " + i.best.c : "") + (i.best.r ? ", " + i.best.r : "") + ", " + new Date(i.best.t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
         bc.appendChild(b1); bc.appendChild(b2);
       }
       cell(fmt(i.lo) + " to " + fmt(i.hi)); cell(i.bid ? fmt(i.bid) + (i.bidn > 1 ? " (" + i.bidn + ")" : "") : "");
@@ -186,7 +186,7 @@ td.best .hot { font-weight: 700; }
     });
     $("empty").hidden = shown.length > 0;
     if (!shown.length) $("empty").innerHTML = "<strong>No items match</strong>Clear the search or widen the time window.";
-    $("note").textContent = ready + " items have 5 or more listings in this window. " + (d.items.length - ready) + " more are logged and waiting on more sightings. Sold of listed counts listings that were greyed out in the shop, which means someone paid that price. Top buy offer is the highest price someone offered in chat, with the number of offers in brackets. Cheapest now is the lowest unsold listing seen in the last day, with the seller, the room and the time it was seen. It may be gone by the time you get there.";
+    $("note").textContent = ready + " items have 5 or more listings in this window. " + (d.items.length - ready) + " more are logged and waiting on more sightings. Sold of listed counts listings that were greyed out in the shop, which means someone paid that price. Top buy offer is the highest price someone offered in chat, with the number of offers in brackets. Cheapest now is the lowest unsold listing seen in the last day, with the seller, the channel when it was recorded, the room and the time it was seen. It may be gone by the time you get there.";
     document.querySelectorAll("thead button").forEach(function (b) {
       if (b.dataset.k === sortK) b.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort");
     });
