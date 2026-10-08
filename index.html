@@ -69,7 +69,16 @@ td.best .hot { font-weight: 700; }
 .alert .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--sold); flex: 0 0 14px; animation: pulse 1s ease-in-out infinite; }
 .alert-main { font-family: var(--display); font-size: 1.05rem; display: flex; gap: 10px; align-items: center; }
 .alert-new { background: var(--sold); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 4px; animation: blink 0.8s steps(2, start) infinite; }
-.alert-list { color: var(--muted); font-size: 0.9rem; font-family: var(--mono); }
+.alert-list { flex: 1 1 100%; display: grid; grid-template-columns: auto minmax(0, max-content) auto auto minmax(0, 1fr); gap: 4px 18px; font-family: var(--mono); font-size: 0.9rem; }
+.alert-row { display: contents; }
+.alert-row > span { min-width: 0; }
+.alert-row .n { color: var(--muted); }
+.alert-row .it { font-family: var(--body); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 34ch; }
+.alert-row .pr { color: var(--meso); font-weight: 600; text-align: right; }
+.alert-row .pc { color: var(--sold); text-align: right; }
+.alert-row .wh { color: var(--muted); }
+.alert-row.more { display: block; grid-column: 1 / -1; color: var(--muted); }
+@media (max-width: 700px) { .alert-list { grid-template-columns: auto minmax(0, 1fr) auto; } .alert-row .pc, .alert-row .wh { grid-column: 2 / -1; text-align: left; } .alert-row .it { max-width: none; } }
 .alert.fresh { animation: flash 0.9s ease-in-out 6; }
 .sound { display: flex; gap: 7px; align-items: center; color: var(--muted); font-size: 0.85rem; margin-top: -12px; }
 @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.45; } }
@@ -314,9 +323,15 @@ td.best .hot { font-weight: 700; }
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
     $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " 50% or more under what it sells for, seen in the last hour";
-    $("alert-list").textContent = hot.slice(0, 3).map(function (i) {
-      return i.item + " " + fmt(i.best.u) + " (" + Math.round(i.vsSold * 100) + "% under sold price of " + fmt(i.soldAt) + ", " + i.best.s + (i.best.c ? " CH " + i.best.c : "") + (i.best.r ? " " + i.best.r : "") + ")";
-    }).join("  |  ") + (hot.length > 3 ? "  |  +" + (hot.length - 3) + " more" : "");
+    var ul = $("alert-list"); ul.textContent = "";
+    hot.slice(0, 8).forEach(function (i, k) {
+      var li = document.createElement("span"); li.className = "alert-row";
+      var parts = [[(k + 1) + ".", "n"], [i.item, "it"], [fmt(i.best.u), "pr"], [Math.round(i.vsSold * 100) + "% under sold " + fmt(i.soldAt), "pc"],
+        [[i.best.s, i.best.c ? "CH " + i.best.c : "", i.best.r || ""].filter(Boolean).join(", "), "wh"]];
+      parts.forEach(function (p) { var e = document.createElement("span"); e.className = p[1]; e.textContent = p[0]; li.appendChild(e); });
+      ul.appendChild(li);
+    });
+    if (hot.length > 8) { var more = document.createElement("span"); more.className = "alert-row more"; more.textContent = "+" + (hot.length - 8) + " more on the Best deals tab"; ul.appendChild(more); }
     if (fresh.length) ping(fresh.length);
   }
   function ping(n) {
