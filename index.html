@@ -368,8 +368,10 @@ td.best .hot { font-weight: 700; }
   render();
   // Each watcher program keeps its own file up to date between hand scans. One file per PC.
   // Icons the watchers cropped from shop rows. They only fill items that have no icon yet.
+  // Watcher files live on a separate branch so their updates do not rebuild the site.
+  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
   ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json"].forEach(function (f) {
-    fetch(f + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }).then(function (more) {
+    fetch(LIVE + f + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }).then(function (more) {
       var added = 0;
       Object.keys(more || {}).forEach(function (k) { if (!ICONS[k] && /^data:image\/png;base64,/.test(more[k])) { ICONS[k] = more[k]; added++; } });
       if (added) render();
@@ -379,7 +381,7 @@ td.best .hot { font-weight: 700; }
   var FILES = ["data/watcher.json", "data/watcher-2.json", "data/watcher-3.json"], live = {};
   function poll() {
     Promise.all(FILES.map(function (f) {
-      return fetch(f + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; })
+      return fetch(LIVE + f + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; })
         .then(function (x) { if (Array.isArray(x)) live[f] = x; }).catch(function () {});
     })).then(function () {
       var all = base.slice(); FILES.forEach(function (f) { if (live[f]) all = all.concat(live[f]); });
