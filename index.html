@@ -191,10 +191,12 @@ tr.thin td:first-child { font-weight: 400; color: var(--muted); }
   try { scans = JSON.parse(document.getElementById("scan-data").textContent); } catch (e) { scans = []; }
   if (!scans.length) fail("No scans yet", "Prices appear here after the first Free Market scan is logged.");
   render();
-  // The watcher program on Adam's PC keeps this file up to date between hand scans.
-  fetch("data/watcher.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; }).then(function (extra) {
-    if (Array.isArray(extra) && extra.length) { scans = scans.concat(extra); render(); }
-  }).catch(function () {});
+  // Each watcher program keeps its own file up to date between hand scans. One file per PC.
+  ["data/watcher.json", "data/watcher-2.json", "data/watcher-3.json"].forEach(function (f) {
+    fetch(f + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; }).then(function (extra) {
+      if (Array.isArray(extra) && extra.length) { scans = scans.concat(extra); render(); }
+    }).catch(function () {});
+  });
 })();
 </script>
 </body>
