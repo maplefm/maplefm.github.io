@@ -63,10 +63,29 @@ td.best .hot { font-weight: 700; }
 .tabs button:focus-visible { outline: 2px solid var(--meso); outline-offset: 2px; }
 #deals-view td.pct { color: var(--meso); font-weight: 600; }
 #deals-view td.l { text-align: left; }
+.alert { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; width: 100%;
+  padding: 12px 16px; border-radius: 8px; background: var(--meso-soft); border: 2px solid var(--meso); color: var(--fg); }
+.alert:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.alert .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--sold); flex: 0 0 14px; animation: pulse 1s ease-in-out infinite; }
+.alert-main { font-family: var(--display); font-size: 1.05rem; display: flex; gap: 10px; align-items: center; }
+.alert-new { background: var(--sold); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 4px; animation: blink 0.8s steps(2, start) infinite; }
+.alert-list { color: var(--muted); font-size: 0.9rem; font-family: var(--mono); }
+.alert.fresh { animation: flash 0.9s ease-in-out 6; }
+.sound { display: flex; gap: 7px; align-items: center; color: var(--muted); font-size: 0.85rem; margin-top: -12px; }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.45; } }
+@keyframes blink { to { visibility: hidden; } }
+@keyframes flash { 50% { background: var(--sold); color: #fff; } }
+@media (prefers-reduced-motion: reduce) { .alert .dot, .alert-new, .alert.fresh { animation: none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <button type="button" class="alert" id="alert" hidden aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="alert-main"><b id="alert-count"></b><span id="alert-new" class="alert-new" hidden>NEW</span></span>
+    <span class="alert-list" id="alert-list"></span>
+  </button>
+  <label class="check sound"><input type="checkbox" id="sound"> Play a sound when a new deal shows up</label>
   <header>
     <h1>Guild FM Prices</h1>
     <p class="sub">Going rates in the MapleStory Classic Free Market, built from shop scans and priced sell messages in chat. The going rate is the median asking price per unit, which ignores joke listings. Average counts every listing. Sold at is the median of listings that sold out. An item shows up once it has been seen in at least 5 listings. Updated after each scan.</p>
@@ -217,6 +236,7 @@ td.best .hot { font-weight: 700; }
       tb.appendChild(tr);
     });
     renderDeals(d, q);
+    renderAlert(d);
     $("empty").hidden = shown.length > 0;
     if (!shown.length) $("empty").innerHTML = "<strong>No items match</strong>Clear the search or widen the time window.";
     $("note").textContent = ready + " items have 5 or more listings in this window. " + (d.items.length - ready) + " more are logged and waiting on more sightings. Sold of listed counts listings that were greyed out in the shop, which means someone paid that price. Top buy offer is the highest price someone offered in chat, with the number of offers in brackets. Cheapest now is the lowest unsold listing seen in the last day, with the seller, the channel when it was recorded, the room and the time it was seen. It may be gone by the time you get there.";
@@ -278,9 +298,52 @@ td.best .hot { font-weight: 700; }
   });
   if (location.hash === "#deals") showTab("deals");
 
+  // Live alert: anything still for sale at 30% or more under the going rate.
+  var HOT = 0.3, seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
+  function renderAlert(d) {
+    var hot = d.items.filter(function (i) { return i.n >= MIN && i.best && i.deal >= HOT; })
+      .sort(function (a, b) { return b.deal - a.deal; });
+    var keys = {}; hot.forEach(function (i) { keys[i.item + "|" + i.best.s + "|" + i.best.u + "|" + i.best.t] = 1; });
+    var fresh = seenDeals && armed ? Object.keys(keys).filter(function (k) { return !seenDeals[k]; }) : [];
+    seenDeals = keys;
+    $("alert").hidden = !hot.length;
+    if (!hot.length) return;
+    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " 30% or more under the going rate";
+    $("alert-list").textContent = hot.slice(0, 3).map(function (i) {
+      return i.item + " " + fmt(i.best.u) + " (" + Math.round(i.deal * 100) + "% under, " + i.best.s + (i.best.c ? " CH " + i.best.c : "") + (i.best.r ? " " + i.best.r : "") + ")";
+    }).join("  |  ") + (hot.length > 3 ? "  |  +" + (hot.length - 3) + " more" : "");
+    if (fresh.length) ping(fresh.length);
+  }
+  function ping(n) {
+    $("alert-new").hidden = false;
+    var a = $("alert"); a.classList.remove("fresh"); void a.offsetWidth; a.classList.add("fresh");
+    clearInterval(titleTimer); var on = false, left = 20;
+    titleTimer = setInterval(function () { on = !on; document.title = on ? "(" + n + ") New FM deal" : baseTitle; if (--left <= 0 && document.hasFocus()) { clearInterval(titleTimer); document.title = baseTitle; } }, 1000);
+    if ($("sound").checked) beep();
+  }
+  function beep() {
+    try {
+      var C = window.AudioContext || window.webkitAudioContext, ctx = beep.ctx || (beep.ctx = new C());
+      [0, 0.18].forEach(function (t) {
+        var o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.15); o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.16);
+      });
+    } catch (e) {}
+  }
+  $("alert").addEventListener("click", function () {
+    $("alert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle;
+    dK = "pct"; dDir = -1; showTab("deals"); render(); $("deals-view").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $("sound").addEventListener("change", function () { if (this.checked) beep(); try { localStorage.setItem("fm-sound", this.checked ? "1" : ""); } catch (e) {} });
+  try { $("sound").checked = localStorage.getItem("fm-sound") === "1"; } catch (e) {}
+  window.addEventListener("focus", function () { clearInterval(titleTimer); document.title = baseTitle; });
+
   function fail(title, msg) { $("empty").hidden = false; $("empty").innerHTML = ""; var s = document.createElement("strong"); s.textContent = title; $("empty").appendChild(s); $("empty").appendChild(document.createTextNode(msg)); }
 
-  try { scans = JSON.parse(document.getElementById("scan-data").textContent); } catch (e) { scans = []; }
+  var base = [];
+  try { base = JSON.parse(document.getElementById("scan-data").textContent); } catch (e) { base = []; }
+  scans = base;
   if (!scans.length) fail("No scans yet", "Prices appear here after the first Free Market scan is logged.");
   render();
   // Each watcher program keeps its own file up to date between hand scans. One file per PC.
@@ -292,11 +355,18 @@ td.best .hot { font-weight: 700; }
       if (added) render();
     }).catch(function () {});
   });
-  ["data/watcher.json", "data/watcher-2.json", "data/watcher-3.json"].forEach(function (f) {
-    fetch(f + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; }).then(function (extra) {
-      if (Array.isArray(extra) && extra.length) { scans = scans.concat(extra); render(); }
-    }).catch(function () {});
-  });
+  // The watcher files are re-read every minute so the page stays live without a refresh.
+  var FILES = ["data/watcher.json", "data/watcher-2.json", "data/watcher-3.json"], live = {};
+  function poll() {
+    Promise.all(FILES.map(function (f) {
+      return fetch(f + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (x) { if (Array.isArray(x)) live[f] = x; }).catch(function () {});
+    })).then(function () {
+      var all = base.slice(); FILES.forEach(function (f) { if (live[f]) all = all.concat(live[f]); });
+      scans = all; render(); armed = true;
+    });
+  }
+  poll(); setInterval(poll, 60000);
 })();
 </script>
 </body>
