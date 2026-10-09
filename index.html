@@ -321,7 +321,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     <p>Our guild's FM Watcher programs read Free Market shops and trade chat off the screen while we play, and this page updates itself every minute.</p>
     <p><b>Typical</b> is the median of real sales: shop rows seen greyed out, which means someone paid that price. Items with fewer than 3 sales fall back to the median asking price and are marked <b>ASK</b>. Items seen fewer than 5 times are marked <b>LOW DATA</b>.</p>
     <p><b>Cheapest now</b> is the lowest listing still for sale seen in the last day, with the seller, channel and room. It may be gone by the time you get there. Listings seen in the last 3 hours are marked as likely still up.</p>
-    <p>The red banner only shows listings seen in the last hour at half or less of what the item sells for. Tick the sound box to get a beep when a new one comes in.</p>
+    <p>The red banner lists every listing seen in the last 10 minutes at half or less of what the item sells for, newest first. Tick the sound box to get a beep when a new one comes in.</p>
     <p>On the chart, filled dots are sales, hollow dots are asking prices, and the shaded band is the middle half of sales. Press <kbd>/</kbd> to search. Guild members' own shops are left out.</p>
   </div>
 </dialog>
@@ -677,21 +677,24 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
   // ---------- alert
   var seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
   function renderAlert() {
-    var now = Date.now();
-    var hot = D.list.filter(function (i) {
-      if (!(i.n >= MIN && i.bestL && i.salesN >= 2 && i.kind === "sale" && now - i.bestL.t <= H)) return false;
-      i.vsSold = 1 - i.best / i.typ; return i.vsSold >= HOT;
-    }).sort(function (a, b) { return b.vsSold - a.vsSold; });
-    var keys = {}; hot.forEach(function (i) { keys[i.item + "|" + i.bestL.s + "|" + i.best + "|" + i.bestL.t] = 1; });
+    // Every listing seen in the last 10 minutes at half or less of what the item sells for, newest first.
+    var now = Date.now(), WIN = 10 * 6e4;
+    var hot = D.L.filter(function (l) {
+      if (l.so || l.b || now - l.t > WIN) return false;
+      var i = D.byName[l.i]; if (!i || i.n < MIN || i.salesN < 2 || i.kind !== "sale" || !i.typ) return false;
+      if (l.chat && l.u < i.typ * 0.3) return false;
+      l.vsSold = 1 - l.u / i.typ; l.typ = i.typ; return l.vsSold >= HOT;
+    }).sort(function (a, b) { return b.t - a.t || b.vsSold - a.vsSold; });
+    var keys = {}; hot.forEach(function (l) { keys[l.i + "|" + l.s + "|" + l.u + "|" + l.t] = 1; });
     var fresh = seenDeals && armed ? Object.keys(keys).filter(function (k) { return !seenDeals[k]; }) : [];
     seenDeals = keys;
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
-    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " at half price or better, seen in the last hour";
+    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " at half price or better in the last 10 minutes, newest first";
     var ul = $("alert-list"); ul.textContent = "";
-    hot.slice(0, 8).forEach(function (i, k) {
+    hot.slice(0, 8).forEach(function (l, k) {
       var li = el("span", "alert-row");
-      [[(k + 1) + ".", "n"], [i.item, "it"], [fmt(i.best), "pr"], [Math.round(i.vsSold * 100) + "% under " + short(i.typ), "pc"], [[i.bestL.s, where(i.bestL)].filter(Boolean).join(", "), "wh"]]
+      [[ago(l.t), "n"], [l.i, "it"], [fmt(l.u), "pr"], [Math.round(l.vsSold * 100) + "% under " + short(l.typ), "pc"], [[l.s, where(l)].filter(Boolean).join(", "), "wh"]]
         .forEach(function (p) { li.appendChild(el("span", p[1], p[0])); });
       ul.appendChild(li);
     });
