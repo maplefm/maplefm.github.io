@@ -761,10 +761,23 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
   // The GitHub API answers with the newest copy right away, and a "not changed" answer costs nothing
   // against its hourly limit. The raw file host is the fallback; it can lag by up to 5 minutes.
   var API = "https://api.github.com/repos/maplefm/maplefm.github.io/contents/";
+  // Each viewer gets 60 API answers an hour. Files that do not exist yet are checked again only every
+  // 15 minutes, and when the allowance runs low the page switches to the raw host until it resets.
+  var missing = {}, rawUntil = 0;
+  function getRaw(path) { return fetch(LIVE + path + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
   function getJSON(path) {
+    var now = Date.now();
+    if (missing[path] && now - missing[path] < 9e5) return Promise.resolve(null);
+    if (now < rawUntil) return getRaw(path);
     return fetch(API + path + "?ref=live", { cache: "no-cache", headers: { Accept: "application/vnd.github.raw+json" } })
-      .then(function (r) { if (!r.ok) throw r.status; return r.json(); })
-      .catch(function () { return fetch(LIVE + path + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }); });
+      .then(function (r) {
+        var left = +r.headers.get("x-ratelimit-remaining"), reset = +r.headers.get("x-ratelimit-reset");
+        if (r.headers.get("x-ratelimit-remaining") !== null && left < 8) rawUntil = reset ? reset * 1000 : now + 36e5;
+        if (r.status === 404) { missing[path] = now; return null; }
+        if (!r.ok) throw r.status;
+        delete missing[path]; return r.json();
+      })
+      .catch(function () { return getRaw(path); });
   }
   function poll() {
     Promise.all(FILES.map(function (f) {
