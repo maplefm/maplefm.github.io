@@ -425,7 +425,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
         var key = r.s + "|" + r.i + "|" + r.p + "|" + (r.q || 1) + "|" + (r.k || "");
         var prev = seen[key];
         if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
-        var l = { i: r.i, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, chat: chat, who: s.who || "Adam", x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
+        var l = { i: r.i, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: s.who || "Adam", x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
         seen[key] = l; L.push(l); whoRows[l.who] = (whoRows[l.who] || 0) + 1;
       });
     });
@@ -767,7 +767,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     // Every listing seen in the last 10 minutes at half or less of what the item sells for, newest first.
     var now = Date.now(), WIN = 10 * 6e4;
     var hot = D.L.filter(function (l) {
-      if (l.so || l.b || now - l.t > WIN) return false;
+      if (l.so || l.b || now - l.t > WIN || !l.tx) return false;   // only listings with their own sighting time
       var i = D.byName[l.i]; if (!i || i.n < MIN || i.salesN < 2 || i.kind !== "sale" || !i.typ) return false;
       if (l.chat && l.u < i.typ * 0.3) return false;
       l.vsSold = 1 - l.u / i.typ; l.typ = i.typ; return l.vsSold >= HOT;
