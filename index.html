@@ -230,6 +230,15 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
 .pbs th { text-align: right; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--line); }
 .pbs th:first-child, .pbs td:first-child { text-align: left; }
 .pbs td { text-align: right; padding: 5px 6px; border-bottom: 1px dashed var(--line); white-space: nowrap; }
+.selladd { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 0 14px 12px; }
+.selladd input { padding: 8px 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--panel2); min-width: 0; }
+.selladd #sell-item { flex: 1 1 240px; }
+.selladd #sell-qty { width: 80px; }
+td.why { white-space: normal; text-align: left; font-size: .78rem; color: var(--muted); font-weight: 600; max-width: 260px; }
+.rec { font-size: 1.02rem; }
+.rec.pick { background: var(--gold-soft); border-radius: 8px; padding: 2px 6px; }
+button.rm { cursor: pointer; border: 0; background: transparent; color: var(--muted); font-weight: 800; font-size: 1rem; }
+.addsell { cursor: pointer; border: 2px solid var(--wood2); background: var(--panel2); border-radius: 10px; padding: 6px 10px; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -264,6 +273,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
         <div class="tabs" role="tablist">
           <button role="tab" id="tab-prices" aria-selected="true">Prices</button>
           <button role="tab" id="tab-deals" aria-selected="false">Best deals</button>
+          <button role="tab" id="tab-sell" aria-selected="false">Sell my items</button>
         </div>
         <div class="meta"><span class="badge">REAL SALES</span><span id="updated"></span></div>
       </div>
@@ -300,6 +310,25 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
           <tbody id="rows"></tbody>
         </table>
         <div class="empty" id="empty"><strong>Loading prices</strong>One moment.</div>
+      </div>
+
+      <div id="sell-view" hidden>
+        <div class="selladd">
+          <input list="itemnames" id="sell-item" placeholder="Add an item you want to sell" aria-label="Item to sell">
+          <datalist id="itemnames"></datalist>
+          <input type="number" id="sell-qty" min="1" value="1" aria-label="How many">
+          <button type="button" id="sell-add" class="chip">Add</button>
+          <span class="note">Saved in this browser only. You can also add from an item's panel.</span>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead><tr>
+              <th>Item</th><th>Qty</th><th title="Under the cheapest listing up now, without going below the low end of real sales">Quick sale</th><th title="What it usually sells for">Fair</th><th title="Top of the normal sale range. Takes longer to sell.">Patient</th><th>Up now</th><th>Buyer offer</th><th>Total at fair</th><th></th>
+            </tr></thead>
+            <tbody id="sell-rows"></tbody>
+          </table>
+          <div class="empty" id="sell-empty"><strong>Nothing added yet</strong>Add the items in your inventory you want to sell and you'll get a price to list each one at.</div>
+        </div>
       </div>
 
       <div id="deals-view" class="scroll" hidden>
@@ -579,6 +608,61 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     document.querySelectorAll("thead button[data-k]").forEach(function (b) { if (b.dataset.k === state.sortK) b.setAttribute("aria-sort", state.sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort"); });
   }
 
+  // ---------- sell my items
+  var SELL = []; try { SELL = JSON.parse(localStorage.getItem("fm-sell") || "[]"); } catch (e) { SELL = []; }
+  function saveSell() { try { localStorage.setItem("fm-sell", JSON.stringify(SELL)); } catch (e) {} }
+  function nice(x) { if (!x || x < 10) return Math.max(1, Math.floor(x || 0)); var step = Math.pow(10, Math.max(0, String(Math.floor(x)).length - 2)); var n = Math.floor(x / step) * step; return step >= 10 ? n - 1 : n; }
+  // Quick: just under the cheapest listing up now, but never under the low end of real sales.
+  // Fair: what it usually sells for. Patient: the top of the normal sale range.
+  function advice(i) {
+    var su = i.sales.map(function (x) { return x.u; }), au = i.asks.map(function (x) { return x.u; });
+    var p25 = su.length >= 3 ? quant(su, .25) : 0, p50 = su.length >= 3 ? quant(su, .5) : 0, p75 = su.length >= 3 ? quant(su, .75) : 0;
+    var low = i.bestL ? i.bestL.u : 0, askMed = au.length ? median(au) : 0;
+    var fair = p50 || (askMed ? askMed * 0.95 : low);
+    var floor = p25 || (fair ? fair * 0.8 : 0);
+    var under = low && floor && low < floor;          // someone listed below the low end of real sales
+    var quick = !low ? (floor || fair * 0.9) : under ? floor : Math.max(floor, low - Math.max(1, low * 0.01));
+    var patient = p75 || askMed || fair * 1.15;
+    if (patient < fair) patient = fair;
+    var why = [];
+    if (low) why.push("Cheapest up now " + short(low) + " from " + i.bestL.s);
+    if (su.length >= 3) why.push("sales usually " + short(p25) + " to " + short(p75)); else why.push(su.length ? "only " + su.length + " sale seen, priced from asking prices" : "no sales seen yet, priced from asking prices");
+    if (under) why.push("that is below what it normally sells for, so the quick price stays at the low end of sales instead of matching it");
+    var sellers = {}; i.buy.forEach(function (x) { sellers[x.s] = 1; });
+    var bids = i.bids.map(function (x) { return x.u; }).filter(function (v) { return !fair || v <= fair * 2.5; });
+    return { quick: nice(quick), fair: nice(fair), patient: nice(patient), low: low, ups: Object.keys(sellers).length, bid: bids.length ? Math.max.apply(null, bids) : 0, why: why.join("; ") };
+  }
+  function renderSell() {
+    var dl = $("itemnames"); if (dl.childElementCount !== D.list.length) { dl.textContent = ""; D.list.slice().sort(function (a, b) { return a.item.localeCompare(b.item); }).forEach(function (i) { var o = el("option"); o.value = i.item; dl.appendChild(o); }); }
+    var tb = $("sell-rows"); tb.textContent = ""; var total = 0;
+    SELL.forEach(function (s, k) {
+      var i = D.byName[s.i], tr = el("tr"); tr.dataset.item = s.i;
+      if (!i) { tr.appendChild(el("td", null, s.i)); tr.appendChild(el("td", null, s.q)); var td = el("td", "why", "Not seen in the market yet, so no price to suggest."); td.colSpan = 6; tr.appendChild(td); }
+      else {
+        var a = advice(i);
+        tr.appendChild(nameCell(i));
+        tr.appendChild(el("td", null, fmt(s.q)));
+        [[a.quick, "pick"], [a.fair, ""], [a.patient, ""]].forEach(function (v) { var td = el("td"); td.appendChild(money(v[0], "rec " + v[1])); tr.appendChild(td); });
+        var up = el("td"); if (a.low) { up.appendChild(money(a.low)); up.appendChild(el("small", null, " " + a.ups + (a.ups === 1 ? " seller" : " sellers"))); } else up.textContent = "None"; tr.appendChild(up);
+        var bd = el("td"); if (a.bid) bd.appendChild(money(a.bid)); tr.appendChild(bd);
+        var tot = el("td"); tot.appendChild(money(a.fair * s.q)); tr.appendChild(tot); total += a.fair * s.q;
+      }
+      var rmc = el("td"), rm = el("button", "rm", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove " + s.i);
+      rm.addEventListener("click", function (e) { e.stopPropagation(); SELL.splice(k, 1); saveSell(); render(); }); rmc.appendChild(rm); tr.appendChild(rmc);
+      tb.appendChild(tr);
+      if (i) { var wr = el("tr"); var wd = el("td", "why", advice(i).why); wd.colSpan = 9; wr.appendChild(wd); tb.appendChild(wr); }
+    });
+    $("sell-empty").hidden = SELL.length > 0;
+    $("count").textContent = SELL.length ? SELL.length + " items, worth about " + short(total) + " mesos at fair prices" : "";
+  }
+  function addSell(name, q) {
+    name = (name || "").trim(); if (!name) return;
+    var hit = D.list.filter(function (i) { return i.item.toLowerCase() === name.toLowerCase(); })[0]; if (hit) name = hit.item;
+    var ex = SELL.filter(function (s) { return s.i === name; })[0];
+    if (ex) ex.q += q || 1; else SELL.push({ i: name, q: q || 1 });
+    saveSell();
+  }
+
   function renderDeals() {
     var base = visible(); renderChips(base);
     var list = base.filter(function (i) { return (state.cat === "All" || i.cat === state.cat) && i.n >= MIN && i.bestL && i.deal > 0; })
@@ -706,6 +790,8 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     if (!i) { $("itemtitle").textContent = "Item info"; ip.appendChild(el("p", "note", "Pick an item to see its chart, recent sales and where to buy it.")); return; }
     $("itemtitle").textContent = "Item info";
     var hd = el("div", "ih"); hd.appendChild(iconBox(i.item)); var ht = el("div"); ht.appendChild(el("h3", null, i.item)); ht.appendChild(el("p", null, i.cat + " · " + fmt(i.asks.length) + " listings · " + fmt(i.salesN) + " sales")); hd.appendChild(ht); ip.appendChild(hd);
+    var as = el("button", "addsell", SELL.some(function (s) { return s.i === i.item; }) ? "In my sell list ✓" : "+ Add to my sell list"); as.type = "button";
+    as.addEventListener("click", function () { addSell(i.item, 1); render(); }); ip.appendChild(as);
     var big = el("div", "big"); big.appendChild(money(i.typ)); big.appendChild(el("span", null, i.kind === "sale" ? "typical sale" : "typical asking price, not enough sales yet")); ip.appendChild(big);
     var lg = el("div", "legend"); [["s", "sale"], ["a", "asking"], ["b", "middle half of sales"]].forEach(function (x) { var s = el("span"); s.appendChild(el("i", x[0])); s.appendChild(document.createTextNode(x[1])); lg.appendChild(s); });
     var seg = el("div", "seg"); [["spread", "Spread"], ["time", "Over time"]].forEach(function (x) { var b = el("button", null, x[1]); b.type = "button"; b.setAttribute("aria-pressed", state.chart === x[0]); b.addEventListener("click", function () { state.chart = x[0]; renderItem(); }); seg.appendChild(b); });
@@ -809,7 +895,9 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     renderCards(); renderTicker(); renderAlert();
     $("prices-view").hidden = state.tab !== "prices"; $("deals-view").hidden = state.tab !== "deals";
     $("tab-prices").setAttribute("aria-selected", state.tab === "prices"); $("tab-deals").setAttribute("aria-selected", state.tab === "deals");
-    if (state.tab === "prices") renderPrices(); else renderDeals();
+    $("sell-view").hidden = state.tab !== "sell"; $("tab-sell").setAttribute("aria-selected", state.tab === "sell");
+    $("chips").parentNode.hidden = state.tab === "sell";
+    if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else renderSell();
     if (!state.sel && D.list.length) { var top = D.list.slice().sort(function (a, b) { return b.vol - a.vol; })[0]; state.sel = top.item; }
     renderItem();
     var lastT = D.L.reduce(function (a, l) { return Math.max(a, l.t); }, 0);
@@ -832,6 +920,9 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
   document.querySelectorAll("thead button[data-d]").forEach(function (b) { b.addEventListener("click", function () { if (state.dK === b.dataset.d) state.dDir = -state.dDir; else { state.dK = b.dataset.d; state.dDir = (b.dataset.d === "item" || b.dataset.d === "s" || b.dataset.d === "u") ? 1 : -1; } render(); }); });
   $("tab-prices").addEventListener("click", function () { state.tab = "prices"; render(); });
   $("tab-deals").addEventListener("click", function () { state.tab = "deals"; render(); });
+  $("tab-sell").addEventListener("click", function () { state.tab = "sell"; try { history.replaceState(null, "", "#sell"); } catch (e) {} render(); });
+  $("sell-add").addEventListener("click", function () { addSell($("sell-item").value, Math.max(1, +$("sell-qty").value || 1)); $("sell-item").value = ""; $("sell-qty").value = 1; render(); });
+  $("sell-item").addEventListener("keydown", function (e) { if (e.key === "Enter") $("sell-add").click(); });
   $("alert").addEventListener("click", function () { $("alert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle; state.tab = "deals"; state.dK = "pct"; state.dDir = -1; render(); $("deals-view").scrollIntoView({ behavior: "smooth", block: "start" }); });
   $("sound").addEventListener("change", function () { if (this.checked) beep(); try { localStorage.setItem("fm-sound", this.checked ? "1" : ""); } catch (e) {} });
   try { $("sound").checked = localStorage.getItem("fm-sound") === "1"; } catch (e) {}
@@ -839,7 +930,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
   $("helpbtn").addEventListener("click", function () { $("help").showModal(); });
   $("helpx").addEventListener("click", function () { $("help").close(); });
   $("help").addEventListener("click", function (e) { if (e.target === this) this.close(); });
-  (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
+  (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
 
   // ---------- data loading
   ICONFILES.forEach(function (f) {
