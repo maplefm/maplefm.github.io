@@ -318,7 +318,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
           <datalist id="itemnames"></datalist>
           <input type="number" id="sell-qty" min="1" value="1" aria-label="How many">
           <button type="button" id="sell-add" class="chip">Add</button>
-          <span class="note">Saved in this browser only. You can also add from an item's panel.</span>
+          <label class="note">Items you hover in game from <select id="sell-src" class="sel"><option value="">nobody</option><option value="data/watcher-sell.json">Adam's watcher</option><option value="data/watcher-2-sell.json">Jack's watcher</option></select></label>
         </div>
         <div class="scroll">
           <table>
@@ -362,7 +362,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     <p>Our guild's FM Watcher programs read Free Market shops and trade chat off the screen while we play, and this page updates itself every minute.</p>
     <p><b>Typical</b> is the median of real sales: shop rows seen greyed out, which means someone paid that price. Items with fewer than 3 sales fall back to the median asking price and are marked <b>ASK</b>. Items seen fewer than 5 times are marked <b>LOW DATA</b>.</p>
     <p><b>Cheapest now</b> is the lowest listing still for sale seen in the last day, with the seller, channel and room. It may be gone by the time you get there. Listings seen in the last 3 hours are marked as likely still up.</p>
-    <p>The red banner lists every listing seen in the last 10 minutes at half or less of what the item sells for, newest first. Tick the sound box to get a beep when a new one comes in.</p>
+    <p>The red banner lists every listing seen in the last 10 minutes at half or less of what the item sells for, or 30% under for items worth 10,000 or more, newest first. Tick the sound box to get a beep when a new one comes in.</p>
     <p>On the chart, filled dots are sales, hollow dots are asking prices, and the shaded band is the middle half of sales. Press <kbd>/</kbd> to search. Guild members' own shops are left out.</p>
   </div>
 </dialog>
@@ -632,15 +632,28 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     var bids = i.bids.map(function (x) { return x.u; }).filter(function (v) { return !fair || v <= fair * 2.5; });
     return { quick: nice(quick), fair: nice(fair), patient: nice(patient), low: low, ups: Object.keys(sellers).length, bid: bids.length ? Math.max.apply(null, bids) : 0, why: why.join("; ") };
   }
+  var GAME = [], HIDE = {};
+  try { HIDE = JSON.parse(localStorage.getItem("fm-sell-hide") || "{}"); } catch (e) { HIDE = {}; }
+  function gameKey(g) { return g.i + "|" + JSON.stringify(g.x || {}); }
+  function loadGame() {
+    var src = ""; try { src = localStorage.getItem("fm-sell-src") || ""; } catch (e) {}
+    $("sell-src").value = src;
+    if (!src) { GAME = []; return Promise.resolve(); }
+    return getJSON(src).then(function (x) { GAME = Array.isArray(x) ? x : []; });
+  }
   function renderSell() {
     var dl = $("itemnames"); if (dl.childElementCount !== D.list.length) { dl.textContent = ""; D.list.slice().sort(function (a, b) { return a.item.localeCompare(b.item); }).forEach(function (i) { var o = el("option"); o.value = i.item; dl.appendChild(o); }); }
     var tb = $("sell-rows"); tb.textContent = ""; var total = 0;
-    SELL.forEach(function (s, k) {
+    var rows = SELL.map(function (s, k) { return { i: s.i, q: s.q, k: k }; });
+    GAME.forEach(function (g) { if (!HIDE[gameKey(g)]) rows.unshift({ i: g.i, q: 1, g: g }); });
+    rows.forEach(function (s) {
       var i = D.byName[s.i], tr = el("tr"); tr.dataset.item = s.i;
       if (!i) { tr.appendChild(el("td", null, s.i)); tr.appendChild(el("td", null, s.q)); var td = el("td", "why", "Not seen in the market yet, so no price to suggest."); td.colSpan = 6; tr.appendChild(td); }
       else {
         var a = advice(i);
-        tr.appendChild(nameCell(i));
+        var nc = nameCell(i);
+        if (s.g) { var tag = el("span", "tg ask", "FROM GAME " + ago(s.g.t * 1000)); nc.querySelector("div div").appendChild(tag); var ch = statChip(i.item, s.g.x, s.g.xj); if (ch) nc.querySelector("b").appendChild(ch); }
+        tr.appendChild(nc);
         tr.appendChild(el("td", null, fmt(s.q)));
         [[a.quick, "pick"], [a.fair, ""], [a.patient, ""]].forEach(function (v) { var td = el("td"); td.appendChild(money(v[0], "rec " + v[1])); tr.appendChild(td); });
         var up = el("td"); if (a.low) { up.appendChild(money(a.low)); up.appendChild(el("small", null, " " + a.ups + (a.ups === 1 ? " seller" : " sellers"))); } else up.textContent = "None"; tr.appendChild(up);
@@ -648,12 +661,22 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
         var tot = el("td"); tot.appendChild(money(a.fair * s.q)); tr.appendChild(tot); total += a.fair * s.q;
       }
       var rmc = el("td"), rm = el("button", "rm", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove " + s.i);
-      rm.addEventListener("click", function (e) { e.stopPropagation(); SELL.splice(k, 1); saveSell(); render(); }); rmc.appendChild(rm); tr.appendChild(rmc);
+      rm.addEventListener("click", function (e) { e.stopPropagation(); if (s.g) { HIDE[gameKey(s.g)] = 1; try { localStorage.setItem("fm-sell-hide", JSON.stringify(HIDE)); } catch (er) {} } else { SELL.splice(s.k, 1); saveSell(); } render(); }); rmc.appendChild(rm); tr.appendChild(rmc);
       tb.appendChild(tr);
-      if (i) { var wr = el("tr"); var wd = el("td", "why", advice(i).why); wd.colSpan = 9; wr.appendChild(wd); tb.appendChild(wr); }
+      if (i) {
+        var why = advice(i).why;
+        if (s.g && s.g.x) {   // what the same roll has gone for
+          var ks = keyStat(i.item, s.g.x, s.g.xj), v = s.g.x[ks];
+          if (ks && v != null) {
+            var same = i.all.filter(function (x) { return x.x && x.x[ks] === v && !x.b; }).map(function (x) { return x.u; });
+            why += same.length ? "; this roll (" + ks + " " + v + ") has been seen " + same.length + "x around " + short(median(same)) : "; no other listing with this exact roll seen yet";
+          }
+        }
+        var wr = el("tr"); var wd = el("td", "why", why); wd.colSpan = 9; wr.appendChild(wd); tb.appendChild(wr);
+      }
     });
-    $("sell-empty").hidden = SELL.length > 0;
-    $("count").textContent = SELL.length ? SELL.length + " items, worth about " + short(total) + " mesos at fair prices" : "";
+    $("sell-empty").hidden = rows.length > 0;
+    $("count").textContent = rows.length ? rows.length + " items, worth about " + short(total) + " mesos at fair prices" : "";
   }
   function addSell(name, q) {
     name = (name || "").trim(); if (!name) return;
@@ -856,14 +879,14 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
       if (l.so || l.b || now - l.t > WIN || !l.tx) return false;   // only listings with their own sighting time
       var i = D.byName[l.i]; if (!i || i.n < MIN || i.salesN < 2 || i.kind !== "sale" || !i.typ) return false;
       if (l.chat && l.u < i.typ * 0.3) return false;
-      l.vsSold = 1 - l.u / i.typ; l.typ = i.typ; return l.vsSold >= HOT;
+      l.vsSold = 1 - l.u / i.typ; l.typ = i.typ; return l.vsSold >= (i.typ >= 10000 ? 0.3 : HOT);
     }).sort(function (a, b) { return b.t - a.t || b.vsSold - a.vsSold; });
     var keys = {}; hot.forEach(function (l) { keys[l.i + "|" + l.s + "|" + l.u + "|" + l.t] = 1; });
     var fresh = seenDeals && armed ? Object.keys(keys).filter(function (k) { return !seenDeals[k]; }) : [];
     seenDeals = keys;
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
-    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " at half price or better in the last 10 minutes, newest first";
+    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " in the last 10 minutes, newest first: 50% off, or 30% off on items worth 10K or more";
     var ul = $("alert-list"); ul.textContent = "";
     hot.slice(0, 8).forEach(function (l, k) {
       var li = el("span", "alert-row");
@@ -923,6 +946,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
   $("tab-sell").addEventListener("click", function () { state.tab = "sell"; try { history.replaceState(null, "", "#sell"); } catch (e) {} render(); });
   $("sell-add").addEventListener("click", function () { addSell($("sell-item").value, Math.max(1, +$("sell-qty").value || 1)); $("sell-item").value = ""; $("sell-qty").value = 1; render(); });
   $("sell-item").addEventListener("keydown", function (e) { if (e.key === "Enter") $("sell-add").click(); });
+  $("sell-src").addEventListener("change", function () { try { localStorage.setItem("fm-sell-src", this.value); } catch (e) {} loadGame().then(render); });
   $("alert").addEventListener("click", function () { $("alert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle; state.tab = "deals"; state.dK = "pct"; state.dDir = -1; render(); $("deals-view").scrollIntoView({ behavior: "smooth", block: "start" }); });
   $("sound").addEventListener("change", function () { if (this.checked) beep(); try { localStorage.setItem("fm-sound", this.checked ? "1" : ""); } catch (e) {} });
   try { $("sound").checked = localStorage.getItem("fm-sound") === "1"; } catch (e) {}
@@ -966,7 +990,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
         .then(function (x) { if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1]; }); live[f[0]] = x; } }).catch(function () {});
     })).then(function () {
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
-      scans = all; render(); armed = true;
+      scans = all; loadGame().then(function () { render(); armed = true; });
     });
   }
   render(); poll(); setInterval(poll, 60000);
