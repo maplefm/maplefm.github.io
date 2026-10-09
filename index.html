@@ -218,6 +218,18 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
   .col-last, .col-trend, .col-vol { display: none; }
   .nm { min-width: 150px; }
 }
+.xs { display: inline-flex; gap: 4px; align-items: center; margin-left: 6px; font-size: .72rem; font-weight: 800; padding: 1px 6px; border-radius: 6px; background: var(--panel2); border: 1px solid var(--line); vertical-align: 1px; }
+.xs em, .pbs em { font-style: normal; font-weight: 800; }
+.xs em.base, .pbs em.base { color: var(--muted); }
+.li.hasx { position: relative; cursor: help; }
+.tipbox { display: none; position: absolute; z-index: 30; right: 8px; top: calc(100% - 4px); width: 240px; padding: 10px 12px; border-radius: 10px; background: #1b2338; color: #f2f5ff; border: 2px solid #8fa3d9; box-shadow: var(--shadow); font-size: .8rem; line-height: 1.35; }
+.tipbox b { display: block; color: #ffd66e; margin-bottom: 4px; font-size: .88rem; }
+.li.hasx:hover .tipbox, .li.hasx:focus .tipbox, .li.hasx:focus-within .tipbox { display: block; }
+.pbs h4 { margin: 0 0 6px; font-family: var(--display); font-weight: 600; font-size: .95rem; }
+.pbs table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.pbs th { text-align: right; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.pbs th:first-child, .pbs td:first-child { text-align: left; }
+.pbs td { text-align: right; padding: 5px 6px; border-bottom: 1px dashed var(--line); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -412,8 +424,8 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
         if (now - t > winDays * DAY && latest - t > winDays * DAY) return;
         var key = r.s + "|" + r.i + "|" + r.p + "|" + (r.q || 1) + "|" + (r.k || "");
         var prev = seen[key];
-        if (prev) { if (r.so && !prev.so) prev.so = true; return; }
-        var l = { i: r.i, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, chat: chat, who: s.who || "Adam" };
+        if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; } return; }
+        var l = { i: r.i, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, chat: chat, who: s.who || "Adam", x: r.x || null, xt: r.xt || null, xn: r.xn || "" };
         seen[key] = l; L.push(l); whoRows[l.who] = (whoRows[l.who] || 0) + 1;
       });
     });
@@ -590,6 +602,42 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     document.querySelectorAll("thead button[data-d]").forEach(function (b) { if (b.dataset.d === state.dK) b.setAttribute("aria-sort", state.dDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort"); });
   }
 
+  // ---------- base stats, from the public item database, so a roll can be shown as plus or minus
+  var BASE = {}, BASEMAP = { incPAD: "ATT", incMAD: "MATT", incPDD: "WDEF", incMDD: "MDEF", incSTR: "STR", incDEX: "DEX", incINT: "INT", incLUK: "LUK", incMHP: "HP", incMMP: "MP", incACC: "ACC", incEVA: "AVOID", incSpeed: "SPEED", incJump: "JUMP", tuc: "SLOTS", reqLevel: "REQLV" };
+  function loadBase(name) {
+    var id = typeof ICONS[name] === "number" ? ICONS[name] : 0;
+    if (!id || BASE[name] !== undefined) return;
+    BASE[name] = null;
+    fetch("https://maplestory.io/api/GMS/83/item/" + id).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.metaInfo) return; var b = {};
+      Object.keys(BASEMAP).forEach(function (k) { if (j.metaInfo[k]) b[BASEMAP[k]] = j.metaInfo[k]; });
+      b.cash = !!j.metaInfo.cash; BASE[name] = b; if (state.sel === name) renderItem();
+    }).catch(function () {});
+  }
+  // The stat that matters most for an item: attack for weapons, magic attack for wands and staffs, else the first one.
+  function keyStat(name, x) {
+    var b = BASE[name] || {};
+    if ((b.MATT || 0) > (b.ATT || 0) || (!b.ATT && x && x.MATT != null && x.ATT == null)) return "MATT";
+    if (b.ATT || (x && x.ATT != null)) return "ATT";
+    if (x && x.SUCCESS != null) return "SUCCESS";
+    var order = ["WDEF", "MDEF", "STR", "DEX", "INT", "LUK", "HP", "MP", "ACC", "AVOID", "SPEED", "JUMP"];
+    for (var k = 0; k < order.length; k++) if (x && x[order[k]] != null) return order[k];
+    return "";
+  }
+  function statChip(name, x) {
+    var k = keyStat(name, x); if (!k || !x || x[k] == null) return null;
+    var b = BASE[name] || {}, v = x[k], s = el("span", "xs");
+    s.textContent = (k === "SUCCESS" ? v + "%" : k + " " + v);
+    if (b[k] != null && k !== "SUCCESS") { var d = v - b[k]; var dd = el("em", d > 0 ? "up" : d < 0 ? "down" : "", d === 0 ? "base" : (d > 0 ? "+" : "") + d); s.appendChild(dd); }
+    return s;
+  }
+  function tipBox(l) {
+    var box = el("div", "tipbox");
+    box.appendChild(el("b", null, l.xn || l.i));
+    (l.xt || []).slice(1).forEach(function (line) { box.appendChild(el("div", null, line)); });
+    return box;
+  }
+
   // ---------- item panel
   function pick(name) {
     state.sel = name; state.list = "buy";
@@ -639,6 +687,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     return svg;
   }
   function renderItem() {
+    if (state.sel) loadBase(state.sel);
     var ip = $("ip"); ip.textContent = ""; $("wiki").textContent = "";
     var i = state.sel && D.byName[state.sel];
     if (!i) { $("itemtitle").textContent = "Item info"; ip.appendChild(el("p", "note", "Pick an item to see its chart, recent sales and where to buy it.")); return; }
@@ -653,6 +702,28 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     [[i.lastSale ? i.lastSale.u : 0, "Last sale"], [i.last3, "Last 3 avg"], [null, "Sales seen", i.salesN]].forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "–".replace("–", "None"))); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
     ip.appendChild(st);
     if (i.bid) { var bd = el("div", "bids"); bd.appendChild(document.createTextNode("Buyers in chat: top offer ")); bd.appendChild(money(i.bid)); bd.appendChild(document.createTextNode(" from " + i.bids.length + (i.bids.length === 1 ? " offer" : " offers"))); ip.appendChild(bd); }
+    var withX = i.all.filter(function (x) { return x.x && !x.b; });
+    var b0 = BASE[i.item] || {};
+    if (b0.ATT || b0.MATT || b0.SLOTS) { var bl = el("p", "note", "Base: " + ["ATT", "MATT", "WDEF", "STR", "DEX", "INT", "LUK"].filter(function (k) { return b0[k]; }).map(function (k) { return k + " " + b0[k]; }).join(", ") + (b0.SLOTS ? ", " + b0.SLOTS + " slots" : "") + (b0.REQLV ? ", level " + b0.REQLV : "")); ip.appendChild(bl); }
+    if (withX.length) {
+      var ks = keyStat(i.item, withX[0].x);
+      var groups = {};
+      withX.forEach(function (x) { var v = x.x[ks]; if (v == null) return; (groups[v] || (groups[v] = [])).push(x); });
+      var vals = Object.keys(groups).map(Number).sort(function (a, b) { return b - a; });
+      if (vals.length) {
+        var sec = el("div", "pbs"); sec.appendChild(el("h4", null, "Price by " + (ks === "SUCCESS" ? "success rate" : ks)));
+        var tb = el("table"); var hr = el("tr"); ["Roll", "Seen", "Sold at", "Asking", "Cheapest"].forEach(function (h) { hr.appendChild(el("th", null, h)); }); tb.appendChild(hr);
+        vals.forEach(function (v) {
+          var g = groups[v], sold = g.filter(function (x) { return x.so; }).map(function (x) { return x.u; }), ask = g.filter(function (x) { return !x.so; }).map(function (x) { return x.u; });
+          var tr = el("tr"); var c0 = el("td"); c0.appendChild(el("b", null, ks === "SUCCESS" ? v + "%" : ks + " " + v));
+          if (b0[ks] != null && ks !== "SUCCESS") { var d = v - b0[ks]; c0.appendChild(el("em", d > 0 ? "up" : d < 0 ? "down" : "", d === 0 ? " base" : " " + (d > 0 ? "+" : "") + d)); }
+          tr.appendChild(c0); tr.appendChild(el("td", null, g.length));
+          [sold.length ? median(sold) : 0, ask.length ? median(ask) : 0, ask.length ? Math.min.apply(null, ask) : 0].forEach(function (n) { var td = el("td"); if (n) td.appendChild(money(n)); else td.textContent = ""; tr.appendChild(td); });
+          tb.appendChild(tr);
+        });
+        sec.appendChild(tb); sec.appendChild(el("p", "note", "Built from tooltips: hover an item in a shop for a second and its stats are read.")); ip.appendChild(sec);
+      }
+    }
     var lt = el("div", "ltabs");
     var bb = el("button"); bb.type = "button"; bb.appendChild(document.createTextNode("Where to buy")); bb.appendChild(el("em", null, i.buy.length)); bb.setAttribute("aria-selected", state.list === "buy");
     var rb = el("button"); rb.type = "button"; rb.appendChild(document.createTextNode("Recent sales")); rb.appendChild(el("em", null, i.salesN)); rb.setAttribute("aria-selected", state.list === "sales");
@@ -667,7 +738,9 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
       li.appendChild(el("b", null, x.s));
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var w = where(x), sm = el("small", null, (w ? w + " · " : "") + ago(x.t) + (state.list === "buy" ? (fresh ? " · likely still up" : "") : ""));
-      li.appendChild(sm); ls.appendChild(li);
+      li.appendChild(sm);
+      if (x.x) { var chip = statChip(i.item, x.x); if (chip) li.children[1].appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); }
+      ls.appendChild(li);
     });
     if (!rows.length) ls.appendChild(el("div", "li", state.list === "buy" ? "Nothing seen for sale in the last day." : "No sales seen yet."));
     ip.appendChild(ls);
