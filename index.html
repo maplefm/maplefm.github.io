@@ -424,8 +424,8 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
         if (now - t > winDays * DAY && latest - t > winDays * DAY) return;
         var key = r.s + "|" + r.i + "|" + r.p + "|" + (r.q || 1) + "|" + (r.k || "");
         var prev = seen[key];
-        if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; } return; }
-        var l = { i: r.i, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, chat: chat, who: s.who || "Adam", x: r.x || null, xt: r.xt || null, xn: r.xn || "" };
+        if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
+        var l = { i: r.i, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, chat: chat, who: s.who || "Adam", x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
         seen[key] = l; L.push(l); whoRows[l.who] = (whoRows[l.who] || 0) + 1;
       });
     });
@@ -617,7 +617,8 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
   // The stat that matters most for an item. Weapons: attack, or magic attack for wands and staffs.
   // Other equips: the main stat of the class that wears it, so STR warrior, INT mage, DEX bowman, LUK thief.
   var JOBSTAT = [[1, "STR"], [2, "INT"], [4, "DEX"], [8, "LUK"]];
-  function keyStat(name, x) {
+  var JOBNAME = { WARRIOR: "STR", MAGICIAN: "INT", BOWMAN: "DEX", THIEF: "LUK", PIRATE: "STR" };
+  function keyStat(name, x, xj) {
     var b = BASE[name] || {};
     if (x && x.SUCCESS != null) return "SUCCESS";
     if (category(name) === "Weapons" || (BASE[name] && (b.ATT || b.MATT) && !b.WDEF)) {
@@ -625,6 +626,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
       if (b.ATT || (x && x.ATT != null)) return "ATT";
     }
     var jobs = JOBSTAT.filter(function (j) { return (b.job || 0) & j[0]; }).map(function (j) { return j[1]; });
+    if (xj && JOBNAME[xj]) jobs = [JOBNAME[xj]];
     if (jobs.length === 1) return jobs[0];
     var mains = ["STR", "DEX", "INT", "LUK"], pick = "", best = -1;
     mains.forEach(function (k) { var v = Math.max(b[k] || 0, x && x[k] != null ? x[k] : -1); if ((!jobs.length || jobs.indexOf(k) > -1) && v > best) { best = v; pick = k; } });
@@ -634,11 +636,12 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     for (var k = 0; k < order.length; k++) if (x && x[order[k]] != null) return order[k];
     return "";
   }
-  function statChip(name, x) {
-    var k = keyStat(name, x); if (!k || !x || x[k] == null) return null;
-    var b = BASE[name] || {}, v = x[k], s = el("span", "xs");
+  function baseOf(name, x, k) { if (x && x[k + "_b"] != null) return x[k + "_b"]; var b = BASE[name] || {}; return b[k] != null ? b[k] : (k === "STR" || k === "DEX" || k === "INT" || k === "LUK" ? (BASE[name] ? 0 : null) : null); }
+  function statChip(name, x, xj) {
+    var k = keyStat(name, x, xj); if (!k || !x || x[k] == null) return null;
+    var bv = baseOf(name, x, k), v = x[k], s = el("span", "xs");
     s.textContent = (k === "SUCCESS" ? v + "%" : k + " " + v);
-    if (b[k] != null && k !== "SUCCESS") { var d = v - b[k]; var dd = el("em", d > 0 ? "up" : d < 0 ? "down" : "", d === 0 ? "base" : (d > 0 ? "+" : "") + d); s.appendChild(dd); }
+    if (bv != null && k !== "SUCCESS") { var d = v - bv; var dd = el("em", d > 0 ? "up" : d < 0 ? "down" : "", d === 0 ? "base" : (d > 0 ? "+" : "") + d); s.appendChild(dd); }
     return s;
   }
   function tipBox(l) {
@@ -716,7 +719,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
     var b0 = BASE[i.item] || {};
     if (b0.ATT || b0.MATT || b0.SLOTS) { var bl = el("p", "note", "Base: " + ["ATT", "MATT", "WDEF", "STR", "DEX", "INT", "LUK"].filter(function (k) { return b0[k]; }).map(function (k) { return k + " " + b0[k]; }).join(", ") + (b0.SLOTS ? ", " + b0.SLOTS + " slots" : "") + (b0.REQLV ? ", level " + b0.REQLV : "")); ip.appendChild(bl); }
     if (withX.length) {
-      var ks = keyStat(i.item, withX[0].x);
+      var ks = keyStat(i.item, withX[0].x, withX[0].xj);
       var groups = {};
       withX.forEach(function (x) { var v = x.x[ks]; if (v == null) return; (groups[v] || (groups[v] = [])).push(x); });
       var vals = Object.keys(groups).map(Number).sort(function (a, b) { return b - a; });
@@ -726,7 +729,8 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
         vals.forEach(function (v) {
           var g = groups[v], sold = g.filter(function (x) { return x.so; }).map(function (x) { return x.u; }), ask = g.filter(function (x) { return !x.so; }).map(function (x) { return x.u; });
           var tr = el("tr"); var c0 = el("td"); c0.appendChild(el("b", null, ks === "SUCCESS" ? v + "%" : ks + " " + v));
-          if (b0[ks] != null && ks !== "SUCCESS") { var d = v - b0[ks]; c0.appendChild(el("em", d > 0 ? "up" : d < 0 ? "down" : "", d === 0 ? " base" : " " + (d > 0 ? "+" : "") + d)); }
+          var bv0 = baseOf(i.item, g[0].x, ks);
+          if (bv0 != null && ks !== "SUCCESS") { var d = v - bv0; c0.appendChild(el("em", d > 0 ? "up" : d < 0 ? "down" : "", d === 0 ? " base" : " " + (d > 0 ? "+" : "") + d)); }
           tr.appendChild(c0); tr.appendChild(el("td", null, g.length));
           [sold.length ? median(sold) : 0, ask.length ? median(ask) : 0, ask.length ? Math.min.apply(null, ask) : 0].forEach(function (n) { var td = el("td"); if (n) td.appendChild(money(n)); else td.textContent = ""; tr.appendChild(td); });
           tb.appendChild(tr);
@@ -749,7 +753,7 @@ dialog button.x { cursor: pointer; border: 0; background: var(--gold); color: #2
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var w = where(x), sm = el("small", null, (w ? w + " · " : "") + ago(x.t) + (state.list === "buy" ? (fresh ? " · likely still up" : "") : ""));
       li.appendChild(sm);
-      if (x.x) { var chip = statChip(i.item, x.x); if (chip) li.children[1].appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); }
+      if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) li.children[1].appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); }
       ls.appendChild(li);
     });
     if (!rows.length) ls.appendChild(el("div", "li", state.list === "buy" ? "Nothing seen for sale in the last day." : "No sales seen yet."));
