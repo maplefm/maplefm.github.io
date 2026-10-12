@@ -364,7 +364,7 @@ tr.under td { background: var(--hot-soft); }
           <datalist id="itemnames"></datalist>
           <input type="number" id="sell-qty" min="1" value="1" aria-label="How many">
           <button type="button" id="sell-add" class="chip">Add</button>
-          <label class="note">Items you hover in game from <select id="sell-src" class="sel"><option value="">nobody</option><option value="data/watcher-sell.json">Adam's watcher</option><option value="data/watcher-2-sell.json">Jack's watcher</option></select></label>
+          <label class="note">Items you hover in game from <select id="sell-src" class="sel"><option value="">nobody</option><option value="data/watcher-sell.json">Adam's watcher</option><option value="data/watcher-2-sell.json">Jack's watcher</option><option value="data/watcher-3-sell.json">Matt's watcher</option><option value="data/watcher-4-sell.json">Jimmy's watcher</option></select></label>
         </div>
         <div class="scroll">
           <table>
@@ -422,8 +422,8 @@ tr.under td { background: var(--hot-soft); }
   "use strict";
   var OWN = ["maya", "injure", "excite", "dean", "liar"];
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
-  var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Guild"]];
-  var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json"];
+  var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"]];
+  var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json", "data/watcher-4-icons.json"];
   var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5, HALF = 2;
   var $ = function (id) { return document.getElementById(id); };
   var ICONS = {}; try { ICONS = JSON.parse($("icon-ids").textContent); } catch (e) {}
