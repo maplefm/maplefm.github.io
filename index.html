@@ -239,6 +239,19 @@ td.why { white-space: normal; text-align: left; font-size: .78rem; color: var(--
 .rec.pick { background: var(--gold-soft); border-radius: 8px; padding: 2px 6px; }
 button.rm { cursor: pointer; border: 0; background: transparent; color: var(--muted); font-weight: 800; font-size: 1rem; }
 .addsell { cursor: pointer; border: 2px solid var(--wood2); background: var(--panel2); border-radius: 10px; padding: 6px 10px; font-weight: 800; }
+.mvt { font-weight: 800; font-size: .8rem; white-space: nowrap; }
+.mvt.up { color: var(--sale); } .mvt.down { color: var(--hot); } .mvt.flat { color: var(--muted); }
+.mvs { display: flex; gap: 12px; flex-wrap: wrap; font-size: .85rem; }
+.mvs .lbl { color: var(--muted); font-weight: 700; }
+.subh { margin: 8px 14px 6px; font-family: var(--display); font-weight: 600; font-size: 1rem; }
+.watchcfg input { width: 64px; padding: 4px 6px; }
+.alert.watch { background: var(--sale-soft); border-color: var(--sale); }
+.alert.watch .dot { background: var(--sale); }
+tr.under td { background: var(--hot-soft); }
+.pl.up { color: var(--sale); } .pl.down { color: var(--hot); }
+.star { cursor: pointer; border: 2px solid var(--wood2); background: var(--panel2); border-radius: 10px; padding: 6px 10px; font-weight: 800; }
+.star[aria-pressed="true"] { background: var(--gold); color: #2b1d0e; }
+.panelbtns { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -265,7 +278,11 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     <span class="alert-head"><span class="dot" aria-hidden="true"></span><span id="alert-count"></span><span id="alert-new" class="alert-new" hidden>NEW</span></span>
     <span class="alert-list" id="alert-list"></span>
   </button>
-  <label class="soundrow"><input type="checkbox" id="sound"> Play a sound when a new deal shows up</label>
+  <button type="button" class="alert watch" id="walert" hidden aria-live="polite">
+    <span class="alert-head"><span class="dot" aria-hidden="true"></span><span id="walert-count"></span><span id="walert-new" class="alert-new" hidden>NEW</span></span>
+    <span class="alert-list" id="walert-list"></span>
+  </button>
+  <label class="soundrow"><input type="checkbox" id="sound"> Play a sound when a new deal or a big move shows up</label>
 
   <div class="main">
     <section class="panel" aria-labelledby="ptitle">
@@ -274,6 +291,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
           <button role="tab" id="tab-prices" aria-selected="true">Prices</button>
           <button role="tab" id="tab-deals" aria-selected="false">Best deals</button>
           <button role="tab" id="tab-sell" aria-selected="false">Sell my items</button>
+          <button role="tab" id="tab-pos" aria-selected="false">My positions</button>
         </div>
         <div class="meta"><span class="badge">REAL SALES</span><span id="updated"></span></div>
       </div>
@@ -304,12 +322,40 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
             <th class="col-last"><button data-k="last3">Last 3</button></th>
             <th><button data-k="best">Cheapest now</button></th>
             <th class="col-trend"><button data-k="trend">Trend</button></th>
+            <th><button data-k="move" title="Change in the last day, or 3 days if there is no day-old price. Sort to see the biggest movers.">Move</button></th>
             <th><button data-k="sales">Sales</button></th>
             <th class="col-vol"><button data-k="vol">Volume</button></th>
           </tr></thead>
           <tbody id="rows"></tbody>
         </table>
         <div class="empty" id="empty"><strong>Loading prices</strong>One moment.</div>
+      </div>
+
+      <div id="pos-view" hidden>
+        <div class="selladd">
+          <input list="itemnames" id="pos-item" placeholder="Item you bought to flip or merge" aria-label="Item">
+          <input type="number" id="pos-qty" min="1" value="1" aria-label="How many" title="How many">
+          <input type="number" id="pos-paid" min="0" placeholder="Paid each" aria-label="Price paid each">
+          <button type="button" id="pos-add" class="chip">Track</button>
+        </div>
+        <div class="selladd watchcfg">
+          <label class="note">Ping me when a starred item or a position moves more than <input type="number" id="watch-th" min="3" max="100" value="15" aria-label="Alert threshold percent">% in a day</label>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Item</th><th>Qty</th><th>Paid</th><th>Worth now</th><th>Move</th><th>P/L each</th><th>P/L total</th><th></th></tr></thead>
+            <tbody id="pos-rows"></tbody>
+          </table>
+          <div class="empty" id="pos-empty"><strong>No positions yet</strong>Add what you bought and what you paid, and you'll see if you're winning or losing as prices move.</div>
+        </div>
+        <h3 class="subh">Watchlist</h3>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Item</th><th>Typical</th><th>1 day</th><th>3 days</th><th>7 days</th><th>Cheapest now</th><th></th></tr></thead>
+            <tbody id="watch-rows"></tbody>
+          </table>
+          <div class="empty" id="watch-empty"><strong>Nothing starred</strong>Click Watch in an item's panel to follow it. Your positions are watched automatically.</div>
+        </div>
       </div>
 
       <div id="sell-view" hidden>
@@ -363,6 +409,8 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     <p><b>Typical</b> is the median of real sales: shop rows seen greyed out, which means someone paid that price. Items with fewer than 3 sales fall back to the median asking price and are marked <b>ASK</b>. Items seen fewer than 5 times are marked <b>LOW DATA</b>.</p>
     <p><b>Cheapest now</b> is the lowest listing still for sale seen in the last day, with the seller, channel and room. It may be gone by the time you get there. Listings seen in the last 3 hours are marked as likely still up.</p>
     <p>The red banner lists every listing seen in the last 10 minutes at half or less of what the item sells for, or 30% under for items worth 10,000 or more, newest first. Tick the sound box to get a beep when a new one comes in.</p>
+    <p><b>Typical</b> leans toward recent prices: each sale counts half as much for every 2 days of age, so a swing over 2 or 3 days shows up quickly while older sales still steady the number. <b>Move</b> compares the median price of the last 24 hours with the same 24 hours 1, 3 and 7 days earlier, and needs at least 5 sightings in each, ignoring joke prices.</p>
+    <p><b>My positions</b> tracks what you bought to flip or merge: quantity, what you paid, and profit or loss against today's typical price. Rows turn red when you're underwater or the price fell more than 5% in a day. Click <b>Watch</b> in an item's panel to follow it. Watched items and your positions ping you, with the title flash and optional sound, when they move more than your set percent in a day. Positions, watched items and the sell list are saved in this browser only.</p>
     <p>On the chart, filled dots are sales, hollow dots are asking prices, and the shaded band is the middle half of sales. Press <kbd>/</kbd> to search. Guild members' own shops are left out.</p>
   </div>
 </dialog>
@@ -376,7 +424,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
   var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Guild"]];
   var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json"];
-  var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5;
+  var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5, HALF = 2;
   var $ = function (id) { return document.getElementById(id); };
   var ICONS = {}; try { ICONS = JSON.parse($("icon-ids").textContent); } catch (e) {}
   var base = []; try { base = JSON.parse($("scan-data").textContent); } catch (e) {}
@@ -401,6 +449,12 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
   function coin() { return el("span", "coin"); }
   function money(n, cls) { var s = el("span", "num" + (cls ? " " + cls : "")); s.appendChild(coin()); s.appendChild(document.createTextNode(short(n))); return s; }
   function median(a) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+  function wmedian(p) {
+    if (!p.length) return 0; p = p.slice().sort(function (a, b) { return a[0] - b[0]; });
+    var tot = p.reduce(function (s, x) { return s + x[1]; }, 0), acc = 0;
+    for (var k = 0; k < p.length; k++) { acc += p[k][1]; if (acc >= tot / 2) return p[k][0]; }
+    return p[p.length - 1][0];
+  }
   function quant(a, q) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var i = (a.length - 1) * q, lo = Math.floor(i); return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); }
   function roomLabel(r) { if (!r) return ""; var m = /^FM(\d+)$/.exec(r); return m ? "Free Market " + m[1] : r; }
   function where(l) { return [l.c ? "CH " + l.c : "", roomLabel(l.r)].filter(Boolean).join(", "); }
@@ -464,13 +518,18 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
       it.all.push(l);
       if (l.b) it.bids.push(l); else if (l.so) it.sales.push(l); else it.asks.push(l);
     });
+    var ref = latest;
     var list = Object.keys(items).map(function (k) {
       var it = items[k], su = it.sales.map(function (x) { return x.u; }), au = it.asks.map(function (x) { return x.u; });
       it.cat = category(k);
       it.n = it.sales.length + it.asks.length;
       it.salesN = it.sales.length;
       it.kind = it.sales.length >= 3 ? "sale" : "ask";
-      it.typ = it.kind === "sale" ? median(su) : median(au.length ? au : su);
+      // Recent sightings count more: each one's weight halves every HALF days, so a 2 to 3 day swing shows up fast
+      // while older prices still steady the number.
+      var wts = function (arr) { return arr.map(function (x) { return [x.u, Math.pow(0.5, Math.max(0, ref - x.t) / (HALF * DAY))]; }); };
+      it.typ = it.kind === "sale" ? wmedian(wts(it.sales)) : wmedian(wts(it.asks.length ? it.asks : it.sales));
+      it.typFlat = it.kind === "sale" ? median(su) : median(au.length ? au : su);
       it.sales.sort(function (a, b) { return b.t - a.t; });
       it.last3 = it.sales.length ? it.sales.slice(0, 3).reduce(function (a, x) { return a + x.u; }, 0) / Math.min(3, it.sales.length) : 0;
       it.lastSale = it.sales[0] || null;
@@ -487,6 +546,14 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
       var dk = Object.keys(days).sort(function (a, b) { return Date.parse(a) - Date.parse(b); });
       it.daily = dk.map(function (d) { return [Date.parse(d), median(days[d])]; });
       it.trend = it.daily.length >= 3 ? (it.daily[it.daily.length - 1][1] / it.daily[0][1] - 1) : -9;
+      // movement: median of the last 24 hours against the same 24 hours 1, 3 and 7 days earlier
+      // joke listings (a fifth or five times the typical price) are left out, and each window needs 5 sightings
+      var px = it.all.filter(function (x) { return !x.b && (!it.typ || (x.u >= it.typ / 5 && x.u <= it.typ * 5)); });
+      var win = function (a, b) { var v = px.filter(function (x) { return ref - x.t >= a && ref - x.t < b; }).map(function (x) { return x.u; }); return v.length >= 5 ? median(v) : 0; };
+      var cur = win(0, DAY);
+      it.mv = [1, 3, 7].map(function (d) { var old = win(d * DAY, (d + 1) * DAY); return cur && old ? cur / old - 1 : null; });
+      var anyMv = it.mv.filter(function (v) { return v != null; });
+      it.move = anyMv.length ? Math.abs(anyMv[0]) : -1;
       return it;
     });
     var byName = {}; list.forEach(function (i) { byName[i.item] = i; });
@@ -571,6 +638,11 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     svg.appendChild(pl); return svg;
   }
 
+  function moveTag(v, label) {
+    var s = el("span", "mvt " + (v > 0.02 ? "up" : v < -0.02 ? "down" : "flat"));
+    s.textContent = (v > 0.02 ? "\u25B2 " : v < -0.02 ? "\u25BC " : "\u25A0 ") + (v > 0 ? "+" : "") + Math.round(v * 100) + "%" + (label ? " " + label : "");
+    return s;
+  }
   function nameCell(i, extraTag) {
     var td = el("td"), w = el("div", "nm"); w.appendChild(iconBox(i.item));
     var t = el("div"); t.appendChild(el("b", null, i.item));
@@ -598,6 +670,8 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
       var lc = el("td", "col-last"); if (i.last3) lc.appendChild(money(i.last3)); else lc.appendChild(el("span", "tfd", "No sales")); tr.appendChild(lc);
       var bc = el("td"); if (i.bestL) { bc.appendChild(money(i.best)); if (i.deal >= 0.25) bc.appendChild(el("span", "tg deal", Math.round(i.deal * 100) + "% OFF")); } else bc.appendChild(el("span", "tfd", "None up")); tr.appendChild(bc);
       var trc = el("td", "col-trend"); if (i.daily.length >= 3) trc.appendChild(spark(i.daily)); else trc.appendChild(el("span", "tfd", "Too few days")); tr.appendChild(trc);
+      var mc = el("td"); var mvi = i.mv[0] != null ? 0 : i.mv[1] != null ? 1 : -1;
+      if (mvi > -1) mc.appendChild(moveTag(i.mv[mvi], mvi === 0 ? "1d" : "3d")); else mc.appendChild(el("span", "tfd", "Too new")); tr.appendChild(mc);
       var sc = el("td"); sc.appendChild(el("span", "cnt" + (i.salesN ? " sold" : ""), fmt(i.salesN))); tr.appendChild(sc);
       var vc = el("td", "col-vol"); if (i.vol) vc.appendChild(money(i.vol)); else vc.appendChild(document.createTextNode("")); tr.appendChild(vc);
       tb.appendChild(tr);
@@ -606,6 +680,76 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     if (!shown.length) { $("empty").innerHTML = ""; $("empty").appendChild(el("strong", null, "No items match")); $("empty").appendChild(document.createTextNode("Clear the search, pick another category, or turn on low-data items in Filters.")); }
     $("count").textContent = "Showing " + shown.length + " of " + D.list.length + " items";
     document.querySelectorAll("thead button[data-k]").forEach(function (b) { if (b.dataset.k === state.sortK) b.setAttribute("aria-sort", state.sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort"); });
+  }
+
+  // ---------- positions and watchlist
+  function loadLS(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } }
+  function saveLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var POS = loadLS("fm-pos", []), WATCH = loadLS("fm-watch", {}), WSEEN = loadLS("fm-watch-seen", {});
+  function watched() { var w = {}; Object.keys(WATCH).forEach(function (k) { w[k] = 1; }); POS.forEach(function (p) { w[p.i] = 1; }); return Object.keys(w); }
+  function plSpan(v) { return el("span", "num pl " + (v >= 0 ? "up" : "down"), (v >= 0 ? "+" : "\u2212") + short(Math.abs(v))); }
+  function renderPos() {
+    var tb = $("pos-rows"); tb.textContent = ""; var tot = 0, cost = 0;
+    POS.forEach(function (p, k) {
+      var i = D.byName[p.i], tr = el("tr"); tr.dataset.item = p.i;
+      var now = i ? i.typ : 0, pl = now ? now - p.paid : 0;
+      if (i) tr.appendChild(nameCell(i)); else tr.appendChild(el("td", null, p.i));
+      tr.appendChild(el("td", null, fmt(p.q)));
+      var pc = el("td"); pc.appendChild(money(p.paid)); tr.appendChild(pc);
+      var nc = el("td"); if (now) nc.appendChild(money(now)); else nc.textContent = "No price yet"; tr.appendChild(nc);
+      var mc = el("td"); if (i && i.mv[0] != null) mc.appendChild(moveTag(i.mv[0], "1d")); else if (i && i.mv[1] != null) mc.appendChild(moveTag(i.mv[1], "3d")); tr.appendChild(mc);
+      var e1 = el("td"); if (now) { e1.appendChild(plSpan(pl)); e1.appendChild(el("small", null, " " + (pl >= 0 ? "+" : "") + Math.round(pl / p.paid * 100) + "%")); } tr.appendChild(e1);
+      var e2 = el("td"); if (now) e2.appendChild(plSpan(pl * p.q)); tr.appendChild(e2);
+      if (now) { tot += pl * p.q; cost += p.paid * p.q; }
+      if (now && (pl < 0 || (i.mv[0] != null && i.mv[0] < -0.05))) tr.classList.add("under");
+      var rc = el("td"), rm = el("button", "rm", "\u00D7"); rm.type = "button"; rm.setAttribute("aria-label", "Remove " + p.i);
+      rm.addEventListener("click", function (e) { e.stopPropagation(); POS.splice(k, 1); saveLS("fm-pos", POS); render(); }); rc.appendChild(rm); tr.appendChild(rc);
+      tb.appendChild(tr);
+    });
+    $("pos-empty").hidden = POS.length > 0;
+    var wb = $("watch-rows"); wb.textContent = "";
+    watched().forEach(function (name) {
+      var i = D.byName[name], tr = el("tr"); tr.dataset.item = name;
+      if (i) tr.appendChild(nameCell(i)); else tr.appendChild(el("td", null, name));
+      var tc = el("td"); if (i) tc.appendChild(money(i.typ)); tr.appendChild(tc);
+      [0, 1, 2].forEach(function (d) { var td = el("td"); if (i && i.mv[d] != null) td.appendChild(moveTag(i.mv[d])); else td.appendChild(el("span", "tfd", "n/a")); tr.appendChild(td); });
+      var cc = el("td"); if (i && i.bestL) cc.appendChild(money(i.best)); tr.appendChild(cc);
+      var rc = el("td");
+      if (WATCH[name]) { var rm = el("button", "rm", "\u00D7"); rm.type = "button"; rm.setAttribute("aria-label", "Stop watching " + name); rm.addEventListener("click", function (e) { e.stopPropagation(); delete WATCH[name]; saveLS("fm-watch", WATCH); render(); }); rc.appendChild(rm); }
+      else rc.appendChild(el("small", null, "position"));
+      tr.appendChild(rc); wb.appendChild(tr);
+    });
+    $("watch-empty").hidden = watched().length > 0;
+    $("count").textContent = POS.length ? POS.length + " positions, " + (tot >= 0 ? "up " : "down ") + short(Math.abs(tot)) + " mesos" + (cost ? " (" + (tot >= 0 ? "+" : "") + Math.round(tot / cost * 100) + "%)" : "") + " against what you paid" : "";
+  }
+  // a starred item or a position moving past the threshold in a day pings, once per item, day and direction
+  var wArmed = false;
+  function renderWatchAlert() {
+    var th = Math.max(3, +$("watch-th").value || 15) / 100, day = new Date().toDateString();
+    var moved = watched().map(function (n) { return D.byName[n]; }).filter(function (i) { return i && i.mv[0] != null && Math.abs(i.mv[0]) >= th; })
+      .sort(function (a, b) { return Math.abs(b.mv[0]) - Math.abs(a.mv[0]); });
+    $("walert").hidden = !moved.length;
+    if (!moved.length) return;
+    $("walert-count").textContent = moved.length + (moved.length === 1 ? " item you're watching" : " items you're watching") + " moved more than " + Math.round(th * 100) + "% in a day";
+    var ul = $("walert-list"); ul.textContent = "";
+    moved.slice(0, 8).forEach(function (i) {
+      var li = el("span", "alert-row"); li.appendChild(el("span", "n", POS.some(function (p) { return p.i === i.item; }) ? "position" : "watching"));
+      li.appendChild(el("span", "it", i.item)); li.appendChild(el("span", "pr", fmt(i.typ))); var m = moveTag(i.mv[0], "1d"); m.className += " pc"; li.appendChild(m);
+      var p = POS.filter(function (x) { return x.i === i.item; })[0];
+      li.appendChild(el("span", "wh", p ? "you paid " + fmt(p.paid) + ", " + (i.typ >= p.paid ? "up " : "down ") + short(Math.abs(i.typ - p.paid)) + " each" : ""));
+      ul.appendChild(li);
+    });
+    var fresh = moved.filter(function (i) { var k = i.item + "|" + day + "|" + (i.mv[0] > 0 ? "up" : "down"); if (WSEEN[k]) return false; WSEEN[k] = 1; return true; });
+    if (fresh.length) {
+      saveLS("fm-watch-seen", WSEEN);
+      if (wArmed) {
+        $("walert-new").hidden = false;
+        var a = $("walert"); a.classList.remove("fresh"); void a.offsetWidth; a.classList.add("fresh");
+        clearInterval(titleTimer); var on = false, left = 20, n = fresh.length;
+        titleTimer = setInterval(function () { on = !on; document.title = on ? "(" + n + ") Price move on your watchlist" : baseTitle; if (--left <= 0 && document.hasFocus()) { clearInterval(titleTimer); document.title = baseTitle; } }, 1000);
+        if ($("sound").checked) beep();
+      }
+    }
   }
 
   // ---------- sell my items
@@ -813,9 +957,17 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
     if (!i) { $("itemtitle").textContent = "Item info"; ip.appendChild(el("p", "note", "Pick an item to see its chart, recent sales and where to buy it.")); return; }
     $("itemtitle").textContent = "Item info";
     var hd = el("div", "ih"); hd.appendChild(iconBox(i.item)); var ht = el("div"); ht.appendChild(el("h3", null, i.item)); ht.appendChild(el("p", null, i.cat + " · " + fmt(i.asks.length) + " listings · " + fmt(i.salesN) + " sales")); hd.appendChild(ht); ip.appendChild(hd);
-    var as = el("button", "addsell", SELL.some(function (s) { return s.i === i.item; }) ? "In my sell list ✓" : "+ Add to my sell list"); as.type = "button";
-    as.addEventListener("click", function () { addSell(i.item, 1); render(); }); ip.appendChild(as);
+    var btns = el("div", "panelbtns");
+    var as = el("button", "addsell", SELL.some(function (s) { return s.i === i.item; }) ? "In sell list \u2713" : "+ Sell list"); as.type = "button";
+    as.addEventListener("click", function () { addSell(i.item, 1); render(); }); btns.appendChild(as);
+    var st = el("button", "star", WATCH[i.item] ? "\u2605 Watching" : "\u2606 Watch"); st.type = "button"; st.setAttribute("aria-pressed", !!WATCH[i.item]);
+    st.addEventListener("click", function () { if (WATCH[i.item]) delete WATCH[i.item]; else WATCH[i.item] = { t: Date.now() }; saveLS("fm-watch", WATCH); render(); }); btns.appendChild(st);
+    var pb = el("button", "addsell", "+ Position"); pb.type = "button";
+    pb.addEventListener("click", function () { state.tab = "pos"; render(); $("pos-item").value = i.item; $("pos-paid").focus(); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); }); btns.appendChild(pb);
+    ip.appendChild(btns);
     var big = el("div", "big"); big.appendChild(money(i.typ)); big.appendChild(el("span", null, i.kind === "sale" ? "typical sale" : "typical asking price, not enough sales yet")); ip.appendChild(big);
+    var mvs = el("div", "mvs"); [["1 day", 0], ["3 days", 1], ["7 days", 2]].forEach(function (x) { var s = el("span"); s.appendChild(el("span", "lbl", x[0] + " ")); if (i.mv[x[1]] != null) s.appendChild(moveTag(i.mv[x[1]])); else s.appendChild(el("span", "tfd", "n/a")); mvs.appendChild(s); });
+    ip.appendChild(mvs);
     var lg = el("div", "legend"); [["s", "sale"], ["a", "asking"], ["b", "middle half of sales"]].forEach(function (x) { var s = el("span"); s.appendChild(el("i", x[0])); s.appendChild(document.createTextNode(x[1])); lg.appendChild(s); });
     var seg = el("div", "seg"); [["spread", "Spread"], ["time", "Over time"]].forEach(function (x) { var b = el("button", null, x[1]); b.type = "button"; b.setAttribute("aria-pressed", state.chart === x[0]); b.addEventListener("click", function () { state.chart = x[0]; renderItem(); }); seg.appendChild(b); });
     lg.appendChild(seg); ip.appendChild(lg);
@@ -915,12 +1067,13 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
   // ---------- render
   function render() {
     D = build();
-    renderCards(); renderTicker(); renderAlert();
+    renderCards(); renderTicker(); renderAlert(); renderWatchAlert();
     $("prices-view").hidden = state.tab !== "prices"; $("deals-view").hidden = state.tab !== "deals";
     $("tab-prices").setAttribute("aria-selected", state.tab === "prices"); $("tab-deals").setAttribute("aria-selected", state.tab === "deals");
     $("sell-view").hidden = state.tab !== "sell"; $("tab-sell").setAttribute("aria-selected", state.tab === "sell");
-    $("chips").parentNode.hidden = state.tab === "sell";
-    if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else renderSell();
+    $("pos-view").hidden = state.tab !== "pos"; $("tab-pos").setAttribute("aria-selected", state.tab === "pos");
+    $("chips").parentNode.hidden = state.tab === "sell" || state.tab === "pos";
+    if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else if (state.tab === "sell") renderSell(); else renderPos();
     if (!state.sel && D.list.length) { var top = D.list.slice().sort(function (a, b) { return b.vol - a.vol; })[0]; state.sel = top.item; }
     renderItem();
     var lastT = D.L.reduce(function (a, l) { return Math.max(a, l.t); }, 0);
@@ -944,6 +1097,18 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
   $("tab-prices").addEventListener("click", function () { state.tab = "prices"; render(); });
   $("tab-deals").addEventListener("click", function () { state.tab = "deals"; render(); });
   $("tab-sell").addEventListener("click", function () { state.tab = "sell"; try { history.replaceState(null, "", "#sell"); } catch (e) {} render(); });
+  $("tab-pos").addEventListener("click", function () { state.tab = "pos"; try { history.replaceState(null, "", "#positions"); } catch (e) {} render(); });
+  $("pos-add").addEventListener("click", function () {
+    var n = $("pos-item").value.trim(), q = Math.max(1, +$("pos-qty").value || 1), paid = +$("pos-paid").value;
+    if (!n || !(paid > 0)) { $("pos-paid").focus(); return; }
+    var hit = D.list.filter(function (i) { return i.item.toLowerCase() === n.toLowerCase(); })[0]; if (hit) n = hit.item;
+    POS.push({ i: n, q: q, paid: paid, t: Date.now() }); saveLS("fm-pos", POS);
+    $("pos-item").value = ""; $("pos-qty").value = 1; $("pos-paid").value = ""; render();
+  });
+  $("pos-paid").addEventListener("keydown", function (e) { if (e.key === "Enter") $("pos-add").click(); });
+  $("watch-th").value = loadLS("fm-watch-th", 15);
+  $("watch-th").addEventListener("change", function () { saveLS("fm-watch-th", +this.value || 15); render(); });
+  $("walert").addEventListener("click", function () { $("walert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle; state.tab = "pos"; render(); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); });
   $("sell-add").addEventListener("click", function () { addSell($("sell-item").value, Math.max(1, +$("sell-qty").value || 1)); $("sell-item").value = ""; $("sell-qty").value = 1; render(); });
   $("sell-item").addEventListener("keydown", function (e) { if (e.key === "Enter") $("sell-add").click(); });
   $("sell-src").addEventListener("change", function () { try { localStorage.setItem("fm-sell-src", this.value); } catch (e) {} loadGame().then(render); });
@@ -954,7 +1119,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
   $("helpbtn").addEventListener("click", function () { $("help").showModal(); });
   $("helpx").addEventListener("click", function () { $("help").close(); });
   $("help").addEventListener("click", function (e) { if (e.target === this) this.close(); });
-  (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
+  (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; if (/positions/.test(h)) state.tab = "pos"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
 
   // ---------- data loading
   ICONFILES.forEach(function (f) {
@@ -990,7 +1155,7 @@ button.rm { cursor: pointer; border: 0; background: transparent; color: var(--mu
         .then(function (x) { if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1]; }); live[f[0]] = x; } }).catch(function () {});
     })).then(function () {
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
-      scans = all; loadGame().then(function () { render(); armed = true; });
+      scans = all; loadGame().then(function () { render(); armed = true; wArmed = true; });
     });
   }
   render(); poll(); setInterval(poll, 60000);
