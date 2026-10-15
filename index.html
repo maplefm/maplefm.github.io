@@ -698,7 +698,7 @@ tr.under td { background: var(--hot-soft); }
       CN = {}; CAPT = {}; if (D) render();
     }).catch(function () {});
   }
-  function idOf(name) { if (typeof ICONS[name] === "number") return ICONS[name]; var r = dbRow(name); return r ? r[1] : 0; }
+  function idOf(name) { var r = dbRow(name); return r ? r[1] : 0; }
 
   // ---------- tidying names read off the screen
   // Shop text often turns a W into VW, Vv, YV or a yen sign, cuts long names short, and picks up stray letters.
@@ -857,10 +857,12 @@ tr.under td { background: var(--hot-soft); }
     if (n !== captN || !Object.keys(CAPT).length) { CAPT = {}; Object.keys(CAPTRAW).forEach(function (k) { var c = canon(k).n; if (!CAPT[c]) CAPT[c] = CAPTRAW[k]; if (!CAPT[k]) CAPT[k] = CAPTRAW[k]; }); captN = n; }
     return CAPT[name] || "";
   }
+  // Classic World's own icons from maplestory.io first; then icons cut from real shop windows.
+  var IO = "https://maplestory.io/api/MCW/1/item/";
   function iconSrc(name) {
+    var r = dbRow(name); if (r) return IO + r[1] + "/icon";
     var cap = captured(name); if (cap) return cap;
-    var v = ICONS[name]; if (v) return typeof v === "string" ? v : "https://maplestory.io/api/GMS/83/item/" + v + "/icon";
-    var r = dbRow(name); return r ? "https://maplestory.io/api/GMS/83/item/" + r[1] + "/icon" : "";
+    var v = ICONS[name]; return typeof v === "string" ? v : "";
   }
   function iconBox(name, cls) {
     var b = el("span", "itc" + (cls ? " " + cls : ""));
@@ -1042,7 +1044,7 @@ tr.under td { background: var(--hot-soft); }
       var k = c[0]; if (k !== "All" && !cnt[k] && state.cat !== k) return;
       var nm = CATNAME[k] || k;
       var b = el("button", "cchip" + (k === "All" ? " all" : "")); b.type = "button"; b.setAttribute("aria-pressed", state.cat === k); b.title = nm + ": " + (cnt[k] || 0) + " items"; b.setAttribute("aria-label", nm + ", " + (cnt[k] || 0) + " items");
-      if (k === "All") b.appendChild(el("span", null, "ALL")); else { var im = new Image(); im.alt = ""; im.src = "https://maplestory.io/api/GMS/83/item/" + c[1] + "/icon"; b.appendChild(im); }
+      if (k === "All") b.appendChild(el("span", null, "ALL")); else { var im = new Image(); im.alt = ""; im.src = IO + c[1] + "/icon"; b.appendChild(im); }
       b.appendChild(el("em", null, cnt[k] || 0));
       b.addEventListener("click", function () { state.cat = k; render(); });
       box.appendChild(b);
@@ -1302,7 +1304,7 @@ tr.under td { background: var(--hot-soft); }
     var id = idOf(name);
     if (!id || BASE[name] !== undefined) return;
     BASE[name] = null;
-    fetch("https://maplestory.io/api/GMS/83/item/" + id).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    fetch(IO + id).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.metaInfo) return; var b = {};
       Object.keys(BASEMAP).forEach(function (k) { if (j.metaInfo[k] != null) b[BASEMAP[k]] = j.metaInfo[k]; });
       b.cash = !!j.metaInfo.cash; b.job = j.metaInfo.reqJob || 0; b.sub = j.typeInfo ? j.typeInfo.subCategory : "";
@@ -1472,7 +1474,7 @@ tr.under td { background: var(--hot-soft); }
     var ip = $("ip"); ip.textContent = ""; $("wiki").textContent = "";
     var i = state.sel && D.byName[state.sel];
     if (!i) { ip.appendChild(el("p", "note", "Pick an item to see its chart, recent sales and where to buy it.")); return; }
-    if (idOf(i.item)) { var a = el("a", null, "Item data: maplestory.io"); a.href = "https://maplestory.io/api/GMS/83/item/" + idOf(i.item); a.target = "_blank"; a.rel = "noopener"; $("wiki").appendChild(a); }
+    if (idOf(i.item)) { var a = el("a", null, "Item data: maplestory.io"); a.href = IO + idOf(i.item); a.target = "_blank"; a.rel = "noopener"; $("wiki").appendChild(a); }
     var hd = el("div", "ih"); hd.appendChild(iconBox(i.item)); var ht = el("div"); ht.appendChild(el("h3", null, i.item));
     ht.appendChild(el("p", null, fmt(i.asks.length) + " listings · " + fmt(i.salesN) + " sales"));
     var ll = levelLine(i); if (ll) ht.appendChild(el("p", null, ll));
