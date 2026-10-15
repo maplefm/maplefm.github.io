@@ -1,0 +1,19 @@
+name: Item list
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * 1"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p data && python3 tools/itemdb.py data/itemdb.json
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git add data/itemdb.json
+          git diff --cached --quiet || git commit -m "Refresh item list from maplestory.io"
+          git push
