@@ -637,8 +637,8 @@ tr.under td { background: var(--hot-soft); }
   "use strict";
   var OWN = ["maya", "injure", "excite", "dean", "liar"];
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
-  var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"]];
-  var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json", "data/watcher-4-icons.json", "data/streams-icons.json"];
+  var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"]];
+  var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json", "data/watcher-4-icons.json", "data/streams-icons.json", "data/streams-vods-icons.json"];
   var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5;
   var $ = function (id) { return document.getElementById(id); };
   var ICONS = {}; try { ICONS = JSON.parse($("icon-ids").textContent); } catch (e) {}
@@ -680,7 +680,7 @@ tr.under td { background: var(--hot-soft); }
       if (!j || !j.items) return;
       DBK = j.kinds || [];
       j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); } });
-      CN = {}; if (D) render();
+      CN = {}; CAPT = {}; if (D) render();
     }).catch(function () {});
   }
   function idOf(name) { if (typeof ICONS[name] === "number") return ICONS[name]; var r = dbRow(name); return r ? r[1] : 0; }
@@ -834,7 +834,16 @@ tr.under td { background: var(--hot-soft); }
   function reqLevel(name) { var b = BASE[name]; if (b && b.REQLV != null) return b.REQLV; var r = dbRow(name); return r ? r[2] : -1; }
   var JOBS = [[1, "Warrior"], [2, "Magician"], [4, "Bowman"], [8, "Thief"], [16, "Pirate"]];
   function className(m) { if (m <= 0) return ""; var n = JOBS.filter(function (j) { return m & j[0]; }).map(function (j) { return j[1]; }); return n.length > 2 ? "" : n.join(", "); }
+  // Icons cut out of real Classic shop windows by the watchers and the stream reader. Classic reuses
+  // some item ids for different items, so these beat the old v83 item list whenever we have one.
+  var CAPTRAW = {}, CAPT = {}, captN = -1;
+  function captured(name) {
+    var n = Object.keys(CAPTRAW).length;
+    if (n !== captN || !Object.keys(CAPT).length) { CAPT = {}; Object.keys(CAPTRAW).forEach(function (k) { var c = canon(k).n; if (!CAPT[c]) CAPT[c] = CAPTRAW[k]; if (!CAPT[k]) CAPT[k] = CAPTRAW[k]; }); captN = n; }
+    return CAPT[name] || "";
+  }
   function iconSrc(name) {
+    var cap = captured(name); if (cap) return cap;
     var v = ICONS[name]; if (v) return typeof v === "string" ? v : "https://maplestory.io/api/GMS/83/item/" + v + "/icon";
     var r = dbRow(name); return r ? "https://maplestory.io/api/GMS/83/item/" + r[1] + "/icon" : "";
   }
@@ -1683,8 +1692,8 @@ tr.under td { background: var(--hot-soft); }
   // ---------- data loading
   ICONFILES.forEach(function (f) {
     fetch(LIVE + f + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }).then(function (more) {
-      var added = 0; Object.keys(more || {}).forEach(function (k) { if (!ICONS[k] && /^data:image\/png;base64,/.test(more[k])) { ICONS[k] = more[k]; added++; } });
-      if (added && D) { CN = {}; render(); }
+      var added = 0; Object.keys(more || {}).forEach(function (k) { if (!CAPTRAW[k] && /^data:image\/png;base64,/.test(more[k])) { CAPTRAW[k] = more[k]; added++; } });
+      if (added && D) { CAPT = {}; render(); }
     }).catch(function () {});
   });
   // The GitHub API answers with the newest copy right away, and a "not changed" answer costs nothing
