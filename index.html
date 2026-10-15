@@ -111,6 +111,19 @@ button, input, select { font: inherit; color: inherit; }
 .av { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 9px; border: 2px solid var(--wood); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
 @keyframes fill { to { width: 100%; } }
 
+/* maintenance bar */
+.mbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 9px 14px; border-radius: 12px; border: var(--bw) solid; font-weight: 800; font-size: .9rem; text-decoration: none; color: var(--ink); }
+.mbar .mdot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 11px; }
+.mbar .mlink { margin-left: auto; font-size: .78rem; text-decoration: underline; color: var(--muted); }
+.mbar small { color: var(--muted); font-weight: 700; }
+.mbar.down { background: var(--hot-soft); border-color: var(--hot); box-shadow: 0 4px 0 #8f2416; }
+.mbar.down .mdot { background: var(--hot); animation: pulse 1s ease-in-out infinite; }
+.mbar.soon { background: #fff4cc; border-color: #d9a21b; box-shadow: 0 4px 0 #8a6408; }
+:root[data-theme="dark"] .mbar.soon { background: #3d2f10; }
+.mbar.soon .mdot { background: #e3a21a; }
+.mbar.done { background: var(--up-soft); border-color: var(--up); box-shadow: 0 4px 0 #13521f; }
+.mbar.done .mdot { background: var(--up); }
+
 /* alert */
 .alert { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; padding: 10px 14px; border-radius: 14px;
   background: var(--hot-soft); border: var(--bw) solid var(--hot); color: var(--ink); box-shadow: 0 4px 0 #8f2416; }
@@ -433,6 +446,8 @@ tr.under td { background: var(--hot-soft); }
       </div>
     </div>
   </header>
+
+  <a class="mbar" id="mbar" hidden target="_blank" rel="noopener"><span class="mdot" aria-hidden="true"></span><span id="mtext"></span><span class="mlink">Nexon notice</span></a>
 
   <div class="cards" id="cards"></div>
 
@@ -1717,7 +1732,34 @@ tr.under td { background: var(--hot-soft); }
       })
       .catch(function () { return getRaw(path); });
   }
+  // ---------- maintenance: Nexon's Classic World notices, checked every half hour by a GitHub job
+  var MAINT = null;
+  function whenTxt(d) { return d.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
+  function timeTxt(d) { return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }); }
+  function renderMaint() {
+    var bar = $("mbar"); if (!MAINT || !MAINT.notices) { bar.hidden = true; return; }
+    var now = Date.now(), pick = null, kind = "";
+    MAINT.notices.forEach(function (n) {
+      var a = n.start ? Date.parse(n.start) : 0, b = n.end ? Date.parse(n.end) : 0;
+      var done = n.status === "completed" || (b && now - b > 6 * H);
+      var k = "";
+      if (!done && a && a <= now) k = "down";
+      else if (!done && a > now && a - now < 7 * DAY) k = "soon";
+      else if (done && b && now - b < 12 * H && now >= a) k = "done";
+      var rank = { down: 3, soon: 2, done: 1 }[k] || 0;
+      if (rank > ({ down: 3, soon: 2, done: 1 }[kind] || 0)) { pick = n; kind = k; }
+    });
+    if (!pick) { bar.hidden = true; return; }
+    var a = pick.start ? new Date(pick.start) : null, b = pick.end ? new Date(pick.end) : null, t = "";
+    if (kind === "down") t = b && now > b.getTime() ? "Classic World maintenance is running past " + timeTxt(b) + ". Nexon hasn't called it done yet." : "Classic World is down for maintenance" + (b ? " until about " + timeTxt(b) + " your time." : ".") + " Prices pause until the servers are back.";
+    else if (kind === "soon") t = "Maintenance coming: " + whenTxt(a) + (b ? " to " + timeTxt(b) : "") + " your time. " + (pick.down || "Classic World servers go down.");
+    else t = "Maintenance finished" + (b ? " at " + timeTxt(b) : "") + ". Classic World is back up.";
+    bar.className = "mbar " + kind; bar.href = pick.url; bar.hidden = false;
+    $("mtext").textContent = t;
+    if (MAINT.checked) { var sm = el("small", null, " Checked " + ago(Date.parse(MAINT.checked))); $("mtext").appendChild(sm); }
+  }
   function poll() {
+    getJSON("data/maintenance.json").then(function (m) { if (m && m.notices) { MAINT = m; renderMaint(); } });
     Promise.all(FILES.map(function (f) {
       return getJSON(f[0])
         .then(function (x) { if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1]; }); live[f[0]] = x; } }).catch(function () {});
@@ -1726,7 +1768,7 @@ tr.under td { background: var(--hot-soft); }
       scans = all; loadGame().then(function () { render(); armed = true; wArmed = true; });
     });
   }
-  render(); rotateFinder(); loadDB(); poll(); setInterval(poll, 60000);
+  render(); rotateFinder(); loadDB(); poll(); setInterval(poll, 60000); setInterval(renderMaint, 60000);
 })();
 </script>
 </body>
