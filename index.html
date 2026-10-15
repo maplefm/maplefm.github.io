@@ -601,7 +601,7 @@ tr.under td { background: var(--hot-soft); }
   <div class="dbody">
     <p>This page shows what items really sell for in the MapleStory Classic Free Market, read off the screen by our guild's FM Watcher while we shop. Pick an item to see its price chart, its recent sales and where to buy it. It updates itself every minute.</p>
     <p><b>Prices are real sales.</b> A sale is a shop row seen greyed out, which means someone paid the price printed on it. Asking prices of rows still for sale are shown apart and are never counted as sales.</p>
-    <p><b>Typical</b> is the middle price of an item's recent sales: the last 24 hours when 5 or more sold in them, otherwise its last 10 sales. The <b>typical range</b> is the middle half of those same sales. Items with fewer than 3 sales fall back to asking prices and say <b>Ask</b>, and items seen fewer than 5 times say <b>Low data</b>.</p>
+    <p><b>Typical</b> leans on the present: the middle price of the last 24 hours of sales when 5 or more sold in them, otherwise of the last 3 days. If even that is thin, it uses the last 10 sales, and if today's asking prices sit well above those it follows today's asks instead and says <b>Rising</b>. The <b>typical range</b> is the middle half of those same sales. Items with fewer than 3 sales fall back to asking prices and say <b>Ask</b>, and items seen fewer than 5 times say <b>Low data</b>.</p>
     <p><b>24h</b> is the typical sale of the last 24 hours against the 24 hours before it. <b>Cheapest now</b> is the lowest listing still up from the last day. In the item panel, a listing is <b>likely still up</b> when it was seen in the last 3 hours, and crossed out when the same shop was seen again later without it.</p>
     <p>The red banner lists every listing seen in the last 10 minutes at half or less of what the item sells for, or 30% under for items worth 10,000 or more, newest first.</p>
     <p><b>Sell my items</b> prices what you're holding. <b>My positions</b> tracks what you bought to flip, and the star in an item's panel watches it; both ping you when the price moves past your set percent in a day. They're saved in this browser only.</p>
@@ -939,11 +939,26 @@ tr.under td { background: var(--hot-soft); }
       it.kind = it.sales.length >= 3 ? "sale" : "ask";
       it.sales.sort(function (a, b) { return b.t - a.t; });
       it.asks.sort(function (a, b) { return b.t - a.t; });
-      // Typical: the middle price of the last 24 hours of sales when 5 or more sold in them, else of the last 10 sales.
+      // Typical leans hard on the present, because Classic prices move fast:
+      // 1. the last 24 hours of sales when 5 or more sold in them;
+      // 2. else the last 3 days of sales, when at least 3 sold;
+      // 3. else the last 10 sales, but if today's asking prices sit well above them, the market has moved,
+      //    so typical follows the low end of what sellers are asking today.
       var day = it.sales.filter(function (x) { return now - x.t <= DAY; });
-      var set = it.kind === "sale" ? (day.length >= 5 ? day : it.sales.slice(0, 10)) : (it.asks.length ? it.asks.slice(0, 10) : it.sales.slice(0, 10));
+      var d3 = it.sales.filter(function (x) { return now - x.t <= 3 * DAY; });
+      var askNow = it.asks.filter(function (x) { return now - x.t <= DAY && !x.chat; }).map(function (x) { return x.u; });
+      var set, basis;
+      if (it.kind === "sale") {
+        if (day.length >= 5) { set = day; basis = "24h"; }
+        else if (d3.length >= 3) { set = d3.slice(0, 10); basis = "3d"; }
+        else { set = it.sales.slice(0, 10); basis = "old"; }
+      } else { set = it.asks.length ? it.asks.slice(0, 10) : it.sales.slice(0, 10); basis = "ask"; }
       var su = set.map(function (x) { return x.u; });
-      it.typ = median(su); it.lo = quant(su, .25); it.hi = quant(su, .75); it.typN = su.length; it.typDay = day.length >= 5;
+      it.typ = median(su); it.lo = quant(su, .25); it.hi = quant(su, .75); it.typN = su.length; it.typDay = basis === "24h";
+      it.typSet = set; it.basis = basis; it.moved = false;
+      if (basis === "old" && askNow.length >= 3 && quant(askNow, .25) > it.typ * 1.15) {
+        it.lo = quant(askNow, .1); it.typ = quant(askNow, .25); it.hi = median(askNow); it.moved = true; it.basis = "asknow";
+      }
       it.last3 = it.sales.length ? it.sales.slice(0, 3).reduce(function (a, x) { return a + x.u; }, 0) / Math.min(3, it.sales.length) : 0;
       it.lastSale = it.sales[0] || null;
       it.vol = it.sales.reduce(function (a, x) { return a + x.p; }, 0);
@@ -1101,6 +1116,7 @@ tr.under td { background: var(--hot-soft); }
     t.appendChild(el("small", null, CATNAME[i.cat] || i.cat));
     if (i.tier) t.appendChild(el("span", "tg tier", i.tier));
     if (i.n < MIN) t.appendChild(el("span", "tg low", "Low data")); else if (i.kind === "ask") t.appendChild(el("span", "tg ask", "Ask"));
+    if (i.moved) { var mv = el("span", "tg ask", "Rising"); mv.title = "Recent sales are thin and today's asking prices are well above them, so typical follows today's asks"; t.appendChild(mv); }
     if (extraTag) t.appendChild(extraTag);
     w.appendChild(t); td.appendChild(w); return td;
   }
@@ -1215,8 +1231,12 @@ tr.under td { background: var(--hot-soft); }
   // Quick: just under the cheapest listing up now, but never under the low end of real sales.
   // Fair: what it usually sells for. Patient: the top of the normal sale range.
   function advice(i) {
-    var su = i.sales.map(function (x) { return x.u; }), au = i.asks.map(function (x) { return x.u; });
+    // the same recent sales typical uses, not the whole week, so a fast-moving market does not drag prices down
+    var su = (i.kind === "sale" ? i.typSet : i.sales).map(function (x) { return x.u; });
+    var au = i.asks.filter(function (x) { return Date.now() - x.t <= 3 * DAY; }).map(function (x) { return x.u; });
+    if (!au.length) au = i.asks.map(function (x) { return x.u; });
     var p25 = su.length >= 3 ? quant(su, .25) : 0, p50 = su.length >= 3 ? quant(su, .5) : 0, p75 = su.length >= 3 ? quant(su, .75) : 0;
+    if (i.moved) { p25 = i.lo; p50 = i.typ; p75 = i.hi; }
     var low = i.bestL ? i.bestL.u : 0, askMed = au.length ? median(au) : 0;
     var fair = p50 || (askMed ? askMed * 0.95 : low);
     var floor = p25 || (fair ? fair * 0.8 : 0);
@@ -1496,7 +1516,8 @@ tr.under td { background: var(--hot-soft); }
     else big.appendChild(money(i.typ));
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
     ip.appendChild(big);
-    ip.appendChild(el("p", "note", (i.kind === "sale" ? "typical range" : "typical asking range, not enough sales yet") + " · typical " + fmt(i.typ) + " from " + (i.typDay ? "the last 24 hours" : "the last " + i.typN + (i.kind === "sale" ? " sales" : " listings"))));
+    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet" }[i.basis];
+    ip.appendChild(el("p", "note", "typical " + fmt(i.typ) + " from " + why));
     var lg = el("div", "legend"); [["s", "sale"], ["a", "asking"], ["m", "daily median"]].forEach(function (x) { var s = el("span"); s.appendChild(el("i", x[0])); s.appendChild(document.createTextNode(x[1])); lg.appendChild(s); });
     var seg = el("div", "seg"); [["time", "Over time"], ["spread", "Spread"]].forEach(function (x) { var b = el("button", null, x[1]); b.type = "button"; b.setAttribute("aria-pressed", state.chart === x[0]); b.addEventListener("click", function () { state.chart = x[0]; renderItem(); }); seg.appendChild(b); });
     lg.appendChild(seg); ip.appendChild(lg);
