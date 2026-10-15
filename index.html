@@ -600,6 +600,7 @@ tr.under td { background: var(--hot-soft); }
     <h3>How the prices are read</h3>
     <p>Every price comes from guildmates running FM Watcher while they play, and from public MapleStory Classic streams our Stream Reader watches. The program finds Free Market shop windows on screen, reads each row's item and price, and checks them against consistency rules before anything is published.</p>
     <p>A <b>sale</b> is a shop row seen greyed out, or a row whose stock dropped between visits, at the price printed on it. Coverage depends on where we walked, so some items only have a few sales.</p>
+    <p>Streamers who would rather be left out can tell Adam and their channel is skipped from then on.</p>
     <p>No footage is stored or hosted. Seller names are the shop owners' in-game names, as anyone in the Free Market could see them.</p>
     <p>Item details, icons, levels and classes come from <a href="https://maplestory.io" target="_blank" rel="noopener">maplestory.io</a>.</p>
     <h3>Thanks to the people scanning</h3>
@@ -868,7 +869,9 @@ tr.under td { background: var(--hot-soft); }
         var key = r.s + "|" + name + "|" + r.p + "|" + (r.q || 1) + "|" + (r.k || "");
         var prev = seen[key];
         if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
-        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: r.r || (chat ? "chat" : ""), c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
+        var room = r.r || (chat ? "chat" : "");
+        if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room)) room = "";
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
         seen[key] = l; L.push(l);
       });
     });
@@ -984,7 +987,7 @@ tr.under td { background: var(--hot-soft); }
   }
   function openSources() {
     var box = $("crew"); box.textContent = "";
-    D.who.forEach(function (w, k) { var d = el("div"); d.appendChild(avatar(w.name)); var t = el("span"); t.appendChild(el("b", null, (k + 1) + ". " + w.name)); t.appendChild(el("small", null, fmt(w.sales) + " sales · " + fmt(w.shopsN) + " shops · " + w.daysN + (w.daysN === 1 ? " day" : " days") + (w.stream ? " · stream" : ""))); d.appendChild(t); box.appendChild(d); });
+    D.who.forEach(function (w, k) { var d = el("div"); d.appendChild(avatar(w.name)); var t = el("span"); var nb = el("b", null, (k + 1) + ". "); if (w.stream) { var a = el("a", null, w.name); a.href = "https://www.twitch.tv/" + encodeURIComponent(w.name); a.target = "_blank"; a.rel = "noopener"; nb.appendChild(a); } else nb.appendChild(document.createTextNode(w.name)); t.appendChild(nb); t.appendChild(el("small", null, fmt(w.sales) + " sales · " + fmt(w.shopsN) + " shops · " + w.daysN + (w.daysN === 1 ? " day" : " days") + (w.stream ? " · stream" : ""))); d.appendChild(t); box.appendChild(d); });
     $("crew-note").textContent = D.who.length ? "Most sales first, over the time range in Filters." : "No scans in the current time range.";
     $("sources").showModal();
   }
@@ -1475,7 +1478,7 @@ tr.under td { background: var(--hot-soft); }
       li.appendChild(avatar(x.s));
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
-      var w = where(x); li.appendChild(el("small", null, (w ? w + " · " : "") + ago(x.t)));
+      var w = where(x); li.appendChild(el("small", null, (w ? w + " · " : "") + ago(x.t) + (x.stream ? " · seen on " + x.who + "'s stream" : "")));
       if (state.list === "buy") li.appendChild(el("span", "stt " + x.st, x.st === "gone" ? "Not seen on the shop's later visit" : x.st === "up" ? "Likely still up" : "May be gone by now"));
       if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); }
       ls.appendChild(li);
