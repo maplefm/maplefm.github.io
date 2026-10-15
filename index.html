@@ -1046,7 +1046,7 @@ tr.under td { background: var(--hot-soft); }
   }
 
   // ---------- category chips
-  var CATS = [["All", 0], ["Scrolls", 2040000], ["Weapons", 1302000], ["Equips", 1082002], ["Stars", 2070000], ["Use", 2000000], ["Etc", 4000019], ["Cash", 5150001], ["Other", 3010000]];
+  var CATS = [["All", 0], ["Scrolls", 2040000], ["Weapons", 1302000], ["Equips", 1082002], ["Stars", 2070000], ["Use", 2000000], ["Etc", 4000019], ["Cash", 1007077], ["Other", 3010000]];
   function renderChips(basel) {
     var cnt = {}; basel.forEach(function (i) { cnt[i.cat] = (cnt[i.cat] || 0) + 1; }); cnt.All = basel.length;
     var box = $("chips"); box.textContent = "";
