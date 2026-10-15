@@ -1756,7 +1756,6 @@ tr.under td { background: var(--hot-soft); }
     else t = "Maintenance finished" + (b ? " at " + timeTxt(b) : "") + ". Classic World is back up.";
     bar.className = "mbar " + kind; bar.href = pick.url; bar.hidden = false;
     $("mtext").textContent = t;
-    if (MAINT.checked) { var sm = el("small", null, " Checked " + ago(Date.parse(MAINT.checked))); $("mtext").appendChild(sm); }
   }
   function poll() {
     getJSON("data/maintenance.json").then(function (m) { if (m && m.notices) { MAINT = m; renderMaint(); } });
