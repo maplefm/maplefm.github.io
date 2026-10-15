@@ -859,19 +859,29 @@ tr.under td { background: var(--hot-soft); }
   }
   // Classic World's own icons from maplestory.io first; then icons cut from real shop windows.
   var IO = "https://maplestory.io/api/MCW/1/item/";
-  function iconSrc(name) {
-    var r = dbRow(name); if (r) return IO + r[1] + "/icon";
-    var cap = captured(name); if (cap) return cap;
-    var v = ICONS[name]; return typeof v === "string" ? v : "";
+  function iconSrcs(name) {
+    var out = [], r = dbRow(name);
+    if (r) { out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
+    var cap = captured(name); if (cap) out.push(cap);
+    var v = ICONS[name]; if (typeof v === "string") out.push(v);
+    return out;
+  }
+  function iconSrc(name) { return iconSrcs(name)[0] || ""; }
+  // try each source in turn until one loads
+  function loadIcon(im, name) {
+    var list = iconSrcs(name), k = 0;
+    if (!list.length) return false;
+    im.onerror = function () { k++; if (k < list.length) this.src = list[k]; else this.remove(); };
+    im.src = list[0]; return true;
   }
   function iconBox(name, cls) {
     var b = el("span", "itc" + (cls ? " " + cls : ""));
     var src = iconSrc(name);
-    if (src) { var im = new Image(); im.alt = ""; im.loading = "lazy"; im.onerror = function () { this.remove(); }; im.src = src; b.appendChild(im); }
+    if (src) { var im = new Image(); im.alt = ""; im.loading = "lazy"; loadIcon(im, name); b.appendChild(im); }
     var tg = scrollTag(name); if (tg) b.appendChild(el("span", "stag", tg));
     return b;
   }
-  function iconImg(name) { var src = iconSrc(name); if (!src) return null; var im = new Image(); im.alt = ""; im.src = src; im.onerror = function () { this.remove(); }; return im; }
+  function iconImg(name) { var im = new Image(); im.alt = ""; return loadIcon(im, name) ? im : null; }
 
   // ---------- data
   function build() {
