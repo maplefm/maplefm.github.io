@@ -1232,7 +1232,9 @@ tr.under td { background: var(--hot-soft); }
     var bids = i.bids.map(function (x) { return x.u; }).filter(function (v) { return !fair || v <= fair * 2.5; });
     return { quick: nice(quick), fair: nice(fair), patient: nice(patient), low: low, ups: Object.keys(sellers).length, bid: bids.length ? Math.max.apply(null, bids) : 0, why: why.join("; ") };
   }
+  // removed game items remember when they were removed; hovering the item in game again brings it back
   var GAME = [], HIDE = loadLS("fm-sell-hide", {});
+  Object.keys(HIDE).forEach(function (k) { if (HIDE[k] === 1) HIDE[k] = Math.floor(Date.now() / 1000); });
   function gameKey(g) { return g.i + "|" + JSON.stringify(g.x || {}); }
   function loadGame() {
     var src = ""; try { src = localStorage.getItem("fm-sell-src") || ""; } catch (e) {}
@@ -1244,7 +1246,7 @@ tr.under td { background: var(--hot-soft); }
     var dl = $("itemnames"); if (dl.childElementCount !== D.list.length) { dl.textContent = ""; D.list.slice().sort(function (a, b) { return a.item.localeCompare(b.item); }).forEach(function (i) { var o = el("option"); o.value = i.item; dl.appendChild(o); }); }
     var tb = $("sell-rows"); tb.textContent = ""; var total = 0;
     var rows = SELL.map(function (s, k) { return { i: s.i, q: s.q, k: k }; });
-    GAME.forEach(function (g) { if (!HIDE[gameKey(g)]) rows.unshift({ i: canon(g.i).n, q: 1, g: g }); });
+    GAME.forEach(function (g) { if (!HIDE[gameKey(g)] || g.t > HIDE[gameKey(g)]) rows.unshift({ i: canon(g.i).n, q: 1, g: g }); });
     rows.forEach(function (s) {
       var i = D.byName[s.i], tr = el("tr"); tr.dataset.item = s.i;
       if (!i) { tr.appendChild(el("td", null, s.i)); tr.appendChild(el("td", null, s.q)); var td = el("td", "why", "Not seen in the market yet, so no price to suggest."); td.colSpan = 6; tr.appendChild(td); }
@@ -1260,7 +1262,7 @@ tr.under td { background: var(--hot-soft); }
         var tot = el("td"); tot.appendChild(money(a.fair * s.q)); tr.appendChild(tot); total += a.fair * s.q;
       }
       var rmc = el("td"), rm = el("button", "rm", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove " + s.i);
-      rm.addEventListener("click", function (e) { e.stopPropagation(); if (s.g) { HIDE[gameKey(s.g)] = 1; saveLS("fm-sell-hide", HIDE); } else { SELL.splice(s.k, 1); saveSell(); } render(); }); rmc.appendChild(rm); tr.appendChild(rmc);
+      rm.addEventListener("click", function (e) { e.stopPropagation(); if (s.g) { HIDE[gameKey(s.g)] = Math.max(s.g.t || 0, Math.floor(Date.now() / 1000)); saveLS("fm-sell-hide", HIDE); } else { SELL.splice(s.k, 1); saveSell(); } render(); }); rmc.appendChild(rm); tr.appendChild(rmc);
       tb.appendChild(tr);
       if (i) {
         var why = advice(i).why;
