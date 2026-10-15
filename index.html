@@ -691,7 +691,7 @@ tr.under td { background: var(--hot-soft); }
   var DB = {}, DBB = {}, DBK = [];
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
   function loadDB() {
-    return fetch("data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    return fetch("data/itemdb.json?v=mcw1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.items) return;
       DBK = j.kinds || [];
       j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); } });
