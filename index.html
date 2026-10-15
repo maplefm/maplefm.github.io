@@ -484,6 +484,7 @@ tr.under td { background: var(--hot-soft); }
             <h4>Show</h4>
             <label class="tog"><input type="checkbox" id="f-low"><span>Low-data items<small>Items seen fewer than 5 times</small></span></label>
             <label class="tog"><input type="checkbox" id="f-cash" checked><span>Cash Shop items<small>Items bought with NX</small></span></label>
+            <label class="tog"><input type="checkbox" id="f-spot"><span>Spot holders<small id="spotn">Junk put up at silly prices to hold a shop spot</small></span></label>
             <label class="tog"><input type="checkbox" id="f-sold"><span>Only items with sales<small>Hide items nobody has bought yet</small></span></label>
             <label class="tog"><input type="checkbox" id="f-bids"><span>Only items people are buying<small>Has a buy offer in chat</small></span></label>
             <h4>Prices from</h4>
@@ -691,7 +692,7 @@ tr.under td { background: var(--hot-soft); }
   var DB = {}, DBB = {}, DBK = [];
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
   function loadDB() {
-    return fetch("data/itemdb.json?v=mcw1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    return fetch("data/itemdb.json?v=mcw2").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.items) return;
       DBK = j.kinds || [];
       j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); } });
@@ -919,6 +920,21 @@ tr.under td { background: var(--hot-soft); }
       ["Lesser", "Intermediate", "Greater", "Superior"].forEach(function (t) { var n = l.i + ": " + t, a = byN[n]; if (!a || a.length < 2) return; var d = Math.abs(Math.log(l.u / median(a))); if (d < bd) { bd = d; best = n; } });
       if (best) { l.i = best; l.tl = false; }
     });
+    // Spot holders: junk listed at a silly price just to keep a shop up (a Mushroom Spore for 50,000).
+    // 1. more than 10x the item's median listing, when the item was seen 4 or more times;
+    // 2. a Use or Etc item over 10,000 and over 500x what the NPC pays for it (catches items where most listings are spots);
+    // 3. listings that sold are trusted, unless they're over 30x the median (usually a spot swapped out, not a sale).
+    var grp = {}; L.forEach(function (l) { if (!l.b) (grp[l.i] || (grp[l.i] = [])).push(l.u); });
+    var gmed = {}; Object.keys(grp).forEach(function (k) { gmed[k] = grp[k].length >= 4 ? median(grp[k]) : 0; });
+    var spotN = 0, showSpot = $("f-spot").checked;
+    L.forEach(function (l) {
+      if (l.b) return;
+      var m = gmed[l.i], r = m ? l.u / m : 0, cat = category(l.i), row = dbRow(l.i), npc = row && row[6] ? row[6] : 0;
+      if (m && r > 10 && (!l.so || r > 30)) l.spot = true;
+      else if (!l.so && npc && (cat === "Use" || cat === "Etc" || cat === "Other") && l.u >= 10000 && l.u > npc * 500) l.spot = true;
+      if (l.spot) spotN++;
+    });
+    if (!showSpot) L = L.filter(function (l) { return !l.spot; });
     L.forEach(function (l) {
       var w = who[l.who] || (who[l.who] = { name: l.who, stream: l.stream, sales: 0, rows: 0, shops: {}, days: {} });
       w.rows++; if (l.so && !l.b) w.sales++; if (!l.chat) w.shops[l.sk] = 1; w.days[new Date(l.t).toDateString()] = 1;
@@ -993,7 +1009,7 @@ tr.under td { background: var(--hot-soft); }
     var byName = {}; list.forEach(function (i) { byName[i.item] = i; });
     var sales = L.filter(function (l) { return l.so && !l.b; }), active = L.filter(function (l) { return !l.so && !l.b && (now - l.t <= DAY || latest - l.t <= DAY); });
     var whoList = Object.keys(who).map(function (k) { var w = who[k]; w.shopsN = Object.keys(w.shops).length; w.daysN = Object.keys(w.days).length; return w; }).sort(function (a, b) { return b.sales - a.sales || b.rows - a.rows; });
-    return { list: list, byName: byName, L: L, sales: sales, active: active, latest: latest, who: whoList };
+    return { list: list, byName: byName, L: L, sales: sales, active: active, latest: latest, who: whoList, spotN: spotN };
   }
 
   // ---------- top cards
@@ -1079,8 +1095,9 @@ tr.under td { background: var(--hot-soft); }
   function lvRange() { var a = $("lv-min").value, b = $("lv-max").value; return [a === "" ? null : +a, b === "" ? null : +b]; }
   function visible() {
     var q = $("q").value.trim().toLowerCase(), low = $("f-low").checked, onlySold = $("f-sold").checked, onlyBids = $("f-bids").checked, cash = $("f-cash").checked, cls = +$("cls").value || 0, lr = lvRange();
-    var fon = low || !cash || onlySold || onlyBids || lr[0] != null || lr[1] != null || $("win").value !== "7";
+    var fon = low || !cash || $("f-spot").checked || onlySold || onlyBids || lr[0] != null || lr[1] != null || $("win").value !== "7";
     $("fon").hidden = !fon;
+    $("spotn").textContent = "Junk put up at silly prices to hold a shop spot" + (D.spotN ? " · " + fmt(D.spotN) + ($("f-spot").checked ? " shown" : " left out") : "");
     return D.list.filter(function (i) {
       if (!(i.n > 0) || !(low || i.n >= MIN) || (onlySold && !i.salesN) || (onlyBids && !i.bid) || (!cash && i.cat === "Cash")) return false;
       if (q && i.item.toLowerCase().indexOf(q) < 0) return false;
@@ -1538,6 +1555,7 @@ tr.under td { background: var(--hot-soft); }
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var w = where(x); li.appendChild(el("small", null, (w ? w + " · " : "") + ago(x.t) + (x.stream ? " · seen on " + x.who + "'s stream" : "")));
+      if (x.spot) li.appendChild(el("span", "stt gone", "Spot holder"));
       if (state.list === "buy") li.appendChild(el("span", "stt " + x.st, x.st === "gone" ? "Not seen on the shop's later visit" : x.st === "up" ? "Likely still up" : "May be gone by now"));
       if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); }
       ls.appendChild(li);
@@ -1694,13 +1712,13 @@ tr.under td { background: var(--hot-soft); }
   });
   $("menubtn").addEventListener("click", function () { var m = $("menu"); m.hidden = !m.hidden; this.setAttribute("aria-expanded", String(!m.hidden)); });
   $("fbtn").addEventListener("click", function () { var f = $("fbox"); f.hidden = !f.hidden; this.setAttribute("aria-expanded", String(!f.hidden)); });
-  ["q", "win", "f-low", "f-sold", "f-bids", "f-cash", "cls", "lv-min", "lv-max"].forEach(function (id) { $(id).addEventListener("input", render); $(id).addEventListener("change", render); });
+  ["q", "win", "f-low", "f-sold", "f-bids", "f-cash", "f-spot", "cls", "lv-min", "lv-max"].forEach(function (id) { $(id).addEventListener("input", render); $(id).addEventListener("change", render); });
   var PRESETS = [[0, 10], [10, 20], [20, 30], [30, 40], [40, 50], [50, 70]];
   PRESETS.forEach(function (p) { var b = el("button", null, p[0] + "–" + p[1]); b.type = "button"; b.addEventListener("click", function () { var on = $("lv-min").value === String(p[0]) && $("lv-max").value === String(p[1]); $("lv-min").value = on ? "" : p[0]; $("lv-max").value = on ? "" : p[1]; syncPresets(); render(); }); $("presets").appendChild(b); });
   function syncPresets() { [].forEach.call($("presets").children, function (b, k) { b.setAttribute("aria-pressed", $("lv-min").value === String(PRESETS[k][0]) && $("lv-max").value === String(PRESETS[k][1])); }); }
   ["lv-min", "lv-max"].forEach(function (id) { $(id).addEventListener("input", syncPresets); });
   syncPresets();
-  $("freset").addEventListener("click", function () { $("f-low").checked = false; $("f-sold").checked = false; $("f-bids").checked = false; $("f-cash").checked = true; $("win").value = "7"; $("lv-min").value = ""; $("lv-max").value = ""; $("cls").value = ""; syncPresets(); render(); });
+  $("freset").addEventListener("click", function () { $("f-low").checked = false; $("f-sold").checked = false; $("f-bids").checked = false; $("f-cash").checked = true; $("f-spot").checked = false; $("win").value = "7"; $("lv-min").value = ""; $("lv-max").value = ""; $("cls").value = ""; syncPresets(); render(); });
   document.querySelectorAll("thead button[data-k]").forEach(function (b) { b.addEventListener("click", function () { if (state.sortK === b.dataset.k) state.sortDir = -state.sortDir; else { state.sortK = b.dataset.k; state.sortDir = b.dataset.k === "item" || b.dataset.k === "best" ? 1 : -1; } render(); }); });
   document.querySelectorAll("thead button[data-d]").forEach(function (b) { b.addEventListener("click", function () { if (state.dK === b.dataset.d) state.dDir = -state.dDir; else { state.dK = b.dataset.d; state.dDir = (b.dataset.d === "item" || b.dataset.d === "s" || b.dataset.d === "u") ? 1 : -1; } render(); }); });
   $("tab-prices").addEventListener("click", function () { state.tab = "prices"; try { history.replaceState(null, "", state.sel ? "#item=" + encodeURIComponent(state.sel) : "#"); } catch (e) {} render(); });
