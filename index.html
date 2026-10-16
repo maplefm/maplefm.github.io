@@ -908,7 +908,9 @@ tr.under td { background: var(--hot-soft); }
         if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
         var room = r.r || (chat ? "chat" : "");
         if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room)) room = "";
-        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: r.q || 1, u: r.p / (r.q || 1), so: !!r.so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
+        // Stars, bullets and Wooden Tops show how many are in the set, but the price is for the whole set.
+        var set = category(name) === "Stars";
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : r.q || 1, u: set ? r.p : r.p / (r.q || 1), n: set ? r.q || 0 : 0, so: !!r.so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
         seen[key] = l; L.push(l);
       });
     });
@@ -1286,6 +1288,7 @@ tr.under td { background: var(--hot-soft); }
     GAME.forEach(function (g) { if (!HIDE[gameKey(g)] || g.t > HIDE[gameKey(g)]) rows.unshift({ i: canon(g.i).n, q: 1, g: g }); });
     rows.forEach(function (s) {
       var i = D.byName[s.i], tr = el("tr"); tr.dataset.item = s.i;
+      if (i && i.cat === "Stars" && s.q >= 10) s.q = 1;     // a star count typed in means one set
       if (!i) { tr.appendChild(el("td", null, s.i)); tr.appendChild(el("td", null, s.q)); var td = el("td", "why", "Not seen in the market yet, so no price to suggest."); td.colSpan = 6; tr.appendChild(td); }
       else {
         var a = advice(i);
@@ -1553,7 +1556,7 @@ tr.under td { background: var(--hot-soft); }
       var li = el("div", "li" + (state.list === "buy" && x.st === "gone" ? " gone" : ""));
       li.appendChild(avatar(x.s));
       var nb = el("b", null, x.s); li.appendChild(nb);
-      var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
+      var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var w = where(x); li.appendChild(el("small", null, (w ? w + " · " : "") + ago(x.t) + (x.stream ? " · seen on " + x.who + "'s stream" : "")));
       if (x.spot) li.appendChild(el("span", "stt gone", "Spot holder"));
       if (state.list === "buy") li.appendChild(el("span", "stt " + x.st, x.st === "gone" ? "Not seen on the shop's later visit" : x.st === "up" ? "Likely still up" : "May be gone by now"));
