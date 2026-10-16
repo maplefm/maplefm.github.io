@@ -683,6 +683,27 @@ tr.under td { background: var(--hot-soft); }
   function money(n, cls) { var s = el("span", "num" + (cls ? " " + cls : "")); s.appendChild(coin()); s.appendChild(document.createTextNode(short(n))); return s; }
   function median(a) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
   function quant(a, q) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var i = (a.length - 1) * q, lo = Math.floor(i); return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); }
+  // Older watcher versions saved half-read map names like "ee Market <1> p" for Free Market 1.
+  function fixRoom(r) {
+    if (!r || /^FM(\d{1,2}| Entrance)?$/.test(r) || r === "chat") return r;
+    if (!/(fr)?e\s*e?\s*mark/i.test(r)) return r;
+    if (/entr/i.test(r)) return "FM Entrance";
+    var m = /<\s*(\d{1,2})/.exec(r) || /(\d{1,2})\D{0,3}$/.exec(r);
+    return m && +m[1] >= 1 && +m[1] <= 30 ? "FM" + (+m[1]) : "FM";
+  }
+  // Misread scroll names ("Statt Magic Attack Scroll") snap to the real scroll from the item list.
+  var SB = null, SBC = {};
+  function snapScroll(n) {
+    if (SBC[n] != null) return SBC[n];
+    var m = /^(.*Scroll)(: (Lesser|Intermediate|Greater|Superior))?$/.exec(n);
+    if (!m || dbRow(n) || !Object.keys(DB).length) return n;
+    if (!SB) { SB = {}; Object.keys(DB).forEach(function (k) { var t = /^(.*scroll): (lesser|intermediate|greater|superior)$/.exec(k); if (t) SB[t[1].replace(/[^a-z0-9]/g, "")] = DB[k][0].replace(/: \w+$/, ""); }); }
+    var key = m[1].toLowerCase().replace(/[^a-z0-9]/g, ""), best = "", bd = 99, second = 99;
+    if (SB[key]) best = SB[key], bd = 0;
+    else Object.keys(SB).forEach(function (k) { var d = lev(key, k, 4); if (d < bd) { second = bd; bd = d; best = SB[k]; } else if (d < second) second = d; });
+    var out = best && (bd === 0 || (bd <= 3 && second > bd)) ? best + (m[2] || "") : n;
+    SBC[n] = out; return out;
+  }
   function roomLabel(r) { if (!r) return ""; var m = /^FM(\d+)$/.exec(r); return m ? "Free Market " + m[1] : r === "chat" ? "trade chat" : r; }
   function where(l) { return [l.c ? "CH " + l.c : "", roomLabel(l.r)].filter(Boolean).join(", "); }
   function hue(s) { var h = 0; for (var k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) % 360; return h; }
@@ -892,6 +913,10 @@ tr.under td { background: var(--hot-soft); }
     ordered.forEach(function (s) { s.rows.forEach(function (r) { raws[r.i] = (raws[r.i] || 0) + 1; }); });
     if (Object.keys(raws).some(function (r) { return !CN[r]; })) CN = canonAll(raws);
     var seen = {}, L = [], who = {}, sellerLast = {}, itemLast = {};
+    // A shop row read as "4 for 133,333" when the same seller's same item at the same price was also read
+    // as "1 for 133,333" is a misread bundle size; equipment never comes in bundles.
+    var oneSeen = {};
+    ordered.forEach(function (s) { s.rows.forEach(function (r) { if ((r.q || 1) === 1) oneSeen[String(r.s).toLowerCase() + "|" + canon(r.i).n + "|" + r.p] = 1; }); });
     var latest = ordered.length ? Date.parse(ordered[0].at) : now;
     ordered.forEach(function (s) {
       var st = Date.parse(s.at), chat = /chat/.test(s.src || ""), by = s.by || s.who || "Adam", stream = !!s.by;
@@ -901,21 +926,37 @@ tr.under td { background: var(--hot-soft); }
         var t = r.t ? r.t * 1000 : st;
         if (!chat) { sellerLast[sl] = Math.max(sellerLast[sl] || 0, t); }
         if (now - t > winDays * DAY && latest - t > winDays * DAY) return;
-        var cn = canon(r.i), name = cn.n;
+        var cn = canon(r.i), name = snapScroll(cn.n);
         if (!chat) itemLast[sl + "|" + name] = Math.max(itemLast[sl + "|" + name] || 0, t);
-        var key = r.s + "|" + name + "|" + r.p + "|" + (r.q || 1) + "|" + (r.k || "");
+        var cat0 = category(name), qty = r.q || 1;
+        if (qty > 1 && (oneSeen[sl + "|" + name + "|" + r.p] || cat0 === "Equips" || cat0 === "Weapons" || cat0 === "Cash")) qty = 1;
+        var key = r.s + "|" + name + "|" + r.p + "|" + qty + "|" + (r.k || "");
         var prev = seen[key];
         if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
-        var room = r.r || (chat ? "chat" : "");
+        var room = fixRoom(r.r) || (chat ? "chat" : "");
         if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room)) room = "";
         // Stars, bullets and Wooden Tops show how many are in the set, but the price is for the whole set.
-        var set = category(name) === "Stars";
-        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : r.q || 1, u: set ? r.p : r.p / (r.q || 1), n: set ? r.q || 0 : 0, so: !!r.so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
+        var set = cat0 === "Stars";
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: !!r.so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
         seen[key] = l; L.push(l);
       });
     });
     // A scroll whose tier was cut off joins the tier it's priced like, when one is close.
     var byN = {}; L.forEach(function (l) { if (!l.tl && !l.b) (byN[l.i] || (byN[l.i] = [])).push(l.u); });
+    // The hover text gives the success rate, and the rate tells the tier: 100% Lesser, 60% Intermediate, 10% Greater.
+    var RATE = { 100: "Lesser", 60: "Intermediate", 10: "Greater" };
+    var rateTier = {};
+    L.forEach(function (l) {
+      var t = l.x && RATE[l.x.SUCCESS];
+      if (!t) return;
+      var b = l.tl ? l.i : splitTier(l.i).b;
+      if (!/Scroll$/.test(b)) {     // the row name was cut off, but the hover text has the full name
+        var full = (l.xt || []).map(function (x) { var m = /([A-Za-z][A-Za-z.\- ]+Scroll)\b/.exec(x); return m ? m[1].trim() : ""; }).filter(Boolean)[0];
+        if (full) b = snapScroll(full);
+      }
+      if (/Scroll$/.test(b)) { l.i = b + ": " + t; l.tl = false; rateTier[String(l.s).toLowerCase() + "|" + b + "|" + l.p] = t; }
+    });
+    L.forEach(function (l) { var t = l.tl && rateTier[String(l.s).toLowerCase() + "|" + l.i + "|" + l.p]; if (t) { l.i = l.i + ": " + t; l.tl = false; } });
     L.forEach(function (l) {
       if (!l.tl) return;
       var best = "", bd = Math.log(2.5);
