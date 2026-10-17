@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FM Shop Spots · Guild FM</title>
+<meta name="description" content="Where to open your shop in every MapleStory Classic Free Market room so the most shops fit: legal spots, portal dead zones and the busiest spots.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}
+:root {
+  --bg: #f4f2ee; --glow1: rgba(255,138,61,.16); --glow2: rgba(56,189,178,.12);
+  --panel: #ffffff; --panel2: #f6f4f0; --line: #ebe7e0; --line2: #ddd7cc;
+  --ink: #1d1f24; --muted: #6b7180; --accent: #f26b1d; --accent-soft: #fff1e7;
+  --floor: #8a6a45; --ladder: #b49a74; --dead: rgba(224,69,47,.16); --dead-line: rgba(224,69,47,.55);
+  --shop: #2f7de1; --prime: #e0a21b; --portal: #d0402f;
+  --shadow: 0 1px 2px rgba(16,18,24,.05), 0 10px 30px rgba(16,18,24,.07);
+  --display: "Outfit", "Segoe UI", system-ui, sans-serif; --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+:root[data-theme="dark"] {
+  --bg: #0d1015; --glow1: rgba(255,122,40,.12); --glow2: rgba(64,170,255,.07);
+  --panel: #151920; --panel2: #1c212a; --line: #242a35; --line2: #303846;
+  --ink: #e8eaf0; --muted: #98a0af; --accent: #ff8a3d; --accent-soft: #2a1c12;
+  --floor: #c49a6a; --ladder: #7d6a52; --dead: rgba(255,107,85,.14); --dead-line: rgba(255,107,85,.5);
+  --shop: #5aa2ff; --prime: #f2c35b; --portal: #ff7a6b;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+}
+html { color-scheme: light; } :root[data-theme="dark"] { color-scheme: dark; }
+body { font-family: var(--body); color: var(--ink); font-size: 15px; line-height: 1.45; min-height: 100vh; -webkit-font-smoothing: antialiased;
+  background: radial-gradient(1100px 600px at 8% -10%, var(--glow1), transparent 60%), radial-gradient(900px 600px at 100% 0%, var(--glow2), transparent 60%), var(--bg); background-attachment: fixed; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; display: grid; gap: 16px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.brand i { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #ffa766, var(--accent)); box-shadow: 0 6px 16px rgba(242,107,29,.35); }
+.brand b { font-family: var(--display); font-weight: 800; font-size: 1.5rem; letter-spacing: -.03em; }
+.brand b span { color: var(--accent); }
+.nav a { color: inherit; text-decoration: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-weight: 600; font-size: .86rem; }
+h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spacing: -.03em; }
+.lead { margin: 4px 0 0; color: var(--muted); max-width: 70ch; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; width: max-content; max-width: 100%; }
+.tabs button { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 10px; font-weight: 600; font-size: .88rem; color: var(--muted); }
+.tabs button:hover { color: var(--ink); background: var(--panel2); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--panel); }
+.tabs .sep { width: 1px; background: var(--line2); margin: 4px 4px; }
+.top { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { padding: 14px 16px; }
+.kpi small { display: block; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.kpi b { display: block; font-family: var(--display); font-weight: 800; font-size: 1.7rem; letter-spacing: -.02em; }
+.kpi em { font-style: normal; color: var(--muted); font-size: .82rem; }
+.mapbox { padding: 12px; }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 4px 6px 2px; color: var(--muted); font-size: .84rem; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.list h3, .rules h3 { margin: 0; padding: 14px 16px; font-family: var(--display); font-weight: 700; font-size: 1.05rem; border-bottom: 1px solid var(--line); }
+.slot { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 0 10px; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.slot:last-child { border-bottom: 0; }
+.slot:hover, .slot.on { background: var(--panel2); }
+.slot .n { grid-row: 1 / span 2; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-family: var(--display); font-weight: 700; color: #fff; background: var(--shop); }
+.slot.prime .n { background: var(--prime); color: #2a1d00; }
+.slot b { font-weight: 600; font-size: .92rem; }
+.slot small { grid-column: 2; color: var(--muted); font-size: .8rem; }
+.slot .tag { grid-row: 1 / span 2; grid-column: 3; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.rules { padding-bottom: 6px; }
+.rules ol { margin: 10px 0; padding: 0 16px 0 34px; display: grid; gap: 8px; }
+.rules p { margin: 8px 16px; color: var(--muted); font-size: .88rem; }
+.ctl { display: grid; gap: 10px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+.ctl label { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-weight: 600; font-size: .88rem; }
+.ctl input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+.ctl .tog { display: flex; gap: 8px; align-items: center; grid-template-columns: none; }
+.ctl button { all: unset; cursor: pointer; justify-self: start; font-size: .82rem; color: var(--muted); text-decoration: underline; }
+svg text { font-family: var(--body); }
+@media (max-width: 900px) { .cols { grid-template-columns: minmax(0, 1fr); } .top { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./"><i></i><b>Guild <span>FM</span></b></a>
+    <nav class="nav"><a href="./">Prices</a> <a href="report.html">Market close</a></nav>
+  </header>
+  <div>
+    <h1>Free Market Shop Spots</h1>
+    <p class="lead">Where to open your shop so the most shops fit in every room. Shops can't open too close to an up or down arrow, or too close to another shop. Packing them edge to edge from one end, instead of anywhere, fits more on every floor.</p>
+  </div>
+  <div class="tabs" id="rooms" role="tablist" aria-label="Free Market room"></div>
+  <div class="top" id="kpis"></div>
+  <div class="panel mapbox">
+    <div id="map"></div>
+    <div class="legend">
+      <span><i style="background:var(--shop)"></i>Shop spot</span>
+      <span><i style="background:var(--prime)"></i>Busiest spots, right by an arrow</span>
+      <span><i style="background:var(--dead);border:1px dashed var(--dead-line)"></i>No shops here</span>
+      <span><i style="background:var(--portal)"></i>Up or down arrow</span>
+    </div>
+  </div>
+  <div class="cols">
+    <div class="panel list"><h3 id="listh">Spots</h3><div id="slots"></div></div>
+    <div class="panel rules">
+      <h3>How it works</h3>
+      <ol>
+        <li>Every Henesys room (FM 1 to 6) has the same layout, and so does every Perion room (FM 7 to 11). Only the arrows move a few pixels, and FM 4 and FM 11 have an extra exit.</li>
+        <li>Stand on a spot and open your shop. Start at the left end of a floor and go right, one shop width at a time, and nobody's shop gets squeezed out.</li>
+        <li>The gold spots sit right next to an arrow, where everyone moving between floors walks past.</li>
+      </ol>
+      <p>Floors, ladders and arrows come from the game's own map data (maplestory.io, MapleStory Classic World). The spacing rule isn't published. Both gaps start at 140, the usual private-server rule, which also matches the tightest shops we've seen side by side. If the game tells you "you can't open a shop here" on a spot, nudge the sliders and tell the guild.</p>
+      <div class="ctl">
+        <label>Space between shops <span id="rsv"></span><input type="range" id="rs" min="80" max="220" step="5" value="140"></label>
+        <label>Space from an arrow <span id="rpv"></span><input type="range" id="rp" min="40" max="260" step="5" value="140"></label>
+        <label class="tog"><input type="checkbox" id="sp"> Hidden spawn points block shops too</label>
+        <button type="button" id="reset">Reset to 140 and 140</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  try { var n = JSON.parse(localStorage.getItem("fm-night") || "null"); if (n == null ? matchMedia("(prefers-color-scheme: dark)").matches : n) document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+  // Map geometry from the game data (maplestory.io MCW). Floors: [name, y, left x, right x].
+  var HEN = {
+    town: "Henesys", vr: [-500, -480, 1040, 70],
+    floors: [["Top floor", -416, -263, 803], ["Middle floor", -206, -308, 488], ["Right ledge", -146, 682, 1028], ["Right steps, upper", -86, 592, 682], ["Right steps, lower", -26, 502, 592], ["Bottom floor", 34, -488, 1028]],
+    ladders: [[118, -414, -208], [735, -414, -148], [358, -204, 32], [-192, -204, 32]],
+    spawns: [[828, -210], [80, -49], [-65, -266], [373, -481], [12, -481]]
+  };
+  var PER = {
+    town: "Perion", vr: [-720, 930, 810, 1560],
+    floors: [["Top floor", 975, -428, 518], ["Middle floor", 1185, -473, 563], ["Small middle platform", 1425, -113, 203], ["Bottom floor", 1515, -698, 788]],
+    ladders: [[335, 977, 1122], [-205, 977, 1122], [259, 1187, 1448], [-156, 1187, 1448], [-45, 1427, 1513]],
+    spawns: [[379, 1396], [49, 1105], [48, 880], [-230, 1406]]
+  };
+  // Arrows per room: [name, x, y]. up = goes up a floor, dn = goes down, out = leaves the market.
+  var P_PER = [["up00", -438, 1511], ["up01", -416, 1181], ["up02", -360, 971], ["dn00", 461, 971], ["dn01", 491, 1181], ["dn02", 530, 1510]];
+  var ROOMS = {
+    1: [HEN, [["up00", -274, 30], ["up01", -248, -209], ["up02", -192, -420], ["dn00", 676, -421], ["dn01", 423, -211], ["dn02", 429, 32]]],
+    2: [HEN, [["up00", -278, 30], ["up01", -262, -210], ["up02", -180, -424], ["dn00", 672, -420], ["dn01", 425, -211], ["dn02", 425, 30]]],
+    3: [HEN, [["up00", -277, 31], ["up01", -255, -210], ["up02", -190, -421], ["dn00", 680, -420], ["dn01", 422, -210], ["dn02", 427, 29]]],
+    4: [HEN, [["up00", -271, 30], ["up01", -255, -210], ["up02", -187, -420], ["dn00", 670, -417], ["dn01", 423, -211], ["dn02", 423, 30], ["out00", 793, 33]]],
+    5: [HEN, [["up00", -278, 33], ["up01", -256, -209], ["up02", -190, -418], ["dn00", 676, -418], ["dn01", 426, -211], ["dn02", 430, 31]]],
+    6: [HEN, [["up00", -278, 33], ["up01", -256, -209], ["up02", -190, -418], ["dn00", 676, -418], ["dn01", 426, -211], ["dn02", 430, 31]]],
+    7: [PER, P_PER], 8: [PER, P_PER], 9: [PER, P_PER], 10: [PER, P_PER],
+    11: [PER, P_PER.concat([["out00", 50, 1421]])]
+  };
+  var EDGE = 18;      // a character can't stand right at the edge of a floor
+  var $ = function (id) { return document.getElementById(id); };
+  var room = 1, sel = -1;
+  try { var h = +location.hash.replace(/\D/g, ""); if (ROOMS[h]) room = h; } catch (e) {}
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function arrowName(p) { return /^up/.test(p[0]) ? "up arrow" : /^dn/.test(p[0]) ? "down arrow" : "exit"; }
+
+  function solve(r) {
+    var G = ROOMS[r][0], ports = ROOMS[r][1], RS = +$("rs").value, RP = +$("rp").value, useSp = $("sp").checked;
+    var block = ports.map(function (p) { return { x: p[1], y: p[2], r: RP, p: p }; });
+    if (useSp) G.spawns.forEach(function (s) { block.push({ x: s[0], y: s[1], r: RP, sp: true }); });
+    var shops = [], dead = [];
+    G.floors.forEach(function (f, fi) {
+      var y = f[1], a = f[2] + EDGE, b = f[3] - EDGE;
+      // dead zones on this floor, for drawing
+      block.forEach(function (k) { var dy = Math.abs(k.y - y); if (dy < k.r) { var w = Math.sqrt(k.r * k.r - dy * dy); if (w > 6 && k.x + w > f[2] && k.x - w < f[3]) dead.push([fi, Math.max(f[2], k.x - w), Math.min(f[3], k.x + w)]); } });
+      // pack from the left: the greedy leftmost packing fits the most shops on a line
+      for (var x = a; x <= b; x += 1) {
+        var ok = block.every(function (k) { var dx = x - k.x, dy = y - k.y; return dx * dx + dy * dy >= k.r * k.r; });
+        if (ok) ok = shops.every(function (s) { var dx = x - s.x, dy = y - s.y; return dx * dx + dy * dy >= RS * RS; });
+        if (ok) { shops.push({ x: x, y: y, f: fi }); x += RS - 1; }
+      }
+    });
+    // busiest: the spot closest to each arrow on its floor
+    shops.forEach(function (s) {
+      var best = null;
+      ports.forEach(function (p) { if (Math.abs(p[2] - s.y) < 30) { var d = Math.abs(p[1] - s.x); if (!best || d < best.d) best = { d: d, p: p }; } });
+      s.near = best;
+    });
+    var primeSet = {};
+    ports.forEach(function (p) {
+      var c = shops.filter(function (s) { return s.near && s.near.p === p; }).sort(function (u, v) { return u.near.d - v.near.d; })[0];
+      if (c && c.near.d < RS * 1.6) primeSet[shops.indexOf(c)] = 1;
+    });
+    shops.forEach(function (s, i) { s.prime = !!primeSet[i]; });
+    return { G: G, ports: ports, shops: shops, dead: dead, RS: RS, RP: RP };
+  }
+  function naive(r) {
+    // shops dropped anywhere, average of many random fill orders: how many fit when nobody plans
+    var S = solve(r), G = S.G, tot = 0, runs = 60, seed = 7;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    var cand = [];
+    G.floors.forEach(function (f) { for (var x = f[2] + EDGE; x <= f[3] - EDGE; x += 4) cand.push([x, f[1]]); });
+    var legal = cand.filter(function (c) { return S.ports.every(function (p) { var dx = c[0] - p[1], dy = c[1] - p[2]; return dx * dx + dy * dy >= S.RP * S.RP; }); });
+    for (var k = 0; k < runs; k++) {
+      var placed = [], pool = legal.slice();
+      for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+      pool.forEach(function (c) { if (placed.every(function (s) { var dx = c[0] - s[0], dy = c[1] - s[1]; return dx * dx + dy * dy >= S.RS * S.RS; })) placed.push(c); });
+      tot += placed.length;
+    }
+    return tot / runs;
+  }
+  function describe(s, S) {
+    var f = S.G.floors[s.f][0], marks = [];
+    S.ports.forEach(function (p) { if (Math.abs(p[2] - s.y) < 30) marks.push({ x: p[1], what: "the " + arrowName(p) }); });
+    S.G.ladders.forEach(function (l) { if (s.y >= l[1] - 5 && s.y <= l[2] + 5) marks.push({ x: l[0], what: "the ladder" }); });
+    var m = marks.sort(function (a, b) { return Math.abs(a.x - s.x) - Math.abs(b.x - s.x); })[0];
+    if (!m) return f;
+    var d = s.x - m.x, w = Math.abs(d) / S.RS, how = Math.abs(d) < 25 ? "at " + m.what : (w < 0.75 ? "just " : (function (n) { return "about " + n + (n === 1 ? " shop " : " shops "); })(Math.round(w * 2) / 2)) + (d < 0 ? "left of " : "right of ") + m.what;
+    return f + ", " + how;
+  }
+  function draw() {
+    var S = solve(room), G = S.G, vr = G.vr, W = 1000, sx = W / (vr[2] - vr[0]), H = Math.round((vr[3] - vr[1]) * sx) + 20;
+    var X = function (x) { return (x - vr[0]) * sx; }, Y = function (y) { return (y - vr[1]) * sx + 10; };
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Free Market " + room + " shop spots");
+    function add(t, a, txt) { var e = document.createElementNS(ns, t); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; }
+    S.dead.forEach(function (d) { var f = G.floors[d[0]]; add("rect", { x: X(d[1]), y: Y(f[1]) - 46, width: Math.max(1, X(d[2]) - X(d[1])), height: 46, fill: "var(--dead)", stroke: "var(--dead-line)", "stroke-dasharray": "4 3", rx: 6 }); });
+    G.ladders.forEach(function (l) { add("line", { x1: X(l[0]), x2: X(l[0]), y1: Y(l[1]), y2: Y(l[2]), stroke: "var(--ladder)", "stroke-width": 5, "stroke-dasharray": "2 4", "stroke-linecap": "round" }); });
+    G.floors.forEach(function (f) { add("line", { x1: X(f[2]), x2: X(f[3]), y1: Y(f[1]), y2: Y(f[1]), stroke: "var(--floor)", "stroke-width": 6, "stroke-linecap": "round" }); add("text", { x: X(f[2]) + 4, y: Y(f[1]) + 18, "font-size": 11, fill: "var(--muted)" }, f[0]); });
+    S.ports.forEach(function (p) {
+      var up = /^up/.test(p[0]), out = /^out/.test(p[0]), x = X(p[1]), y = Y(p[2]) - 18;
+      add("path", { d: up ? "M" + (x - 9) + "," + (y + 6) + " L" + x + "," + (y - 8) + " L" + (x + 9) + "," + (y + 6) + " Z" : out ? "M" + (x - 8) + "," + (y - 8) + " h16 v16 h-16 Z" : "M" + (x - 9) + "," + (y - 6) + " L" + x + "," + (y + 8) + " L" + (x + 9) + "," + (y - 6) + " Z", fill: "var(--portal)" });
+    });
+    S.shops.forEach(function (s, i) {
+      var g = document.createElementNS(ns, "g"); g.style.cursor = "pointer";
+      var x = X(s.x), y = Y(s.y), w = Math.max(14, Math.min(30, S.RS * sx * 0.8));
+      var r = document.createElementNS(ns, "rect"); r.setAttribute("x", x - w / 2); r.setAttribute("y", y - 34); r.setAttribute("width", w); r.setAttribute("height", 28); r.setAttribute("rx", 6);
+      r.setAttribute("fill", s.prime ? "var(--prime)" : "var(--shop)"); if (i === sel) { r.setAttribute("stroke", "var(--ink)"); r.setAttribute("stroke-width", "3"); }
+      var t = document.createElementNS(ns, "text"); t.setAttribute("x", x); t.setAttribute("y", y - 15); t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", 12); t.setAttribute("font-weight", 700); t.setAttribute("fill", s.prime ? "#2a1d00" : "#fff"); t.textContent = i + 1;
+      g.appendChild(r); g.appendChild(t); g.addEventListener("click", function () { pick(i); }); svg.appendChild(g);
+    });
+    $("map").textContent = ""; $("map").appendChild(svg);
+    // numbers
+    var nv = naive(room), k = $("kpis"); k.textContent = "";
+    [["Shops that fit", S.shops.length, "packed edge to edge"], ["If placed anywhere", "~" + Math.round(nv), "about " + Math.max(0, Math.round(S.shops.length - nv)) + " fewer, on average"],
+     ["Busiest spots", S.shops.filter(function (s) { return s.prime; }).length, "one beside each arrow"], ["Room", "FM " + room, ROOMS[room][0].town + " Free Market"]].forEach(function (x) {
+      var d = el("div", "panel kpi"); d.appendChild(el("small", null, x[0])); d.appendChild(el("b", null, String(x[1]))); d.appendChild(el("em", null, x[2])); k.appendChild(d);
+    });
+    var L = $("slots"); L.textContent = ""; $("listh").textContent = S.shops.length + " spots in FM " + room + ", left to right on each floor";
+    S.shops.forEach(function (s, i) {
+      var d = el("div", "slot" + (s.prime ? " prime" : "") + (i === sel ? " on" : "")); d.tabIndex = 0;
+      d.appendChild(el("span", "n", i + 1)); d.appendChild(el("b", null, describe(s, S))); d.appendChild(el("small", null, "x " + s.x + (s.near ? " · " + Math.round(s.near.d) + " px from the " + arrowName(s.near.p) : "")));
+      if (s.prime) d.appendChild(el("span", "tag", "Busiest"));
+      d.addEventListener("click", function () { pick(i); }); d.addEventListener("keydown", function (e) { if (e.key === "Enter") pick(i); });
+      L.appendChild(d);
+    });
+    $("rsv").textContent = S.RS; $("rpv").textContent = S.RP;
+    document.querySelectorAll("#rooms button").forEach(function (b) { b.setAttribute("aria-selected", +b.dataset.r === room); });
+  }
+  function pick(i) { sel = sel === i ? -1 : i; draw(); }
+  var tabs = $("rooms");
+  Object.keys(ROOMS).forEach(function (r) {
+    if (+r === 7) tabs.appendChild(el("span", "sep"));
+    var b = el("button", null, "FM " + r); b.type = "button"; b.dataset.r = r; b.setAttribute("role", "tab");
+    b.title = ROOMS[r][0].town; b.addEventListener("click", function () { room = +r; sel = -1; try { history.replaceState(null, "", "#fm" + r); } catch (e) {} draw(); });
+    tabs.appendChild(b);
+  });
+  ["rs", "rp", "sp"].forEach(function (id) { $(id).addEventListener("input", function () { sel = -1; draw(); }); });
+  $("reset").addEventListener("click", function () { $("rs").value = 140; $("rp").value = 140; $("sp").checked = false; sel = -1; draw(); });
+  draw();
+})();
+</script>
+</body>
+</html>
