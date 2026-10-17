@@ -1949,7 +1949,7 @@ dialog h3 { color: var(--accent-ink); }
   var seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
   // Deal alerts are for Adam and Jack only. Opening the site once with #vip=CODE turns them on for that
   // browser; the page only holds a hash of the code. It keeps them off other visitors' screens, it is not a lock.
-  var DEALS_HASH = "920b7f65b897398975710c0daf9ed207612a6af2e045d00df6ad9b6ea5145618", DEALS_ON = loadLS("fm-deals-on", false);
+  var DEALS_HASH = "920b7f65b897398975710c0daf9ed207612a6af2e045d00df6ad9b6ea5145618", DEALS_ON = true;      // deal alerts are open to everyone again (first come, first served)
   (function () {
     var m = /[#&]vip=([A-Za-z0-9_-]+)/.exec(location.hash); if (!m || !window.crypto || !crypto.subtle) return;
     crypto.subtle.digest("SHA-256", new TextEncoder().encode("maplefm-deals:" + m[1])).then(function (b) {
