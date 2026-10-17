@@ -1,8 +1,8 @@
 """Build data/itemdb.json: a compact list of every MapleStory Classic World item from maplestory.io.
 
 Each row is [name, id, required level, job bitmask, cash 0/1, kind, NPC sell price].
-The NPC price is fetched per item for Use, Etc and Setup items only (0 when unknown); the site uses it
-to spot "spot holder" listings, like a Mushroom Spore put up for 50,000 just to hold a shop spot. Job bits: 1 warrior, 2 magician,
+The NPC price is fetched per item for every non-Cash item (0 when unknown); the site shows it as the
+vendor price and uses it to spot "spot holder" listings, like a Mushroom Spore put up for 50,000 just to hold a shop spot. Job bits: 1 warrior, 2 magician,
 4 bowman, 8 thief, 16 pirate, 0 anyone. Kind is an index into "kinds" (overall category: sub category).
 The price site uses it for icons, classes, levels and to tidy up names read off the screen.
 """
@@ -37,11 +37,11 @@ def npc_price(row):
     except Exception:
         return 0
 
-want = [r for r in rows if r[1] // 1000000 in (2, 3, 4)]
-with ThreadPoolExecutor(8) as ex:
+want = [r for r in rows if not r[4]]          # every item that isn't Cash Shop: equips sell to NPCs too
+with ThreadPoolExecutor(16) as ex:
     for r, p in zip(want, ex.map(npc_price, want)):
         r[6] = p
-print(sum(1 for r in want if r[6]), "of", len(want), "use/etc/setup items have an NPC price")
+print(sum(1 for r in want if r[6]), "of", len(want), "non-cash items have an NPC price")
 out = sys.argv[1] if len(sys.argv) > 1 else "data/itemdb.json"
 with open(out, "w", encoding="utf-8") as f:
     json.dump({"source": "maplestory.io MCW 1, MapleStory Classic World", "kinds": kinds, "items": rows}, f, separators=(",", ":"), ensure_ascii=False)
