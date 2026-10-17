@@ -2032,7 +2032,8 @@ dialog h3 { color: var(--accent-ink); }
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
     var good = hot.filter(function (r) { return !r.check; }).length;
-    $("alert-count").textContent = (good ? good + (good === 1 ? " deal" : " deals") + " in the last 10 minutes, biggest profit first" : "Nothing worth flipping right now") + " · at least " + short(MINPROF) + " profit after relisting " + FASTPCT + "% under typical";
+    $("alert-count").textContent = good ? "💰 " + good + (good === 1 ? " flip" : " flips") + " ready · " + short(MINPROF) + "+ profit" : "👀 Too good to be true? Double check these";
+    $("alert-count").title = "Listed in the last 10 minutes, biggest profit first. Profit assumes you relist " + FASTPCT + "% under typical.";
     var ul = $("alert-list"); ul.textContent = "";
     hot.slice(0, 8).forEach(function (r) {
       var l = r.l, li = el("span", "alert-row" + (r.check ? " chk" : ""));
