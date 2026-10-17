@@ -938,6 +938,8 @@ dialog h3 { color: var(--accent-ink); }
   var OWN = ["maya", "injure", "excite", "dean", "liar"];
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
   var CREW = ["Adam", "Jack", "Matt", "Jimmy"];
+  // trade chat rows read wrong before a reader fix, corrected by hand: seller|item as read|price -> real item
+  var CHATFIX = { "videogame|Claw Attack Scroll: Intermediate|140000": "Earring LUK Scroll: Intermediate" };
   var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"]];
   var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json", "data/watcher-4-icons.json", "data/streams-icons.json", "data/streams-vods-icons.json"];
   var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5;
@@ -1216,6 +1218,7 @@ dialog h3 { color: var(--accent-ink); }
         if (!chat) { sellerLast[sl] = Math.max(sellerLast[sl] || 0, t); }
         if (now - t > winDays * DAY && latest - t > winDays * DAY) return;
         var cn = canon(r.i), name = snapScroll(cn.n);
+        if (chat && CHATFIX[sl + "|" + name + "|" + r.p]) name = CHATFIX[sl + "|" + name + "|" + r.p];
         if (!chat) itemLast[sl + "|" + name] = Math.max(itemLast[sl + "|" + name] || 0, t);
         var cat0 = category(name), qty = r.q || 1;
         if (qty > 1 && (oneSeen[sl + "|" + name + "|" + r.p] || cat0 === "Equips" || cat0 === "Weapons" || cat0 === "Cash")) qty = 1;
