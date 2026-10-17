@@ -137,6 +137,12 @@ button, input, select { font: inherit; color: inherit; }
 .alert-row .pr { font-weight: 900; text-align: right; }
 .alert-row .pc { color: var(--hot); font-weight: 800; text-align: right; }
 .alert-row .wh { color: var(--muted); }
+.alert-row .pc b { color: var(--up); font-weight: 900; margin-right: 2px; }
+.alert-row .pc { color: var(--muted); font-weight: 600; }
+.alert-row.chk > span { opacity: .6; }
+.alert-row .chkt { font-style: normal; margin-left: 6px; font-size: .72rem; font-weight: 800; color: var(--ask); background: var(--gold-soft); padding: 1px 6px; border-radius: 4px; }
+.menu .minprof { display: block; line-height: 1.9; }
+.menu .minprof input { width: 82px; padding: 3px 7px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: inherit; font-weight: 700; }
 .alert-row.more { display: block; grid-column: 1 / -1; color: var(--muted); }
 .alert.fresh { animation: flash .9s ease-in-out 6; }
 .alert.watch { background: var(--up-soft); border-color: var(--up); box-shadow: 0 4px 0 #13521f; }
@@ -687,6 +693,7 @@ dialog h3 { color: var(--accent-ink); }
         <hr>
         <label><input type="checkbox" id="m-activity"> Show sales and activity panel</label>
         <label><input type="checkbox" id="sound"> Sound on new deals and big moves</label>
+        <label class="minprof">Deal alert when I'd make at least <input type="text" inputmode="numeric" id="m-minprof" aria-label="Smallest profit for a deal alert, in mesos"> mesos</label>
         <label><input type="checkbox" id="m-night"> Night mode</label>
       </div>
     </div>
@@ -1982,6 +1989,8 @@ dialog h3 { color: var(--accent-ink); }
   var seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
   // Deal alerts are for Adam and Jack only. Opening the site once with #vip=CODE turns them on for that
   // browser; the page only holds a hash of the code. It keeps them off other visitors' screens, it is not a lock.
+  var MINPROF = loadLS("fm-min-profit", 50000);
+  function parseMesos(t) { var m = /^\s*([\d.,]+)\s*([kmb]?)\s*$/i.exec(String(t)); if (!m) return NaN; var v = parseFloat(m[1].replace(/,/g, "")); return Math.round(v * ({ k: 1e3, m: 1e6, b: 1e9 }[m[2].toLowerCase()] || 1)); }
   var DEALS_HASH = "920b7f65b897398975710c0daf9ed207612a6af2e045d00df6ad9b6ea5145618", DEALS_ON = true;      // deal alerts are open to everyone again (first come, first served)
   (function () {
     var m = /[#&]vip=([A-Za-z0-9_-]+)/.exec(location.hash); if (!m || !window.crypto || !crypto.subtle) return;
@@ -1994,25 +2003,44 @@ dialog h3 { color: var(--accent-ink); }
   })();
   function renderAlert() {
     if (!DEALS_ON) { $("alert").hidden = true; return; }
-    // Every listing seen in the last 10 minutes at half or less of what the item sells for, newest first.
-    var now = Date.now(), WIN = 10 * 6e4;
-    var hot = D.L.filter(function (l) {
-      if (l.so || l.b || now - l.t > WIN || !l.tx) return false;
-      var i = D.byName[l.i]; if (!i || i.n < MIN || i.salesN < 2 || i.kind !== "sale" || !i.typ) return false;
-      if (l.chat && l.u < i.typ * 0.3) return false;
-      l.vsSold = 1 - l.u / i.typ; l.typ = i.typ; return l.vsSold >= (i.typ >= 10000 ? 0.3 : HOT);
-    }).sort(function (a, b) { return b.t - a.t || b.vsSold - a.vsSold; });
-    var keys = {}; hot.forEach(function (l) { keys[l.i + "|" + l.s + "|" + l.u + "|" + l.t] = 1; });
+    // A deal is a listing from the last 10 minutes you can flip for real money:
+    // 1. profit = (typical less 5%, so the relist sells) minus their price, times how many are in the row; at least MINPROF;
+    // 2. and at least 20% under typical, so normal price swings on pricey items don't set it off;
+    // 3. the item sold at least 3 times in the last 7 days, so it turns around fast;
+    // 4. anything under its NPC price always counts (profit from selling to the store), from 1K up;
+    // 5. more than 85% under typical is usually a misread or a spot holder: listed with a "check" tag, never pinged.
+    var now = Date.now(), WIN = 10 * 6e4, WEEK = 7 * DAY;
+    var hot = [];
+    D.L.forEach(function (l) {
+      if (l.so || l.b || l.spot || now - l.t > WIN || !l.tx) return;
+      var i = D.byName[l.i]; if (!i) return;
+      var q = l.q || 1, vp = vendor(l.i), npcGain = vp > l.u ? (vp - l.u) * q : 0;
+      var sold7 = i.sales.filter(function (x) { return now - x.t <= WEEK; }).length;
+      var flip = i.typ && i.kind === "sale" ? (i.typ * (1 - FASTPCT / 100) - l.u) * q : 0;
+      var off = i.typ ? 1 - l.u / i.typ : 0;
+      var r = { l: l, typ: i.typ, off: off, profit: 0, why: "", check: false };
+      if (npcGain >= 1000 && npcGain >= flip) { r.profit = npcGain; r.why = "NPC buys at " + short(vp); }
+      else if (i.typ && i.kind === "sale" && sold7 >= 3 && off >= 0.2 && flip >= MINPROF) {
+        r.profit = flip; r.why = Math.round(off * 100) + "% under " + short(i.typ); r.check = off > 0.85 || (l.chat && off > 0.7);
+      } else return;
+      hot.push(r);
+    });
+    hot.sort(function (a, b) { return (a.check - b.check) || (b.profit - a.profit) || (b.l.t - a.l.t); });
+    var keys = {}; hot.forEach(function (r) { if (!r.check) keys[r.l.i + "|" + r.l.s + "|" + r.l.u + "|" + r.l.t] = 1; });
     var fresh = seenDeals && armed ? Object.keys(keys).filter(function (k) { return !seenDeals[k]; }) : [];
     seenDeals = keys;
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
-    $("alert-count").textContent = hot.length + (hot.length === 1 ? " deal" : " deals") + " in the last 10 minutes, newest first: 50% off, or 30% off on items worth 10K or more";
+    var good = hot.filter(function (r) { return !r.check; }).length;
+    $("alert-count").textContent = (good ? good + (good === 1 ? " deal" : " deals") + " in the last 10 minutes, biggest profit first" : "Nothing worth flipping right now") + " · at least " + short(MINPROF) + " profit after relisting " + FASTPCT + "% under typical";
     var ul = $("alert-list"); ul.textContent = "";
-    hot.slice(0, 8).forEach(function (l) {
-      var li = el("span", "alert-row");
-      [[ago(l.t), "n"], [l.i, "it"], [fmt(l.u), "pr"], [Math.round(l.vsSold * 100) + "% under " + short(l.typ), "pc"], [[l.s, where(l)].filter(Boolean).join(", "), "wh"]]
-        .forEach(function (p) { li.appendChild(el("span", p[1], p[0])); });
+    hot.slice(0, 8).forEach(function (r) {
+      var l = r.l, li = el("span", "alert-row" + (r.check ? " chk" : ""));
+      var pc = el("span", "pc"); pc.appendChild(el("b", null, "+" + short(r.profit))); pc.appendChild(document.createTextNode(" " + r.why));
+      if (r.check) pc.appendChild(el("em", "chkt", "check: may be a misread"));
+      [[ago(l.t), "n"], [l.i + ((l.q || 1) > 1 ? " ×" + fmt(l.q) : ""), "it"], [fmt(l.u) + ((l.q || 1) > 1 ? " ea" : ""), "pr"]].forEach(function (p) { li.appendChild(el("span", p[1], p[0])); });
+      li.appendChild(pc);
+      li.appendChild(el("span", "wh", [l.s, where(l)].filter(Boolean).join(", ")));
       ul.appendChild(li);
     });
     if (hot.length > 8) ul.appendChild(el("span", "alert-row more", "+" + (hot.length - 8) + " more on the Best deals tab"));
@@ -2121,7 +2149,9 @@ dialog h3 { color: var(--accent-ink); }
     SELL.length = 0; saveSell(); renderSell();
   });
   $("sell-src").addEventListener("change", function () { try { localStorage.setItem("fm-sell-src", this.value); } catch (e) {} loadGame().then(render); });
-  $("alert").addEventListener("click", function () { $("alert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle; state.tab = "deals"; state.dK = "pct"; state.dDir = -1; render(); $("deals-view").scrollIntoView({ behavior: "smooth", block: "start" }); });
+  $("alert").addEventListener("click", function () { $("alert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle; state.tab = "deals"; state.dK = "gap"; state.dDir = -1; render(); $("deals-view").scrollIntoView({ behavior: "smooth", block: "start" }); });
+  $("m-minprof").value = fmt(MINPROF);
+  $("m-minprof").addEventListener("change", function () { var v = parseMesos(this.value); if (!(v >= 0)) v = 50000; MINPROF = v; saveLS("fm-min-profit", v); this.value = fmt(v); seenDeals = null; renderAlert(); });
   $("sound").addEventListener("change", function () { if (this.checked) beep(); try { localStorage.setItem("fm-sound", this.checked ? "1" : ""); } catch (e) {} });
   try { $("sound").checked = localStorage.getItem("fm-sound") === "1"; } catch (e) {}
   $("scrim").addEventListener("click", function () { document.body.classList.remove("sheet"); });
