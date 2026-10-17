@@ -182,9 +182,91 @@ for d in days:
 now = datetime.datetime.now(ET)
 close = (now.date() - datetime.timedelta(days=1 if now.hour < 4 else 0)).isoformat()
 latest = close if close in past else max(d for d in past if d <= close) if any(d <= close for d in past) else days[-1]
+
+# ---- a lasting store of each item's daily price and each day's sales, so long ranges outlive the raw data
+STORE = os.path.join(os.path.dirname(OUT) or ".", "report-store.json")
+try:
+    store = json.load(open(STORE, encoding="utf-8"))
+except Exception:
+    store = {}
+px = store.setdefault("px", {}); dv = store.setdefault("vol", {}); tot = store.setdefault("tot", {}); big = store.setdefault("big", {})
+for name, v in daily.items():
+    for d, (m, n) in v.items():
+        px.setdefault(name, {})[d] = [round(m, 2), n]
+for d in days:
+    vol = {}
+    for name, u, p, sl, t in sales.get(d, []):
+        x = vol.setdefault(name, [0, 0]); x[0] += 1; x[1] += p
+    dv[d] = vol
+    tot[d] = past[d]["stats"]
+    big[d] = past[d]["biggest_sale"]
+json.dump(store, open(STORE, "w", encoding="utf-8"), separators=(",", ":"))
+
+RANGES = [("3d", "72 hours", 3), ("week", "Week", 7), ("month", "Month", 30), ("quarter", "Quarter", 91), ("year", "Year", 365), ("all", "All time", None)]
+all_days = sorted(set(px_d for v in px.values() for px_d in v) | set(hist))
+first = all_days[0] if all_days else latest
+
+def at_or_before(series, d):
+    ks = [k for k in sorted(series) if k <= d]
+    return (ks[-1], series[ks[-1]]) if ks else (None, None)
+
+def make_range(key, label, n):
+    end = latest
+    start = first if n is None else max(first, (datetime.date.fromisoformat(end) - datetime.timedelta(days=n)).isoformat())
+    span = max(1, (datetime.date.fromisoformat(end) - datetime.date.fromisoformat(start)).days)
+    edge = max(1, span // 4)       # the first and last quarter of the range set the start and end prices
+    def card(k):
+        s = series[k]; s0d, s0 = at_or_before(s, start); cur = s.get(end) or at_or_before(s, end)[1]
+        if s0 is None: s0d, s0 = min(s), s[min(s)]
+        ds = [d for d in sorted(s) if s0d <= d <= end]
+        rose = fell = items = 0
+        for name, v in px.items():
+            if k != "Market" and category(name) != k: continue
+            a = [v[d][0] for d in sorted(v) if start <= d <= end]
+            if not a: continue
+            items += 1
+            if len(a) >= 2:
+                if a[-1] > a[0] * 1.02: rose += 1
+                elif a[-1] < a[0] * 0.98: fell += 1
+        return {"name": k, "value": cur, "chg": (cur / s0 - 1) if cur and s0 else None, "series": [[d, s[d]] for d in ds],
+                "rose": rose, "fell": fell, "items": items, "blurb": BLURB.get(k, "items")}
+    movers = []
+    for name, v in px.items():
+        ds = sorted(d for d in v if start <= d <= end)
+        if len(ds) < 2: continue
+        lo_end = (datetime.date.fromisoformat(start) + datetime.timedelta(days=edge)).isoformat()
+        hi_start = (datetime.date.fromisoformat(end) - datetime.timedelta(days=edge)).isoformat()
+        a = [d for d in ds if d <= lo_end]; b = [d for d in ds if d >= hi_start and d not in a]
+        if not a or not b: continue
+        pa = statistics.median(v[d][0] for d in a); pb = statistics.median(v[d][0] for d in b)
+        na = sum(v[d][1] for d in a); nb = sum(v[d][1] for d in b)
+        if min(na, nb) < 3 or not pa: continue
+        movers.append((name, pb / pa - 1, pb, pa, na + nb))
+    movers.sort(key=lambda x: x[1])
+    fmt = lambda x: {"item": x[0], "chg": round(x[1], 4), "price": round(x[2]), "was": round(x[3]), "seen": x[4], "cat": category(x[0])}
+    vol = {}
+    for d in dv:
+        if start < d <= end or (start == first and d == start):
+            for name, (c, m) in dv[d].items():
+                x = vol.setdefault(name, [0, 0]); x[0] += c; x[1] += m
+    tdays = [d for d in tot if start < d <= end or (start == first and d == start)]
+    bigs = [big[d] for d in tdays if big.get(d)]
+    return {"key": key, "label": label, "start": start, "end": end,
+            "market": card("Market"), "categories": [card(c) for c in CATS],
+            "gainers": [fmt(x) for x in movers[::-1][:8] if x[1] > 0], "losers": [fmt(x) for x in movers[:8] if x[1] < 0],
+            "most_traded": [{"item": k, "sales": v[0], "volume": v[1], "cat": category(k)} for k, v in sorted(vol.items(), key=lambda kv: -kv[1][1])[:8]],
+            "biggest_sale": max(bigs, key=lambda b: b["price"]) if bigs else None,
+            "stats": {"sales": sum(tot[d]["sales"] for d in tdays), "volume": sum(tot[d]["volume"] for d in tdays),
+                      "listings": sum(tot[d]["listings"] for d in tdays),
+                      "items": sum(1 for v in px.values() if any(start <= d <= end for d in v)), "days": len(tdays)}}
+
 report = dict(past[latest])
 report["generated"] = datetime.datetime.now(ET).isoformat(timespec="seconds")
 report["history"] = hist
 report["days"] = {d: past[d] for d in sorted(past)[-45:]}
+report["ranges"] = {k: make_range(k, lb, n) for k, lb, n in RANGES}
+report["first"] = first
 json.dump(report, open(OUT, "w", encoding="utf-8"), separators=(",", ":"))
 print(latest, "market", report["market"]["value"], report["market"]["chg"], "items", report["stats"]["items"], "days", len(report["days"]))
+for k, r in report["ranges"].items():
+    print(" ", k, r["start"], "->", r["end"], "market", r["market"]["chg"], "sales", r["stats"]["sales"], "gainers", len(r["gainers"]), "top", r["gainers"][:1])

@@ -38,6 +38,11 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .nav { display: flex; gap: 6px; align-items: center; }
 .nav button, .nav a { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-weight: 600; font-size: .86rem; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
 .nav button:disabled { opacity: .35; cursor: default; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; width: max-content; max-width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.tabs button { all: unset; cursor: pointer; padding: 7px 13px; border-radius: 10px; font-weight: 600; font-size: .88rem; color: var(--muted); }
+.tabs button:hover { color: var(--ink); background: var(--panel2); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--panel); }
+.note { margin: -4px 0 0; color: var(--muted); font-size: .86rem; }
 .title h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spacing: -.03em; }
 .title p { margin: 2px 0 0; color: var(--muted); font-weight: 500; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
@@ -93,6 +98,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     </div>
   </header>
   <div class="title"><h1 id="h1">Market Close</h1><p id="sub">Loading the report…</p></div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Report range"></div>
   <div id="body"><div class="panel loading">Loading the report…</div></div>
   <p class="foot">Each index starts at 100 on its first day. A day's move is the average change of every item seen on both that day and the day before, from shop scans by the guild's watchers and Twitch streams. Spot-holder and junk prices are left out. The report closes at midnight Eastern.</p>
 </div>
@@ -101,7 +107,14 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   var $ = function (id) { return document.getElementById(id); };
   try { var n = JSON.parse(localStorage.getItem("fm-night") || "null"); if (n == null ? matchMedia("(prefers-color-scheme: dark)").matches : n) document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
   var SRC = ["https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/report.json", "data/report.json"];
-  var R = null, DAYS = [], at = 0, DB = {};
+  var R = null, DAYS = [], at = 0, DB = {}, TAB = "daily";
+  var TABS = [["daily", "Daily"], ["3d", "72 hours"], ["week", "Week"], ["month", "Month"], ["quarter", "Quarter"], ["year", "Year"], ["all", "All time"]];
+  var OVER = { daily: "today", "3d": "over 72 hours", week: "this week", month: "this month", quarter: "this quarter", year: "this year", all: "all time" };
+  function shortDate(d) { return new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
+  TABS.forEach(function (t) {
+    var b = el("button", null, t[1]); b.type = "button"; b.setAttribute("role", "tab"); b.dataset.k = t[0];
+    b.addEventListener("click", function () { TAB = t[0]; show(); }); document.getElementById("tabs").appendChild(b);
+  });
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
   function short(n) { n = Math.round(n || 0); var a = Math.abs(n); return a >= 1e9 ? (n / 1e9).toFixed(2) + "B" : a >= 1e6 ? (n / 1e6).toFixed(a >= 1e7 ? 1 : 2) + "M" : a >= 1e4 ? (n / 1e3).toFixed(a >= 1e5 ? 0 : 1) + "K" : n.toLocaleString("en-US"); }
   function pct(v) { return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v * 100).toFixed(1) + "%"; }
@@ -144,7 +157,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   }
   function list(title, rows, make) {
     var p = el("div", "panel list"); p.appendChild(el("h3", null, title));
-    if (!rows || !rows.length) { p.appendChild(el("div", "empty", "Not enough data for this day.")); return p; }
+    if (!rows || !rows.length) { p.appendChild(el("div", "empty", "Not enough data for this " + (TAB === "daily" ? "day" : "range") + " yet.")); return p; }
     rows.forEach(function (r) { p.appendChild(make(r)); }); return p;
   }
   function itemRow(name, sub, right, rsub, rcls) {
@@ -154,16 +167,30 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     if (rsub) r.appendChild(el("small", null, rsub)); a.appendChild(r); return a;
   }
   function show() {
-    var day = DAYS[at], r = (R.days && R.days[day]) || R;
-    $("h1").textContent = "Market Close";
-    $("sub").textContent = dayName(day) + (at === DAYS.length - 1 ? " · latest report" : "");
-    $("prev").disabled = at <= 0; $("next").disabled = at >= DAYS.length - 1;
+    var day = DAYS[at], r, range = TAB !== "daily" && R.ranges && R.ranges[TAB];
+    document.querySelectorAll("#tabs button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.k === TAB); });
+    $("prev").hidden = $("next").hidden = !!range;
+    if (range) {
+      r = range;
+      $("h1").textContent = range.label === "All time" ? "All Time" : range.label + " in Review";
+      $("sub").textContent = shortDate(range.start) + " to " + dayName(range.end);
+    } else {
+      r = (R.days && R.days[day]) || R;
+      $("h1").textContent = "Market Close";
+      $("sub").textContent = dayName(day) + (at === DAYS.length - 1 ? " · latest report" : "");
+      $("prev").disabled = at <= 0; $("next").disabled = at >= DAYS.length - 1;
+    }
     var b = $("body"); b.textContent = "";
     var wrap = el("div"); wrap.style.display = "grid"; wrap.style.gap = "14px";
+    var want = { "3d": 3, week: 7, month: 30, quarter: 91, year: 365 }[TAB];
+    if (range && want && R.first && range.start === R.first) {
+      var have = Math.round((Date.parse(range.end) - Date.parse(R.first)) / 864e5) + 1;
+      wrap.appendChild(el("p", "note", "Tracking started " + shortDate(R.first) + ", so this covers the " + have + " days there are so far. It fills out as the days go by."));
+    }
     wrap.appendChild(idxCard(r.market, true));
     var g = el("div", "grid"); r.categories.forEach(function (c) { g.appendChild(idxCard(c)); }); wrap.appendChild(g);
     var st = el("div", "panel stats"), s = r.stats || {};
-    [["Sales seen", (s.sales || 0).toLocaleString("en-US"), ""], ["Meso volume", money(s.volume), ""], ["Listings read", (s.listings || 0).toLocaleString("en-US"), ""], ["Items priced", (s.items || 0).toLocaleString("en-US"), ""],
+    [["Sales seen", (s.sales || 0).toLocaleString("en-US"), range ? OVER[TAB] : ""], ["Meso volume", money(s.volume), ""], ["Listings read", (s.listings || 0).toLocaleString("en-US"), ""], ["Items priced", (s.items || 0).toLocaleString("en-US"), ""],
      ["Biggest sale", r.biggest_sale ? money(r.biggest_sale.price) : "–", r.biggest_sale ? r.biggest_sale.item : ""]].forEach(function (x) {
       var d = el("div"); d.appendChild(el("small", null, x[0])); var bb = el("b"); if (typeof x[1] === "string") bb.textContent = x[1]; else bb.appendChild(x[1]); d.appendChild(bb); if (x[2]) d.appendChild(el("em", null, x[2])); st.appendChild(d);
     });
@@ -174,19 +201,20 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     ls.appendChild(list("Most traded", r.most_traded, function (x) { return itemRow(x.item, x.sales + (x.sales === 1 ? " sale" : " sales"), money(x.volume), "volume"); }));
     wrap.appendChild(ls);
     b.appendChild(wrap); drawSparks();
-    try { history.replaceState(null, "", "#" + day); } catch (e) {}
+    try { history.replaceState(null, "", "#" + (range ? TAB : day)); } catch (e) {}
   }
   function load(i) {
     if (i >= SRC.length) { $("sub").textContent = "No report yet. The first one is made at midnight Eastern."; $("body").textContent = ""; return; }
     fetch(SRC[i] + "?t=" + Date.now()).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
       R = j; DAYS = Object.keys(j.days || {}).sort(); if (!DAYS.length) DAYS = [j.day];
-      var want = location.hash.slice(1); at = DAYS.indexOf(want); if (at < 0) at = DAYS.indexOf(j.day); if (at < 0) at = DAYS.length - 1;
+      var want = location.hash.slice(1); if (j.ranges && j.ranges[want]) TAB = want;
+      at = DAYS.indexOf(want); if (at < 0) at = DAYS.indexOf(j.day); if (at < 0) at = DAYS.length - 1;
       show();
     }).catch(function () { load(i + 1); });
   }
   $("prev").addEventListener("click", function () { if (at > 0) { at--; show(); } });
   $("next").addEventListener("click", function () { if (at < DAYS.length - 1) { at++; show(); } });
-  document.addEventListener("keydown", function (e) { if (e.key === "ArrowLeft") $("prev").click(); if (e.key === "ArrowRight") $("next").click(); });
+  document.addEventListener("keydown", function (e) { if (TAB !== "daily") return; if (e.key === "ArrowLeft") $("prev").click(); if (e.key === "ArrowRight") $("next").click(); });
   fetch("data/itemdb.json?v=mcw2").then(function (r) { return r.json(); }).then(function (j) { j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) DB[k] = r[1]; }); if (R) show(); }).catch(function () {});
   load(0);
 })();
