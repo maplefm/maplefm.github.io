@@ -1304,7 +1304,7 @@ dialog h3 { color: var(--accent-ink); }
     D.sales.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 18).forEach(function (l) {
       ev.push({ t: l.t, cls: "sold", parts: [l.s + " : Sold ", [l.i], " for " + fmt(l.p) + " mesos!"] });
     });
-    D.list.filter(function (i) { return i.n >= MIN && i.bestL && i.deal >= 0.4 && Date.now() - i.bestL.t < 6 * H; }).slice(0, 10).forEach(function (i) {
+    if (DEALS_ON) D.list.filter(function (i) { return i.n >= MIN && i.bestL && i.deal >= 0.4 && Date.now() - i.bestL.t < 6 * H; }).slice(0, 10).forEach(function (i) {
       ev.push({ t: i.bestL.t, cls: "deal", parts: [i.bestL.s + " : Selling ", [i.item], " for " + fmt(i.best) + ", " + Math.round(i.deal * 100) + "% under typical" + (where(i.bestL) ? " (" + where(i.bestL) + ")" : "")] });
     });
     ev.sort(function (a, b) { return b.t - a.t; });
@@ -1899,7 +1899,20 @@ dialog h3 { color: var(--accent-ink); }
 
   // ---------- alert
   var seenDeals = null, armed = false, baseTitle = document.title, titleTimer = null;
+  // Deal alerts are for Adam and Jack only. Opening the site once with #vip=CODE turns them on for that
+  // browser; the page only holds a hash of the code. It keeps them off other visitors' screens, it is not a lock.
+  var DEALS_HASH = "920b7f65b897398975710c0daf9ed207612a6af2e045d00df6ad9b6ea5145618", DEALS_ON = loadLS("fm-deals-on", false);
+  (function () {
+    var m = /[#&]vip=([A-Za-z0-9_-]+)/.exec(location.hash); if (!m || !window.crypto || !crypto.subtle) return;
+    crypto.subtle.digest("SHA-256", new TextEncoder().encode("maplefm-deals:" + m[1])).then(function (b) {
+      var hex = Array.prototype.map.call(new Uint8Array(b), function (x) { return ("0" + x.toString(16)).slice(-2); }).join("");
+      if (hex === DEALS_HASH) { DEALS_ON = true; saveLS("fm-deals-on", true); }
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+      if (D) render();
+    });
+  })();
   function renderAlert() {
+    if (!DEALS_ON) { $("alert").hidden = true; return; }
     // Every listing seen in the last 10 minutes at half or less of what the item sells for, newest first.
     var now = Date.now(), WIN = 10 * 6e4;
     var hot = D.L.filter(function (l) {
