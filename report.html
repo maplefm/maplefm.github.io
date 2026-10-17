@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Market Close · Guild FM</title>
-<meta name="description" content="End of day report for the MapleStory Classic Free Market: the Guild FM index, category indexes, biggest movers and most traded items.">
+<title>Market Close · Club FM</title>
+<meta name="description" content="End of day report for the MapleStory Classic Free Market: the Club FM index, category indexes, biggest movers and most traded items.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}
 :root {
-  --bg: #f4f2ee; --glow1: rgba(255,138,61,.16); --glow2: rgba(56,189,178,.12);
-  --panel: #ffffff; --panel2: #f6f4f0; --line: #ebe7e0; --line2: #ddd7cc;
-  --ink: #1d1f24; --muted: #6b7180; --accent: #f26b1d; --accent-soft: #fff1e7; --gold: #c98a12; --gold-line: #e7c46b;
+  --bg: #f6f3fc; --glow1: rgba(124,77,230,.17); --glow2: rgba(240,190,60,.13);
+  --panel: #ffffff; --panel2: #f5f1fc; --line: #e8e1f4; --line2: #d7cbec;
+  --ink: #1d1430; --muted: #6a6184; --accent: #6d3fd1; --accent-soft: #f1eafe; --gold: #c98a12; --gold-line: #e7c46b;
   --up: #12895f; --up-fill: rgba(18,137,95,.16); --down: #d0402f; --down-fill: rgba(208,64,47,.14);
   --shadow: 0 1px 2px rgba(16,18,24,.05), 0 10px 30px rgba(16,18,24,.07);
   --display: "Outfit", "Segoe UI", system-ui, sans-serif; --body: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 :root[data-theme="dark"] {
-  --bg: #0d1015; --glow1: rgba(255,122,40,.12); --glow2: rgba(64,170,255,.07);
-  --panel: #151920; --panel2: #1c212a; --line: #242a35; --line2: #303846;
-  --ink: #e8eaf0; --muted: #98a0af; --accent: #ff8a3d; --accent-soft: #2a1c12; --gold: #f2c35b; --gold-line: #8a6a24;
+  --bg: #0d0916; --glow1: rgba(140,90,255,.19); --glow2: rgba(240,190,60,.07);
+  --panel: #161025; --panel2: #1e1732; --line: #2a2242; --line2: #3a2f58;
+  --ink: #ece8f7; --muted: #a49bc0; --accent: #a57cff; --accent-soft: #251a40; --gold: #f2c35b; --gold-line: #8a6a24;
   --up: #5fd39b; --up-fill: rgba(95,211,155,.14); --down: #ff7f73; --down-fill: rgba(255,127,115,.13);
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
 }
@@ -32,7 +32,7 @@ a { color: inherit; }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 22px 16px 60px; display: grid; gap: 16px; }
 header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.brand i { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #ffa766, var(--accent)); box-shadow: 0 6px 16px rgba(242,107,29,.35); }
+.brand i { width: 28px; height: 28px; border-radius: 8px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 23 3 10l7 6 6-9 6 9 7-6-2 13z' fill='%23f6c94a' stroke='%23a8740a' stroke-width='1.4' stroke-linejoin='round'/%3E%3Crect x='5' y='22.5' width='22' height='4.5' rx='1.2' fill='%23e4ae25' stroke='%23a8740a' stroke-width='1.4'/%3E%3Ccircle cx='16' cy='18' r='2.5' fill='%23b07bff' stroke='%23fff' stroke-width='.8'/%3E%3Ccircle cx='9.6' cy='19.6' r='1.6' fill='%2361d4f0'/%3E%3Ccircle cx='22.4' cy='19.6' r='1.6' fill='%2361d4f0'/%3E%3Ccircle cx='3' cy='10' r='1.5' fill='%23fff3c4'/%3E%3Ccircle cx='16' cy='7' r='1.5' fill='%23fff3c4'/%3E%3Ccircle cx='29' cy='10' r='1.5' fill='%23fff3c4'/%3E%3C/svg%3E") center/76% no-repeat, linear-gradient(135deg, #8b5cf6, #3b1a7a); box-shadow: 0 6px 16px rgba(109,63,209,.38); }
 .brand b { font-family: var(--display); font-weight: 800; font-size: 1.5rem; letter-spacing: -.03em; }
 .brand b span { color: var(--accent); }
 .nav { display: flex; gap: 6px; align-items: center; }
@@ -85,12 +85,13 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .loading { padding: 60px 20px; text-align: center; color: var(--muted); }
 @media (max-width: 860px) { .grid, .lists { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .lists { grid-template-columns: minmax(0, 1fr); } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats div { border-bottom: 1px solid var(--line); } }
 @media (max-width: 520px) { .grid { grid-template-columns: minmax(0, 1fr); } .title h1 { font-size: 1.6rem; } .idx.big .val b { font-size: 2.2rem; } }
+.brand span { background: linear-gradient(135deg, var(--accent), #c08a16); -webkit-background-clip: text; background-clip: text; color: transparent; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <a class="brand" href="./"><i></i><b>Guild <span>FM</span></b></a>
+    <a class="brand" href="./"><i></i><b>Club <span>FM</span></b></a>
     <div class="nav">
       <button type="button" id="prev" aria-label="Previous day">‹ Prev</button>
       <button type="button" id="next" aria-label="Next day">Next ›</button>
@@ -149,7 +150,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   }
   function idxCard(c, big) {
     var d = el("div", "panel idx" + (big ? " big" : ""));
-    d.appendChild(el("h2", null, big ? "Guild FM Index" : c.name));
+    d.appendChild(el("h2", null, big ? "Club FM Index" : c.name));
     var v = el("div", "val"); v.appendChild(el("b", null, c.value != null ? c.value.toFixed(1) : "–")); v.appendChild(el("span", "chg " + cls(c.chg), pct(c.chg))); d.appendChild(v);
     d.appendChild(spark(c.series, big));
     d.appendChild(el("small", null, big ? (c.rose + " rose, " + c.fell + " fell · " + c.items + " items priced") : (c.items + " " + c.blurb + (c.rose + c.fell ? " · " + c.rose + " up, " + c.fell + " down" : ""))));
