@@ -6,6 +6,7 @@ on:
     paths: [tools/itemdb.py, .github/workflows/itemdb.yml]
   schedule:
     - cron: "17 9 * * 1"
+concurrency: itemdb
 permissions:
   contents: write
 jobs:
@@ -18,5 +19,6 @@ jobs:
           git config user.name maplefm
           git config user.email maplefm@users.noreply.github.com
           git add data/itemdb.json
-          git diff --cached --quiet || git commit -m "Refresh item list from maplestory.io"
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Refresh item list from maplestory.io"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 7; done
