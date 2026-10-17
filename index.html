@@ -663,6 +663,12 @@ dialog h3 { color: var(--accent-ink); }
 .card.finder { box-shadow: var(--shadow), inset 3px 0 0 var(--gold); }
 .cta, .addbtn { background: linear-gradient(135deg, var(--accent2), var(--accent)); }
 .cta:hover, .addbtn:hover { background: var(--orange-lo); }
+#alert { background: linear-gradient(135deg, var(--accent-soft), var(--gold-soft)); border-color: var(--accent); }
+#alert .dot { background: var(--accent); box-shadow: 0 0 0 3px var(--gold-soft); }
+#alert .alert-new { background: linear-gradient(135deg, var(--accent), #3b1a7a); color: #fff; }
+#alert.fresh { animation: royalflash .9s ease-in-out 6; }
+@keyframes royalflash { 50% { background: linear-gradient(135deg, var(--accent), #3b1a7a); color: #fff; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(240,194,74,.35), 0 10px 30px rgba(109,63,209,.45) !important; } }
+@media (prefers-reduced-motion: reduce) { #alert.fresh { animation: none; } }
 ::selection { background: var(--accent-soft); color: var(--accent-ink); }
 </style>
 </head>
