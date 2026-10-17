@@ -1,0 +1,33 @@
+name: Market report
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/report.py, .github/workflows/report.yml]
+  schedule:
+    # 11:55 PM Eastern in daylight time and in standard time (the script picks the Eastern day being closed)
+    - cron: "55 3 * * *"
+    - cron: "55 4 * * *"
+permissions:
+  contents: write
+concurrency: report
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - run: |
+          git fetch -q origin main
+          git show FETCH_HEAD:tools/report.py > /tmp/report.py
+          git show FETCH_HEAD:data/itemdb.json > /tmp/itemdb.json
+          mkdir -p data
+          python3 /tmp/report.py data /tmp/itemdb.json data/report.json
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git add data/report.json
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Market close report"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

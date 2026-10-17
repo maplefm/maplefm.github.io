@@ -627,10 +627,12 @@ dialog h3 { color: var(--accent-ink); }
       <p>Buy low. Flip high.</p>
     </div>
     <div class="top-right">
+      <a class="pill" href="report.html" style="text-decoration:none" title="End of day report: the Guild FM index, category indexes and biggest movers">📈 Market close</a>
       <span class="pill" id="livepill"><span class="live"></span><span id="livetxt">Loading</span></span>
       <button class="roundbtn" id="menubtn" aria-label="Menu" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
       <div class="menu" id="menu" hidden>
         <button type="button" id="m-about">About this site</button>
+        <button type="button" onclick="location.href='report.html'">Daily market close report</button>
         <button type="button" id="m-sources">Where prices come from</button>
         <button type="button" id="m-contrib">Contribute to pricing</button>
         <hr>
