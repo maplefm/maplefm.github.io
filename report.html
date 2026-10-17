@@ -216,7 +216,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   $("prev").addEventListener("click", function () { if (at > 0) { at--; show(); } });
   $("next").addEventListener("click", function () { if (at < DAYS.length - 1) { at++; show(); } });
   document.addEventListener("keydown", function (e) { if (TAB !== "daily") return; if (e.key === "ArrowLeft") $("prev").click(); if (e.key === "ArrowRight") $("next").click(); });
-  fetch("data/itemdb.json?v=mcw2").then(function (r) { return r.json(); }).then(function (j) { j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) DB[k] = r[1]; }); if (R) show(); }).catch(function () {});
+  fetch("data/itemdb.json?v=mcw3").then(function (r) { return r.json(); }).then(function (j) { j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) DB[k] = r[1]; }); if (R) show(); }).catch(function () {});
   load(0);
 })();
 </script>

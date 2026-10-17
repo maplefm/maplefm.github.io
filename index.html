@@ -1002,7 +1002,7 @@ dialog h3 { color: var(--accent-ink); }
   function vendor(name) { return VEND[String(name).toLowerCase()] || 0; }
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
   function loadDB() {
-    return fetch("data/itemdb.json?v=mcw2").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    return fetch("data/itemdb.json?v=mcw3").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.items) return;
       DBK = j.kinds || [];
       j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); } });
