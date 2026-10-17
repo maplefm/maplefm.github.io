@@ -107,12 +107,12 @@ svg text { font-family: var(--body); }
         <li>Stand on a spot and open your shop. Start at the left end of a floor and go right, one shop width at a time, and nobody's shop gets squeezed out.</li>
         <li>The gold spots sit right next to an arrow, where everyone moving between floors walks past.</li>
       </ol>
-      <p>Floors, ladders and arrows come from the game's own map data (maplestory.io, MapleStory Classic World). The spacing rule isn't published. Both gaps start at 140, the usual private-server rule, which also matches the tightest shops we've seen side by side. If the game tells you "you can't open a shop here" on a spot, nudge the sliders and tell the guild.</p>
+      <p>Floors, ladders and arrows come from the game's own map data (maplestory.io, MapleStory Classic World). The spacing rule isn't published, so it's measured from real shops in stream frames and screenshots: the closest two shops we've seen were about 115 apart, and the closest shop to an arrow about 65 away. The top floor in a busy room really does hold the 8 shops shown here. If the game tells you "you can't open a shop here" on a spot, nudge the sliders and tell the guild.</p>
       <div class="ctl">
-        <label>Space between shops <span id="rsv"></span><input type="range" id="rs" min="80" max="220" step="5" value="140"></label>
-        <label>Space from an arrow <span id="rpv"></span><input type="range" id="rp" min="40" max="260" step="5" value="140"></label>
+        <label>Space between shops <span id="rsv"></span><input type="range" id="rs" min="80" max="220" step="5" value="115"></label>
+        <label>Space from an arrow <span id="rpv"></span><input type="range" id="rp" min="30" max="260" step="5" value="65"></label>
         <label class="tog"><input type="checkbox" id="sp"> Hidden spawn points block shops too</label>
-        <button type="button" id="reset">Reset to 140 and 140</button>
+        <button type="button" id="reset">Reset to 115 and 65</button>
       </div>
     </div>
   </div>
@@ -123,7 +123,7 @@ svg text { font-family: var(--body); }
   // Map geometry from the game data (maplestory.io MCW). Floors: [name, y, left x, right x].
   var HEN = {
     town: "Henesys", vr: [-500, -480, 1040, 70],
-    floors: [["Top floor", -416, -263, 803], ["Middle floor", -206, -308, 488], ["Right ledge", -146, 682, 1028], ["Right steps, upper", -86, 592, 682], ["Right steps, lower", -26, 502, 592], ["Bottom floor", 34, -488, 1028]],
+    floors: [["Top floor", -416, -263, 803], ["Middle floor", -206, -308, 488], ["Right steps, lower", -26, 502, 592], ["Right steps, upper", -86, 592, 682], ["Right ledge", -146, 682, 1028], ["Bottom floor", 34, -488, 1028]],
     ladders: [[118, -414, -208], [735, -414, -148], [358, -204, 32], [-192, -204, 32]],
     spawns: [[828, -210], [80, -49], [-65, -266], [373, -481], [12, -481]]
   };
@@ -214,7 +214,7 @@ svg text { font-family: var(--body); }
     function add(t, a, txt) { var e = document.createElementNS(ns, t); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; }
     S.dead.forEach(function (d) { var f = G.floors[d[0]]; add("rect", { x: X(d[1]), y: Y(f[1]) - 46, width: Math.max(1, X(d[2]) - X(d[1])), height: 46, fill: "var(--dead)", stroke: "var(--dead-line)", "stroke-dasharray": "4 3", rx: 6 }); });
     G.ladders.forEach(function (l) { add("line", { x1: X(l[0]), x2: X(l[0]), y1: Y(l[1]), y2: Y(l[2]), stroke: "var(--ladder)", "stroke-width": 5, "stroke-dasharray": "2 4", "stroke-linecap": "round" }); });
-    G.floors.forEach(function (f) { add("line", { x1: X(f[2]), x2: X(f[3]), y1: Y(f[1]), y2: Y(f[1]), stroke: "var(--floor)", "stroke-width": 6, "stroke-linecap": "round" }); add("text", { x: X(f[2]) + 4, y: Y(f[1]) + 18, "font-size": 11, fill: "var(--muted)" }, f[0]); });
+    G.floors.forEach(function (f) { add("line", { x1: X(f[2]), x2: X(f[3]), y1: Y(f[1]), y2: Y(f[1]), stroke: "var(--floor)", "stroke-width": 6, "stroke-linecap": "round" }); var shortF = f[3] - f[2] < 200; add("text", { x: shortF ? X(f[3]) + 6 : X(f[2]) + 4, y: Y(f[1]) + (shortF ? 4 : 18), "font-size": 11, fill: "var(--muted)" }, f[0]); });
     S.ports.forEach(function (p) {
       var up = /^up/.test(p[0]), out = /^out/.test(p[0]), x = X(p[1]), y = Y(p[2]) - 18;
       add("path", { d: up ? "M" + (x - 9) + "," + (y + 6) + " L" + x + "," + (y - 8) + " L" + (x + 9) + "," + (y + 6) + " Z" : out ? "M" + (x - 8) + "," + (y - 8) + " h16 v16 h-16 Z" : "M" + (x - 9) + "," + (y - 6) + " L" + x + "," + (y + 8) + " L" + (x + 9) + "," + (y - 6) + " Z", fill: "var(--portal)" });
@@ -254,7 +254,7 @@ svg text { font-family: var(--body); }
     tabs.appendChild(b);
   });
   ["rs", "rp", "sp"].forEach(function (id) { $(id).addEventListener("input", function () { sel = -1; draw(); }); });
-  $("reset").addEventListener("click", function () { $("rs").value = 140; $("rp").value = 140; $("sp").checked = false; sel = -1; draw(); });
+  $("reset").addEventListener("click", function () { $("rs").value = 115; $("rp").value = 65; $("sp").checked = false; sel = -1; draw(); });
   draw();
 })();
 </script>
