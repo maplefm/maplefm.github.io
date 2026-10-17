@@ -919,6 +919,7 @@ dialog h3 { color: var(--accent-ink); }
   "use strict";
   var OWN = ["maya", "injure", "excite", "dean", "liar"];
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
+  var CREW = ["Adam", "Jack", "Matt", "Jimmy"];
   var FILES = [["data/watcher.json", "Adam"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"]];
   var ICONFILES = ["data/watcher-icons.json", "data/watcher-2-icons.json", "data/watcher-3-icons.json", "data/watcher-4-icons.json", "data/streams-icons.json", "data/streams-vods-icons.json"];
   var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5;
@@ -1233,6 +1234,21 @@ dialog h3 { color: var(--accent-ink); }
       ["Lesser", "Intermediate", "Greater", "Superior"].forEach(function (t) { var n = l.i + ": " + t, a = byN[n]; if (!a || a.length < 2) return; var d = Math.abs(Math.log(l.u / median(a))); if (d < bd) { bd = d; best = n; } });
       if (best) { l.i = best; l.tl = false; }
     });
+    // Before 1:25 PM ET on Oct 17 the watchers guessed a cut-off tier from the text alone and often swapped
+    // Greater and Intermediate (Greater is the 10% scroll and usually the cheaper one). Rows from before then are
+    // checked against prices seen since, with the icon colour working: a row far off its own tier's price and
+    // right on the other tier's is moved over. Only for scrolls where both tiers have 4+ recent prices 2x apart.
+    var TIERCUT = Date.UTC(2026, 9, 17, 17, 25), tref = {};
+    L.forEach(function (l) { if (l.t < TIERCUT || l.b || l.tl) return; var sp = splitTier(l.i); if (sp.t === "Greater" || sp.t === "Intermediate") (tref[sp.b + "|" + sp.t] || (tref[sp.b + "|" + sp.t] = [])).push(l.u); });
+    L.forEach(function (l) {
+      if (l.t >= TIERCUT || l.b || l.tl) return;
+      var sp = splitTier(l.i); if (sp.t !== "Greater" && sp.t !== "Intermediate") return;
+      var other = sp.t === "Greater" ? "Intermediate" : "Greater", a = tref[sp.b + "|" + sp.t], o = tref[sp.b + "|" + other];
+      if (!a || !o || a.length < 4 || o.length < 4) return;
+      var ma = median(a), mo = median(o); if (Math.max(ma, mo) < 2 * Math.min(ma, mo)) return;
+      var da = Math.abs(Math.log(l.u / ma)), dob = Math.abs(Math.log(l.u / mo));
+      if (da > Math.log(1.6) && dob < Math.log(1.3)) { l.i = sp.b + ": " + other; l.tierFixed = true; }
+    });
     // Spot holders: junk listed at a silly price just to keep a shop up (a Mushroom Spore for 50,000).
     // 1. more than 10x the item's median listing, when the item was seen 4 or more times;
     // 2. a Use or Etc item over 10,000 and over 500x what the NPC pays for it (catches items where most listings are spots);
@@ -1249,6 +1265,7 @@ dialog h3 { color: var(--accent-ink); }
     });
     if (!showSpot) L = L.filter(function (l) { return !l.spot; });
     L.forEach(function (l) {
+      if (l.stream || CREW.indexOf(l.who) < 0) return;      // the contributor list is the club's own watchers only
       var w = who[l.who] || (who[l.who] = { name: l.who, stream: l.stream, sales: 0, rows: 0, shops: {}, days: {} });
       w.rows++; if (l.so && !l.b) w.sales++; if (!l.chat) w.shops[l.sk] = 1; w.days[new Date(l.t).toDateString()] = 1;
     });
