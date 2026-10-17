@@ -376,6 +376,7 @@ dialog ol { margin: 0; padding-left: 20px; display: grid; gap: 5px; }
 .selltools .pbtn:disabled { opacity: .45; cursor: default; }
 .selladd .note { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 #sell-view td.why { max-width: none; }
+@media (max-width: 640px) { #sell-view .col-opt { display: none; } #sell-view td.why { white-space: normal; } }
 .ih p.vend { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-weight: 600; color: var(--ink); }
 .ih p.vend .tg { margin-left: 4px; }
 #sell-view tbody td:first-child { width: 34px; padding-right: 0; }
@@ -777,7 +778,7 @@ dialog h3 { color: var(--accent-ink); }
         <div class="tbox scroll">
           <table>
             <thead><tr>
-              <th class="c"><span class="sr">Remove</span></th><th>Item</th><th>Qty</th><th id="fast-th" title="Typical price minus your Sell fast percent, so it sells quickly">Sell fast</th><th title="Just under the cheapest listing up now, without going below the low end of real sales">Undercut</th><th title="What it usually sells for">Fair</th><th>Cheapest now</th><th>Total</th>
+              <th class="c"><span class="sr">Remove</span></th><th>Item</th><th>Qty</th><th id="fast-th" title="Typical price minus your Sell fast percent, so it sells quickly">Sell fast</th><th class="col-opt" title="Just under the cheapest listing up now, without going below the low end of real sales">Undercut</th><th class="col-opt" title="What it usually sells for">Fair</th><th class="col-opt">Cheapest now</th><th>Total</th>
             </tr></thead>
             <tbody id="sell-rows"></tbody>
           </table>
@@ -1587,8 +1588,8 @@ dialog h3 { color: var(--accent-ink); }
         if (s.g) { var tag = el("span", "tg ask", "From game " + ago(s.g.t * 1000)); nc.querySelector(".t").appendChild(tag); var ch = statChip(i.item, s.g.x, s.g.xj); if (ch) nc.querySelector("b").appendChild(ch); }
         tr.appendChild(nc);
         tr.appendChild(el("td", null, fmt(s.q)));
-        [[fast, "pick"], [a.quick, ""], [a.fair, ""]].forEach(function (v) { var td = el("td"); td.appendChild(money(v[0], "rec " + v[1])); tr.appendChild(td); });
-        var up = el("td"); if (a.low) { up.appendChild(money(a.low)); up.appendChild(el("small", null, " " + a.ups + (a.ups === 1 ? " seller" : " sellers"))); } else up.textContent = "None"; tr.appendChild(up);
+        [[fast, "pick", ""], [a.quick, "", "col-opt"], [a.fair, "", "col-opt"]].forEach(function (v) { var td = el("td", v[2]); td.appendChild(money(v[0], "rec " + v[1])); tr.appendChild(td); });
+        var up = el("td", "col-opt"); if (a.low) { up.appendChild(money(a.low)); up.appendChild(el("small", null, " " + a.ups + (a.ups === 1 ? " seller" : " sellers"))); } else up.textContent = "None"; tr.appendChild(up);
         var tot = el("td"); tot.appendChild(money(fast * s.q)); tr.appendChild(tot); total += fast * s.q;
       }
       rm.addEventListener("click", function (e) { e.stopPropagation(); if (s.g) { HIDE[gameKey(s.g)] = Math.max(s.g.t || 0, Math.floor(Date.now() / 1000)); saveLS("fm-sell-hide", HIDE); } else { SELL.splice(s.k, 1); saveSell(); } render(); }); 
