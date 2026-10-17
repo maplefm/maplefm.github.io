@@ -1130,7 +1130,7 @@ dialog h3 { color: var(--accent-ink); }
         var prev = seen[key];
         if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
         var room = fixRoom(r.r) || (chat ? "chat" : "");
-        if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room)) room = "";
+        if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room) && !/^[A-Z][A-Za-z'.:-]+( [A-Za-z0-9'.:<>-]+){0,5}$/.test(room)) room = "";   // streams: FM rooms and cleanly read map names
         // Stars, bullets and Wooden Tops show how many are in the set, but the price is for the whole set.
         var set = cat0 === "Stars";
         var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: !!r.so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, xn: r.xn || "", xj: r.xj || "" };
