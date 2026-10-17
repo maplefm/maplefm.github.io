@@ -451,7 +451,7 @@ tr.under td { background: var(--hot-soft); }
   --shadow-sm: 0 1px 2px rgba(0,0,0,.35);
 }
 body { font-weight: 500; letter-spacing: -.005em; -webkit-font-smoothing: antialiased;
-  background: radial-gradient(1100px 600px at 8% -10%, var(--glow1), transparent 60%), radial-gradient(900px 600px at 100% 0%, var(--glow2), transparent 60%), var(--bg) fixed; }
+  background: radial-gradient(1100px 600px at 8% -10%, var(--glow1), transparent 60%), radial-gradient(900px 600px at 100% 0%, var(--glow2), transparent 60%), var(--bg); background-attachment: fixed; }
 .clouds { display: none; }
 .num { font-weight: 700; }
 .coin { box-shadow: none; }
@@ -607,6 +607,9 @@ dialog h3 { color: var(--accent-ink); }
   .sheetx { display: grid !important; }
 }
 .sheetx { display: none; }
+/* the filter popover must never be cut off when the list is short or empty */
+.window:has(.fbox:not([hidden])), .window:has(.menu:not([hidden])) { overflow: visible; }
+.fbox { max-height: min(70vh, 560px); overflow: auto; z-index: 60; }
 </style>
 </head>
 <body>
@@ -1973,7 +1976,14 @@ dialog h3 { color: var(--accent-ink); }
     var tr = e.target.closest && e.target.closest("tbody tr[data-item]"); if (tr && e.key === "Enter") pick(tr.dataset.item);
   });
   $("menubtn").addEventListener("click", function () { var m = $("menu"); m.hidden = !m.hidden; this.setAttribute("aria-expanded", String(!m.hidden)); });
-  $("fbtn").addEventListener("click", function () { var f = $("fbox"); f.hidden = !f.hidden; this.setAttribute("aria-expanded", String(!f.hidden)); });
+  $("fbtn").addEventListener("click", function () {
+    var f = $("fbox"); f.hidden = !f.hidden; this.setAttribute("aria-expanded", String(!f.hidden));
+    if (!f.hidden) {      // fit on screen, above the recent sales bar, scrolling the page up a little when needed
+      f.style.maxHeight = ""; var want = Math.min(f.scrollHeight, 560), top = f.getBoundingClientRect().top, need = top + want + 70 - window.innerHeight;
+      if (need > 0) { window.scrollBy(0, Math.min(need, Math.max(0, top - 80))); top = f.getBoundingClientRect().top; }
+      f.style.maxHeight = Math.max(200, Math.min(want, window.innerHeight - top - 70)) + "px";
+    }
+  });
   var qTimer = null;
   ["q", "win", "f-low", "f-sold", "f-bids", "f-cash", "f-spot", "cls", "lv-min", "lv-max"].forEach(function (id) {
     var go = function () { if (id === "win" || id === "f-spot") { DIRTY = true; render(); } else renderView(); };
