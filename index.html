@@ -143,6 +143,15 @@ button, input, select { font: inherit; color: inherit; }
 .alert-row .chkt { font-style: normal; margin-left: 6px; font-size: .72rem; font-weight: 800; color: var(--ask); background: var(--gold-soft); padding: 1px 6px; border-radius: 4px; }
 .menu .minprof { display: block; line-height: 1.9; }
 .menu .minprof input { width: 82px; padding: 3px 7px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: inherit; font-weight: 700; }
+.tg.chk { background: var(--gold-soft); color: var(--ask); border: 1px solid var(--gold); }
+.chkbox { margin: 8px 0; padding: 9px 12px; border-radius: 12px; background: var(--gold-soft); border: 1px solid var(--gold); font-size: .84rem; }
+.chkbox ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+.dclist { display: grid; gap: 6px; max-height: 60vh; overflow: auto; }
+.dcrow { all: unset; box-sizing: border-box; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; }
+.dcrow:hover { background: var(--panel2); }
+.dcrow span { display: grid; gap: 2px; min-width: 0; }
+.dcrow small { color: var(--muted); font-size: .78rem; }
+#m-check em { font-style: normal; font-size: .72rem; font-weight: 800; color: var(--ask); background: var(--gold-soft); padding: 1px 6px; border-radius: 6px; }
 .alert-row.more { display: block; grid-column: 1 / -1; color: var(--muted); }
 .alert.fresh { animation: flash .9s ease-in-out 6; }
 .alert.watch { background: var(--up-soft); border-color: var(--up); box-shadow: 0 4px 0 #13521f; }
@@ -695,6 +704,7 @@ dialog h3 { color: var(--accent-ink); }
         <button type="button" onclick="location.href='report.html'">Daily market close report</button>
         <button type="button" onclick="location.href='placements.html'">Where to put your shop</button>
         <button type="button" id="m-sources">Where prices come from</button>
+        <button type="button" id="m-check">Data check <em id="m-check-n"></em></button>
         <button type="button" id="m-contrib">Contribute to pricing</button>
         <hr>
         <label><input type="checkbox" id="m-activity"> Show sales and activity panel</label>
@@ -888,6 +898,14 @@ dialog h3 { color: var(--accent-ink); }
     <h3>Thanks to the people scanning</h3>
     <div class="crew" id="crew"></div>
     <p class="note" id="crew-note"></p>
+  </div>
+</dialog>
+
+<dialog id="datacheck" aria-labelledby="dc-t">
+  <div class="wtitle"><h2 id="dc-t">Data check</h2><button class="x" data-close aria-label="Close">×</button></div>
+  <div class="dbody">
+    <p>Every time the prices refresh, each item is checked against the rest of the data: tiers that look mixed up, our watchers and the streams disagreeing, a price that jumped or crashed in a week, everyone listing far under typical, and bundles that don't match singles. Items that fail show <b>⚠ Check</b>, and their deals never ping.</p>
+    <div class="dclist" id="dclist"></div>
   </div>
 </dialog>
 
@@ -1337,9 +1355,46 @@ dialog h3 { color: var(--accent-ink); }
       return it;
     });
     var byName = {}; list.forEach(function (i) { byName[i.item] = i; });
+    selfCheck(list, byName, now);
     var sales = L.filter(function (l) { return l.so && !l.b; }), active = L.filter(function (l) { return !l.so && !l.b && (now - l.t <= DAY || latest - l.t <= DAY); });
     var whoList = Object.keys(who).map(function (k) { var w = who[k]; w.shopsN = Object.keys(w.shops).length; w.daysN = Object.keys(w.days).length; return w; }).sort(function (a, b) { return b.sales - a.sales || b.rows - a.rows; });
     return { list: list, byName: byName, L: L, sales: sales, active: active, latest: latest, who: whoList, spotN: spotN };
+  }
+
+  // ---------- self check: before anyone trusts a price, it has to hold up against the rest of the data.
+  // Each failed check adds a flag to the item. A flagged item shows "Check" in the lists and its panel says why,
+  // and its deals are shown greyed with no ping, so nobody acts on a number that might be a misread.
+  function selfCheck(list, byName, now) {
+    list.forEach(function (i) {
+      i.flags = [];
+      if (!i.typ) return;
+      var recent = i.all.filter(function (x) { return !x.b && now - x.t <= 3 * DAY; });
+      // 1. a scroll tier whose prices are mixed up with the other tier (a misread tier)
+      if (i.tier) {
+        ["Lesser", "Intermediate", "Greater"].forEach(function (t) {
+          if (t === i.tier) return; var o = byName[i.baseName + ": " + t];
+          if (!o || !o.typ || o.n < 4 || Math.max(o.typ, i.typ) < 1.8 * Math.min(o.typ, i.typ)) return;
+          var near = recent.filter(function (x) { return Math.abs(Math.log(x.u / o.typ)) < Math.log(1.3) && Math.abs(Math.log(x.u / i.typ)) > Math.log(1.6); }).length;
+          if (recent.length >= 4 && near / recent.length >= 0.25) i.flags.push(Math.round(near / recent.length * 100) + "% of the last 3 days' prices match " + t + " (" + short(o.typ) + ") instead, so some rows may be the wrong tier");
+          else if (Math.abs(Math.log(i.typ / o.typ)) < Math.log(1.15) && o.n >= 4 && i.n >= 4) i.flags.push("Typical matches the " + t + " tier almost exactly, which usually means tiers got mixed up");
+        });
+      }
+      // 2. our watchers and the streams disagree by more than 2x
+      var mine = recent.filter(function (x) { return !x.stream; }).map(function (x) { return x.u; }), strm = recent.filter(function (x) { return x.stream; }).map(function (x) { return x.u; });
+      if (mine.length >= 3 && strm.length >= 3) { var a = median(mine), b = median(strm); if (Math.max(a, b) > 2 * Math.min(a, b)) i.flags.push("Our watchers see about " + short(a) + " but streams see about " + short(b)); }
+      // 3. typical jumped or crashed more than 2.5x in a week
+      var old = i.all.filter(function (x) { return !x.b && now - x.t > 4 * DAY && now - x.t <= 11 * DAY; }).map(function (x) { return x.u; });
+      if (old.length >= 3 && i.typN >= 3) { var r = i.typ / median(old); if (r > 2.5 || r < 0.4) i.flags.push("Typical is " + (r > 1 ? r.toFixed(1) + "x" : Math.round((1 - r) * 100) + "% under") + " what it was last week (" + short(median(old)) + ")"); }
+      // 4. everyone is listing well under typical: typical is stale, the "deals" are just today's price
+      var ask = i.asks.filter(function (x) { return now - x.t <= DAY && !x.chat && !x.spot; }), sellers = {};
+      ask.forEach(function (x) { sellers[String(x.s).toLowerCase()] = x.u; });
+      var sv = Object.keys(sellers).map(function (k) { return sellers[k]; });
+      if (sv.length >= 4 && median(sv) < i.typ * 0.65) i.flags.push(sv.length + " sellers today ask a median " + short(median(sv)) + ", well under typical " + short(i.typ) + ", so typical may be out of date");
+      // 5. bundles that don't agree with singles (a misread quantity)
+      var single = recent.filter(function (x) { return (x.q || 1) === 1; }).map(function (x) { return x.u; }), multi = recent.filter(function (x) { return (x.q || 1) > 1; });
+      if (single.length >= 3 && multi.length) { var ms = median(single), bad = multi.filter(function (x) { return x.u > ms * 4 || x.u < ms / 4; }).length; if (bad >= 2) i.flags.push(bad + " bundle listings price out very differently from singles, so a quantity may be misread"); }
+      i.check = i.flags.length > 0;
+    });
   }
 
   // ---------- top cards
@@ -1463,6 +1518,7 @@ dialog h3 { color: var(--accent-ink); }
     t.appendChild(el("small", null, CATNAME[i.cat] || i.cat));
     if (i.tier) t.appendChild(el("span", "tg tier", i.tier));
     if (i.n < MIN) t.appendChild(el("span", "tg low", "Low data")); else if (i.kind === "ask") t.appendChild(el("span", "tg ask", "Ask"));
+    if (i.check) { var ck = el("span", "tg chk", "⚠ Check"); ck.title = i.flags.join("\n"); t.appendChild(ck); }
     if (i.moved) { var mv = el("span", "tg ask", "Rising"); mv.title = "Recent sales are thin and today's asking prices are well above them, so typical follows today's asks"; t.appendChild(mv); }
     if (extraTag) t.appendChild(extraTag);
     w.appendChild(t); td.appendChild(w); return td;
@@ -1891,6 +1947,7 @@ dialog h3 { color: var(--accent-ink); }
     ht.appendChild(el("p", null, fmt(i.asks.length) + " listings · " + fmt(i.salesN) + " sales"));
     var ll = levelLine(i); if (ll) ht.appendChild(el("p", null, ll));
     var vp = vendor(i.item);
+    if (i.check) { var cb = el("div", "chkbox"); cb.appendChild(el("b", null, "⚠ Double check this price before you act on it")); var ul = el("ul"); i.flags.forEach(function (f) { ul.appendChild(el("li", null, f)); }); cb.appendChild(ul); ht.appendChild(cb); }
     if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); ht.appendChild(vl); }
     hd.appendChild(ht); ip.appendChild(hd);
     var big = el("div", "big");
@@ -2044,7 +2101,12 @@ dialog h3 { color: var(--accent-ink); }
       var r = { l: l, typ: i.typ, off: off, profit: 0, why: "", check: false };
       if (npcGain >= 1000 && npcGain >= flip) { r.profit = npcGain; r.why = "NPC buys at " + short(vp); }
       else if (i.typ && i.kind === "sale" && sold7 >= 3 && off >= 0.2 && flip >= MINPROF) {
-        r.profit = flip; r.why = Math.round(off * 100) + "% under " + short(i.typ); r.check = off > 0.85 || (l.chat && off > 0.7);
+        r.profit = flip; r.why = Math.round(off * 100) + "% under " + short(i.typ); r.check = off > 0.85 || (l.chat && off > 0.7) || i.check;
+        // the going rate, not a deal: 3 or more other sellers in the last day ask within 25% of this price
+        var near = {}; i.asks.forEach(function (x) { if (x !== l && now - x.t <= DAY && !x.chat && Math.abs(Math.log(x.u / l.u)) < Math.log(1.25)) near[String(x.s).toLowerCase()] = 1; });
+        delete near[String(l.s).toLowerCase()];
+        if (Object.keys(near).length >= 3) { r.check = true; r.note = "others ask the same"; }
+        if (i.check && !r.note) r.note = "price under review";
       } else return;
       hot.push(r);
     });
@@ -2061,7 +2123,7 @@ dialog h3 { color: var(--accent-ink); }
     hot.slice(0, 8).forEach(function (r) {
       var l = r.l, li = el("span", "alert-row" + (r.check ? " chk" : ""));
       var pc = el("span", "pc"); pc.appendChild(el("b", null, "+" + short(r.profit))); pc.appendChild(document.createTextNode(" " + r.why));
-      if (r.check) pc.appendChild(el("em", "chkt", "check: may be a misread"));
+      if (r.check) pc.appendChild(el("em", "chkt", r.note || "check: may be a misread"));
       [[ago(l.t), "n"], [l.i + ((l.q || 1) > 1 ? " ×" + fmt(l.q) : ""), "it"], [fmt(l.u) + ((l.q || 1) > 1 ? " ea" : ""), "pr"]].forEach(function (p) { li.appendChild(el("span", p[1], p[0])); });
       li.appendChild(pc);
       li.appendChild(el("span", "wh", [l.s, where(l)].filter(Boolean).join(", ")));
@@ -2090,6 +2152,7 @@ dialog h3 { color: var(--accent-ink); }
   function render(rebuild) {
     if (rebuild === true || DIRTY || !D || Date.now() - lastBuild > 5 * 6e4) { D = build(); DIRTY = false; lastBuild = Date.now(); }
     renderCards(); renderTicker(); renderAlert(); renderWatchAlert();
+    var nck = D.list.filter(function (i) { return i.check; }).length; $("m-check-n").textContent = nck ? nck : "";
     ["prices", "deals", "sell", "pos"].forEach(function (t) { $(t + "-view").hidden = state.tab !== t; $("tab-" + t).setAttribute("aria-selected", state.tab === t); });
     $("chips").parentNode.hidden = state.tab === "sell" || state.tab === "pos";
     if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else if (state.tab === "sell") renderSell(); else renderPos();
@@ -2202,6 +2265,17 @@ dialog h3 { color: var(--accent-ink); }
   $("actx").addEventListener("click", function () { $("m-activity").checked = false; saveLS("fm-activity", false); $("activity").hidden = true; });
   $("m-about").addEventListener("click", function () { closeMenus(); $("help").showModal(); });
   $("m-sources").addEventListener("click", function () { closeMenus(); openSources(); });
+  $("m-check").addEventListener("click", function () {
+    closeMenus(); var box = $("dclist"); box.textContent = "";
+    var bad = D.list.filter(function (i) { return i.check; }).sort(function (a, b) { return b.vol - a.vol; });
+    if (!bad.length) box.appendChild(el("p", "note", "Everything passes right now."));
+    bad.forEach(function (i) {
+      var d = el("button", "dcrow"); d.type = "button"; d.appendChild(iconBox(i.item)); var t = el("span"); t.appendChild(el("b", null, i.item));
+      i.flags.forEach(function (f) { t.appendChild(el("small", null, f)); }); d.appendChild(t);
+      d.addEventListener("click", function () { $("datacheck").close(); pick(i.item); }); box.appendChild(d);
+    });
+    $("datacheck").showModal();
+  });
   $("m-contrib").addEventListener("click", function () { closeMenus(); $("contrib").showModal(); });
   document.querySelectorAll("dialog").forEach(function (d) {
     d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
