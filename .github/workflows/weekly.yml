@@ -13,13 +13,12 @@ jobs:
   weekly:
     runs-on: ubuntu-latest
     env:
-      DATA_KEY: ${{ secrets.DATA_KEY }}
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - run: |
           git fetch -q origin live
           git show origin/live:data/report.json > /tmp/report.json
           git show origin/live:data/ranks.json > /tmp/ranks.json
-          pip install -q cryptography
-          git show origin/live:data/discord_weekly.json.enc > /tmp/weekly.enc 2>/dev/null && python3 tools/vault.py cat /tmp/weekly.enc data/discord_weekly.json > /tmp/weekly.json || echo '{}' > /tmp/weekly.json
+          curl -fsSL -H "Authorization: token ${ARCHIVE_TOKEN}" https://raw.githubusercontent.com/maplefm/clubfm-archive/live/data/discord_weekly.json -o /tmp/weekly.json 2>/dev/null || echo '{}' > /tmp/weekly.json
           python3 tools/discord.py weekly /tmp/report.json /tmp/ranks.json /tmp/weekly.json

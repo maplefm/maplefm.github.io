@@ -369,37 +369,31 @@ async function kofiIncome(env) {
 // ---------------------------------------------------------------- Discord slash commands
 // /price <item>: typical price, the asks and the latest sale from the board's summary, in any channel the bot is in.
 // Discord signs every request with the app's Ed25519 key (DISCORD_PUBLIC_KEY var); anything unsigned is refused.
-// ---------------------------------------------------------------- the encrypted data branch
-// Listings, sellers and pay records sit on the public data branch as <file>.enc: "FMV1", a 12-byte nonce, then
-// AES-256-GCM over the gzipped JSON with the file's path as associated data (tools/vault.py writes them). Only
-// this Worker and the GitHub jobs hold DATA_KEY. Signed-in members get the live listings from /data/live.
+// ---------------------------------------------------------------- the private data
+// Listings, sellers and pay records live in the private maplefm/clubfm-archive repository. This Worker reads them
+// with ARCHIVE_READ (a read-only GitHub token) and hands signed-in members their listings from /data/live.
+const ARCH_RAW = "https://raw.githubusercontent.com/maplefm/clubfm-archive/live/";
 const LIVE_RAW = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
-let VKEY = null, VKEYSRC = "";
-async function vaultKey(env) {
-  if (!env.DATA_KEY) throw new Error("no data key");
-  if (VKEY && VKEYSRC === env.DATA_KEY) return VKEY;
-  const raw = Uint8Array.from(atob(env.DATA_KEY), (c) => c.charCodeAt(0));
-  VKEY = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]); VKEYSRC = env.DATA_KEY;
-  return VKEY;
-}
-// the gzipped plain bytes of one data file, or null
-async function vaultGz(env, path, ttl = 60) {
-  const r = await fetch(LIVE_RAW + path + ".enc", { cf: { cacheTtl: ttl, cacheEverything: true } });
+// one cached copy per file for ttl seconds, shared by every member on this Cloudflare location
+async function archFetch(env, path, ttl = 60) {
+  const key = new Request("https://archive.cache/" + path + "?b=" + Math.floor(Date.now() / 1000 / ttl));
+  const cache = caches.default;
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  if (!env.ARCHIVE_READ) return null;
+  const r = await fetch(ARCH_RAW + path, { headers: { Authorization: "token " + env.ARCHIVE_READ, "User-Agent": "clubfm-worker" } });
   if (!r.ok) return null;
-  const b = new Uint8Array(await r.arrayBuffer());
-  if (b.length < 32 || String.fromCharCode(b[0], b[1], b[2], b[3]) !== "FMV1") return null;
-  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b.slice(4, 16), additionalData: new TextEncoder().encode(path) }, await vaultKey(env), b.slice(16));
-  return new Uint8Array(pt);
+  const res = new Response(r.body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=" + ttl } });
+  await cache.put(key, res.clone());
+  return res;
 }
 async function vaultJSON(env, path, ttl) {
-  const gz = env.DATA_KEY ? await vaultGz(env, path, ttl).catch(() => null) : null;
-  if (!gz) {   // before the branch is encrypted (or if a file was never locked) read the plain copy
-    const r = await fetch(LIVE_RAW + path, { cf: { cacheTtl: ttl || 60, cacheEverything: true } });
-    return r.ok ? r.json().catch(() => null) : null;
-  }
-  const txt = await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
-  return JSON.parse(txt);
+  const r = await archFetch(env, path, ttl || 60);
+  return r ? r.json().catch(() => null) : null;
 }
+// what a member's board loads: the raw scans, joined into one object without parsing them
+const MEMBER_FILES = ["watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", "streams.json", "streams-vods.json", "inbox.json",
+  "watcher-sell.json", "watcher-2-sell.json", "watcher-3-sell.json", "watcher-4-sell.json"];
 // Per-account and per-address limits on the member bundle: the board asks about once every five minutes, a
 // script pulling it in a loop gets cut off. Counted per Worker instance, with Cloudflare's limiter on top when bound.
 const HITS = new Map();
@@ -451,9 +445,22 @@ async function dataLive(req, env) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
   if (overLimit("a:" + id, 30, 600) || overLimit("i:" + ip, 60, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
   if (env.RL) { try { const ok = await env.RL.limit({ key: "a:" + id }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
-  const gz = await vaultGz(env, "data/live.json", 30);
-  if (!gz) return json({ error: "not ready" }, 503);
-  return new Response(gz, { encodeBody: "manual", headers: { "Content-Type": "application/json", "Content-Encoding": "gzip", "Cache-Control": "private, no-store" } });
+  const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60).catch(() => null)));
+  if (!parts.some(Boolean)) return json({ error: "not ready" }, 503);
+  const { readable, writable } = new TransformStream();
+  (async () => {
+    const w = writable.getWriter(), enc = new TextEncoder();
+    let first = true;
+    await w.write(enc.encode("{"));
+    for (let i = 0; i < MEMBER_FILES.length; i++) {
+      if (!parts[i]) continue;
+      await w.write(enc.encode((first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":")); first = false;
+      const rd = parts[i].body.getReader();
+      for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); }
+    }
+    await w.write(enc.encode("}")); await w.close();
+  })();
+  return new Response(readable, { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } });
 }
 
 const hex2buf = (h) => new Uint8Array(h.match(/../g).map((b) => parseInt(b, 16)));
