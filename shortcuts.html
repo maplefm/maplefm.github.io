@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chat shortcuts · Club FM</title>
+<meta name="description" content="Every trade chat shortcut the Club FM price board understands: GFA, WG, WLR, zhelm and hundreds more, with the item each one means.">
+<link rel="icon" href="og-icon.png?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root { --bg: #f7f1ff; --panel: #fff8e7; --panel2: #f3ecff; --ink: #2a1c4a; --muted: #6b5a8c; --line: #e0c08a; --line2: #d9cdf2; --accent: #6d3fd1; --wood: #7a3b0c; }
+:root:not([data-theme="light"]) { color-scheme: light dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #1b1430; --panel: #2a2140; --panel2: #352a52; --ink: #f1e9ff; --muted: #b6a7d6; --line: #4a3a6a; --line2: #4a3a6a; --accent: #b89bff; --wood: #c58a4d; } }
+:root[data-theme="dark"] { --bg: #1b1430; --panel: #2a2140; --panel2: #352a52; --ink: #f1e9ff; --muted: #b6a7d6; --line: #4a3a6a; --line2: #4a3a6a; --accent: #b89bff; --wood: #c58a4d; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 Inter, system-ui, sans-serif; }
+main { max-width: 860px; margin: 0 auto; padding: 28px 16px 80px; }
+.back { display: inline-block; margin-bottom: 18px; color: var(--accent); font-weight: 700; text-decoration: none; }
+.card { background: var(--panel); border: 3px solid var(--wood); border-radius: 16px; padding: 22px 24px; }
+h1 { margin: 0 0 4px; font-size: 1.7rem; } .lead { color: var(--muted); margin: 0 0 16px; }
+h2 { font-size: 1.05rem; margin: 22px 0 8px; }
+.rates { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.rates span { background: var(--panel2); border: 1px solid var(--line2); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: .9rem; }
+.q { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--line2); background: var(--panel2); color: var(--ink); margin: 6px 0 14px; }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.it { border: 1px solid var(--line2); border-radius: 12px; padding: 8px 12px; background: var(--panel2); display: flex; flex-direction: column; gap: 4px; }
+.it a { color: var(--ink); font-weight: 800; text-decoration: none; font-size: .92rem; } .it a:hover { color: var(--accent); }
+.keys { display: flex; flex-wrap: wrap; gap: 4px; }
+.keys code { background: var(--panel); border: 1px solid var(--line2); border-radius: 6px; padding: 1px 7px; font-size: .82rem; font-weight: 700; color: var(--accent); }
+.n { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
+.empty { color: var(--muted); padding: 14px 0; }
+a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="index.html">← Back to Club FM</a>
+<div class="card">
+<h1>Chat shortcuts the board understands</h1>
+<p class="lead">Type any of these into the search box on the board, or after <code>/price</code> in the Discord, and it finds the item. These are the names players use in trade chat.</p>
+<h2>Scroll rates</h2>
+<p>Scrolls show by their success rate. Add the rate to any scroll shortcut: <b>GFA 60</b>, <b>gfa 10%</b>, <b>earring dex 100</b>.</p>
+<div class="rates"><span>100% = Lesser</span><span>60% = Intermediate</span><span>10% = Greater</span><span>Chaos</span></div>
+<h2>Every shortcut</h2>
+<input class="q" id="q" type="search" placeholder="Filter: type a shortcut or an item name" autocomplete="off" aria-label="Filter shortcuts">
+<p class="n" id="count"></p>
+<div class="list" id="list"></div>
+<p class="empty" id="empty" hidden>No shortcut matches that. Search the item's full name on the board instead.</p>
+<p class="n">Missing one everyone uses? Say so in <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">the Discord</a> and it goes in.</p>
+</div>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var groups = {}, order = [];
+  fetch("data/abbr.json").then(function (r) { return r.json(); }).then(function (a) {
+    Object.keys(a).forEach(function (k) { var v = a[k]; if (!groups[v]) { groups[v] = []; order.push(v); } groups[v].push(k); });
+    order.sort(function (x, y) { return x.localeCompare(y); });
+    render("");
+  });
+  function render(q) {
+    q = q.toLowerCase().trim();
+    var list = $("list"), n = 0; list.textContent = "";
+    order.forEach(function (item) {
+      var keys = groups[item].slice().sort(function (x, y) { return x.length - y.length || x.localeCompare(y); });
+      if (q && item.toLowerCase().indexOf(q) < 0 && !keys.some(function (k) { return k.indexOf(q) > -1; })) return;
+      n++;
+      var box = document.createElement("div"); box.className = "it";
+      var a = document.createElement("a"); a.href = "index.html#item=" + encodeURIComponent(item); a.textContent = item; box.appendChild(a);
+      var ks = document.createElement("div"); ks.className = "keys";
+      keys.forEach(function (k) { var c = document.createElement("code"); c.textContent = k; ks.appendChild(c); });
+      box.appendChild(ks); list.appendChild(box);
+    });
+    $("count").textContent = n + (n === 1 ? " item" : " items") + ", " + Object.keys(groups).reduce(function (t, k) { return t + groups[k].length; }, 0) + " shortcuts in all";
+    $("empty").hidden = n > 0;
+  }
+  var T; $("q").addEventListener("input", function () { clearTimeout(T); var v = this.value; T = setTimeout(function () { render(v); }, 80); });
+})();
+</script>
+</body>
+</html>

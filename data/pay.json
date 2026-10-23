@@ -1,0 +1,18 @@
+{
+ "rate_per_100": 0.5,
+ "daily_cap": 10,
+ "weekly_cap": 50,
+ "weekly_budget": 250,
+ "min_payout": 5,
+ "unlock_verified": 2000,
+ "hover_credit": 0.1,
+ "strict": true,
+ "witness_credit": 0.25,
+ "self_to_bar": 0.25,
+ "kofi_budget": {
+  "weeks": 4,
+  "share": 1.0,
+  "max": 1000
+ },
+ "cold_bonus": 0.5
+}

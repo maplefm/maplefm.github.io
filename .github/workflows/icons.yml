@@ -1,0 +1,28 @@
+name: Icon shards
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/icons.py, .github/workflows/icons.yml]
+  schedule:
+    - cron: "41 * * * *"
+permissions:
+  contents: write
+concurrency: icons
+jobs:
+  icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - run: |
+          git show origin/main:tools/icons.py > /tmp/icons.py 2>/dev/null || (git fetch origin main && git show FETCH_HEAD:tools/icons.py > /tmp/icons.py)
+          python3 /tmp/icons.py data
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git add -A data/icons
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Icon shards"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

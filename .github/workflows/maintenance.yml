@@ -1,0 +1,49 @@
+name: Maintenance check
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/maintenance.py, .github/workflows/maintenance.yml]
+  schedule:
+    - cron: "7,37 * * * *"
+permissions:
+  contents: write
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+concurrency: maintenance
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - run: |
+          git show origin/main:tools/maintenance.py > /tmp/maintenance.py 2>/dev/null || (git fetch origin main && git show FETCH_HEAD:tools/maintenance.py > /tmp/maintenance.py)
+          mkdir -p data
+          python3 /tmp/maintenance.py /tmp/m.json
+          python3 - <<'PY'
+          import json
+          new = json.load(open('/tmp/m.json'))
+          try: old = json.load(open('data/maintenance.json'))
+          except Exception: old = None
+          # only commit when the notices change, so the live branch is not flooded every half hour
+          if not old or old.get('notices') != new.get('notices'):
+              json.dump(new, open('data/maintenance.json', 'w'), indent=1)
+              open('/tmp/changed', 'w').write('1')
+          PY
+      - name: Maple News from Nexon
+        run: |
+          git show origin/main:tools/discord.py > /tmp/discord.py 2>/dev/null || git show FETCH_HEAD:tools/discord.py > /tmp/discord.py
+          git show origin/main:tools/nexon_news.py > /tmp/nexon_news.py 2>/dev/null || git show FETCH_HEAD:tools/nexon_news.py > /tmp/nexon_news.py
+          python3 /tmp/nexon_news.py data/nexon_news.json && touch /tmp/changed || true
+      - run: |
+          if [ -f /tmp/changed ]; then
+            git config user.name maplefm
+            git config user.email maplefm@users.noreply.github.com
+            git add data/maintenance.json; git add data/nexon_news.json 2>/dev/null || true
+            if git diff --cached --quiet; then echo "nothing new"; else
+              git commit -m "Nexon notices and news"
+              for i in 1 2 3; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 5; done
+            fi
+          fi

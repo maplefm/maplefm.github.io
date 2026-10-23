@@ -1,0 +1,32 @@
+name: Item pages
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "29 10 * * *"
+concurrency: itempages
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # one page per priced item for search engines; the numbers refresh live on open, this keeps the baked copy close
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json -o /tmp/summary.json
+          python3 tools/itempages.py /tmp/summary.json .
+          git add -A item items sitemap.xml
+          git diff --cached --quiet && exit 0
+          b=item-pages-$(date -u +%Y%m%d)
+          git checkout -q -b "$b"
+          git commit -q -m "item pages: daily refresh"
+          git push -q -f origin "$b"
+          n=$(gh pr create --base main --head "$b" --title "item pages: daily refresh" --body "Daily rebuild of the item price pages." | grep -o '[0-9]*$')
+          gh pr merge "$n" --rebase --delete-branch
+          gh api -X POST repos/${{ github.repository }}/pages/builds || true

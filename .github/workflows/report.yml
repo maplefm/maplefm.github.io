@@ -1,0 +1,46 @@
+name: Market report
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/report.py, .github/workflows/report.yml]
+  schedule:
+    # 11:55 PM Eastern in daylight time and in standard time (the script picks the Eastern day being closed)
+    - cron: "55 3 * * *"
+    - cron: "55 4 * * *"
+permissions:
+  contents: write
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+concurrency: report
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    env:
+      DATA_KEY: ${{ secrets.DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - name: Unlock the data
+        run: |
+          pip install -q cryptography
+          git fetch -q origin main && git show FETCH_HEAD:tools/vault.py > /tmp/vault.py
+          python3 /tmp/vault.py unlock .
+      - run: |
+          git fetch -q origin main
+          git show FETCH_HEAD:tools/report.py > /tmp/report.py
+          git show FETCH_HEAD:data/itemdb.json > /tmp/itemdb.json
+          mkdir -p data
+          python3 /tmp/report.py data /tmp/itemdb.json data/report.json
+          git show FETCH_HEAD:tools/discord.py > /tmp/discord.py
+          mkdir -p /tmp/main/data && git show FETCH_HEAD:data/itemdb.json > /tmp/main/data/itemdb.json
+          python3 /tmp/discord.py report data/report.json data/discord_report.json || true
+          python3 /tmp/discord.py coverage data data/discord_coverage.json || true
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          python3 /tmp/vault.py lock . && git add -A data
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Market close report"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

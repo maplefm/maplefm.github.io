@@ -1,0 +1,47 @@
+name: Site updates
+# Posts what landed on main to the Club FM Discord #site-updates: site changes and FM Watcher releases.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "5 22 * * *"       # one plain note a day at about 6 PM Eastern, when there is something to say
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "Post a note to #site-updates: title"
+        required: false
+      text:
+        description: "Post a note to #site-updates: body (use \\n for new lines)"
+        required: false
+permissions:
+  contents: write
+concurrency: news
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    env:
+      DATA_KEY: ${{ secrets.DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - env:
+          NOTE_TITLE: ${{ github.event.inputs.title }}
+          NOTE_TEXT: ${{ github.event.inputs.text }}
+        run: |
+          pip install -q cryptography
+          git fetch -q origin live
+          git show origin/live:data/discord_news.json.enc > /tmp/news.enc 2>/dev/null && python3 tools/vault.py cat /tmp/news.enc data/discord_news.json > /tmp/news.json || echo '{}' > /tmp/news.json
+          if [ -n "$NOTE_TEXT" ]; then python3 tools/discord.py note "$NOTE_TITLE" "$NOTE_TEXT"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then python3 tools/discord.py news /tmp/news.json; python3 tools/discord.py digest /tmp/news.json
+          else python3 tools/discord.py news /tmp/news.json; fi
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git worktree add -q /tmp/live origin/live
+          mkdir -p /tmp/live/data && cp /tmp/news.json /tmp/live/data/discord_news.json
+          cd /tmp/live && python3 "$GITHUB_WORKSPACE/tools/vault.py" lock . && git add -A data
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Site updates state"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

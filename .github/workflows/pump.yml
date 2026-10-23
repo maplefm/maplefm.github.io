@@ -1,0 +1,78 @@
+name: Live pump
+# GitHub runs scheduled jobs hours late when it is busy, so this one job stays up for about 5.5 hours,
+# pulls the price inbox every 5 minutes and the ranks every 30, then starts its own next run.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 */6 * * *"
+permissions:
+  contents: write
+  actions: write
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+  DISCORD_HOOK_DEALS: ${{ secrets.DISCORD_HOOK_DEALS }}
+  INBOX_KEY: ${{ secrets.INBOX_KEY }}
+  DATA_KEY: ${{ secrets.DATA_KEY }}
+  ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+concurrency:
+  group: pump
+  cancel-in-progress: false
+jobs:
+  pump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - name: Browser for the board snapshot
+        run: pip install -q playwright==1.56.0 cryptography
+      - name: Loop
+        run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin main && git worktree add -q /tmp/main origin/main
+          # raw scans from the crew watchers and stream readers land in the private data repository
+          git clone -q --depth 1 -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch || echo "no archive access"
+          end=$(( $(date +%s) + 330*60 ))
+          n=0
+          while [ $(date +%s) -lt $end ]; do
+            git fetch -q origin main live
+            git reset -q --hard origin/live
+            git -C /tmp/main reset -q --hard origin/main
+            # listings and pay records are stored encrypted (tools/vault.py); work on plain copies, lock before commit
+            python3 /tmp/main/tools/vault.py unlock .
+            if [ -d /tmp/arch ]; then
+              git -C /tmp/arch fetch -q --depth 1 origin live && git -C /tmp/arch reset -q --hard FETCH_HEAD
+              for f in /tmp/arch/data/watcher*.json /tmp/arch/data/streams*.json; do [ -f "$f" ] && cp "$f" data/; done
+            fi
+            git show origin/main:tools/inbox.py > /tmp/inbox.py
+            git show origin/main:tools/ranks.py > /tmp/ranks.py
+            git show origin/main:tools/discord.py > /tmp/discord.py
+            mkdir -p data
+            curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json
+            python3 /tmp/inbox.py /tmp/inbox.json data/inbox_block.json data/inbox_state.json /tmp/links.json || true
+            if [ -s /tmp/inbox.json ] && ! cmp -s /tmp/inbox.json data/inbox.json; then cp /tmp/inbox.json data/inbox.json; fi
+            if [ $(( n % 6 )) -eq 0 ]; then python3 /tmp/ranks.py data data/ranks.json || true; fi
+            # Club FM Discord: big sales every pass, rank changes every half hour (quiet when the secret is missing)
+            python3 /tmp/discord.py sales data data/discord_sales.json || true
+            python3 /tmp/discord.py deals data data/summary.json data/discord_deals.json || true
+            if [ $(( n % 6 )) -eq 0 ]; then python3 /tmp/discord.py ranks data/ranks.json data/discord_ranks.json || true; fi
+            # contributor credits for the Earn trial board, from the rules in tools/credits.py and the rate in data/pay.json
+            if [ $(( n % 6 )) -eq 0 ]; then curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json; curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/kofi-income -o /tmp/kofi.json || echo '{}' > /tmp/kofi.json; python3 -I /tmp/main/tools/credits.py data data/credits.json /tmp/main/data/pay.json /tmp/main/data/itemdb.json /tmp/links.json data/credits_ledger.json /tmp/kofi.json || true; fi
+            # the finished price board, built by the page itself, so visitors see it at once
+            python3 /tmp/main/tools/vault.py lock . && git add -A data
+            if ! git diff --cached --quiet || [ $(( n % 6 )) -eq 0 ]; then timeout 300 python3 /tmp/main/tools/snapshot.py /tmp/main . data/summary.json || true; fi
+            python3 /tmp/main/tools/vault.py bundle . && python3 /tmp/main/tools/vault.py lock . && git add -A data
+            if ! git diff --cached --quiet; then
+              git commit -q -m "Live pump: inbox, ranks and board"
+              for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
+            fi
+            n=$(( n + 1 ))
+            sleep 300
+          done
+      - name: Start the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pump.yml --ref main -R ${{ github.repository }}

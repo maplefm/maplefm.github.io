@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>/price bot · Club FM</title>
+<meta name="description" content="Add Club FM's /price command to your Discord server or your own account. Price check any MapleStory Classic item from watched Free Market sales, right in chat.">
+<link rel="canonical" href="https://maplefm.gg/bot/">
+<meta property="og:title" content="Club FM /price for Discord">
+<meta property="og:description" content="Price check any MapleStory Classic item from watched Free Market sales, in any Discord chat.">
+<meta property="og:image" content="https://maplefm.gg/og.png">
+<link rel="icon" href="/og-icon.png?v=2">
+<style>
+:root { --bg: #f7f1ff; --panel: #fff8e7; --panel2: #f3ecff; --ink: #2a1c4a; --muted: #6b5a8c; --line2: #d9cdf2; --accent: #6d3fd1; --wood: #7a3b0c; --discord: #5865f2; }
+@media (prefers-color-scheme: dark) { :root { --bg: #1b1430; --panel: #2a2140; --panel2: #352a52; --ink: #f1e9ff; --muted: #b6a7d6; --line2: #4a3a6a; --accent: #b89bff; --wood: #c58a4d; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 Inter, system-ui, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 28px 16px 80px; }
+.back { display: inline-block; margin-bottom: 18px; color: var(--accent); font-weight: 700; text-decoration: none; }
+.card { background: var(--panel); border: 3px solid var(--wood); border-radius: 16px; padding: 22px 24px; }
+h1 { margin: 0 0 6px; font-size: 1.8rem; } .lead { color: var(--muted); margin: 0 0 18px; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 18px; }
+.btn { display: block; text-decoration: none; background: var(--discord); color: #fff; border-radius: 14px; padding: 14px 16px; }
+.btn b { display: block; font-size: 1.05rem; } .btn span { font-size: .86rem; opacity: .9; }
+.btn.alt { background: var(--panel2); color: var(--ink); border: 2px solid var(--line2); }
+.demo { background: #313338; color: #dbdee1; border-radius: 12px; padding: 14px 16px; font-size: .92rem; margin: 6px 0 14px; }
+.demo .cmd { color: #c9cdfb; background: rgba(88,101,242,.3); border-radius: 4px; padding: 0 4px; }
+.demo .emb { border-left: 4px solid #5b4bdb; background: #2b2d31; border-radius: 6px; padding: 10px 12px; margin-top: 8px; }
+.demo .emb b { color: #fff; }
+h2 { font-size: 1.05rem; margin: 20px 0 6px; } ol { padding-left: 20px; } li { margin: 4px 0; }
+code { background: var(--panel2); border: 1px solid var(--line2); border-radius: 6px; padding: 1px 6px; font-weight: 700; color: var(--accent); }
+a { color: var(--accent); }
+@media (max-width: 560px) { .btns { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="/">← Back to Club FM</a>
+<div class="card">
+<h1>/price in any Discord</h1>
+<p class="lead">Type <code>/price</code> and an item. Club FM answers with the typical price from sales players watched happen, the cheapest ask right now, and how it moved today. Only you see the answer.</p>
+<div class="demo">
+<div><span class="cmd">/price</span> glove for att 60</div>
+<div class="emb"><b>Gloves Attack Scroll 60%</b><br>Typical, range, cheapest ask and the 24h move, with a link to every listing on the board.</div>
+</div>
+<div class="btns">
+<a class="btn" href="https://discord.com/oauth2/authorize?client_id=1562655420441694289&amp;integration_type=0&amp;scope=applications.commands" target="_blank" rel="noopener"><b>Add to your server</b><span>For guild owners. Everyone in the server gets /price.</span></a>
+<a class="btn alt" href="https://discord.com/oauth2/authorize?client_id=1562655420441694289&amp;integration_type=1&amp;scope=applications.commands" target="_blank" rel="noopener"><b>Add to my apps</b><span>Just you, in any server, DM or group chat.</span></a>
+</div>
+<h2>Good to know</h2>
+<ol>
+<li>It asks for no permissions. It can't read your messages; it only answers <code>/price</code>.</li>
+<li>Suggestions pop up as you type. Chat shortcuts work too: <code>gfa 60</code>, <code>wg</code>, <code>glove for att 10</code>. <a href="/shortcuts.html">Every shortcut</a>.</li>
+<li>Prices come from <a href="/contribute.html">FM Watcher</a> scanners and streams. More scanners means more items priced.</li>
+</ol>
+<p>Want deal alerts and the weekly digest too? <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Join the Club FM Discord</a>.</p>
+</div>
+</main>
+</body>
+</html>

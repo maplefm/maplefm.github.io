@@ -1,0 +1,14 @@
+name = "clubfm-accounts"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Contributor accounts for maplefm.gg: Discord sign-in, watcher linking, payout details, Adam's admin page.
+# Secrets (set in the Cloudflare dashboard, never in this file): DISCORD_CLIENT_SECRET, SESSION_SECRET, LINK_SECRET
+# Vars: DISCORD_CLIENT_ID, ADMIN_IDS (comma-separated Discord user ids), SITE (https://maplefm.gg)
+
+[vars]
+SITE = "https://maplefm.gg"
+
+[[kv_namespaces]]
+binding = "ACCOUNTS"
+id = "51bbedbc9e234b7481f7692af6945abd"

@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contribute and Earn · Club FM</title>
+<meta name="description" content="Run Club FM Watcher, add the Free Market prices you see, climb the Scanner Ranks and get paid per 100 verified sales once you clear the bar. It only reads your screen.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contribute and Earn · Club FM">
+<meta property="og:description" content="Run Club FM Watcher while you play, add the Free Market prices you see, climb the ranks and earn. It only reads your screen.">
+<meta property="og:image" content="https://maplefm.gg/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="og-icon.png?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}
+:root {
+  --bg1: #2a1060; --bg2: #6d3fd1; --panel: #fffaf0; --panel2: #f4ecff; --line: #e3d6f7;
+  --ink: #24104d; --muted: #6b5a8c; --accent: #6d3fd1; --accent-ink: #4a23a3; --gold: #d9a520; --gold-hi: #ffe27a;
+  --ok: #1f7a46; --ok-soft: #e2f6ea; --no: #b32b2b; --no-soft: #fde6e6;
+  --display: "Fredoka", "Trebuchet MS", system-ui, sans-serif; --body: "Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg1: #0d0620; --bg2: #2a1060; --panel: #1b1230; --panel2: #251a40; --line: #3a2c5c;
+  --ink: #f3ecff; --muted: #b9a9dc; --accent: #a07cff; --accent-ink: #c9b2ff; --ok: #6fd28a; --ok-soft: #173826; --no: #ff8a7a; --no-soft: #4a1d16; } }
+:root[data-theme="dark"] {
+  --bg1: #0d0620; --bg2: #2a1060; --panel: #1b1230; --panel2: #251a40; --line: #3a2c5c;
+  --ink: #f3ecff; --muted: #b9a9dc; --accent: #a07cff; --accent-ink: #c9b2ff; --ok: #6fd28a; --ok-soft: #173826; --no: #ff8a7a; --no-soft: #4a1d16; }
+body { font-family: var(--body); font-weight: 600; color: var(--ink); line-height: 1.5; min-height: 100vh;
+  background: radial-gradient(1200px 600px at 50% -200px, var(--bg2), var(--bg1)); }
+a { color: var(--accent-ink); }
+.wrap { max-width: 980px; margin: 0 auto; padding: 22px 16px 60px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #fff3c4; }
+.top a.home { color: #fff3c4; text-decoration: none; font: 700 1.5rem var(--display); display: flex; align-items: center; gap: 8px; }
+.top a.home span { color: var(--gold-hi); }
+.top a.back { color: #fff3c4; font-weight: 800; font-size: .9rem; }
+.hero { margin: 26px 0 18px; color: #fff; }
+.hero h1 { font: 700 clamp(1.8rem, 5vw, 2.8rem)/1.1 var(--display); margin: 0 0 10px; }
+.hero h1 b { color: var(--gold-hi); font-weight: 700; }
+.hero p { margin: 0; max-width: 680px; color: #e8dcff; font-size: 1.05rem; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.jump a { color: #fff3c4; text-decoration: none; font: 700 .86rem var(--body); padding: 6px 12px; border-radius: 999px; border: 1.5px solid rgba(255,243,196,.45); background: rgba(255,255,255,.08); }
+.jump a:hover { background: rgba(255,255,255,.16); }
+.pair { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; align-items: start; }
+.pair .card { margin: 16px 0 0; height: 100%; }
+.pair + .card { margin-top: 20px; }
+@media (max-width: 760px) { .pair { grid-template-columns: 1fr; } .pair .card { margin: 16px 0 0; } }
+.card { background: var(--panel); border: 2.5px solid var(--line); border-radius: 18px; padding: 20px 22px; margin: 16px 0;
+  box-shadow: 0 5px 0 rgba(20,6,50,.45), 0 14px 30px rgba(0,0,0,.25); }
+.card h2 { font: 700 1.3rem var(--display); margin: 0 0 10px; }
+.card h3 { font: 700 1.05rem var(--display); margin: 14px 0 6px; }
+.dl { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 14px; text-decoration: none; cursor: pointer;
+  font: 700 1.15rem var(--display); color: #fff3c4; background: linear-gradient(135deg, #6d3fd1, #3b1a7a);
+  border: 2.5px solid var(--gold); box-shadow: 0 4px 0 #24104d; transition: transform .12s; }
+.btn:hover { transform: translateY(-2px); }
+.btn:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+.btn.small { padding: 9px 16px; font-size: .98rem; box-shadow: 0 3px 0 #24104d; }
+.btn.ghost { background: var(--panel2); color: var(--ink); border-color: var(--line); box-shadow: 0 3px 0 var(--line); }
+.btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+.meta { color: var(--muted); font-size: .92rem; }
+.meta b { color: var(--ink); }
+.promise, .side { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.promise div { border-radius: 12px; padding: 12px 14px; }
+.promise .yes { background: var(--ok-soft); }
+.promise .no { background: var(--no-soft); }
+.promise h3 { margin: 0 0 6px; font: 700 1rem var(--display); }
+.promise .yes h3 { color: var(--ok); } .promise .no h3 { color: var(--no); }
+.promise ul { margin: 0; padding-left: 18px; }
+.promise li { margin: 3px 0; }
+ol.steps { margin: 0; padding-left: 22px; }
+ol.steps li { margin: 8px 0; }
+code, kbd { font-family: ui-monospace, Consolas, monospace; background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 0 5px; font-size: .9em; }
+.log { list-style: none; margin: 0; padding: 0; }
+.log li { padding: 8px 0; border-top: 1px solid var(--line); }
+.log li:first-child { border-top: 0; }
+.log b { font-family: var(--display); }
+.note { color: var(--muted); font-size: .9rem; }
+.must { margin: 8px 0 12px; padding: 12px 14px; border-radius: 12px; background: var(--gold-hi); color: #3b2a00; border: 2px solid var(--gold); font-size: .98rem; }
+:root[data-theme="dark"] .must { background: #3a2c08; color: #ffe27a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .must { background: #3a2c08; color: #ffe27a; } }
+.side > div { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.side h3 { margin: 0 0 8px; }
+.gives { list-style: none; margin: 0; padding: 0; }
+.gives li { display: grid; grid-template-columns: 30px 1fr; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); align-items: start; }
+.gives li:first-child { border-top: 0; }
+.gives li i { font-style: normal; font-size: 1.2rem; line-height: 1.3; text-align: center; }
+.gives li b { display: block; font-family: var(--display); font-weight: 600; }
+.gives li span { color: var(--muted); font-size: .86rem; }
+.ladder { list-style: none; margin: 0; padding: 0; position: relative; }
+.ladder li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 6px 10px; margin: 3px 0; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-family: var(--display); font-weight: 600; }
+.ladder li small { color: var(--muted); font: 700 .8rem var(--body); }
+.ladder li.hi { background: linear-gradient(135deg, #6d3fd1, #3b1a7a); color: #fff3c4; border-color: var(--gold); }
+.ladder li.hi small { color: #e8dcff; }
+.ladder li.bar { grid-template-columns: 1fr; text-align: center; background: var(--ok-soft); border: 2px dashed var(--ok); color: var(--ok); font-weight: 700; padding: 9px 10px; margin: 8px 0; }
+.ladder li.bar small { color: var(--ok); display: block; }
+.ladder li.you { outline: 3px solid var(--gold); }
+.banner { border: 2px solid var(--gold); background: linear-gradient(135deg, rgba(217,165,32,.14), var(--panel2)); border-radius: 12px; padding: 10px 14px; font-weight: 700; margin: 0 0 12px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0 0 14px; }
+.kpi { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.kpi small { display: block; color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.kpi b { font-family: var(--display); font-size: 1.4rem; font-weight: 700; }
+.kpi span { display: block; color: var(--muted); font-size: .8rem; }
+.how { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.how div { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.how b { display: block; font-family: var(--display); font-weight: 600; margin-bottom: 4px; }
+.how p { margin: 0; color: var(--muted); font-size: .88rem; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { padding: 8px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.tbl { overflow-x: auto; }
+.flag { display: inline-block; margin: 2px 4px 0 0; padding: 2px 8px; border-radius: 999px; background: var(--no-soft); color: var(--no); font-size: .72rem; font-weight: 800; }
+.ok { color: var(--ok); font-weight: 800; }
+.lock { color: var(--muted); font-size: .84rem; }
+.rules { margin: 0; padding-left: 22px; } .rules li { margin: 5px 0; }
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { position: relative; padding: 5px 0 5px 26px; border-top: 1px solid var(--line); }
+.checks li:first-child { border-top: 0; }
+.checks li::before { content: "✓"; position: absolute; left: 2px; top: 5px; color: var(--ok); font-weight: 800; }
+.acctbox { margin-top: 16px; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--panel2); }
+.acctbox .acct { margin-top: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.chips span { font: 800 .68rem/1.6 var(--body); padding: 0 8px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); }
+.chips span.ok { color: var(--ok); border-color: var(--ok); } .chips span.warn { color: var(--no); border-color: var(--no); }
+.linkrow { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.linkrow label { display: block; font-size: .78rem; font-weight: 800; color: var(--muted); margin-bottom: 4px; }
+.more { margin-top: 14px; } .more summary { cursor: pointer; font: 700 .95rem var(--display); color: var(--accent-ink); } .more ol { margin-top: 8px; }
+@media (max-width: 640px) { .linkrow { grid-template-columns: 1fr; } }
+.acct { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; align-items: end; }
+.acct label { display: block; font-size: .78rem; font-weight: 800; color: var(--muted); margin-bottom: 4px; }
+.acct input[type=text], .acct input[type=email] { width: 100%; font: 700 .95rem var(--body); color: var(--ink); background: var(--panel2); border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.acct .chk { display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+.code { font: 700 1.4rem var(--display); letter-spacing: .18em; background: var(--panel2); color: var(--accent-ink); border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 12px; display: inline-block; }
+.who { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .who img { width: 40px; height: 40px; border-radius: 50%; background: var(--panel2); }
+.wallgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.wallcard { border: 1px solid var(--line); border-radius: 12px; padding: 12px 8px; text-align: center; background: var(--panel2); display: grid; justify-items: center; gap: 4px; }
+.wallcard.top { border-color: #f0c040; box-shadow: 0 0 0 2px rgba(240,192,64,.25); }
+.wallcard .wav { width: 56px; height: 56px; border-radius: 50%; background: var(--panel); display: grid; place-items: center; font-weight: 800; overflow: hidden; }
+.wallcard .wav img { width: 100%; height: 100%; object-fit: contain; }
+.wallcard small { color: var(--muted); font-weight: 700; font-size: .72rem; }
+.earngrid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, 1fr); gap: 16px; align-items: start; margin-top: 2px; }
+.earnrank { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+@media (max-width: 900px) { .earngrid { grid-template-columns: 1fr; } }
+.topl { display: grid; gap: 6px; } .topl .er { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; padding: 7px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--panel); }
+.topl .er.me { outline: 2px solid var(--gold); }
+.topl .er .nm { min-width: 0; } .topl .er .nm b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topl .er .nm small { display: block; color: var(--muted); font-size: .72rem; }
+.topl .er .bar { height: 5px; border-radius: 3px; background: var(--line); margin-top: 4px; overflow: hidden; } .topl .er .bar i { display: block; height: 100%; background: var(--ok); }
+.topl .er .bar i.lock { background: var(--accent); }
+.topl .er .amt { text-align: right; } .topl .er .amt small { display: block; font-weight: 700; color: var(--muted); font-size: .7rem; }
+.topl b.pos { color: var(--muted); font-size: .8rem; } .topl .amt { font-variant-numeric: tabular-nums; font-weight: 800; }
+.wk { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.wk button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel2); font-weight: 800; font-size: .84rem; }
+.wk button[aria-pressed="true"] { background: var(--accent); color: #fff3c4; border-color: var(--accent); }
+@media (max-width: 640px) { .promise, .side { grid-template-columns: 1fr; } .card { padding: 16px; } }
+.sitefoot { max-width: 1100px; margin: 8px auto 90px; padding: 0 16px; text-align: center; font-size: .74rem; color: var(--muted, #6b5a8c); line-height: 1.6; }
+.sitefoot a { color: inherit; font-weight: 700; }
+.sitefoot .fnav { margin-bottom: 6px; font-size: .8rem; }
+.kofitab { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: calc((100vw - 980px) / 2 - 28px); max-width: 150px; z-index: 45; display: none; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 16px 10px; border-radius: 16px 0 0 16px; text-decoration: none; color: #fff; background: linear-gradient(180deg, rgba(255,138,101,.85), rgba(226,87,122,.85)); border: 1px solid rgba(255,255,255,.35); border-right: 0; box-shadow: 0 8px 26px rgba(120,30,60,.22); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: .85; transition: opacity .15s, transform .15s; }
+@media (min-width: 1280px) { .kofitab { display: flex; } }
+.kofitab:hover { opacity: 1; transform: translateY(-50%) translateX(-2px); }
+.kofitab i { font-style: normal; font-size: 1.6rem; line-height: 1; }
+.kofitab b { display: block; font: 800 .9rem/1.2 var(--body, system-ui); }
+.kofitab span { display: block; font: 600 .72rem/1.3 var(--body, system-ui); opacity: .92; }
+.kofitab a { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: inherit; }
+.kofitab .kx { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border: 0; border-radius: 50%; background: rgba(255,255,255,.28); color: #fff; font: 700 .85rem/20px var(--body, system-ui); cursor: pointer; padding: 0; }
+.kofitab .kx:hover { background: rgba(255,255,255,.5); }
+.kofitab[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="home" href="./">👑 Club <span>FM</span></a>
+    <a class="back" href="./">Back to prices</a>
+  </div>
+
+  <div class="hero">
+    <h1>Contribute and <b>earn</b></h1>
+    <p>Run Club FM Watcher while you play and every shop you open becomes a price on the site, for everyone. Climb the Scanner Ranks as you go, and once you've cleared the bar, every 100 verified sales you catch pays.</p>
+    <div class="jump"><a href="#download">Download</a><a href="#gatherer">Becoming an intel gatherer</a><a href="#earn">Earn</a><a href="#safety">Safe to run</a><a href="#setup">Setup</a></div>
+  </div>
+
+  <div class="pair">
+  <section class="card" id="download" aria-labelledby="dl-t">
+    <h2 id="dl-t">Download</h2>
+    <div class="dl">
+      <a class="btn" id="dlbtn" href="download/FMWatcher.zip" download>⬇ Club FM Watcher</a>
+      <div class="meta" id="dlmeta">Windows · free</div>
+    </div>
+    <p class="note">Unzip it anywhere, like your Documents folder. The link always gives the newest version, and once installed it updates itself.</p>
+  </section>
+  <section class="card" id="setup" aria-labelledby="setup-t">
+    <h2 id="setup-t">Setup, about five minutes</h2>
+    <ol class="steps">
+      <li>Download and unzip <b>FMWatcher.zip</b>.</li>
+      <li>Double-click <code>install.bat</code>. It installs Python and the Tesseract text reader through Windows' own installer. Close it when it says Done.</li>
+      <li>Open MapleStory, then double-click <code>start.bat</code> and leave its window open in the background. It reads your character's name off the screen, so you show up on the ranks under your IGN with nothing to type.</li>
+      <li>Optional check: double-click <code>snapshot.bat</code> with a shop open. It saves a picture in the <code>review</code> folder showing the boxes it reads.</li>
+    </ol>
+    <h2 style="margin-top:18px">While you shop</h2>
+    <div class="must"><b>Open the Change Channel window once, every time you log in.</b> That's how the watcher knows which channel you're on, so every price lands on the right channel and FM room. Skip it and your scans can't be placed.</div>
+    <ol class="steps">
+      <li>Keep the minimap in view. It tells us which FM room you're in.</li>
+      <li>Scroll through each shop to the bottom, about a second per scroll is plenty. Every row gets read.</li>
+      <li>Rest your mouse on an equip's row for a second. The watcher reads the tooltip the game shows you, so the site can price it by its stats.</li>
+    </ol>
+    <p class="note">Your prices show on the site within about 15 minutes.</p>
+    <p class="note">Club FM is free for everyone and always will be. If it helps you, you can <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">support it on Ko-fi</a>; that's what funds the contributor payouts.</p>
+  </section>
+  </div>
+
+  <section class="card" id="gatherer" aria-labelledby="g-t">
+    <h2 id="g-t">Becoming an intel gatherer</h2>
+    <p class="note" style="margin:0 0 12px">What you put in on the left, where it takes you on the right. Every sale your watcher catches climbs the ladder. Pay switches on at the dashed line.</p>
+    <div class="side">
+      <div>
+        <h3>What you contribute</h3>
+        <ul class="gives">
+          <li><i>🛒</i><div><b>Shop scans</b><span>Open shops and scroll to the bottom. Every row is a price, every sold slot is a sale caught. This is what climbs the ranks and what pays.</span></div></li>
+          <li><i>✅</i><div><b>Verified sales</b><span>A sale another contributor's watcher or a Twitch stream also saw. These count toward the pay bar and earn the full rate.</span></div></li>
+          <li><i>📺</i><div><b>Streaming</b><span>Stream MapleStory Classic on Twitch with Classic in the title and the Stream Reader catches your FM trips. Connect your Twitch in the earn section and those catches earn as yours.</span></div></li>
+          <li><i>🔎</i><div><b>Equip tooltips</b><span>Rest your mouse on an equip's row for a second so the site can price it by its stats.</span></div></li>
+          <li><i>💬</i><div><b>Trade chat</b><span>Posts you see in the chat box feed the price board. They don't earn, they just make the prices sharper.</span></div></li>
+          <li><i>🗺️</i><div><b>Coverage</b><span>Keep the minimap in view and open Change Channel once, so we know which room and channel you're scanning.</span></div></li>
+        </ul>
+      </div>
+      <div>
+        <h3>The ladder</h3>
+        <ol class="ladder" id="ladder"></ol>
+        <p class="note" style="margin:8px 0 0">Ranks count every sale caught, all time. The pay bar counts verified sales only. Number one wears the Crown.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="wall" aria-labelledby="wall-t">
+    <h2 id="wall-t">Supporters wall</h2>
+    <p class="note" style="margin:0 0 12px">The people funding the FM Watchers through <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">Ko-fi</a>. The Tiger tier and up open the Mega Deal notifier; $100 of lifetime support keeps it for good. Tier names are a nod to the first GMS #1 race, nothing more.</p>
+    <div class="wallgrid" id="wallgrid"><p class="note">Nobody yet. The first name here gets bragging rights forever.</p></div>
+  </section>
+
+  <section class="card" id="earn" aria-labelledby="earn-t">
+    <h2 id="earn-t">Earn with FM Watcher</h2>
+    <p class="note" style="margin:0 0 12px">Trial: the numbers are real, no money moves yet.</p>
+    <div class="kpis" id="kpis"></div>
+    <div class="earngrid">
+    <div class="earnleft">
+    <div class="how">
+      <div><b>1. Scan</b><p>Run FM Watcher while you shop.</p></div>
+      <div><b>2. Clear the bar</b><p><span id="barn">2,000</span> verified sales, all time.</p></div>
+      <div><b>3. Link</b><p>Sign in with Discord, link your watcher, add PayPal.</p></div>
+      <div><b>4. Get paid</b><p>Every Monday, per 100 sales caught.</p></div>
+    </div>
+    <p style="margin:14px 0 0"><a class="btn small" id="signin" aria-disabled="true" href="#" onclick="return false">Sign in with Discord</a> <a class="btn small ghost" href="#download">Get FM Watcher</a></p>
+
+    <div id="account" hidden class="acctbox">
+      <div class="who"><img id="av" alt=""><div><b id="dname"></b><div class="chips" id="dchips"></div></div><span style="flex:1"></span><button type="button" class="btn small ghost" id="logout">Sign out</button></div>
+      <div class="acct">
+        <div><label>In-game name</label><input type="text" id="ign" maxlength="13" placeholder="Maya"></div>
+        <div><label>PayPal email</label><input type="email" id="paypal" placeholder="you@example.com"></div>
+        <div class="chk"><input type="checkbox" id="adult"><label for="adult" style="margin:0">I am 18 or older</label></div>
+        <div><button type="button" class="btn small" id="save">Save</button> <span class="note" id="saved"></span></div>
+      </div>
+      <div class="linkrow">
+        <div><label>Stream on Twitch?</label><a class="btn small ghost" id="twitch" href="#">Connect Twitch</a></div>
+        <div class="note" id="twitchhelp">Verify your channel and the sales our Stream Reader catches on your stream count as yours. Unverified streams only witness.</div>
+      </div>
+      <div class="linkrow">
+        <div><label>Link code</label><span class="code" id="code"></span></div>
+        <div class="note" id="linkhelp">Add <code>"link_code": "<span id="code2"></span>"</code> to the watcher's <code>config.json</code>, then restart the watcher. <span id="watchers"></span></div>
+      </div>
+    </div>
+
+    </div>
+    <aside class="earnrank" aria-labelledby="er-t">
+      <h3 id="er-t" style="margin:0 0 4px">Earnings ranking</h3>
+      <p class="note" style="margin:0 0 10px">What this week's scanning would pay at the posted rate, everyone who scanned, with their progress to the pay bar.</p>
+      <div class="topl" id="top"></div>
+      <p class="note" id="topnote"></p>
+    </aside>
+    </div>
+
+    <h3>To get paid you need</h3>
+    <ul class="checks">
+      <li><b>A bar of <span id="barn2">2,000</span></b>, built from verified sales (one each) and unverified sales (a quarter each), all time. Verified means another person's watcher or a stream saw it too.</li>
+      <li><b>A linked account</b> with a PayPal email, 18 or older, linked at least 7 days.</li>
+      <li><b>At least $5 in the week.</b> Less rolls into next week.</li>
+      <li><b>Under the caps:</b> <span id="capd">$10</span> a day, <span id="capw">$50</span> a week per person. Past the weekly budget the rate scales down for everyone.</li>
+      <li><b>Your first two payouts</b> are checked by a person before they send.</li>
+    </ul>
+
+    <h3>Credits</h3>
+    <div class="wk" id="wk"></div>
+    <div class="tbl" id="board">Loading credits…</div>
+
+    <details class="more"><summary>All the rules</summary>
+      <ol class="rules" id="rules"></ol>
+      <p class="note" id="verify"></p>
+      <p class="note">Flags don't block anyone on their own; they mark weeks for a closer look before approving. Confirmed cheating zeroes the week and locks the account.</p>
+    </details>
+  </section>
+
+  <section class="card" aria-labelledby="safe-t">
+    <h2 id="safe-t">What it does, and what it never does</h2>
+    <div class="promise">
+      <div class="yes">
+        <h3>It only reads your screen</h3>
+        <ul>
+          <li>Looks at the shop windows and chat box, the same pixels you see.</li>
+          <li>Reads item names and prices off them.</li>
+          <li>Sends only prices: item, price, quantity, the shop owner's name as the FM shows it, and the time.</li>
+          <li>Puts you on the site's leaderboard under the name you choose, or as Guest.</li>
+        </ul>
+      </div>
+      <div class="no">
+        <h3>It never touches your game</h3>
+        <ul>
+          <li>Never clicks, types or presses a key in MapleStory.</li>
+          <li>Runs no macros, prompts or scripts in the game.</li>
+          <li>Never takes control of your client or your computer.</li>
+          <li>Never reads or changes game files or game memory, and never reads network traffic.</li>
+          <li>Never uploads screenshots. Images stay on your PC.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">The whole program is plain Python you can open in Notepad. Using it is your choice and your responsibility; it only does what a person writing prices down by hand would do.</p>
+  </section>
+
+  <section class="card" id="safety" aria-labelledby="sec-t">
+    <h2 id="sec-t">Safe to run</h2>
+    <ol class="steps">
+      <li><b>Nothing hidden.</b> There's no .exe. The watcher is plain Python files you can open in Notepad and read line by line, and the full source is public on <a href="https://github.com/maplefm/maplefm.github.io/tree/main/download/source" target="_blank" rel="noopener">GitHub</a>.</li>
+      <li><b>Official installers only.</b> install.bat installs Python and the Tesseract text reader through Windows' own installer, or straight from python.org and Tesseract's official release page. Nothing else gets installed.</li>
+      <li><b>Stays in its folder.</b> It only reads and writes files inside its own folder. It never opens your other files, browsers, passwords or game files.</li>
+      <li><b>No login needed to scan.</b> Your prices go up under a random ID and the name you choose, or Guest. Signing in with Discord is only for getting paid.</li>
+      <li><b>Updates are locked down.</b> Updates come only from this site, and each one is checked against its fingerprint before it installs. Only the Club FM admin can publish an update; contributors and the price data can't change the program.</li>
+      <li><b>Easy to remove.</b> To uninstall, close the black window and delete the folder. That's it.</li>
+    </ol>
+    <p class="note">Windows may ask whether you want to run install.bat or start.bat because they came from the internet. That's normal for any downloaded file; choose Run.</p>
+  </section>
+
+
+  <section class="card" id="update" aria-labelledby="up-t">
+    <h2 id="up-t">Updating</h2>
+    <p>Like a game launcher: every time you open <code>start.bat</code> it checks this site and patches itself. When the site shows the purple update banner, or the watcher window says a new version is out, close the watcher and open <code>start.bat</code> again. Your settings and saved prices are kept.</p>
+    <p class="note">Running a copy from before October 19? It can't update itself yet. Download it once more and copy your <code>config.json</code> into the new folder. From then on it updates on its own.</p>
+    <h2 style="margin-top:18px">Patch notes</h2>
+    <ul class="log" id="log"></ul>
+  </section>
+</div>
+<footer class="sitefoot"><nav class="fnav"><a href="index.html">Price board</a> · <a href="contribute.html">Contribute and Earn</a> · <a href="report.html">Market close</a> · <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Discord</a> · <a href="terms.html">Terms of Use</a> · <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">☕ Support</a></nav>
+Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON. MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" target="_blank" rel="noopener">maplestory.io</a> · character pictures from <a href="https://classicrank.com" target="_blank" rel="noopener">classicrank.com</a> · prices scanned by our contributors and from public streams.<br>
+Price data © Club FM. No scraping, bulk copying or AI training without permission. See the <a href="terms.html">Terms of Use</a>.</footer>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function usd(n) { return "$" + (Math.round((n || 0) * 100) / 100).toFixed(2); }
+  function fmt(n) { return (Math.round((n || 0) * 10) / 10).toLocaleString("en-US"); }
+  function num(n) { return (n || 0).toLocaleString("en-US"); }
+
+  // ---------------------------------------------------------------- download and patch notes
+  $("dlbtn").addEventListener("click", function () { try { localStorage.setItem("fm-gatherer", "1"); } catch (e) {} });
+  try { if (/[?&]g=1/.test(location.search)) localStorage.setItem("fm-gatherer", "1"); } catch (e) {}
+  fetch("download/version.json?t=" + Math.floor(Date.now() / 6e5), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
+    if (!v) return;
+    $("dlbtn").href = "download/FMWatcher.zip?v=" + encodeURIComponent(v.version);
+    var d = new Date(v.date);
+    $("dlmeta").innerHTML = "Windows · version <b>" + esc(v.version) + "</b> · " + esc(d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })) + " · " + Math.round((v.size || 0) / 1024) + " KB";
+    var ul = $("log");
+    (v.history || []).slice(0, 8).forEach(function (h) {
+      var li = document.createElement("li");
+      li.innerHTML = "<b>" + esc(h.version) + "</b> <span class='note'>" + esc(h.date) + "</span><br>" + esc(h.notes || "");
+      ul.appendChild(li);
+    });
+  }).catch(function () {});
+
+  // ---------------------------------------------------------------- supporters wall
+  (function () {
+    var g = $("wallgrid"); if (!g) return;
+    fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/supporters").then(function (r) { return r.ok ? r.json() : []; }).then(function (l) {
+      l = (l || []).filter(function (x) { return x.ign || x.name; }); if (!l.length) return;
+      var order = ["Beta Tester", "FangBlade", "Tiger", "curryishott", "Suuushi", ""];
+      l.sort(function (a, b) { return order.indexOf(a.tier) - order.indexOf(b.tier); });
+      g.textContent = "";
+      l.forEach(function (x) {
+        var d = el("div", "wallcard" + (x.tier === "Beta Tester" ? " top" : "")), av = el("span", "wav", (x.ign || x.name).slice(0, 1).toUpperCase());
+        if (/^[A-Za-z0-9]{3,13}$/.test(x.ign || "")) fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(x.ign) + "?fields=name,photo").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { var u = j && j.data && j.data.photo; if (!u) return; var im = new Image(); im.alt = ""; im.onload = function () { av.textContent = ""; av.appendChild(im); }; im.src = u; }).catch(function () {});
+        d.appendChild(av); d.appendChild(el("b", null, x.ign || x.name));
+        d.appendChild(el("small", null, (x.tier ? x.tier + " tier" : "Supporter") + (x.lifetime ? " · lifetime" : "")));
+        g.appendChild(d);
+      });
+    }).catch(function () {});
+  })();
+
+  // ---------------------------------------------------------------- the ladder
+  var TIERS = [["Scout", 0], ["Apprentice", 10], ["Merchant", 50], ["Trader", 150], ["Broker", 400], ["Tycoon", 1000], ["Royal", 2500], ["Monarch", 5000], ["Legend", 10000], ["Immortal", 25000], ["Titan", 50000], ["Mythic", 100000]];
+  var UNLOCK = 2000;
+  function ladder(mine) {
+    var o = $("ladder"); o.textContent = "";
+    var placed = false;
+    TIERS.forEach(function (t, i) {
+      if (!placed && t[1] >= UNLOCK) {
+        var b = el("li", "bar"); b.appendChild(document.createTextNode("💵 Pay unlocks here")); b.appendChild(el("small", null, num(UNLOCK) + " verified sales caught, all time")); o.appendChild(b); placed = true;
+      }
+      if (t[0] === "Titan") {
+        var m = el("li", "bar"); m.appendChild(document.createTextNode("🔔 Mega Deals unlock here")); m.appendChild(el("small", null, "the deal notifier on the site and the private #mega-deals channel, from " + num(t[1]) + " sales caught, or the Tiger tier and up on Ko-fi")); o.appendChild(m);
+      }
+      var li = el("li", i >= 6 ? "hi" : ""); li.appendChild(document.createTextNode((i === TIERS.length - 1 ? "👑 " : "") + t[0]));
+      li.appendChild(el("small", null, t[1] ? num(t[1]) + " sales" : "start"));
+      if (mine != null && mine.tier === t[0]) { li.classList.add("you"); li.title = "You are here"; }
+      o.appendChild(li);
+    });
+    $("barn").textContent = num(UNLOCK); $("barn2").textContent = num(UNLOCK);
+  }
+  ladder(null);
+
+  // ---------------------------------------------------------------- earn board and accounts
+  var SRC = ["https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/credits.json", "data/credits.json"];
+  var API = "https://clubfm-accounts.aaweaver93.workers.dev";   // the accounts service
+  var C = null, W = 0, LINKS = {}, ME = null;
+  function api(path, opts) { return fetch(API + path, Object.assign({ credentials: "include" }, opts || {})).then(function (r) { return r.json(); }); }
+  function showAccount(a) {
+    ME = a || null; $("account").hidden = !a; if (!a) return;
+    $("av").src = a.avatar || ""; $("dname").textContent = a.name;
+    var ch = $("dchips"); ch.textContent = "";
+    function chip(t, c) { ch.appendChild(el("span", c || "", t)); }
+    chip(a.paypalSet ? "PayPal " + a.paypalHint : "No PayPal yet", a.paypalSet ? "ok" : "warn");
+    chip(a.adult ? "18+" : "Age not confirmed", a.adult ? "ok" : "warn");
+    chip(a.watchers.length ? a.watchers.length + " watcher" + (a.watchers.length > 1 ? "s" : "") + " linked" : "No watcher linked", a.watchers.length ? "ok" : "warn");
+    if (a.payoutHold) chip("First payout from " + new Date(a.payoutHold * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" }));
+    if (a.club) chip("Club member", "ok");
+    if (a.inGuild === false) chip("Not in the Club FM Discord yet");
+    else if (a.inGuild === null) chip("Sign in again to check your Discord roles");
+    if (a.locked) chip("Locked", "warn");
+    $("ign").value = a.ign || ""; $("paypal").value = ""; $("paypal").placeholder = a.paypalSet ? a.paypalHint + " (saved)" : "you@example.com"; $("adult").checked = !!a.adult;
+    $("code").textContent = a.code || ""; $("code2").textContent = a.code || "";
+    var tw = $("twitch");
+    if (a.twitch) { chip("Twitch: " + a.twitch.name, "ok"); tw.textContent = "Disconnect " + a.twitch.name; tw.href = "#"; tw.onclick = function (e) { e.preventDefault(); api("/twitch/unlink", { method: "POST" }).then(function (r) { if (r.account) showAccount(r.account); }); return false; }; $("twitchhelp").textContent = "Sales caught on your stream count as yours, same rules as a watcher."; }
+    else { tw.textContent = "Connect Twitch"; tw.href = API + "/twitch/login"; tw.onclick = null; }
+    $("watchers").textContent = a.watchers.length ? "Linked. A new code appears here if you add another PC." : "";
+  }
+  function accounts() {
+    if (!API) return;
+    var b = $("signin"); b.removeAttribute("aria-disabled"); b.href = API + "/login"; b.onclick = null;
+    api("/me").then(function (m) { if (m.signedIn) { showAccount(m.account); b.hidden = true; } }).catch(function () {});
+    api("/public/links").then(function (l) { LINKS = l || {}; if (C) show(); }).catch(function () {});
+    $("save").addEventListener("click", function () {
+      var body = { ign: $("ign").value, adult: $("adult").checked }; if ($("paypal").value.trim()) body.paypal = $("paypal").value.trim();
+      api("/me", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(function (r) { if (r.error) { $("saved").textContent = r.error; return; } showAccount(r.account); $("saved").textContent = "Saved."; setTimeout(function () { $("saved").textContent = ""; }, 3000); });
+    });
+    $("logout").addEventListener("click", function () { api("/logout", { method: "POST" }).then(function () { location.reload(); }); });
+  }
+  function nameOf(r) { return LINKS[r.tag] || r.name; }
+  function status(r) {
+    if (r.owner) return usd(r.uncapped) + " not taken";
+    if (r.unlocked === false) return "locked · " + num(Math.floor(r.bar != null ? r.bar : r.lifetime_verified)) + " of " + num(UNLOCK) + " on the bar";
+    return usd(r.pays) + (r.capped ? " (capped)" : "");
+  }
+  function topEarners(w) {
+    var box = $("top"); box.textContent = "";
+    var rows = w.rows.slice().sort(function (a, b) { return (b.uncapped || 0) - (a.uncapped || 0) || b.credits - a.credits; });
+    var me = (ME && ME.ign || "").toLowerCase();
+    rows.slice(0, 25).forEach(function (r, i) {
+      var d = el("div", "er" + (me && nameOf(r).toLowerCase() === me ? " me" : "")); d.appendChild(el("b", "pos", "#" + (i + 1)));
+      var n = el("span", "nm"); n.appendChild(el("b", null, nameOf(r)));
+      var lv = r.bar != null ? r.bar : r.lifetime_verified != null ? r.lifetime_verified : r.verified, pct = Math.min(100, Math.round(100 * lv / UNLOCK));
+      var sub = r.owner ? "site owner, not paid" : r.unlocked === false ? num(Math.floor(lv)) + " of " + num(UNLOCK) + " on the bar" : "pay unlocked · " + num(r.lifetime_verified || 0) + " verified";
+      n.appendChild(el("small", null, sub));
+      var bar = el("span", "bar"); var fill = el("i", r.unlocked === false ? "lock" : ""); fill.style.width = pct + "%"; bar.appendChild(fill); n.appendChild(bar);
+      d.appendChild(n);
+      var a = el("span", "amt"); a.appendChild(el("b", null, usd(r.uncapped || 0))); a.appendChild(el("small", null, r.owner ? "would pay" : r.unlocked === false ? "would pay, locked" : (r.capped ? "pays " + usd(r.pays) + ", capped" : "pays"))); d.appendChild(a);
+      box.appendChild(d);
+    });
+    $("topnote").textContent = rows.length ? "Credits this week at " + usd(w.math.rate_per_100) + " per 100. The bar fills toward " + num(UNLOCK) + " verified sales; past it the amount pays out, up to the daily and weekly caps." : "No scans this week yet.";
+  }
+  function kpi(label, val, sub) { var k = el("div", "kpi"); k.appendChild(el("small", null, label)); k.appendChild(el("b", null, val)); if (sub) k.appendChild(el("span", null, sub)); return k; }
+  function show() {
+    var w = C.weeks[W], m = w.math, k = $("kpis"); k.textContent = "";
+    if (m.unlock_verified) { UNLOCK = m.unlock_verified; ladder(null); }
+    k.appendChild(kpi("Rate", usd(m.rate_per_100) + " per 100", m.scaled ? "scaled to " + usd(m.effective_rate) + " this week to hold the budget" : "verified sales, half for unverified"));
+    k.appendChild(kpi("The bar", num(UNLOCK) + " verified", "sales caught all time before pay starts"));
+    k.appendChild(kpi("Per person", usd(m.daily_cap) + " a day", "and " + usd(m.weekly_cap) + " a week, most anyone can earn"));
+    k.appendChild(kpi("Weekly budget", usd(m.weekly_budget), m.scaled ? "reached: rate scaled this week" : (m.kofi_28d > 250 ? "follows Ko-fi support, " : "") + usd(m.paying) + " used so far this week"));
+    k.appendChild(kpi("Week", w.start + " to " + w.end, w.current ? "in progress, Eastern time" : "closed"));
+    $("capd").textContent = usd(m.daily_cap); $("capw").textContent = usd(m.weekly_cap);
+    $("verify").textContent = "Watcher posts are signed and checked on arrival. Credits and flags are recomputed every half hour and a week is re-checked in full before approval. A listing pays once, to whoever caught it first.";
+    var wk = $("wk"); wk.textContent = "";
+    C.weeks.forEach(function (x, i) { var b = el("button", null, x.current ? "This week" : "Week of " + x.start); b.type = "button"; b.setAttribute("aria-pressed", i === W); b.addEventListener("click", function () { W = i; show(); }); wk.appendChild(b); });
+    var box = $("board"); box.textContent = "";
+    if (!w.rows.length) { box.appendChild(el("p", "note", "No watcher scans this week yet.")); return; }
+    var t = el("table"), h = el("tr");
+    [["Scanner", ""], ["Credits", "n"], ["Verified", "n"], ["Unverified", "n"], ["Not watched", "n"], ["Hovers", "n"], ["Witnessed", "n"], ["Cold rooms", "n"], ["Hours", "n"], ["All-time verified", "n"], ["Pays", "n"], ["Flags", ""]].forEach(function (c) { h.appendChild(el("th", c[1], c[0])); });
+    t.appendChild(h);
+    w.rows.forEach(function (r) {
+      var tr = el("tr");
+      tr.appendChild(el("td", null, nameOf(r) + (r.owner ? " · site owner" : "")));
+      tr.appendChild(el("td", "n", fmt(r.credits)));
+      tr.appendChild(el("td", "n", String(r.verified)));
+      tr.appendChild(el("td", "n", String(r.self)));
+      var dr = el("td", "n dim", String(r.dropped || 0)); dr.title = "Sold slots that were already grey when the scanner walked in and nobody else saw sell. They count for rank, not for pay."; tr.appendChild(dr);
+      var hv = el("td", "n", String(r.hovers || 0)); hv.title = "Equips whose stats this scanner was first to capture by hovering them in game; each earns a tenth of a credit"; tr.appendChild(hv);
+      var wi = el("td", "n", String(r.witnessed || 0)); wi.title = "Other people's sales this scanner's watcher confirmed; each earns a quarter credit"; tr.appendChild(wi);
+      var cd = el("td", "n", String(r.cold || 0)); cd.title = "Watched sales caught in a room and channel nobody else had read in the past day; each earns extra credit"; tr.appendChild(cd);
+      tr.appendChild(el("td", "n", String(r.hours)));
+      tr.appendChild(el("td", "n", r.lifetime_verified != null ? num(r.lifetime_verified) : "–"));
+      tr.appendChild(el("td", "n " + (r.unlocked === false ? "lock" : ""), status(r)));
+      var f = el("td"); if (r.flags.length) r.flags.forEach(function (x) { f.appendChild(el("span", "flag", x)); }); else f.appendChild(el("span", "ok", "clean")); tr.appendChild(f);
+      t.appendChild(tr);
+    });
+    box.appendChild(t);
+    box.appendChild(el("p", "note", "Generated " + new Date(C.generated).toLocaleString("en-US") + ". Updates every half hour while the pump runs. Payouts under " + usd(m.min_payout) + " roll into the next week."));
+    topEarners(w);
+  }
+  function rules() {
+    var r = C.rules, o = $("rules");
+    ["A credit is a sale your watcher watched happen: you saw the listing open, came back, and it was sold, or someone else also saw it sold. A slot that was already grey when you walked in still counts for your rank, but not for pay" + (r.strict ? "." : " once strict mode is on."),
+     "Verified means another person's watcher, or a Twitch stream, saw that listing within a day of the sale. Two watchers on one account never verify each other.",
+     "Nothing pays until your bar reaches " + num(UNLOCK) + ". A verified sale moves it by one, an unverified sale by " + (r.self_to_bar || 0) + ". Credits before that still show here and still climb your rank.",
+     "Verified sales earn the full rate. Unverified sales earn " + (r.self_rate * 100) + "% while few people scan; that share goes up as the scanner base grows.",
+     "When your watcher confirms someone else's sale, you earn " + (r.witness_credit || 0) + " of a credit for it, up to two witnesses per sale. Scanning the same room as someone else is worth doing.",
+     "The first scanner to hover an equip and capture its stats earns " + (r.hover_credit || 0) + " of a credit for it. That is what prices gear by roll.",
+     "Cold-room bounty: a watched sale caught in a room and channel nobody else has read in the past day earns an extra " + (r.cold_bonus || 0) + " of a credit. The coverage map on the board shows which spots are cold right now.",
+     "Only names the game has earn. A misread the reader could not match to a real item shows on the board as a scrap, never as a credit.",
+     "Each person earns at most the daily and weekly caps shown above, however much they scan.",
+     "Watcher shop scans earn. Stream captures earn only for streamers who connected their Twitch on this page; other streams witness. Trade chat feeds the board but earns nothing.",
+     "A sale earns only if it went for more than an NPC shop would pay for the item" + (r.min_price ? ", or at least " + r.min_price + " meso when the item has no NPC price" : "") + ". It still shows on the price board, it just doesn't pay.",
+     "One seller's shop yields at most " + r.shop_cap_per_day + " credits a day across everyone. A shop built to farm credits runs dry fast.",
+     "A listing counts once. Reporting the same sold slot again earns nothing.",
+     "Two watchers on one person count as one scanner. Accounts sharing a PayPal, a PC or a network at the same hours are merged.",
+     "Club members' own shops never earn anyone credit.",
+     "If the week's total at the posted rate passes the weekly budget, the rate scales down for that week and the board says so. The posted rate only changes for weeks ahead."]
+    .forEach(function (x) { o.appendChild(el("li", null, x)); });
+  }
+  function load(i) {
+    if (i >= SRC.length) { $("board").textContent = "Credits are not published yet."; return; }
+    fetch(SRC[i], { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!j || !j.weeks) return load(i + 1); C = j; if (j.weeks[0] && j.weeks[0].math.unlock_verified) UNLOCK = j.weeks[0].math.unlock_verified; rules(); show(); }).catch(function () { load(i + 1); });
+  }
+  load(0); accounts();
+  if (location.hash === "#signed-in") { history.replaceState(null, "", "#earn"); var e = $("earn"); if (e) e.scrollIntoView(); }
+})();
+</script>
+<div class="kofitab" id="kofitab"><button type="button" class="kx" aria-label="Hide for now" onclick="this.parentNode.hidden=true">×</button><a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener" title="Support Club FM on Ko-fi"><i>☕</i><b>Support Club FM</b><span>Donations pay the FM Watchers who scan the market.</span></a></div>
+</body>
+</html>

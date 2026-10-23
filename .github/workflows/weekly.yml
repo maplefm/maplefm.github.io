@@ -1,0 +1,25 @@
+name: Weekly digest
+# Sunday evening: the week on the Free Market, one card to the Club FM Discord.
+on:
+  schedule:
+    - cron: "23 22 * * 0"       # Sundays about 6 PM Eastern
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+  DISCORD_HOOK_DIGEST: ${{ secrets.DISCORD_HOOK_DIGEST }}
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    env:
+      DATA_KEY: ${{ secrets.DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git fetch -q origin live
+          git show origin/live:data/report.json > /tmp/report.json
+          git show origin/live:data/ranks.json > /tmp/ranks.json
+          pip install -q cryptography
+          git show origin/live:data/discord_weekly.json.enc > /tmp/weekly.enc 2>/dev/null && python3 tools/vault.py cat /tmp/weekly.enc data/discord_weekly.json > /tmp/weekly.json || echo '{}' > /tmp/weekly.json
+          python3 tools/discord.py weekly /tmp/report.json /tmp/ranks.json /tmp/weekly.json
