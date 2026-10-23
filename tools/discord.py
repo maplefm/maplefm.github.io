@@ -33,6 +33,7 @@ def hooks():
     except Exception: h = {}
     if os.environ.get("DISCORD_HOOK_DEALS"): h["mega_deals"] = os.environ["DISCORD_HOOK_DEALS"]   # the private #mega-deals channel
     if os.environ.get("DISCORD_HOOK_DIGEST"): h["digest"] = os.environ["DISCORD_HOOK_DIGEST"]     # the weekly card in #announcements
+    if os.environ.get("DISCORD_HOOK_MEMBERS"): h["members"] = os.environ["DISCORD_HOOK_MEMBERS"]  # the members-only market recap
     if h.get("market_close"): h["coverage"] = h["market_close"]   # both land in #nightly-report since the coverage channel was folded in
     return h
 
@@ -543,9 +544,43 @@ def job_weekly(report_path, ranks_path, state_path):
 def job_note(title, text):
     post("site", embeds=[{"title": title or "Club FM", "description": text.replace("\\n", "\n")[:3900], "color": PURPLE, "url": SITE}])
 
+# ---------------------------------------------------------------- members' weekly market recap
+def job_members(summary_path, feed_path, state_path):
+    """Sunday: the item-level week for members (signed-in site members hold the Members role): the biggest movers by
+    typical price over 7 days, and the best deals scanners caught. Nothing about contributor pay."""
+    st = load(state_path, {})
+    wk = datetime.datetime.now(ET).date().isoformat()
+    if st.get("members_week") == wk: return
+    sm = load(summary_path, {}); feed = load(feed_path, [])
+    moves = []
+    for r in sm.get("rows") or []:
+        if not isinstance(r, dict) or (r.get("salesN") or 0) < 8 or r.get("equip"): continue
+        d = [x for x in (r.get("daily") or []) if x and x[1]]
+        if len(d) < 4 or not d[0][1]: continue
+        ch = d[-1][1] / d[0][1] - 1
+        if abs(ch) >= 0.05: moves.append((ch, r))
+    moves.sort(key=lambda x: x[0])
+    def line(ch, r): return f"{plain(shown(r['item']), 48)} · {meso(int(r['typ']))} ({'+' if ch > 0 else ''}{int(round(ch * 100))}%)"
+    up = [line(c, r) for c, r in reversed(moves[-5:]) if c > 0]
+    dn = [line(c, r) for c, r in moves[:5] if c < 0]
+    now = time.time(); week = [f for f in (feed if isinstance(feed, list) else []) if isinstance(f, dict) and f.get("t", 0) >= now - 7 * 86400]
+    week.sort(key=lambda f: -(f.get("flip") or 0))
+    best = [f"{plain(shown(f.get('item')), 40)} at {meso(int(f.get('p') or 0))} · {int(round((f.get('off') or 0) * 100))}% under, +{meso(int(f.get('flip') or 0))}" for f in week[:5]]
+    fields = []
+    if up: fields.append({"name": "Rising", "value": "\n".join(up)[:1000], "inline": False})
+    if dn: fields.append({"name": "Falling", "value": "\n".join(dn)[:1000], "inline": False})
+    if best: fields.append({"name": "Best deals caught", "value": "\n".join(best)[:1000], "inline": False})
+    if not fields: return
+    emb = {"title": "The week in the FM, for members", "color": PURPLE, "fields": fields, "url": SITE,
+           "description": "Typical prices over the last 7 days from watched sales. Every listing behind these is on the board when you're signed in.",
+           "footer": {"text": "Club FM · members-only recap"}}
+    if post("members", embeds=[emb]):
+        st["members_week"] = wk; save(state_path, st)
+
+
 if __name__ == "__main__":
     job, a = sys.argv[1], sys.argv[2:]
     if not hooks():
         print("DISCORD_HOOKS not set, skipping"); sys.exit(0)
     if job == "digest": job_news(a[0], None, True)
-    else: {"sales": job_sales, "deals": job_deals, "ranks": job_ranks, "report": job_report, "coverage": job_coverage, "news": job_news, "note": job_note, "weekly": job_weekly}[job](*a)
+    else: {"sales": job_sales, "deals": job_deals, "ranks": job_ranks, "report": job_report, "coverage": job_coverage, "news": job_news, "note": job_note, "weekly": job_weekly, "members": job_members}[job](*a)
