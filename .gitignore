@@ -1,0 +1,11 @@
+# private data is committed only as <file>.enc (tools/vault.py); the plain copies never leave the job
+data/*.json
+!data/itemdb.json
+!data/names.json
+!data/summary-public.json
+!data/ranks.json
+!data/report.json
+!data/credits.json
+!data/maintenance.json
+!data/nexon_news.json
+!data/*-icons.json

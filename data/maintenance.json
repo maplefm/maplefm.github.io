@@ -1,0 +1,46 @@
+{
+ "checked": "2026-10-22T22:40:52.810388Z",
+ "source": "Nexon news, Classic World maintenance",
+ "notices": [
+  {
+   "id": 47098,
+   "title": "Unscheduled Maintenance - October 22, 2026",
+   "status": "completed",
+   "start": "2026-10-22T20:00:00Z",
+   "end": "2026-10-22T22:00:00Z",
+   "down": "All MapleStory Classic World game servers.",
+   "posted": "2026-10-22T12:00:22Z",
+   "url": "https://www.nexon.com/maplestory/news/maintenance/47098"
+  },
+  {
+   "id": 46800,
+   "title": "Scheduled Grand Launch - October 21, 2026",
+   "status": "completed",
+   "start": "2026-10-21T13:00:00Z",
+   "end": "2026-10-21T18:00:00Z",
+   "down": "All MapleStory Classic World game servers.",
+   "posted": "2026-10-21T10:59:23Z",
+   "url": "https://www.nexon.com/maplestory/news/maintenance/46800"
+  },
+  {
+   "id": 46523,
+   "title": "Scheduled Minor Patch Maintenance - October 15, 2026",
+   "status": "completed",
+   "start": "2026-10-15T15:00:00Z",
+   "end": "2026-10-15T18:00:00Z",
+   "down": "All MapleStory Classic World game servers.",
+   "posted": "2026-10-15T10:55:48Z",
+   "url": "https://www.nexon.com/maplestory/news/maintenance/46523"
+  },
+  {
+   "id": 46321,
+   "title": "Unscheduled Maintenance - October 8, 2026",
+   "status": "completed",
+   "start": "2026-10-08T14:00:00Z",
+   "end": "2026-10-08T16:00:00Z",
+   "down": "All MapleStory Classic World game servers.",
+   "posted": "2026-10-08T05:00:00Z",
+   "url": "https://www.nexon.com/maplestory/news/maintenance/46321"
+  }
+ ]
+}
