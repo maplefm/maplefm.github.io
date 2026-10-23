@@ -1,10 +1,15 @@
 {
- "version": "2026.10.23.2",
- "date": "2026-10-23T19:23:27+00:00",
- "notes": "Scans now go to Club FM's private data repository, so listings stay private to members. Nothing to change on your end.",
- "sha256": "cea2651e2aab2d400b44f4c356c534b3c57f9a0f250d4e3c8e3e2eeb7b5d821e",
- "size": 56856,
+ "version": "2026.10.23.3",
+ "date": "2026-10-23T20:31:15+00:00",
+ "notes": "Prices from watchers without a GitHub key now go to Club FM's own private inbox instead of a shared sheet.",
+ "sha256": "8ea1963bf32d9fc04953dba43c9ab693c362958ab1851d05fb76a2337dc7d368",
+ "size": 56785,
  "history": [
+  {
+   "version": "2026.10.23.3",
+   "date": "2026-10-23",
+   "notes": "Prices from watchers without a GitHub key now go to Club FM's own private inbox instead of a shared sheet."
+  },
   {
    "version": "2026.10.23.2",
    "date": "2026-10-23",
@@ -142,5 +147,5 @@
   }
  ],
  "pip": [],
- "sig": "1200d8dc85a2a5958ee973b656b68d6882daff9c37f09bab83a58eda36e2cb7c06d55254032fa0786ae44a4cdee8ebfb62c12502ee865a74ef9ac819bbe40471b0c81dfa15b1726871500dcc1b28c1503d753dc8d9aeaadff2254bcd8a200e7be659190d3dc0dcc7c2642162cb537c9e5e1b9e680f6440e6bd59b83c9a7dfffcc65d299073be536e921377eb701b75a7850b052187f5174ba618017e0b272654b1aae1517cf6fb1865ee3f7fa148f3575bda9c070071a570c9b2c2b2907103f8c79bbe7d471a0f89e072a027b41413a70e1a860276cf38066e71fece5e2f6caad22a0fe3da68e0033396128a6c24ff3add519fdca07eae98df9c088b04be992e"
+ "sig": "bd495f6da8b3e300d8920056242b3f9e94fb3b56ce3c206b230ef42428162b53dc4bda3ca2b4c9315fe33eccf24c1baa398181d2487750299baa9f56cddbbcc5699da2a337e982ce0e3030ae22a7c0a42b22c515701cac57e6d71c0338a3241f87d92652a08da11facf22f4f00167659c7d1a7c6bd61829e0b0a0e277b8e6863839c07ae0a5275ead2466d010d42b718273cce4e029d3eb553eb275f545090652024c1dfcaa425a648f5430dd567d41109358925189361f18bafa047c8af0455c79813d375e2b052db1dcb07220bfee35f4f7b6aedc4777a8ad64fd6eb344851c411f73acf1f4c1cd9751590e67abe636db123aab86a967b18dc130b7a0d47a6"
 }

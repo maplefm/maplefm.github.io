@@ -10,6 +10,7 @@ permissions:
   contents: write
 env:
   INBOX_KEY: ${{ secrets.INBOX_KEY }}
+  INBOX_PULL_KEY: ${{ secrets.INBOX_PULL_KEY }}
 concurrency: inbox
 jobs:
   pull:

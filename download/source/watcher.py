@@ -13,11 +13,12 @@ os.chdir(HERE)
 from PIL import Image, ImageDraw
 import fmparse
 
-VERSION = "2026.10.23.2"
+VERSION = "2026.10.23.3"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
-INBOX_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSfPkj13lR8RnLt1dey2CnBWmlJ1tD5iY3Lf3k8KlBKi715UrQ/formResponse"
-INBOX_FIELD = "entry.349764117"
+# the price inbox: Club FM's own server, readable only by the site's jobs
+INBOX_FORM = "https://clubfm-accounts.aaweaver93.workers.dev/inbox"
+INBOX_FIELD = "m"
 ACCOUNTS = "https://clubfm-accounts.aaweaver93.workers.dev"   # the Club FM accounts service for linking a watcher to a contributor account
 
 DEFAULTS = {
@@ -721,7 +722,7 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
     for bi, batch in enumerate(batches):
         raw = json.dumps(batch, separators=(",", ":"), sort_keys=True).encode("utf-8")
         z = base64.b64encode(zlib.compress(raw, 9)).decode()
-        size = 24000                     # the form turns away posts over about 32,000 characters
+        size = 24000                     # the inbox turns away posts over about 60,000 characters
         parts = [z[i:i + size] for i in range(0, len(z), size)] or [""]
         if len(parts) > 8:
             continue
