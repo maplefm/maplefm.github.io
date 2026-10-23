@@ -40,12 +40,37 @@ def sig_ok(key_hex, m):
     return hmac.compare_digest(want, str(m.get("sig") or ""))
 
 
+WORKER_INBOX = "https://clubfm-accounts.aaweaver93.workers.dev/inbox/pull"
+
+
+def fetch_worker_rows():
+    """Posts from the Worker's inbox (watchers from 2026.10.23.3 on), read with INBOX_PULL_KEY."""
+    key = os.environ.get("INBOX_PULL_KEY") or ""
+    if not key: return []
+    out, after = [], 0
+    for _ in range(50):
+        req = urllib.request.Request(WORKER_INBOX + "?after=%d" % after, headers={"User-Agent": "maplefm-inbox", "Authorization": "Bearer " + key})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            j = json.load(r)
+        rows = j.get("rows") or []
+        out += [[x[0], x[1]] for x in rows]
+        if len(rows) < 2000: break
+        after = j.get("last") or after
+    return out
+
+
 def fetch_rows():
-    req = urllib.request.Request(CSV_URL, headers={"User-Agent": "maplefm-inbox"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        text = r.read().decode("utf-8", "replace")
-    rows = list(csv.reader(io.StringIO(text)))
-    return rows[1:]
+    rows = []
+    try: rows += fetch_worker_rows()
+    except Exception as e: print("worker inbox:", e)
+    # older watchers still post through the Google Form until they update
+    try:
+        req = urllib.request.Request(CSV_URL, headers={"User-Agent": "maplefm-inbox"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            text = r.read().decode("utf-8", "replace")
+        rows += list(csv.reader(io.StringIO(text)))[1:]
+    except Exception as e: print("sheet inbox:", e)
+    return rows
 
 
 def clean_name(nm, sid):

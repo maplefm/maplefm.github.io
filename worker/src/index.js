@@ -60,6 +60,8 @@ async function route(req, env, url) {
   if (p === "/twitch/callback") return twitchCallback(req, env, url);
   if (p === "/twitch/unlink" && req.method === "POST") return twitchUnlink(req, env);
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
+  if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
+  if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/public/links") return publicLinks(env);
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
@@ -413,6 +415,36 @@ async function sessionId(req, env) {
   const [id, exp] = payload.split("|");
   return id && Number(exp) >= now() ? id : null;
 }
+// ---------------------------------------------------------------- the price inbox
+// Watchers without a GitHub key post their listings here (signed, compressed, in parts; tools/inbox.py checks
+// them). Posts sit in D1 for 15 days and only the pump can read them back, with INBOX_PULL_KEY.
+async function inboxPost(req, env) {
+  if (!env.INBOX_DB) return json({ error: "inbox offline" }, 503);
+  const ip = req.headers.get("CF-Connecting-IP") || "";
+  if (overLimit("p:" + ip, 200, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "120" });
+  const body = await req.text();
+  if (body.length > 60000) return json({ error: "too big" }, 413);
+  let msg = "";
+  try { msg = /json/.test(req.headers.get("Content-Type") || "") ? String(JSON.parse(body).m || "") : String(new URLSearchParams(body).get("m") || ""); } catch (e) {}
+  let m = null; try { m = JSON.parse(msg); } catch (e) {}
+  if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") return json({ error: "bad post" }, 400);
+  await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
+  return json({ ok: true });
+}
+async function inboxPull(req, env, url) {
+  const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
+  if (!want || got.length !== want.length || !(await same(got, want))) return json({ error: "no" }, 403);
+  const after = Math.max(0, parseInt(url.searchParams.get("after") || "0", 10) || 0);
+  const r = await env.INBOX_DB.prepare("SELECT id, t, msg FROM posts WHERE id > ? ORDER BY id LIMIT 2000").bind(after).all();
+  const rows = (r.results || []).map((x) => [new Date(x.t).toISOString(), x.msg, x.id]);
+  if (!after) await env.INBOX_DB.prepare("DELETE FROM posts WHERE t < ?").bind(Date.now() - 15 * DAY * 1000).run();
+  return json({ rows, last: rows.length ? rows[rows.length - 1][2] : after }, 200, { "Cache-Control": "no-store" });
+}
+async function same(a, b) {
+  const h = async (x) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(x)));
+  const x = await h(a), y = await h(b); let d = 0; for (let i = 0; i < x.length; i++) d |= x[i] ^ y[i]; return d === 0;
+}
+
 async function dataLive(req, env) {
   const id = await sessionId(req, env);
   if (!id) return json({ error: "sign in" }, 401, { "Cache-Control": "no-store" });

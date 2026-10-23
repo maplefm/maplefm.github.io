@@ -12,6 +12,7 @@ env:
   DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
   DISCORD_HOOK_DEALS: ${{ secrets.DISCORD_HOOK_DEALS }}
   INBOX_KEY: ${{ secrets.INBOX_KEY }}
+  INBOX_PULL_KEY: ${{ secrets.INBOX_PULL_KEY }}
   DATA_KEY: ${{ secrets.DATA_KEY }}
   ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
 concurrency:
