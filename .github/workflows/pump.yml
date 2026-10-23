@@ -13,7 +13,6 @@ env:
   DISCORD_HOOK_DEALS: ${{ secrets.DISCORD_HOOK_DEALS }}
   INBOX_KEY: ${{ secrets.INBOX_KEY }}
   INBOX_PULL_KEY: ${{ secrets.INBOX_PULL_KEY }}
-  DATA_KEY: ${{ secrets.DATA_KEY }}
   ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
 concurrency:
   group: pump
@@ -27,46 +26,53 @@ jobs:
         with:
           ref: live
       - name: Browser for the board snapshot
-        run: pip install -q playwright==1.56.0 cryptography
+        run: pip install -q playwright==1.56.0
       - name: Loop
         run: |
-          git config user.name maplefm
-          git config user.email maplefm@users.noreply.github.com
+          git config --global user.name maplefm
+          git config --global user.email maplefm@users.noreply.github.com
+          PUB="$GITHUB_WORKSPACE"
           git fetch -q origin main && git worktree add -q /tmp/main origin/main
-          # raw scans from the crew watchers and stream readers land in the private data repository
-          git clone -q --depth 1 -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch || echo "no archive access"
+          # Working data (listings, sellers, pay, bot state) lives in the private repository, in plain JSON so git
+          # stores each 5-minute change as a small difference. The public branch only gets the price-only files.
+          git clone -q -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
           end=$(( $(date +%s) + 330*60 ))
-          n=0
+          n=0; lastsig=""
           while [ $(date +%s) -lt $end ]; do
-            git fetch -q origin main live
-            git reset -q --hard origin/live
+            cd /tmp/arch
+            git fetch -q origin live && git reset -q --hard origin/live
+            git -C "$PUB" fetch -q origin main live
             git -C /tmp/main reset -q --hard origin/main
-            # listings and pay records are stored encrypted (tools/vault.py); work on plain copies, lock before commit
-            python3 /tmp/main/tools/vault.py unlock .
-            if [ -d /tmp/arch ]; then
-              git -C /tmp/arch fetch -q --depth 1 origin live && git -C /tmp/arch reset -q --hard FETCH_HEAD
-              for f in /tmp/arch/data/watcher*.json /tmp/arch/data/streams*.json; do [ -f "$f" ] && cp "$f" data/; done
-            fi
-            git show origin/main:tools/inbox.py > /tmp/inbox.py
-            git show origin/main:tools/ranks.py > /tmp/ranks.py
-            git show origin/main:tools/discord.py > /tmp/discord.py
+            T=/tmp/main/tools
             mkdir -p data
             curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json
-            python3 /tmp/inbox.py /tmp/inbox.json data/inbox_block.json data/inbox_state.json /tmp/links.json || true
+            python3 $T/inbox.py /tmp/inbox.json data/inbox_block.json data/inbox_state.json /tmp/links.json || true
             if [ -s /tmp/inbox.json ] && ! cmp -s /tmp/inbox.json data/inbox.json; then cp /tmp/inbox.json data/inbox.json; fi
-            if [ $(( n % 6 )) -eq 0 ]; then python3 /tmp/ranks.py data data/ranks.json || true; fi
+            if [ $(( n % 6 )) -eq 0 ]; then python3 $T/ranks.py data data/ranks.json || true; fi
             # Club FM Discord: big sales every pass, rank changes every half hour (quiet when the secret is missing)
-            python3 /tmp/discord.py sales data data/discord_sales.json || true
-            python3 /tmp/discord.py deals data data/summary.json data/discord_deals.json || true
-            if [ $(( n % 6 )) -eq 0 ]; then python3 /tmp/discord.py ranks data/ranks.json data/discord_ranks.json || true; fi
-            # contributor credits for the Earn trial board, from the rules in tools/credits.py and the rate in data/pay.json
-            if [ $(( n % 6 )) -eq 0 ]; then curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json; curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/kofi-income -o /tmp/kofi.json || echo '{}' > /tmp/kofi.json; python3 -I /tmp/main/tools/credits.py data data/credits.json /tmp/main/data/pay.json /tmp/main/data/itemdb.json /tmp/links.json data/credits_ledger.json /tmp/kofi.json || true; fi
-            # the finished price board, built by the page itself, so visitors see it at once
-            python3 /tmp/main/tools/vault.py lock . && git add -A data
-            if ! git diff --cached --quiet || [ $(( n % 6 )) -eq 0 ]; then timeout 300 python3 /tmp/main/tools/snapshot.py /tmp/main . data/summary.json || true; fi
-            python3 /tmp/main/tools/vault.py bundle . && python3 /tmp/main/tools/vault.py lock . && git add -A data
+            python3 $T/discord.py sales data data/discord_sales.json || true
+            python3 $T/discord.py deals data data/summary.json data/discord_deals.json || true
+            if [ $(( n % 6 )) -eq 0 ]; then python3 $T/discord.py ranks data/ranks.json data/discord_ranks.json || true; fi
+            # contributor credits for the Earn board, from the rules in tools/credits.py and the rate in data/pay.json
+            if [ $(( n % 6 )) -eq 0 ]; then curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/kofi-income -o /tmp/kofi.json || echo '{}' > /tmp/kofi.json; python3 -I $T/credits.py data data/credits.json /tmp/main/data/pay.json /tmp/main/data/itemdb.json /tmp/links.json data/credits_ledger.json /tmp/kofi.json || true; fi
+            git add -A data
+            # the finished price board, built by the page itself (the full copy stays private, a price-only copy goes public)
+            if ! git diff --cached --quiet || [ $(( n % 6 )) -eq 0 ]; then timeout 300 python3 $T/snapshot.py /tmp/main . data/summary.json || true; git add -A data; fi
             if ! git diff --cached --quiet; then
-              git commit -q -m "Live pump: inbox, ranks and board"
+              git commit -q -m "Pump: inbox, ranks and board"
+              for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
+            fi
+            # public copy: prices only, ranks, the earn board, icons, and a stamp that says the listings changed
+            cd "$PUB"
+            git reset -q --hard origin/live
+            git rm -q --ignore-unmatch data/*.enc data/live.json
+            for f in summary-public ranks report credits names; do [ -f /tmp/arch/data/$f.json ] && cp /tmp/arch/data/$f.json data/; done
+            for f in /tmp/arch/data/*-icons.json; do [ -f "$f" ] && cp "$f" data/; done
+            sig=$(cat /tmp/arch/data/watcher*.json /tmp/arch/data/streams.json /tmp/arch/data/streams-vods.json /tmp/arch/data/inbox.json 2>/dev/null | sha1sum | cut -c1-12)
+            if [ "$sig" != "$lastsig" ]; then echo "{\"at\":$(date +%s%3N),\"v\":\"$sig\"}" > data/live.sig; lastsig="$sig"; fi
+            git add -A data
+            if ! git diff --cached --quiet; then
+              git commit -q -m "Live pump: prices and ranks"
               for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
             fi
             n=$(( n + 1 ))

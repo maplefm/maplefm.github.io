@@ -1,46 +1,38 @@
 name: Market report
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: [tools/report.py, .github/workflows/report.yml]
   schedule:
     # 11:55 PM Eastern in daylight time and in standard time (the script picks the Eastern day being closed)
     - cron: "55 3 * * *"
     - cron: "55 4 * * *"
+concurrency: report
 permissions:
   contents: write
-env:
-  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
-concurrency: report
 jobs:
   report:
     runs-on: ubuntu-latest
     env:
-      DATA_KEY: ${{ secrets.DATA_KEY }}
+      DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: live
-      - name: Unlock the data
-        run: |
-          pip install -q cryptography
-          git fetch -q origin main && git show FETCH_HEAD:tools/vault.py > /tmp/vault.py
-          python3 /tmp/vault.py unlock .
+      # the working data is in the private repository; the finished report is public
       - run: |
-          git fetch -q origin main
-          git show FETCH_HEAD:tools/report.py > /tmp/report.py
-          git show FETCH_HEAD:data/itemdb.json > /tmp/itemdb.json
-          mkdir -p data
-          python3 /tmp/report.py data /tmp/itemdb.json data/report.json
-          git show FETCH_HEAD:tools/discord.py > /tmp/discord.py
-          mkdir -p /tmp/main/data && git show FETCH_HEAD:data/itemdb.json > /tmp/main/data/itemdb.json
-          python3 /tmp/discord.py report data/report.json data/discord_report.json || true
-          python3 /tmp/discord.py coverage data data/discord_coverage.json || true
-      - run: |
-          git config user.name maplefm
-          git config user.email maplefm@users.noreply.github.com
-          python3 /tmp/vault.py lock . && git add -A data
+          git config --global user.name maplefm
+          git config --global user.email maplefm@users.noreply.github.com
+          git fetch -q origin main && git worktree add -q /tmp/main origin/main
+          git clone -q -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
+          cd /tmp/arch && mkdir -p data
+          python3 /tmp/main/tools/report.py data /tmp/main/data/itemdb.json data/report.json
+          python3 /tmp/main/tools/discord.py report data/report.json data/discord_report.json || true
+          python3 /tmp/main/tools/discord.py coverage data data/discord_coverage.json || true
+          git add -A data
+          if ! git diff --cached --quiet; then git commit -q -m "Market close report"; for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done; fi
+          cd "$GITHUB_WORKSPACE"
+          cp /tmp/arch/data/report.json data/report.json
+          git add data/report.json
           git diff --cached --quiet && exit 0
           git commit -q -m "Market close report"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

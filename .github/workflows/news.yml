@@ -22,7 +22,7 @@ jobs:
   news:
     runs-on: ubuntu-latest
     env:
-      DATA_KEY: ${{ secrets.DATA_KEY }}
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,17 +31,17 @@ jobs:
           NOTE_TITLE: ${{ github.event.inputs.title }}
           NOTE_TEXT: ${{ github.event.inputs.text }}
         run: |
-          pip install -q cryptography
-          git fetch -q origin live
-          git show origin/live:data/discord_news.json.enc > /tmp/news.enc 2>/dev/null && python3 tools/vault.py cat /tmp/news.enc data/discord_news.json > /tmp/news.json || echo '{}' > /tmp/news.json
+          git config --global user.name maplefm
+          git config --global user.email maplefm@users.noreply.github.com
+          # what was already announced is kept in the private data repository
+          git clone -q --depth 1 -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
+          mkdir -p /tmp/arch/data
+          [ -f /tmp/arch/data/discord_news.json ] && cp /tmp/arch/data/discord_news.json /tmp/news.json || echo '{}' > /tmp/news.json
           if [ -n "$NOTE_TEXT" ]; then python3 tools/discord.py note "$NOTE_TITLE" "$NOTE_TEXT"
           elif [ "${{ github.event_name }}" = "schedule" ]; then python3 tools/discord.py news /tmp/news.json; python3 tools/discord.py digest /tmp/news.json
           else python3 tools/discord.py news /tmp/news.json; fi
-          git config user.name maplefm
-          git config user.email maplefm@users.noreply.github.com
-          git worktree add -q /tmp/live origin/live
-          mkdir -p /tmp/live/data && cp /tmp/news.json /tmp/live/data/discord_news.json
-          cd /tmp/live && python3 "$GITHUB_WORKSPACE/tools/vault.py" lock . && git add -A data
+          cp /tmp/news.json /tmp/arch/data/discord_news.json
+          cd /tmp/arch && git add data/discord_news.json
           git diff --cached --quiet && exit 0
           git commit -q -m "Site updates state"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

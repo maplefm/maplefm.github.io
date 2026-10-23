@@ -1,0 +1,32 @@
+name: Data move to private repo
+# One time: the encrypted state written to the public branch on Oct 23 goes back to the private repository as
+# plain files, so nothing is lost when the pump starts working there. Run by hand.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    env:
+      DATA_KEY: ${{ secrets.DATA_KEY }}
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - run: |
+          pip install -q cryptography
+          git config --global user.name maplefm
+          git config --global user.email maplefm@users.noreply.github.com
+          git fetch -q origin main && git show origin/main:tools/vault.py > /tmp/vault.py
+          python3 /tmp/vault.py unlock .
+          git clone -q -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
+          # the raw scans are newer in the private repo already; everything the jobs wrote since the move comes over
+          for f in inbox inbox_state inbox_block credits_ledger credits report-store summary discord_sales discord_deals discord_dealfeed discord_ranks discord_report discord_coverage discord_news; do
+            [ -f data/$f.json ] && cp data/$f.json /tmp/arch/data/$f.json && echo "moved $f"
+          done
+          cd /tmp/arch && git add -A data
+          git diff --cached --quiet && exit 0
+          git commit -q -m "State from the public branch, Oct 23"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
