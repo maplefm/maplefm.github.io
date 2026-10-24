@@ -69,7 +69,7 @@ def page(title, desc, canon, body, ld=None):
 <div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><a class="go" href="/">Open the live price board</a></div>
 {body}
 <p class="foot">Prices come from sales that players running FM Watcher saw happen in Free Market shops, updated through the day. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
-</main></body></html>"""
+</main><script src="/assets/hit.js" defer></script></body></html>"""
 
 
 NX = {}

@@ -82,4 +82,5 @@ document.getElementById("copy").addEventListener("click", function () { var b = 
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); }).catch(function () {}); });
 fetch(API + "/chat/price?q=claw%2060").then(function (r) { return r.text(); }).then(function (t) { if (t && t.length < 400 && /:/.test(t)) document.getElementById("demo").textContent = t; }).catch(function () {});
 </script>
+<script src="/assets/hit.js" defer></script>
 </body></html>

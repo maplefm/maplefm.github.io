@@ -30,6 +30,7 @@ export default {
     ctx.waitUntil(notifyWatchers(env));
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
     ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
+    ctx.waitUntil(trafficPost(env).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
   },
   async fetch(req, env) {
@@ -68,6 +69,9 @@ async function route(req, env, url) {
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
+  if (p === "/hit" && req.method === "POST") return hit(req, env);
+  if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await trafficSend(env, Date.now() - 3600e3, Date.now(), "Traffic, last hour (test)")); }
   if (p === "/r" && req.method === "POST") return refHit(req, env, url);
   if (p === "/twitchbot/connect") return tbConnect(req, env, url);
   if (p === "/twitchbot/callback") return tbCallback(req, env, url);
@@ -780,6 +784,7 @@ async function chatPrice(req, env, url) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
   const txt = (t) => new Response(t.slice(0, 390), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
   if (overLimit("cp:" + ip, 120, 60)) return txt("Club FM: slow down a little, try again in a minute.");
+  logHit(env, "!price", "", "", ip).catch(() => {});
   return txt(await priceLine(env, String(url.searchParams.get("q") || "")));
 }
 async function priceLine(env, raw) {
@@ -890,6 +895,7 @@ async function tbEventsub(req, env) {
   if (!bot || e.chatter_user_id === bot.id) return new Response("ok");
   await env.ACCOUNTS.put("tbseen:" + id, "1", { expirationTtl: 900 });
   const line = await priceLine(env, said);
+  await logHit(env, "!price bot", e.broadcaster_user_login || "", "", "tb:" + e.chatter_user_id).catch(() => {});
   await helix(env, "POST", "/chat/messages", { broadcaster_id: b, sender_id: bot.id, message: line, reply_parent_message_id: e.message_id });
   const day = new Date().toISOString().slice(0, 10), k = "tbuse:" + b + ":" + day;
   await env.ACCOUNTS.put(k, String(Number(await env.ACCOUNTS.get(k) || 0) + 1), { expirationTtl: 400 * 86400 });
@@ -927,6 +933,93 @@ async function refStats(env, url) {
     out[who] = { visits: tv, uniques: tu, days };
   }
   return out;
+}
+
+// ---------------------------------------------------------------- traffic
+// Every page loads /assets/hit.js, which posts the page, the referring site and a ?ref= tag here. Stored in D1 with a
+// daily scrambled visitor id (hmac of the day and address); the address itself is never kept. Bots are skipped.
+// Reports go to a private Discord channel only Adam sees: hourly 9 AM to 11 PM Eastern, overnight at 8 AM.
+const TRAFFIC_CH = "1563607619468394537";
+let HITS_READY = false;
+async function hitsTable(env) {
+  if (HITS_READY || !env.INBOX_DB) return;
+  await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS hits (t INTEGER, p TEXT, r TEXT, q TEXT, v TEXT)").run();
+  await env.INBOX_DB.prepare("CREATE INDEX IF NOT EXISTS hits_t ON hits (t)").run();
+  HITS_READY = true;
+}
+async function logHit(env, page, ref, tag, who) {
+  if (!env.INBOX_DB) return;
+  await hitsTable(env);
+  const day = new Date().toISOString().slice(0, 10), v = (await hmac(env.SESSION_SECRET || "x", "v|" + day + "|" + who)).slice(0, 12);
+  await env.INBOX_DB.prepare("INSERT INTO hits (t, p, r, q, v) VALUES (?, ?, ?, ?, ?)").bind(Date.now(), page, ref, tag, v).run();
+}
+async function hit(req, env) {
+  const ok = new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*" } });
+  const ua = req.headers.get("User-Agent") || "", ip = req.headers.get("CF-Connecting-IP") || "";
+  if (/bot|crawl|spider|slurp|headless|preview|lighthouse|playwright|python|curl/i.test(ua) || !ua) return ok;
+  if (overLimit("hit:" + ip, 60, 60)) return ok;
+  let b = {}; try { b = JSON.parse(await req.text()); } catch (e) { return ok; }
+  let page = String(b.p || "/").slice(0, 120), ref = String(b.r || "").toLowerCase().replace(/^www\./, "").slice(0, 80), tag = String(b.q || "").replace(/[^\w-]/g, "").slice(0, 24);
+  if (/(^|\.)maplefm\.gg$/.test(ref)) ref = "";
+  await logHit(env, page, ref, tag, ip);
+  return ok;
+}
+function pageLabel(p) {
+  if (p === "/" || p === "/index.html") return "Price board";
+  const m = p.match(/^\/item\/([^/]+)/); if (m) return "Item: " + m[1].replace(/-/g, " ");
+  return p.replace(/^\//, "").replace(/\.html$/, "").replace(/\/$/, "") || "Price board";
+}
+async function trafficStats(env, from, to) {
+  await hitsTable(env);
+  const q = (sql, ...a) => env.INBOX_DB.prepare(sql).bind(...a).all().then((r) => r.results || []);
+  const web = "p NOT LIKE '!%'";
+  const [tot] = await q(`SELECT COUNT(*) n, COUNT(DISTINCT v) u FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
+  const pages = await q(`SELECT p, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND ${web} GROUP BY p ORDER BY n DESC LIMIT 40`, from, to);
+  const refs = await q(`SELECT r, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND ${web} AND r != '' GROUP BY r ORDER BY n DESC LIMIT 6`, from, to);
+  const tags = await q(`SELECT q, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND q != '' GROUP BY q ORDER BY n DESC LIMIT 6`, from, to);
+  const price = await q(`SELECT p, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '!%' GROUP BY p`, from, to);
+  const by = {}; pages.forEach((r) => { const k = pageLabel(r.p).startsWith("Item: ") ? "Item pages" : pageLabel(r.p); by[k] = (by[k] || 0) + r.n; });
+  const items = pages.filter((r) => /^\/item\//.test(r.p)).slice(0, 3).map((r) => pageLabel(r.p).slice(6) + " " + r.n);
+  return { views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price };
+}
+function trafficEmbed(st, prev, title, from, to) {
+  const d = (a, b) => (b == null ? "" : a === b ? " (same as yesterday)" : " (" + (a > b ? "+" : "") + (a - b) + " vs yesterday)");
+  const f = [];
+  f.push({ name: "Visitors", value: "**" + st.visitors + "**" + d(st.visitors, prev && prev.visitors), inline: true });
+  f.push({ name: "Page views", value: "**" + st.views + "**" + d(st.views, prev && prev.views), inline: true });
+  const pc = st.price.reduce((s, r) => s + r.n, 0);
+  f.push({ name: "!price answers", value: "**" + pc + "**", inline: true });
+  if (st.pages.length) f.push({ name: "Top pages", value: st.pages.map((x) => x[0] + " · " + x[1]).join("\n") + (st.items.length ? "\nMost viewed items: " + st.items.join(", ") : "") });
+  if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });
+  if (st.tags.length) f.push({ name: "Partner links", value: st.tags.map((x) => x.q + " · " + x.n).join("\n"), inline: true });
+  return { title, color: 0x6d3fd1, fields: f, description: "<t:" + Math.floor(from / 1000) + ":t> to <t:" + Math.floor(to / 1000) + ":t>", footer: { text: "Visitors are counted once a day each. No cookies, no IPs kept." } };
+}
+async function trafficSend(env, from, to, title) {
+  const st = await trafficStats(env, from, to), prev = await trafficStats(env, from - 864e5, to - 864e5);
+  const r = await fetch(DISCORD + "/channels/" + TRAFFIC_CH + "/messages", { method: "POST", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ embeds: [trafficEmbed(st, prev, title, from, to)] }) });
+  return { status: r.status, st };
+}
+function etParts(ms) {
+  const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Detroit", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
+  const o = {}; f.formatToParts(new Date(ms)).forEach((x) => { o[x.type] = x.value; });
+  return { day: o.year + "-" + o.month + "-" + o.day, hour: Number(o.hour) % 24, minute: Number(o.minute) };
+}
+async function trafficPost(env) {
+  if (!env.DISCORD_BOT_TOKEN || !env.INBOX_DB ) return;
+  const nowMs = Date.now(), et = etParts(nowMs);
+  if (et.minute > 14) return;
+  const top = nowMs - et.minute * 60e3 - (new Date(nowMs).getUTCSeconds()) * 1e3;   // the top of this hour
+  const key = "traffic:posted:" + et.day + ":" + et.hour;
+  if (await env.ACCOUNTS.get(key)) return;
+  if (et.hour === 8) {
+    await env.ACCOUNTS.put(key, "1", { expirationTtl: 2 * DAY });
+    await trafficSend(env, top - 9 * 3600e3, top, "Overnight traffic, 11 PM to 8 AM");
+  } else if (et.hour >= 9 && et.hour <= 23) {
+    await env.ACCOUNTS.put(key, "1", { expirationTtl: 2 * DAY });
+    const h = et.hour - 1, lab = (x) => (x % 12 || 12) + (x < 12 ? " AM" : " PM");
+    await trafficSend(env, top - 3600e3, top, "Traffic, " + lab(h) + " to " + lab(et.hour));
+  }
+  if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
 }
 
 // ---------------------------------------------------------------- #deal-feed: Mega Deals, 30 minutes later
