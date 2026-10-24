@@ -42,7 +42,7 @@ HEAD = {  # name: (head x share, side view facing left)
     "bubbling": (.42, False), "curse_eye": (.30, True), "dark_stump": (.45, False), "drake": (.17, True),
     "evil_eye": (.26, True), "evil_eye_dead": (.20, True), "fire_boar": (.13, True),
     "green_mushroom": (.45, False), "green_mushroom_dead": (.45, False), "horny_mushroom": (.45, False),
-    "jrbalrog": (.47, False), "jrbalrog_dead": (.45, False), "jrnecki": (.30, True), "ligator": (.30, True),
+    "jrbalrog": (.47, False), "jrbalrog_dead": ([.47, .38, .2], False), "jrnecki": (.30, True), "ligator": (.30, True),
     "lorang": (.36, False), "lupin": (.30, True), "mano": (.24, True), "mushmom": (.45, False), "mushmom_dead": (.45, False),
     "octopus": (.45, False), "octopus_dead": (.45, False), "orange_mushroom": (.45, False), "orange_mushroom_dead": (.45, False),
     "pig": (.30, True), "pig_dead": (.32, True), "ribbon_pig": (.30, True), "slime": (.36, False), "slime_dead": (.36, False),
@@ -73,18 +73,33 @@ for f in sorted(glob.glob(os.path.join(SRC, "*"))):
     key = os.path.splitext(name)[0]; share, side = HEAD.get(key, (.45, False))
     crw = cr.transpose(Image.FLIP_LEFT_RIGHT) if side else cr
     base_x = crw.width * (13 / 28 if side else 15 / 28)      # middle of the crown's band, not of the picture
-    heads = [head_at(fr, share) for fr in frames]
+    heads = [head_at(fr, share[min(k, len(share) - 1)] if isinstance(share, list) else share) for k, fr in enumerate(frames)]
     area0 = max((hd[2] for hd in heads if hd), default=1)
     sink = max(3, ch // 6)                                    # the band sits a little into the head
     pad = max(0, ch - sink - min((hd[1] for hd in heads if hd), default=0))
     padx_l = max(0, int(-(min((hd[0] for hd in heads if hd), default=0) - base_x)))
     padx_r = max(0, int(max((hd[0] for hd in heads if hd), default=0) - base_x + crw.width - w))
+    dying = key.endswith("_dead")
+    ground = (frames[min(len(frames) - 1, max([k for k, hd in enumerate(heads) if hd] or [0]))].getchannel("A").getbbox() or (0, 0, 0, h))[3] + pad
+    live = [bool(hd and hd[2] >= area0 * 0.3) for hd in heads]
+    last = max([k for k, ok in enumerate(live) if ok] or [0])
+    lx, ly = None, None
     out = []
-    for fr, hd in zip(frames, heads):
+    for k, (fr, hd) in enumerate(zip(frames, heads)):
         cv = Image.new("RGBA", (w + padx_l + padx_r, h + pad), (0, 0, 0, 0)); cv.paste(fr, (padx_l, pad), fr)
-        if hd and hd[2] >= area0 * 0.3:
+        if live[k] and k <= last:
             x = int(round(padx_l + hd[0] - base_x)); y = hd[1] + pad - ch + sink
+            lx, ly = x, y
             cv.alpha_composite(crw, (x, max(0, y)))
+        elif dying and lx is not None:
+            # knocked off: it tumbles away from the head and comes to rest on the ground
+            n = k - last; steps = max(1, len(frames) - 1 - last); t = min(1.0, n / steps)
+            ang = (-1 if side else 1) * min(35, 18 * n)
+            rc = crw.rotate(ang, resample=Image.NEAREST, expand=True)
+            gx = lx + (5 if side else -5) * n
+            gy = int(ly + (ground - rc.height - ly) * t) - (5 if t < 1 else 0)
+            gx = max(0, min(cv.width - rc.width, gx)); gy = max(0, min(cv.height - rc.height, gy))
+            cv.alpha_composite(rc, (gx, gy))
         out.append(cv)
     w2, h2 = out[0].size
     dst = os.path.join(OUT, name)
