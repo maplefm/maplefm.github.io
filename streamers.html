@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For Streamers · Club FM</title>
+<meta name="description" content="Club FM for MapleStory Classic streamers: a !price command for your chat, prices priced by roll, quest log, and credit for every sale your stream shows.">
+<link rel="canonical" href="https://maplefm.gg/streamers.html">
+<meta property="og:title" content="Club FM for streamers"><meta property="og:description" content="!price in your Twitch chat, real sale prices priced by roll, and credit for every shop your stream shows."><meta property="og:image" content="https://maplefm.gg/og.png">
+<link rel="icon" href="/og-icon.png?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1;--soft:#efe8ff;--code:#1e1733}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--soft:#2a2045;--code:#0e0a19}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
+main{max-width:900px;margin:0 auto;padding:14px 16px 48px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.brand{font:800 1.25rem Outfit,sans-serif;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}.brand img{height:30px;image-rendering:pixelated}
+.go{font-weight:700;text-decoration:none;background:var(--accent);color:#fff;padding:8px 14px;border-radius:999px;font-size:.9rem}
+.hero{background:linear-gradient(135deg,#3b1a7a,#6d3fd1 60%,#8b5cf6);color:#fff;border-radius:20px;padding:26px 24px}
+.hero h1{font:800 2.2rem/1.1 Outfit,sans-serif;margin:0}.hero p{margin:10px 0 0;font-size:1.05rem;opacity:.92;max-width:640px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.card h2{font:700 1.1rem Outfit,sans-serif;margin:0 0 6px}.card p{margin:0;color:var(--muted)}
+h2.s{font:800 1.4rem Outfit,sans-serif;margin:26px 0 8px}
+.code{display:flex;gap:8px;align-items:stretch;margin:8px 0}
+.code code{flex:1;background:var(--code);color:#e9e2ff;border-radius:12px;padding:12px 14px;font:13px/1.5 ui-monospace,Consolas,monospace;overflow-x:auto;white-space:nowrap}
+.code button{font:700 .85rem Inter;border:0;background:var(--accent);color:#fff;border-radius:12px;padding:0 14px;cursor:pointer}
+.chat{background:#18181b;color:#efeff1;border-radius:12px;padding:12px 14px;font:14px/1.6 Inter,sans-serif}
+.chat b{color:#a970ff}.chat .bot b{color:#00ad96}
+ol{padding-left:20px}ol li{margin:6px 0}
+.note{color:var(--muted);font-size:.9rem}
+.cta{background:var(--card);border:2px solid var(--accent);border-radius:16px;padding:18px;margin-top:22px}
+.cta h2{font:800 1.3rem Outfit,sans-serif;margin:0 0 6px}
+a{color:var(--accent)}
+</style></head><body><main>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt=""> Club FM</a><a class="go" href="/">Open the price board</a></div>
+<section class="hero"><h1>Club FM for streamers</h1><p>Your chat asks "what's this worth?" all stream. Give them an answer from real Free Market sales, priced by the item's roll, in one command.</p></section>
+
+<div class="grid">
+  <div class="card"><h2>!price in your chat</h2><p>Viewers type !price claw 60 and your bot answers with the typical sale, the range, the cheapest listing up right now and today's move.</p></div>
+  <div class="card"><h2>Priced by roll</h2><p>A 10 attack Work Gloves and a clean pair aren't the same item. Equips are priced by their attack or main stat, and by slots used.</p></div>
+  <div class="card"><h2>Your shops count</h2><p>Every shop your stream shows on screen is read and credited to your channel on the board, and linking Twitch earns you credit in the Earn program.</p></div>
+  <div class="card"><h2>Quest Log</h2><p>Every quest at your level, what it needs, where it drops, and what it costs to just buy. Send chat to maplefm.gg/quests.html.</p></div>
+</div>
+
+<h2 class="s">Add !price to your chat</h2>
+<p>Works with Nightbot, StreamElements and Fossabot. Paste one of these in your chat as a mod:</p>
+<p class="note"><b>Nightbot</b></p>
+<div class="code"><code id="nb">!commands add !price $(urlfetch https://clubfm-accounts.aaweaver93.workers.dev/chat/price?q=$(querystring))</code><button type="button" data-c="nb">Copy</button></div>
+<p class="note"><b>StreamElements</b></p>
+<div class="code"><code id="se">!command add !price ${customapi.https://clubfm-accounts.aaweaver93.workers.dev/chat/price?q=${queryescape ${1:}}}</code><button type="button" data-c="se">Copy</button></div>
+<p class="note"><b>Fossabot</b>: add a command !price with the response</p>
+<div class="code"><code id="fb">$(customapi https://clubfm-accounts.aaweaver93.workers.dev/chat/price?q=$(querystring))</code><button type="button" data-c="fb">Copy</button></div>
+<p class="note">What chat sees:</p>
+<div class="chat"><div><b>viewer</b>: !price claw 60</div><div class="bot"><b>Nightbot</b>: <span id="demo">Claw Attack Scroll 60%: typical 244K (240K to 250K) from 24 sales · cheapest now 190K · down 11% today · maplefm.gg/item/claw-attack-scroll-60</span></div></div>
+<p class="note">Chat shortcuts work too: wg, gfa 60, claw 60, 10 int earring. Live answer above is pulled from the board when this page loads.</p>
+
+<h2 class="s">Get credit for your stream</h2>
+<ol>
+  <li>Stream MapleStory Classic as you normally do. When you open shops in the Free Market, Club FM reads them and credits your channel on the board under On stream.</li>
+  <li>Sign in at <a href="/contribute.html#earn">maplefm.gg/contribute.html</a> with Discord and link your Twitch. Your shops then count toward the Earn program.</li>
+  <li>Join the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a> to get the Streamer role and a direct line for feature requests.</li>
+</ol>
+
+<div class="cta"><h2>Partner streamers</h2><p>We work with a few Classic streamers who use Club FM on stream: a partner spot on the board, a !price command set up for you, features built for your stream, and support for the channel. Message Maya in the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a>.</p></div>
+</main>
+<script>
+document.querySelectorAll("button[data-c]").forEach(function (b) { b.addEventListener("click", function () { var t = document.getElementById(b.dataset.c).textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); }).catch(function () {}); }); });
+fetch("https://clubfm-accounts.aaweaver93.workers.dev/chat/price?q=claw%2060").then(function (r) { return r.text(); }).then(function (t) { if (t && t.length < 400) document.getElementById("demo").textContent = t; }).catch(function () {});
+</script>
+</body></html>
