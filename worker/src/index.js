@@ -71,6 +71,7 @@ async function route(req, env, url) {
   if (p === "/admin/note" && req.method === "POST") return adminNote(req, env);
   if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
   if (p === "/admin/channels" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelAccess(env), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/chanperm" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); let b = null; try { b = await req.json(); } catch (e) {} if (!b || !/^\d+$/.test(String(b.channel)) || !/^\d+$/.test(String(b.target))) return json({ error: "bad" }, 400); const r = await fetch(DISCORD + "/channels/" + b.channel + "/permissions/" + b.target, { method: "PUT", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ type: b.type === 1 ? 1 : 0, allow: String(b.allow || "0"), deny: String(b.deny || "0") }) }); return json({ status: r.status, body: r.ok ? null : await r.text() }); }
   if (p === "/admin/voice" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await privateVoice(req, env)); }
   if (p === "/kofi" && req.method === "POST") return kofi(req, env);
   if (p === "/admin/setup-commands" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await setupCommands(env)); }
@@ -481,7 +482,17 @@ async function channelAccess(env) {
   const [chans, roles, guild] = await Promise.all([get("/guilds/" + GUILD + "/channels"), get("/guilds/" + GUILD + "/roles"), get("/guilds/" + GUILD)]);
   let members = await get("/guilds/" + GUILD + "/members?limit=1000");
   if (!Array.isArray(chans) || !Array.isArray(roles)) return { error: "discord", chans, roles };
-  const memberErr = Array.isArray(members) ? null : members; if (!Array.isArray(members)) members = [];
+  const memberErr = Array.isArray(members) ? null : members;
+  if (!Array.isArray(members)) {
+    // no Server Members intent: look up everyone who has a site account, one by one
+    members = []; let cursor; const ids = [];
+    do { const l = await env.ACCOUNTS.list({ prefix: "acct:", cursor }); cursor = l.list_complete ? null : l.cursor; for (const k of l.keys) ids.push(k.name.slice(5)); } while (cursor);
+    for (let i = 0; i < ids.length; i += 10) {
+      const got = await Promise.all(ids.slice(i, i + 10).map((id) => fetch(DISCORD + "/guilds/" + GUILD + "/members/" + id, { headers: H }).then((r) => (r.ok ? r.json() : null)).catch(() => null)));
+      for (const m of got) if (m && m.user) members.push(m);
+    }
+  }
+  const roleHolders = {}; for (const m of members) for (const id of m.roles || []) (roleHolders[id] || (roleHolders[id] = [])).push(m.nick || m.user.global_name || m.user.username);
   const rp = {}, rn = {}; for (const r of roles) { rp[r.id] = BigInt(r.permissions); rn[r.id] = r.name; }
   const ev = GUILD, owner = guild && guild.owner_id;
   const parent = {}; for (const c of chans) parent[c.id] = c;
@@ -502,7 +513,8 @@ async function channelAccess(env) {
     const who = members.filter((m) => canSee(c, m.roles || [], m.user.id)).map((m) => (m.nick || m.user.global_name || m.user.username) + (m.user.bot ? " (bot)" : ""));
     return { name: c.name, type: c.type === 2 ? "voice" : c.type === 0 ? "text" : c.type === 5 ? "announcement" : c.type === 15 ? "forum" : String(c.type), category: (parent[c.parent_id] || {}).name || "", everyone, roles: rolesIn, members: everyone ? null : who };
   });
-  return { members: members.length, memberErr, channels: out };
+  const holders = {}; for (const r of roles) if (roleHolders[r.id]) holders[r.name] = roleHolders[r.id];
+  return { members: members.length, memberErr: memberErr ? "member list needs the Server Members intent; showing members with site accounts" : null, ids: roles.reduce((o, r) => (o[r.name] = r.id, o), {}), chanIds: chans.reduce((o, c) => (o[c.name] = c.id, o), {}), holders, channels: out };
 }
 // a voice channel only the listed members (and admins) can see and join
 async function privateVoice(req, env) {
