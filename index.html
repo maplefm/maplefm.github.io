@@ -652,6 +652,10 @@ tbody tr.thin td { opacity: .72; }
 .li .av { grid-row: 1 / span 3; width: 30px; height: 30px; flex-basis: 30px; border-radius: 50%; font-size: .8rem; border-width: 1.5px; }
 .li b { font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .86rem; }
 .li small { grid-column: 2; color: var(--muted); font-weight: 700; font-size: .72rem; }
+.li small .wh { font-weight: 800; color: var(--ink); }
+.li small .unk { font-style: italic; }
+.li small a.tv { text-decoration: none; font-size: .9em; filter: grayscale(.2); }
+.li small a.tv:hover { filter: none; }
 .li .stt { grid-column: 2; font-size: .68rem; font-weight: 800; }
 .li .stt.up { color: var(--up); } .li .stt.gone { color: var(--muted); text-decoration: line-through; } .li .stt.old { color: var(--muted); }
 .li .p { grid-row: 1 / span 3; grid-column: 3; text-align: right; }
@@ -1548,7 +1552,15 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     if (newest.stream) { note.appendChild(document.createTextNode(" · seen on ")); note.appendChild(streamLink(newest)); }
     if (!li) note.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
-  function where(l) { return [l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "", roomLabel(l.r)].filter(Boolean).join(", "); }
+  function where(l) { return [l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "", roomLabel(l.r) + (l.r && l.ri ? " (likely)" : "")].filter(Boolean).join(", "); }
+  // Where to buy: where to walk to, in plain words; says so when the room hasn't been seen yet
+  function buyWhere(l) {
+    if (l.chat) return "trade chat";
+    var room = l.r && l.r !== "chat" ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
+    var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
+    if (!ch && !room) return "location not seen yet";
+    return [ch || "channel not seen yet", room || "room not seen yet"].join(", ");
+  }
   function hue(s) { var h = 0; for (var k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) % 360; return h; }
   function avatar(name, cls) { var a = el("span", "av" + (cls ? " " + cls : ""), (name || "?").replace(/[^A-Za-z0-9]/g, "").charAt(0).toUpperCase() || "?"); a.style.background = "hsl(" + hue(name || "") + " 55% 48%)"; a.setAttribute("aria-hidden", "true"); return a; }
 
@@ -2033,6 +2045,18 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
         if (best) { l.c = best.c; l.ci = true; if (!l.r && best.r) l.r = best.r; n++; }
       });
       if (n) mark("channels inferred " + n);
+      // the same for the room: a shop doesn't move while it's open, so a sighting with no Free Market room takes the
+      // room another scanner or stream saw the same seller's shop in, on the same channel, within three hours
+      var rooms = {}, nr = 0;
+      L.forEach(function (l) { if (l.c && !l.chat && l.s && l.r && l.r !== "chat" && !l.ri) (rooms[String(l.s).toLowerCase() + "|" + l.c] || (rooms[String(l.s).toLowerCase() + "|" + l.c] = [])).push(l); });
+      L.forEach(function (l) {
+        if (!l.c || l.chat || !l.s || l.r) return;
+        var rs = rooms[String(l.s).toLowerCase() + "|" + l.c]; if (!rs) return;
+        var best = null, bd = 3 * H + 1;
+        rs.forEach(function (o) { var d = Math.abs(o.t - l.t); if (d < bd) { bd = d; best = o; } });
+        if (best) { l.r = best.r; l.ri = true; nr++; }
+      });
+      if (nr) mark("rooms inferred " + nr);
     })();
     // A scroll whose tier was cut off joins the tier it's priced like, when one is close.
     var byN = {}; L.forEach(function (l) { if (!l.tl && !l.b) (byN[l.i] || (byN[l.i] = [])).push(l.u); });
@@ -3734,8 +3758,11 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       li.appendChild(avatar(x.s));
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
-      var w = where(x), sm = el("small", null, (w ? w + " · " : "") + ago(x.t)); li.appendChild(sm);
-      if (x.stream) { sm.appendChild(document.createTextNode(" · seen on ")); sm.appendChild(streamLink(x)); }
+      var sm = el("small"); li.appendChild(sm);
+      if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not seen yet/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
+      else { var w = where(x); sm.appendChild(document.createTextNode((w ? w + " · " : "") + ago(x.t))); }
+      // seen on a stream: a small TV that opens the broadcast at that moment; the streamer's name is on hover
+      if (x.stream) { var tv = streamLink(x); tv.textContent = "📺"; tv.classList.add("tv"); tv.title = "Seen on " + x.who + "'s stream. " + tv.title; tv.setAttribute("aria-label", tv.title); sm.appendChild(document.createTextNode(" ")); sm.appendChild(tv); }
       if (x.spot) li.appendChild(el("span", "stt gone", "Spot holder"));
       if (state.list === "buy") {
         var mine = (MYSOLD[soldKey(x)] || 0) > x.t;
