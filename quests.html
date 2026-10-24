@@ -1,122 +1,250 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quest Helper · MapleStory Classic · Club FM</title>
-<meta name="description" content="Every MapleStory Classic quest that asks for items: what you need, how many, where it drops or how to craft it, and what it costs to just buy it on the Free Market.">
+<title>Quest Log · MapleStory Classic · Club FM</title>
+<meta name="description" content="Your MapleStory Classic quest log: what's open at your level, what you've started, what's next, and exactly what each quest needs, where it drops and what it costs on the Free Market.">
 <link rel="canonical" href="https://maplefm.gg/quests.html">
-<meta property="og:title" content="Quest Helper · MapleStory Classic · Club FM"><meta property="og:description" content="What every quest needs, where to get it, and what it costs on the Free Market."><meta property="og:image" content="https://maplefm.gg/og.png">
-<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=1">
+<meta property="og:title" content="Quest Log · MapleStory Classic · Club FM"><meta property="og:description" content="Every quest at your level, what it needs, where to get it, and what it costs on the Free Market."><meta property="og:image" content="https://maplefm.gg/og.png">
+<link rel="icon" href="/og-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
-.ctl input,.ctl select{font:inherit;padding:8px 10px;border:2px solid var(--line2);border-radius:10px;background:#fff;color:var(--ink)}
-.ctl input[type=search]{flex:1 1 240px}
-.ctl label{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center}
-.q{border:2px solid var(--line2);border-radius:12px;padding:10px 12px;margin:10px 0;background:#fff}
-.q.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(109,63,209,.15)}
-.q h3{margin:0;font-size:1rem;display:flex;gap:8px;align-items:center;justify-content:space-between}
-.q h3 label{display:flex;gap:8px;align-items:center;cursor:pointer}
-.q .sub{font-size:.8rem;color:var(--muted);margin:2px 0 6px}
-.q table{margin:0}.q td{padding:5px 4px;font-size:.88rem;vertical-align:top}
-.q td.n{text-align:right;white-space:nowrap;font-weight:800}
-.q td small{display:block;color:var(--muted);font-size:.76rem}
-.cost{font-size:.82rem;color:var(--muted);margin:6px 0 0}
-.list{position:sticky;top:8px;z-index:5;border:2px solid var(--accent);border-radius:12px;background:var(--panel2);padding:10px 12px;margin:12px 0}
-.list h2{margin:0 0 6px;font-size:1rem}
-.list table td{font-size:.85rem;padding:3px 4px}
-.list td small{display:block;color:var(--muted);font-size:.76rem}
-.list .tot{font-weight:800;margin:6px 0 0}
-.muted{color:var(--muted)}
+:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1;--accent2:#8b5cf6;--soft:#efe8ff;--gold:#e0a91c;--gold-soft:#fff3d1;--ok:#12895f;--ok-soft:#dcf5ea;--warn:#b0570a;--shadow:0 2px 0 rgba(60,30,120,.06),0 8px 24px rgba(60,30,120,.08)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--accent2:#c4b5fd;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f12;--ok:#4ade80;--ok-soft:#173326;--shadow:0 2px 0 rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
+a{color:var(--accent)}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.brand{font:800 1.25rem Outfit,sans-serif;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}
+.brand img{height:30px;image-rendering:pixelated}
+.navs{display:flex;gap:8px;flex-wrap:wrap}
+.navs a{font-weight:700;font-size:.85rem;text-decoration:none;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.navs a.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.hero{background:linear-gradient(135deg,#3b1a7a,#6d3fd1 60%,#8b5cf6);color:#fff;border-radius:18px;padding:18px 20px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.hero h1{font:800 1.9rem/1.1 Outfit,sans-serif;margin:0}
+.hero p{margin:6px 0 0;opacity:.9}
+.me{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 12px;min-width:250px}
+.me .lvrow{display:flex;align-items:center;gap:8px;font-weight:700}
+.me input{width:70px;font:800 1.2rem Outfit;border:0;border-radius:10px;padding:4px 8px;text-align:center}
+.me small{display:block;opacity:.85;margin-top:6px;font-size:.78rem}
+.me a{color:#ffe08a;font-weight:700}
+.bar{height:8px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#ffd34d;border-radius:99px}
+.tabs{display:flex;gap:6px;margin:16px 0 10px;flex-wrap:wrap}
+.tabs button{font:700 .9rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tabs button em{font-style:normal;background:var(--soft);color:var(--accent);border-radius:99px;padding:0 8px;font-size:.8rem}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs button[aria-pressed="true"] em{background:rgba(255,255,255,.25);color:#fff}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ctl input,.ctl select{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.ctl input[type=search]{flex:1 1 260px}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}.hero{grid-template-columns:1fr}}
+.q{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:12px}
+.q.doing{border-color:var(--accent);box-shadow:0 0 0 2px rgba(109,63,209,.18),var(--shadow)}
+.q.done{opacity:.72}
+.qh{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center}
+.npc{width:56px;height:56px;border-radius:14px;background:var(--soft);display:grid;place-items:center;overflow:hidden}
+.npc img{max-width:52px;max-height:52px;image-rendering:pixelated}
+.qh h3{margin:0;font:700 1.08rem Outfit,sans-serif}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.chip{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent)}
+.chip.lv{background:var(--gold-soft);color:var(--warn)}.chip.rep{background:var(--ok-soft);color:var(--ok)}
+.acts{display:flex;gap:6px}
+.acts button{font:700 .8rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 10px;border-radius:10px;cursor:pointer}
+.acts button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.acts button.ok.on{background:var(--ok);border-color:var(--ok)}
+.sec{margin-top:10px}
+.sec h4{margin:0 0 6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.row{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.ic{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center}
+.ic img{max-width:32px;max-height:32px;image-rendering:pixelated}
+.row b{font-weight:700}.row a{text-decoration:none;font-weight:700}
+.src{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.src span{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:1px 6px}
+.src img{height:18px;image-rendering:pixelated}
+.qty{text-align:right;font-weight:800;white-space:nowrap}.qty small{display:block;font-weight:600;color:var(--muted);font-size:.75rem}
+.rw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rw span{display:inline-flex;gap:4px;align-items:center;font-weight:700;font-size:.85rem;background:var(--bg);border-radius:10px;padding:3px 8px}
+.rw img{height:22px;image-rendering:pixelated}
+.cost{margin-top:8px;font-size:.84rem;color:var(--muted)}
+.pre{font-size:.8rem;color:var(--muted);margin-top:6px}
+.side{position:sticky;top:10px;display:grid;gap:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px}
+.panel h2{margin:0 0 8px;font:700 1rem Outfit,sans-serif}
+.panel .row{grid-template-columns:30px 1fr auto}.panel .ic{width:30px;height:30px}
+.tot{font-weight:800;margin-top:8px}
+.note{color:var(--muted);font-size:.84rem}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+.foot{color:var(--muted);font-size:.78rem;margin-top:20px}
 </style></head><body><main>
-<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><a class="go" href="/">Open the live price board</a></div>
-<div class="card">
-<h1>Quest Helper</h1>
-<p class="sub">Every MapleStory Classic quest that asks for items: how many, where to get them, and what they cost to just buy on the Free Market.</p>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt=""> Club FM</a>
+<div class="navs"><a href="/items/">Item prices</a><a href="/report.html">Market close</a><a class="go" href="/">Price board</a></div></div>
+
+<section class="hero">
+  <div><h1>Quest Log</h1><p>Every MapleStory Classic quest: what's open at your level, what you've started, what's next, and exactly what each one needs, where it drops and what it costs to just buy.</p></div>
+  <div class="me">
+    <div class="lvrow">My level <input type="number" id="lv" min="1" max="250" placeholder="?"></div>
+    <div class="bar"><i id="pbar" style="width:0"></i></div>
+    <small id="ptxt">Set your level to see what's open.</small>
+    <small id="acct">Loading…</small>
+  </div>
+</section>
+
+<div class="tabs" id="tabs"></div>
 <div class="ctl">
-  <input type="search" id="s" placeholder="Search a quest, an item or an NPC, like processed wood or Icarus" aria-label="Search quests">
-  <label>My level <input type="number" id="lv" min="1" max="200" style="width:80px" placeholder="any"></label>
+  <input type="search" id="s" placeholder="Search a quest, item, NPC or mob: processed wood, Icarus, stirge" aria-label="Search quests">
   <select id="rg" aria-label="Region"><option value="">All regions</option></select>
-  <label><input type="checkbox" id="mine"> Only quests I'm on</label>
+  <select id="sort" aria-label="Sort"><option value="lv">Lowest level first</option><option value="exp">Most EXP first</option><option value="cost">Cheapest to buy first</option></select>
 </div>
-<div class="list" id="list" hidden></div>
-<p class="note" id="count">Loading quests…</p>
-<div id="qs"></div>
-<p class="note src">Quests from the game data. Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0); drop rates are measured by players. Prices are typical Free Market sales on Club FM.</p>
+<div class="layout">
+  <div id="qs"><p class="empty">Loading quests…</p></div>
+  <aside class="side">
+    <div class="panel" id="shop"><h2>Shopping list</h2><p class="note">Start a quest and everything it needs adds up here, with what it costs on the Free Market.</p></div>
+    <div class="panel"><h2>How it works</h2><p class="note">Mark quests Started or Done here. Sign in with Discord and your log follows you to any browser. Coming soon: FM Watcher reads your in-game quest window and fills this in for you.</p></div>
+  </aside>
 </div>
-<p class="foot">Tick the quests you're on and Club FM adds up everything you need and what it would cost to buy. Your picks stay in this browser. <a href="/terms.html">Terms</a></p>
+<p class="foot">Quests and rewards from the MapleStory Classic game data (pictures via maplestory.io). Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0); drop rates are measured by players. Prices are typical Free Market sales on Club FM. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
 </main>
 <script>
 (function () {
-  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
+  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/", ACCT = "https://clubfm-accounts.aaweaver93.workers.dev", IO = "https://maplestory.io/api/MCW/1/";
   var $ = function (id) { return document.getElementById(id); };
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
   var TIER = { Lesser: "100%", Intermediate: "60%", Greater: "10%" };
   function shown(n) { var m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(n); return m ? m[1] + " " + (TIER[m[2]] || m[2]) : n; }
   function slug(n) { return shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
   function meso(n) { n = +n || 0; if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B"; if (n >= 999.5e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1).replace(/\.?0+$/, "") + "K"; return Math.round(n).toLocaleString(); }
-  var MINE = {}; try { MINE = JSON.parse(localStorage.getItem("fm-quests") || "{}") || {}; } catch (e) {}
-  function save() { try { localStorage.setItem("fm-quests", JSON.stringify(MINE)); } catch (e) {} }
-  var Q = [], G = {}, PRICE = {}, PAGES = {};
-  function where(item) {
-    var g = G[item]; if (!g) return "";
-    var bits = [];
-    if (g.d && g.d.length) bits.push("Drops from " + g.d.slice(0, 2).map(function (d) { return d[0] + (d[2] != null ? " " + d[2] + "%" : ""); }).join(", "));
-    if (g.c && g.c.length) { var c = g.c[0]; bits.push("Craft (" + c[0] + " Lv " + c[1] + "): " + c[2].map(function (x) { return x[1] + " " + x[0]; }).join(", ")); }
-    if (g.s && g.s.length) bits.push("NPC " + g.s[0][0] + " sells it for " + meso(g.s[0][2]));
-    return bits.join(" · ");
+  function img(src, cls) { var i = new Image(); i.loading = "lazy"; i.alt = ""; i.src = src; if (cls) i.className = cls; i.onerror = function () { i.remove(); }; return i; }
+  function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) b.appendChild(img(IO + "item/" + id + "/icon")); return b; }
+
+  // ---- my log: this browser, plus the Discord account when signed in
+  var LOG = { done: {}, doing: {}, level: 0 }; try { var s0 = JSON.parse(localStorage.getItem("fm-qlog") || "null"); if (s0) LOG = s0; } catch (e) {}
+  LOG.done = LOG.done || {}; LOG.doing = LOG.doing || {};
+  var SIGNED = false;
+  function saveLocal() { try { localStorage.setItem("fm-qlog", JSON.stringify(LOG)); } catch (e) {} }
+  function push(set, level) {
+    if (!SIGNED) return;
+    var body = {}; if (set) body.set = set; if (level != null) body.level = level;
+    fetch(ACCT + "/me/quests", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(function () {});
   }
-  function itemCell(name, qty) {
-    var td = el("td"), a;
-    if (PAGES[name] || PRICE[name] != null) { a = el("a", null, shown(name)); a.href = "/item/" + slug(name) + "/"; } else a = el("b", null, shown(name));
-    td.appendChild(a); var w = where(name); if (w) td.appendChild(el("small", null, w));
-    return td;
+  function setState(name, st) {
+    delete LOG.done[name]; delete LOG.doing[name];
+    if (st === "done") LOG.done[name] = Date.now(); else if (st === "doing") LOG.doing[name] = Date.now();
+    saveLocal(); var o = {}; o[name] = st || null; push(o); render();
+  }
+  function stateOf(n) { return LOG.done[n] ? "done" : LOG.doing[n] ? "doing" : ""; }
+
+  var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, TAB = "open";
+  try { TAB = localStorage.getItem("fm-qtab") || "open"; } catch (e) {}
+
+  function sources(name) {
+    var g = G[name], out = el("div", "src"); if (!g) return null;
+    (g.d || []).slice(0, 3).forEach(function (d) { var s = el("span"); if (d[6] != null) s.appendChild(img(IO + "mob/" + d[6] + "/icon")); s.appendChild(document.createTextNode(d[0] + (d[2] != null ? " " + d[2] + "%" : ""))); out.appendChild(s); });
+    if (g.c && g.c.length) { var c = g.c[0]; out.appendChild(el("span", null, "⚒ " + c[0] + " Lv " + c[1] + ": " + c[2].map(function (x) { return x[1] + " " + x[0]; }).join(", "))); }
+    if (g.s && g.s.length) { var sp = el("span"); if (g.s[0][4] != null) sp.appendChild(img(IO + "npc/" + g.s[0][4] + "/icon")); sp.appendChild(document.createTextNode("NPC " + g.s[0][0] + " · " + meso(g.s[0][2]))); out.appendChild(sp); }
+    return out.childNodes.length ? out : null;
+  }
+  function needRow(name, qty) {
+    var r = el("div", "row"); r.appendChild(itemIcon(name));
+    var mid = el("div"), nm;
+    if (PRICE[name] != null || G[name]) { nm = el("a", null, shown(name)); nm.href = "/item/" + slug(name) + "/"; } else nm = el("b", null, shown(name));
+    mid.appendChild(nm); var src = sources(name); if (src) mid.appendChild(src); r.appendChild(mid);
+    var q = el("div", "qty", "×" + qty.toLocaleString()); if (PRICE[name]) q.appendChild(el("small", null, meso(PRICE[name] * qty) + " on the FM")); r.appendChild(q);
+    return r;
+  }
+  function costOf(q) { var c = 0; q.need.forEach(function (x) { if (PRICE[x[0]]) c += PRICE[x[0]] * x[1]; }); return c; }
+  function preDone(q) { return !q.pre.length || q.pre.every(function (id) { var p = BYID[id]; return !p || LOG.done[p.n]; }); }
+  function bucket(q) {
+    var st = stateOf(q.n), lv = LOG.level || 0;
+    if (st === "done") return "done"; if (st === "doing") return "doing";
+    if (lv && q.lv > lv) return "next";
+    return preDone(q) ? "open" : "locked";
+  }
+  function card(q) {
+    var st = stateOf(q.n), d = el("div", "q" + (st ? " " + st : ""));
+    var h = el("div", "qh"), npc = el("div", "npc"); if (q.gid != null) npc.appendChild(img(IO + "npc/" + q.gid + "/icon")); h.appendChild(npc);
+    var t = el("div"); t.appendChild(el("h3", null, q.n.replace(/\?/g, " ")));
+    var m = el("div", "meta"); if (q.lv) m.appendChild(el("span", "chip lv", "Lv " + q.lv + "+")); if (q.g) m.appendChild(el("span", "chip", q.g)); if (q.a) m.appendChild(el("span", "chip", q.a)); if (q.rep) m.appendChild(el("span", "chip rep", "repeatable"));
+    t.appendChild(m); h.appendChild(t);
+    var acts = el("div", "acts");
+    var b1 = el("button", st === "doing" ? "on" : "", st === "doing" ? "Started ✓" : "Start"); b1.type = "button"; b1.addEventListener("click", function () { setState(q.n, st === "doing" ? null : "doing"); });
+    var b2 = el("button", "ok" + (st === "done" ? " on" : ""), st === "done" ? "Done ✓" : "Done"); b2.type = "button"; b2.addEventListener("click", function () { setState(q.n, st === "done" ? null : "done"); });
+    acts.appendChild(b1); acts.appendChild(b2); h.appendChild(acts); d.appendChild(h);
+    if (q.need.length) { var s1 = el("div", "sec"); s1.appendChild(el("h4", null, "Bring")); q.need.forEach(function (x) { s1.appendChild(needRow(x[0], x[1])); }); d.appendChild(s1); var c = costOf(q); if (c) d.appendChild(el("p", "cost", "Buying it all on the Free Market: about " + meso(c) + " mesos.")); }
+    if (q.kill.length) { var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt")); q.kill.forEach(function (k) { var r = el("div", "row"), ic = el("div", "ic"); if (k[2] != null) ic.appendChild(img(IO + "mob/" + k[2] + "/icon")); r.appendChild(ic); r.appendChild(el("b", null, k[0])); r.appendChild(el("div", "qty", "×" + k[1])); s2.appendChild(r); }); d.appendChild(s2); }
+    var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, "💰 " + q.meso.toLocaleString())); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
+    q.get.forEach(function (x) { var s = el("span"); if (IDS[x[0]]) s.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); rw.appendChild(s); });
+    if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); d.appendChild(s3); }
+    if (q.pre.length) { var pn = q.pre.map(function (id) { return BYID[id] ? BYID[id].n : null; }).filter(Boolean); if (pn.length) d.appendChild(el("p", "pre", "After: " + pn.join(", ") + (preDone(q) ? " ✓" : ""))); }
+    return d;
   }
   function render() {
-    var s = $("s").value.trim().toLowerCase(), lv = +$("lv").value || 0, rg = $("rg").value, only = $("mine").checked;
-    var box = $("qs"); box.textContent = "";
-    var shown_ = Q.filter(function (q) {
-      if (only && !MINE[q.name]) return false;
-      if (lv && q.lvl > lv) return false;
-      if (rg && q.region !== rg) return false;
-      if (s && (q.name + " " + q.giver + " " + q.region + " " + q.items.map(function (x) { return x[0]; }).join(" ")).toLowerCase().indexOf(s) < 0) return false;
+    var s = $("s").value.trim().toLowerCase(), rg = $("rg").value, sort = $("sort").value, lv = LOG.level || 0;
+    var counts = { open: 0, doing: 0, next: 0, done: 0, all: Q.length }, buckets = {};
+    Q.forEach(function (q) { var b = bucket(q); buckets[q.id] = b; if (b === "locked") b = "open"; counts[b] = (counts[b] || 0) + 1; });
+    var T = $("tabs"); T.textContent = "";
+    [["open", lv ? "Open at Lv " + lv : "Open now"], ["doing", "In progress"], ["next", "Upcoming"], ["done", "Completed"], ["all", "All quests"]].forEach(function (t) {
+      var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", TAB === t[0]); b.appendChild(document.createTextNode(t[1])); b.appendChild(el("em", null, counts[t[0]] || 0));
+      b.addEventListener("click", function () { TAB = t[0]; try { localStorage.setItem("fm-qtab", TAB); } catch (e) {} render(); }); T.appendChild(b);
+    });
+    var inRange = Q.filter(function (q) { return !lv || q.lv <= lv; }), doneIn = inRange.filter(function (q) { return LOG.done[q.n]; }).length;
+    $("pbar").style.width = inRange.length ? Math.round(doneIn / inRange.length * 100) + "%" : "0";
+    $("ptxt").textContent = lv ? doneIn + " of " + inRange.length + " quests up to level " + lv + " done." : "Set your level to see what's open.";
+    var list = Q.filter(function (q) {
+      var b = buckets[q.id];
+      if (TAB === "open" && b !== "open" && b !== "locked") return false;
+      if (TAB !== "open" && TAB !== "all" && b !== TAB) return false;
+      if (rg && q.a !== rg) return false;
+      if (s && (q.n + " " + q.g + " " + q.a + " " + q.need.map(function (x) { return x[0]; }).join(" ") + " " + q.kill.map(function (x) { return x[0]; }).join(" ")).toLowerCase().indexOf(s) < 0) return false;
       return true;
     });
-    $("count").textContent = shown_.length + " of " + Q.length + " quests" + (lv ? " open at level " + lv : "") + ".";
-    shown_.slice(0, 300).forEach(function (q) {
-      var d = el("div", "q" + (MINE[q.name] ? " on" : "")), h = el("h3"), lab = el("label"), cb = el("input"); cb.type = "checkbox"; cb.checked = !!MINE[q.name];
-      cb.addEventListener("change", function () { if (cb.checked) MINE[q.name] = 1; else delete MINE[q.name]; save(); render(); });
-      lab.appendChild(cb); lab.appendChild(document.createTextNode(q.name)); h.appendChild(lab); h.appendChild(el("span", "muted", q.lvl ? "Lv " + q.lvl + "+" : "")); d.appendChild(h);
-      d.appendChild(el("p", "sub", [q.giver ? "from " + q.giver : "", q.region, q.rep ? "repeatable" : ""].filter(Boolean).join(" · ")));
-      var tb = el("table"), cost = 0, priced = 0;
-      q.items.forEach(function (x) { var tr = el("tr"); tr.appendChild(itemCell(x[0], x[1])); var p = PRICE[x[0]]; var n = el("td", "n", "×" + x[1].toLocaleString()); if (p) { n.appendChild(el("small", null, meso(p * x[1]) + " to buy")); cost += p * x[1]; priced++; } tr.appendChild(n); tb.appendChild(tr); });
-      d.appendChild(tb);
-      if (priced) d.appendChild(el("p", "cost", "Buying " + (priced < q.items.length ? "the priced items" : "everything") + " on the Free Market: about " + meso(cost) + " mesos."));
-      box.appendChild(d);
-    });
-    if (shown_.length > 300) box.appendChild(el("p", "note", "Showing the first 300. Search or set your level to narrow it down."));
-    // shopping list for the quests you're on
-    var mine = Q.filter(function (q) { return MINE[q.name]; }), L = $("list"); L.textContent = "";
-    if (!mine.length) { L.hidden = true; return; }
-    L.hidden = false; L.appendChild(el("h2", null, "Your shopping list · " + mine.length + " quest" + (mine.length === 1 ? "" : "s")));
-    var need = {}; mine.forEach(function (q) { q.items.forEach(function (x) { need[x[0]] = (need[x[0]] || 0) + x[1]; }); });
-    var tb2 = el("table"), tot = 0;
-    Object.keys(need).sort().forEach(function (n) { var tr = el("tr"); tr.appendChild(itemCell(n)); var p = PRICE[n]; var c = el("td", "n", "×" + need[n].toLocaleString()); if (p) { c.appendChild(el("small", null, meso(p * need[n]))); tot += p * need[n]; } tr.appendChild(c); tb2.appendChild(tr); });
-    L.appendChild(tb2); if (tot) L.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy what's priced."));
+    if (TAB === "open") list.sort(function (a, b) { return (buckets[a.id] === "locked") - (buckets[b.id] === "locked"); });
+    if (sort === "exp") list.sort(function (a, b) { return b.exp - a.exp; });
+    else if (sort === "cost") list.sort(function (a, b) { return costOf(a) - costOf(b); });
+    var box = $("qs"); box.textContent = "";
+    if (!list.length) box.appendChild(el("p", "empty", TAB === "doing" ? "Nothing started yet. Hit Start on a quest and it shows here, with a shopping list on the side." : TAB === "done" ? "No quests marked done yet." : "No quests match."));
+    list.slice(0, 120).forEach(function (q) { box.appendChild(card(q)); });
+    if (list.length > 120) box.appendChild(el("p", "note", "Showing 120 of " + list.length + ". Search or pick a region to narrow it down."));
+    // shopping list for started quests
+    var P = $("shop"); P.textContent = ""; P.appendChild(el("h2", null, "Shopping list"));
+    var mine = Q.filter(function (q) { return LOG.doing[q.n]; }), need = {};
+    mine.forEach(function (q) { q.need.forEach(function (x) { need[x[0]] = (need[x[0]] || 0) + x[1]; }); });
+    var keys = Object.keys(need).sort(), tot = 0;
+    if (!keys.length) P.appendChild(el("p", "note", "Start a quest and everything it needs adds up here, with what it costs on the Free Market."));
+    keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = "/item/" + slug(n) + "/"; r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
+    if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
   }
+  function accountLine() {
+    var a = $("acct"); a.textContent = "";
+    if (SIGNED) a.appendChild(document.createTextNode("Synced to your Discord account."));
+    else { a.appendChild(document.createTextNode("Saved in this browser. ")); var l = el("a", null, "Sign in with Discord"); l.href = ACCT + "/login?back=quests"; a.appendChild(l); a.appendChild(document.createTextNode(" to keep it everywhere.")); }
+  }
+  $("lv").addEventListener("change", function () { var v = Math.max(0, Math.min(250, parseInt(this.value, 10) || 0)); LOG.level = v; saveLocal(); push(null, v); render(); });
+  ["s", "rg", "sort"].forEach(function (id) { $(id).addEventListener("input", render); });
+
+  var acct = fetch(ACCT + "/me/quests", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   Promise.all([fetch(LIVE + "data/itemguide.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
-               fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })]).then(function (res) {
-    G = res[0].items || {}; var byQ = {};
-    Object.keys(G).forEach(function (item) { (G[item].q || []).forEach(function (q) {
-      var k = q[0]; var o = byQ[k] || (byQ[k] = { name: q[0], lvl: q[1], giver: q[3], region: q[4], rep: q[5], items: [] });
-      o.items.push([item, q[2]]); if (q[1] > o.lvl) o.lvl = q[1];
-    }); PAGES[item] = 1; });
-    Q = Object.keys(byQ).map(function (k) { return byQ[k]; }).sort(function (a, b) { return a.lvl - b.lvl || a.name.localeCompare(b.name); });
+               fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }), acct]).then(function (res) {
+    var g = res[0]; G = g.items || {}; IDS = g.ids || {}; Q = (g.quests || []).slice();
+    Q.forEach(function (q) { BYID[q.id] = q; });
+    Q.sort(function (a, b) { return a.lv - b.lv || a.n.localeCompare(b.n); });
     ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) PRICE[r.item] = r.typ; });
-    var regions = {}; Q.forEach(function (q) { if (q.region) regions[q.region] = 1; });
+    var a = res[2];
+    if (a && a.signedIn) {
+      SIGNED = true;
+      // merge: anything marked in this browser but not on the account goes up once
+      var up = {}; Object.keys(LOG.done).forEach(function (n) { if (!a.done[n]) up[n] = "done"; }); Object.keys(LOG.doing).forEach(function (n) { if (!a.done[n] && !a.doing[n]) up[n] = "doing"; });
+      LOG.done = Object.assign({}, a.done, LOG.done); LOG.doing = Object.assign({}, a.doing); Object.keys(up).forEach(function (n) { if (up[n] === "doing") LOG.doing[n] = Date.now(); });
+      Object.keys(LOG.done).forEach(function (n) { delete LOG.doing[n]; });
+      if (a.level) LOG.level = a.level; else if (LOG.level) push(null, LOG.level);
+      if (Object.keys(up).length) push(up);
+      saveLocal();
+    }
+    accountLine();
+    if (LOG.level) $("lv").value = LOG.level;
+    var regions = {}; Q.forEach(function (q) { if (q.a) regions[q.a] = 1; });
     Object.keys(regions).sort().forEach(function (r) { var o = el("option", null, r); o.value = r; $("rg").appendChild(o); });
-    try { var lv0 = localStorage.getItem("fm-quest-lv"); if (lv0) $("lv").value = lv0; } catch (e) {}
-    var m = /[?&#]q=([^&]+)/.exec(location.href); if (m) $("s").value = decodeURIComponent(m[1]);
+    var m = /[?&#]q=([^&]+)/.exec(location.href); if (m) { $("s").value = decodeURIComponent(m[1]); TAB = "all"; }
     render();
-  }).catch(function () { $("count").textContent = "Couldn't load the quest list. Try again in a minute."; });
-  ["s", "rg", "mine"].forEach(function (id) { $(id).addEventListener("input", render); });
-  $("lv").addEventListener("input", function () { try { localStorage.setItem("fm-quest-lv", $("lv").value); } catch (e) {} render(); });
+  }).catch(function () { $("qs").textContent = ""; $("qs").appendChild(el("p", "empty", "Couldn't load the quest list. Try again in a minute.")); });
 })();
 </script>
 </body></html>

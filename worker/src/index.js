@@ -96,7 +96,7 @@ function login(req, env, url) {
   back.searchParams.set("prompt", "none");
   const h = new Headers({ Location: back.toString() });
   h.append("Set-Cookie", `fm_state=${state}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
-  h.append("Set-Cookie", `fm_back=${url.searchParams.get("back") === "home" ? "home" : "earn"}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
+  h.append("Set-Cookie", `fm_back=${["home", "quests"].includes(url.searchParams.get("back")) ? url.searchParams.get("back") : "earn"}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
 }
 
@@ -127,7 +127,7 @@ async function callback(req, env, url) {
   if (!acct.code) acct.code = await newCode(env, u.id);
   await env.ACCOUNTS.put(key, JSON.stringify(acct));
   const session = await sign(env.SESSION_SECRET, u.id + "|" + (now() + 30 * DAY));
-  const h = new Headers({ Location: env.SITE + (cookie(req, "fm_back") === "home" ? "/#signed-in" : "/earn.html#signed-in") });
+  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in" }[cookie(req, "fm_back")] || "/earn.html#signed-in") });
   h.append("Set-Cookie", `${COOKIE}=${session}; Path=/; Max-Age=${30 * DAY}; Secure; HttpOnly; SameSite=None`);
   h.append("Set-Cookie", `fm_state=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
