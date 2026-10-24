@@ -94,9 +94,42 @@ def main():
     qlist = get(IO + "/quest") or []
     print("game quests", len(qlist))
     npc_name = {}
+    mob_name = {}
+    for m in (get(IO + "/mob") or []):
+        if isinstance(m, dict) and m.get("id") is not None: mob_name[m["id"]] = m.get("name") or ""
+    allq = []
+    def item_name(iid):
+        nm = names.get(iid)
+        if not nm:
+            n = get(f"{IO}/item/{iid}/name")
+            nm = (n.get("name") if isinstance(n, dict) else None) or str(iid)
+            names[iid] = nm
+        return nm
     for k, q in enumerate(qlist):
         d = get(f"{IO}/quest/{q['id']}")
         if not d or "id" not in d: continue
+        try:
+            st0, rc = d.get("requirementToStart") or {}, d.get("requirementToComplete") or {}
+            rw = d.get("rewardOnComplete") or {}
+            nm0 = str(d.get("name") or q.get("name") or "").strip()
+            w0 = wq_by_name.get(nm0.lower()) or {}
+            gid0 = st0.get("npcId")
+            if gid0 and gid0 not in npc_name:
+                n = get(f"{IO}/npc/{gid0}/name"); npc_name[gid0] = (n.get("name") if isinstance(n, dict) else n) or ""
+            allq.append({
+                "id": d["id"], "n": nm0, "lv": int(st0.get("levelMinimum") or num(w0.get("required_level")) or 0),
+                "g": w0.get("giver") or npc_name.get(gid0, ""), "gid": gid0, "a": w0.get("region") or d.get("areaName") or "",
+                "rep": 1 if str(w0.get("repeatable") or "0") == "1" else 0,
+                "jobs": st0.get("jobs") or [],
+                "pre": [x.get("id") for x in (st0.get("quests") or []) if isinstance(x, dict) and x.get("state") == 2],
+                "need": [[item_name(int(x["id"])), int(x["count"])] for x in (rc.get("items") or []) if int(x.get("count") or 0) > 0],
+                "kill": [[mob_name.get(x.get("id"), str(x.get("id"))), int(x.get("count") or 0), x.get("id")] for x in (rc.get("mobs") or [])],
+                "exp": int(rw.get("exp") or 0), "meso": int(rw.get("money") or rw.get("meso") or 0), "fame": int(rw.get("pop") or rw.get("fame") or 0),
+                "get": [[item_name(int(x["id"])), int(x["count"])] for x in (rw.get("items") or []) if int(x.get("count") or 0) > 0],
+                "end": rc.get("npcId"),
+            })
+        except Exception as e:
+            print("quest", q.get("id"), e)
         req = (d.get("requirementToComplete") or {}).get("items") or []
         need = [(int(x["id"]), int(x["count"])) for x in req if int(x.get("count") or 0) > 0]
         if not need: continue
@@ -184,9 +217,13 @@ def main():
     for nm in want:
         i = byname.get(nm.lower())
         if i: ids[nm] = i
+    for q in allq:
+        for x in q["need"] + q["get"]:
+            i = byname.get(x[0].lower())
+            if i: ids[x[0]] = i
     doc = {"v": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "n": len(items),
            "src": "Quests from MapleStory Classic game data (maplestory.io). Givers, crafting, drops and shops from the MapleStory Classic Wiki (mapleclassic.wiki), CC BY-NC-SA 4.0.",
-           "items": items, "ids": ids}
+           "items": items, "ids": ids, "quests": allq}
     json.dump(doc, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("items", len(items), "with quests", sum(1 for v in items.values() if "q" in v), "bytes", os.path.getsize(out_path))
 
