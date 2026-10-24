@@ -276,6 +276,7 @@ _SCROLL_BASES = [
     ("Earring LUK Scroll", ["earring luk", "earing luk", "earning luk", "earing luck", "earring luck", "luk earring"]),
     ("Hat Accuracy Scroll", ["hat acc", "helm acc"]), ("Cape STR Scroll", ["cape str"]),
     ("Pet Equip Speed Scroll", ["pet equip speed", "pet speed"]), ("Bow Attack Scroll", ["bow"]),
+    ("Two-handed Sword Attack Scroll", ["2hsword", "2h sword", "2hs", "two handed sword", "two hand sword", "2 hand sword"]),
 ]
 _TIER = {"10": "Greater", "60": "Intermediate", "100": "Lesser"}
 
