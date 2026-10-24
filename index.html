@@ -2579,7 +2579,10 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var help = el("a", "st"); help.href = "contribute.html"; help.title = "Run FM Watcher while you shop and climb the ranks";
     help.appendChild(el("span", "heart", "♥")); help.appendChild(el("b", null, "Scan with us")); c.appendChild(help);
     // the hook: the biggest sales caught, one at a time
-    var big = k && k.big ? [k.big] : D.sales.slice().sort(function (a, b) { return b.p - a.p; }).filter(function (l, n, arr) { return arr.findIndex(function (x) { return x.i === l.i; }) === n; }).slice(0, 5);
+    // skip one-off sales far above the item's normal price (a lucky roll or a typo reads as a mistake next to "about 2K")
+    var sane = function (l) { var it = D.byName[l.i]; return !it || !it.typ || l.p <= it.typ * 8; };
+    var big = D.sales.filter(sane).sort(function (a, b) { return b.p - a.p; }).filter(function (l, n, arr) { return arr.findIndex(function (x) { return x.i === l.i; }) === n; }).slice(0, 5);
+    if (!big.length && k && k.big && sane(k.big)) big = [k.big];
     var hook = el("button", "st hook"); hook.type = "button"; c.appendChild(hook);
     function showHook() {
       if (!big.length) { hook.textContent = ""; return; }
