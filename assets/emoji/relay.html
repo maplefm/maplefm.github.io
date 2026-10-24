@@ -8,12 +8,12 @@
   // "@kofi" first hands the files to a ko-fi.com tab instead of discord.com
   var raw = decodeURIComponent(location.hash.slice(1)), to = "https://discord.com";
   if (raw.indexOf("@kofi,") === 0) { to = "https://ko-fi.com"; raw = raw.slice(6); }
-  var names = raw.split(",").filter(function (n) { return /^\/?[a-z0-9_]+\.(gif|png)$/.test(n) || n === "icon" || n === "cover"; });
+  var names = raw.split(",").filter(function (n) { return /^\/?(anim\/)?[a-z0-9_]+\.(gif|png)$/.test(n) || n === "icon" || n === "cover"; });
   var out = [];
   for (var i = 0; i < names.length; i++) {
     var n = names[i], url = n === "icon" ? "../../clubfm-icon-512.png" : n === "cover" ? "../kofi-cover.png" : n[0] === "/" ? n.slice(1) : "mobs/" + n;
     var r = await fetch(url + "?v=" + Date.now()); if (!r.ok) continue;
-    out.push({ name: n === "icon" ? "clubfm-icon-512.png" : n === "cover" ? "kofi-cover.png" : n.replace(/^\//, ""), type: r.headers.get("Content-Type") || "", buf: await r.arrayBuffer() });
+    out.push({ name: n === "icon" ? "clubfm-icon-512.png" : n === "cover" ? "kofi-cover.png" : n.replace(/^\/?(anim\/)?/, ""), type: r.headers.get("Content-Type") || "", buf: await r.arrayBuffer() });
   }
   if (window.opener) window.opener.postMessage({ clubfmEmoji: out }, to);
   document.body.textContent = "Sent " + out.length + " files. You can close this tab.";
