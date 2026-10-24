@@ -101,6 +101,11 @@ for f in sorted(glob.glob(os.path.join(SRC, "*"))):
             gx = max(0, min(cv.width - rc.width, gx)); gy = max(0, min(cv.height - rc.height, gy))
             cv.alpha_composite(rc, (gx, gy))
         out.append(cv)
+    side_len = max(out[0].size)
+    sq = []
+    for cv in out:
+        c2 = Image.new("RGBA", (side_len, side_len), (0, 0, 0, 0)); c2.paste(cv, ((side_len - cv.width) // 2, side_len - cv.height), cv); sq.append(c2)
+    out = sq
     w2, h2 = out[0].size
     dst = os.path.join(OUT, name)
     if len(out) == 1 and name.endswith(".png"):
