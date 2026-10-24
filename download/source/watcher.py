@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.1"
+VERSION = "2026.10.24.2"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -379,7 +379,13 @@ class Store:
         r = cands[0]
         a, b = fmparse.norm(r["i"]).replace("namecutoff", ""), fmparse.norm(tip["name"])
         if not (b.startswith(a[:10]) or difflib.SequenceMatcher(None, a, b[:len(a) + 2]).ratio() >= 0.7):
-            return None                      # the tooltip belongs to some other item
+            # The pointer sits on this exact row. A scrolled item's title often reads badly ("mr Guardian ruta" for
+            # 10 attack Work Gloves): when the title isn't any real item, the stats belong to the row under the pointer.
+            # A title that clearly names another item still means the popup belongs to something else.
+            if fmparse._known_name(tip["name"]) or any(fmparse.norm(r["i"])[:8] in fmparse.norm(l) for l in tip["lines"][:1]):
+                if not any(a[:10] and a[:10] in fmparse.norm(l) for l in tip["lines"]):
+                    return None
+            tip = dict(tip, name=r["i"])
         key = json.dumps([day, seller, r["i"], r["p"], r["q"]])
         with self.lock:
             o = self.d["shop"].get(key)

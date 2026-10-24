@@ -1,10 +1,15 @@
 {
- "version": "2026.10.24.1",
- "date": "2026-10-24T04:23:18+00:00",
- "notes": "A short chime when a hovered item's stats are read, a low tone when a hover couldn't be read. Tooltips that open above the pointer are read too.",
- "sha256": "e59e159d8481159dd7686df05147b0d6e66a7488b88baa9c6aed87e279fde4e7",
- "size": 59743,
+ "version": "2026.10.24.2",
+ "date": "2026-10-24T04:38:27+00:00",
+ "notes": "Scrolled items whose tooltip title reads badly keep their stats: the row under the pointer is used. Fixes 10 attack Work Gloves showing no stats.",
+ "sha256": "406422547650bbd51026c011a981aec9077b1143782fdfaf811373231b2960b6",
+ "size": 59936,
  "history": [
+  {
+   "version": "2026.10.24.2",
+   "date": "2026-10-24",
+   "notes": "Scrolled items whose tooltip title reads badly keep their stats: the row under the pointer is used. Fixes 10 attack Work Gloves showing no stats."
+  },
   {
    "version": "2026.10.24.1",
    "date": "2026-10-24",
@@ -149,13 +154,8 @@
    "version": "2026.10.19.2",
    "date": "2026-10-19",
    "notes": "Small fixes."
-  },
-  {
-   "version": "2026.10.19.1",
-   "date": "2026-10-19",
-   "notes": "Anyone can scan for Club FM now. Updates install themselves."
   }
  ],
  "pip": [],
- "sig": "128b83017eed085f54fb7230e7bb7bc803a3832721677c7bce8bc8b4812ae68f39e380e2f7035359ef56dcced9d673529193a3d96e3083f9ec5b33cc99dddfae2af1ac5c01498623962d13e305781dd7f5908bfc265a451eab0bb48dcb04ee0c95dfc38ac1f7baaeb22295ad1a7c7dbd2e509eeb24d98080c8778cb0911694c1824ccdc41f4e9e713965c0af0b825ddb699f991d88aa0dff747bc8196b2f09866809146fcb2868ae8bfe131a775ab4e1f96a1467b1b0c177168d9089b6913b52015daa4b1841395464fed6e3b536d98ebcd15fd11cf3e500baab18864a7f401256d95e3a1c5911f20f7babeca45dde3f9d0280ed8a700ea72a21ea71f1145eee"
+ "sig": "a6258da20bb508b4bade11acd704f7b01d3fb72741f2eefcba8e7eef1902c760c649fdf40ea04fd58457113e93e66d0663735364d0cf7faa0763efd2a0a6927db7fb25684390d4b551729981dba272b7a504ed6b82022b4783bf6ca89937ed444cffc7c37da3fe8407507d3c83ca0eae90c2532d13947a6cc869be3903f1b26708276e42a0b25daf0d39fecf9174f06fda6d5e2c8de9529a20f32b144d46e788d66c741cad8ada396f4af629156ff7671173bcc3cf730e055f6de947a45c98ef47efcdd69b9f795f2ce257ef7185ecad998da2c4e6a0c275a4240352ce874ac00f60270a00b04d59dbc58f3187b24492975f9f85c405e961b6402306b2d9801d"
 }
