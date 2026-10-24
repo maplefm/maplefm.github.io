@@ -3537,11 +3537,13 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       var q = l.q || 1, vp = vendor(l.i), npcGain = vp > l.u ? (vp - l.u) * q : 0;
       var sold7 = i.sales.filter(function (x) { return now - x.t <= WEEK; }).length;
       var ref = i.typ, g = i.equip ? rollOf(l.i, l) : null;
-      if (i.equip && g != null) {                                               // a known roll is judged against the same roll
-        var gm = i.gradeMed && i.gradeMed[g];
-        if (gm && gm.n >= 2) ref = gm.p;
-        else if (i.bands && g < 0) ref = i.bands.lo;
-        else if (i.bands && g > 0 && i.bands.from === "rolls") ref = i.bands.hi;
+      if (i.equip && g != null) {
+        // a hovered equip is judged only against sales of the same roll with the same slots used, the same rule as
+        // Mega Deals: a +1 crit Work Gloves with 4 of 5 slots left took a failed scroll and is worth far less than a
+        // clean one. Slots not read, or no sales of that exact roll and slots yet: no deal.
+        var su = slotsUsed(l.i, l), rt = su != null && i.rollTyp ? i.rollTyp[g + "|" + su] : null;
+        if (!rt) return;
+        ref = rt.typ;
       }
       var flip = ref && i.kind === "sale" ? (ref * (1 - FASTPCT / 100) - l.u) * q : 0;
       var off = ref ? 1 - l.u / ref : 0;
