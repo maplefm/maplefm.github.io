@@ -1,10 +1,15 @@
 {
- "version": "2026.10.24.4",
- "date": "2026-10-24T15:48:07+00:00",
- "notes": "Hover wanted list now reads from the public price summary.",
- "sha256": "327adc94d4c201a581d11b294e1b9d610c0f13359b47448e4965a7665a469de7",
- "size": 60659,
+ "version": "2026.10.24.5",
+ "date": "2026-10-24T17:58:31+00:00",
+ "notes": "Scan stats: the watcher prints your last hour and today (new listings, shops, sales caught, listings per active hour) at the top of every hour, and stats.bat shows them any time.",
+ "sha256": "f98c7a3a40a467ee50395efe04191c42392f0eb70048fe203bb4d63afa003e62",
+ "size": 61853,
  "history": [
+  {
+   "version": "2026.10.24.5",
+   "date": "2026-10-24",
+   "notes": "Scan stats: the watcher prints your last hour and today (new listings, shops, sales caught, listings per active hour) at the top of every hour, and stats.bat shows them any time."
+  },
   {
    "version": "2026.10.24.4",
    "date": "2026-10-24",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.3",
    "date": "2026-10-20",
    "notes": "Clearer update messages and small fixes."
-  },
-  {
-   "version": "2026.10.20.2",
-   "date": "2026-10-20",
-   "notes": "Better reading on more screens."
   }
  ],
  "pip": [],
- "sig": "bed237309e7765162ca8e3511b14dc034868ca56a6b28c971d8a60d924e8bfebc6ea30dffef326d8f796ba6f89776a746e00ab889ee1eb2dac25d54cdcb5fb92a9f375691360b682826d2ffc475a9f90a848fad96955f434f23718ff971d0bf6244a7f1bea4f3f1ebfc23a42b57fced9054d33192c75c2a7a33d27e7d9b65fb425e7811d39bec48347523d166745bd4c3388fabc71e5b432284feaac2262c5fd38de5cc81e76b874b83e9ff16b0ebb7e107c328339990e90a79c2dcefc3745646ebf8babe3ee5d8ee45ee42cd9fca9fd213592dcade4e911c45bc0d0a5a91b7f41fbf43535d3f7d0eb3515d81afe157a7dee6d8fc63fdd0f7f7de1f714fdcc7a"
+ "sig": "b17063347f5c2ca237684dc03ef60eecaa9cca70afd47d0e27abfdce7e52f382229d060209f7dd202e1d215ea529959e0857637eb742f80c0c5d583c53e5c6cc522aff16e3a772892b2004ea50758ac405104f378326a19fcdceed9250a3e2cd5607c6048c1cbb8c5503efcaaf4efd4bb27a78e1284f6ca17ca6e94494aa41af44b4af6ea28e0844db05f158faeefddcd0b8c2b927824081faed94e925618f88f43855ec23e26f253d5147adfaffd1e00a23adfdce205d0290ccabad77613681934ba9bce4e9afca7e033f470867f8ea7fbe2709a06b7a105b9f6ecc5c2c9336918726e6a8ef72cfe916cd8c87cbedb564eea38d7ecf55c39d5980e63eccd3a0"
 }
