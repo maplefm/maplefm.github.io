@@ -78,6 +78,13 @@ def main():
     sitems = cargo("shop_items", ["shop_id", "item_id", "price", "currency"])
     reac = cargo("reactor_drops", ["reactor_id", "item_id", "drop_rate", "required_quest"])
 
+    # game ids for pictures: mobs and NPCs by name from the game data
+    mob_id, npc_id = {}, {}
+    for m in (get(IO + "/mob") or []):
+        if isinstance(m, dict) and m.get("name"): mob_id.setdefault(str(m["name"]).strip().lower(), m.get("id"))
+    for n in (get(IO + "/npc") or []):
+        if isinstance(n, dict) and n.get("name"): npc_id.setdefault(str(n["name"]).strip().lower(), n.get("id"))
+    print("mob ids", len(mob_id), "npc ids", len(npc_id))
     wq_by_name = {str(q.get("name_en") or "").strip().lower(): q for q in wq}
     mon_lv = {str(m.get("name_en") or ""): int(num(m.get("level"))) for m in mons}
     mon_where = {str(m.get("name_en") or ""): (m.get("primary_location") or m.get("region") or "") for m in mons}
@@ -114,7 +121,7 @@ def main():
             key = (name.lower(), iname.lower())
             if key in seen: continue
             seen.add(key)
-            g(iname)["q"].append([name, lvl, cnt, giver, region, 1 if str(wiki.get("repeatable") or "0") == "1" else 0])
+            g(iname)["q"].append([name, lvl, cnt, giver, region, 1 if str(wiki.get("repeatable") or "0") == "1" else 0, nid or npc_id.get(str(giver).lower())])
         if k % 25 == 0: time.sleep(0.3)
 
     # ---- wiki quests the game data doesn't list yet (newly added ones)
@@ -123,7 +130,7 @@ def main():
         if not qn or not iname or cnt <= 0 or (qn.lower(), iname.lower()) in seen: continue
         seen.add((qn.lower(), iname.lower()))
         wiki = wq_by_name.get(qn.lower()) or {}
-        g(iname)["q"].append([qn, int(num(wiki.get("required_level"))), cnt, wiki.get("giver") or "", wiki.get("region") or "", 1 if str(wiki.get("repeatable") or "0") == "1" else 0])
+        g(iname)["q"].append([qn, int(num(wiki.get("required_level"))), cnt, wiki.get("giver") or "", wiki.get("region") or "", 1 if str(wiki.get("repeatable") or "0") == "1" else 0, npc_id.get(str(wiki.get("giver") or "").lower())])
 
     # ---- crafting: how an item is made, and how many recipes use it
     for r in rec:
@@ -142,7 +149,7 @@ def main():
         if not iname or not mob: continue
         rate = num(r.get("drop_rate"), None) if r.get("drop_rate") not in (None, "") else None
         g(iname)["d"].append([mob, mon_lv.get(mob, 0), round(rate, 2) if rate is not None else None, int(num(r.get("sample_kills"))), mon_where.get(mob, ""),
-                              1 if str(r.get("quest_flag") or "0") == "1" else 0])
+                              1 if str(r.get("quest_flag") or "0") == "1" else 0, mob_id.get(mob.lower())])
 
     # ---- NPC shops
     shop = {}
@@ -154,7 +161,7 @@ def main():
         if not iname or not sid: continue
         s = shop.get(sid, {})
         cur = r.get("currency") or s.get("currency") or ""
-        g(iname)["s"].append([s.get("npc") or sid, s.get("town") or s.get("map") or "", int(num(r.get("price"))), "" if cur in ("", "meso", "mesos", "Mesos") else cur])
+        g(iname)["s"].append([s.get("npc") or sid, s.get("town") or s.get("map") or "", int(num(r.get("price"))), "" if cur in ("", "meso", "mesos", "Mesos") else cur, npc_id.get(str(s.get("npc") or sid).lower())])
 
     for r in reac:
         iname = str(r.get("item_id") or "").strip()
@@ -167,9 +174,19 @@ def main():
         v["s"].sort(key=lambda x: x[2])
         v = {k: x for k, x in v.items() if x}
         if v: items[nm] = v
+    # item ids for icons: every item the guide names, from the item list (and the game data for the rest)
+    ids = {}
+    byname = {v.lower(): k for k, v in names.items()}
+    want = set(items)
+    for v in items.values():
+        for c in v.get("c") or []:
+            for x in c[2]: want.add(x[0])
+    for nm in want:
+        i = byname.get(nm.lower())
+        if i: ids[nm] = i
     doc = {"v": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "n": len(items),
            "src": "Quests from MapleStory Classic game data (maplestory.io). Givers, crafting, drops and shops from the MapleStory Classic Wiki (mapleclassic.wiki), CC BY-NC-SA 4.0.",
-           "items": items}
+           "items": items, "ids": ids}
     json.dump(doc, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("items", len(items), "with quests", sum(1 for v in items.values() if "q" in v), "bytes", os.path.getsize(out_path))
 
