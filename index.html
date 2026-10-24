@@ -1184,7 +1184,7 @@ dialog h3 { color: var(--accent-ink); }
       <a class="gate" id="gate" hidden href="https://clubfm-accounts.aaweaver93.workers.dev/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.</span><i>Sign in with Discord</i></a>
       <div class="tabs" role="tablist" aria-label="Views">
         <button role="tab" id="tab-prices" aria-selected="true">Prices</button>
-        <button role="tab" id="tab-deals" class="clubonly" aria-selected="false">Best deals</button>
+        <button role="tab" id="tab-deals" aria-selected="false">Best deals</button>
         <button role="tab" id="tab-sell" aria-selected="false">Sell my items</button>
         <button role="tab" id="tab-pos" aria-selected="false">My positions</button>
       </div>
@@ -1402,7 +1402,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
 <dialog id="clubdlg" aria-labelledby="cl-t">
   <div class="wtitle"><h2 id="cl-t">Club member sign in</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
-    <p class="note">Deal alerts, Best deals, Cheapest now and Where to buy are open to everyone. Sign in with Discord to contribute, earn, and keep your watchlist on any browser.</p>
+    <p class="note">Prices, Cheapest now and Where to buy are open to everyone. Best deals are open too, 10 minutes after Mega Deals holders see them. Live deal alerts are for Mega Deals holders. Sign in with Discord to contribute, earn, and keep your watchlist on any browser.</p>
     <input type="password" id="club-key" autocomplete="off" placeholder="Club key">
     <div class="fbrow"><span class="note" id="club-msg"></span><button type="button" class="cta" id="club-go">Sign in</button></div>
   </div>
@@ -1515,7 +1515,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // scroll it into view and flash it, so the shop it sits in is one look away
   function jumpToStat(i, v, newest, ks) {
     if (!newest) return;
-    var inBuy = DEALS_ON && !newest.so && Date.now() - newest.t < DAY;
+    var inBuy = !newest.so && Date.now() - newest.t < DAY;
     state.list = inBuy ? "buy" : "sales"; renderItem();
     var ls = $("ip").querySelector(".list");
     var li = ls && Array.prototype.filter.call(ls.querySelectorAll(".li[data-sv]"), function (x) { return x.dataset.sv === String(v); })[0];
@@ -1531,7 +1531,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   }
   function jumpToGrade(i, g, newest, ks, base) {
     if (!newest) return;
-    var inBuy = DEALS_ON && !newest.so && !newest.chat && Date.now() - newest.t < DAY;
+    var inBuy = !newest.so && !newest.chat && Date.now() - newest.t < DAY;
     state.list = inBuy ? "buy" : "sales"; renderItem();
     var ls = $("ip").querySelector(".list");
     var li = ls && Array.prototype.filter.call(ls.querySelectorAll(".li[data-g]"), function (x) { return x.dataset.g === String(g); })[0];
@@ -2256,7 +2256,9 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       it.lastSale = it.sales[0] || null;
       it.vol = it.sales.reduce(function (a, x) { return a + x.p; }, 0);
       it.bid = it.bids.length ? Math.max.apply(null, it.bids.map(function (x) { return x.u; })) : 0;
-      var fresh = it.asks.filter(function (x) { return (latest - x.t <= DAY || now - x.t <= DAY) && !(x.chat && it.typ && x.u < it.typ * 0.3) && !(it.typ >= 2000 && x.u < it.typ * 0.03); })   // "1 for 1 mesos" on a 20K item is a misread
+      // Mega Deals first: a listing priced 20% or more under typical stays off the public board for its first 10 minutes,
+      // so Club and Mega Deals holders see it first. Then it goes public.
+      var fresh = it.asks.filter(function (x) { if (!DEALS_ON && it.typ && x.u < it.typ * 0.8 && now - x.t < HOLD) { HELD = Math.min(HELD, x.t + HOLD); return false; } return (latest - x.t <= DAY || now - x.t <= DAY) && !(x.chat && it.typ && x.u < it.typ * 0.3) && !(it.typ >= 2000 && x.u < it.typ * 0.03); })   // "1 for 1 mesos" on a 20K item is a misread
         .sort(function (a, b) { return a.u - b.u || b.t - a.t; });
       // Cheapest now: the lowest listing seen in the last day whose shop nobody has seen since without it. The more
       // people scan, the sooner a sold or pulled listing is caught missing, so this stays fresh as scanners grow.
@@ -2612,6 +2614,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   }
   // Sold buttons: anyone can mark a listing in Where to buy as sold. Enough players (the Worker says how many) and it
   // drops out of Cheapest now, deals and alerts until a scan sees it again. Your own mark hides it for you at once.
+  var HOLD = 10 * 6e4, HELD = Infinity;   // when the next held-back deal goes public
   var GONE = { need: 2, items: {} }, GONE_AT = 0, MYSOLD = {};
   try { MYSOLD = JSON.parse(localStorage.getItem("fm-sold") || "{}"); } catch (e) {}
   function soldKey(x) { return (String(x.s) + "|" + x.i + "|" + x.u).toLowerCase(); }
@@ -2698,7 +2701,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     D.sales.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 18).forEach(function (l) {
       ev.push({ t: l.t, cls: "sold", parts: [l.s + " : Sold ", [l.i], " for " + fmt(l.p) + " mesos!"] });
     });
-    if (DEALS_ON) D.list.filter(function (i) { return i.n >= MIN && i.deal >= 0.4 && (i.equip ? i.rd && i.rd.length && i.rd[0].l && Date.now() - i.rd[0].t < 6 * H : i.bestL && Date.now() - i.bestL.t < 6 * H); }).slice(0, 10).forEach(function (i) {
+    D.list.filter(function (i) { return i.n >= MIN && i.deal >= 0.4 && (i.equip ? i.rd && i.rd.length && i.rd[0].l && Date.now() - i.rd[0].t < 6 * H : i.bestL && Date.now() - i.bestL.t < 6 * H); }).slice(0, 10).forEach(function (i) {
       var dl = i.equip ? i.rd[0].l : i.bestL, du = i.equip ? i.rd[0].p : i.best, dt = i.equip ? ", " + Math.round(i.deal * 100) + "% under what this roll sells for" : ", " + Math.round(i.deal * 100) + "% under typical";
       ev.push({ t: dl.t, cls: "deal", parts: [dl.s + " : Selling ", [i.item], " for " + fmt(du) + dt + (where(dl) ? " (" + where(dl) + ")" : "")] });
     });
@@ -2986,7 +2989,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var patient = p75 || askMed || fair * 1.15;
     if (patient < fair) patient = fair;
     var why = [];
-    if (low) why.push("Cheapest up now " + short(low) + (DEALS_ON ? " from " + i.bestL.s : ""));
+    if (low) why.push("Cheapest up now " + short(low) + " from " + i.bestL.s);
     if (su.length >= 3) why.push("sales usually " + short(p25) + " to " + short(p75)); else why.push(su.length ? "only " + su.length + " sale seen, priced from asking prices" : "no sales seen yet, priced from asking prices");
     if (under) why.push("that is below what it normally sells for, so the quick price stays at the low end of sales instead of matching it");
     var sellers = {}; (i.buy || []).forEach(function (x) { sellers[x.s] = 1; });
@@ -3415,7 +3418,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       var rl = el("div", "rl"); rl.appendChild(el("span", null, short(mn))); rl.appendChild(el("span", null, short(mxv))); s2.appendChild(rl);
     }
     var kv2 = el("div", "kv");
-    [["Sales seen", fmt(i.salesN)], ["Last 3 avg", i.last3 ? short(i.last3) : "–"], ["Last sold", i.lastSale ? ago(i.lastSale.t) : "never"], ["Asking now", i.bestL && DEALS_ON ? short(i.best) : "–"]].forEach(function (p) { kv2.appendChild(el("span", null, p[0])); kv2.appendChild(el("b", null, p[1])); });
+    [["Sales seen", fmt(i.salesN)], ["Last 3 avg", i.last3 ? short(i.last3) : "–"], ["Last sold", i.lastSale ? ago(i.lastSale.t) : "never"], ["Asking now", i.bestL ? short(i.best) : "–"]].forEach(function (p) { kv2.appendChild(el("span", null, p[0])); kv2.appendChild(el("b", null, p[1])); });
     s2.appendChild(kv2);
     var ups = {}; (i.buy || []).forEach(function (x) { if (x.st !== "gone") ups[x.s] = 1; }); var nu = Object.keys(ups).length;
     var lst = el("div", "stl"); lst.appendChild(el("span", null, "Listed")); lst.appendChild(el("span", "ok", nu ? nu + (nu === 1 ? " shop listing" : " shops listing") : "none up now")); s2.appendChild(lst);
@@ -3441,7 +3444,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // ---------- item panel
   function pick(name) {
     document.body.classList.remove("noside");
-    state.sel = name; state.list = DEALS_ON ? "buy" : "sales"; hideHov();
+    state.sel = name; state.list = "buy"; hideHov();
     try { history.replaceState(null, "", "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "")); } catch (e) {}
     document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); });
     document.querySelectorAll('tbody tr[data-item="' + (window.CSS && CSS.escape ? CSS.escape(name) : name) + '"]').forEach(function (r) { r.classList.add("sel"); });
@@ -3696,7 +3699,6 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var bb = el("button"); bb.type = "button"; bb.appendChild(document.createTextNode("Where to buy")); bb.appendChild(el("em", null, buyRows.length)); bb.setAttribute("aria-selected", state.list === "buy");
     var rb = el("button"); rb.type = "button"; rb.appendChild(document.createTextNode("Recent sales")); rb.setAttribute("aria-selected", state.list === "sales");
     bb.addEventListener("click", function () { state.list = "buy"; renderItem(); }); rb.addEventListener("click", function () { state.list = "sales"; renderItem(); });
-    if (!DEALS_ON) { bb.hidden = true; state.list = "sales"; }
     lt.appendChild(bb); lt.appendChild(rb); ip.appendChild(lt);
     if (state.list === "buy") {
       // sort the sellers by cheapest first or most recently seen first; the choice is remembered
@@ -3873,7 +3875,6 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   function setClub(on) {
     DEALS_ON = on; document.body.classList.toggle("club", on);
     if (on && $("ubar").hidden) updateBar();
-    if (!on && state.tab === "deals") state.tab = "prices";
     if (on && state.wantDeals) { state.tab = "deals"; state.wantDeals = false; }
     if (!on && state.list === "buy") state.list = "sales";
     $("m-club").textContent = on ? "Club member · sign out" : "Club member sign in";
@@ -3891,7 +3892,9 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var m = /[#&]vip=([A-Za-z0-9_-]+)/.exec(location.hash), k = m ? m[1] : "";
     if (m) try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
     if (!k) try { k = localStorage.getItem("fm-club") || ""; } catch (e) {}
-    setClub(true);   // the whole board is open to everyone; Discord sign-in is for contributing and earning
+    // Prices and listings are open to everyone. Deals (Best deals, deal alerts, deals in the ticker) are for the Club and
+    // Mega Deals roles only, unlocked by Discord sign-in or the club key.
+    if (k) tryClub(k, true);
   })();
   function renderAlert() {
     if (!DEALS_ON) { $("alert").hidden = true; return; }
@@ -4450,7 +4453,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
   });
   window.addEventListener("focus", function () { clearInterval(titleTimer); document.title = baseTitle; });
-  (function fromHash() { var h = location.hash; if (/deals/.test(h)) { if (DEALS_ON) state.tab = "deals"; else state.wantDeals = true; } if (/sell/.test(h)) state.tab = "sell"; if (/positions/.test(h)) state.tab = "pos"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
+  (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; if (/positions/.test(h)) state.tab = "pos"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
 
   // ---------- data loading
   // The GitHub API answers with the newest copy right away, and a "not changed" answer costs nothing
@@ -4525,6 +4528,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   }
   function poll() {
     loadGone();
+    if (Date.now() >= HELD && D) { HELD = Infinity; DIRTY = true; render(); }
     getJSON("data/maintenance.json").then(function (m) { if (m && m.notices) { MAINT = m; renderMaint(); } });
     getJSON("data/ranks.json").then(function (r) { if (r && r.who) { var ch = !RANKS || RANKS.updated !== r.updated; RANKS = r; if (ch && D) { DIRTY = true; render(); } } });
     getBundle().then(function (b) {
