@@ -5,7 +5,7 @@
 (function () {
   var p = location.pathname, n = p.toLowerCase();
   if ((n.match(/\//g) || []).length === 2 && /\/$/.test(n)) n = n.replace(/\/+$/, "");
-  n = n.replace(/\.htm$/, ".html");
+  n = n.replace(/(%20|[.,!?;:)\]'"])+$/, "").replace(/\.htm$/, ".html");
   if (n !== p) location.replace(n + location.search + location.hash);
 })();
 </script>
