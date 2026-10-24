@@ -3800,6 +3800,30 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     titleTimer = setInterval(function () { on = !on; document.title = on ? "(" + n + ") New FM deal" : baseTitle; if (--left <= 0 && document.hasFocus()) { clearInterval(titleTimer); document.title = baseTitle; } }, 1000);
     if ($("sound").checked) beep();
   }
+
+  // On a tall screen the item card grows down to the bottom of the window: the listings (or recent sales) list takes
+  // the spare room instead of stopping at a fixed 330px with blank page below. Phones and narrow windows keep the sheet.
+  (function () {
+    var side = document.getElementById("side"); if (!side || !window.MutationObserver) return;
+    var busy = false;
+    function fit() {
+      busy = false;
+      var lists = side.querySelectorAll(".list, .actrows");
+      if (window.innerWidth <= 1180) { lists.forEach(function (l) { l.style.maxHeight = ""; }); return; }
+      lists.forEach(function (l) {
+        if (!l.offsetParent) return;
+        l.style.maxHeight = "";
+        // the card sticks 72px from the top and may be up to the window height minus 84px: fill that
+        var base = l.clientHeight, spare = window.innerHeight - 84 - side.scrollHeight;
+        var grow = Math.max(0, Math.min(spare, l.scrollHeight - base));
+        if (grow > 8) l.style.maxHeight = (base + grow) + "px";
+      });
+    }
+    function soon() { if (!busy) { busy = true; requestAnimationFrame(fit); } }
+    new MutationObserver(soon).observe(side, { childList: true, subtree: true });
+    window.addEventListener("resize", soon);
+    soon();
+  })();
   function beep() {
     try {
       var C = window.AudioContext || window.webkitAudioContext, ctx = beep.ctx || (beep.ctx = new C());
