@@ -1,10 +1,15 @@
 {
- "version": "2026.10.23.3",
- "date": "2026-10-23T20:31:15+00:00",
- "notes": "Prices from watchers without a GitHub key now go to Club FM's own private inbox instead of a shared sheet.",
- "sha256": "8ea1963bf32d9fc04953dba43c9ab693c362958ab1851d05fb76a2337dc7d368",
- "size": 56785,
+ "version": "2026.10.23.4",
+ "date": "2026-10-24T02:14:03+00:00",
+ "notes": "Reads the chalkboard posts over players' heads when you stand in the Free Market Entrance. Counted as asking prices, once a day per seller.",
+ "sha256": "bcd860f1f6d927851c7a026dc6a77010e1d3e536a2c61c3ed16390a7a6185ecd",
+ "size": 59536,
  "history": [
+  {
+   "version": "2026.10.23.4",
+   "date": "2026-10-23",
+   "notes": "Reads the chalkboard posts over players' heads when you stand in the Free Market Entrance. Counted as asking prices, once a day per seller."
+  },
   {
    "version": "2026.10.23.3",
    "date": "2026-10-23",
@@ -147,5 +152,5 @@
   }
  ],
  "pip": [],
- "sig": "bd495f6da8b3e300d8920056242b3f9e94fb3b56ce3c206b230ef42428162b53dc4bda3ca2b4c9315fe33eccf24c1baa398181d2487750299baa9f56cddbbcc5699da2a337e982ce0e3030ae22a7c0a42b22c515701cac57e6d71c0338a3241f87d92652a08da11facf22f4f00167659c7d1a7c6bd61829e0b0a0e277b8e6863839c07ae0a5275ead2466d010d42b718273cce4e029d3eb553eb275f545090652024c1dfcaa425a648f5430dd567d41109358925189361f18bafa047c8af0455c79813d375e2b052db1dcb07220bfee35f4f7b6aedc4777a8ad64fd6eb344851c411f73acf1f4c1cd9751590e67abe636db123aab86a967b18dc130b7a0d47a6"
+ "sig": "3b8f9b00472cbb762a454bc61ad343afe497897c6df8d60262d1b8eaacaa27bd9406c73542666e65b2fb585631fcebc7eb6f5e17cb314f9d0fc96ea89609845cb5cbfdd37249363cd6f78e082f83c856c6cb19ef2cb6194327be4d5332d60c153a96f8adb34c1daaf03795adc5af3173d4bf07b47f24f75f9338dbecbdd894f3abbff9dee46eed8637b659b7c53ed1ee4da48a045215923bc7b39221dba6c2fb4a1908830b958a77dd2736fec7208cd9377e558bfae53257aa2ab4b0d122718d78b0b7f97894b685c3c6e61e1448dd7135639c5579967fed6f0dbcdfd266be12c8b5be26a0259cb453ae6c0f8bc8523eb4bc011c6f47d47e23faa41d1d0bc756"
 }

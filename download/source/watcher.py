@@ -12,8 +12,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE)
 from PIL import Image, ImageDraw
 import fmparse
+try:
+    import boards
+except Exception:          # numpy missing: everything else still works
+    boards = None
 
-VERSION = "2026.10.23.3"
+VERSION = "2026.10.23.4"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -991,6 +995,18 @@ def worker(cfg, jobs, store):
                     added = store.add_inventory(tip)
                     if added:
                         log("sell list +" if added is True else "sell list (again)", tip["name"], " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
+            elif kind == "board":
+                rh = quick_hash(extra["room"], (40, 8))
+                if rh != getattr(worker, "board_hash", None):
+                    worker.board_hash = rh; worker.board_room = fmparse.read_room(extra["room"])
+                if worker.board_room != "FM Entrance":
+                    continue
+                posts = boards.read_boards(img, scale=img.height / 1080)
+                for player, side, item, price, x in posts:
+                    store.add_chat(player, side, item, price, x)
+                if posts:
+                    review_save(cfg, "board", img, {"rows": [list(p[:4]) for p in posts]})
+                    log(f"board {len(posts)} chalkboard posts: " + ", ".join(f"{p[0]} {p[2]} {p[3]:,}" for p in posts[:4]) + (" ..." if len(posts) > 4 else ""))
             else:
                 msgs = fmparse.read_chat(img)
                 found = []
@@ -1056,7 +1072,7 @@ def main():
     log("channel:", current_channel(cfg) or "not known yet. Open the Change Channel window once and it is picked up.")
     last_shop_hash = last_chat_hash = None
     nudge_at = 0.0
-    last_chat = last_save = 0.0
+    last_chat = last_save = last_board = 0.0
     last_pub = time.time()
     announced = None
     chw = ChannelWatch(); last_chw = 0.0
@@ -1106,6 +1122,10 @@ def main():
                             tipimg = grab(sct, game, box)
                             if fmparse.looks_like_tooltip(tipimg):
                                 jobs.put(("inv", tipimg, None))
+                    elif boards and cfg.get("boards", True) and t - last_board >= cfg.get("board_every_seconds", 45) and jobs.qsize() < 2:
+                        # Free Market Entrance: read the chat bubbles over everyone's head (the worker checks the map first)
+                        last_board = t
+                        jobs.put(("board", grab(sct, game, [0, 0, game[2], game[3]]), {"room": grab(sct, game, cfg["room_region"])}))
                     elif t - last_chat >= cfg["chat_every_seconds"]:
                         last_chat = t
                         chat = grab(sct, game, chat_box)
