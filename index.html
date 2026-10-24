@@ -1126,7 +1126,7 @@ dialog h3 { color: var(--accent-ink); }
     </div>
     <div class="top-right">
       <span class="pill clubchip" title="Signed in as a club member: deal alerts and where to buy are on"><img class="ssi" src="assets/superstar@4x.png" alt=""> Club</span>
-      <a class="pill signpill" id="signpill" href="https://clubfm-accounts.aaweaver93.workers.dev/login?back=home" title="Sign in with Discord to contribute and earn. Your watchlist, positions and settings also follow you to any browser, and your Discord roles unlock what they unlock"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18.4 18.4 0 0 1 4.5 2.2 15.1 15.1 0 0 0-15.4 0A18.4 18.4 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.2 18.2a19.9 19.9 0 0 0 6 3l1.3-1.8a12.8 12.8 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12 0l.5.4a12.8 12.8 0 0 1-2 1l1.3 1.8a19.9 19.9 0 0 0 6-3c.6-5.2-1-9.7-3.5-13.8ZM8.5 15.4c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg><span id="signtxt">Sign in with Discord</span></a>
+      <a class="pill signpill" id="signpill" href="https://api.maplefm.gg/login?back=home" title="Sign in with Discord to contribute and earn. Your watchlist, positions and settings also follow you to any browser, and your Discord roles unlock what they unlock"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18.4 18.4 0 0 1 4.5 2.2 15.1 15.1 0 0 0-15.4 0A18.4 18.4 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.2 18.2a19.9 19.9 0 0 0 6 3l1.3-1.8a12.8 12.8 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12 0l.5.4a12.8 12.8 0 0 1-2 1l1.3 1.8a19.9 19.9 0 0 0 6-3c.6-5.2-1-9.7-3.5-13.8ZM8.5 15.4c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg><span id="signtxt">Sign in with Discord</span></a>
       <a class="pill" id="discpill" href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener" style="text-decoration:none" title="Join the Club FM Discord: price checks, scanner help, and the live feed">💬 Discord<span class="cnt" id="disccnt" hidden></span></a>
       <a class="pill contribpill" href="contribute.html" title="Run FM Watcher, add the prices you see, climb the ranks and earn. It only reads your screen.">⬇ Contribute and earn</a>
       <a class="pill" href="quests.html" style="text-decoration:none" title="Your quest log: what is open at your level, what you started, what is next, and what each quest needs">📜 Quest log</a>
@@ -1184,7 +1184,7 @@ dialog h3 { color: var(--accent-ink); }
   <div class="main">
     <section class="window" aria-labelledby="ptitle">
       <div class="wtitle"><h2 id="ptitle">Price Board</h2><span class="meta"><span class="badge" title="Typical prices come from sales we saw, not asking prices">FROM SALES</span></span></div>
-      <a class="gate" id="gate" hidden href="https://clubfm-accounts.aaweaver93.workers.dev/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.</span><i>Sign in with Discord</i></a>
+      <a class="gate" id="gate" hidden href="https://api.maplefm.gg/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.</span><i>Sign in with Discord</i></a>
       <div class="tabs" role="tablist" aria-label="Views">
         <button role="tab" id="tab-prices" aria-selected="true">Prices</button>
         <button role="tab" id="tab-deals" aria-selected="false">Best deals</button>
@@ -2446,7 +2446,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   var TIERS = [[100000, "Mythic", "mythic"], [50000, "Titan", "titan"], [25000, "Immortal", "immortal"], [10000, "Legend", "tlegend"], [5000, "Monarch", "monarch"], [2500, "Royal", "royal"], [1000, "Tycoon", "tycoon"], [400, "Broker", "broker"], [150, "Trader", "trader"], [50, "Merchant", "merchant"], [10, "Apprentice", "apprentice"], [0, "Scout", "scout"]];
   // Ko-fi supporters, by in-game name: a heart next to the name on the board, with the tier in the tooltip
   var SUPP = {};
-  fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/supporters").then(function (r) { return r.ok ? r.json() : []; }).then(function (l) { (l || []).forEach(function (x) { if (x.ign) SUPP[x.ign.toLowerCase()] = x; }); if (D) renderBoard(); }).catch(function () {});
+  fetch("https://api.maplefm.gg/public/supporters").then(function (r) { return r.ok ? r.json() : []; }).then(function (l) { (l || []).forEach(function (x) { if (x.ign) SUPP[x.ign.toLowerCase()] = x; }); if (D) renderBoard(); }).catch(function () {});
   function supporterOf(name) { return SUPP[String(name || "").toLowerCase()] || null; }
   function heart(sp) { var h = el("span", "heart", "♥"); h.title = "Supports Club FM on Ko-fi" + (sp.tier ? ": " + sp.tier + " tier" : "") + (sp.lifetime ? " · lifetime supporter" : ""); h.setAttribute("aria-label", h.title); return h; }
   function tierOf(n) { for (var k = 0; k < TIERS.length; k++) if (n >= TIERS[k][0]) return { name: TIERS[k][1], cls: TIERS[k][2], next: k ? TIERS[k - 1] : null, at: TIERS[k][0] }; }
@@ -2506,7 +2506,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     // the board on the left is the live one; the rotating card only lives on if something still asks for it
   }
   // header: how many people are in the Discord and how many are on right now
-  fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/stats").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+  fetch("https://api.maplefm.gg/public/stats").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
     if (!j || !j.members || j.members < 25) return; var c = $("disccnt");   // a tiny number reads as an empty room; show it once the server has some people in it c.textContent = " " + fmt(j.members) + (j.online ? " · " + fmt(j.online) + " on" : ""); c.hidden = false;
     $("discpill").title = fmt(j.members) + " in the Club FM Discord, " + fmt(j.online) + " online now. Price checks, scanner help, and the live feed.";
   }).catch(function () {});
@@ -2611,7 +2611,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   function ev(p) {
     try {
       if (EV_SEEN[p]) return; EV_SEEN[p] = 1;
-      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://clubfm-accounts.aaweaver93.workers.dev/hit";
+      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://api.maplefm.gg/hit";
       if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" })); else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
     } catch (e) {}
   }
@@ -2648,7 +2648,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   var POP = null, POP_AT = 0;
   function loadPopular() {
     if (Date.now() - POP_AT < 10 * 60e3) return; POP_AT = Date.now();
-    fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/popular").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.items) { POP = j.items; if (D) renderPicks(); } }).catch(function () {});
+    fetch("https://api.maplefm.gg/public/popular").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.items) { POP = j.items; if (D) renderPicks(); } }).catch(function () {});
   }
   // short names under the quick-pick icons: every scroll shares one icon, so the label says which one
   function pickLabel(n) {
@@ -3844,7 +3844,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // ---------- settings that follow your Discord sign-in
   // Signed in, the board's own settings (watchlist, positions, filters, theme, club key...) are kept with the
   // account, so a cleared browser or another PC gets them back. Nothing is sent when you are not signed in.
-  var ACCT = "https://clubfm-accounts.aaweaver93.workers.dev", ME_ACCT = null, syncTimer = null;
+  var ACCT = "https://api.maplefm.gg", ME_ACCT = null, syncTimer = null;
   var SYNC_KEYS = ["fm-watch", "fm-watch-th", "fm-watch-seen", "fm-pos", "fm-sell", "fm-sell-hide", "fm-min-profit", "fm-night", "fm-activity", "fm-fast-pct", "fm-sound", "fm-me", "fm-sell-src", "fm-buy-sort", "fm-tiers-seen", "fm-club", "fm-fb-tuck", "fm-ranks-open", "fm-gatherer", "fm-upd-hide"];
   function syncBlob() { var o = {}; SYNC_KEYS.forEach(function (k) { try { var v = localStorage.getItem(k); if (v != null) o[k] = v; } catch (e) {} }); return o; }
   function syncPush() {

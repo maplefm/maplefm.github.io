@@ -22,7 +22,9 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 .hero h1{font:800 1.9rem/1.1 Outfit,sans-serif;margin:0}
 .hero p{margin:6px 0 0;opacity:.9}
 .me{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 12px;min-width:250px}
-.me .lvrow{display:flex;align-items:center;gap:8px;font-weight:700}
+.me .lvrow{display:flex;align-items:center;gap:8px;font-weight:700;flex-wrap:wrap}
+.me .ign input{width:9.5em;font:inherit;font-size:.9rem;font-weight:600;padding:6px 10px;border-radius:10px;border:0;background:rgba(255,255,255,.9);color:#2b2140}
+#lvsrc{opacity:.9}#lvsrc a{color:inherit}
 .me input{width:70px;font:800 1.2rem Outfit;border:0;border-radius:10px;padding:4px 8px;text-align:center}
 .me small{display:block;opacity:.85;margin-top:6px;font-size:.78rem}
 .me a{color:#ffe08a;font-weight:700}
@@ -94,7 +96,8 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 <section class="hero">
   <div><h1>Quest Log</h1><p>Every MapleStory Classic quest: what's open at your level, what you've started, what's next, and exactly what each one needs, where it drops and what it costs to just buy.</p></div>
   <div class="me">
-    <div class="lvrow">My level <input type="number" id="lv" min="1" max="250" placeholder="?"></div>
+    <div class="lvrow">My level <input type="number" id="lv" min="1" max="250" placeholder="?"><span class="ign" id="ignbox"><input type="text" id="ign" placeholder="or your IGN" maxlength="16" autocomplete="off" aria-label="Your character name, to pull your level from classicrank.com"></span></div>
+    <small id="lvsrc" hidden></small>
     <div class="bar"><i id="pbar" style="width:0"></i></div>
     <small id="ptxt">Set your level to see what's open.</small>
     <small id="acct">Loading…</small>
@@ -118,7 +121,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 </main>
 <script>
 (function () {
-  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/", ACCT = "https://clubfm-accounts.aaweaver93.workers.dev", IO = "https://maplestory.io/api/MCW/1/";
+  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/", ACCT = "https://api.maplefm.gg", IO = "https://maplestory.io/api/MCW/1/";
   var $ = function (id) { return document.getElementById(id); };
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
   var TIER = { Lesser: "100%", Intermediate: "60%", Greater: "10%" };
@@ -262,15 +265,33 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     render();
     if (FOCUS) { var c = document.getElementById("q-" + FOCUS); if (c) setTimeout(function () { c.scrollIntoView({ behavior: first ? "auto" : "smooth", block: "start" }); }, 30); }
   }
+  // your level straight from classicrank.com: from your account's IGN when signed in, else the IGN you type here
+  // (or the name you looked up on the board). Typing a level by hand keeps yours until the next visit.
+  var HANDLV = false;
+  function pullLevel(ign) {
+    ign = String(ign || "").trim(); if (!/^[A-Za-z0-9]{2,16}$/.test(ign)) return;
+    fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(ign) + "?fields=name,level,job").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var d = j && j.data; if (!d || !d.level) { var s0 = $("lvsrc"); s0.hidden = false; s0.textContent = "No character named " + ign + " on classicrank.com yet."; return; }
+      try { localStorage.setItem("fm-me", d.name); } catch (e) {}
+      $("ign").value = d.name;
+      var s = $("lvsrc"); s.hidden = false; s.textContent = "";
+      s.appendChild(document.createTextNode(d.name + (d.job ? ", " + d.job : "") + ", level " + d.level + " on "));
+      var a = el("a", null, "classicrank.com"); a.href = "https://classicrank.com/user/" + encodeURIComponent(d.name); a.target = "_blank"; a.rel = "noopener"; s.appendChild(a);
+      if (HANDLV || LOG.level === d.level) return;
+      LOG.level = d.level; $("lv").value = d.level; saveLocal(); if (SIGNED) push(null, d.level); render();
+    }).catch(function () {});
+  }
+  $("ign").addEventListener("change", function () { pullLevel(this.value); });
   function accountLine() {
     var a = $("acct"); a.textContent = "";
     if (SIGNED) a.appendChild(document.createTextNode("Synced to your Discord account."));
     else { a.appendChild(document.createTextNode("Saved in this browser. ")); var l = el("a", null, "Sign in with Discord"); l.href = ACCT + "/login?back=quests"; a.appendChild(l); a.appendChild(document.createTextNode(" to keep it everywhere.")); }
   }
-  $("lv").addEventListener("change", function () { var v = Math.max(0, Math.min(250, parseInt(this.value, 10) || 0)); LOG.level = v; saveLocal(); push(null, v); render(); });
+  $("lv").addEventListener("change", function () { HANDLV = true; var v = Math.max(0, Math.min(250, parseInt(this.value, 10) || 0)); LOG.level = v; saveLocal(); push(null, v); render(); });
   ["s", "rg", "sort"].forEach(function (id) { $(id).addEventListener("input", function () { if (id !== "sort") FOCUS = 0; SHOWN = 120; render(); }); });
 
   var acct = fetch(ACCT + "/me/quests", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  var meIgn = fetch(ACCT + "/me", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { return m && m.signedIn && m.account ? m.account.ign || "" : ""; }).catch(function () { return ""; });
   Promise.all([fetch(LIVE + "data/itemguide.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
                fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }), acct]).then(function (res) {
     var g = res[0]; G = g.items || {}; IDS = g.ids || {}; MOBIMG = g.mobimg || {}; Q = (g.quests || []).slice();
@@ -290,6 +311,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     }
     accountLine();
     if (LOG.level) $("lv").value = LOG.level;
+    meIgn.then(function (ign) { var saved = ""; try { saved = localStorage.getItem("fm-me") || ""; } catch (e) {} pullLevel(ign || saved); });
     var regions = {}; Q.forEach(function (q) { if (q.a) regions[q.a] = 1; });
     Object.keys(regions).sort().forEach(function (r) { var o = el("option", null, r); o.value = r; $("rg").appendChild(o); });
     route(true);
