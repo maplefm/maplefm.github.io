@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="/assets/api.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Club FM · MapleStory Classic FM Price Board</title>
@@ -2635,7 +2636,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   function ev(p) {
     try {
       if (EV_SEEN[p]) return; EV_SEEN[p] = 1;
-      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://api.maplefm.gg/hit";
+      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://clubfm-accounts.aaweaver93.workers.dev/hit";
       if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" })); else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
     } catch (e) {}
   }
