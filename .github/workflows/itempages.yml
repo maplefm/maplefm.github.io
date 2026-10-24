@@ -20,7 +20,8 @@ jobs:
           git config user.name maplefm
           git config user.email maplefm@users.noreply.github.com
           curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json -o /tmp/summary.json
-          python3 tools/itempages.py /tmp/summary.json .
+          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemguide.json -o /tmp/itemguide.json || echo '{"items":{}}' > /tmp/itemguide.json
+          python3 tools/itempages.py /tmp/summary.json . /tmp/itemguide.json
           git add -A item items sitemap.xml
           git diff --cached --quiet && exit 0
           b=item-pages-$(date -u +%Y%m%d)
