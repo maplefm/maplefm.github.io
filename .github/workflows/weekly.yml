@@ -9,7 +9,7 @@ permissions:
 env:
   DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
   DISCORD_HOOK_DIGEST: ${{ secrets.DISCORD_HOOK_DIGEST }}
-  DISCORD_HOOK_MEMBERS: ${{ secrets.DISCORD_HOOK_MEMBERS }}
+  DISCORD_HOOK_DEALS: ${{ secrets.DISCORD_HOOK_DEALS }}
 jobs:
   weekly:
     runs-on: ubuntu-latest
@@ -23,9 +23,9 @@ jobs:
           git show origin/live:data/ranks.json > /tmp/ranks.json
           curl -fsSL -H "Authorization: token ${ARCHIVE_TOKEN}" https://raw.githubusercontent.com/maplefm/clubfm-archive/live/data/discord_weekly.json -o /tmp/weekly.json 2>/dev/null || echo '{}' > /tmp/weekly.json
           python3 tools/discord.py weekly /tmp/report.json /tmp/ranks.json /tmp/weekly.json
-          # the members-only recap: item movers and the best deals caught, from the private data
+          # the Mega Deals weekly recap in #mega-deals: item movers and the best deals caught, from the private data
           A="https://raw.githubusercontent.com/maplefm/clubfm-archive/live/data"
           curl -fsSL -H "Authorization: token ${ARCHIVE_TOKEN}" $A/summary.json -o /tmp/summary.json || echo '{}' > /tmp/summary.json
           curl -fsSL -H "Authorization: token ${ARCHIVE_TOKEN}" $A/discord_dealfeed.json -o /tmp/feed.json || echo '[]' > /tmp/feed.json
           echo '{}' > /tmp/members.json
-          if [ -n "$DISCORD_HOOK_MEMBERS" ]; then python3 tools/discord.py members /tmp/summary.json /tmp/feed.json /tmp/members.json; fi
+          if [ -n "$DISCORD_HOOK_DEALS" ]; then python3 tools/discord.py members /tmp/summary.json /tmp/feed.json /tmp/members.json; fi
