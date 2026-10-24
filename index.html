@@ -2661,6 +2661,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   function watched() { var w = {}; Object.keys(WATCH).forEach(function (k) { w[k] = 1; }); POS.forEach(function (p) { w[p.i] = 1; }); return Object.keys(w); }
   function plSpan(v) { return el("span", "num pl " + (v >= 0 ? "up" : "down"), (v >= 0 ? "+" : "−") + short(Math.abs(v))); }
   function renderPos() {
+    fillNames();
     var tb = $("pos-rows"); tb.textContent = ""; var tot = 0, cost = 0;
     POS.forEach(function (p, k) {
       var i = D.byName[p.i], tr = el("tr"); tr.dataset.item = p.i;
@@ -2762,8 +2763,12 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     if (!src) { GAME = []; return Promise.resolve(); }
     var x = BUNDLE && BUNDLE[src]; GAME = Array.isArray(x) ? x : []; return Promise.resolve();
   }
-  function renderSell() {
+  // the item suggestions shared by Sell my items and My positions
+  function fillNames() {
     var dl = $("itemnames"); if (dl.childElementCount !== D.list.length) { dl.textContent = ""; D.list.slice().sort(function (a, b) { return a.item.localeCompare(b.item); }).forEach(function (i) { var o = el("option"); o.value = i.item; dl.appendChild(o); }); }
+  }
+  function renderSell() {
+    fillNames();
     var tb = $("sell-rows"); tb.textContent = ""; var total = 0;
     var rows = SELL.map(function (s, k) { return { i: s.i, q: s.q, k: k, at: s.t || 0 }; });
     // hovered items whose name didn't read cleanly (not a real item and never seen in the market) are left out
