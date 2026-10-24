@@ -28,6 +28,7 @@ export default {
   async scheduled(ev, env, ctx) {
     // every 5 minutes: watchlist DMs; on the hourly run: the role sync too
     ctx.waitUntil(notifyWatchers(env));
+    ctx.waitUntil(watchdogAlert(env).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
   },
   async fetch(req, env) {
@@ -82,6 +83,7 @@ async function route(req, env, url) {
   if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
   if (p === "/admin/channels" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelAccess(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/chanperm" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); let b = null; try { b = await req.json(); } catch (e) {} if (!b || !/^\d+$/.test(String(b.channel)) || !/^\d+$/.test(String(b.target))) return json({ error: "bad" }, 400); const r = await fetch(DISCORD + "/channels/" + b.channel + "/permissions/" + b.target, { method: "PUT", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ type: b.type === 1 ? 1 : 0, allow: String(b.allow || "0"), deny: String(b.deny || "0") }) }); return json({ status: r.status, body: r.ok ? null : await r.text() }); }
+  if (p === "/admin/watchdog/test" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await watchdogTest(me, env)); }
   if (p === "/admin/brand/fix" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandFix(req, env)); }
   if (p === "/admin/brand" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandAudit(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/voice" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await privateVoice(req, env)); }
@@ -923,6 +925,68 @@ async function refStats(env, url) {
     out[who] = { visits: tv, uniques: tu, days };
   }
   return out;
+}
+
+// ---------------------------------------------------------------- watchdog DMs
+// The Watchdog workflow writes data/watchdog.json on the live branch every 15 minutes. When the set of failing
+// checks changes, or it repaired something, every admin gets one DM: what broke, what it fixed, what still needs a hand.
+const WD_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/watchdog.json";
+function wdEmbeds(wd, prev) {
+  const failing = wd.failing || [], was = (prev && prev.failing) || [], fixed = (wd.repairs || []).filter((r) => r.ok);
+  const byName = {}; (wd.checks || []).forEach((c) => { byName[c.name] = c; });
+  const when = "Checked <t:" + wd.at + ":t>";
+  if (failing.length) {
+    const lines = failing.map((n) => "**" + n + "**: " + ((byName[n] && byName[n].detail) || "failing"));
+    const fields = [{ name: "What's wrong", value: lines.join("\n").slice(0, 1000) }];
+    if (fixed.length) fields.push({ name: "Already tried", value: fixed.map((r) => r.what).join("\n").slice(0, 1000) });
+    fields.push({ name: "Next", value: fixed.length ? "Watching to see if the fix holds. The daily check-up picks up anything still broken." : "Can't fix this one on its own. The daily check-up will look at it, or ask Claude now." });
+    return [{ title: "\u26a0\ufe0f Club FM: " + failing.length + (failing.length === 1 ? " check failing" : " checks failing"), color: 0xe5484d, fields, footer: { text: "Watchdog" }, description: when }];
+  }
+  const back = was.filter((n) => !failing.includes(n));
+  const fields = [];
+  if (back.length) fields.push({ name: "Back up", value: back.join(", ").slice(0, 1000) });
+  if (fixed.length) fields.push({ name: "Fixed on its own", value: fixed.map((r) => r.what).join("\n").slice(0, 1000) });
+  fields.push({ name: "All checks", value: (wd.checks || []).length + " of " + (wd.checks || []).length + " passing" });
+  return [{ title: "\u2705 Club FM is healthy", color: 0x2ecc71, fields, footer: { text: "Watchdog" }, description: when }];
+}
+async function wdAdmins(env) { return String(env.ADMIN_IDS || "").split(",").map((x) => x.trim()).filter((x) => /^\d{15,}$/.test(x)); }
+async function wdDM(env, ids, embeds) {
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  let sent = 0;
+  for (const id of ids) {
+    const c = await (await fetch(DISCORD + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
+    if (!c || !c.id) continue;
+    const r = await fetch(DISCORD + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds }) });
+    if (r.ok) sent++;
+  }
+  return sent;
+}
+async function watchdogAlert(env) {
+  if (!env.DISCORD_BOT_TOKEN) return;
+  const r = await fetch(WD_URL + "?b=" + Math.floor(Date.now() / 60000), { headers: { "User-Agent": "clubfm-worker" } });
+  if (!r.ok) return;
+  const wd = await r.json().catch(() => null);
+  if (!wd || !wd.at) return;
+  const prev = (await env.ACCOUNTS.get("wd:last", "json")) || null;
+  if (prev && prev.at >= wd.at) return;
+  const sig = (wd.failing || []).join("|") + "#" + (wd.repairs || []).map((x) => x.what).join("|");
+  const prevSig = prev ? (prev.failing || []).join("|") + "#" + (prev.repairs || []).map((x) => x.what).join("|") : null;
+  await env.ACCOUNTS.put("wd:last", JSON.stringify({ at: wd.at, failing: wd.failing || [], repairs: wd.repairs || [] }));
+  if (prevSig === null || sig === prevSig) return;
+  if (!(wd.failing || []).length && !(prev.failing || []).length && !(wd.repairs || []).some((x) => x.ok)) return;
+  await wdDM(env, await wdAdmins(env), wdEmbeds(wd, prev));
+}
+async function watchdogTest(me, env) {
+  const r = await fetch(WD_URL + "?b=" + Date.now(), { headers: { "User-Agent": "clubfm-worker" } });
+  const live = r.ok ? await r.json().catch(() => null) : null;
+  const at = Math.floor(Date.now() / 1000);
+  const broken = { at, failing: ["Fresh prices", "!price (api.maplefm.gg)"], repairs: [{ what: "restarted the live pump (prices were stale)", ok: true }],
+    checks: [{ name: "Fresh prices", detail: "updated 52 min ago" }, { name: "!price (api.maplefm.gg)", detail: "status 522" }] };
+  const healed = { at: at + 900, failing: [], repairs: [], checks: (live && live.checks) || new Array(14).fill({}) };
+  const embeds = [{ title: "Sample alerts", description: "This is a test. Here's what the watchdog sends when something breaks, then when it's fixed.", color: 0x6d3fd1 }]
+    .concat(wdEmbeds(broken, { failing: [] })).concat(wdEmbeds(healed, broken));
+  if (live) embeds.push({ title: "Right now", color: live.ok ? 0x2ecc71 : 0xe5484d, description: (live.ok ? "All " + live.checks.length + " checks passing. " : "Failing: " + live.failing.join(", ") + ". ") + "Last check <t:" + live.at + ":R>." });
+  return { sent: await wdDM(env, [String(me.id)], embeds) };
 }
 
 // ---------------------------------------------------------------- watchlist DMs
