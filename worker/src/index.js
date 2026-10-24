@@ -65,6 +65,7 @@ async function route(req, env, url) {
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
+  if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/public/links") return publicLinks(env);
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
@@ -719,6 +720,27 @@ async function interactions(req, env) {
     return json({ type: 4, data: { embeds: [{ title: shown(r.item), description: lines.join("\n"), url: link, color: 0x5b4bdb, footer: { text: (more ? "Also matched: " + more + " · " : "") + "Club FM, priced by watched sales · add /price: maplefm.gg/bot" } }] } });
   }
   return json({ type: 4, data: { content: "Unknown command", flags: 64 } });
+}
+
+// ---------------------------------------------------------------- !price for Twitch chat
+// Plain text for chat bots (Nightbot, StreamElements, Fossabot): one line under 400 characters.
+// Nightbot: !commands add !price $(urlfetch https://clubfm-accounts.aaweaver93.workers.dev/chat/price?q=$(querystring))
+async function chatPrice(req, env, url) {
+  const ip = req.headers.get("CF-Connecting-IP") || "";
+  const txt = (t) => new Response(t.slice(0, 390), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
+  if (overLimit("cp:" + ip, 120, 60)) return txt("Club FM: slow down a little, try again in a minute.");
+  const q = decodeURIComponent(String(url.searchParams.get("q") || "")).replace(/^!?price\s*/i, "").trim().slice(0, 80);
+  if (!q) return txt("Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg");
+  const rows = await summaryRows(env), ab = await abbrMap();
+  const hits = findRows(rows, q, ab);
+  if (!hits.length) return txt("No recent listings for " + q + ". Check maplefm.gg");
+  const r = hits[0], bits = [shown(r.item) + ":"];
+  if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? " from " + (r.salesN || 0) + " sales" : " from asks"));
+  if (r.best) bits.push("· cheapest now " + meso(r.best));
+  if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
+  const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  bits.push("· maplefm.gg/item/" + slug);
+  return txt(bits.join(" "));
 }
 
 // ---------------------------------------------------------------- watchlist DMs
