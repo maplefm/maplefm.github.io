@@ -2646,17 +2646,9 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var m = document.querySelector(".main"); if (m && m.getBoundingClientRect().top > window.innerHeight * 0.5) m.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   var POP = null, POP_AT = 0;
-  var PICK_FALLBACK = ["Gloves Attack Scroll 60%", "Work Gloves", "Selective 5-slot Coupon", "Mystery Palette Coupon", "Kumbi Throwing-Stars", "Korean Fan", "White Label Ring", "Claw Attack Scroll 60%", "SP Reset Scroll", "Emerald Earrings"];
   function loadPopular() {
     if (Date.now() - POP_AT < 10 * 60e3) return; POP_AT = Date.now();
     fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/popular").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.items) { POP = j.items; if (D) renderPicks(); } }).catch(function () {});
-  }
-  function findItem(n) {
-    if (D.byName[n]) return D.byName[n];
-    var lo = n.toLowerCase(), hit = null;
-    D.list.some(function (i) { var a = i.item.toLowerCase(); if (a === lo || a.replace(/[^a-z0-9]/g, "") === lo.replace(/[^a-z0-9]/g, "")) { hit = i; return true; } return false; });
-    if (!hit) { var r = searchItems(n, 1); if (r[0] && r[0].it) hit = r[0].it; }
-    return hit;
   }
   // short names under the quick-pick icons: every scroll shares one icon, so the label says which one
   function pickLabel(n) {
@@ -2668,7 +2660,6 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var box = $("picks"); if (!box || !D) return; loadPopular();
     var score = {}, add = function (i, v) { if (i && i.typ) score[i.item] = (score[i.item] || 0) + v; };
     (POP || []).forEach(function (x) { add(D.byName[x[0]], x[1] * 6); });
-    PICK_FALLBACK.forEach(function (n, k) { add(findItem(n), (10 - k) * 0.6); });
     D.list.forEach(function (i) { if (i.n >= MIN && i.salesN) add(i, Math.min(i.salesN, 60) / 10); });
     var top = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; }).slice(0, 10);
     var sig = top.join("|") + top.map(function (n) { var i = D.byName[n]; return i.typ + ":" + (i.mv[0] || 0); }).join(",");
