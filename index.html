@@ -1038,6 +1038,7 @@ dialog h3 { color: var(--accent-ink); }
 .kofitab .kx { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border: 0; border-radius: 50%; background: rgba(255,255,255,.28); color: #fff; font: 700 .85rem/20px var(--body, system-ui); cursor: pointer; padding: 0; }
 .kofitab .kx:hover { background: rgba(255,255,255,.5); }
 .kofitab[hidden] { display: none !important; }
+.ssi { height: 1.05em; width: auto; vertical-align: -0.15em; image-rendering: pixelated; }
 </style>
 </head>
 <body>
@@ -1050,7 +1051,7 @@ dialog h3 { color: var(--accent-ink); }
       <p>Scanned by players. Priced by sales.</p>
     </div>
     <div class="top-right">
-      <span class="pill clubchip" title="Signed in as a club member: deal alerts and where to buy are on">👑 Club</span>
+      <span class="pill clubchip" title="Signed in as a club member: deal alerts and where to buy are on"><img class="ssi" src="assets/superstar@4x.png" alt=""> Club</span>
       <a class="pill signpill" id="signpill" href="https://clubfm-accounts.aaweaver93.workers.dev/login?back=home" title="Sign in with Discord to contribute and earn. Your watchlist, positions and settings also follow you to any browser, and your Discord roles unlock what they unlock"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18.4 18.4 0 0 1 4.5 2.2 15.1 15.1 0 0 0-15.4 0A18.4 18.4 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.2 18.2a19.9 19.9 0 0 0 6 3l1.3-1.8a12.8 12.8 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12 0l.5.4a12.8 12.8 0 0 1-2 1l1.3 1.8a19.9 19.9 0 0 0 6-3c.6-5.2-1-9.7-3.5-13.8ZM8.5 15.4c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg><span id="signtxt">Sign in with Discord</span></a>
       <a class="pill" id="discpill" href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener" style="text-decoration:none" title="Join the Club FM Discord: price checks, scanner help, and the live feed">💬 Discord<span class="cnt" id="disccnt" hidden></span></a>
       <a class="pill contribpill" href="contribute.html" title="Run FM Watcher, add the prices you see, climb the ranks and earn. It only reads your screen.">⬇ Contribute and earn</a>
@@ -1080,7 +1081,7 @@ dialog h3 { color: var(--accent-ink); }
 
   <a class="mbar" id="mbar" hidden target="_blank" rel="noopener"><span class="mdot" aria-hidden="true"></span><span id="mtext"></span><span class="mlink">Nexon notice</span></a>
 
-  <div class="ubar" id="ubar" hidden><span>👑</span><span id="utext"></span><button type="button" id="ubarx" aria-label="Hide this notice">×</button></div>
+  <div class="ubar" id="ubar" hidden><span><img class="ssi" src="assets/superstar@4x.png" alt=""></span><span id="utext"></span><button type="button" id="ubarx" aria-label="Hide this notice">×</button></div>
 
   <div class="cards" id="cards"></div>
 
@@ -1404,6 +1405,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var h = Math.round(m / 60); if (h < 48) return h + "h ago"; return Math.round(h / 24) + "d ago";
   }
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function ssCrown() { var i = document.createElement("img"); i.src = "assets/superstar@4x.png"; i.alt = "Crown"; i.className = "ssi"; return i; }
   function coin() { return el("span", "coin"); }
   function money(n, cls) { var s = el("span", "num" + (cls ? " " + cls : "")); s.appendChild(coin()); s.appendChild(document.createTextNode(short(n))); return s; }
   function median(a) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
@@ -4002,7 +4004,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   })();
   function boardSummary(all) {
     var s = $("bsum"); if (!s) return; s.textContent = "";
-    all.slice(0, 3).forEach(function (w, i) { var b = el("span"); b.appendChild(el("b", null, (i === 0 ? "👑 " : "#" + (i + 1) + " ") + w.name)); b.appendChild(document.createTextNode(" " + fmt(w.sales))); s.appendChild(b); if (i < 2) s.appendChild(document.createTextNode(" · ")); });
+    all.slice(0, 3).forEach(function (w, i) { var b = el("span"); var bb = el("b", null, (i === 0 ? " " : "#" + (i + 1) + " ") + w.name); if (i === 0) bb.insertBefore(ssCrown(), bb.firstChild); b.appendChild(bb); b.appendChild(document.createTextNode(" " + fmt(w.sales))); s.appendChild(b); if (i < 2) s.appendChild(document.createTextNode(" · ")); });
     if (all.length > 3) s.appendChild(document.createTextNode(" · " + all.length + " scanners"));
   }
   function renderBoard() {
@@ -4017,7 +4019,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       var old = BLAST[w.name];
       r.className = "brow" + (w.rank === 1 ? " top1" : "") + (w.name === RK_ME ? " me" : "");
       r.textContent = "";
-      r.appendChild(el("span", "pos" + (w.rank === 1 ? " p1" : ""), w.rank === 1 ? "👑" : "#" + w.rank));
+      var ps = el("span", "pos" + (w.rank === 1 ? " p1" : ""), w.rank === 1 ? null : "#" + w.rank); if (w.rank === 1) ps.appendChild(ssCrown()); r.appendChild(ps);
       r.appendChild(badgeFor(w.name, w.rank));
       var bn = el("div", "bn"), nb = el("b", null, w.name); bn.appendChild(nb); var sp = supporterOf(w.name); if (sp) nb.appendChild(heart(sp));
       var tb = tierBadge(w); if (old && old.r !== w.rank) { var dl = el("span", "dlt " + (w.rank < old.r ? "u" : "d"), (w.rank < old.r ? "▲" : "▼") + Math.abs(old.r - w.rank)); dl.title = "was #" + old.r; tb.appendChild(dl); }

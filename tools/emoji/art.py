@@ -18,11 +18,14 @@ DEFS = """<defs>
 def svg(body):
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">{DEFS}{body}</svg>'
 
+import base64 as _b64, os as _os
+_SS = _b64.b64encode(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "..", "assets", "superstar@4x.png"), "rb").read()).decode()
+
 def crown(x, y, s=1.0, rot=0):
+    # the Superstar Crown (Cash Shop item 1007750), the Club FM logo, sitting where the old drawn crown sat
+    w = 42; h = w * 92 / 112
     return (f'<g transform="translate({x},{y}) rotate({rot}) scale({s})">'
-            f'<path d="M-20 6 L-22 -14 L-10 -4 L0 -20 L10 -4 L22 -14 L20 6 Z" fill="url(#gold)" stroke="{OL}" stroke-width="4" stroke-linejoin="round"/>'
-            f'<rect x="-21" y="3" width="42" height="9" rx="3" fill="#e3a921" stroke="{OL}" stroke-width="4"/>'
-            f'<circle cx="0" cy="-4" r="3.6" fill="#b07cff" stroke="{OL}" stroke-width="2"/></g>')
+            f'<image href="data:image/png;base64,{_SS}" x="{-w/2}" y="{14-h}" width="{w}" height="{h:.1f}" style="image-rendering:pixelated"/></g>')
 
 def eyes(kind, cx, cy, look=0):
     lx, rx = cx - 15, cx + 15
@@ -173,12 +176,12 @@ def _(f, n):
         q = (p - 0.25) / 0.25
         e = ease(q)
         return svg(clubby(sx=1 + 0.25 * e, sy=1 - 0.38 * e, dy=14 * e, eye="x", mouth_="flat", crown_on=False, larm=200 + 40 * e, rarm=-20 - 40 * e,
-                          extra_front=crown(64 + 34 * e, 30 + 74 * e, 0.9, 110 * e)))
+                          extra_front=crown(64 + 26 * e, 30 + 68 * e, 0.9, 110 * e)))
     q = (p - 0.5) / 0.5   # ghost rises
     gy = 60 - 50 * q
     ghost = (f'<g opacity="{0.9 - 0.6 * q}" transform="translate(64,{gy})"><path d="M-16 8 Q-16 -18 0 -18 Q16 -18 16 8 L12 4 L8 9 L4 4 L0 9 L-4 4 L-8 9 L-12 4 Z" fill="#eef4ff" stroke="{OL}" stroke-width="3"/>'
              f'<circle cx="-6" cy="-6" r="2.4" fill="{OL}"/><circle cx="6" cy="-6" r="2.4" fill="{OL}"/></g>')
-    return svg(clubby(sx=1.25, sy=0.62, dy=14, eye="x", mouth_="flat", crown_on=False, larm=240, rarm=-60, extra_front=crown(98, 104, 0.9, 110) + ghost))
+    return svg(clubby(sx=1.25, sy=0.62, dy=14, eye="x", mouth_="flat", crown_on=False, larm=240, rarm=-60, extra_front=crown(90, 98, 0.9, 110) + ghost))
 
 @anim("clubby_hype", 12, 60)
 def _(f, n):

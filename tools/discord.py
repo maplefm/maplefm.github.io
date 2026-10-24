@@ -225,7 +225,7 @@ def job_ranks(ranks_path, state_path):
         if w["rank"] == 1 and o["rank"] != 1:
             crown = w
     if crown:
-        events.insert(0, (crown, "takes the Crown, most sales caught of anyone 👑"))
+        events.insert(0, (crown, "takes the Crown, most sales caught of anyone <:crown:1563401437218734160>"))
     # one embed per person, with their character picture when classicrank.com has one
     embeds = []
     for w, what in events[:10]:
