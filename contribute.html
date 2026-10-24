@@ -383,7 +383,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // ---------------------------------------------------------------- supporters wall
   (function () {
     var g = $("wallgrid"); if (!g) return;
-    fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/supporters").then(function (r) { return r.ok ? r.json() : []; }).then(function (l) {
+    fetch("https://api.maplefm.gg/public/supporters").then(function (r) { return r.ok ? r.json() : []; }).then(function (l) {
       l = (l || []).filter(function (x) { return x.ign || x.name; }); if (!l.length) return;
       var order = ["Beta Tester", "FangBlade", "Tiger", "curryishott", "Suuushi", ""];
       l.sort(function (a, b) { return order.indexOf(a.tier) - order.indexOf(b.tier); });
@@ -422,7 +422,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
 
   // ---------------------------------------------------------------- earn board and accounts
   var SRC = ["https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/credits.json", "data/credits.json"];
-  var API = "https://clubfm-accounts.aaweaver93.workers.dev";   // the accounts service
+  var API = "https://api.maplefm.gg";   // the accounts service
   var C = null, W = 0, LINKS = {}, ME = null;
   function api(path, opts) { return fetch(API + path, Object.assign({ credentials: "include" }, opts || {})).then(function (r) { return r.json(); }); }
   function showAccount(a) {
