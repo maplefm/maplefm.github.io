@@ -71,7 +71,7 @@ async function route(req, env, url) {
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
-  if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await trafficSend(env, Date.now() - 3600e3, Date.now(), "Traffic, last hour (test)")); }
+  if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); { const n = Date.now(), e = etParts(n); return json(await trafficSend(env, n - 3600e3, n, "Traffic, last hour (test)", n - (e.hour * 60 + e.minute) * 60e3)); } }
   if (p === "/r" && req.method === "POST") return refHit(req, env, url);
   if (p === "/twitchbot/connect") return tbConnect(req, env, url);
   if (p === "/twitchbot/callback") return tbCallback(req, env, url);
@@ -982,7 +982,8 @@ async function trafficStats(env, from, to) {
   const items = pages.filter((r) => /^\/item\//.test(r.p)).slice(0, 3).map((r) => pageLabel(r.p).slice(6) + " " + r.n);
   return { views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price };
 }
-function trafficEmbed(st, prev, title, from, to) {
+function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.views + "** views · **" + pc + "** !price"; }
+function trafficEmbed(st, prev, title, from, to, extra) {
   const d = (a, b) => (b == null ? "" : a === b ? " (same as yesterday)" : " (" + (a > b ? "+" : "") + (a - b) + " vs yesterday)");
   const f = [];
   f.push({ name: "Visitors", value: "**" + st.visitors + "**" + d(st.visitors, prev && prev.visitors), inline: true });
@@ -992,11 +993,16 @@ function trafficEmbed(st, prev, title, from, to) {
   if (st.pages.length) f.push({ name: "Top pages", value: st.pages.map((x) => x[0] + " · " + x[1]).join("\n") + (st.items.length ? "\nMost viewed items: " + st.items.join(", ") : "") });
   if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });
   if (st.tags.length) f.push({ name: "Partner links", value: st.tags.map((x) => x.q + " · " + x.n).join("\n"), inline: true });
+  (extra || []).forEach((x) => f.push({ name: x[0], value: totalsLine(x[1]), inline: false }));
   return { title, color: 0x6d3fd1, fields: f, description: "<t:" + Math.floor(from / 1000) + ":t> to <t:" + Math.floor(to / 1000) + ":t>", footer: { text: "Visitors are counted once a day each. No cookies, no IPs kept." } };
 }
-async function trafficSend(env, from, to, title) {
+// Visitors in a total are counted once per day each (the id changes daily), so "all time" visitors are visitor-days.
+async function trafficSend(env, from, to, title, dayStart) {
   const st = await trafficStats(env, from, to), prev = await trafficStats(env, from - 864e5, to - 864e5);
-  const r = await fetch(DISCORD + "/channels/" + TRAFFIC_CH + "/messages", { method: "POST", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ embeds: [trafficEmbed(st, prev, title, from, to)] }) });
+  const extra = [];
+  if (dayStart != null && dayStart < from) extra.push(["Today so far", await trafficStats(env, dayStart, to)]);
+  extra.push(["All time (since Oct 24)", await trafficStats(env, 0, to)]);
+  const r = await fetch(DISCORD + "/channels/" + TRAFFIC_CH + "/messages", { method: "POST", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ embeds: [trafficEmbed(st, prev, title, from, to, extra)] }) });
   return { status: r.status, st };
 }
 function etParts(ms) {
@@ -1011,13 +1017,19 @@ async function trafficPost(env) {
   const top = nowMs - et.minute * 60e3 - (new Date(nowMs).getUTCSeconds()) * 1e3;   // the top of this hour
   const key = "traffic:posted:" + et.day + ":" + et.hour;
   if (await env.ACCOUNTS.get(key)) return;
-  if (et.hour === 8) {
+  const midnight = top - et.hour * 3600e3;
+  if (et.hour === 0) {
+    // end of day: the whole day that just finished, plus all time
     await env.ACCOUNTS.put(key, "1", { expirationTtl: 2 * DAY });
-    await trafficSend(env, top - 9 * 3600e3, top, "Overnight traffic, 11 PM to 8 AM");
+    const y = etParts(top - 3600e3).day;
+    await trafficSend(env, top - 24 * 3600e3, top, "End of day " + y + ": full day's traffic");
+  } else if (et.hour === 8) {
+    await env.ACCOUNTS.put(key, "1", { expirationTtl: 2 * DAY });
+    await trafficSend(env, top - 9 * 3600e3, top, "Overnight traffic, 11 PM to 8 AM", midnight);
   } else if (et.hour >= 9 && et.hour <= 23) {
     await env.ACCOUNTS.put(key, "1", { expirationTtl: 2 * DAY });
     const h = et.hour - 1, lab = (x) => (x % 12 || 12) + (x < 12 ? " AM" : " PM");
-    await trafficSend(env, top - 3600e3, top, "Traffic, " + lab(h) + " to " + lab(et.hour));
+    await trafficSend(env, top - 3600e3, top, "Traffic, " + lab(h) + " to " + lab(et.hour), midnight);
   }
   if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
 }
