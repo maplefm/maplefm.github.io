@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://maplefm.gg/">
 <meta property="og:image" content="https://maplefm.gg/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="og-icon.png?v=2">
+<link rel="icon" href="og-icon.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -816,7 +816,7 @@ button, .card, .cchip, tbody tr, .li, .pill, .tabs button, input, select { trans
 .ticker .deal b { color: var(--up); }
 
 .brand h1 { font-family: var(--display); font-weight: 800; font-size: 1.9rem; color: var(--ink); -webkit-text-stroke: 0; text-shadow: none; letter-spacing: -.03em; display: flex; align-items: center; gap: 9px; }
-.brand h1::before { content: ""; width: 32px; height: 32px; border-radius: 10px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 23 3 10l7 6 6-9 6 9 7-6-2 13z' fill='%23f6c94a' stroke='%23a8740a' stroke-width='1.4' stroke-linejoin='round'/%3E%3Crect x='5' y='22.5' width='22' height='4.5' rx='1.2' fill='%23e4ae25' stroke='%23a8740a' stroke-width='1.4'/%3E%3Ccircle cx='16' cy='18' r='2.5' fill='%23b07bff' stroke='%23fff' stroke-width='.8'/%3E%3Ccircle cx='9.6' cy='19.6' r='1.6' fill='%2361d4f0'/%3E%3Ccircle cx='22.4' cy='19.6' r='1.6' fill='%2361d4f0'/%3E%3Ccircle cx='3' cy='10' r='1.5' fill='%23fff3c4'/%3E%3Ccircle cx='16' cy='7' r='1.5' fill='%23fff3c4'/%3E%3Ccircle cx='29' cy='10' r='1.5' fill='%23fff3c4'/%3E%3C/svg%3E") center/76% no-repeat, linear-gradient(135deg, #8b5cf6, #3b1a7a); box-shadow: 0 6px 16px rgba(109,63,209,.38); }
+.brand h1::before { content: ""; width: 32px; height: 32px; border-radius: 10px; background: url("assets/superstar@4x.png") center/84% no-repeat, linear-gradient(135deg, #8b5cf6, #3b1a7a); box-shadow: 0 6px 16px rgba(109,63,209,.38);  image-rendering: pixelated; }
 .brand h1 span { color: var(--accent); }
 .brand p { color: var(--muted); font-weight: 600; }
 :root[data-theme="dark"] .brand p { color: var(--muted); }
@@ -2347,7 +2347,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   function supporterOf(name) { return SUPP[String(name || "").toLowerCase()] || null; }
   function heart(sp) { var h = el("span", "heart", "♥"); h.title = "Supports Club FM on Ko-fi" + (sp.tier ? ": " + sp.tier + " tier" : "") + (sp.lifetime ? " · lifetime supporter" : ""); h.setAttribute("aria-label", h.title); return h; }
   function tierOf(n) { for (var k = 0; k < TIERS.length; k++) if (n >= TIERS[k][0]) return { name: TIERS[k][1], cls: TIERS[k][2], next: k ? TIERS[k - 1] : null, at: TIERS[k][0] }; }
-  var CROWN_SVG = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23 3 10l7 6 6-9 6 9 7-6-2 13z" fill="#f6c94a" stroke="#a8740a" stroke-width="1.6" stroke-linejoin="round"/><rect x="5" y="22.5" width="22" height="4.5" rx="1.2" fill="#e4ae25" stroke="#a8740a" stroke-width="1.6"/><circle cx="16" cy="18" r="2.6" fill="#b07bff" stroke="#fff" stroke-width=".8"/><circle cx="9.6" cy="19.6" r="1.6" fill="#61d4f0"/><circle cx="22.4" cy="19.6" r="1.6" fill="#61d4f0"/></svg>';
+  var CROWN_SVG = '<img src="assets/superstar@4x.png" alt="" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated">';
   var GEM = { mythic: "✦", titan: "⬢", immortal: "✧", tlegend: "★", monarch: "♛", royal: "♛", tycoon: "◆", broker: "◆", trader: "●", merchant: "●", apprentice: "●", scout: "○" };
   function rankBadge(r) {
     var b = el("span", "rbadge r" + Math.min(r, 4)); b.title = r === 1 ? "Number one scanner: wears the Crown" : r <= 3 ? "Top 3 scanner" : "Top 10 scanner";
