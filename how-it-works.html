@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Club FM Works · Club FM</title>
+<meta name="description" content="Where Club FM's MapleStory Classic prices come from, how they're calculated, what is collected, and who runs the site.">
+<link rel="canonical" href="https://maplefm.gg/how-it-works.html">
+<link rel="icon" href="/og-icon.png?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:14px 16px 48px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.brand{font:800 1.25rem Outfit,sans-serif;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}.brand img{height:30px;image-rendering:pixelated}
+h1{font:800 2rem/1.15 Outfit,sans-serif;margin:8px 0 4px}.lead{color:var(--muted);margin:0 0 10px}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}nav.toc a{font-size:.85rem;font-weight:600;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:12px}
+h2{font:700 1.2rem Outfit,sans-serif;margin:0 0 6px}ol{padding-left:20px;margin:6px 0}li{margin:4px 0}p{margin:6px 0}
+.muted{color:var(--muted)}a{color:var(--accent)}
+</style></head><body><main>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt=""> Club FM</a><a href="/streamers.html">For streamers</a></div>
+<h1>How Club FM works</h1>
+<p class="lead">The full picture, for anyone who wants to look under the hood.</p>
+<nav class="toc"><a href="#sources">Where prices come from</a><a href="#math">How a price is set</a><a href="#data">What we collect</a><a href="#safe">Safety</a><a href="#who">Who runs it</a></nav>
+
+<section id="sources"><h2>Where prices come from</h2>
+<ol>
+<li><b>Players in the Free Market.</b> Volunteers run FM Watcher, a free Windows program, while they shop. It reads the shop windows on their own screen: item names, prices, quantities and sold slots. Resting the mouse on an equip lets it read the item's stats.</li>
+<li><b>Trade chat and chalkboards.</b> Buy and sell posts seen in chat, and chalkboards in the Free Market Entrance, count as asking prices.</li>
+<li><b>Public Twitch streams.</b> When a MapleStory Classic stream shows Free Market shops, those shops are read the same way and credited to the channel.</li>
+</ol>
+<p class="muted">Everything comes from what any player can see in game. There is no hacking, packet reading or access to Nexon's servers.</p>
+</section>
+
+<section id="math"><h2>How a price is set</h2>
+<ol>
+<li>The <b>typical price</b> is the middle of recent real sales, a slot that sold out between two scans. Asking prices are only used when there are no sales yet.</li>
+<li><b>Equips are priced by their roll.</b> A 10 attack Work Gloves and a clean pair are judged against sales of the same stats and slots used.</li>
+<li>Odd outliers and misreads are filtered out, and a <b>check mark</b> means a second scanner or a stream saw the same sale.</li>
+<li>Prices refresh about every 15 minutes. They can still be wrong or late, so check before a big trade.</li>
+</ol>
+</section>
+
+<section id="data"><h2>What we collect</h2>
+<ol>
+<li>From the game screen: items, prices, stats, the shop owner's in-game name as shown in the Free Market, channel, room and time. Nothing else on a scanner's screen leaves their PC.</li>
+<li>From visitors: nothing. Browsing needs no account and the site sets no cookies of its own. Your watchlist and settings stay in your browser.</li>
+<li>From the !price chat command: only the item name typed. We never see who asked.</li>
+<li>Contributors who want credit sign in with Discord. That's used for ranks and payouts only.</li>
+</ol>
+<p class="muted">Full legal wording is in the <a href="/terms.html">Terms of Use</a>.</p>
+</section>
+
+<section id="safe"><h2>Safety</h2>
+<ol>
+<li><b>Viewers:</b> the board is a public web page. No downloads, no logins, no ads.</li>
+<li><b>Streamers:</b> the !price command only fetches a line of text, like any !weather command. It can't post on its own or touch your channel settings.</li>
+<li><b>Scanners:</b> FM Watcher only reads the screen, the same way streaming software captures it. It never clicks, types, moves your character, or touches the game's files or memory. Club FM isn't approved by Nexon, so we can't promise zero risk, but the watcher does nothing to the game.</li>
+<li><b>Game rules:</b> Club FM never buys or sells mesos, items, accounts or access for real money.</li>
+</ol>
+</section>
+
+<section id="who"><h2>Who runs it</h2>
+<p>Club FM is built by one player who loves the game, and it's run for the community, not for profit. The developer pays the costs out of pocket. There are no investors, no ads and no outside owners.</p>
+<p>Donations on <a href="https://ko-fi.com/maplefm">Ko-fi</a> go back to the players who scan prices, through the <a href="/contribute.html">Contribute and earn</a> program. The goal is a site that pays for itself and answers only to its players.</p>
+<p>Some streamers who use Club FM on stream are sponsored, and sponsored streams say so.</p>
+<p>Questions or ideas? Ask in the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a>.</p>
+</section>
+</main></body></html>
