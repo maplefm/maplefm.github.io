@@ -1,5 +1,5 @@
 {
- "at": 1792850964,
+ "at": 1792879117,
  "ok": true,
  "failing": [],
  "checks": [
@@ -7,91 +7,91 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 430,
+   "ms": 246,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 168,
+   "ms": 102,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 153,
+   "ms": 152,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 169,
+   "ms": 110,
    "fix": null
   },
   {
    "name": "Contribute",
    "ok": true,
    "detail": "loads",
-   "ms": 145,
+   "ms": 208,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 232,
+   "ms": 238,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 124,
+   "ms": 101,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 222,
+   "ms": 173,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 171,
+   "ms": 114,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: typical 2K (2K to 3K) from 95 sales · cheapest now 1K · up 25% today · maplef",
-   "ms": 516,
+   "detail": "Work Gloves: typical 2K (2K to 3K) from 94 sales · cheapest now 1K · up 12% today · maplef",
+   "ms": 820,
    "fix": null
   },
   {
    "name": "!price (old address)",
    "ok": true,
-   "detail": "Work Gloves: typical 2K (2K to 3K) from 95 sales · cheapest now 1K · up 25% today · maplef",
-   "ms": 575,
+   "detail": "Work Gloves: typical 2K (2K to 3K) from 94 sales · cheapest now 1K · up 12% today · maplef",
+   "ms": 173,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated 1 min ago",
-   "ms": 155,
+   "detail": "updated 3 min ago",
+   "ms": 71,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1324 items",
-   "ms": 432,
+   "detail": "1333 items",
+   "ms": 346,
    "fix": null
   },
   {
@@ -104,5 +104,5 @@
  ],
  "repairs": [],
  "history": [],
- "beat": 1792850964
+ "beat": 1792879117
 }
