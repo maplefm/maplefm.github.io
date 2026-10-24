@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.3"
+VERSION = "2026.10.24.4"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -81,7 +81,7 @@ CFG_CHIME = [True]
 
 # Equips the price board most needs a hover on (worth 50K+ and mostly listed without stats). Item names only,
 # refreshed every 20 minutes. The watcher never moves the mouse: it only tells you which row to rest it on.
-HW_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/hoverwanted.json"
+HW_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json"
 HW = {"items": {}, "at": 0.0}
 NUDGED = {}
 def hover_wanted():
@@ -91,7 +91,7 @@ def hover_wanted():
             req = urllib.request.Request(HW_URL + "?t=" + str(int(time.time())), headers={"User-Agent": "fm-watcher/" + VERSION})
             with urllib.request.urlopen(req, timeout=20) as r:
                 j = json.loads(r.read().decode("utf-8"))
-            HW["items"] = {str(x.get("i")): int(x.get("typ") or 0) for x in (j.get("items") or []) if x.get("i")}
+            HW["items"] = {str(x.get("i")): int(x.get("typ") or 0) for x in (j.get("hw") or j.get("items") or []) if x.get("i")}
         except Exception:
             pass
     return HW["items"]

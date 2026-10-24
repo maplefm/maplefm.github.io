@@ -1,10 +1,15 @@
 {
- "version": "2026.10.24.3",
- "date": "2026-10-24T15:34:43+00:00",
- "notes": "Hover wanted: the watcher now tells you (with a two-note chime) when a shop has an equip the board needs stats for. Just rest your mouse on that row.",
- "sha256": "078d6a71d785f8a8e6b04a915f24b1a4bd1f03d4b2cacc1332308ab45364d94b",
- "size": 60649,
+ "version": "2026.10.24.4",
+ "date": "2026-10-24T15:48:07+00:00",
+ "notes": "Hover wanted list now reads from the public price summary.",
+ "sha256": "327adc94d4c201a581d11b294e1b9d610c0f13359b47448e4965a7665a469de7",
+ "size": 60659,
  "history": [
+  {
+   "version": "2026.10.24.4",
+   "date": "2026-10-24",
+   "notes": "Hover wanted list now reads from the public price summary."
+  },
   {
    "version": "2026.10.24.3",
    "date": "2026-10-24",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.2",
    "date": "2026-10-20",
    "notes": "Better reading on more screens."
-  },
-  {
-   "version": "2026.10.20.1",
-   "date": "2026-10-20",
-   "notes": "Easier setup on more PCs."
   }
  ],
  "pip": [],
- "sig": "2352cd814a2348761e0fc6d1a5776f2d068dd716c6480e8131a79d4c3aa08addae3dfd8fa9eb0e95d53b669a106471adf826c89b2c9aba56c0376db2d1dc21ae7533726635884d130a9513b7c2611625b21b73afad3df9d4c1bfb52998037a898f3932efe2fbd2e3e46926c0c4fa569b1601329dd3cefe06d73cbe02fa3797110dcd1cac5ec365c823994351705f0036e94f139c2197c7e1b41e8553f983d43dcde0acb43ed6795dcb58e550c9e495697ba55f6a0c4a62bf65b4b3ffe9da036fa12bfd217c180c95603ecfca3421bb4501aa9972654e2b5e1141bad27a4b3711af0c0126c0f630204970cf5e1f92db6d3f7a3b1d72f39c78f4c87a0c3404561e"
+ "sig": "bed237309e7765162ca8e3511b14dc034868ca56a6b28c971d8a60d924e8bfebc6ea30dffef326d8f796ba6f89776a746e00ab889ee1eb2dac25d54cdcb5fb92a9f375691360b682826d2ffc475a9f90a848fad96955f434f23718ff971d0bf6244a7f1bea4f3f1ebfc23a42b57fced9054d33192c75c2a7a33d27e7d9b65fb425e7811d39bec48347523d166745bd4c3388fabc71e5b432284feaac2262c5fd38de5cc81e76b874b83e9ff16b0ebb7e107c328339990e90a79c2dcefc3745646ebf8babe3ee5d8ee45ee42cd9fca9fd213592dcade4e911c45bc0d0a5a91b7f41fbf43535d3f7d0eb3515d81afe157a7dee6d8fc63fdd0f7f7de1f714fdcc7a"
 }
