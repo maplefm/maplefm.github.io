@@ -2028,6 +2028,10 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     // 3. listings that sold are trusted, unless they're over 30x the median (usually a spot swapped out, not a sale).
     var grp = {}; L.forEach(function (l) { if (!l.b) (grp[l.i] || (grp[l.i] = [])).push(l.u); });
     var gmed = {}; Object.keys(grp).forEach(function (k) { gmed[k] = grp[k].length >= 4 ? median(grp[k]) : 0; });
+    // what the item actually sells for: a Use or Etc item that keeps selling well above its NPC price
+    // (Cash Shop coupons the NPC buys for 1 meso) is a real market, so its open listings aren't spots
+    var sgrp = {}; L.forEach(function (l) { if (l.so && !l.b) (sgrp[l.i] || (sgrp[l.i] = [])).push(l.u); });
+    var smed = {}; Object.keys(sgrp).forEach(function (k) { if (sgrp[k].length >= 3) smed[k] = median(sgrp[k]); });
     var spotN = 0, showSpot = $("f-spot").checked;
     L.forEach(function (l) {
       if (l.b) return;
@@ -2039,7 +2043,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       var tipUp = l.x && l.x._tip && Object.keys(l.x._tip).some(function (k) { return l.x._tip[k] > 0; });
       if (eq) { if (m && r > 10 && !tipUp) l.pricey = true; }        // shown and counted as a sale, but kept out of typical
       else if (m && r > 10 && (!l.so || r > 30)) l.spot = true;
-      else if (!l.so && npc && (cat === "Use" || cat === "Etc" || cat === "Other") && l.u >= 10000 && l.u > npc * 500) l.spot = true;
+      else if (!l.so && npc && (cat === "Use" || cat === "Etc" || cat === "Other") && l.u >= 10000 && l.u > npc * 500 && !nxOf(l.i) && !(smed[l.i] && l.u <= smed[l.i] * 3)) l.spot = true;
       if (l.spot) spotN++;
     });
     if (!showSpot) L = L.filter(function (l) { return !l.spot; });
