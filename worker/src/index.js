@@ -53,6 +53,9 @@ async function route(req, env, url) {
   if (p === "/logout" && req.method === "POST") return logout(env);
   if (p === "/me" && req.method === "GET") return me(req, env);
   if (p === "/me" && req.method === "POST") return updateMe(req, env);
+  if (p === "/me/quests" && req.method === "GET") return getQuests(req, env);
+  if (p === "/me/quests" && req.method === "POST") return putQuests(req, env);
+  if (p === "/watcher/quests" && req.method === "POST") return watcherQuests(req, env);
   if (p === "/me/settings" && req.method === "GET") return getSettings(req, env);
   if (p === "/me/settings" && req.method === "POST") return putSettings(req, env);
   if (p === "/link" && req.method === "POST") return link(req, env);
@@ -528,6 +531,52 @@ async function privateVoice(req, env) {
   const r = await fetch(DISCORD + "/guilds/" + GUILD + "/channels", { method: "POST", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
   return r.ok ? { ok: true, id: j.id, name: j.name } : { error: r.status, body: j };
+}
+
+// ---------------------------------------------------------------- quest log
+// Each account keeps its quest progress: done and started quests by name, and the character's level.
+// The site sets them by hand; a linked FM Watcher reports what it reads in the game's quest window.
+const QKEY = (id) => "quests:" + id;
+async function loadQ(env, id) { return (await env.ACCOUNTS.get(QKEY(id), "json")) || { done: {}, doing: {}, level: 0, updated: 0 }; }
+function cleanName(n) { return String(n || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 80); }
+async function getQuests(req, env) {
+  const a = await whoami(req, env);
+  if (!a) return json({ signedIn: false });
+  return json(Object.assign({ signedIn: true }, await loadQ(env, a.id)), 200, { "Cache-Control": "no-store" });
+}
+async function putQuests(req, env) {
+  const a = await whoami(req, env);
+  if (!a) return json({ error: "sign in first" }, 401);
+  const raw = await req.text(); if (raw.length > 40000) return json({ error: "too big" }, 413);
+  let b; try { b = JSON.parse(raw); } catch (e) { return json({ error: "bad json" }, 400); }
+  const q = await loadQ(env, a.id), t = now();
+  // set: {"Quest name": "done" | "doing" | null}
+  for (const [k0, v] of Object.entries(b.set || {}).slice(0, 400)) {
+    const k = cleanName(k0); if (!k) continue;
+    delete q.done[k]; delete q.doing[k];
+    if (v === "done") q.done[k] = t; else if (v === "doing") q.doing[k] = t;
+  }
+  if (b.level != null) { const lv = Math.max(0, Math.min(250, parseInt(b.level, 10) || 0)); q.level = lv; }
+  q.updated = t;
+  await env.ACCOUNTS.put(QKEY(a.id), JSON.stringify(q));
+  return json(Object.assign({ ok: true }, q));
+}
+// a linked watcher: {hid, done: [...], doing: [...], level}. The watcher id is the credential, as for linking.
+async function watcherQuests(req, env) {
+  let b; try { b = await req.json(); } catch (e) { return json({ error: "bad json" }, 400); }
+  const hid = String((b && b.hid) || "");
+  if (!/^[0-9a-f]{16}$/.test(hid)) return json({ error: "bad watcher" }, 400);
+  const ip = req.headers.get("CF-Connecting-IP") || "";
+  if (overLimit("wq:" + hid, 60, 600) || overLimit("wqi:" + ip, 120, 600)) return json({ error: "slow down" }, 429);
+  const id = await env.ACCOUNTS.get("watcher:" + hid);
+  if (!id) return json({ error: "not linked" }, 404);
+  const q = await loadQ(env, id), t = now();
+  for (const n of (Array.isArray(b.done) ? b.done : []).slice(0, 400)) { const k = cleanName(n); if (k) { delete q.doing[k]; q.done[k] = q.done[k] || t; } }
+  for (const n of (Array.isArray(b.doing) ? b.doing : []).slice(0, 100)) { const k = cleanName(n); if (k && !q.done[k]) q.doing[k] = q.doing[k] || t; }
+  if (b.level != null) { const lv = parseInt(b.level, 10); if (lv > 0 && lv <= 250) q.level = lv; }
+  q.updated = t; q.fromWatcher = t;
+  await env.ACCOUNTS.put(QKEY(id), JSON.stringify(q));
+  return json({ ok: true, done: Object.keys(q.done).length, doing: Object.keys(q.doing).length });
 }
 
 // ---------------------------------------------------------------- timestamp marks
