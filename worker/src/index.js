@@ -444,18 +444,18 @@ async function same(a, b) {
 }
 
 async function dataLive(req, env) {
+  // Open to everyone: the board shows every listing without signing in. Discord sign-in is for contributing and
+  // earning. Bulk pulling is still held back per address (and per account when signed in), and every copy carries
+  // timestamp marks: the account's when signed in, the address's otherwise.
   const id = await sessionId(req, env);
-  if (!id) return json({ error: "sign in" }, 401, { "Cache-Control": "no-store" });
-  // the listings behind the deals are for Club and Mega Deals holders only (Mega Deals is earned at MEGA_AT sales
-  // caught or the $100 Ko-fi tier); everyone else gets the price-only board
-  const acct = await env.ACCOUNTS.get("acct:" + id, "json");
-  if (!acct || acct.locked || !(await isClub(acct, env))) return json({ error: "club" }, 403, { "Cache-Control": "no-store" });
+  const acct = id ? await env.ACCOUNTS.get("acct:" + id, "json") : null;
+  if (acct && acct.locked) return json({ error: "locked" }, 403, { "Cache-Control": "no-store" });
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if (overLimit("a:" + id, 30, 600) || overLimit("i:" + ip, 60, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
-  if (env.RL) { try { const ok = await env.RL.limit({ key: "a:" + id }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
+  if ((id && overLimit("a:" + id, 30, 600)) || overLimit("i:" + ip, id ? 60 : 24, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
+  if (env.RL) { try { const ok = await env.RL.limit({ key: id ? "a:" + id : "i:" + ip }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
   const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60).catch(() => null)));
   if (!parts.some(Boolean)) return json({ error: "not ready" }, 503);
-  const mk = await markKey(env, id);
+  const mk = await markKey(env, id || "ip:" + ip);
   const { readable, writable } = new TransformStream();
   (async () => {
     const w = writable.getWriter(), enc = new TextEncoder();
