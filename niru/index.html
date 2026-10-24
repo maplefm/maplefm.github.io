@@ -10,6 +10,6 @@
   var go = function () { location.replace("/?ref=niru" + location.hash); };
   try { sessionStorage.setItem("fm-ref", "niru"); localStorage.setItem("fm-ref", "niru"); } catch (e) {}
   var done = false, t = setTimeout(function () { if (!done) go(); }, 900);
-  fetch("https://clubfm-accounts.aaweaver93.workers.dev/r?p=niru", { method: "POST", keepalive: true }).catch(function () {}).then(function () { done = true; clearTimeout(t); go(); });
+  fetch("https://api.maplefm.gg/r?p=niru", { method: "POST", keepalive: true }).catch(function () {}).then(function () { done = true; clearTimeout(t); go(); });
 })();
 </script></body></html>
