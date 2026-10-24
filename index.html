@@ -3466,11 +3466,18 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var mvs = el("div", "mvs"); [["1 day", 0], ["3 days", 1], ["7 days", 2]].forEach(function (x) { var s = el("span"); s.appendChild(el("span", "lbl", x[0] + " ")); if (i.mv[x[1]] != null) s.appendChild(moveTag(i.mv[x[1]])); else s.appendChild(el("span", "tfd", "n/a")); mvs.appendChild(s); });
     ip.appendChild(mvs);
     if (i.bid) { var bd = el("div", "bids"); bd.appendChild(document.createTextNode("Buyers in chat: top offer ")); bd.appendChild(money(i.bid)); bd.appendChild(document.createTextNode(" from " + i.bids.length + (i.bids.length === 1 ? " offer" : " offers"))); ip.appendChild(bd); }
-    var withX = i.all.filter(function (x) { return x.x && !x.b; });
+    // listings with stats actually read (a trade chat "clean" tag alone has none)
+    var withX = i.all.filter(function (x) { return x.x && !x.b && Object.keys(x.x).some(function (k) { return /^[A-Z]+$/.test(k) && k !== "SLOTS"; }); });
     if (withX.length) {
-      var ks = keyStat(i.item, withX[0].x, withX[0].xj);
+      var ksN = {}; withX.forEach(function (x) { var k = keyStat(i.item, x.x, x.xj); if (k) ksN[k] = (ksN[k] || 0) + 1; });
+      var ks = Object.keys(ksN).sort(function (a, b) { return ksN[b] - ksN[a]; })[0] || keyStat(i.item, withX[0].x, withX[0].xj);
+      // the first hover can be a clean pair: gloves and other armour that gain attack from scrolls are grouped by
+      // attack as soon as any listing shows some, and the clean ones count as attack 0
+      var attX = withX.filter(function (x) { return x.x.ATT != null || x.x.MATT != null; })[0];
+      if (attX && ks !== "ATT" && ks !== "MATT" && ks !== "SUCCESS") ks = keyStat(i.item, attX.x, attX.xj);
+      var noBaseAtt = (ks === "ATT" || ks === "MATT") && category(i.item) !== "Weapons" && !(fullBase(i.item).s || {})[ks];
       var groups = {};
-      withX.forEach(function (x) { var v = x.x[ks]; if (v == null) return; var bv = baseOf(i.item, x.x, ks); if (ks !== "SUCCESS" && (v < 0 || (bv != null ? v > bv * 2 + 40 : v > 250))) return; (groups[v] || (groups[v] = [])).push(x); });   // a roll twice the base is a misread, not a scroll job
+      withX.forEach(function (x) { var v = x.x[ks]; if (v == null && noBaseAtt && x.x.SLOTS != null) v = 0; if (v == null) return; var bv = baseOf(i.item, x.x, ks); if (ks !== "SUCCESS" && (v < 0 || (bv != null ? v > bv * 2 + 40 : v > 250))) return; (groups[v] || (groups[v] = [])).push(x); });   // a roll twice the base is a misread, not a scroll job
       var vals = Object.keys(groups).map(Number).sort(function (a, b) { return b - a; });
       if (vals.length) {
         var sec = el("div", "subw pbs"); var h5 = el("h4"); h5.appendChild(document.createTextNode("Price by " + (ks === "SUCCESS" ? "success rate" : ks))); sec.appendChild(h5);
