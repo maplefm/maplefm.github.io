@@ -519,7 +519,7 @@ async function brandFix(req, env) {
     for (const e of body.emojis.slice(0, 12)) {
       const img = await dataUri(e.url);
       const old = Array.isArray(list) ? list.find((x) => x.name === e.name) : null;
-      if (old) { const d = await fetch(DISCORD + "/guilds/" + GUILD + "/emojis/" + old.id, { method: "DELETE", headers: H }); if (!d.ok) { out.emojis.push(e.name + " delete " + d.status + " " + (await d.text()).slice(0, 120)); continue; } }
+      if (old) { const d = await fetch(DISCORD + "/guilds/" + GUILD + "/emojis/" + old.id, { method: "DELETE", headers: { Authorization: H.Authorization } }); if (!d.ok) { out.emojis.push(e.name + " delete " + d.status + " " + (await d.text()).slice(0, 120)); continue; } }
       const c = await fetch(DISCORD + "/guilds/" + GUILD + "/emojis", { method: "POST", headers: H, body: JSON.stringify({ name: e.name, image: img }) });
       out.emojis.push(e.name + " " + c.status + (c.ok ? "" : " " + (await c.text()).slice(0, 160)));
     }
@@ -1052,7 +1052,7 @@ async function syncRoles(env) {
       const managed = tierIds.concat(crownId ? [crownId] : []).concat(megaId && want.has(megaId) ? [megaId] : []);
       for (const id of managed) {
         if (want.has(id) && !have.has(id)) { const r = await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + a.id + "/roles/" + id, { method: "PUT", headers: H }); if (r.ok) { have.add(id); changed = true; } else failed++; }
-        if (!want.has(id) && have.has(id) && !isAdmin(a, env)) { const r = await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + a.id + "/roles/" + id, { method: "DELETE", headers: H }); if (r.ok) { have.delete(id); changed = true; } else failed++; }
+        if (!want.has(id) && have.has(id) && !isAdmin(a, env)) { const r = await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + a.id + "/roles/" + id, { method: "DELETE", headers: { Authorization: H.Authorization } }); if (r.ok) { have.delete(id); changed = true; } else failed++; }
       }
       a.roles = [...have]; a.rolesSynced = now(); a.rolesFailed = failed;   // a failed call (bot role below the tier roles, say) is retried next hour
       if (changed || failed !== (a.rolesFailedBefore || 0)) { a.rolesFailedBefore = failed; await env.ACCOUNTS.put(k.name, JSON.stringify(a)); }
