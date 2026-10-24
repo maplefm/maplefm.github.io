@@ -1,10 +1,15 @@
 {
- "version": "2026.10.23.4",
- "date": "2026-10-24T02:14:03+00:00",
- "notes": "Reads the chalkboard posts over players' heads when you stand in the Free Market Entrance. Counted as asking prices, once a day per seller.",
- "sha256": "bcd860f1f6d927851c7a026dc6a77010e1d3e536a2c61c3ed16390a7a6185ecd",
- "size": 59536,
+ "version": "2026.10.24.1",
+ "date": "2026-10-24T04:23:18+00:00",
+ "notes": "A short chime when a hovered item's stats are read, a low tone when a hover couldn't be read. Tooltips that open above the pointer are read too.",
+ "sha256": "e59e159d8481159dd7686df05147b0d6e66a7488b88baa9c6aed87e279fde4e7",
+ "size": 59743,
  "history": [
+  {
+   "version": "2026.10.24.1",
+   "date": "2026-10-24",
+   "notes": "A short chime when a hovered item's stats are read, a low tone when a hover couldn't be read. Tooltips that open above the pointer are read too."
+  },
   {
    "version": "2026.10.23.4",
    "date": "2026-10-23",
@@ -152,5 +157,5 @@
   }
  ],
  "pip": [],
- "sig": "3b8f9b00472cbb762a454bc61ad343afe497897c6df8d60262d1b8eaacaa27bd9406c73542666e65b2fb585631fcebc7eb6f5e17cb314f9d0fc96ea89609845cb5cbfdd37249363cd6f78e082f83c856c6cb19ef2cb6194327be4d5332d60c153a96f8adb34c1daaf03795adc5af3173d4bf07b47f24f75f9338dbecbdd894f3abbff9dee46eed8637b659b7c53ed1ee4da48a045215923bc7b39221dba6c2fb4a1908830b958a77dd2736fec7208cd9377e558bfae53257aa2ab4b0d122718d78b0b7f97894b685c3c6e61e1448dd7135639c5579967fed6f0dbcdfd266be12c8b5be26a0259cb453ae6c0f8bc8523eb4bc011c6f47d47e23faa41d1d0bc756"
+ "sig": "128b83017eed085f54fb7230e7bb7bc803a3832721677c7bce8bc8b4812ae68f39e380e2f7035359ef56dcced9d673529193a3d96e3083f9ec5b33cc99dddfae2af1ac5c01498623962d13e305781dd7f5908bfc265a451eab0bb48dcb04ee0c95dfc38ac1f7baaeb22295ad1a7c7dbd2e509eeb24d98080c8778cb0911694c1824ccdc41f4e9e713965c0af0b825ddb699f991d88aa0dff747bc8196b2f09866809146fcb2868ae8bfe131a775ab4e1f96a1467b1b0c177168d9089b6913b52015daa4b1841395464fed6e3b536d98ebcd15fd11cf3e500baab18864a7f401256d95e3a1c5911f20f7babeca45dde3f9d0280ed8a700ea72a21ea71f1145eee"
 }
