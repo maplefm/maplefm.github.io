@@ -63,13 +63,7 @@ def fetch_rows():
     rows = []
     try: rows += fetch_worker_rows()
     except Exception as e: print("worker inbox:", e)
-    # older watchers still post through the Google Form until they update
-    try:
-        req = urllib.request.Request(CSV_URL, headers={"User-Agent": "maplefm-inbox"})
-        with urllib.request.urlopen(req, timeout=60) as r:
-            text = r.read().decode("utf-8", "replace")
-        rows += list(csv.reader(io.StringIO(text)))[1:]
-    except Exception as e: print("sheet inbox:", e)
+    # the old Google Sheet inbox is private now; watchers older than 2026.10.23.3 must update to be read
     return rows
 
 
