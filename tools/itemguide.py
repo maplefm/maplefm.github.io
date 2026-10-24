@@ -1,0 +1,178 @@
+"""Quest, drop, crafting and shop guide for every item: data/itemguide.json, shown at the bottom of each item card.
+
+Sources:
+  1. maplestory.io's MapleStory Classic game data (region MCW): every quest and the exact items and counts it
+     asks for, the level it opens at and the NPC that gives it. Complete, straight from the game files.
+  2. The MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0) through its Cargo tables: quest givers and
+     regions, crafting recipes, monster drops measured by players, NPC shops, reactor (box) drops.
+
+Run daily by .github/workflows/itemguide.yml, so new quests show up the day either source has them.
+  python tools/itemguide.py OUT.json [itemdb.json]
+"""
+import sys, os, json, time, re, html, urllib.request, urllib.parse
+
+IO = "https://maplestory.io/api/MCW/1"
+WIKI = "https://mapleclassic.wiki/api.php"
+UA = {"User-Agent": "ClubFM-itemguide/1.0 (https://maplefm.gg; daily, polite)"}
+
+
+def get(url, tries=4):
+    for k in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
+                return json.load(r)
+        except Exception as e:
+            if k == tries - 1:
+                print("failed", url[:120], e); return None
+            time.sleep(2 + 3 * k)
+
+
+def cargo(table, fields):
+    """every row of a wiki Cargo table, 500 at a time"""
+    out, off = [], 0
+    while True:
+        q = urllib.parse.urlencode({"action": "cargoquery", "format": "json", "limit": 500, "offset": off, "tables": table, "fields": ",".join(fields)})
+        j = get(WIKI + "?" + q)
+        rows = (j or {}).get("cargoquery")
+        if rows is None:
+            print("cargo error", table, json.dumps(j)[:200]); break
+        out += [{k.replace(" ", "_"): (html.unescape(v) if isinstance(v, str) else v) for k, v in r["title"].items()} for r in rows]
+        if len(rows) < 500: break
+        off += 500; time.sleep(0.5)
+    print(table, len(out))
+    return out
+
+
+def num(v, d=0):
+    try: return float(v)
+    except (TypeError, ValueError): return d
+
+
+def ingredients(s):
+    """'[[Tree Branch|<span ...>Tree Branch</span>]] &times; 10, [[Firewood|...]] × 5' -> [['Tree Branch', 10], ['Firewood', 5]]"""
+    s = html.unescape(html.unescape(s or ""))
+    out = []
+    for m in re.finditer(r"\[\[([^|\]]+)(?:\|[^\]]*)?\]\][^,\[]*?[×x]\s*([\d,]+)", s):
+        out.append([m.group(1).strip(), int(m.group(2).replace(",", ""))])
+    return out
+
+
+def main():
+    out_path = sys.argv[1]
+    names = {}
+    if len(sys.argv) > 2 and os.path.exists(sys.argv[2]):
+        for r in (json.load(open(sys.argv[2], encoding="utf-8")).get("items") or []):
+            if r and len(r) > 1 and r[1]: names[int(r[1])] = r[0]
+    G = {}                                    # item name -> guide
+
+    def g(name):
+        return G.setdefault(name, {"q": [], "d": [], "c": [], "u": 0, "s": [], "r": []})
+
+    # ---- wiki tables
+    wq = cargo("quests", ["id", "name_en", "required_level", "giver", "region", "repeatable", "profession", "profession_level"])
+    wqi = cargo("quest_required_items", ["quest_id", "item_id", "quantity"])
+    rec = cargo("recipes", ["profession", "level", "output_item", "output_count", "meso_cost", "catalyst", "catalyst_count", "ingredients"])
+    mons = cargo("monsters", ["name_en", "level", "primary_location", "region"])
+    drops = cargo("monster_drops", ["monster_id", "item_id", "drop_rate", "sample_kills", "quest_flag"])
+    shops = cargo("shops", ["id", "name_en", "npc", "town", "map", "currency"])
+    sitems = cargo("shop_items", ["shop_id", "item_id", "price", "currency"])
+    reac = cargo("reactor_drops", ["reactor_id", "item_id", "drop_rate", "required_quest"])
+
+    wq_by_name = {str(q.get("name_en") or "").strip().lower(): q for q in wq}
+    mon_lv = {str(m.get("name_en") or ""): int(num(m.get("level"))) for m in mons}
+    mon_where = {str(m.get("name_en") or ""): (m.get("primary_location") or m.get("region") or "") for m in mons}
+
+    # ---- game data: every quest's required items
+    seen = set()
+    qlist = get(IO + "/quest") or []
+    print("game quests", len(qlist))
+    npc_name = {}
+    for k, q in enumerate(qlist):
+        d = get(f"{IO}/quest/{q['id']}")
+        if not d or "id" not in d: continue
+        req = (d.get("requirementToComplete") or {}).get("items") or []
+        need = [(int(x["id"]), int(x["count"])) for x in req if int(x.get("count") or 0) > 0]
+        if not need: continue
+        start = d.get("requirementToStart") or {}
+        name = str(d.get("name") or q.get("name") or "").strip()
+        wiki = wq_by_name.get(name.lower()) or {}
+        giver = wiki.get("giver") or ""
+        nid = start.get("npcId")
+        if not giver and nid:
+            if nid not in npc_name:
+                n = get(f"{IO}/npc/{nid}/name")
+                npc_name[nid] = (n.get("name") if isinstance(n, dict) else n) or ""
+            giver = npc_name[nid]
+        lvl = int(start.get("levelMinimum") or num(wiki.get("required_level")) or 0)
+        region = wiki.get("region") or d.get("areaName") or ""
+        for iid, cnt in need:
+            iname = names.get(iid)
+            if not iname:
+                n = get(f"{IO}/item/{iid}/name")
+                iname = (n.get("name") if isinstance(n, dict) else None) or str(iid)
+                names[iid] = iname
+            key = (name.lower(), iname.lower())
+            if key in seen: continue
+            seen.add(key)
+            g(iname)["q"].append([name, lvl, cnt, giver, region, 1 if str(wiki.get("repeatable") or "0") == "1" else 0])
+        if k % 25 == 0: time.sleep(0.3)
+
+    # ---- wiki quests the game data doesn't list yet (newly added ones)
+    for r in wqi:
+        qn, iname, cnt = str(r.get("quest_id") or "").strip(), str(r.get("item_id") or "").strip(), int(num(r.get("quantity")))
+        if not qn or not iname or cnt <= 0 or (qn.lower(), iname.lower()) in seen: continue
+        seen.add((qn.lower(), iname.lower()))
+        wiki = wq_by_name.get(qn.lower()) or {}
+        g(iname)["q"].append([qn, int(num(wiki.get("required_level"))), cnt, wiki.get("giver") or "", wiki.get("region") or "", 1 if str(wiki.get("repeatable") or "0") == "1" else 0])
+
+    # ---- crafting: how an item is made, and how many recipes use it
+    for r in rec:
+        outn = str(r.get("output_item") or "").strip()
+        ing = ingredients(r.get("ingredients"))
+        if not outn: continue
+        cat = r.get("catalyst") or ""
+        g(outn)["c"].append([r.get("profession") or "", int(num(r.get("level"))), ing, int(num(r.get("meso_cost"))), int(num(r.get("output_count"), 1)) or 1,
+                             [cat, int(num(r.get("catalyst_count"), 1)) or 1] if cat else None])
+        for nm, _ in ing:
+            g(nm)["u"] += 1
+
+    # ---- monster drops (measured by players on the wiki; a rate when enough kills were counted)
+    for r in drops:
+        iname, mob = str(r.get("item_id") or "").strip(), str(r.get("monster_id") or "").strip()
+        if not iname or not mob: continue
+        rate = num(r.get("drop_rate"), None) if r.get("drop_rate") not in (None, "") else None
+        g(iname)["d"].append([mob, mon_lv.get(mob, 0), round(rate, 2) if rate is not None else None, int(num(r.get("sample_kills"))), mon_where.get(mob, ""),
+                              1 if str(r.get("quest_flag") or "0") == "1" else 0])
+
+    # ---- NPC shops
+    shop = {}
+    for s in shops:
+        for k in (s.get("id"), s.get("name_en"), s.get("npc")):
+            if k: shop.setdefault(str(k).strip(), s)
+    for r in sitems:
+        iname, sid = str(r.get("item_id") or "").strip(), str(r.get("shop_id") or "").strip()
+        if not iname or not sid: continue
+        s = shop.get(sid, {})
+        cur = r.get("currency") or s.get("currency") or ""
+        g(iname)["s"].append([s.get("npc") or sid, s.get("town") or s.get("map") or "", int(num(r.get("price"))), "" if cur in ("", "meso", "mesos", "Mesos") else cur])
+
+    for r in reac:
+        iname = str(r.get("item_id") or "").strip()
+        if iname: g(iname)["r"].append([str(r.get("reactor_id") or ""), num(r.get("drop_rate"), None), r.get("required_quest") or ""])
+
+    # tidy: sort, drop empty parts, drop items with nothing to say
+    items = {}
+    for nm, v in G.items():
+        v["q"].sort(key=lambda x: (x[1], x[0])); v["d"].sort(key=lambda x: (-(x[2] or 0), x[1])); v["c"].sort(key=lambda x: (x[0], x[1]))
+        v["s"].sort(key=lambda x: x[2])
+        v = {k: x for k, x in v.items() if x}
+        if v: items[nm] = v
+    doc = {"v": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "n": len(items),
+           "src": "Quests from MapleStory Classic game data (maplestory.io). Givers, crafting, drops and shops from the MapleStory Classic Wiki (mapleclassic.wiki), CC BY-NC-SA 4.0.",
+           "items": items}
+    json.dump(doc, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("items", len(items), "with quests", sum(1 for v in items.values() if "q" in v), "bytes", os.path.getsize(out_path))
+
+
+if __name__ == "__main__":
+    main()
