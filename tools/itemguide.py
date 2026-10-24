@@ -48,6 +48,22 @@ def num(v, d=0):
     except (TypeError, ValueError): return d
 
 
+def norm(name):
+    """quest names match across sources despite apostrophes, '?' stand-ins and '(quest)' suffixes"""
+    n = html.unescape(str(name or "")).lower().replace("\u2019", "'")
+    n = re.sub(r"\s*\(quest\)\s*$", "", n)
+    n = re.sub(r"'s\b|'", "", n)
+    return re.sub(r"[^a-z0-9]", "", n)
+
+
+def is_image(url):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=25) as r:
+            return r.status == 200 and "image" in (r.headers.get("Content-Type") or "")
+    except Exception:
+        return False
+
+
 def ingredients(s):
     """'[[Tree Branch|<span ...>Tree Branch</span>]] &times; 10, [[Firewood|...]] × 5' -> [['Tree Branch', 10], ['Firewood', 5]]"""
     s = html.unescape(html.unescape(s or ""))
@@ -77,6 +93,8 @@ def main():
     shops = cargo("shops", ["id", "name_en", "npc", "town", "map", "currency"])
     sitems = cargo("shop_items", ["shop_id", "item_id", "price", "currency"])
     reac = cargo("reactor_drops", ["reactor_id", "item_id", "drop_rate", "required_quest"])
+    qgive = cargo("quest_given_items", ["quest_id", "item_id", "quantity"])
+    qsteps = cargo("quest_steps", ["quest_id", "step_number", "target_monster", "required_item"])
 
     # game ids for pictures: mobs and NPCs by name from the game data
     mob_id, npc_id = {}, {}
@@ -86,6 +104,7 @@ def main():
         if isinstance(n, dict) and n.get("name"): npc_id.setdefault(str(n["name"]).strip().lower(), n.get("id"))
     print("mob ids", len(mob_id), "npc ids", len(npc_id))
     wq_by_name = {str(q.get("name_en") or "").strip().lower(): q for q in wq}
+    wq_by_norm = {norm(q.get("name_en")): q for q in wq if q.get("name_en")}
     mon_lv = {str(m.get("name_en") or ""): int(num(m.get("level"))) for m in mons}
     mon_where = {str(m.get("name_en") or ""): (m.get("primary_location") or m.get("region") or "") for m in mons}
 
@@ -112,7 +131,9 @@ def main():
             st0, rc = d.get("requirementToStart") or {}, d.get("requirementToComplete") or {}
             rw = d.get("rewardOnComplete") or {}
             nm0 = str(d.get("name") or q.get("name") or "").strip()
-            w0 = wq_by_name.get(nm0.lower()) or {}
+            w0 = wq_by_name.get(nm0.lower()) or wq_by_norm.get(norm(nm0)) or {}
+            if "?" in nm0:
+                nm0 = str(w0.get("name_en") or "").strip() or re.sub(r"(?<=\w)\?(?=\w)", " ", nm0).replace("?&", " &").replace("&?", "& ")
             gid0 = st0.get("npcId")
             if gid0 and gid0 not in npc_name:
                 n = get(f"{IO}/npc/{gid0}/name"); npc_name[gid0] = (n.get("name") if isinstance(n, dict) else n) or ""
@@ -134,8 +155,8 @@ def main():
         need = [(int(x["id"]), int(x["count"])) for x in req if int(x.get("count") or 0) > 0]
         if not need: continue
         start = d.get("requirementToStart") or {}
-        name = str(d.get("name") or q.get("name") or "").strip()
-        wiki = wq_by_name.get(name.lower()) or {}
+        name = allq[-1]["n"] if allq and allq[-1]["id"] == d["id"] else str(d.get("name") or q.get("name") or "").strip()
+        wiki = wq_by_name.get(name.lower()) or wq_by_norm.get(norm(name)) or {}
         giver = wiki.get("giver") or ""
         nid = start.get("npcId")
         if not giver and nid:
@@ -151,19 +172,27 @@ def main():
                 n = get(f"{IO}/item/{iid}/name")
                 iname = (n.get("name") if isinstance(n, dict) else None) or str(iid)
                 names[iid] = iname
-            key = (name.lower(), iname.lower())
+            key = (norm(name), iname.lower())
             if key in seen: continue
             seen.add(key)
-            g(iname)["q"].append([name, lvl, cnt, giver, region, 1 if str(wiki.get("repeatable") or "0") == "1" else 0, nid or npc_id.get(str(giver).lower())])
+            g(iname)["q"].append([name, lvl, cnt, giver, region, 1 if str(wiki.get("repeatable") or "0") == "1" else 0, nid or npc_id.get(str(giver).lower()), d["id"]])
         if k % 25 == 0: time.sleep(0.3)
+
+    qid_by_norm = {}
+    for q in allq: qid_by_norm.setdefault(norm(q["n"]), q["id"])
+    # the wiki splits job quests by class, "Finding the Instructor (Warrior)"; the game keeps one name per job id
+    JOB = {"warrior": 100, "magician": 200, "bowman": 300, "thief": 400, "pirate": 500}
+    for q in allq:
+        for jn, jid in JOB.items():
+            if jid in (q.get("jobs") or []): qid_by_norm.setdefault(norm(q["n"] + jn), q["id"])
 
     # ---- wiki quests the game data doesn't list yet (newly added ones)
     for r in wqi:
         qn, iname, cnt = str(r.get("quest_id") or "").strip(), str(r.get("item_id") or "").strip(), int(num(r.get("quantity")))
-        if not qn or not iname or cnt <= 0 or (qn.lower(), iname.lower()) in seen: continue
-        seen.add((qn.lower(), iname.lower()))
+        if not qn or not iname or cnt <= 0 or (norm(qn), iname.lower()) in seen: continue
+        seen.add((norm(qn), iname.lower()))
         wiki = wq_by_name.get(qn.lower()) or {}
-        g(iname)["q"].append([qn, int(num(wiki.get("required_level"))), cnt, wiki.get("giver") or "", wiki.get("region") or "", 1 if str(wiki.get("repeatable") or "0") == "1" else 0, npc_id.get(str(wiki.get("giver") or "").lower())])
+        g(iname)["q"].append([qn, int(num(wiki.get("required_level"))), cnt, wiki.get("giver") or "", wiki.get("region") or "", 1 if str(wiki.get("repeatable") or "0") == "1" else 0, npc_id.get(str(wiki.get("giver") or "").lower()), qid_by_norm.get(norm(qn))])
 
     # ---- crafting: how an item is made, and how many recipes use it
     for r in rec:
@@ -200,6 +229,38 @@ def main():
         iname = str(r.get("item_id") or "").strip()
         if iname: g(iname)["r"].append([str(r.get("reactor_id") or ""), num(r.get("drop_rate"), None), r.get("required_quest") or ""])
 
+    # ---- quest sources: handed over by an NPC during a quest, dropped by a mob only while on the quest, or a reward
+    for r in qgive:
+        iname, qn = str(r.get("item_id") or "").strip(), str(r.get("quest_id") or "").strip()
+        if iname and qn: g(iname).setdefault("g", []).append([qn, qid_by_norm.get(norm(qn)), "given"])
+    have_drop = {(nm, d[0].lower()) for nm, v in G.items() for d in v["d"]}
+    for r in qsteps:
+        iname, mob, qn = str(r.get("required_item") or "").strip(), str(r.get("target_monster") or "").strip(), str(r.get("quest_id") or "").strip()
+        if iname and mob and (iname, mob.lower()) not in have_drop:
+            have_drop.add((iname, mob.lower()))
+            g(iname)["d"].append([mob, mon_lv.get(mob, 0), None, 0, mon_where.get(mob, ""), 1, mob_id.get(mob.lower())])
+    for q in allq:
+        for x in q["get"]:
+            g(x[0]).setdefault("g", []).append([q["n"], q["id"], "reward"])
+    for v in G.values():
+        if v.get("g"):
+            seen_g, keep = set(), []
+            for x in v["g"]:
+                k = (norm(x[0]), x[2])
+                if k not in seen_g: seen_g.add(k); keep.append(x)
+            v["g"] = keep
+
+    # quest items with no known source yet: keep the game's own description as the hint ("from an old box...")
+    bare = sorted({x[0] for q in allq for x in q["need"] if not any((G.get(x[0]) or {}).get(k) for k in ("d", "c", "s", "r", "g"))})
+    for i in range(0, len(bare), 40):
+        part = bare[i:i + 40]
+        where = "name_en IN (" + ",".join("'" + n.replace("'", "\\'") + "'" for n in part) + ")"
+        qs = urllib.parse.urlencode({"action": "cargoquery", "format": "json", "limit": 500, "tables": "items", "fields": "name_en,description_en", "where": where})
+        for r in ((get(WIKI + "?" + qs) or {}).get("cargoquery") or []):
+            t = r["title"]; nm, ds = html.unescape(t.get("name en") or ""), html.unescape(t.get("description en") or "")
+            if nm and ds: g(nm)["t"] = re.sub(r"\s+", " ", ds).strip()[:220]
+    print("quest items without a source", len(bare))
+
     # tidy: sort, drop empty parts, drop items with nothing to say
     items = {}
     for nm, v in G.items():
@@ -221,7 +282,20 @@ def main():
         for x in q["need"] + q["get"]:
             i = byname.get(x[0].lower())
             if i: ids[x[0]] = i
-    doc = {"v": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "n": len(items),
+    for nm, v in items.items():
+        for d in v.get("d") or []:
+            pass
+        if nm not in ids:
+            i = byname.get(nm.lower())
+            if i: ids[nm] = i
+    # mob pictures: some Classic mobs have no standing frame, so their icon 404s; use the walk animation instead
+    mobs_used = {k[2] for q in allq for k in q["kill"] if k[2] is not None} | {d[6] for v in items.values() for d in v.get("d") or [] if d[6] is not None}
+    mobimg = {}
+    for mid in sorted(mobs_used, key=str):
+        if is_image(f"{IO}/mob/{mid}/icon"): continue
+        mobimg[str(mid)] = "render/move" if is_image(f"{IO}/mob/{mid}/render/move") else ""
+    print("mobs", len(mobs_used), "without an icon", mobimg)
+    doc = {"v": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "n": len(items), "mobimg": mobimg,
            "src": "Quests from MapleStory Classic game data (maplestory.io). Givers, crafting, drops and shops from the MapleStory Classic Wiki (mapleclassic.wiki), CC BY-NC-SA 4.0.",
            "items": items, "ids": ids, "quests": allq}
     json.dump(doc, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
