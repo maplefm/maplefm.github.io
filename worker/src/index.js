@@ -66,6 +66,8 @@ async function route(req, env, url) {
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
+  if (p === "/r" && req.method === "POST") return refHit(req, env, url);
+  if (p === "/admin/refs" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await refStats(env, url), 200, { "Cache-Control": "no-store" }); }
   if (p === "/public/links") return publicLinks(env);
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
@@ -741,6 +743,33 @@ async function chatPrice(req, env, url) {
   const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   bits.push("· maplefm.gg/item/" + slug);
   return txt(bits.join(" "));
+}
+
+// ---------------------------------------------------------------- partner links (maplefm.gg/niru)
+// A partner's link pings here once per visitor per day; visits, unique visitors and sign-ins are counted per day.
+const PARTNERS = ["niru"];
+async function refHit(req, env, url) {
+  const who = String(url.searchParams.get("p") || "").toLowerCase();
+  if (!PARTNERS.includes(who)) return json({ ok: false }, 404);
+  const ip = req.headers.get("CF-Connecting-IP") || "", day = new Date().toISOString().slice(0, 10);
+  if (overLimit("ref:" + ip, 20, 600)) return json({ ok: true });
+  const vh = (await hmac(env.SESSION_SECRET || "x", "ref|" + day + "|" + ip)).slice(0, 16);
+  const seenKey = "refseen:" + who + ":" + day + ":" + vh;
+  const k = "ref:" + who + ":" + day, c = (await env.ACCOUNTS.get(k, "json")) || { visits: 0, uniques: 0 };
+  c.visits++;
+  if (!(await env.ACCOUNTS.get(seenKey))) { c.uniques++; await env.ACCOUNTS.put(seenKey, "1", { expirationTtl: 2 * 86400 }); }
+  await env.ACCOUNTS.put(k, JSON.stringify(c), { expirationTtl: 400 * 86400 });
+  return json({ ok: true }, 200, { "Cache-Control": "no-store" });
+}
+async function refStats(env, url) {
+  const out = {};
+  for (const who of PARTNERS) {
+    const l = await env.ACCOUNTS.list({ prefix: "ref:" + who + ":" });
+    let tv = 0, tu = 0; const days = {};
+    for (const k of l.keys) { const c = (await env.ACCOUNTS.get(k.name, "json")) || {}; days[k.name.split(":")[2]] = c; tv += c.visits || 0; tu += c.uniques || 0; }
+    out[who] = { visits: tv, uniques: tu, days };
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------- watchlist DMs
