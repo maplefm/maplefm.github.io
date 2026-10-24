@@ -18,7 +18,7 @@ import base64, gzip, json, os, sys, time
 MAGIC = b"FMV1"
 # plain on purpose: what every visitor already sees on the board or the public pages
 PUBLIC = {"itemdb.json", "names.json", "summary-public.json", "ranks.json", "report.json", "credits.json",
-          "maintenance.json", "nexon_news.json", "live.sig"}
+          "maintenance.json", "nexon_news.json", "live.sig", "hoverwanted.json"}
 # what a signed-in member's board loads, in one file
 MEMBER = ["watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", "streams.json",
           "streams-vods.json", "inbox.json", "watcher-sell.json", "watcher-2-sell.json", "watcher-3-sell.json",

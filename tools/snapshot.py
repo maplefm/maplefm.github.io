@@ -65,6 +65,10 @@ with sync_playwright() as p:
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from vault import public_summary
     json.dump(public_summary(j), open(os.path.join(os.path.dirname(OUT) or ".", "summary-public.json"), "w", encoding="utf-8"), separators=(",", ":"))
+    # equips that need a hover, for FM Watcher's "hover these" nudge: item names and typical prices only
+    hw = j.get("hw") or []
+    json.dump({"at": int(time.time()), "items": hw}, open(os.path.join(os.path.dirname(OUT) or ".", "hoverwanted.json"), "w", encoding="utf-8"), separators=(",", ":"))
+    print("hover wanted: %d items" % len(hw))
     # the tidied spelling of every raw name, so visitors' first build skips that work
     nj = json.loads(names)
     print("names: %d, %d bytes" % (len(nj.get("cl") or {}), len(names)))

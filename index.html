@@ -1045,6 +1045,8 @@ dialog h3 { color: var(--accent-ink); }
 .kofitab .kx:hover { background: rgba(255,255,255,.5); }
 .kofitab[hidden] { display: none !important; }
 .ssi { height: 1.05em; width: auto; vertical-align: -0.15em; image-rendering: pixelated; }
+.xs em.slot { margin-left: 4px; font-style: normal; font-size: .85em; opacity: .85; padding: 0 4px; border-radius: 4px; background: rgba(120,100,200,.14); }
+.xs em.slot.clean { background: rgba(46,204,113,.16); }
 </style>
 </head>
 <body>
@@ -3071,7 +3073,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     if (x._tip && x.SUCCESS == null) {
       var bl = bonusLabel(x), gg = rollOf(name, { x: x }), cs = el("span", "xs " + (gg > 0 ? "upx" : gg < 0 ? "downx" : "")); cs.textContent = bl;
       cs.title = "From the tooltip: " + Object.keys(x._tip).map(function (k) { return k + " " + x[k] + (x._tip[k] ? " (" + x[k + "_b"] + (x._tip[k] > 0 ? " +" : " ") + x._tip[k] + ")" : ""); }).join(", ");
-      return cs;
+      return slotTag(cs, name, x);
     }
     var k = keyStat(name, x, xj), g = rollOf(name, { x: x, xj: xj }), s = el("span", "xs");
     if (k && x[k] != null) s.textContent = (k === "SUCCESS" ? x[k] + "%" : k + " " + x[k]);
@@ -3080,7 +3082,16 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     else if (x.clean) s.textContent = "Clean";
     else return null;
     if (g != null && k !== "SUCCESS") s.appendChild(el("em", g > 0 ? "up" : g < 0 ? "down" : "", g === 0 ? "avg" : (g > 0 ? "+" : "") + g));
-    return s;
+    return slotTag(s, name, x);
+  }
+  // "3/7 used" or "clean" from the hover's Remaining Enhancements against the item's base slots: scrolls taken,
+  // passes and fails both, worked out only from what the player's own screen showed.
+  function slotTag(s, name, x) {
+    var su = slotsUsed(name, { x: x }), b = fullBase(name).s.SLOTS;
+    if (su == null || !b) return s;
+    var t = el("em", "slot" + (su === 0 ? " clean" : ""), su === 0 ? "clean, " + b + " slots" : su + "/" + b + " used");
+    t.title = su === 0 ? "No scrolls used: all " + b + " upgrade slots left" : su + " of " + b + " upgrade slots used (passed or failed scrolls), " + x.SLOTS + " left";
+    s.appendChild(t); return s;
   }
   // The game's tooltip shows a stat that rolled off its base as "Critical Rate: +2 (1 +1)": base 1, one above.
   // A stat with no brackets rolled exactly its base. So every hovered equip tells us its own roll, per stat.
@@ -3801,12 +3812,26 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // The table from the last visit is kept in this browser, so it shows the moment the page opens; the live
   // prices take over as soon as they arrive, and rows move to their new places.
   var SUMK = ["item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "best", "deal", "daily", "salesN", "vol", "equip", "move", "basis", "typWho", "conf"];
+  // Equips worth 50K+ whose open listings mostly have no hover yet: the watcher tells scanners to rest the mouse on
+  // these first. Item names only, never sellers or spots.
+  function hoverWanted() {
+    var by = {}, t = Date.now() - 7 * DAY;
+    (D.active || []).forEach(function (l) {
+      if (!l || !l.i || (l.t && l.t < t)) return;
+      var it = D.byName && D.byName[l.i]; if (!it || !it.equip || !(it.typ >= 50000)) return;
+      var b = by[l.i] || (by[l.i] = { i: l.i, typ: it.typ, n: 0, x: 0 }); b.n++;
+      if (l.x && (l.x._tip || l.x.SLOTS != null)) b.x++;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; }).filter(function (b) { return b.n >= 1 && b.x / b.n < 0.5; })
+      .sort(function (a, b) { return b.typ * (b.n - b.x) - a.typ * (a.n - a.x); }).slice(0, 40)
+      .map(function (b) { return { i: b.i, typ: b.typ, miss: b.n - b.x }; });
+  }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
     var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.rd && i.rd.length) o.rd = i.rd.slice(0, 5).map(function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== "l") c[k] = d[k]; }); return c; }); return o; });
     var who = (D.whoAll || []).map(function (w) { return { name: w.name, rank: w.rank, sales: w.sales, week: w.week, rows: w.rows, shopsN: w.shopsN, daysN: w.daysN, stream: w.stream, club: w.club }; });
     var big = D.sales.slice().sort(function (a, b) { return b.p - a.p; })[0];
-    saveLS("fm-summary", { at: Date.now(), rows: rows, who: who, kpi: { big: big ? { i: big.i, p: big.p } : null, sales: D.sales.length, active: D.active.length } });
+    saveLS("fm-summary", { at: Date.now(), rows: rows, who: who, kpi: { big: big ? { i: big.i, p: big.p } : null, sales: D.sales.length, active: D.active.length }, hw: hoverWanted() });
   }
   // a saved board, from this browser's last visit or from the copy the server rebuilds every few minutes,
   // becomes the page at once; the raw scans then load behind it and take over
