@@ -82,6 +82,7 @@ async function route(req, env, url) {
   if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
   if (p === "/admin/channels" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelAccess(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/chanperm" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); let b = null; try { b = await req.json(); } catch (e) {} if (!b || !/^\d+$/.test(String(b.channel)) || !/^\d+$/.test(String(b.target))) return json({ error: "bad" }, 400); const r = await fetch(DISCORD + "/channels/" + b.channel + "/permissions/" + b.target, { method: "PUT", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ type: b.type === 1 ? 1 : 0, allow: String(b.allow || "0"), deny: String(b.deny || "0") }) }); return json({ status: r.status, body: r.ok ? null : await r.text() }); }
+  if (p === "/admin/brand/fix" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandFix(req, env)); }
   if (p === "/admin/brand" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandAudit(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/voice" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await privateVoice(req, env)); }
   if (p === "/kofi" && req.method === "POST") return kofi(req, env);
@@ -503,6 +504,27 @@ async function brandAudit(env) {
     channels: Array.isArray(chans) ? chans.map((c) => c.name).filter((n) => /👑|crown/i.test(n)) : chans,
     webhooks: Array.isArray(hooks) ? hooks.map((w) => ({ name: w.name, id: w.id, channel: w.channel_id, avatar: w.avatar && `${cdn}/avatars/${w.id}/${w.avatar}.png?size=256` })) : hooks,
   };
+}
+
+// Swap brand art in place: {appIcon: url} sets the Discord app icon; {emojis: [{name, url}]} replaces guild emojis by name.
+async function brandFix(req, env) {
+  const body = await req.json().catch(() => ({}));
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  const dataUri = async (u) => { const r = await fetch(u); if (!r.ok) throw new Error("fetch " + u + " " + r.status); const b = new Uint8Array(await r.arrayBuffer()); let s = ""; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); const t = /\.gif(\?|$)/.test(u) ? "image/gif" : "image/png"; return "data:" + t + ";base64," + btoa(s); };
+  const out = {};
+  if (body.appIcon) { const r = await fetch(DISCORD + "/applications/@me", { method: "PATCH", headers: H, body: JSON.stringify({ icon: await dataUri(body.appIcon) }) }); out.appIcon = r.status + " " + (r.ok ? "" : (await r.text()).slice(0, 200)); }
+  if (Array.isArray(body.emojis)) {
+    const list = await (await fetch(DISCORD + "/guilds/" + GUILD + "/emojis", { headers: H })).json();
+    out.emojis = [];
+    for (const e of body.emojis.slice(0, 12)) {
+      const img = await dataUri(e.url);
+      const old = Array.isArray(list) ? list.find((x) => x.name === e.name) : null;
+      if (old) { const d = await fetch(DISCORD + "/guilds/" + GUILD + "/emojis/" + old.id, { method: "DELETE", headers: H }); if (!d.ok) { out.emojis.push(e.name + " delete " + d.status + " " + (await d.text()).slice(0, 120)); continue; } }
+      const c = await fetch(DISCORD + "/guilds/" + GUILD + "/emojis", { method: "POST", headers: H, body: JSON.stringify({ name: e.name, image: img }) });
+      out.emojis.push(e.name + " " + c.status + (c.ok ? "" : " " + (await c.text()).slice(0, 160)));
+    }
+  }
+  return out;
 }
 
 async function channelAccess(env) {

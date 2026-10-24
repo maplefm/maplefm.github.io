@@ -411,7 +411,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       if (t[0] === "Titan") {
         var m = el("li", "bar"); m.appendChild(document.createTextNode("🔔 Mega Deals unlock here")); m.appendChild(el("small", null, "the deal notifier on the site and the private #mega-deals channel, from " + num(t[1]) + " sales caught, or the Tiger tier and up on Ko-fi")); o.appendChild(m);
       }
-      var li = el("li", i >= 6 ? "hi" : ""); li.appendChild(document.createTextNode((i === TIERS.length - 1 ? "👑 " : "") + t[0]));
+      var li = el("li", i >= 6 ? "hi" : ""); if (i === TIERS.length - 1) { var ci = document.createElement("img"); ci.src = "assets/superstar@4x.png"; ci.alt = ""; ci.style.cssText = "height:1.05em;vertical-align:-0.15em;image-rendering:pixelated;margin-right:4px"; li.appendChild(ci); } li.appendChild(document.createTextNode(t[0]));
       li.appendChild(el("small", null, t[1] ? num(t[1]) + " sales" : "start"));
       if (mine != null && mine.tier === t[0]) { li.classList.add("you"); li.title = "You are here"; }
       o.appendChild(li);
