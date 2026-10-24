@@ -67,6 +67,10 @@ async function route(req, env, url) {
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/r" && req.method === "POST") return refHit(req, env, url);
+  if (p === "/twitchbot/connect") return tbConnect(req, env, url);
+  if (p === "/twitchbot/callback") return tbCallback(req, env, url);
+  if (p === "/twitchbot/eventsub" && req.method === "POST") return tbEventsub(req, env);
+  if (p === "/admin/twitchbot" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await tbStatus(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/refs" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await refStats(env, url), 200, { "Cache-Control": "no-store" }); }
   if (p === "/public/links") return publicLinks(env);
   if (p === "/public/supporters") return publicSupporters(env);
@@ -731,18 +735,126 @@ async function chatPrice(req, env, url) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
   const txt = (t) => new Response(t.slice(0, 390), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
   if (overLimit("cp:" + ip, 120, 60)) return txt("Club FM: slow down a little, try again in a minute.");
-  const q = decodeURIComponent(String(url.searchParams.get("q") || "")).replace(/^!?price\s*/i, "").trim().slice(0, 80);
-  if (!q) return txt("Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg");
+  return txt(await priceLine(env, String(url.searchParams.get("q") || "")));
+}
+async function priceLine(env, raw) {
+  let q = raw; try { q = decodeURIComponent(raw); } catch (e) {}
+  q = q.replace(/^!?(price|pc|fm)\s*/i, "").trim().slice(0, 80);
+  if (!q) return "Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg";
   const rows = await summaryRows(env), ab = await abbrMap();
   const hits = findRows(rows, q, ab);
-  if (!hits.length) return txt("No recent listings for " + q + ". Check maplefm.gg");
+  if (!hits.length) return "No recent listings for " + q + ". Check maplefm.gg";
   const r = hits[0], bits = [shown(r.item) + ":"];
   if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? " from " + (r.salesN || 0) + " sales" : " from asks"));
   if (r.best) bits.push("· cheapest now " + meso(r.best));
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
   const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   bits.push("· maplefm.gg/item/" + slug);
-  return txt(bits.join(" "));
+  return bits.join(" ").slice(0, 390);
+}
+
+// ---------------------------------------------------------------- Club FM Twitch chat bot
+// Our own bot in a streamer's chat, no Nightbot needed. Built on Twitch's chat bot model:
+// 1. Adam connects the bot account once (/twitchbot/connect?as=bot): scopes user:read:chat user:write:chat user:bot.
+// 2. A streamer clicks "Add the Club FM bot" (/twitchbot/connect?as=channel): scope channel:bot. That subscribes an
+//    EventSub webhook (channel.chat.message) for their chat, delivered to /twitchbot/eventsub.
+// 3. !price, !pc and !fm get answered with the same line as /chat/price, sent through Helix Send Chat Message
+//    with an app token, as a reply to the asker. 3 second cooldown per channel, 20 answers a minute per channel.
+// KV: tb:bot {id, login}, tb:ch:<broadcaster id> {login, name, at, sub}, tb:apptoken {t, exp}.
+// Needs Worker secrets TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET, and the redirect URL
+// https://clubfm-accounts.aaweaver93.workers.dev/twitchbot/callback added to the Twitch app.
+const TB_CMDS = /^!(price|pc|fm)\b/i;
+async function tbSecret(env) { return (await hmac(env.SESSION_SECRET || "x", "eventsub-secret")).slice(0, 48); }
+async function tbAppToken(env) {
+  const c = await env.ACCOUNTS.get("tb:apptoken", "json");
+  if (c && c.exp > now() + 600) return c.t;
+  const body = new URLSearchParams({ client_id: env.TWITCH_CLIENT_ID, client_secret: env.TWITCH_CLIENT_SECRET, grant_type: "client_credentials" });
+  const t = await (await fetch("https://id.twitch.tv/oauth2/token", { method: "POST", body })).json();
+  if (!t.access_token) throw new Error("twitch app token: " + JSON.stringify(t).slice(0, 200));
+  await env.ACCOUNTS.put("tb:apptoken", JSON.stringify({ t: t.access_token, exp: now() + (t.expires_in || 3600) }));
+  return t.access_token;
+}
+async function helix(env, method, path, body) {
+  const tok = await tbAppToken(env);
+  const r = await fetch("https://api.twitch.tv/helix" + path, { method, headers: { Authorization: "Bearer " + tok, "Client-Id": env.TWITCH_CLIENT_ID, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  let j = null; try { j = await r.json(); } catch (e) {}
+  return { status: r.status, j };
+}
+async function tbConnect(req, env, url) {
+  if (!env.TWITCH_CLIENT_ID) return text("The Club FM bot isn't switched on yet.", 503);
+  const as = url.searchParams.get("as") === "bot" ? "bot" : "channel";
+  if (as === "bot") { const me = await whoami(req, env); if (!isAdmin(me, env)) return text("Admin only. Sign in on maplefm.gg first.", 403); }
+  const state = as + "." + randomHex(16);
+  const u = new URL("https://id.twitch.tv/oauth2/authorize");
+  u.searchParams.set("client_id", env.TWITCH_CLIENT_ID);
+  u.searchParams.set("redirect_uri", url.origin + "/twitchbot/callback");
+  u.searchParams.set("response_type", "code");
+  u.searchParams.set("scope", as === "bot" ? "user:read:chat user:write:chat user:bot" : "channel:bot");
+  u.searchParams.set("force_verify", "true");
+  u.searchParams.set("state", state);
+  const h = new Headers({ Location: u.toString() });
+  h.append("Set-Cookie", `fm_tbstate=${state}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
+  return new Response(null, { status: 302, headers: h });
+}
+async function tbCallback(req, env, url) {
+  const code = url.searchParams.get("code"), state = url.searchParams.get("state") || "";
+  const done = (msg, ok) => new Response(`<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Club FM bot</title><body style="font:16px system-ui;background:#140f22;color:#efe9ff;display:grid;place-items:center;min-height:90vh;margin:0;padding:16px"><div style="max-width:460px;text-align:center"><h1 style="font-size:1.5rem">${ok ? "Club FM bot is in" : "Not connected"}</h1><p>${msg}</p><p><a style="color:#a78bfa" href="${env.SITE}/streamers.html">Back to Club FM</a></p></div>`, { status: ok ? 200 : 400, headers: { "Content-Type": "text/html; charset=utf-8", "Set-Cookie": "fm_tbstate=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax" } });
+  if (!code || !state || state !== cookie(req, "fm_tbstate")) return done("The Twitch sign-in didn't complete. Try the button again.", false);
+  const as = state.split(".")[0];
+  const body = new URLSearchParams({ client_id: env.TWITCH_CLIENT_ID, client_secret: env.TWITCH_CLIENT_SECRET, grant_type: "authorization_code", code, redirect_uri: url.origin + "/twitchbot/callback" });
+  const tok = await (await fetch("https://id.twitch.tv/oauth2/token", { method: "POST", body })).json();
+  if (!tok.access_token) return done("Twitch didn't accept the connection. Try again.", false);
+  const u = await (await fetch("https://api.twitch.tv/helix/users", { headers: { Authorization: "Bearer " + tok.access_token, "Client-Id": env.TWITCH_CLIENT_ID } })).json();
+  const me = u && u.data && u.data[0];
+  if (!me) return done("Couldn't read the Twitch account.", false);
+  if (as === "bot") {
+    const a = await whoami(req, env); if (!isAdmin(a, env)) return done("Admin only.", false);
+    await env.ACCOUNTS.put("tb:bot", JSON.stringify({ id: me.id, login: me.login, name: me.display_name, at: now() }));
+    return done("Bot account set to " + me.display_name + ". Streamers can now add it from maplefm.gg/streamers.html.", true);
+  }
+  const bot = await env.ACCOUNTS.get("tb:bot", "json");
+  if (!bot) return done("The bot account isn't set up yet. Message Maya in the Club FM Discord.", false);
+  const sub = await tbSubscribe(env, url.origin, me.id, bot.id);
+  if (!sub.ok) return done("Twitch wouldn't start the chat feed (" + sub.why + "). Message Maya in the Club FM Discord.", false);
+  await env.ACCOUNTS.put("tb:ch:" + me.id, JSON.stringify({ login: me.login, name: me.display_name, at: now(), sub: sub.id }));
+  return done(me.display_name + ": type !price work gloves in your chat to try it. Prices come from real Free Market sales on maplefm.gg. Remove it anytime under Twitch Settings, Connections.", true);
+}
+async function tbSubscribe(env, origin, broadcasterId, botId) {
+  const r = await helix(env, "POST", "/eventsub/subscriptions", { type: "channel.chat.message", version: "1", condition: { broadcaster_user_id: broadcasterId, user_id: botId }, transport: { method: "webhook", callback: origin + "/twitchbot/eventsub", secret: await tbSecret(env) } });
+  if (r.status === 202) return { ok: true, id: r.j.data[0].id };
+  if (r.status === 409) return { ok: true, id: "existing" };
+  return { ok: false, why: (r.j && r.j.message) || String(r.status) };
+}
+async function tbEventsub(req, env) {
+  const raw = await req.text();
+  const id = req.headers.get("Twitch-Eventsub-Message-Id") || "", ts = req.headers.get("Twitch-Eventsub-Message-Timestamp") || "";
+  const sig = req.headers.get("Twitch-Eventsub-Message-Signature") || "";
+  if ("sha256=" + await hmac(await tbSecret(env), id + ts + raw) !== sig) return new Response("bad signature", { status: 403 });
+  if (Math.abs(Date.now() - Date.parse(ts)) > 10 * 60 * 1000) return new Response("old", { status: 403 });
+  const kind = req.headers.get("Twitch-Eventsub-Message-Type");
+  let m; try { m = JSON.parse(raw); } catch (e) { return new Response("bad json", { status: 400 }); }
+  if (kind === "webhook_callback_verification") return new Response(m.challenge, { headers: { "Content-Type": "text/plain" } });
+  if (kind === "revocation") { const b = m.subscription && m.subscription.condition && m.subscription.condition.broadcaster_user_id; if (b) await env.ACCOUNTS.delete("tb:ch:" + b); return new Response("ok"); }
+  if (kind !== "notification") return new Response("ok");
+  const e = m.event || {}, said = String(e.message && e.message.text || "").trim();
+  if (!TB_CMDS.test(said)) return new Response("ok");
+  if (await env.ACCOUNTS.get("tbseen:" + id)) return new Response("ok");
+  const b = e.broadcaster_user_id;
+  if (overLimit("tbcd:" + b, 1, 3) || overLimit("tbmin:" + b, 20, 60)) return new Response("ok");
+  const bot = await env.ACCOUNTS.get("tb:bot", "json");
+  if (!bot || e.chatter_user_id === bot.id) return new Response("ok");
+  await env.ACCOUNTS.put("tbseen:" + id, "1", { expirationTtl: 900 });
+  const line = await priceLine(env, said);
+  await helix(env, "POST", "/chat/messages", { broadcaster_id: b, sender_id: bot.id, message: line, reply_parent_message_id: e.message_id });
+  const day = new Date().toISOString().slice(0, 10), k = "tbuse:" + b + ":" + day;
+  await env.ACCOUNTS.put(k, String(Number(await env.ACCOUNTS.get(k) || 0) + 1), { expirationTtl: 400 * 86400 });
+  return new Response("ok");
+}
+async function tbStatus(env) {
+  const bot = await env.ACCOUNTS.get("tb:bot", "json"), out = { switchedOn: !!env.TWITCH_CLIENT_ID, bot, channels: [] };
+  const l = await env.ACCOUNTS.list({ prefix: "tb:ch:" });
+  for (const k of l.keys) { const c = await env.ACCOUNTS.get(k.name, "json"); const b = k.name.slice(6); const use = await env.ACCOUNTS.list({ prefix: "tbuse:" + b + ":" }); let n = 0; for (const u of use.keys) n += Number(await env.ACCOUNTS.get(u.name) || 0); out.channels.push({ ...c, id: b, answers: n }); }
+  return out;
 }
 
 // ---------------------------------------------------------------- partner links (maplefm.gg/niru)
