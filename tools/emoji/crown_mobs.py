@@ -36,6 +36,32 @@ def head(fr):
     top = next(y for y in range(h) if widths[y] >= mxw * 0.25)
     xs = [x for y in range(top, min(h, top + 4)) for x in range(w) if px[x, y] > 40]
     return (sum(xs) / len(xs), top, total)
+
+HEAD = {  # name: (head x share, side view facing left)
+    "blue_snail": (.27, True), "red_snail": (.27, True), "snail": (.27, True), "snail_dead": (.22, True),
+    "bubbling": (.42, False), "curse_eye": (.30, True), "dark_stump": (.45, False), "drake": (.17, True),
+    "evil_eye": (.26, True), "evil_eye_dead": (.20, True), "fire_boar": (.13, True),
+    "green_mushroom": (.45, False), "green_mushroom_dead": (.45, False), "horny_mushroom": (.45, False),
+    "jrbalrog": (.47, False), "jrbalrog_dead": (.45, False), "jrnecki": (.30, True), "ligator": (.30, True),
+    "lorang": (.36, False), "lupin": (.30, True), "mano": (.24, True), "mushmom": (.45, False), "mushmom_dead": (.45, False),
+    "octopus": (.45, False), "octopus_dead": (.45, False), "orange_mushroom": (.45, False), "orange_mushroom_dead": (.45, False),
+    "pig": (.30, True), "pig_dead": (.32, True), "ribbon_pig": (.30, True), "slime": (.36, False), "slime_dead": (.36, False),
+    "stone_golem": (.47, False), "stump": (.45, False), "stump_dead": (.45, False), "wild_boar": (.20, True),
+    "zombie_mushmom": (.45, False), "zombie_mushroom": (.45, False),
+}
+def head_at(fr, share):
+    """top of the head: the highest solid pixel in a narrow band of columns around the head"""
+    a = fr.getchannel("A"); w, h = fr.size; px = a.load()
+    total = sum(1 for y in range(h) for x in range(w) if px[x, y] > 40)
+    if not total: return None
+    cx = int(round(share * (w - 1))); half = max(3, int(w * 0.06))
+    band = range(max(0, cx - half), min(w, cx + half + 1))
+    for y in range(h):
+        n = sum(1 for x in band if px[x, y] > 40)
+        if n >= max(2, len(band) // 3):
+            return (cx, y, total)
+    return None
+
 for f in sorted(glob.glob(os.path.join(SRC, "*"))):
     name = os.path.basename(f); im = Image.open(f)
     frames, durs = [], []
@@ -44,25 +70,31 @@ for f in sorted(glob.glob(os.path.join(SRC, "*"))):
     w, h = frames[0].size
     sc = 2 if w >= 60 else 1
     cr = crown(sc); cw, ch = cr.size
-    heads = [head(fr) for fr in frames]
+    key = os.path.splitext(name)[0]; share, side = HEAD.get(key, (.45, False))
+    crw = cr.transpose(Image.FLIP_LEFT_RIGHT) if side else cr
+    base_x = crw.width * (13 / 28 if side else 15 / 28)      # middle of the crown's band, not of the picture
+    heads = [head_at(fr, share) for fr in frames]
     area0 = max((hd[2] for hd in heads if hd), default=1)
-    pad = ch - 5
+    sink = max(3, ch // 6)                                    # the band sits a little into the head
+    pad = max(0, ch - sink - min((hd[1] for hd in heads if hd), default=0))
+    padx_l = max(0, int(-(min((hd[0] for hd in heads if hd), default=0) - base_x)))
+    padx_r = max(0, int(max((hd[0] for hd in heads if hd), default=0) - base_x + crw.width - w))
     out = []
     for fr, hd in zip(frames, heads):
-        cv = Image.new("RGBA", (w, h + pad), (0, 0, 0, 0)); cv.paste(fr, (0, pad), fr)
-        if hd and hd[2] >= area0 * 0.3:            # a dying mob that has mostly faded loses its crown too
-            x = int(round(hd[0] - cw / 2)); x = max(0, min(w - cw, x))
-            y = hd[1] + pad - ch + 5
-            cv.alpha_composite(cr, (x, max(0, y)))
+        cv = Image.new("RGBA", (w + padx_l + padx_r, h + pad), (0, 0, 0, 0)); cv.paste(fr, (padx_l, pad), fr)
+        if hd and hd[2] >= area0 * 0.3:
+            x = int(round(padx_l + hd[0] - base_x)); y = hd[1] + pad - ch + sink
+            cv.alpha_composite(crw, (x, max(0, y)))
         out.append(cv)
+    w2, h2 = out[0].size
     dst = os.path.join(OUT, name)
     if len(out) == 1 and name.endswith(".png"):
         out[0].save(dst)
     else:
         # GIF: one shared palette for every frame, index 0 kept for transparent, pixels fully on or off
         masks = [o.getchannel("A").point(lambda v: 255 if v >= 128 else 0) for o in out]
-        strip = Image.new("RGB", (w, (h + pad) * len(out)), (0, 0, 0))
-        for i, (o, m) in enumerate(zip(out, masks)): strip.paste(o.convert("RGB"), (0, i * (h + pad)), m)
+        strip = Image.new("RGB", (w2, h2 * len(out)), (0, 0, 0))
+        for i, (o, m) in enumerate(zip(out, masks)): strip.paste(o.convert("RGB"), (0, i * h2), m)
         pq = strip.quantize(colors=255, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
         pal = [255, 0, 255] + pq.getpalette()[:765]
         ref = Image.new("P", (1, 1)); ref.putpalette(pal)
