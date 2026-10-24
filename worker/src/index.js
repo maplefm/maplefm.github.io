@@ -82,6 +82,7 @@ async function route(req, env, url) {
   if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
   if (p === "/admin/channels" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelAccess(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/chanperm" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); let b = null; try { b = await req.json(); } catch (e) {} if (!b || !/^\d+$/.test(String(b.channel)) || !/^\d+$/.test(String(b.target))) return json({ error: "bad" }, 400); const r = await fetch(DISCORD + "/channels/" + b.channel + "/permissions/" + b.target, { method: "PUT", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ type: b.type === 1 ? 1 : 0, allow: String(b.allow || "0"), deny: String(b.deny || "0") }) }); return json({ status: r.status, body: r.ok ? null : await r.text() }); }
+  if (p === "/admin/brand" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandAudit(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/voice" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await privateVoice(req, env)); }
   if (p === "/kofi" && req.method === "POST") return kofi(req, env);
   if (p === "/admin/setup-commands" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await setupCommands(env)); }
@@ -486,6 +487,24 @@ async function dataLive(req, env) {
 // Who can see each channel: the server's roles and members run through Discord's permission rules
 // (base role permissions, Administrator, then the channel's @everyone, role and member overwrites).
 const P_ADMIN = 8n, P_VIEW = 1024n, P_CONNECT = 1048576n, P_SPEAK = 2097152n, P_SEND = 2048n;
+// Every place the Club FM look shows up in Discord: server art, bot and app avatars, emojis, role icons, webhooks.
+async function brandAudit(env) {
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
+  const get = async (u) => { const r = await fetch(DISCORD + u, { headers: H }); return r.ok ? r.json() : { error: r.status }; };
+  const [guild, me, app, emojis, roles, chans] = await Promise.all([get("/guilds/" + GUILD), get("/users/@me"), get("/applications/@me"), get("/guilds/" + GUILD + "/emojis"), get("/guilds/" + GUILD + "/roles"), get("/guilds/" + GUILD + "/channels")]);
+  const cdn = "https://cdn.discordapp.com";
+  const hooks = await get("/guilds/" + GUILD + "/webhooks");
+  return {
+    server: { name: guild.name, icon: guild.icon && `${cdn}/icons/${GUILD}/${guild.icon}.png?size=256`, banner: guild.banner, splash: guild.splash },
+    bot: { name: me.username, avatar: me.avatar && `${cdn}/avatars/${me.id}/${me.avatar}.png?size=256` },
+    app: { name: app.name, icon: app.icon && `${cdn}/app-icons/${app.id}/${app.icon}.png?size=256` },
+    emojis: Array.isArray(emojis) ? emojis.map((e) => ({ name: e.name, id: e.id, url: `${cdn}/emojis/${e.id}.${e.animated ? "gif" : "png"}` })) : emojis,
+    roles: Array.isArray(roles) ? roles.filter((r) => r.icon || r.unicode_emoji || /crown/i.test(r.name)).map((r) => ({ name: r.name, unicode: r.unicode_emoji, icon: r.icon && `${cdn}/role-icons/${r.id}/${r.icon}.png` })) : roles,
+    channels: Array.isArray(chans) ? chans.map((c) => c.name).filter((n) => /👑|crown/i.test(n)) : chans,
+    webhooks: Array.isArray(hooks) ? hooks.map((w) => ({ name: w.name, id: w.id, channel: w.channel_id, avatar: w.avatar && `${cdn}/avatars/${w.id}/${w.avatar}.png?size=256` })) : hooks,
+  };
+}
+
 async function channelAccess(env) {
   const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
   const get = async (u) => { const r = await fetch(DISCORD + u, { headers: H }); return r.ok ? r.json() : { error: r.status, body: (await r.text()).slice(0, 200) }; };
