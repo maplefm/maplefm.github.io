@@ -3327,6 +3327,26 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     var b = fullBase(name).s.SLOTS; if (!b || x.SLOTS > b) return null;
     return b - x.SLOTS;
   }
+  // which stat a roll's +/- number is about, for the label on Price by roll: one stat when only one moved off base,
+  // "Total stats" when several did and the number is their sum, "" when only a chat grade like (-3) is known
+  var STATABBR = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", WDEF: "W.DEF", MDEF: "M.DEF", ACC: "ACC", AVOID: "AVOID", SPEED: "SPEED", JUMP: "JUMP" };
+  function rollBasis(name, l) {
+    var x = l && l.x; if (!x || x.g != null) return "";
+    if (x._tip) {
+      var kk = keyStat(name, x, l.xj); if (kk && x._tip[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return kk;
+      var moved = Object.keys(x._tip).filter(function (k) { return x._tip[k]; });
+      return moved.length === 1 ? moved[0] : moved.length ? "TOTAL" : "";
+    }
+    var k = keyStat(name, x, l.xj);
+    if (!k || k === "SUCCESS" || x[k] == null) k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : "";
+    return k;
+  }
+  function gradeLabel(i, g, fallback) {
+    var c = {}, best = "", n = 0;
+    i.rolls.forEach(function (r) { if (r.g !== g) return; var b = rollBasis(i.item, r.l); if (b) { c[b] = (c[b] || 0) + 1; if (c[b] > n) { n = c[b]; best = b; } } });
+    best = best || fallback || "";
+    return best === "TOTAL" ? "Total stats" : STATABBR[best] || best;
+  }
   function rollOf0(name, l) {
     var x = l && l.x; if (!x) return null;
     if (x.g != null) return x.g;
@@ -3467,7 +3487,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
         var m = i.gradeMed[g], d = el("div", "gr " + (g > 0 ? "up" : g < 0 ? "down" : ""));
         var sign = g === 0 ? "base" : (g > 0 ? "+" : "") + g;
         if (gkb != null) { var lb2 = el("b", null, gks + " " + (gkb + g) + " "); lb2.appendChild(el("em", null, g === 0 ? "base" : "(" + sign + ")")); d.appendChild(lb2); }
-        else d.appendChild(el("b", null, g === 0 ? "Average" : sign)); d.appendChild(money(m.p)); d.appendChild(el("small", null, m.n + (m.n === 1 ? " seen" : " seen")));
+        else { var gl = g === 0 ? "" : gradeLabel(i, g, gks); d.appendChild(el("b", null, g === 0 ? "Average" : (gl ? gl + " " : "") + sign)); if (gl) d.title = (g > 0 ? g + " more " : -g + " less ") + gl + " than the item's base"; } d.appendChild(money(m.p)); d.appendChild(el("small", null, m.n + (m.n === 1 ? " seen" : " seen")));
         // click: jump to the newest listing with this roll, and say where it was seen
         var newest = i.rolls.filter(function (r) { return r.g === g; }).sort(function (a, b) { return b.l.t - a.l.t; })[0];
         if (newest) { d.classList.add("jump"); d.title = "Click: jump to the newest one seen with this roll" + (where(newest.l) ? " (" + where(newest.l) + ")" : ""); d.addEventListener("click", function () { jumpToGrade(i, g, newest.l, gks, gkb); }); }
