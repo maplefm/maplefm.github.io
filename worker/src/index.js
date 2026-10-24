@@ -81,6 +81,7 @@ async function route(req, env, url) {
   if (p === "/public/links") return publicLinks(env);
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
+  if (p === "/public/popular") return publicPopular(env);
   if (p === "/public/kofi-income") return kofiIncome(env);
   if (p === "/interactions" && req.method === "POST") return interactions(req, env);
   if (p === "/admin" && req.method === "GET") return admin(req, env);
@@ -964,6 +965,21 @@ async function hit(req, env) {
   await logHit(env, page, ref, tag, ip);
   return ok;
 }
+// Popular right now: items people opened on the board in the last two days, one vote per visitor per item.
+// Feeds the quick picks under the search. Cached for 10 minutes; the site falls back to sales volume when it is thin.
+async function publicPopular(env) {
+  const h = { "Cache-Control": "public, max-age=300", "Access-Control-Allow-Origin": "*" };
+  const c = await env.ACCOUNTS.get("popular", "json");
+  if (c && now() - (c.at || 0) < 600) return json(c, 200, h);
+  const out = { at: now(), items: [] };
+  if (env.INBOX_DB) {
+    await hitsTable(env);
+    const r = await env.INBOX_DB.prepare("SELECT substr(p, 7) i, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND p LIKE '#open:%' GROUP BY i ORDER BY n DESC LIMIT 20").bind(Date.now() - 48 * 3600e3).all().catch(() => ({ results: [] }));
+    out.items = (r.results || []).map((x) => [x.i, x.n]);
+  }
+  await env.ACCOUNTS.put("popular", JSON.stringify(out), { expirationTtl: 3600 });
+  return json(out, 200, h);
+}
 function pageLabel(p) {
   if (p === "/" || p === "/index.html") return "Price board";
   const m = p.match(/^\/item\/([^/]+)/); if (m) return "Item: " + m[1].replace(/-/g, " ");
@@ -972,15 +988,17 @@ function pageLabel(p) {
 async function trafficStats(env, from, to) {
   await hitsTable(env);
   const q = (sql, ...a) => env.INBOX_DB.prepare(sql).bind(...a).all().then((r) => r.results || []);
-  const web = "p NOT LIKE '!%'";
+  const web = "p NOT LIKE '!%' AND p NOT LIKE '#%'";
   const [tot] = await q(`SELECT COUNT(*) n, COUNT(DISTINCT v) u FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
   const pages = await q(`SELECT p, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND ${web} GROUP BY p ORDER BY n DESC LIMIT 40`, from, to);
   const refs = await q(`SELECT r, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND ${web} AND r != '' GROUP BY r ORDER BY n DESC LIMIT 6`, from, to);
   const tags = await q(`SELECT q, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND q != '' GROUP BY q ORDER BY n DESC LIMIT 6`, from, to);
   const price = await q(`SELECT p, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '!%' GROUP BY p`, from, to);
+  const opens = await q(`SELECT substr(p, 7) i, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '#open:%' GROUP BY i ORDER BY n DESC LIMIT 3`, from, to);
+  const [ev] = await q(`SELECT SUM(p LIKE '#find:%') f, SUM(p LIKE '#pick:%') k FROM hits WHERE t >= ? AND t < ?`, from, to);
   const by = {}; pages.forEach((r) => { const k = pageLabel(r.p).startsWith("Item: ") ? "Item pages" : pageLabel(r.p); by[k] = (by[k] || 0) + r.n; });
   const items = pages.filter((r) => /^\/item\//.test(r.p)).slice(0, 3).map((r) => pageLabel(r.p).slice(6) + " " + r.n);
-  return { views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price };
+  return { views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
 }
 function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.views + "** views · **" + pc + "** !price"; }
 function trafficEmbed(st, prev, title, from, to, extra) {
@@ -991,6 +1009,7 @@ function trafficEmbed(st, prev, title, from, to, extra) {
   const pc = st.price.reduce((s, r) => s + r.n, 0);
   f.push({ name: "!price answers", value: "**" + pc + "**", inline: true });
   if (st.pages.length) f.push({ name: "Top pages", value: st.pages.map((x) => x[0] + " · " + x[1]).join("\n") + (st.items.length ? "\nMost viewed items: " + st.items.join(", ") : "") });
+  if (st.opens && st.opens.length) f.push({ name: "Most opened on the board", value: st.opens.map((x) => x.i + " · " + x.n).join("\n") + "\nSearches " + st.finds + " · quick picks clicked " + st.picks });
   if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });
   if (st.tags.length) f.push({ name: "Partner links", value: st.tags.map((x) => x.q + " · " + x.n).join("\n"), inline: true });
   (extra || []).forEach((x) => f.push({ name: x[0], value: totalsLine(x[1]), inline: false }));

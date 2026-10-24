@@ -1048,6 +1048,65 @@ dialog h3 { color: var(--accent-ink); }
 .ssi { height: 1.05em; width: auto; vertical-align: -0.15em; image-rendering: pixelated; }
 .xs em.slot { margin-left: 4px; font-style: normal; font-size: .85em; opacity: .85; padding: 0 4px; border-radius: 4px; background: rgba(120,100,200,.14); }
 .xs em.slot.clean { background: rgba(46,204,113,.16); }
+
+/* front door: the search is the hero, quick picks under it, one trust strip */
+.hero { background: var(--panel); border: var(--bw) solid var(--wood); border-radius: 18px; box-shadow: var(--shadow); padding: 18px 20px 14px; display: flex; flex-direction: column; gap: 12px; }
+.htitle { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.7rem; line-height: 1.15; color: var(--ink); }
+.htitle span { display: block; font-family: var(--body); font-size: .92rem; font-weight: 700; color: var(--muted); margin-top: 3px; }
+.hsearch { position: relative; z-index: 30; }
+.hsearch .search { width: 100%; min-width: 0; }
+.hsearch .search input { font-size: 1.12rem; padding-top: 14px; padding-bottom: 14px; border-width: 3px; border-color: var(--accent, var(--wood)); box-shadow: 0 0 0 4px var(--accent-soft, rgba(245,138,31,.18)); }
+.hsearch .sugg { position: absolute; left: 0; right: 0; top: calc(100% + 6px); display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 2px; padding: 6px; background: var(--panel); border: 2px solid var(--line2); border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.22); max-height: min(60vh, 420px); overflow-y: auto; }
+.hsearch .sugg[hidden] { display: none; }
+.hsearch .sugg .sh { padding: 4px 8px 6px; }
+.hsearch .sugg .so { border-radius: 10px; border: 0; background: transparent; padding: 6px 10px 6px 6px; gap: 10px; }
+.hsearch .sugg .so .sn { flex: 1; font-size: .95rem; }
+.hsearch .sugg .so .sp { font-size: .95rem; }
+.hsearch .sugg .so .sp.none { color: var(--muted); font-weight: 700; font-size: .8rem; }
+.hrow { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; }
+.plbl { font-size: .7rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.picks { display: flex; gap: 8px; flex-wrap: wrap; flex: 1 1 auto; min-width: 0; }
+.pk { position: relative; width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--line2); background: var(--white, #fff); display: grid; place-items: center; cursor: pointer; padding: 0; transition: transform .12s, border-color .12s; }
+:root[data-theme="dark"] .pk { background: var(--panel2); }
+.pk:hover, .pk:focus-visible { transform: translateY(-2px); border-color: var(--accent, var(--wood)); outline: none; }
+.pk img { max-width: 34px; max-height: 34px; }
+.pk i { position: absolute; right: -5px; top: -6px; font-style: normal; font-size: .62rem; font-weight: 900; line-height: 1; padding: 2px 3px; border-radius: 6px; color: #fff; box-shadow: 0 0 0 1.5px var(--panel, #fff); }
+.pk i.up { background: #1f9d55; } .pk i.dn { background: #d64545; }
+.pk .tip { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); white-space: nowrap; background: #2b2140; color: #fff; font-size: .78rem; font-weight: 700; padding: 5px 9px; border-radius: 8px; pointer-events: none; z-index: 40; display: none; gap: 6px; align-items: center; }
+.pk .tip .num { color: #ffd66b; }
+@media (hover: hover) { .pk:hover .tip, .pk:focus-visible .tip { display: flex; } }
+.picks .pk:first-child .tip { left: 0; transform: none; }
+.hdeal { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 999px; border: 2px solid #e9b21c; background: #fff6d2; color: var(--ink); font-weight: 800; font-size: .84rem; text-decoration: none; max-width: 100%; min-width: 0; }
+:root[data-theme="dark"] .hdeal { background: #3d2f10; }
+.hdeal[hidden] { display: none; }
+.hdeal img { max-width: 26px; max-height: 26px; }
+.hdeal small { font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.hdeal b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.hdeal:hover { transform: translateY(-1px); }
+.cards.strip { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; padding-top: 10px; border-top: 2px dashed var(--line); font-size: .84rem; font-weight: 700; color: var(--muted); }
+.strip .st { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.strip .st b { color: var(--ink); font-weight: 800; }
+.strip button.st, .strip a.st { all: unset; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; border-radius: 6px; }
+.strip button.st:hover b, .strip a.st:hover b, .strip button.st:focus-visible b { text-decoration: underline; }
+.strip .hook { flex: 1 1 260px; min-width: 0; justify-content: flex-end; color: var(--ink); overflow: hidden; }
+.strip .hook > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; animation: hookin .45s ease; }
+.strip .hook img { max-width: 22px; max-height: 22px; }
+.strip .heart { color: #e0336b; }
+@keyframes hookin { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.window.board { margin-top: 0; }
+@media (max-width: 700px) {
+  .hero { display: contents; }
+  .htitle { font-size: 1.35rem; padding: 0 2px; }
+  .hsearch { position: sticky; top: 0; z-index: 60; background: var(--bg, var(--panel)); padding: 6px 0; margin: -6px 0; }
+  .hsearch .search input { font-size: 1rem; padding-top: 11px; padding-bottom: 11px; }
+  .hrow { gap: 8px; }
+  .plbl { width: 100%; }
+  .pk { width: 40px; height: 40px; }
+  .hsearch kbd { display: none; }
+  .cards.strip { border-top: 0; padding-top: 0; gap: 4px 14px; font-size: .8rem; }
+  .strip .hook { flex-basis: 100%; justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { .strip .hook > span { animation: none; } .pk { transition: none; } }
 </style>
 </head>
 <body>
@@ -1092,7 +1151,15 @@ dialog h3 { color: var(--accent-ink); }
 
   <div class="ubar" id="ubar" hidden><span><img class="ssi" src="assets/superstar@4x.png" alt=""></span><span id="utext"></span><button type="button" id="ubarx" aria-label="Hide this notice">×</button></div>
 
-  <div class="cards" id="cards"></div>
+  <section class="hero" id="hero" aria-labelledby="htitle">
+    <h2 class="htitle" id="htitle">What's it worth?<span>Real Free Market prices, from sales players actually caught.</span></h2>
+    <div class="hsearch" id="hsearch">
+      <label class="search"><span class="sr">Search any item</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg><input type="search" id="q" placeholder="Try GFA 60, work gloves, white label ring..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugg"><kbd>/</kbd></label>
+      <div class="sugg" id="sugg" role="listbox" hidden></div>
+    </div>
+    <div class="hrow"><span class="plbl">Popular right now</span><div class="picks" id="picks" role="list"></div><a class="hdeal" id="hdeal" href="#" hidden></a></div>
+    <div class="cards strip" id="cards"></div>
+  </section>
 
   <button type="button" class="alert" id="alert" hidden aria-live="polite">
     <span class="alert-head"><span class="dot" aria-hidden="true"></span><span id="alert-count"></span><span id="alert-new" class="alert-new" hidden>NEW</span></span>
@@ -1108,16 +1175,6 @@ dialog h3 { color: var(--accent-ink); }
     <div class="act" id="act"></div>
   </section>
 
-    <aside class="window board" id="board" aria-labelledby="btitle">
-      <button type="button" class="wtitle btog" id="btog" aria-expanded="false" aria-controls="bbody"><h2 id="btitle">🏆 Scanner Ranks</h2><span class="bsum" id="bsum"></span><span class="meta"><span class="badge" id="blive" title="Moves on its own as new scans land">LIVE</span><span class="chev" aria-hidden="true"></span></span></button>
-      <div class="bbody" id="bbody" hidden>
-      <div class="bsearch"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg><input type="search" id="bq" placeholder="Find your name" autocomplete="off" aria-label="Find a scanner on the board"><span class="bqhint" id="bqhint"></span></div>
-      <div class="ladder blad" id="bladder" aria-label="The ladder: tiers by sales caught"></div>
-      <div class="bl" id="bl"></div>
-      <div class="bfoot" id="bfoot"></div>
-      <details class="bstreams" id="bstreams" hidden><summary><span class="chev"></span>📺 On stream <span class="note" id="bstr-sub"></span></summary><div class="bstr" id="bstr"></div></details>
-      </div>
-    </aside>
   <div class="main">
     <section class="window" aria-labelledby="ptitle">
       <div class="wtitle"><h2 id="ptitle">Price Board</h2><span class="meta"><span class="badge" title="Typical prices come from sales we saw, not asking prices">FROM SALES</span></span></div>
@@ -1130,8 +1187,6 @@ dialog h3 { color: var(--accent-ink); }
       </div>
       <div class="tools">
         <div class="chips" id="chips" role="group" aria-label="Categories"></div>
-        <label class="search"><span class="sr">Filter items</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg><input type="search" id="q" placeholder="Search any item: GFA 60, WG, white label ring..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugg"><kbd>/</kbd></label>
-        <div class="sugg" id="sugg" role="listbox" hidden></div>
         <button type="button" class="wbtn" id="wonly" aria-pressed="false">★ Watchlist <em id="wcount">0</em></button>
         <span class="selpill"><select id="cls" aria-label="Class"><option value="">All classes</option><option value="1">Warrior</option><option value="2">Magician</option><option value="4">Bowman</option><option value="8">Thief</option></select></span>
         <div class="fwrap">
@@ -1256,6 +1311,16 @@ dialog h3 { color: var(--accent-ink); }
       <div class="ip" id="ip"><p class="note">Pick an item to see its price, recent sales and where to buy it.</p></div>
     </aside>
   </div>
+    <aside class="window board" id="board" aria-labelledby="btitle">
+      <button type="button" class="wtitle btog" id="btog" aria-expanded="false" aria-controls="bbody"><h2 id="btitle">🏆 Scanner Ranks</h2><span class="bsum" id="bsum"></span><span class="meta"><span class="badge" id="blive" title="Moves on its own as new scans land">LIVE</span><span class="chev" aria-hidden="true"></span></span></button>
+      <div class="bbody" id="bbody" hidden>
+      <div class="bsearch"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg><input type="search" id="bq" placeholder="Find your name" autocomplete="off" aria-label="Find a scanner on the board"><span class="bqhint" id="bqhint"></span></div>
+      <div class="ladder blad" id="bladder" aria-label="The ladder: tiers by sales caught"></div>
+      <div class="bl" id="bl"></div>
+      <div class="bfoot" id="bfoot"></div>
+      <details class="bstreams" id="bstreams" hidden><summary><span class="chev"></span>📺 On stream <span class="note" id="bstr-sub"></span></summary><div class="bstr" id="bstr"></div></details>
+      </div>
+    </aside>
   <div class="scrim" id="scrim"></div>
 
 </div>
@@ -2497,22 +2562,98 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       if (srcs.length) im.src = srcs[0]; else im.onerror(); setTimeout(end, 3000);
     });
   }
+  // ---------- front door: trust strip, quick picks and the deal next to the search
+  var HOOK_T = null, HOOK_K = 0;
   function renderCards() {
     renderStreams();
     var c = $("cards"); c.textContent = "";
-    var k = D.preview && D.kpi, big = k ? k.big : D.sales.slice().sort(function (a, b) { return b.p - a.p; })[0];
-    if (big) c.appendChild(card("Biggest sale caught", big.i, money(big.p), iconImg(big.i), "", function () { pick(big.i); }));
-    else c.appendChild(card("Biggest sale caught", k ? "Loading" : "None yet", "", null));
-    c.appendChild(card("Sales caught", fmt(k ? k.sales : D.sales.length), fmt(k ? k.active : D.active.length) + " items for sale right now", null));
-    var shop = document.createElementNS("http://www.w3.org/2000/svg", "svg"); shop.setAttribute("viewBox", "0 0 32 32"); shop.setAttribute("width", "28"); shop.setAttribute("height", "28"); shop.setAttribute("aria-hidden", "true");
-    shop.innerHTML = '<path d="M5 13h22v14H5z" fill="#fff3dc" stroke="#7a3b0c" stroke-width="2"/><path d="M3 7h26l-2 7H5z" fill="#f58a1f" stroke="#7a3b0c" stroke-width="2" stroke-linejoin="round"/><path d="M9 7l-1 7M16 7v7M23 7l1 7" stroke="#7a3b0c" stroke-width="1.6"/><rect x="12" y="18" width="8" height="9" fill="#e9559d" stroke="#7a3b0c" stroke-width="1.6"/><circle cx="16" cy="21.5" r="1.6" fill="#fff"/>';
-    var lab = el("span"); lab.appendChild(document.createTextNode("Help with prices ")); lab.appendChild(el("span", "heart", "♥"));
-    c.appendChild(card(lab, "Scan with us", "Run FM Watcher while you shop and climb the ranks", shop, "", function () { location.href = "contribute.html"; }));
-    // coverage: how much of the market the last day actually saw. The more people scan, the bigger these get.
-    var cov = coverage24(); if (cov) {
-      var sub = el("span"); sub.appendChild(document.createTextNode(fmt(cov.spots) + " of " + (40 * 20) + " room and channel spots · " + cov.scanners + (cov.scanners === 1 ? " scanner" : " scanners") + (cov.streams ? " + " + cov.streams + (cov.streams === 1 ? " stream" : " streams") : "")));
-      var cc = card("Shops read, last 24h", fmt(cov.shops), sub, null, "", openCoverage); cc.title = "Distinct shops read in the last day, and how many of the Free Market's 800 room and channel spots got a visit. Click for the coverage map and the cold rooms."; c.appendChild(cc);
+    var k = D.preview && D.kpi;
+    function st(icon, num, txt, tag, fn, tip) {
+      var s = el(tag || "span", "st"); if (tag === "button") { s.type = "button"; s.addEventListener("click", fn); } if (tip) s.title = tip;
+      s.appendChild(document.createTextNode(icon + " ")); s.appendChild(el("b", null, num)); s.appendChild(document.createTextNode(" " + txt)); return s;
     }
+    c.appendChild(st("🧾", fmt(k ? k.sales : D.sales.length), "sales caught"));
+    c.appendChild(st("🛒", fmt(k ? k.active : D.active.length), "for sale right now"));
+    var cov = coverage24();
+    if (cov) c.appendChild(st("🗺️", fmt(cov.shops), "shops read today", "button", openCoverage, fmt(cov.spots) + " of " + (40 * 20) + " room and channel spots visited in the last day, by " + cov.scanners + (cov.scanners === 1 ? " scanner" : " scanners") + (cov.streams ? " and " + cov.streams + (cov.streams === 1 ? " stream" : " streams") : "") + ". Click for the coverage map."));
+    var help = el("a", "st"); help.href = "contribute.html"; help.title = "Run FM Watcher while you shop and climb the ranks";
+    help.appendChild(el("span", "heart", "♥")); help.appendChild(el("b", null, "Scan with us")); c.appendChild(help);
+    // the hook: the biggest sales caught, one at a time
+    var big = k && k.big ? [k.big] : D.sales.slice().sort(function (a, b) { return b.p - a.p; }).filter(function (l, n, arr) { return arr.findIndex(function (x) { return x.i === l.i; }) === n; }).slice(0, 5);
+    var hook = el("button", "st hook"); hook.type = "button"; c.appendChild(hook);
+    function showHook() {
+      if (!big.length) { hook.textContent = ""; return; }
+      var b = big[HOOK_K % big.length], sp = el("span"); hook.textContent = "";
+      var im = iconImg(b.i); if (im) hook.appendChild(im);
+      sp.appendChild(document.createTextNode("Big sale caught: ")); sp.appendChild(el("b", null, showName(b.i))); sp.appendChild(document.createTextNode(" for ")); sp.appendChild(money(b.p));
+      hook.appendChild(sp); hook.onclick = function () { ev("#pick:" + b.i); pick(b.i); jumpToCard(); };
+      hook.title = "Biggest sales the scanners caught. Click to see the item.";
+    }
+    showHook(); clearInterval(HOOK_T);
+    if (big.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) HOOK_T = setInterval(function () { HOOK_K++; showHook(); }, 6000);
+    renderPicks(); renderHeroDeal();
+  }
+  // board events for the popular list and the traffic report: no cookies, same counter as page visits
+  var EV_SEEN = {};
+  function ev(p) {
+    try {
+      if (EV_SEEN[p]) return; EV_SEEN[p] = 1;
+      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://clubfm-accounts.aaweaver93.workers.dev/hit";
+      if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" })); else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
+    } catch (e) {}
+  }
+  function jumpToCard() {
+    if (window.innerWidth <= 1180) return;   // phones and tablets get the card as a sheet
+    var m = document.querySelector(".main"); if (m && m.getBoundingClientRect().top > window.innerHeight * 0.5) m.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  var POP = null, POP_AT = 0;
+  var PICK_FALLBACK = ["Gloves Attack Scroll 60%", "Work Gloves", "Selective 5-slot Coupon", "Mystery Palette Coupon", "Kumbi Throwing-Stars", "Korean Fan", "White Label Ring", "Claw Attack Scroll 60%", "SP Reset Scroll", "Emerald Earrings"];
+  function loadPopular() {
+    if (Date.now() - POP_AT < 10 * 60e3) return; POP_AT = Date.now();
+    fetch("https://clubfm-accounts.aaweaver93.workers.dev/public/popular").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.items) { POP = j.items; if (D) renderPicks(); } }).catch(function () {});
+  }
+  function findItem(n) {
+    if (D.byName[n]) return D.byName[n];
+    var lo = n.toLowerCase(), hit = null;
+    D.list.some(function (i) { var a = i.item.toLowerCase(); if (a === lo || a.replace(/[^a-z0-9]/g, "") === lo.replace(/[^a-z0-9]/g, "")) { hit = i; return true; } return false; });
+    if (!hit) { var r = searchItems(n, 1); if (r[0] && r[0].it) hit = r[0].it; }
+    return hit;
+  }
+  function renderPicks() {
+    var box = $("picks"); if (!box || !D) return; loadPopular();
+    var score = {}, add = function (i, v) { if (i && i.typ) score[i.item] = (score[i.item] || 0) + v; };
+    (POP || []).forEach(function (x) { add(D.byName[x[0]], x[1] * 6); });
+    PICK_FALLBACK.forEach(function (n, k) { add(findItem(n), (10 - k) * 0.6); });
+    D.list.forEach(function (i) { if (i.n >= MIN && i.salesN) add(i, Math.min(i.salesN, 60) / 10); });
+    var top = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; }).slice(0, 10);
+    var sig = top.join("|") + top.map(function (n) { var i = D.byName[n]; return i.typ + ":" + (i.mv[0] || 0); }).join(",");
+    if (box.dataset.sig === sig) return; box.dataset.sig = sig; box.textContent = "";
+    top.forEach(function (n) {
+      var i = D.byName[n], b = el("button", "pk"); b.type = "button"; b.setAttribute("role", "listitem");
+      b.setAttribute("aria-label", showName(n) + ", about " + short(i.typ) + " mesos");
+      var im = iconImg(n); if (im) b.appendChild(im); else b.appendChild(el("span", null, showName(n).slice(0, 2)));
+      var mv = i.mv[0]; if (mv != null && Math.abs(mv) >= 0.03) { var a = el("i", mv > 0 ? "up" : "dn", mv > 0 ? "▲" : "▼"); a.title = (mv > 0 ? "Up " : "Down ") + Math.round(Math.abs(mv) * 100) + "% in 24h"; b.appendChild(a); }
+      var tip = el("span", "tip"); tip.appendChild(document.createTextNode(showName(n))); tip.appendChild(money(i.typ)); b.appendChild(tip);
+      b.addEventListener("click", function () { ev("#pick:" + n); pick(n); jumpToCard(); });
+      box.appendChild(b);
+    });
+  }
+  function renderHeroDeal() {
+    var a = $("hdeal"); if (!a || !D) return;
+    var best = null, lbl = "", txt = "";
+    if (DEALS_ON) {
+      D.list.forEach(function (i) { if (!(i.n >= MIN && i.deal >= 0.25)) return; var fresh = i.equip ? i.rd && i.rd.length && i.rd[0].l && Date.now() - i.rd[0].t < 6 * H : i.bestL && Date.now() - i.bestL.t < 6 * H; if (fresh && (!best || i.deal > best.deal)) best = i; });
+      if (best) { lbl = "Best deal now"; txt = Math.round(best.deal * 100) + "% under"; }
+    }
+    if (!best) {
+      D.list.forEach(function (i) { if (i.n >= MIN && i.typ >= 100000 && i.mv[0] != null && (!best || Math.abs(i.mv[0]) > Math.abs(best.mv[0]))) best = i; });
+      if (best && Math.abs(best.mv[0]) >= 0.05) { lbl = "Biggest mover today"; txt = (best.mv[0] > 0 ? "▲ " : "▼ ") + Math.round(Math.abs(best.mv[0]) * 100) + "%"; } else best = null;
+    }
+    a.hidden = !best; if (!best) return;
+    var sig = lbl + best.item + txt; if (a.dataset.sig === sig) return; a.dataset.sig = sig; a.textContent = "";
+    var im = iconImg(best.item); if (im) a.appendChild(im);
+    a.appendChild(el("small", null, lbl)); a.appendChild(el("b", null, showName(best.item))); a.appendChild(document.createTextNode(txt));
+    a.onclick = function (e) { e.preventDefault(); ev("#pick:" + best.item); pick(best.item); jumpToCard(); };
   }
   function openSources() {
     var box = $("crew"); box.textContent = "";
@@ -3274,7 +3415,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     try { history.replaceState(null, "", "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "")); } catch (e) {}
     document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); });
     document.querySelectorAll('tbody tr[data-item="' + (window.CSS && CSS.escape ? CSS.escape(name) : name) + '"]').forEach(function (r) { r.classList.add("sel"); });
-    renderItem();
+    renderItem(); ev("#open:" + name);
     if (window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); }
   }
   function rollBox(i) {
@@ -3981,9 +4122,8 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // search suggestions: every item in the game, best match first, the shortcut it understood on top
   (function () {
     var q = $("q"), box = $("sugg"), hits = [], at = -1, t = null;
-    var tools = box.closest(".tools"); if (tools) tools.parentNode.insertBefore(box, tools.nextSibling);   // its own line under the filters
     function close() { box.hidden = true; q.setAttribute("aria-expanded", "false"); at = -1; }
-    function choose(k) { var r = hits[k]; if (!r) return; close(); pick(r.n); }
+    function choose(k) { var r = hits[k]; if (!r) return; close(); ev("#find:" + q.value.trim().toLowerCase().slice(0, 40)); pick(r.n); jumpToCard(); }
     function mark() { box.querySelectorAll(".so").forEach(function (o, k) { o.setAttribute("aria-selected", k === at ? "true" : "false"); if (k === at) o.scrollIntoView({ block: "nearest" }); }); }
     function show() {
       var v = q.value.trim(); if (!v || !D) { close(); return; }
