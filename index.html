@@ -657,6 +657,9 @@ tbody tr.thin td { opacity: .72; }
 .li .p .num { display: inline-flex; align-items: center; }
 .li .p small { display: block; }
 .li.gone b, .li.gone .p { opacity: .55; }
+.li .soldbtn { grid-column: 3; justify-self: end; align-self: center; font: 800 .68rem var(--body); padding: 2px 8px; border-radius: 999px; border: 1.5px solid var(--line2); background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.li .soldbtn:hover { border-color: #d64545; color: #d64545; }
+.li .soldbtn.on, .li .soldbtn:disabled { border-color: transparent; color: var(--muted); cursor: default; }
 .note { color: var(--muted); font-size: .74rem; font-weight: 700; margin: 0; }
 .bids { background: var(--up-soft); border: 1.5px solid var(--up); border-radius: 10px; padding: 7px 10px; font-weight: 800; font-size: .82rem; }
 /* item guide: quests, drops, crafting, shops, at the bottom of the item card */
@@ -2260,9 +2263,11 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       fresh.forEach(function (x) {
         var sl = String(x.s).toLowerCase(), lastShop = sellerLast[sl] || 0, lastItem = itemLast[sl + "|" + x.i] || x.t;
         x.st = !x.chat && lastShop - lastItem > 5 * 6e4 ? "gone" : now - x.t < 3 * H ? "up" : "old";
+        var gv = GONE.items[soldKey(x)]; x.sold = gv && gv[1] > x.t ? gv[0] : 0;
+        if (x.sold >= GONE.need || (MYSOLD[soldKey(x)] || 0) > x.t) x.st = "sold";
       });
       it.buy = fresh;
-      var still = fresh.filter(function (x) { return x.st !== "gone"; });
+      var still = fresh.filter(function (x) { return x.st !== "gone" && x.st !== "sold"; });
       it.bestL = still[0] || null;
       it.best = it.bestL ? it.bestL.u : 0;
       // A deal needs a typical that rests on sales: 3+ in the last 3 days. Asking prices and a lone old sale don't count.
@@ -2605,6 +2610,31 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" })); else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
     } catch (e) {}
   }
+  // Sold buttons: anyone can mark a listing in Where to buy as sold. Enough players (the Worker says how many) and it
+  // drops out of Cheapest now, deals and alerts until a scan sees it again. Your own mark hides it for you at once.
+  var GONE = { need: 2, items: {} }, GONE_AT = 0, MYSOLD = {};
+  try { MYSOLD = JSON.parse(localStorage.getItem("fm-sold") || "{}"); } catch (e) {}
+  function soldKey(x) { return (String(x.s) + "|" + x.i + "|" + x.u).toLowerCase(); }
+  function loadGone(force) {
+    if (!force && Date.now() - GONE_AT < 60e3) return; GONE_AT = Date.now();
+    fetch(ACCT + "/public/gone").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.items) return; var sig = JSON.stringify(j); if (sig === JSON.stringify(GONE)) return;
+      GONE = j; if (D) { DIRTY = true; render(); }
+    }).catch(function () {});
+  }
+  function soldBtn(x, mine) {
+    var b = el("button", "soldbtn" + (mine ? " on" : ""), mine ? "✓ Sold" : "Sold?"); b.type = "button";
+    b.title = mine ? "You marked this sold. It comes back if a scan sees it again." : "Went to buy it and it's gone? Mark it sold. Once " + GONE.need + " players do, it drops off the list until a scan sees it again.";
+    b.setAttribute("aria-label", mine ? "You marked this listing sold" : "Mark " + x.s + "'s listing as sold");
+    b.addEventListener("click", function (e) {
+      e.stopPropagation(); if (mine) return;
+      var k = soldKey(x); MYSOLD[k] = Date.now();
+      try { var keep = {}; Object.keys(MYSOLD).forEach(function (q) { if (Date.now() - MYSOLD[q] < 2 * DAY) keep[q] = MYSOLD[q]; }); MYSOLD = keep; localStorage.setItem("fm-sold", JSON.stringify(keep)); } catch (er) {}
+      b.disabled = true; b.textContent = "✓ Sold";
+      fetch(ACCT + "/gone", { method: "POST", body: JSON.stringify({ k: k }) }).then(function (r) { return r.json(); }).catch(function () { return null; }).then(function () { loadGone(true); DIRTY = true; render(); });
+    });
+    return b;
+  }
   function jumpToCard() {
     if (window.innerWidth <= 1180) return;   // phones and tablets get the card as a sheet
     var m = document.querySelector(".main"); if (m && m.getBoundingClientRect().top > window.innerHeight * 0.5) m.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -2888,7 +2918,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     Object.keys(WATCH).forEach(function (name) {
       var w = WATCH[name], i = D.byName[name]; if (!w || !w.under || !i) return;
       (i.buy || []).forEach(function (x) {
-        if (x.st === "gone" || x.u > w.under || Date.now() - x.t > 2 * H) return;
+        if (x.st === "gone" || x.st === "sold" || x.u > w.under || Date.now() - x.t > 2 * H) return;
         var k = name + "|" + String(x.s).toLowerCase() + "|" + x.u; if (USEEN[k]) return;
         USEEN[k] = Date.now(); hits.push({ name: name, x: x });
       });
@@ -3677,14 +3707,18 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     }
     var ls = el("div", "list"), rows = state.list === "buy" ? buyRows : i.sales;
     rows.slice(0, 40).forEach(function (x) {
-      var li = el("div", "li" + (state.list === "buy" && x.st === "gone" ? " gone" : ""));
+      var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : ""));
       li.appendChild(avatar(x.s));
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var w = where(x), sm = el("small", null, (w ? w + " · " : "") + ago(x.t)); li.appendChild(sm);
       if (x.stream) { sm.appendChild(document.createTextNode(" · seen on ")); sm.appendChild(streamLink(x)); }
       if (x.spot) li.appendChild(el("span", "stt gone", "Spot holder"));
-      if (state.list === "buy") li.appendChild(el("span", "stt " + x.st, x.st === "gone" ? "Not seen on the shop's later visit" : x.st === "up" ? "Likely still up" : "May be gone by now"));
+      if (state.list === "buy") {
+        var mine = (MYSOLD[soldKey(x)] || 0) > x.t;
+        li.appendChild(el("span", "stt " + (x.st === "sold" ? "gone" : x.st), x.st === "sold" ? (mine && x.sold < GONE.need ? "You marked this sold" : "Marked sold by " + x.sold + (x.sold === 1 ? " player" : " players")) : x.st === "gone" ? "Not seen on the shop's later visit" : (x.st === "up" ? "Likely still up" : "May be gone by now") + (x.sold ? " · " + x.sold + " said sold" : "")));
+        if (x.st !== "gone" && !x.chat) li.appendChild(soldBtn(x, mine));
+      }
       if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); var ksx = keyStat(i.item, x.x, x.xj); if (ksx && x.x[ksx] != null) li.dataset.sv = String(x.x[ksx]); }
       var rr = i.rolls && i.rolls.filter(function (r) { return r.l === x; })[0]; if (rr) li.dataset.g = String(rr.g);
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
@@ -4490,6 +4524,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     });
   }
   function poll() {
+    loadGone();
     getJSON("data/maintenance.json").then(function (m) { if (m && m.notices) { MAINT = m; renderMaint(); } });
     getJSON("data/ranks.json").then(function (r) { if (r && r.who) { var ch = !RANKS || RANKS.updated !== r.updated; RANKS = r; if (ch && D) { DIRTY = true; render(); } } });
     getBundle().then(function (b) {

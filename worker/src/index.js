@@ -82,6 +82,9 @@ async function route(req, env, url) {
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
   if (p === "/public/popular") return publicPopular(env);
+  if (p === "/gone" && req.method === "POST") return gonePost(req, env);
+  if (p === "/public/gone") return goneList(env);
+  if (p === "/admin/gone-need" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const n = Math.max(1, Math.min(20, Number(url.searchParams.get("n")) || 2)); await env.ACCOUNTS.put("gone:need", String(n)); return json({ need: n }); }
   if (p === "/public/kofi-income") return kofiIncome(env);
   if (p === "/interactions" && req.method === "POST") return interactions(req, env);
   if (p === "/admin" && req.method === "GET") return admin(req, env);
@@ -964,6 +967,40 @@ async function hit(req, env) {
   if (/(^|\.)maplefm\.gg$/.test(ref)) ref = "";
   await logHit(env, page, ref, tag, ip);
   return ok;
+}
+// Sold buttons: players mark a listing in Where to buy as sold. One vote per person per listing (a scrambled
+// address, never the address itself). The site hides a listing once enough people mark it and no scan has seen it
+// since. How many it takes lives in KV gone:need (default 2), changed with POST /admin/gone-need?n=3.
+let GONE_READY = false;
+async function goneTable(env) {
+  if (GONE_READY || !env.INBOX_DB) return;
+  await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS gone (k TEXT, v TEXT, t INTEGER, PRIMARY KEY (k, v))").run();
+  await env.INBOX_DB.prepare("CREATE INDEX IF NOT EXISTS gone_t ON gone (t)").run();
+  GONE_READY = true;
+}
+async function gonePost(req, env) {
+  const h = { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" };
+  const ua = req.headers.get("User-Agent") || "", ip = req.headers.get("CF-Connecting-IP") || "";
+  if (!ua || /bot|crawl|spider|headless|python|curl/i.test(ua)) return json({ ok: false }, 200, h);
+  if (overLimit("gone:" + ip, 20, 600)) return json({ ok: false, error: "slow down" }, 429, h);
+  let b = {}; try { b = JSON.parse(await req.text()); } catch (e) { return json({ ok: false }, 400, h); }
+  const k = String(b.k || "").toLowerCase().slice(0, 160);
+  if (!/^[^|]{1,40}\|[^|]{1,100}\|\d{1,12}$/.test(k) || !env.INBOX_DB) return json({ ok: false }, 400, h);
+  await goneTable(env);
+  const v = (await hmac(env.SESSION_SECRET || "x", "gone|" + ip)).slice(0, 16);
+  await env.INBOX_DB.prepare("INSERT INTO gone (k, v, t) VALUES (?, ?, ?) ON CONFLICT (k, v) DO UPDATE SET t = excluded.t").bind(k, v, Date.now()).run();
+  const r = await env.INBOX_DB.prepare("SELECT COUNT(*) n FROM gone WHERE k = ? AND t >= ?").bind(k, Date.now() - 48 * 3600e3).first();
+  return json({ ok: true, n: (r && r.n) || 1 }, 200, h);
+}
+async function goneList(env) {
+  const h = { "Access-Control-Allow-Origin": "*", "Cache-Control": "public, max-age=30" };
+  const need = Number(await env.ACCOUNTS.get("gone:need")) || 2, out = { need, items: {} };
+  if (env.INBOX_DB) {
+    await goneTable(env);
+    const r = await env.INBOX_DB.prepare("SELECT k, COUNT(*) n, MIN(t) t FROM gone WHERE t >= ? GROUP BY k").bind(Date.now() - 48 * 3600e3).all().catch(() => ({ results: [] }));
+    (r.results || []).forEach((x) => { out.items[x.k] = [x.n, x.t]; });
+  }
+  return json(out, 200, h);
 }
 // Popular right now: items people opened on the board in the last two days, one vote per visitor per item.
 // Feeds the quick picks under the search. Cached for 10 minutes; the site falls back to sales volume when it is thin.
