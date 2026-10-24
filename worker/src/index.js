@@ -29,6 +29,7 @@ export default {
     // every 5 minutes: watchlist DMs; on the hourly run: the role sync too
     ctx.waitUntil(notifyWatchers(env));
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
+    ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
   },
   async fetch(req, env) {
@@ -83,6 +84,7 @@ async function route(req, env, url) {
   if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
   if (p === "/admin/channels" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelAccess(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/chanperm" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); let b = null; try { b = await req.json(); } catch (e) {} if (!b || !/^\d+$/.test(String(b.channel)) || !/^\d+$/.test(String(b.target))) return json({ error: "bad" }, 400); const r = await fetch(DISCORD + "/channels/" + b.channel + "/permissions/" + b.target, { method: "PUT", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify({ type: b.type === 1 ? 1 : 0, allow: String(b.allow || "0"), deny: String(b.deny || "0") }) }); return json({ status: r.status, body: r.ok ? null : await r.text() }); }
+  if (p === "/admin/channel-intros" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelIntros(env)); }
   if (p === "/admin/watchdog/test" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await watchdogTest(me, env)); }
   if (p === "/admin/brand/fix" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandFix(req, env)); }
   if (p === "/admin/brand" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await brandAudit(env), 200, { "Cache-Control": "no-store" }); }
@@ -923,6 +925,51 @@ async function refStats(env, url) {
     let tv = 0, tu = 0; const days = {};
     for (const k of l.keys) { const c = (await env.ACCOUNTS.get(k.name, "json")) || {}; days[k.name.split(":")[2]] = c; tv += c.visits || 0; tu += c.uniques || 0; }
     out[who] = { visits: tv, uniques: tu, days };
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- #deal-feed: Mega Deals, 30 minutes later
+// Every deal the board posts to #mega-deals shows up in the public #deal-feed 30 minutes after, so everyone sees
+// what the site catches while Mega Deals members keep first look. At most 6 a run, each deal once.
+const DEAL_FEED = "1562554135126216804", PRICE_CHECK = "1563559723540815924", PARTNER_LOUNGE = "1563560597864583248";
+async function dealFeedPublic(env) {
+  if (!env.DISCORD_BOT_TOKEN) return;
+  const feed = await vaultJSON(env, FEED, 60).catch(() => null);
+  if (!Array.isArray(feed) || !feed.length) return;
+  const t = now(), due = feed.filter((d) => d && d.item && d.key && d.t <= t - 30 * 60 && d.t > t - 75 * 60).sort((a, b) => a.t - b.t);
+  if (!due.length) return;
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  let n = 0;
+  for (const d of due) {
+    if (n >= 6) break;
+    const k = "dealfeed:" + d.key;
+    if (await env.ACCOUNTS.get(k)) continue;
+    await env.ACCOUNTS.put(k, "1", { expirationTtl: 3 * DAY });
+    const emb = { title: String(d.item).slice(0, 80), color: 0xf5c542, url: "https://maplefm.gg/#item=" + encodeURIComponent(d.item),
+      description: "Listed at **" + meso(d.p) + "**" + (d.q > 1 ? " each ×" + d.q : "") + " · " + Math.round((d.off || 0) * 100) + "% under typical " + meso(d.typ) + (d.flip ? "\n**+" + meso(d.flip) + "** to flip" : "") + (d.roll ? " · " + d.roll : ""),
+      fields: [{ name: "Spot", value: String(d.where || "?").slice(0, 40), inline: true }, { name: "Caught by", value: String(d.by || "?").slice(0, 24), inline: true }, { name: "Spotted", value: "<t:" + d.t + ":R>", inline: true }],
+      footer: { text: "Mega Deals members saw this 30 minutes ago, so it may be gone." } };
+    const r = await fetch(DISCORD + "/channels/" + DEAL_FEED + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [emb] }) });
+    if (!r.ok) break;
+    n++;
+  }
+}
+// One-time intro posts for #deal-feed, #price-check and #partner-lounge, pinned when the bot can pin.
+async function channelIntros(env) {
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  const posts = [
+    [DEAL_FEED, { embeds: [{ title: "What this channel is", color: 0xf5c542, description: "Every deal Club FM catches in the Free Market lands here **30 minutes after** Mega Deals members see it. Some will be gone by the time you look, and that's the point: it shows what the site finds every day.\n\nWant them the moment they're caught? Mega Deals unlocks by climbing the Scanner Ranks with FM Watcher: https://maplefm.gg/contribute.html" }] }],
+    [PRICE_CHECK, { embeds: [{ title: "Price check here", color: 0x6d3fd1, description: "Type **/price** and an item, like `/price work gloves` or `/price claw 60`. The bot answers with the typical sale price, the cheapest listing up right now and today's move, from real Free Market sales.\n\nShort names work: wg, gfa 60, 10 int earring. Full list: https://maplefm.gg/shortcuts.html\nQuestions about a price? Ask in #market-talk." }] }],
+    [PARTNER_LOUNGE, { embeds: [{ title: "Welcome, partners", color: 0x9b59b6, description: "This is the private room for streamers who partner with Club FM.\n\n1. Feature requests for your stream go here first.\n2. Setup help for !price and the chat bot: https://maplefm.gg/streamers.html\n3. Your channel's numbers and anything else you need, just ask Maya." }] }],
+  ];
+  const out = [];
+  for (const [ch, body] of posts) {
+    const r = await fetch(DISCORD + "/channels/" + ch + "/messages", { method: "POST", headers: H, body: JSON.stringify(body) });
+    const m = r.ok ? await r.json() : null;
+    let pin = "";
+    if (m) { const p = await fetch(DISCORD + "/channels/" + ch + "/pins/" + m.id, { method: "PUT", headers: { Authorization: H.Authorization } }); pin = p.status === 204 ? "pinned" : "pin " + p.status; }
+    out.push(ch + " " + r.status + " " + pin);
   }
   return out;
 }
