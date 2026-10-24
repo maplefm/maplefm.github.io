@@ -526,10 +526,19 @@ tbody tr.thin td { opacity: .72; }
 .bstr { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; } .bstr a { flex: 1 1 240px; max-width: 360px; }
 .bstr a { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); font-size: .8rem; padding: 4px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); }
 .bstr a:hover { border-color: var(--accent); } .bstr a img { width: 16px; height: 16px; } .bstr a b { flex: 1; } .bstr a small { color: var(--muted); font-weight: 600; } .bstr a .live { color: #fff; background: #e91916; border-radius: 6px; padding: 1px 6px; font-size: .66rem; font-weight: 800; }
-.covwrap { overflow: auto; margin: 8px 0; }
-.covgrid { display: grid; gap: 2px; font-size: .62rem; font-weight: 700; color: var(--muted); }
-.covgrid .h { text-align: center; padding: 2px 0; } .covgrid .r { padding-right: 4px; text-align: right; line-height: 14px; }
-.covgrid .c { width: 100%; height: 14px; border-radius: 3px; background: var(--panel2); border: 1px solid var(--line); }
+#covdlg { max-width: min(1180px, calc(100vw - 32px)); }
+#covdlg .dbody { overflow: hidden; }
+/* the whole Free Market on one screen: 20 rooms across, 40 channels down, sized to the window, no scrolling */
+.covlay { display: flex; gap: 18px; align-items: flex-start; }
+.covmain { flex: 1 1 auto; min-width: 0; }
+.covside { flex: 0 0 250px; max-height: calc(100vh - 190px); overflow: auto; }
+.covside .covh { margin-top: 0; }
+.covgrid { --ch: clamp(7px, calc((100vh - 250px) / 41), 16px); display: grid; column-gap: 4px; row-gap: 2px; font-size: .66rem; font-weight: 800; color: var(--muted); margin: 6px 0 8px; }
+.covgrid .h { text-align: center; line-height: 16px; } .covgrid .h.fm { text-align: right; padding-right: 6px; color: var(--ink); }
+.covgrid .h.g5, .covgrid .c.g5 { margin-right: 5px; }
+.covgrid .r { padding-right: 6px; text-align: right; line-height: var(--ch); font-size: .62rem; white-space: nowrap; }
+.covgrid .c { width: 100%; height: var(--ch); border-radius: 3px; background: var(--panel2); border: 1px solid var(--line); box-sizing: border-box; }
+@media (max-width: 820px) { .covlay { flex-direction: column; } .covside { flex: none; max-height: none; } #covdlg .dbody { overflow: auto; } .covgrid { --ch: 12px; } }
 .covgrid .c.c1, .covleg .c1 { background: #f3d58a; border-color: #d9b45a; } .covgrid .c.c2, .covleg .c2 { background: #8fd9a8; border-color: #5fbf7f; } .covgrid .c.c3, .covleg .c3 { background: #2ecc71; border-color: #1f9d55; }
 .covleg { display: flex; gap: 14px; font-size: .74rem; color: var(--muted); } .covleg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; background: var(--panel2); border: 1px solid var(--line); }
 .covh { font-family: var(--display); font-size: .95rem; margin: 14px 0 4px; }
@@ -1271,11 +1280,17 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   <div class="wtitle"><h2 id="cov-t">🗺️ Coverage map</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
     <p class="note" id="cov-sub"></p>
-    <div class="covwrap"><div class="covgrid" id="covgrid" role="img" aria-label="Rooms and channels read in the last day"></div></div>
-    <div class="covleg"><span><i class="c3"></i>under 1h</span><span><i class="c2"></i>under 6h</span><span><i class="c1"></i>under 24h</span><span><i class="c0"></i>cold</span></div>
-    <h3 class="covh">Cold rooms right now</h3>
-    <p class="note">Nobody has read these in the past day. A watched sale caught in a cold spot earns extra credit, the cold-room bounty. Walk in, open shops, hover gear.</p>
-    <div class="cold" id="covcold"></div>
+    <div class="covlay">
+      <div class="covmain">
+        <div class="covgrid" id="covgrid" role="img" aria-label="Rooms and channels read in the last day"></div>
+        <div class="covleg"><span><i class="c3"></i>under 1h</span><span><i class="c2"></i>under 6h</span><span><i class="c1"></i>under 24h</span><span><i class="c0"></i>cold</span></div>
+      </div>
+      <aside class="covside">
+        <h3 class="covh">Cold rooms right now</h3>
+        <p class="note">Nobody has read these in the past day. A watched sale caught in a cold spot earns extra credit, the cold-room bounty. Walk in, open shops, hover gear.</p>
+        <div class="cold" id="covcold"></div>
+      </aside>
+    </div>
   </div>
 </dialog>
 <dialog id="ranks" aria-labelledby="rk-t">
@@ -3777,14 +3792,15 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   function coverageMap() {
     var now = Date.now(), last = {};
     if (D && D.L) D.L.forEach(function (l) { if (l.chat || !l.r || !l.c) return; var m = /^FM(\d+)$/.exec(l.r); if (!m) return; var k = +m[1] + "|" + l.c; if (!last[k] || l.t > last[k]) last[k] = l.t; });
-    var g = $("covgrid"); g.textContent = ""; g.style.gridTemplateColumns = "34px repeat(" + ROOMS + ", minmax(16px, 1fr))";
-    g.appendChild(el("div", "h", "")); for (var r = 1; r <= ROOMS; r++) g.appendChild(el("div", "h", "FM" + r));
+    var g = $("covgrid"); g.textContent = ""; g.style.gridTemplateColumns = "40px repeat(" + ROOMS + ", minmax(14px, 1fr))";
+    // room numbers across (FM in the corner), a little extra space after every fifth room so they're easy to count
+    g.appendChild(el("div", "h fm", "FM")); for (var r = 1; r <= ROOMS; r++) g.appendChild(el("div", "h" + (r % 5 === 0 && r < ROOMS ? " g5" : ""), String(r)));
     var cold = [], warm = 0;
     for (var ch = 1; ch <= CHANS; ch++) {
       g.appendChild(el("div", "r", "ch " + ch));
       for (var rm = 1; rm <= ROOMS; rm++) {
         var t = last[rm + "|" + ch] || 0, age = t ? now - t : Infinity, cls = age < H ? "c3" : age < 6 * H ? "c2" : age < DAY ? "c1" : "c0";
-        var cell = el("div", "c " + cls); cell.title = "Free Market " + rm + ", channel " + ch + (t ? ": read " + ago(t) : ": not read in the last day"); g.appendChild(cell);
+        var cell = el("div", "c " + cls + (rm % 5 === 0 && rm < ROOMS ? " g5" : "")); cell.title = "Free Market " + rm + ", channel " + ch + (t ? ": read " + ago(t) : ": not read in the last day"); g.appendChild(cell);
         if (cls === "c0") cold.push([rm, ch, t]); else warm++;
       }
     }
