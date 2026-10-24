@@ -1,10 +1,15 @@
 {
- "version": "2026.10.24.2",
- "date": "2026-10-24T04:38:27+00:00",
- "notes": "Scrolled items whose tooltip title reads badly keep their stats: the row under the pointer is used. Fixes 10 attack Work Gloves showing no stats.",
- "sha256": "406422547650bbd51026c011a981aec9077b1143782fdfaf811373231b2960b6",
- "size": 59936,
+ "version": "2026.10.24.3",
+ "date": "2026-10-24T15:34:43+00:00",
+ "notes": "Hover wanted: the watcher now tells you (with a two-note chime) when a shop has an equip the board needs stats for. Just rest your mouse on that row.",
+ "sha256": "078d6a71d785f8a8e6b04a915f24b1a4bd1f03d4b2cacc1332308ab45364d94b",
+ "size": 60649,
  "history": [
+  {
+   "version": "2026.10.24.3",
+   "date": "2026-10-24",
+   "notes": "Hover wanted: the watcher now tells you (with a two-note chime) when a shop has an equip the board needs stats for. Just rest your mouse on that row."
+  },
   {
    "version": "2026.10.24.2",
    "date": "2026-10-24",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.1",
    "date": "2026-10-20",
    "notes": "Easier setup on more PCs."
-  },
-  {
-   "version": "2026.10.19.2",
-   "date": "2026-10-19",
-   "notes": "Small fixes."
   }
  ],
  "pip": [],
- "sig": "a6258da20bb508b4bade11acd704f7b01d3fb72741f2eefcba8e7eef1902c760c649fdf40ea04fd58457113e93e66d0663735364d0cf7faa0763efd2a0a6927db7fb25684390d4b551729981dba272b7a504ed6b82022b4783bf6ca89937ed444cffc7c37da3fe8407507d3c83ca0eae90c2532d13947a6cc869be3903f1b26708276e42a0b25daf0d39fecf9174f06fda6d5e2c8de9529a20f32b144d46e788d66c741cad8ada396f4af629156ff7671173bcc3cf730e055f6de947a45c98ef47efcdd69b9f795f2ce257ef7185ecad998da2c4e6a0c275a4240352ce874ac00f60270a00b04d59dbc58f3187b24492975f9f85c405e961b6402306b2d9801d"
+ "sig": "2352cd814a2348761e0fc6d1a5776f2d068dd716c6480e8131a79d4c3aa08addae3dfd8fa9eb0e95d53b669a106471adf826c89b2c9aba56c0376db2d1dc21ae7533726635884d130a9513b7c2611625b21b73afad3df9d4c1bfb52998037a898f3932efe2fbd2e3e46926c0c4fa569b1601329dd3cefe06d73cbe02fa3797110dcd1cac5ec365c823994351705f0036e94f139c2197c7e1b41e8553f983d43dcde0acb43ed6795dcb58e550c9e495697ba55f6a0c4a62bf65b4b3ffe9da036fa12bfd217c180c95603ecfca3421bb4501aa9972654e2b5e1141bad27a4b3711af0c0126c0f630204970cf5e1f92db6d3f7a3b1d72f39c78f4c87a0c3404561e"
 }

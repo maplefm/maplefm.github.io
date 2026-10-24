@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.2"
+VERSION = "2026.10.24.3"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -78,6 +78,47 @@ def chime(ok=True):
         except Exception: pass
     threading.Thread(target=go, daemon=True).start()
 CFG_CHIME = [True]
+
+# Equips the price board most needs a hover on (worth 50K+ and mostly listed without stats). Item names only,
+# refreshed every 20 minutes. The watcher never moves the mouse: it only tells you which row to rest it on.
+HW_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/hoverwanted.json"
+HW = {"items": {}, "at": 0.0}
+NUDGED = {}
+def hover_wanted():
+    if time.time() - HW["at"] > 1200:
+        HW["at"] = time.time()
+        try:
+            req = urllib.request.Request(HW_URL + "?t=" + str(int(time.time())), headers={"User-Agent": "fm-watcher/" + VERSION})
+            with urllib.request.urlopen(req, timeout=20) as r:
+                j = json.loads(r.read().decode("utf-8"))
+            HW["items"] = {str(x.get("i")): int(x.get("typ") or 0) for x in (j.get("items") or []) if x.get("i")}
+        except Exception:
+            pass
+    return HW["items"]
+def short_meso(v):
+    return f"{v / 1e6:.1f}M" if v >= 1e6 else f"{v // 1000}K" if v >= 1000 else str(v)
+def nudge():
+    """Two rising notes: an item in this shop is on the hover-wanted list."""
+    if not CFG_CHIME[0]: return
+    def go():
+        try:
+            import winsound; winsound.Beep(900, 60); winsound.Beep(1300, 90)
+        except Exception: pass
+    threading.Thread(target=go, daemon=True).start()
+def hover_nudge(res):
+    wanted = hover_wanted()
+    if not wanted: return
+    seller = res.get("seller") or ""
+    for n, r in enumerate(res.get("rows") or []):
+        if r.get("so") or r.get("i") not in wanted: continue
+        k = (seller, r["i"])
+        if time.time() - NUDGED.get(k, 0) < 900: continue
+        if res.get("tip") and res["tip"].get("row") == n: continue
+        NUDGED[k] = time.time()
+        typ = wanted.get(r["i"]) or 0
+        log(f"hover wanted: rest your mouse on {r['i']} (row {n + 1})" + (f", sells for about {short_meso(typ)}" if typ else "") + ". The board has no stats for most of these yet.")
+        nudge()
+        return
 
 def log(*a):
     line = datetime.datetime.now().strftime("%H:%M:%S ") + " ".join(str(x) for x in a)
@@ -992,9 +1033,12 @@ def worker(cfg, jobs, store):
                             elif hit:
                                 log(f"read  {hit[0]} {hit[1]}: " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items() if not k.endswith("_b")))
                                 chime(True)
+                                NUDGED[(res.get("seller") or "", res["tip"].get("name") or "")] = time.time() + 86400
                             else: log(f"hover: read {res['tip']['name']} but couldn't match it to a row in this shop")
                         for hit in store.flush_pending(res):
                             log(f"stats {hit[0]} {hit[1]} (from an earlier hover)")
+                        try: hover_nudge(res)
+                        except Exception as e: log("hover list error:", e)
                         try: store.add_icons(img, res)
                         except Exception as e: log("icon error:", e)
                         behind = jobs.qsize()
