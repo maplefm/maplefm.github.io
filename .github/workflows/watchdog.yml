@@ -1,0 +1,38 @@
+name: Watchdog
+# Every 15 minutes: checks the site, !price and the data pipeline, repairs what can repair itself,
+# and writes data/watchdog.json on live. The Worker DMs the admins when that file shows a change.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "4,19,34,49 * * * *"
+permissions:
+  contents: write
+  actions: write
+concurrency: watchdog
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - name: Check and repair
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch -q origin main
+          git show FETCH_HEAD:tools/watchdog.py > /tmp/watchdog.py
+          mkdir -p data
+          python3 /tmp/watchdog.py data/watchdog.json
+      - name: Save status
+        run: |
+          if [ -f /tmp/wd_changed ]; then
+            git config user.name maplefm
+            git config user.email maplefm@users.noreply.github.com
+            git add data/watchdog.json
+            if ! git diff --cached --quiet; then
+              git commit -q -m "Watchdog status"
+              for i in 1 2 3; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 5; done
+            fi
+          fi
