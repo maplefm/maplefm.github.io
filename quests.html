@@ -1,0 +1,122 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quest Helper · MapleStory Classic · Club FM</title>
+<meta name="description" content="Every MapleStory Classic quest that asks for items: what you need, how many, where it drops or how to craft it, and what it costs to just buy it on the Free Market.">
+<link rel="canonical" href="https://maplefm.gg/quests.html">
+<meta property="og:title" content="Quest Helper · MapleStory Classic · Club FM"><meta property="og:description" content="What every quest needs, where to get it, and what it costs on the Free Market."><meta property="og:image" content="https://maplefm.gg/og.png">
+<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=1">
+<style>
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+.ctl input,.ctl select{font:inherit;padding:8px 10px;border:2px solid var(--line2);border-radius:10px;background:#fff;color:var(--ink)}
+.ctl input[type=search]{flex:1 1 240px}
+.ctl label{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+.q{border:2px solid var(--line2);border-radius:12px;padding:10px 12px;margin:10px 0;background:#fff}
+.q.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(109,63,209,.15)}
+.q h3{margin:0;font-size:1rem;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.q h3 label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.q .sub{font-size:.8rem;color:var(--muted);margin:2px 0 6px}
+.q table{margin:0}.q td{padding:5px 4px;font-size:.88rem;vertical-align:top}
+.q td.n{text-align:right;white-space:nowrap;font-weight:800}
+.q td small{display:block;color:var(--muted);font-size:.76rem}
+.cost{font-size:.82rem;color:var(--muted);margin:6px 0 0}
+.list{position:sticky;top:8px;z-index:5;border:2px solid var(--accent);border-radius:12px;background:var(--panel2);padding:10px 12px;margin:12px 0}
+.list h2{margin:0 0 6px;font-size:1rem}
+.list table td{font-size:.85rem;padding:3px 4px}
+.list td small{display:block;color:var(--muted);font-size:.76rem}
+.list .tot{font-weight:800;margin:6px 0 0}
+.muted{color:var(--muted)}
+</style></head><body><main>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><a class="go" href="/">Open the live price board</a></div>
+<div class="card">
+<h1>Quest Helper</h1>
+<p class="sub">Every MapleStory Classic quest that asks for items: how many, where to get them, and what they cost to just buy on the Free Market.</p>
+<div class="ctl">
+  <input type="search" id="s" placeholder="Search a quest, an item or an NPC, like processed wood or Icarus" aria-label="Search quests">
+  <label>My level <input type="number" id="lv" min="1" max="200" style="width:80px" placeholder="any"></label>
+  <select id="rg" aria-label="Region"><option value="">All regions</option></select>
+  <label><input type="checkbox" id="mine"> Only quests I'm on</label>
+</div>
+<div class="list" id="list" hidden></div>
+<p class="note" id="count">Loading quests…</p>
+<div id="qs"></div>
+<p class="note src">Quests from the game data. Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0); drop rates are measured by players. Prices are typical Free Market sales on Club FM.</p>
+</div>
+<p class="foot">Tick the quests you're on and Club FM adds up everything you need and what it would cost to buy. Your picks stay in this browser. <a href="/terms.html">Terms</a></p>
+</main>
+<script>
+(function () {
+  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
+  var $ = function (id) { return document.getElementById(id); };
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  var TIER = { Lesser: "100%", Intermediate: "60%", Greater: "10%" };
+  function shown(n) { var m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(n); return m ? m[1] + " " + (TIER[m[2]] || m[2]) : n; }
+  function slug(n) { return shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  function meso(n) { n = +n || 0; if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B"; if (n >= 999.5e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1).replace(/\.?0+$/, "") + "K"; return Math.round(n).toLocaleString(); }
+  var MINE = {}; try { MINE = JSON.parse(localStorage.getItem("fm-quests") || "{}") || {}; } catch (e) {}
+  function save() { try { localStorage.setItem("fm-quests", JSON.stringify(MINE)); } catch (e) {} }
+  var Q = [], G = {}, PRICE = {}, PAGES = {};
+  function where(item) {
+    var g = G[item]; if (!g) return "";
+    var bits = [];
+    if (g.d && g.d.length) bits.push("Drops from " + g.d.slice(0, 2).map(function (d) { return d[0] + (d[2] != null ? " " + d[2] + "%" : ""); }).join(", "));
+    if (g.c && g.c.length) { var c = g.c[0]; bits.push("Craft (" + c[0] + " Lv " + c[1] + "): " + c[2].map(function (x) { return x[1] + " " + x[0]; }).join(", ")); }
+    if (g.s && g.s.length) bits.push("NPC " + g.s[0][0] + " sells it for " + meso(g.s[0][2]));
+    return bits.join(" · ");
+  }
+  function itemCell(name, qty) {
+    var td = el("td"), a;
+    if (PAGES[name] || PRICE[name] != null) { a = el("a", null, shown(name)); a.href = "/item/" + slug(name) + "/"; } else a = el("b", null, shown(name));
+    td.appendChild(a); var w = where(name); if (w) td.appendChild(el("small", null, w));
+    return td;
+  }
+  function render() {
+    var s = $("s").value.trim().toLowerCase(), lv = +$("lv").value || 0, rg = $("rg").value, only = $("mine").checked;
+    var box = $("qs"); box.textContent = "";
+    var shown_ = Q.filter(function (q) {
+      if (only && !MINE[q.name]) return false;
+      if (lv && q.lvl > lv) return false;
+      if (rg && q.region !== rg) return false;
+      if (s && (q.name + " " + q.giver + " " + q.region + " " + q.items.map(function (x) { return x[0]; }).join(" ")).toLowerCase().indexOf(s) < 0) return false;
+      return true;
+    });
+    $("count").textContent = shown_.length + " of " + Q.length + " quests" + (lv ? " open at level " + lv : "") + ".";
+    shown_.slice(0, 300).forEach(function (q) {
+      var d = el("div", "q" + (MINE[q.name] ? " on" : "")), h = el("h3"), lab = el("label"), cb = el("input"); cb.type = "checkbox"; cb.checked = !!MINE[q.name];
+      cb.addEventListener("change", function () { if (cb.checked) MINE[q.name] = 1; else delete MINE[q.name]; save(); render(); });
+      lab.appendChild(cb); lab.appendChild(document.createTextNode(q.name)); h.appendChild(lab); h.appendChild(el("span", "muted", q.lvl ? "Lv " + q.lvl + "+" : "")); d.appendChild(h);
+      d.appendChild(el("p", "sub", [q.giver ? "from " + q.giver : "", q.region, q.rep ? "repeatable" : ""].filter(Boolean).join(" · ")));
+      var tb = el("table"), cost = 0, priced = 0;
+      q.items.forEach(function (x) { var tr = el("tr"); tr.appendChild(itemCell(x[0], x[1])); var p = PRICE[x[0]]; var n = el("td", "n", "×" + x[1].toLocaleString()); if (p) { n.appendChild(el("small", null, meso(p * x[1]) + " to buy")); cost += p * x[1]; priced++; } tr.appendChild(n); tb.appendChild(tr); });
+      d.appendChild(tb);
+      if (priced) d.appendChild(el("p", "cost", "Buying " + (priced < q.items.length ? "the priced items" : "everything") + " on the Free Market: about " + meso(cost) + " mesos."));
+      box.appendChild(d);
+    });
+    if (shown_.length > 300) box.appendChild(el("p", "note", "Showing the first 300. Search or set your level to narrow it down."));
+    // shopping list for the quests you're on
+    var mine = Q.filter(function (q) { return MINE[q.name]; }), L = $("list"); L.textContent = "";
+    if (!mine.length) { L.hidden = true; return; }
+    L.hidden = false; L.appendChild(el("h2", null, "Your shopping list · " + mine.length + " quest" + (mine.length === 1 ? "" : "s")));
+    var need = {}; mine.forEach(function (q) { q.items.forEach(function (x) { need[x[0]] = (need[x[0]] || 0) + x[1]; }); });
+    var tb2 = el("table"), tot = 0;
+    Object.keys(need).sort().forEach(function (n) { var tr = el("tr"); tr.appendChild(itemCell(n)); var p = PRICE[n]; var c = el("td", "n", "×" + need[n].toLocaleString()); if (p) { c.appendChild(el("small", null, meso(p * need[n]))); tot += p * need[n]; } tr.appendChild(c); tb2.appendChild(tr); });
+    L.appendChild(tb2); if (tot) L.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy what's priced."));
+  }
+  Promise.all([fetch(LIVE + "data/itemguide.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
+               fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })]).then(function (res) {
+    G = res[0].items || {}; var byQ = {};
+    Object.keys(G).forEach(function (item) { (G[item].q || []).forEach(function (q) {
+      var k = q[0]; var o = byQ[k] || (byQ[k] = { name: q[0], lvl: q[1], giver: q[3], region: q[4], rep: q[5], items: [] });
+      o.items.push([item, q[2]]); if (q[1] > o.lvl) o.lvl = q[1];
+    }); PAGES[item] = 1; });
+    Q = Object.keys(byQ).map(function (k) { return byQ[k]; }).sort(function (a, b) { return a.lvl - b.lvl || a.name.localeCompare(b.name); });
+    ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) PRICE[r.item] = r.typ; });
+    var regions = {}; Q.forEach(function (q) { if (q.region) regions[q.region] = 1; });
+    Object.keys(regions).sort().forEach(function (r) { var o = el("option", null, r); o.value = r; $("rg").appendChild(o); });
+    try { var lv0 = localStorage.getItem("fm-quest-lv"); if (lv0) $("lv").value = lv0; } catch (e) {}
+    var m = /[?&#]q=([^&]+)/.exec(location.href); if (m) $("s").value = decodeURIComponent(m[1]);
+    render();
+  }).catch(function () { $("count").textContent = "Couldn't load the quest list. Try again in a minute."; });
+  ["s", "rg", "mine"].forEach(function (id) { $(id).addEventListener("input", render); });
+  $("lv").addEventListener("input", function () { try { localStorage.setItem("fm-quest-lv", $("lv").value); } catch (e) {} render(); });
+})();
+</script>
+</body></html>

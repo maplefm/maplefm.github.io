@@ -1064,6 +1064,7 @@ dialog h3 { color: var(--accent-ink); }
         <button type="button" id="m-contrib">Contribute and earn</button>
         <button type="button" id="m-short">Chat shortcuts</button>
         <button type="button" id="m-items">All item prices</button>
+        <button type="button" id="m-quests">Quest helper</button>
         <button type="button" id="m-bot">Add /price to Discord</button>
         <button type="button" id="m-acct">Sign in with Discord to keep your settings</button>
         <button type="button" id="m-club">Club member sign in</button>
@@ -1247,7 +1248,7 @@ dialog h3 { color: var(--accent-ink); }
   <div class="scrim" id="scrim"></div>
 
 </div>
-<footer class="sitefoot"><nav class="fnav"><a href="index.html">Price board</a> · <a href="contribute.html">Contribute and Earn</a> · <a href="report.html">Market close</a> · <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Discord</a> · <a href="terms.html">Terms of Use</a> · <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">☕ Support</a></nav>
+<footer class="sitefoot"><nav class="fnav"><a href="index.html">Price board</a> · <a href="quests.html">Quest helper</a> · <a href="contribute.html">Contribute and Earn</a> · <a href="report.html">Market close</a> · <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Discord</a> · <a href="terms.html">Terms of Use</a> · <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">☕ Support</a></nav>
 Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON. MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" target="_blank" rel="noopener">maplestory.io</a> · character pictures from <a href="https://classicrank.com" target="_blank" rel="noopener">classicrank.com</a> · prices scanned by our contributors and from public streams.<br>
 Price data © Club FM. No scraping, bulk copying or AI training without permission. See the <a href="terms.html">Terms of Use</a>.</footer>
 
@@ -4133,7 +4134,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   });
   $("m-contrib").addEventListener("click", function () { closeMenus(); location.href = "contribute.html"; });
   $("m-short").addEventListener("click", function () { closeMenus(); location.href = "shortcuts.html"; });
-  $("m-items").addEventListener("click", function () { closeMenus(); location.href = "items/"; });
+  $("m-quests").addEventListener("click", function () { closeMenus(); location.href = "quests.html"; });
   $("m-bot").addEventListener("click", function () { closeMenus(); location.href = "bot/"; });
   document.addEventListener("DOMContentLoaded", function () { var lb = $("legendbox"), x = $("legendx"); if (!lb) return; try { if (localStorage.getItem("fm-legend") !== "open") lb.classList.add("closed"); } catch (e) { lb.classList.add("closed"); }
     x.textContent = lb.classList.contains("closed") ? "+" : "–";
