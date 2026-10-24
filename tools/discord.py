@@ -652,11 +652,20 @@ def job_covmap(data_dir, state_path):
     rooms = {}
     for r, c in today: rooms[r] = rooms.get(r, 0) + 1
     gaps = [f"FM{n}" for n in range(1, ROOMS + 1) if rooms.get(f"FM{n}", 0) < CHANNELS // 4]
-    desc = (f"**{len(fresh)}** spots read in the last 2 hours, **{len(today)} of {total}** today ({len(today) * 100 // total}%).")
+    sp = lambda n: f"{n} spot" + ("" if n == 1 else "s")
+    desc = (f"**{sp(len(fresh))}** read in the last 2 hours, **{len(today)} of {total}** today ({len(today) * 100 // total}%).")
     fields = []
     top = sorted(by.items(), key=lambda kv: -len(kv[1]))[:6]
-    if top: fields.append({"name": "Last 2 hours", "value": "\n".join(f"{plain(w, 24)} · {len(s)} spots" for w, s in top)[:1000], "inline": True})
-    if gaps: fields.append({"name": "Needs scanning", "value": (", ".join(gaps) if len(gaps) <= 12 else f"{len(gaps)} of {ROOMS} rooms barely touched today")[:1000], "inline": True})
+    if top: fields.append({"name": "Last 2 hours", "value": "\n".join(f"{plain(w, 24)} · {sp(len(s))}" for w, s in top)[:1000], "inline": True})
+    if gaps:
+        if len(gaps) <= 12: need = ", ".join(gaps)
+        else:
+            # most of the market is dark: point at whole channels nobody has opened today, the easiest place to start
+            seen = {c for _, c in today}
+            empty = [c for c in range(1, CHANNELS + 1) if c not in seen]
+            need = ("Most of the market. " if len(gaps) == ROOMS else f"{len(gaps)} of {ROOMS} rooms. ") + \
+                   (f"No reads yet on channels {', '.join(str(c) for c in empty[:8])}" + (" and more" if len(empty) > 8 else "") + "." if empty else "Every channel has a few reads; fill in the dark rooms.")
+        fields.append({"name": "Needs scanning", "value": need[:1000], "inline": True})
     emb = {"title": "Coverage map", "description": desc, "color": BLUE, "fields": fields, "image": {"url": "attachment://coverage.png"},
            "url": f"{SITE}/contribute.html", "footer": {"text": "Pick a dark spot and run FM Watcher there."}}
     if post_file("covmap", png, "coverage.png", [emb]):
