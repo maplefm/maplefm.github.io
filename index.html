@@ -3339,6 +3339,29 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     [t0, (t0 + t1) / 2, t1].forEach(function (t, k) { svg.appendChild(txt(k === 0 ? pl : k === 1 ? (pl + W - pr) / 2 : W - pr, Hh - 6, new Date(t).toLocaleString("en-US", multi ? { month: "short", day: "numeric" } : { hour: "numeric", minute: "2-digit" }), { "text-anchor": k === 0 ? "start" : k === 1 ? "middle" : "end" })); });
     return svg;
   }
+  // Scrolls: what one success costs at each tier. A 10% scroll at 30K is about 300K per success; a 60% at 120K
+  // about 200K. The cheapest way to land one is marked. Only tiers with a typical price count.
+  function scrollMath(name) {
+    var sp = splitTier(name); if (!sp.t || !D) return null;
+    var RATE = { Lesser: 100, Intermediate: 60, Greater: 10 }, rows = [];
+    ["Lesser", "Intermediate", "Greater"].forEach(function (t) { var it = D.byName[sp.b + ": " + t]; if (it && it.typ) rows.push({ t: t, p: it.typ, r: RATE[t], per: it.typ * 100 / RATE[t], it: it }); });
+    if (!rows.length) return null;
+    var best = rows.reduce(function (a, b) { return b.per < a.per ? b : a; });
+    var sec = el("div", "subw"); var h = el("h4"); h.appendChild(document.createTextNode("Cost per success")); h.appendChild(el("small", null, "price ÷ success rate")); sec.appendChild(h);
+    var tb = el("table"); var hr = el("tr"); ["Scroll", "Price", "Per success"].forEach(function (x) { hr.appendChild(el("th", null, x)); }); tb.appendChild(hr);
+    rows.forEach(function (r) {
+      var tr = el("tr"); var c0 = el("td"); c0.appendChild(el("b", null, r.r + "%")); if (r.t === sp.t) c0.appendChild(el("em", null, " this one")); tr.appendChild(c0);
+      var c1 = el("td"); c1.appendChild(money(r.p)); tr.appendChild(c1);
+      var c2 = el("td"); c2.appendChild(money(Math.round(r.per))); if (r === best && rows.length > 1) c2.appendChild(el("span", "tg ok", "cheapest")); tr.appendChild(c2);
+      if (r.t !== sp.t) { tr.className = "jump"; tr.title = "Open the " + r.r + "% scroll"; tr.addEventListener("click", function () { pick(r.it.item); }); }
+      tb.appendChild(tr);
+    });
+    sec.appendChild(tb);
+    var me = rows.filter(function (r) { return r.t === sp.t; })[0];
+    if (me && me.r < 100) sec.appendChild(el("p", "note", "On average you'd use " + Math.round(100 / me.r) + " of these for one success" + ", and every failed one still uses up a slot."));
+    return sec;
+  }
+
   // ---- item guide: what quests ask for this item, where it drops, how it's crafted, who sells it (data/itemguide.json)
   var GUIDE = null, guideAsked = false;
   function loadGuide() {
@@ -3466,6 +3489,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     [[i.lastSale ? i.lastSale.u : 0, "Last sale"], [i.last3, "Last 3 avg"], [null, "Sales" + (i.saleDays ? " · " + i.saleDays + (i.saleDays === 1 ? " day" : " days") : ""), i.salesN]].forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "None")); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
     ip.appendChild(st);
     if (i.equip && (i.bands || i.rolls.length)) ip.appendChild(rollBox(i));
+    var smx = scrollMath(i.item); if (smx) ip.appendChild(smx);
     var lt = el("div", "ltabs");
     var seenS = {}, buyRows = i.buy.filter(function (x) { if (seenS[x.s]) return false; seenS[x.s] = 1; return true; });
     var bb = el("button"); bb.type = "button"; bb.appendChild(document.createTextNode("Where to buy")); bb.appendChild(el("em", null, buyRows.length)); bb.setAttribute("aria-selected", state.list === "buy");
