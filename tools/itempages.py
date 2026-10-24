@@ -53,7 +53,8 @@ h1{margin:0;font-size:1.6rem;line-height:1.15}.sub{color:var(--muted);font-weigh
 table{width:100%;border-collapse:collapse;margin-top:6px}td,th{padding:6px 8px;border-bottom:1px solid var(--line2);text-align:left;font-size:.92rem}th{color:var(--muted);font-size:.75rem;text-transform:uppercase}
 h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink)}
 .foot{color:var(--muted);font-size:.82rem;margin-top:22px}
-@media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}"""
+@media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
+td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}"""
 
 
 def page(title, desc, canon, body, ld=None):
@@ -71,11 +72,40 @@ def page(title, desc, canon, body, ld=None):
 NX = {}
 
 
+def guide_html(name, g, page_of):
+    """quests, drops, crafting and shops for an item, as plain HTML (data/itemguide.json)"""
+    if not g: return ""
+    def link(n, c=None):
+        t = html.escape(n) + (f" ×{c:,}" if c is not None else "")
+        return f'<a href="/item/{page_of[n]}/">{t}</a>' if n in page_of else t
+    out = ""
+    if g.get("q"):
+        tot = sum(q[2] for q in g["q"])
+        rows = "".join(f"<tr><td><b>{html.escape(q[0])}</b><br><small>{html.escape(' · '.join(x for x in [('from ' + q[3]) if q[3] else '', q[4], f'Lv {q[1]}+' if q[1] else '', 'repeatable' if q[5] else ''] if x))}</small></td><td class=n>×{q[2]:,}</td></tr>" for q in g["q"])
+        out += f'<h2>Quests that need {html.escape(shown(name))}</h2><p class="note">{len(g["q"])} quest{"s" if len(g["q"]) != 1 else ""}{f", {tot:,} in all" if len(g["q"]) > 1 else ""}.</p><table>{rows}</table>'
+    get = ""
+    if g.get("d"):
+        get += "<table>" + "".join(f"<tr><td><b>{html.escape(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>Dropped by{(' · ' + html.escape(d[4])) if d[4] else ''}{' · while on the quest' if d[5] else ''}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
+    for c in g.get("c") or []:
+        ing = ", ".join(link(x[0], x[1]) for x in c[2]) + (", " + link(c[5][0], c[5][1]) if c[5] else "")
+        get += f'<p class="rc"><b>Craft: {html.escape(c[0])} Lv {c[1]}</b>{f" · makes {c[4]:,}" if c[4] > 1 else ""}: {ing}{f" · {full(c[3])} mesos" if c[3] else ""}</p>'
+    if g.get("s"):
+        get += "<table>" + "".join(f"<tr><td><b>{html.escape(x[0])}</b><br><small>Sold by NPC{(' · ' + html.escape(x[1])) if x[1] else ''}</small></td><td class=n>{full(x[2])} {html.escape(x[3] or 'mesos')}</td></tr>" for x in g["s"]) + "</table>"
+    for x in g.get("r") or []:
+        get += f'<p class="rc">From {html.escape(x[0])}{f" ({x[1]}%)" if x[1] is not None else ""}{(" · during " + html.escape(x[2])) if x[2] else ""}</p>'
+    if get: out += f"<h2>Where to get {html.escape(shown(name))}</h2>{get}"
+    if g.get("u"): out += f'<p class="note">Used in {g["u"]} crafting recipe{"s" if g["u"] != 1 else ""}.</p>'
+    if out: out += '<p class="note src">Quests from the game data. Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0). Drop rates are measured by players.</p>'
+    return out
+
+
 def main():
     global NX
     try: NX = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "nx_prices.json")))["prices"]
     except Exception: NX = {}
     summ_path, out = sys.argv[1], sys.argv[2]
+    try: GUIDE = json.load(open(sys.argv[3], encoding="utf-8"))["items"] if len(sys.argv) > 3 else {}
+    except Exception: GUIDE = {}
     summ = json.load(open(summ_path, encoding="utf-8"))
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
     ids = {r[0]: r[1] for r in db}
@@ -86,6 +116,9 @@ def main():
     for r in rows: bycat.setdefault(r.get("cat") or "Other", []).append(r)
     for c in bycat.values(): c.sort(key=lambda r: -(r.get("vol") or 0))
     made = []
+    page_of = {r["item"]: slug(r["item"]) for r in rows}
+    extra = [n for n, g in GUIDE.items() if n not in page_of and n in ids and (g.get("q") or g.get("c") or g.get("d"))]
+    for n in extra: page_of[n] = slug(n)
     for r in rows:
         name, s = r["item"], slug(r["item"])
         nm = shown(name); cat = CATS.get(r.get("cat"), r.get("cat") or "Item")
@@ -110,6 +143,7 @@ def main():
 {f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {f'<h2>Typical price by day</h2><table><tr><th>Day</th><th>Typical, mesos</th></tr>{dtab}</table>' if dtab else ''}
 <p style="margin-top:16px"><a href="/#item={html.escape(name)}">See live listings, rolls and recent sales for {html.escape(nm)} on the board →</a></p>
+{guide_html(name, GUIDE.get(name), page_of)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
 <p class="note" id="upd">Updated {when}.</p></div>
 <script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js" defer></script>"""
@@ -120,12 +154,23 @@ def main():
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld))
         made.append((s, nm, r))
+    for name in extra:
+        s = slug(name); nm = shown(name); g = GUIDE[name]
+        icon = f"https://maplestory.io/api/MCW/1/item/{ids[name]}/icon"
+        qn = len(g.get("q") or [])
+        desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
+        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
+<p class="note">No Free Market price yet: nobody has seen one sell. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
+{guide_html(name, g, page_of)}</div>"""
+        d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} · quests, drops, crafting · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body))
+        made.append((s, nm, None))
     # the index: every item by category, biggest markets first
     secs = ""
     for cat in sorted(bycat, key=lambda c: -sum(x.get("vol") or 0 for x in bycat[c])):
         items = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in bycat[cat])
         secs += f'<h2>{html.escape(CATS.get(cat, cat))}</h2><div class="rel">{items}</div>'
-    idx = f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub">{len(made)} items priced from watched Free Market sales · updated {when}</p>{secs}</div>'
+    idx = f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub">{len(rows)} items priced from watched Free Market sales · updated {when}</p>{secs}</div>'
     os.makedirs(os.path.join(out, "items"), exist_ok=True)
     open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx))
     # remove pages for items that dropped out, so stale prices don't linger in search
