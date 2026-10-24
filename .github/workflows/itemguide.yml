@@ -1,0 +1,34 @@
+name: Item guide
+# Quests, drops, crafting and NPC shops for every item, shown at the bottom of each item card. Daily, so quests
+# added to the game or the wiki show up on the board the next morning.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/itemguide.py, .github/workflows/itemguide.yml]
+  schedule:
+    - cron: "41 9 * * *"
+concurrency: itemguide
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin live
+          git worktree add -q /tmp/live origin/live
+          mkdir -p /tmp/live/data
+          python3 tools/itemguide.py /tmp/itemguide.json /tmp/live/data/itemdb.json
+          # never replace a good guide with an empty one when a source is down
+          python3 -c "import json,sys; d=json.load(open('/tmp/itemguide.json')); sys.exit(0 if d['n'] >= 200 else 1)"
+          cp /tmp/itemguide.json /tmp/live/data/itemguide.json
+          cd /tmp/live
+          grep -q '^!data/itemguide.json$' .gitignore || echo '!data/itemguide.json' >> .gitignore
+          git add .gitignore data/itemguide.json
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Refresh the item guide (quests, drops, crafting, shops)"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
