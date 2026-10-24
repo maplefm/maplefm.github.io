@@ -31,4 +31,6 @@ Stop it by closing the window.
 
 Reviewing your own data
 Double-click export.bat. It writes my_scans.csv in this folder with every listing this watcher has seen.
+
+Your scan stats: double-click stats.bat any time to see new listings, shops and sales caught in the last hour and today, with your pace per active hour. The watcher window also prints the same line at the top of every hour.
 Open it in Excel or Google Sheets.

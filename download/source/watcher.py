@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.4"
+VERSION = "2026.10.24.5"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -356,6 +356,10 @@ class Store:
             if "cut off" in r["i"] and r["i"] in full:
                 r["i"] = full[r["i"]]; r["known"] = True
         with self.lock:
+            if not when:                    # minutes spent reading shops, for the hourly scan stats (kept two days)
+                mins = self.d.setdefault("mins", {}); m = str(int(now // 60)); mins[m] = mins.get(m, 0) + 1
+                if len(mins) > 3000:
+                    for k in sorted(mins)[:-2880]: del mins[k]
             seller = self._seller(res["seller"])
             # copies of the same item at the same price: count the sold ones and the open ones separately
             groups = {}
@@ -810,6 +814,34 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
     state["started"] = True
     return True
 
+def scan_stats(store, now=None):
+    """New listings, shops and sales caught, for the last hour and for today, plus the pace per active hour.
+    Active time is minutes in which a shop was actually read, so AFK and travel don't count against you."""
+    now = now or time.time(); today = datetime.date.fromtimestamp(now).isoformat()
+    with store.lock:
+        shop = list(store.d.get("shop", {}).items()); mins = dict(store.d.get("mins", {}))
+    def window(t0):
+        rows = [(k, o) for k, o in shop if o.get("first", 0) >= t0]
+        sellers = {json.loads(k)[1] for k, o in rows}
+        sales = sum(o.get("ns", 0) + o.get("sb", 0) for k, o in rows)
+        active = sum(1 for m in mins if int(m) * 60 >= t0)
+        return {"listings": len(rows), "shops": len(sellers), "sales": sales, "active": active,
+                "pace": round(len(rows) / (active / 60)) if active >= 5 else None}
+    midnight = time.mktime(datetime.date.fromtimestamp(now).timetuple())
+    return {"hour": window(now - 3600), "today": window(midnight), "at": now}
+def stats_text(st):
+    def line(w):
+        return (f"{w['listings']:,} new listings · {w['shops']:,} shops · {w['sales']:,} sales caught · "
+                f"{w['active']} active min" + (f" · {w['pace']:,} listings per active hour" if w["pace"] else ""))
+    return "last hour: " + line(st["hour"]) + "\n         today:     " + line(st["today"])
+def show_stats(cfg):
+    store = Store(os.path.join(HERE, "watcher_data_v2.json"), cfg["keep_days"])
+    st = scan_stats(store)
+    print("FM Watcher scan stats, " + datetime.datetime.now().strftime("%b %d %I:%M %p"))
+    print("  Last hour: " + stats_text(st).split("\n")[0][len("last hour: "):])
+    print("  Today:     " + stats_text(st).split("\n")[1].strip()[len("today:"):].strip())
+    print("  Active minutes count only time spent reading shops. The site's Scanner Ranks show your all-time totals.")
+
 def export_csv(cfg):
     """Write everything this watcher has seen to my_scans.csv, one row per listing, for Excel or Google Sheets."""
     import csv
@@ -1110,6 +1142,8 @@ def main():
         snapshot(cfg); return
     if "--export" in sys.argv:
         export_csv(cfg); return
+    if "--stats" in sys.argv:
+        show_stats(cfg); return
     link_account(cfg)
     import mss
     store = Store(os.path.join(HERE, "watcher_data_v2.json"), cfg["keep_days"])
@@ -1194,6 +1228,11 @@ def main():
                         h = quick_hash(chat, (80, 48))
                         if h != last_chat_hash and not jobs.full():
                             last_chat_hash = h; jobs.put(("chat", chat, None))
+                if int(t // 3600) != getattr(main, "stats_hour", None):
+                    if getattr(main, "stats_hour", None) is not None:
+                        try: log("scan stats, " + stats_text(scan_stats(store)))
+                        except Exception as e: log("stats error:", e)
+                    main.stats_hour = int(t // 3600)
                 if store.dirty and t - last_save > 30:
                     store.dirty = False; store.save(); last_save = t
                 if t - check_update.last > 900:
