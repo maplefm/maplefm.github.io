@@ -3530,9 +3530,11 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     // 4. anything under its NPC price always counts (profit from selling to the store), from 1K up;
     // 5. more than 85% under typical is usually a misread or a spot holder: listed with a "check" tag, never pinged.
     var now = Date.now(), WIN = 10 * 6e4, WEEK = 7 * DAY;
-    var hot = [];
+    var hot = [], one = {};
     D.L.forEach(function (l) {
       if (l.so || l.b || l.spot || now - l.t > WIN || !l.tx) return;
+      // a shop with several copies open is one listing in the alert, not one line per copy
+      var ok1 = String(l.s).toLowerCase() + "|" + l.i + "|" + l.u + "|" + (l.q || 1); if (one[ok1]) return; one[ok1] = 1;
       var i = D.byName[l.i]; if (!i) return;
       var q = l.q || 1, vp = vendor(l.i), npcGain = vp > l.u ? (vp - l.u) * q : 0;
       var sold7 = i.sales.filter(function (x) { return now - x.t <= WEEK; }).length;
