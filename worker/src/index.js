@@ -70,6 +70,8 @@ async function route(req, env, url) {
   if (p === "/admin" && req.method === "GET") return admin(req, env);
   if (p === "/admin/note" && req.method === "POST") return adminNote(req, env);
   if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
+  if (p === "/admin/channels" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await channelAccess(env), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/voice" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await privateVoice(req, env)); }
   if (p === "/kofi" && req.method === "POST") return kofi(req, env);
   if (p === "/admin/setup-commands" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await setupCommands(env)); }
   if (p === "/admin/setup-roles" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await setupRoles(env)); }
@@ -467,6 +469,53 @@ async function dataLive(req, env) {
     await w.write(enc.encode("}")); await w.close();
   })();
   return new Response(readable, { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } });
+}
+
+// ---------------------------------------------------------------- server channel access (admin)
+// Who can see each channel: the server's roles and members run through Discord's permission rules
+// (base role permissions, Administrator, then the channel's @everyone, role and member overwrites).
+const P_ADMIN = 8n, P_VIEW = 1024n, P_CONNECT = 1048576n, P_SPEAK = 2097152n, P_SEND = 2048n;
+async function channelAccess(env) {
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
+  const get = async (u) => { const r = await fetch(DISCORD + u, { headers: H }); return r.ok ? r.json() : { error: r.status, body: (await r.text()).slice(0, 200) }; };
+  const [chans, roles, guild] = await Promise.all([get("/guilds/" + GUILD + "/channels"), get("/guilds/" + GUILD + "/roles"), get("/guilds/" + GUILD)]);
+  let members = await get("/guilds/" + GUILD + "/members?limit=1000");
+  if (!Array.isArray(chans) || !Array.isArray(roles)) return { error: "discord", chans, roles };
+  const memberErr = Array.isArray(members) ? null : members; if (!Array.isArray(members)) members = [];
+  const rp = {}, rn = {}; for (const r of roles) { rp[r.id] = BigInt(r.permissions); rn[r.id] = r.name; }
+  const ev = GUILD, owner = guild && guild.owner_id;
+  const parent = {}; for (const c of chans) parent[c.id] = c;
+  const canSee = (c, roleIds, uid) => {
+    if (uid && uid === owner) return true;
+    let base = rp[ev] || 0n; for (const id of roleIds) base |= rp[id] || 0n;
+    if (base & P_ADMIN) return true;
+    const ow = c.permission_overwrites || [];
+    const e = ow.find((o) => o.id === ev); if (e) { base &= ~BigInt(e.deny); base |= BigInt(e.allow); }
+    let a = 0n, d = 0n; for (const o of ow) if (o.type === 0 && o.id !== ev && roleIds.includes(o.id)) { a |= BigInt(o.allow); d |= BigInt(o.deny); }
+    base &= ~d; base |= a;
+    const m = uid && ow.find((o) => o.type === 1 && o.id === uid); if (m) { base &= ~BigInt(m.deny); base |= BigInt(m.allow); }
+    return !!(base & P_VIEW);
+  };
+  const out = chans.filter((c) => c.type !== 4).sort((a, b) => ((parent[a.parent_id] || {}).position || 0) - ((parent[b.parent_id] || {}).position || 0) || a.position - b.position).map((c) => {
+    const everyone = canSee(c, [], null);
+    const rolesIn = roles.filter((r) => r.id !== ev && canSee(c, [r.id], null)).map((r) => r.name);
+    const who = members.filter((m) => canSee(c, m.roles || [], m.user.id)).map((m) => (m.nick || m.user.global_name || m.user.username) + (m.user.bot ? " (bot)" : ""));
+    return { name: c.name, type: c.type === 2 ? "voice" : c.type === 0 ? "text" : c.type === 5 ? "announcement" : c.type === 15 ? "forum" : String(c.type), category: (parent[c.parent_id] || {}).name || "", everyone, roles: rolesIn, members: everyone ? null : who };
+  });
+  return { members: members.length, memberErr, channels: out };
+}
+// a voice channel only the listed members (and admins) can see and join
+async function privateVoice(req, env) {
+  let b = null; try { b = await req.json(); } catch (e) {}
+  const ids = (b && Array.isArray(b.users) ? b.users : []).filter((x) => /^\d{15,21}$/.test(String(x))).slice(0, 10);
+  const name = String((b && b.name) || "private").slice(0, 60);
+  if (!ids.length) return { error: "no users" };
+  const allow = String(P_VIEW | P_CONNECT | P_SPEAK | P_SEND);
+  const body = { name, type: 2, permission_overwrites: [{ id: GUILD, type: 0, deny: String(P_VIEW | P_CONNECT), allow: "0" }].concat(ids.map((id) => ({ id, type: 1, allow, deny: "0" }))) };
+  if (b && b.parent) body.parent_id = String(b.parent);
+  const r = await fetch(DISCORD + "/guilds/" + GUILD + "/channels", { method: "POST", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  return r.ok ? { ok: true, id: j.id, name: j.name } : { error: r.status, body: j };
 }
 
 // ---------------------------------------------------------------- timestamp marks
