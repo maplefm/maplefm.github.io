@@ -1,0 +1,26 @@
+name: Coverage map
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 */2 * * *"
+concurrency: covmap
+permissions:
+  contents: read
+jobs:
+  covmap:
+    runs-on: ubuntu-latest
+    env:
+      DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+      DISCORD_HOOK_SCANNERS: ${{ secrets.DISCORD_HOOK_SCANNERS }}
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip install -q pillow
+          git config --global user.name maplefm
+          git config --global user.email maplefm@users.noreply.github.com
+          git clone -q --depth 1 -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
+          cd /tmp/arch
+          python3 "$GITHUB_WORKSPACE/tools/discord.py" covmap data data/discord_covmap.json || true
+          git add data/discord_covmap.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then git commit -q -m "Coverage map posted"; for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done; fi

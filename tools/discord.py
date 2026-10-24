@@ -33,6 +33,7 @@ def hooks():
     except Exception: h = {}
     if os.environ.get("DISCORD_HOOK_DEALS"): h["mega_deals"] = os.environ["DISCORD_HOOK_DEALS"]   # the private #mega-deals channel
     if os.environ.get("DISCORD_HOOK_DIGEST"): h["digest"] = os.environ["DISCORD_HOOK_DIGEST"]     # the weekly card in #announcements
+    if os.environ.get("DISCORD_HOOK_SCANNERS"): h["covmap"] = os.environ["DISCORD_HOOK_SCANNERS"]   # the coverage map in #scanners
     if h.get("market_close"): h["coverage"] = h["market_close"]   # both land in #nightly-report since the coverage channel was folded in
     return h
 
@@ -576,10 +577,95 @@ def job_members(summary_path, feed_path, state_path):
     if post("mega_deals", embeds=[emb]):
         st["members_week"] = wk; save(state_path, st)
 
+# ---------------------------------------------------------------- coverage map, every two hours
+def post_file(kind, png, fname, embeds):
+    """a webhook post with one picture attached; the embed shows it with attachment://fname"""
+    url = hooks().get(kind)
+    if not url: return False
+    b = "----clubfm" + str(int(time.time() * 1000))
+    payload = json.dumps({"allowed_mentions": {"parse": []}, "embeds": embeds[:10]})
+    body = (f"--{b}\r\nContent-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n{payload}\r\n"
+            f"--{b}\r\nContent-Disposition: form-data; name=\"files[0]\"; filename=\"{fname}\"\r\nContent-Type: image/png\r\n\r\n").encode() + png + f"\r\n--{b}--\r\n".encode()
+    req = urllib.request.Request(url + "?wait=true", body, {"Content-Type": "multipart/form-data; boundary=" + b, "User-Agent": "maplefm.gg"})
+    for i in range(3):
+        try:
+            urllib.request.urlopen(req, timeout=30).read(); return True
+        except urllib.error.HTTPError as e:
+            if e.code == 429: time.sleep(2 + i * 3); continue
+            print("discord", kind, e.code, e.read()[:200]); return False
+        except Exception as e:
+            print("discord", kind, e); time.sleep(2)
+    return False
+
+def covmap_png(fresh, today, now_label):
+    """FM rooms down the side, channels across: bright for read in the last two hours, soft for earlier today."""
+    from PIL import Image, ImageDraw, ImageFont
+    cw, chh, left, top = 22, 22, 56, 44
+    W, H = left + CHANNELS * cw + 12, top + ROOMS * chh + 40
+    bg, empty, soft, bright, ink, dim = (30, 31, 36), (52, 54, 61), (52, 120, 86), (87, 242, 135), (235, 236, 240), (150, 152, 160)
+    im = Image.new("RGB", (W, H), bg); d = ImageDraw.Draw(im)
+    try:
+        f = ImageFont.truetype("DejaVuSans-Bold.ttf", 12); fs = ImageFont.truetype("DejaVuSans.ttf", 11); ft = ImageFont.truetype("DejaVuSans-Bold.ttf", 14)
+    except Exception:
+        f = fs = ft = ImageFont.load_default()
+    d.text((left, 10), "FM coverage  " + now_label, fill=ink, font=ft)
+    for c in range(1, CHANNELS + 1):
+        if c == 1 or c % 5 == 0: d.text((left + (c - 1) * cw + 4, top - 16), str(c), fill=dim, font=fs)
+    for r in range(1, ROOMS + 1):
+        y = top + (r - 1) * chh
+        d.text((8, y + 4), f"FM{r}", fill=ink, font=f)
+        for c in range(1, CHANNELS + 1):
+            k = (f"FM{r}", c); col = bright if k in fresh else soft if k in today else empty
+            x = left + (c - 1) * cw + (2 if c > 20 else 0)
+            d.rounded_rectangle([x + 1, y + 1, x + cw - 2, y + chh - 2], radius=4, fill=col)
+    ly = top + ROOMS * chh + 12
+    for i, (col, lab) in enumerate([(bright, "last 2 hours"), (soft, "earlier today"), (empty, "not read today")]):
+        x = left + i * 150; d.rounded_rectangle([x, ly, x + 14, ly + 14], radius=3, fill=col); d.text((x + 20, ly), lab, fill=dim, font=fs)
+    import io
+    buf = io.BytesIO(); im.save(buf, "PNG", optimize=True); return buf.getvalue()
+
+def job_covmap(data_dir, state_path):
+    st = load(state_path, {})
+    now = time.time()
+    if now - (st.get("covmap_at") or 0) < 100 * 60: return
+    today_s = datetime.datetime.now(ET).date().isoformat()
+    fresh, today, by = set(), set(), {}
+    for who, d in scan_docs(data_dir):
+        if "chat" in str(d.get("src", "")): continue
+        try: at = datetime.datetime.fromisoformat(d["at"]).timestamp()
+        except Exception: continue
+        for r in d["rows"]:
+            t = int(r.get("t") or at)
+            if et_day(t) != today_s: continue
+            room = str(r.get("r") or "")
+            if not (room.startswith("FM") and room[2:].isdigit() and 1 <= int(room[2:]) <= ROOMS): continue
+            try: c = int(r.get("c") or 0)
+            except Exception: continue
+            if not 1 <= c <= CHANNELS: continue
+            today.add((room, c))
+            if now - t <= 2 * 3600: fresh.add((room, c)); by.setdefault(who, set()).add((room, c))
+    if not today: return
+    total = ROOMS * CHANNELS
+    label = datetime.datetime.now(ET).strftime("%b %d, %I:%M %p ET").replace(" 0", " ")
+    try: png = covmap_png(fresh, today, label)
+    except Exception as e: print("covmap image", e); return
+    rooms = {}
+    for r, c in today: rooms[r] = rooms.get(r, 0) + 1
+    gaps = [f"FM{n}" for n in range(1, ROOMS + 1) if rooms.get(f"FM{n}", 0) < CHANNELS // 4]
+    desc = (f"**{len(fresh)}** spots read in the last 2 hours, **{len(today)} of {total}** today ({len(today) * 100 // total}%).")
+    fields = []
+    top = sorted(by.items(), key=lambda kv: -len(kv[1]))[:6]
+    if top: fields.append({"name": "Last 2 hours", "value": "\n".join(f"{plain(w, 24)} · {len(s)} spots" for w, s in top)[:1000], "inline": True})
+    if gaps: fields.append({"name": "Needs scanning", "value": (", ".join(gaps) if len(gaps) <= 12 else f"{len(gaps)} of {ROOMS} rooms barely touched today")[:1000], "inline": True})
+    emb = {"title": "Coverage map", "description": desc, "color": BLUE, "fields": fields, "image": {"url": "attachment://coverage.png"},
+           "url": f"{SITE}/contribute.html", "footer": {"text": "Pick a dark spot and run FM Watcher there."}}
+    if post_file("covmap", png, "coverage.png", [emb]):
+        st["covmap_at"] = int(now); save(state_path, st)
+
 
 if __name__ == "__main__":
     job, a = sys.argv[1], sys.argv[2:]
     if not hooks():
         print("DISCORD_HOOKS not set, skipping"); sys.exit(0)
     if job == "digest": job_news(a[0], None, True)
-    else: {"sales": job_sales, "deals": job_deals, "ranks": job_ranks, "report": job_report, "coverage": job_coverage, "news": job_news, "note": job_note, "weekly": job_weekly, "members": job_members}[job](*a)
+    else: {"sales": job_sales, "deals": job_deals, "ranks": job_ranks, "report": job_report, "coverage": job_coverage, "news": job_news, "note": job_note, "weekly": job_weekly, "members": job_members, "covmap": job_covmap}[job](*a)
