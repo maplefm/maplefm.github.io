@@ -442,6 +442,10 @@ async function same(a, b) {
 async function dataLive(req, env) {
   const id = await sessionId(req, env);
   if (!id) return json({ error: "sign in" }, 401, { "Cache-Control": "no-store" });
+  // the listings behind the deals are for Club and Mega Deals holders only (Mega Deals is earned at MEGA_AT sales
+  // caught or the $100 Ko-fi tier); everyone else gets the price-only board
+  const acct = await env.ACCOUNTS.get("acct:" + id, "json");
+  if (!acct || acct.locked || !(await isClub(acct, env))) return json({ error: "club" }, 403, { "Cache-Control": "no-store" });
   const ip = req.headers.get("CF-Connecting-IP") || "";
   if (overLimit("a:" + id, 30, 600) || overLimit("i:" + ip, 60, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
   if (env.RL) { try { const ok = await env.RL.limit({ key: "a:" + id }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
@@ -666,7 +670,7 @@ async function syncRoles(env) {
   if (!Array.isArray(roles)) return;
   const byName = {}; for (const r of roles) byName[r.name.toLowerCase()] = r.id;
   const tierIds = TIERS.map(t => byName[t[1].toLowerCase()]).filter(Boolean);
-  const crownId = byName["crown"], megaId = byName["mega deals"], membersId = byName["members"];
+  const crownId = byName["crown"], megaId = byName["mega deals"];
   const ranks = await (await fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/ranks.json", { cf: { cacheTtl: 300 } })).json().catch(() => null);
   if (!ranks || !ranks.who) return;
   const sales = {}; for (const [n, days] of Object.entries(ranks.who)) { let t = 0; for (const v of Object.values(days)) t += v[0] || 0; const k = n.toLowerCase(); sales[k] = Math.max(sales[k] || 0, t); }
@@ -681,11 +685,6 @@ async function syncRoles(env) {
       const mr = await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + a.id, { headers: H });
       if (mr.ok) { const m = await mr.json(); a.roles = Array.isArray(m.roles) ? m.roles : []; a.inGuild = true; await env.ACCOUNTS.put(k.name, JSON.stringify(a)); }
       else if (mr.status === 404) { a.inGuild = false; a.roles = []; await env.ACCOUNTS.put(k.name, JSON.stringify(a)); continue; }
-      // anyone signed in on the site who is in the server is a Member: the members-only channels open up
-      if (membersId && a.inGuild && !(a.roles || []).includes(membersId)) {
-        const r = await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + a.id + "/roles/" + membersId, { method: "PUT", headers: H });
-        if (r.ok) { a.roles = (a.roles || []).concat([membersId]); await env.ACCOUNTS.put(k.name, JSON.stringify(a)); }
-      }
       if (!a.ign || !a.inGuild) continue;
       const n = sales[a.ign.toLowerCase()] || 0;
       const tier = TIERS.find(t => n >= t[0]);

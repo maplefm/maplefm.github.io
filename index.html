@@ -1085,7 +1085,7 @@ dialog h3 { color: var(--accent-ink); }
   <div class="main">
     <section class="window" aria-labelledby="ptitle">
       <div class="wtitle"><h2 id="ptitle">Price Board</h2><span class="meta"><span class="badge" title="Typical prices come from sales we saw, not asking prices">FROM SALES</span></span></div>
-      <a class="gate" id="gate" hidden href="https://clubfm-accounts.aaweaver93.workers.dev/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are open to everyone. The listings behind them are for members: sign in with Discord, it's free.</span><i>Sign in with Discord</i></a>
+      <a class="gate" id="gate" hidden href="https://clubfm-accounts.aaweaver93.workers.dev/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.</span><i>Sign in with Discord</i></a>
       <div class="tabs" role="tablist" aria-label="Views">
         <button role="tab" id="tab-prices" aria-selected="true">Prices</button>
         <button role="tab" id="tab-deals" class="clubonly" aria-selected="false">Best deals</button>
@@ -3270,7 +3270,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       ip.appendChild(el("p", "pvbig", short(pi.typ)));
       if (pi.hi > pi.lo && short(pi.lo) !== short(pi.hi)) ip.appendChild(el("p", "note", "Typical price. Recent sales ran " + short(pi.lo) + " to " + short(pi.hi) + "."));
       var mv = pi.mv && pi.mv[0]; if (typeof mv === "number" && Math.abs(mv) >= 0.01) ip.appendChild(el("p", "note", (mv > 0 ? "Up " : "Down ") + Math.round(Math.abs(mv) * 100) + "% in the last 24 hours"));
-      var gate = el("a", "gate"); gate.href = ACCT + "/login?back=home"; gate.appendChild(el("b", null, "Live listings for this item")); gate.appendChild(el("span", null, "Who's selling it right now, for how much, the rolls and the recent sales. Free with Discord.")); gate.appendChild(el("i", null, "Sign in with Discord")); ip.appendChild(gate);
+      var gate = el("a", "gate"); gate.href = ACCT + "/login?back=home"; gate.appendChild(el("b", null, "Live listings for this item")); gate.appendChild(el("span", null, "Who's selling it right now, for how much, the rolls and the recent sales. A Mega Deals perk.")); gate.appendChild(el("i", null, "Sign in with Discord")); ip.appendChild(gate);
       return;
     }
     var i = state.sel && D.byName[state.sel];
@@ -4073,13 +4073,21 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   // Live listings come from the Club FM Worker, for signed-in members only; the data branch keeps them encrypted.
   // A tiny public stamp says when the data last changed, so the bundle is asked for only when there is something new.
   var BUNDLE = null, bundleAt = -1, MEMBER = null;
+  // signed out: sign in; signed in without Club or Mega Deals: how to earn it
+  function gateText(signedIn) {
+    var g = $("gate"); if (!g) return;
+    g.querySelector("b").textContent = signedIn ? "Live listings and deals are a Mega Deals perk" : "See every live listing, seller, roll and deal";
+    g.querySelector("span").textContent = signedIn ? "Prices are open to everyone. Mega Deals unlocks at 50,000 sales caught with FM Watcher, or with the $100 Ko-fi tier." : "Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.";
+    g.querySelector("i").textContent = signedIn ? "How to earn it" : "Sign in with Discord";
+    g.href = signedIn ? "contribute.html#earn" : ACCT + "/login?back=home";
+  }
   function getBundle() {
     return fetch(LIVE + "data/live.sig?t=" + Math.floor(Date.now() / 6e4), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (sig) {
       var at = sig && sig.at || 0;
       if (BUNDLE && at === bundleAt) return BUNDLE;
       if (MEMBER === false && !ME_ACCT) return null;
       return fetch(ACCT + "/data/live", { credentials: "include", cache: "no-cache" }).then(function (r) {
-        if (r.status === 401) { MEMBER = false; $("gate").hidden = false; return null; }
+        if (r.status === 401 || r.status === 403) { MEMBER = false; gateText(r.status === 403); $("gate").hidden = false; return null; }
         return r.ok ? r.json() : null;
       }).then(function (b) { if (b) { BUNDLE = b; bundleAt = at; MEMBER = true; $("gate").hidden = true; } return BUNDLE; }).catch(function () { return BUNDLE; });
     });

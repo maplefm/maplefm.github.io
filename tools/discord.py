@@ -33,7 +33,6 @@ def hooks():
     except Exception: h = {}
     if os.environ.get("DISCORD_HOOK_DEALS"): h["mega_deals"] = os.environ["DISCORD_HOOK_DEALS"]   # the private #mega-deals channel
     if os.environ.get("DISCORD_HOOK_DIGEST"): h["digest"] = os.environ["DISCORD_HOOK_DIGEST"]     # the weekly card in #announcements
-    if os.environ.get("DISCORD_HOOK_MEMBERS"): h["members"] = os.environ["DISCORD_HOOK_MEMBERS"]  # the members-only market recap
     if h.get("market_close"): h["coverage"] = h["market_close"]   # both land in #nightly-report since the coverage channel was folded in
     return h
 
@@ -571,10 +570,10 @@ def job_members(summary_path, feed_path, state_path):
     if dn: fields.append({"name": "Falling", "value": "\n".join(dn)[:1000], "inline": False})
     if best: fields.append({"name": "Best deals caught", "value": "\n".join(best)[:1000], "inline": False})
     if not fields: return
-    emb = {"title": "The week in the FM, for members", "color": PURPLE, "fields": fields, "url": SITE,
-           "description": "Typical prices over the last 7 days from watched sales. Every listing behind these is on the board when you're signed in.",
-           "footer": {"text": "Club FM · members-only recap"}}
-    if post("members", embeds=[emb]):
+    emb = {"title": "The week in the FM", "color": PURPLE, "fields": fields, "url": SITE,
+           "description": "Typical prices over the last 7 days from watched sales. Every listing behind these is on the board for Mega Deals holders.",
+           "footer": {"text": "Club FM · Mega Deals weekly recap"}}
+    if post("mega_deals", embeds=[emb]):
         st["members_week"] = wk; save(state_path, st)
 
 
