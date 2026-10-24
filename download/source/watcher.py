@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.23.4"
+VERSION = "2026.10.24.1"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -68,6 +68,16 @@ def load_config():
     if cfg.get("review_mode"):
         cfg["publish"] = False
     return cfg
+
+def chime(ok=True):
+    """A short sound so you know a hover was read (high) or missed (low) without looking at the log."""
+    if not CFG_CHIME[0]: return
+    def go():
+        try:
+            import winsound; winsound.Beep(1400 if ok else 500, 70 if ok else 140)
+        except Exception: pass
+    threading.Thread(target=go, daemon=True).start()
+CFG_CHIME = [True]
 
 def log(*a):
     line = datetime.datetime.now().strftime("%H:%M:%S ") + " ".join(str(x) for x in a)
@@ -158,7 +168,7 @@ def hovered_row(game, shop_box):
     if not (4 <= rx <= S["x1"] + 8 and S["row0"] <= ry < S["row0"] + S["pitch"] * S["rows"]):
         return None, None
     idx = int((ry - S["row0"]) // S["pitch"])
-    box = [max(0, cx - 10), max(0, cy - 20), min(game[2], cx + 380), min(game[3], cy + 500)]
+    box = [max(0, cx - 10), max(0, cy - 340), min(game[2], cx + 380), min(game[3], cy + 520)]
     return idx, box
 
 def tip_ready(game, shop_box, t, st={"pos": None, "since": 0, "shots": 0}):
@@ -959,7 +969,7 @@ def worker(cfg, jobs, store):
                                 tip["row"] = extra["row"]; res["tip"] = tip
                                 review_save(cfg, "tip", extra["tip"], tip)
                             elif extra.get("hover"):
-                                review_save(cfg, "tipmiss", extra["tip"], {"row": extra["row"]})
+                                review_save(cfg, "tipmiss", extra["tip"], {"row": extra["row"]}); chime(False)
                                 log(f"hover: couldn't read a tooltip on row {extra['row'] + 1} yet")
                         except Exception as e:
                             log("tooltip error:", e)
@@ -973,7 +983,9 @@ def worker(cfg, jobs, store):
                         if res["tip"]:
                             hit = store.add_tooltip(res)
                             if hit == "pending": log(f"hover: read {res['tip']['name']}, stats saved until its row reads clearly")
-                            elif hit: log(f"stats {hit[0]} {hit[1]} " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items()))
+                            elif hit:
+                                log(f"read  {hit[0]} {hit[1]}: " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items() if not k.endswith("_b")))
+                                chime(True)
                             else: log(f"hover: read {res['tip']['name']} but couldn't match it to a row in this shop")
                         for hit in store.flush_pending(res):
                             log(f"stats {hit[0]} {hit[1]} (from an earlier hover)")
@@ -1039,7 +1051,7 @@ def snapshot(cfg):
     print("Saved review/snapshot.png. Game window is", game[2], "x", game[3], "pixels.")
 
 def main():
-    cfg = load_config()
+    cfg = load_config(); CFG_CHIME[0] = cfg.get("hover_sound", True)
     if sys.platform == "win32":
         import ctypes
         try: ctypes.windll.shcore.SetProcessDpiAwareness(2)
