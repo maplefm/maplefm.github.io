@@ -4,11 +4,13 @@
 // Opened from a Discord tab while managing the server's emojis: hands the listed mob emoji files back to it.
 // Public images only, and only ever posted to discord.com.
 (async function () {
-  var names = decodeURIComponent(location.hash.slice(1)).split(",").filter(function (n) { return /^[a-z0-9_]+\.(gif|png)$/.test(n); });
+  // "jrnecki.gif" is a mob emoji, "/crown.png" an emoji in this folder, "icon" the 512 server icon
+  var names = decodeURIComponent(location.hash.slice(1)).split(",").filter(function (n) { return /^\/?[a-z0-9_]+\.(gif|png)$/.test(n) || n === "icon"; });
   var out = [];
   for (var i = 0; i < names.length; i++) {
-    var r = await fetch("mobs/" + names[i] + "?v=" + Date.now()); if (!r.ok) continue;
-    out.push({ name: names[i], type: r.headers.get("Content-Type") || "", buf: await r.arrayBuffer() });
+    var n = names[i], url = n === "icon" ? "../../clubfm-icon-512.png" : n[0] === "/" ? n.slice(1) : "mobs/" + n;
+    var r = await fetch(url + "?v=" + Date.now()); if (!r.ok) continue;
+    out.push({ name: n === "icon" ? "clubfm-icon-512.png" : n.replace(/^\//, ""), type: r.headers.get("Content-Type") || "", buf: await r.arrayBuffer() });
   }
   if (window.opener) window.opener.postMessage({ clubfmEmoji: out }, "https://discord.com");
   document.body.textContent = "Sent " + out.length + " files. You can close this tab.";
