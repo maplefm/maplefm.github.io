@@ -35,7 +35,7 @@ def superstar(sparkles=False):
     for y, r in enumerate(rows):
         for x, i in enumerate(r):
             k = PAL[i]
-            if k == "t": continue
+            if k == "t" or y >= 24: continue   # below the band: only sparkles
             c = tuple(map(int, k.split(".")))
             if not sparkles and (i in (19, 50) or (i == 1 and not any(0 < rows[yy][xx] not in (19, 50, 1) for yy in range(max(0, y-1), min(29, y+2)) for xx in range(max(0, x-1), min(30, x+2))))):
                 continue
