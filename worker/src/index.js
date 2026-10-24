@@ -69,6 +69,7 @@ async function route(req, env, url) {
   if (p === "/interactions" && req.method === "POST") return interactions(req, env);
   if (p === "/admin" && req.method === "GET") return admin(req, env);
   if (p === "/admin/note" && req.method === "POST") return adminNote(req, env);
+  if (p === "/admin/markcheck" && req.method === "POST") return markCheck(req, env);
   if (p === "/kofi" && req.method === "POST") return kofi(req, env);
   if (p === "/admin/setup-commands" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await setupCommands(env)); }
   if (p === "/admin/setup-roles" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await setupRoles(env)); }
@@ -451,6 +452,7 @@ async function dataLive(req, env) {
   if (env.RL) { try { const ok = await env.RL.limit({ key: "a:" + id }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
   const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60).catch(() => null)));
   if (!parts.some(Boolean)) return json({ error: "not ready" }, 503);
+  const mk = await markKey(env, id);
   const { readable, writable } = new TransformStream();
   (async () => {
     const w = writable.getWriter(), enc = new TextEncoder();
@@ -459,12 +461,50 @@ async function dataLive(req, env) {
     for (let i = 0; i < MEMBER_FILES.length; i++) {
       if (!parts[i]) continue;
       await w.write(enc.encode((first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":")); first = false;
-      const rd = parts[i].body.getReader();
-      for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); }
+      if (mk === null) { const rd = parts[i].body.getReader(); for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); } }
+      else await w.write(enc.encode(markTimes(await parts[i].text(), mk)));
     }
     await w.write(enc.encode("}")); await w.close();
   })();
   return new Response(readable, { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } });
+}
+
+// ---------------------------------------------------------------- timestamp marks
+// Every member's copy of the listings carries its own invisible mark: each row time ("t", in seconds) is nudged by
+// 0, 1 or 2 seconds, picked from the account and the time itself. Nothing on the board reads seconds, so members see
+// no difference, but a copy that turns up somewhere else matches exactly one account's pattern (/admin/markcheck).
+// Off until MARK_KEY is set (rewriting the files needs more CPU than the free plan allows).
+async function markKey(env, id) {
+  if (!env.MARK_KEY) return null;
+  return parseInt((await hmac(env.MARK_KEY, "mark|" + id)).slice(0, 8), 16) >>> 0;
+}
+function markShift(k, t) {
+  let h = (k ^ Math.imul(t >>> 0, 0x9e3779b1)) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b) >>> 0; h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35) >>> 0; h = (h ^ (h >>> 16)) >>> 0;
+  return h % 3;
+}
+function markTimes(text, k) {
+  return text.replace(/"t":(1[6-9]\d{8})(?=[,}])/g, (m, t) => '"t":' + (Number(t) + markShift(k, Number(t))));
+}
+// pairs of [archive time, time in the found copy] for the same rows; returns the accounts whose marks fit best
+async function markCheck(req, env) {
+  const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403);
+  if (!env.MARK_KEY) return json({ error: "marks off" }, 503);
+  let body = null; try { body = await req.json(); } catch (e) {}
+  const pairs = (body && Array.isArray(body.pairs) ? body.pairs : []).filter((x) => Array.isArray(x) && x.length === 2 && x[1] - x[0] >= 0 && x[1] - x[0] <= 2).slice(0, 20000);
+  if (pairs.length < 20) return json({ error: "need at least 20 matched rows" }, 400);
+  const out = []; let cursor;
+  do {
+    const l = await env.ACCOUNTS.list({ prefix: "acct:", cursor }); cursor = l.list_complete ? null : l.cursor;
+    for (const key of l.keys) {
+      const id = key.name.slice(5), k = await markKey(env, id);
+      let hit = 0; for (const [a, b] of pairs) if (markShift(k, a) === b - a) hit++;
+      out.push({ id, hit, of: pairs.length });
+    }
+  } while (cursor);
+  out.sort((a, b) => b.hit - a.hit);
+  // chance alone fits about a third of rows; a real match fits all of them
+  return json({ top: out.slice(0, 5), chance: Math.round(pairs.length / 3) }, 200, { "Cache-Control": "no-store" });
 }
 
 const hex2buf = (h) => new Uint8Array(h.match(/../g).map((b) => parseInt(b, 16)));
