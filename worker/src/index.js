@@ -949,7 +949,11 @@ function wdEmbeds(wd, prev) {
   fields.push({ name: "All checks", value: (wd.checks || []).length + " of " + (wd.checks || []).length + " passing" });
   return [{ title: "\u2705 Club FM is healthy", color: 0x2ecc71, fields, footer: { text: "Watchdog" }, description: when }];
 }
-async function wdAdmins(env) { return String(env.ADMIN_IDS || "").split(",").map((x) => x.trim()).filter((x) => /^\d{15,}$/.test(x)); }
+async function wdAdmins(env) {
+  const ids = String(env.ADMIN_IDS || "").split(",").map((x) => x.trim()).filter((x) => /^\d{15,}$/.test(x));
+  const saved = (await env.ACCOUNTS.get("wd:admins", "json")) || [];
+  return [...new Set(ids.concat(saved))];
+}
 async function wdDM(env, ids, embeds) {
   const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
   let sent = 0;
@@ -977,6 +981,8 @@ async function watchdogAlert(env) {
   await wdDM(env, await wdAdmins(env), wdEmbeds(wd, prev));
 }
 async function watchdogTest(me, env) {
+  const saved = (await env.ACCOUNTS.get("wd:admins", "json")) || [];
+  if (!saved.includes(String(me.id))) await env.ACCOUNTS.put("wd:admins", JSON.stringify(saved.concat([String(me.id)])));
   const r = await fetch(WD_URL + "?b=" + Date.now(), { headers: { "User-Agent": "clubfm-worker" } });
   const live = r.ok ? await r.json().catch(() => null) : null;
   const at = Math.floor(Date.now() / 1000);
