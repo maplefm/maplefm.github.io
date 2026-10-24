@@ -657,6 +657,20 @@ tbody tr.thin td { opacity: .72; }
 .li.gone b, .li.gone .p { opacity: .55; }
 .note { color: var(--muted); font-size: .74rem; font-weight: 700; margin: 0; }
 .bids { background: var(--up-soft); border: 1.5px solid var(--up); border-radius: 10px; padding: 7px 10px; font-weight: 800; font-size: .82rem; }
+/* item guide: quests, drops, crafting, shops, at the bottom of the item card */
+.guide { margin-top: 14px; border-top: 2px dashed var(--line); padding-top: 10px; display: grid; gap: 10px; }
+.guide h4 { margin: 0 0 6px; font-size: .8rem; font-weight: 900; display: flex; justify-content: space-between; gap: 8px; }
+.guide h4 small { color: var(--muted); font-weight: 700; }
+.guide table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.guide td { padding: 4px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+.guide td.n { text-align: right; white-space: nowrap; font-weight: 800; }
+.guide td small { display: block; color: var(--muted); font-size: .7rem; }
+.guide .gl { color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+.guide .rc { padding: 5px 0; border-top: 1px solid var(--line); font-size: .8rem; }
+.guide .rc b { font-weight: 800; }
+.guide .src { font-size: .68rem; color: var(--muted); margin: 0; }
+.guide .src a { color: inherit; }
+
 .subw { border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; }
 .subw h4 { margin: 0 0 6px; font-size: .78rem; font-weight: 900; display: flex; justify-content: space-between; }
 .subw h4 small { color: var(--muted); font-weight: 700; }
@@ -3281,7 +3295,81 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     [t0, (t0 + t1) / 2, t1].forEach(function (t, k) { svg.appendChild(txt(k === 0 ? pl : k === 1 ? (pl + W - pr) / 2 : W - pr, Hh - 6, new Date(t).toLocaleString("en-US", multi ? { month: "short", day: "numeric" } : { hour: "numeric", minute: "2-digit" }), { "text-anchor": k === 0 ? "start" : k === 1 ? "middle" : "end" })); });
     return svg;
   }
+  // ---- item guide: what quests ask for this item, where it drops, how it's crafted, who sells it (data/itemguide.json)
+  var GUIDE = null, guideAsked = false;
+  function loadGuide() {
+    if (guideAsked) return; guideAsked = true;
+    fetch(LIVE + "data/itemguide.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      .then(function (j) { if (j && j.items) { GUIDE = j; GUIDE.low = {}; Object.keys(j.items).forEach(function (k) { GUIDE.low[k.toLowerCase()] = j.items[k]; }); if (state.sel) renderItem(); } });
+  }
+  function guideFor(name) {
+    if (!GUIDE || !name) return null;
+    return GUIDE.items[name] || GUIDE.low[String(name).toLowerCase()] || null;
+  }
+  function guideLink(name, n) {
+    var known = (D && D.byName[name]) || dbRow(name);
+    var a = el("span", known ? "gl" : null, name + (n != null ? " ×" + fmt(n) : ""));
+    if (known) { a.tabIndex = 0; a.title = "Open " + name; a.addEventListener("click", function () { pick(D && D.byName[name] ? name : dbRow(name)[0]); }); }
+    return a;
+  }
+  function guideBox(name) {
+    var g = guideFor(name); if (!g) return null;
+    var box = el("div", "guide");
+    if (g.q) {
+      var tot = g.q.reduce(function (a, q) { return a + q[2]; }, 0);
+      var sec = el("div"); var h = el("h4"); h.appendChild(document.createTextNode("Used in quests")); h.appendChild(el("small", null, g.q.length + (g.q.length === 1 ? " quest" : " quests") + (g.q.length > 1 ? " · " + fmt(tot) + " in all" : ""))); sec.appendChild(h);
+      var tb = el("table");
+      g.q.forEach(function (q) {
+        var tr = el("tr"), c = el("td"); c.appendChild(el("b", null, q[0]));
+        var sub = [q[3] ? "from " + q[3] : "", q[4] || "", q[1] ? "Lv " + q[1] + "+" : "", q[5] ? "repeatable" : ""].filter(Boolean).join(" · ");
+        if (sub) c.appendChild(el("small", null, sub));
+        tr.appendChild(c); tr.appendChild(el("td", "n", "×" + fmt(q[2]))); tb.appendChild(tr);
+      });
+      sec.appendChild(tb); box.appendChild(sec);
+    }
+    var get = el("div"), any = false; var gh = el("h4", null, "Where to get it"); get.appendChild(gh);
+    if (g.d) {
+      any = true; var dt = el("table");
+      g.d.forEach(function (d) {
+        var tr = el("tr"), c = el("td"); c.appendChild(el("b", null, d[0] + (d[1] ? " (Lv " + d[1] + ")" : "")));
+        var sub = ["Dropped by", d[4] || "", d[5] ? "while on the quest" : ""].filter(Boolean).join(" · "); c.appendChild(el("small", null, sub));
+        tr.appendChild(c); tr.appendChild(el("td", "n", d[2] != null ? d[2] + "%" : "drops")); if (d[2] != null && d[3]) tr.lastChild.title = "Measured over " + fmt(d[3]) + " kills";
+        dt.appendChild(tr);
+      });
+      get.appendChild(dt);
+    }
+    if (g.c) {
+      any = true;
+      g.c.forEach(function (c) {
+        var rc = el("div", "rc"); rc.appendChild(el("b", null, "Craft: " + c[0] + " Lv " + c[1] + (c[4] > 1 ? " · makes " + fmt(c[4]) : "") + " "));
+        var parts = el("span"); c[2].forEach(function (x, k) { if (k) parts.appendChild(document.createTextNode(", ")); parts.appendChild(guideLink(x[0], x[1])); });
+        if (c[5]) { parts.appendChild(document.createTextNode(", ")); parts.appendChild(guideLink(c[5][0], c[5][1])); }
+        rc.appendChild(parts); if (c[3]) { rc.appendChild(document.createTextNode(" · ")); rc.appendChild(money(c[3])); }
+        get.appendChild(rc);
+      });
+    }
+    if (g.s) {
+      any = true; var st = el("table");
+      g.s.forEach(function (x) { var tr = el("tr"), c = el("td"); c.appendChild(el("b", null, x[0])); c.appendChild(el("small", null, ["Sold by NPC", x[1]].filter(Boolean).join(" · "))); tr.appendChild(c); var n = el("td", "n"); if (x[3]) n.textContent = fmt(x[2]) + " " + x[3]; else n.appendChild(money(x[2])); tr.appendChild(n); st.appendChild(tr); });
+      get.appendChild(st);
+    }
+    if (g.r) { any = true; g.r.forEach(function (x) { get.appendChild(el("div", "rc", "From " + x[0] + (x[1] != null ? " (" + x[1] + "%)" : "") + (x[2] ? " · during " + x[2] : ""))); }); }
+    if (!any) get.appendChild(el("p", "note", g.q ? "No drop, shop or recipe recorded for this one yet." : ""));
+    if (any || g.q) box.appendChild(get);
+    if (g.u) box.appendChild(el("p", "note", "Used in " + g.u + " crafting recipe" + (g.u === 1 ? "" : "s") + "."));
+    var src = el("p", "src"); src.appendChild(document.createTextNode("Quests from the game data. Givers, drops, crafting and shops from the "));
+    var wl = el("a", null, "MapleStory Classic Wiki"); wl.href = "https://mapleclassic.wiki/wiki/" + encodeURIComponent(String(name).replace(/ /g, "_")); wl.target = "_blank"; wl.rel = "noopener"; src.appendChild(wl);
+    src.appendChild(document.createTextNode(" (CC BY-NC-SA 4.0). Drop rates are measured by players."));
+    box.appendChild(src);
+    return box;
+  }
   function renderItem() {
+    renderItem0();
+    loadGuide();
+    var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
+  }
+
+  function renderItem0() {
     if (state.sel) loadBase(state.sel);
     var ip = $("ip"); ip.textContent = ""; $("wiki").textContent = "";
     if (D && D.preview) {
