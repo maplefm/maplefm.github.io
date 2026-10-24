@@ -69,6 +69,9 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 .rw img{height:22px;image-rendering:pixelated}
 .cost{margin-top:8px;font-size:.84rem;color:var(--muted)}
 .pre{font-size:.8rem;color:var(--muted);margin-top:6px}
+.fill{margin:-4px 0 12px;font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;color:var(--muted)}
+.fill button{font:inherit;font-weight:700;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;cursor:pointer}
+.fill button.yes{background:#6d3fd1;border-color:#6d3fd1;color:#fff}
 .side{position:sticky;top:10px;display:grid;gap:12px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px}
 .panel h2{margin:0 0 8px;font:700 1rem Outfit,sans-serif}
@@ -106,6 +109,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 </section>
 
 <div class="tabs" id="tabs"></div>
+<div class="fill" id="fill" hidden></div>
 <div class="ctl">
   <input type="search" id="s" placeholder="Search a quest, item, NPC or mob: processed wood, Icarus, stirge" aria-label="Search quests">
   <select id="rg" aria-label="Region"><option value="">All regions</option></select>
@@ -153,6 +157,32 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     if (st === "done") LOG.done[name] = Date.now(); else if (st === "doing") LOG.doing[name] = Date.now();
     saveLocal(); var o = {}; o[name] = st || null; push(o); render();
   }
+  // "Nothing under Available in game": at your level everything else is done, except what's in progress, the steps
+  // that come after an in-progress quest, and other classes' job quests
+  function fillable() {
+    var lv = LOG.level || 0; if (!lv) return [];
+    var after = {}, grow = true; Object.keys(LOG.doing).forEach(function (n) { Q.forEach(function (q) { if (q.n === n) after[q.id] = 1; }); });
+    while (grow) { grow = false; Q.forEach(function (q) { if (!after[q.id] && q.pre.some(function (id) { return after[id]; })) { after[q.id] = 1; grow = true; } }); }
+    return Q.filter(function (q) {
+      if (q.lv > lv || LOG.done[q.n] || LOG.doing[q.n] || after[q.id]) return false;
+      if (!q.jobs.length || q.jobs.indexOf(0) > -1) return true;
+      return !!LOG.fam && q.jobs.some(function (j) { return Math.floor(j / 100) === LOG.fam; });
+    });
+  }
+  function fillBar(ask) {
+    var f = $("fill"), list = fillable(); f.textContent = ""; f.hidden = !list.length;
+    if (!list.length) return;
+    if (!ask) {
+      f.appendChild(document.createTextNode("Your in-game Available tab is empty? "));
+      var b = el("button", null, "Mark the rest done up to Lv " + LOG.level); b.type = "button"; b.addEventListener("click", function () { fillBar(true); }); f.appendChild(b);
+      return;
+    }
+    f.appendChild(document.createTextNode("Mark " + list.length + " quests done? Your In Progress quests stay as they are, so mark those Started first." + (LOG.fam ? "" : " Other classes' job quests are skipped.") + " "));
+    var y = el("button", "yes", "Yes, mark them"); y.type = "button";
+    y.addEventListener("click", function () { var up = {}; list.forEach(function (q) { LOG.done[q.n] = Date.now(); up[q.n] = "done"; }); saveLocal(); push(up); render(); });
+    var n = el("button", null, "Cancel"); n.type = "button"; n.addEventListener("click", function () { fillBar(false); });
+    f.appendChild(y); f.appendChild(n);
+  }
   function stateOf(n) { return LOG.done[n] ? "done" : LOG.doing[n] ? "doing" : ""; }
 
   var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, MOBIMG = {}, TAB = "open", FOCUS = 0, SHOWN = 120;
@@ -198,6 +228,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   function bucket(q) {
     var st = stateOf(q.n), lv = LOG.level || 0;
     if (st === "done") return "done"; if (st === "doing") return "doing";
+    if (LOG.fam && q.jobs.length && q.jobs.indexOf(0) < 0 && !q.jobs.some(function (j) { return Math.floor(j / 100) === LOG.fam; })) return "other";   // another class's job quest
     if (lv && q.lv > lv) return "next";
     return preDone(q) ? "open" : "locked";
   }
@@ -229,7 +260,8 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", TAB === t[0]); b.appendChild(document.createTextNode(t[1])); b.appendChild(el("em", null, counts[t[0]] || 0));
       b.addEventListener("click", function () { TAB = t[0]; try { localStorage.setItem("fm-qtab", TAB); } catch (e) {} render(); }); T.appendChild(b);
     });
-    var inRange = Q.filter(function (q) { return !lv || q.lv <= lv; }), doneIn = inRange.filter(function (q) { return LOG.done[q.n]; }).length;
+    fillBar(false);
+    var inRange = Q.filter(function (q) { return (!lv || q.lv <= lv) && buckets[q.id] !== "other"; }), doneIn = inRange.filter(function (q) { return LOG.done[q.n]; }).length;
     $("pbar").style.width = inRange.length ? Math.round(doneIn / inRange.length * 100) + "%" : "0";
     $("ptxt").textContent = lv ? doneIn + " of " + inRange.length + " quests up to level " + lv + " done." : "Set your level to see what's open.";
     var list = Q.filter(function (q) {
@@ -271,13 +303,14 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   var HANDLV = false;
   function pullLevel(ign) {
     ign = String(ign || "").trim(); if (!/^[A-Za-z0-9]{2,16}$/.test(ign)) return;
-    fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(ign) + "?fields=name,level,job").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(ign) + "?fields=name,level,job,family").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       var d = j && j.data; if (!d || !d.level) { var s0 = $("lvsrc"); s0.hidden = false; s0.textContent = "No character named " + ign + " on classicrank.com yet."; return; }
       try { localStorage.setItem("fm-me", d.name); } catch (e) {}
       $("ign").value = d.name;
       var s = $("lvsrc"); s.hidden = false; s.textContent = "";
       s.appendChild(document.createTextNode(d.name + (d.job ? ", " + d.job : "") + ", level " + d.level + " on "));
       var a = el("a", null, "classicrank.com"); a.href = "https://classicrank.com/user/" + encodeURIComponent(d.name); a.target = "_blank"; a.rel = "noopener"; s.appendChild(a);
+      var fam = { Warrior: 1, Magician: 2, Bowman: 3, Thief: 4, Pirate: 5 }[d.family] || 0; if (fam && LOG.fam !== fam) { LOG.fam = fam; saveLocal(); }
       if (HANDLV || LOG.level === d.level) return;
       LOG.level = d.level; $("lv").value = d.level; saveLocal(); if (SIGNED) push(null, d.level); render();
     }).catch(function () {});
