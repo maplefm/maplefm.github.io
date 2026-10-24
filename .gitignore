@@ -9,3 +9,4 @@ data/*.json
 !data/maintenance.json
 !data/nexon_news.json
 !data/*-icons.json
+!data/itemguide.json
