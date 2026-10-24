@@ -11,7 +11,13 @@ T = ["K.....K.....K",
      "KDGGGGPGGGGDK",
      "KYYYYYYYYYYYK",
      "KKKKKKKKKKKKK"]
+import ss_data
+SS = ss_data.superstar()
 def crown(scale):
+    # the Superstar Crown (Cash Shop item 1007750), smaller on the little mobs
+    if scale >= 2: return SS
+    return SS.resize((round(SS.width * 0.75), round(SS.height * 0.75)), Image.LANCZOS)
+def crown_pixel(scale):
     im = Image.new("RGBA", (len(T[0]) * scale, len(T) * scale), (0, 0, 0, 0)); px = im.load()
     for y, row in enumerate(T):
         for x, ch in enumerate(row):
@@ -40,13 +46,13 @@ for f in sorted(glob.glob(os.path.join(SRC, "*"))):
     cr = crown(sc); cw, ch = cr.size
     heads = [head(fr) for fr in frames]
     area0 = max((hd[2] for hd in heads if hd), default=1)
-    pad = ch - 2 * sc
+    pad = ch - 5
     out = []
     for fr, hd in zip(frames, heads):
         cv = Image.new("RGBA", (w, h + pad), (0, 0, 0, 0)); cv.paste(fr, (0, pad), fr)
         if hd and hd[2] >= area0 * 0.3:            # a dying mob that has mostly faded loses its crown too
             x = int(round(hd[0] - cw / 2)); x = max(0, min(w - cw, x))
-            y = hd[1] + pad - ch + 2 * sc
+            y = hd[1] + pad - ch + 5
             cv.alpha_composite(cr, (x, max(0, y)))
         out.append(cv)
     dst = os.path.join(OUT, name)
