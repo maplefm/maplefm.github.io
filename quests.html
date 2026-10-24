@@ -74,6 +74,19 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 .note{color:var(--muted);font-size:.84rem}
 .empty{text-align:center;padding:30px 10px;color:var(--muted)}
 .foot{color:var(--muted);font-size:.78rem;margin-top:20px}
+.ph{width:26px;height:26px;border-radius:8px;background:var(--line);display:grid;place-items:center;color:var(--muted);font:800 .8rem Outfit,sans-serif}
+.npc .ph{width:44px;height:44px;font-size:1.2rem}
+.q.focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,169,28,.35),var(--shadow)}
+.craft{margin-top:5px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:.8rem}
+.craft .ct{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted)}
+.craft .tag{background:var(--accent);color:#fff;font-weight:800;font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:1px 6px}
+.craft ul{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:3px}
+.craft li{display:flex;align-items:center;gap:6px}.craft li img{height:20px;image-rendering:pixelated}.craft li a{font-weight:700}
+.craft li em{font-style:normal;margin-left:auto;font-weight:800;white-space:nowrap}.craft li em small{font-weight:600;color:var(--muted)}
+.qsrc{font-size:.78rem;color:var(--muted);margin-top:3px}.qsrc a{font-weight:700}
+.rw a{color:inherit;text-decoration:none}.rw a:hover span,.rw a:hover{text-decoration:underline}
+.talk{font-size:.84rem;color:var(--muted);margin-top:8px}
+.more{display:block;width:100%;font:700 .95rem Inter;padding:12px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--accent);cursor:pointer}
 </style></head><body><main>
 <div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt=""> Club FM</a>
 <div class="navs"><a href="/items/">Item prices</a><a href="/report.html">Market close</a><a class="go" href="/">Price board</a></div></div>
@@ -112,8 +125,14 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   function shown(n) { var m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(n); return m ? m[1] + " " + (TIER[m[2]] || m[2]) : n; }
   function slug(n) { return shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
   function meso(n) { n = +n || 0; if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B"; if (n >= 999.5e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1).replace(/\.?0+$/, "") + "K"; return Math.round(n).toLocaleString(); }
-  function img(src, cls) { var i = new Image(); i.loading = "lazy"; i.alt = ""; i.src = src; if (cls) i.className = cls; i.onerror = function () { i.remove(); }; return i; }
-  function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) b.appendChild(img(IO + "item/" + id + "/icon")); return b; }
+  function ph(t) { return el("span", "ph", t || "?"); }
+  function img(src, cls, alt) { var i = new Image(); i.loading = "lazy"; i.alt = ""; i.src = src; if (cls) i.className = cls;
+    i.onerror = function () { if (alt && i.src.indexOf(alt) < 0) { i.src = alt; return; } if (i.parentNode) i.parentNode.replaceChild(ph(i.dataset.ph), i); }; return i; }
+  function mobImg(id, name) { var k = MOBIMG[String(id)]; var i = img(IO + "mob/" + id + "/" + (k || "icon"), null, IO + "mob/" + id + "/render/move"); i.dataset.ph = (name || "?").charAt(0); return i; }
+  function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) { var i = img(IO + "item/" + id + "/icon"); i.dataset.ph = name.charAt(0); b.appendChild(i); } else b.appendChild(ph(name.charAt(0))); return b; }
+  function itemHref(name) { return IDS[name] || PRICE[name] != null ? "/item/" + slug(name) + "/" : "/?q=" + encodeURIComponent(name); }
+  function itemLink(name, txt) { var a = el("a", null, txt || shown(name)); a.href = itemHref(name); return a; }
+  function questLink(qn, qid) { var a = el("a", null, qn); if (qid && BYID[qid]) { a.href = "#q-" + qid; } else { a.href = "#q=" + encodeURIComponent(qn); } return a; }
 
   // ---- my log: this browser, plus the Discord account when signed in
   var LOG = { done: {}, doing: {}, level: 0 }; try { var s0 = JSON.parse(localStorage.getItem("fm-qlog") || "null"); if (s0) LOG = s0; } catch (e) {}
@@ -132,21 +151,41 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   }
   function stateOf(n) { return LOG.done[n] ? "done" : LOG.doing[n] ? "doing" : ""; }
 
-  var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, TAB = "open";
+  var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, MOBIMG = {}, TAB = "open", FOCUS = 0, SHOWN = 120;
   try { TAB = localStorage.getItem("fm-qtab") || "open"; } catch (e) {}
 
-  function sources(name) {
-    var g = G[name], out = el("div", "src"); if (!g) return null;
-    (g.d || []).slice(0, 3).forEach(function (d) { var s = el("span"); if (d[6] != null) s.appendChild(img(IO + "mob/" + d[6] + "/icon")); s.appendChild(document.createTextNode(d[0] + (d[2] != null ? " " + d[2] + "%" : ""))); out.appendChild(s); });
-    if (g.c && g.c.length) { var c = g.c[0]; out.appendChild(el("span", null, "⚒ " + c[0] + " Lv " + c[1] + ": " + c[2].map(function (x) { return x[1] + " " + x[0]; }).join(", "))); }
+  function craftBox(c, need, more) {
+    // c = [profession, level, [[ingredient, n]], fee, makes, catalyst]
+    var box = el("div", "craft"), t = el("div", "ct"), crafts = Math.ceil((need || 1) / (c[4] || 1));
+    t.appendChild(el("span", "tag", "Crafted")); t.appendChild(el("b", null, c[0] + " Lv " + c[1]));
+    t.appendChild(document.createTextNode("makes " + (c[4] || 1) + " per craft" + (c[3] ? " · " + meso(c[3]) + " fee" : "") + (need > 1 ? " · ×" + need + " takes " + crafts + " craft" + (crafts > 1 ? "s" : "") : "")));
+    box.appendChild(t);
+    var ul = el("ul"), parts = c[2].slice(); if (c[5]) parts.push([c[5][0], c[5][1], 1]);
+    parts.forEach(function (x) {
+      var li = el("li"); if (IDS[x[0]]) li.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); li.appendChild(itemLink(x[0]));
+      if (x[2]) li.appendChild(el("small", null, " catalyst"));
+      var em = el("em", null, "×" + (x[1] * crafts).toLocaleString()); if (crafts > 1) em.appendChild(el("small", null, " (" + x[1] + " each)")); li.appendChild(em);
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    if (more) { var m = el("a", null, "+" + more + " other recipe" + (more > 1 ? "s" : "")); m.href = "/item/" + slug(c.__name) + "/"; box.appendChild(m); }
+    return box;
+  }
+  function sources(name, qty) {
+    var g = G[name], wrap = el("div"); if (!g) return null;
+    var out = el("div", "src");
+    (g.d || []).slice(0, 3).forEach(function (d) { var s = el("span"); if (d[6] != null) s.appendChild(mobImg(d[6], d[0])); s.appendChild(document.createTextNode(d[0] + (d[2] != null ? " " + d[2] + "%" : d[5] ? " (on quest)" : ""))); out.appendChild(s); });
     if (g.s && g.s.length) { var sp = el("span"); if (g.s[0][4] != null) sp.appendChild(img(IO + "npc/" + g.s[0][4] + "/icon")); sp.appendChild(document.createTextNode("NPC " + g.s[0][0] + " · " + meso(g.s[0][2]))); out.appendChild(sp); }
-    return out.childNodes.length ? out : null;
+    if (out.childNodes.length) wrap.appendChild(out);
+    if (g.c && g.c.length) { var c = g.c[0]; c.__name = name; wrap.appendChild(craftBox(c, qty, g.c.length - 1)); }
+    (g.g || []).slice(0, 2).forEach(function (x) { var p = el("div", "qsrc"); p.appendChild(document.createTextNode(x[2] === "given" ? "Given to you during " : "Reward from ")); p.appendChild(questLink(x[0], x[1])); wrap.appendChild(p); });
+    if (!wrap.childNodes.length && g.t) wrap.appendChild(el("div", "qsrc", "Quest item, found while doing the quest: “" + g.t + "”"));
+    return wrap.childNodes.length ? wrap : null;
   }
   function needRow(name, qty) {
     var r = el("div", "row"); r.appendChild(itemIcon(name));
-    var mid = el("div"), nm;
-    if (PRICE[name] != null || G[name]) { nm = el("a", null, shown(name)); nm.href = "/item/" + slug(name) + "/"; } else nm = el("b", null, shown(name));
-    mid.appendChild(nm); var src = sources(name); if (src) mid.appendChild(src); r.appendChild(mid);
+    var mid = el("div"); mid.appendChild(itemLink(name));
+    var src = sources(name, qty); if (src) mid.appendChild(src); r.appendChild(mid);
     var q = el("div", "qty", "×" + qty.toLocaleString()); if (PRICE[name]) q.appendChild(el("small", null, meso(PRICE[name] * qty) + " on the FM")); r.appendChild(q);
     return r;
   }
@@ -159,8 +198,8 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     return preDone(q) ? "open" : "locked";
   }
   function card(q) {
-    var st = stateOf(q.n), d = el("div", "q" + (st ? " " + st : ""));
-    var h = el("div", "qh"), npc = el("div", "npc"); if (q.gid != null) npc.appendChild(img(IO + "npc/" + q.gid + "/icon")); h.appendChild(npc);
+    var st = stateOf(q.n), d = el("div", "q" + (st ? " " + st : "") + (FOCUS === q.id ? " focus" : "")); d.id = "q-" + q.id;
+    var h = el("div", "qh"), npc = el("div", "npc"); if (q.gid != null) { var ni = img(IO + "npc/" + q.gid + "/icon"); ni.dataset.ph = (q.g || "?").charAt(0); npc.appendChild(ni); } else npc.appendChild(ph((q.g || "?").charAt(0))); h.appendChild(npc);
     var t = el("div"); t.appendChild(el("h3", null, q.n.replace(/\?/g, " ")));
     var m = el("div", "meta"); if (q.lv) m.appendChild(el("span", "chip lv", "Lv " + q.lv + "+")); if (q.g) m.appendChild(el("span", "chip", q.g)); if (q.a) m.appendChild(el("span", "chip", q.a)); if (q.rep) m.appendChild(el("span", "chip rep", "repeatable"));
     t.appendChild(m); h.appendChild(t);
@@ -169,11 +208,12 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     var b2 = el("button", "ok" + (st === "done" ? " on" : ""), st === "done" ? "Done ✓" : "Done"); b2.type = "button"; b2.addEventListener("click", function () { setState(q.n, st === "done" ? null : "done"); });
     acts.appendChild(b1); acts.appendChild(b2); h.appendChild(acts); d.appendChild(h);
     if (q.need.length) { var s1 = el("div", "sec"); s1.appendChild(el("h4", null, "Bring")); q.need.forEach(function (x) { s1.appendChild(needRow(x[0], x[1])); }); d.appendChild(s1); var c = costOf(q); if (c) d.appendChild(el("p", "cost", "Buying it all on the Free Market: about " + meso(c) + " mesos.")); }
-    if (q.kill.length) { var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt")); q.kill.forEach(function (k) { var r = el("div", "row"), ic = el("div", "ic"); if (k[2] != null) ic.appendChild(img(IO + "mob/" + k[2] + "/icon")); r.appendChild(ic); r.appendChild(el("b", null, k[0])); r.appendChild(el("div", "qty", "×" + k[1])); s2.appendChild(r); }); d.appendChild(s2); }
+    if (q.kill.length) { var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt")); q.kill.forEach(function (k) { var r = el("div", "row"), ic = el("div", "ic"); if (k[2] != null) ic.appendChild(mobImg(k[2], k[0])); else ic.appendChild(ph(String(k[0]).charAt(0))); r.appendChild(ic); r.appendChild(el("b", null, k[0])); r.appendChild(el("div", "qty", "×" + k[1])); s2.appendChild(r); }); d.appendChild(s2); }
     var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, "💰 " + q.meso.toLocaleString())); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
-    q.get.forEach(function (x) { var s = el("span"); if (IDS[x[0]]) s.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); rw.appendChild(s); });
+    q.get.forEach(function (x) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); if (IDS[x[0]]) s.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); a.appendChild(s); rw.appendChild(a); });
     if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); d.appendChild(s3); }
-    if (q.pre.length) { var pn = q.pre.map(function (id) { return BYID[id] ? BYID[id].n : null; }).filter(Boolean); if (pn.length) d.appendChild(el("p", "pre", "After: " + pn.join(", ") + (preDone(q) ? " ✓" : ""))); }
+    if (q.pre.length) { var pids = q.pre.filter(function (id) { return BYID[id]; }); if (pids.length) { var pp = el("p", "pre", "After: "); pids.forEach(function (id, k) { if (k) pp.appendChild(document.createTextNode(", ")); pp.appendChild(questLink(BYID[id].n, id)); }); if (preDone(q)) pp.appendChild(document.createTextNode(" ✓")); d.appendChild(pp); } }
+    if (!q.need.length && !q.kill.length) d.appendChild(el("p", "talk", "Talk and deliver: no items to bring and nothing to hunt."));
     return d;
   }
   function render() {
@@ -196,13 +236,14 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       if (s && (q.n + " " + q.g + " " + q.a + " " + q.need.map(function (x) { return x[0]; }).join(" ") + " " + q.kill.map(function (x) { return x[0]; }).join(" ")).toLowerCase().indexOf(s) < 0) return false;
       return true;
     });
-    if (TAB === "open") list.sort(function (a, b) { return (buckets[a.id] === "locked") - (buckets[b.id] === "locked"); });
-    if (sort === "exp") list.sort(function (a, b) { return b.exp - a.exp; });
-    else if (sort === "cost") list.sort(function (a, b) { return costOf(a) - costOf(b); });
+    if (FOCUS && BYID[FOCUS]) { list = list.filter(function (q) { return q.id !== FOCUS; }); list.unshift(BYID[FOCUS]); }
+    if (TAB === "open") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || (buckets[a.id] === "locked") - (buckets[b.id] === "locked"); });
+    if (sort === "exp") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || b.exp - a.exp; });
+    else if (sort === "cost") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || costOf(a) - costOf(b); });
     var box = $("qs"); box.textContent = "";
     if (!list.length) box.appendChild(el("p", "empty", TAB === "doing" ? "Nothing started yet. Hit Start on a quest and it shows here, with a shopping list on the side." : TAB === "done" ? "No quests marked done yet." : "No quests match."));
-    list.slice(0, 120).forEach(function (q) { box.appendChild(card(q)); });
-    if (list.length > 120) box.appendChild(el("p", "note", "Showing 120 of " + list.length + ". Search or pick a region to narrow it down."));
+    list.slice(0, SHOWN).forEach(function (q) { box.appendChild(card(q)); });
+    if (list.length > SHOWN) { var mb = el("button", "more", "Show " + Math.min(120, list.length - SHOWN) + " more of " + list.length); mb.type = "button"; mb.addEventListener("click", function () { SHOWN += 120; render(); }); box.appendChild(mb); }
     // shopping list for started quests
     var P = $("shop"); P.textContent = ""; P.appendChild(el("h2", null, "Shopping list"));
     var mine = Q.filter(function (q) { return LOG.doing[q.n]; }), need = {};
@@ -212,18 +253,27 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = "/item/" + slug(n) + "/"; r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
     if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
   }
+  // deep links: #q-1012 opens one quest (from item pages and the board); #q=name or ?q=name searches
+  function route(first) {
+    var h = location.hash, m = /^#q-(\d+)$/.exec(h), m2 = /[?&#]q=([^&]+)/.exec(location.href);
+    FOCUS = 0;
+    if (m && BYID[+m[1]]) { FOCUS = +m[1]; TAB = "all"; $("s").value = ""; $("rg").value = ""; }
+    else if (m2) { $("s").value = decodeURIComponent(m2[1]); TAB = "all"; }
+    render();
+    if (FOCUS) { var c = document.getElementById("q-" + FOCUS); if (c) setTimeout(function () { c.scrollIntoView({ behavior: first ? "auto" : "smooth", block: "start" }); }, 30); }
+  }
   function accountLine() {
     var a = $("acct"); a.textContent = "";
     if (SIGNED) a.appendChild(document.createTextNode("Synced to your Discord account."));
     else { a.appendChild(document.createTextNode("Saved in this browser. ")); var l = el("a", null, "Sign in with Discord"); l.href = ACCT + "/login?back=quests"; a.appendChild(l); a.appendChild(document.createTextNode(" to keep it everywhere.")); }
   }
   $("lv").addEventListener("change", function () { var v = Math.max(0, Math.min(250, parseInt(this.value, 10) || 0)); LOG.level = v; saveLocal(); push(null, v); render(); });
-  ["s", "rg", "sort"].forEach(function (id) { $(id).addEventListener("input", render); });
+  ["s", "rg", "sort"].forEach(function (id) { $(id).addEventListener("input", function () { if (id !== "sort") FOCUS = 0; SHOWN = 120; render(); }); });
 
   var acct = fetch(ACCT + "/me/quests", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   Promise.all([fetch(LIVE + "data/itemguide.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
                fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }), acct]).then(function (res) {
-    var g = res[0]; G = g.items || {}; IDS = g.ids || {}; Q = (g.quests || []).slice();
+    var g = res[0]; G = g.items || {}; IDS = g.ids || {}; MOBIMG = g.mobimg || {}; Q = (g.quests || []).slice();
     Q.forEach(function (q) { BYID[q.id] = q; });
     Q.sort(function (a, b) { return a.lv - b.lv || a.n.localeCompare(b.n); });
     ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) PRICE[r.item] = r.typ; });
@@ -242,8 +292,8 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     if (LOG.level) $("lv").value = LOG.level;
     var regions = {}; Q.forEach(function (q) { if (q.a) regions[q.a] = 1; });
     Object.keys(regions).sort().forEach(function (r) { var o = el("option", null, r); o.value = r; $("rg").appendChild(o); });
-    var m = /[?&#]q=([^&]+)/.exec(location.href); if (m) { $("s").value = decodeURIComponent(m[1]); TAB = "all"; }
-    render();
+    route(true);
+    window.addEventListener("hashchange", function () { route(false); });
   }).catch(function () { $("qs").textContent = ""; $("qs").appendChild(el("p", "empty", "Couldn't load the quest list. Try again in a minute.")); });
 })();
 </script>

@@ -6,7 +6,7 @@ Reads the board's own summary (data/summary.json on the live branch) and the ite
 OUT_DIR/item/<slug>/index.html for each item with enough data, an index at OUT_DIR/items/index.html, and
 OUT_DIR/sitemap.xml. Pages are plain HTML with the numbers in them, no script needed to read the price.
 """
-import json, os, re, sys, html, datetime
+import urllib.parse, json, os, re, sys, html, datetime
 
 SITE = "https://maplefm.gg"
 TIER = {"Lesser": "100%", "Intermediate": "60%", "Greater": "10%"}
@@ -54,7 +54,10 @@ table{width:100%;border-collapse:collapse;margin-top:6px}td,th{padding:6px 8px;b
 h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink)}
 .foot{color:var(--muted);font-size:.82rem;margin-top:22px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
-td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}"""
+td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
+.craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
+.ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
+.gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}"""
 
 
 def page(title, desc, canon, body, ld=None):
@@ -62,7 +65,7 @@ def page(title, desc, canon, body, ld=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{SITE}/og.png"><meta property="og:type" content="website">
-<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=1">{ld or ''}</head><body><main>
+<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=2">{ld or ''}</head><body><main>
 <div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><a class="go" href="/">Open the live price board</a></div>
 {body}
 <p class="foot">Prices come from sales that players running FM Watcher saw happen in Free Market shops, updated through the day. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
@@ -72,27 +75,45 @@ def page(title, desc, canon, body, ld=None):
 NX = {}
 
 
+IDS = {}
+
+
+def qlink(qn, qid):
+    """a quest name that opens it in the Quest Log"""
+    href = f"/quests.html#q-{qid}" if qid else "/quests.html?q=" + urllib.parse.quote(qn)
+    return f'<a href="{href}">{html.escape(qn)}</a>'
+
+
 def guide_html(name, g, page_of):
     """quests, drops, crafting and shops for an item, as plain HTML (data/itemguide.json)"""
     if not g: return ""
     def link(n, c=None):
-        t = html.escape(n) + (f" ×{c:,}" if c is not None else "")
-        return f'<a href="/item/{page_of[n]}/">{t}</a>' if n in page_of else t
+        t = html.escape(shown(n)) + (f" ×{c:,}" if c is not None else "")
+        return f'<a href="/item/{page_of[n]}/">{t}</a>' if n in page_of else f'<a href="/#item={urllib.parse.quote(n)}">{t}</a>'
+    def ico(n):
+        return f'<img class="gi" src="https://maplestory.io/api/MCW/1/item/{IDS[n]}/icon" alt="" loading="lazy">' if n in IDS else '<span class="gi"></span>'
     out = ""
     if g.get("q"):
         tot = sum(q[2] for q in g["q"])
-        rows = "".join(f"<tr><td><b>{html.escape(q[0])}</b><br><small>{html.escape(' · '.join(x for x in [('from ' + q[3]) if q[3] else '', q[4], f'Lv {q[1]}+' if q[1] else '', 'repeatable' if q[5] else ''] if x))}</small></td><td class=n>×{q[2]:,}</td></tr>" for q in g["q"])
-        out += f'<h2>Quests that need {html.escape(shown(name))}</h2><p class="note">{len(g["q"])} quest{"s" if len(g["q"]) != 1 else ""}{f", {tot:,} in all" if len(g["q"]) > 1 else ""}.</p><table>{rows}</table>'
+        rows = "".join(f"<tr><td><b>{qlink(q[0], q[7] if len(q) > 7 else None)}</b><br><small>{html.escape(' · '.join(x for x in [('from ' + q[3]) if q[3] else '', q[4], f'Lv {q[1]}+' if q[1] else '', 'repeatable' if q[5] else ''] if x))}</small></td><td class=n>×{q[2]:,}</td></tr>" for q in g["q"])
+        out += f'<h2>Quests that need {html.escape(shown(name))}</h2><p class="note">{len(g["q"])} quest{"s" if len(g["q"]) != 1 else ""}{f", {tot:,} in all" if len(g["q"]) > 1 else ""}. Tap a quest to open it in the <a href="/quests.html">Quest Log</a>.</p><table>{rows}</table>'
     get = ""
-    if g.get("d"):
-        get += "<table>" + "".join(f"<tr><td><b>{html.escape(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>Dropped by{(' · ' + html.escape(d[4])) if d[4] else ''}{' · while on the quest' if d[5] else ''}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
     for c in g.get("c") or []:
-        ing = ", ".join(link(x[0], x[1]) for x in c[2]) + (", " + link(c[5][0], c[5][1]) if c[5] else "")
-        get += f'<p class="rc"><b>Craft: {html.escape(c[0])} Lv {c[1]}</b>{f" · makes {c[4]:,}" if c[4] > 1 else ""}: {ing}{f" · {full(c[3])} mesos" if c[3] else ""}</p>'
+        rows = "".join(f'<tr><td>{ico(x[0])} {link(x[0])}</td><td class=n>×{x[1]:,}</td></tr>' for x in c[2])
+        if c[5]: rows += f'<tr><td>{ico(c[5][0])} {link(c[5][0])} <small>catalyst</small></td><td class=n>×{c[5][1]:,}</td></tr>'
+        if c[3]: rows += f'<tr><td><small>Crafting fee</small></td><td class=n>{full(c[3])} mesos</td></tr>'
+        get += (f'<div class="craft"><p class="ch"><span class="tag">Crafted</span> <b>{html.escape(c[0])}</b> Lv {c[1]} · makes {c[4]:,} per craft</p>'
+                f'<table>{rows}</table></div>')
+    if g.get("d"):
+        get += "<table>" + "".join(f"<tr><td><b>{html.escape(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>Dropped by{(' · ' + html.escape(d[4])) if d[4] else ''}{' · only while on the quest' if d[5] else ''}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
+    for x in g.get("g") or []:
+        get += f'<p class="rc">{"Given by the NPC during" if x[2] == "given" else "Reward from the quest"} {qlink(x[0], x[1])}</p>'
     if g.get("s"):
         get += "<table>" + "".join(f"<tr><td><b>{html.escape(x[0])}</b><br><small>Sold by NPC{(' · ' + html.escape(x[1])) if x[1] else ''}</small></td><td class=n>{full(x[2])} {html.escape(x[3] or 'mesos')}</td></tr>" for x in g["s"]) + "</table>"
     for x in g.get("r") or []:
         get += f'<p class="rc">From {html.escape(x[0])}{f" ({x[1]}%)" if x[1] is not None else ""}{(" · during " + html.escape(x[2])) if x[2] else ""}</p>'
+    if not get and g.get("t"):
+        get += f'<p class="rc">Quest item, found while doing the quest. In game: <i>{html.escape(g["t"])}</i></p>'
     if get: out += f"<h2>Where to get {html.escape(shown(name))}</h2>{get}"
     if g.get("u"): out += f'<p class="note">Used in {g["u"]} crafting recipe{"s" if g["u"] != 1 else ""}.</p>'
     if out: out += '<p class="note src">Quests from the game data. Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0). Drop rates are measured by players.</p>'
@@ -109,6 +130,7 @@ def main():
     summ = json.load(open(summ_path, encoding="utf-8"))
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
     ids = {r[0]: r[1] for r in db}
+    IDS.update(ids)
     vendor = {r[0]: r[6] for r in db if len(r) > 6}
     rows = [r for r in (summ.get("rows") or []) if isinstance(r, dict) and r.get("item") in ids and (r.get("n") or 0) >= 5 and r.get("typ")]
     when = datetime.datetime.fromtimestamp((summ.get("at") or 0) / 1000, datetime.timezone.utc).strftime("%B %-d, %Y")
@@ -117,7 +139,7 @@ def main():
     for c in bycat.values(): c.sort(key=lambda r: -(r.get("vol") or 0))
     made = []
     page_of = {r["item"]: slug(r["item"]) for r in rows}
-    extra = [n for n, g in GUIDE.items() if n not in page_of and n in ids and (g.get("q") or g.get("c") or g.get("d"))]
+    extra = [n for n, g in GUIDE.items() if n not in page_of and n in ids and (g.get("q") or g.get("c") or g.get("d") or g.get("g") or g.get("u"))]
     for n in extra: page_of[n] = slug(n)
     for r in rows:
         name, s = r["item"], slug(r["item"])
