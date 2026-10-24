@@ -672,6 +672,7 @@ tbody tr.thin td { opacity: .72; }
 .guide .src { font-size: .68rem; color: var(--muted); margin: 0; }
 .guide .src a { color: inherit; }
 
+.under-in { width: 84px; font: inherit; font-size: .8rem; padding: 4px 6px; border: 2px solid var(--line); border-radius: 8px; background: var(--card, #fff); color: var(--ink); }
 .subw { border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; }
 .subw h4 { margin: 0 0 6px; font-size: .78rem; font-weight: 900; display: flex; justify-content: space-between; }
 .subw h4 small { color: var(--muted); font-weight: 700; }
@@ -1183,10 +1184,10 @@ dialog h3 { color: var(--accent-ink); }
           </table>
           <div class="empty" id="pos-empty"><strong>No positions yet</strong>Add what you bought and what you paid, and you'll see if you're winning or losing as prices move.</div>
         </div>
-        <h3 class="subh">Watchlist <small class="note" style="font-weight:600">Mega Deals holders get a Discord DM when a starred item hits a deal. Sign in with Discord so your stars follow you.</small></h3>
+        <h3 class="subh">Watchlist <small class="note" style="font-weight:600">Set an alert price and this browser tells you when someone lists it at or under it. Mega Deals holders also get a Discord DM on deals. Sign in with Discord so your stars follow you.</small></h3>
         <div class="tbox scroll">
           <table>
-            <thead><tr><th>Item</th><th>Typical</th><th>1 day</th><th>3 days</th><th>7 days</th><th class="clubonly">Cheapest now</th><th></th></tr></thead>
+            <thead><tr><th>Item</th><th>Typical</th><th>1 day</th><th>3 days</th><th>7 days</th><th class="clubonly">Cheapest now</th><th title="Get a notification when someone lists it at or under this price">Alert under</th><th></th></tr></thead>
             <tbody id="watch-rows"></tbody>
           </table>
           <div class="empty" id="watch-empty"><strong>Nothing starred</strong>Click the star in an item's panel to follow it. Your positions are watched automatically.</div>
@@ -2703,6 +2704,15 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       var tc = el("td"); if (i) tc.appendChild(money(i.typ)); tr.appendChild(tc);
       [0, 1, 2].forEach(function (d) { var td = el("td"); if (i && i.mv[d] != null) td.appendChild(moveTag(i.mv[d])); else td.appendChild(el("span", "tfd", "n/a")); tr.appendChild(td); });
       var cc = el("td", "clubonly"); if (i && i.bestL) cc.appendChild(money(i.best)); tr.appendChild(cc);
+      var ac = el("td");
+      if (WATCH[name]) {
+        var ai = el("input"); ai.type = "text"; ai.inputMode = "numeric"; ai.className = "under-in"; ai.placeholder = "price"; ai.title = "Notify me when it's listed at or under this many mesos (100k and 1.5m work)";
+        ai.value = WATCH[name].under ? short(WATCH[name].under) : "";
+        ai.addEventListener("click", function (e) { e.stopPropagation(); });
+        ai.addEventListener("change", function () { var v = parseMesos(ai.value); if (v > 0) WATCH[name].under = v; else delete WATCH[name].under; saveLS("fm-watch", WATCH); if (v > 0) askNotify(); render(); });
+        ac.appendChild(ai);
+      }
+      tr.appendChild(ac);
       var rc = el("td");
       if (WATCH[name]) { var rm = el("button", "rm", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Stop watching " + name); rm.addEventListener("click", function (e) { e.stopPropagation(); delete WATCH[name]; saveLS("fm-watch", WATCH); render(); }); rc.appendChild(rm); }
       else rc.appendChild(el("small", null, "position"));
@@ -2711,9 +2721,41 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     $("watch-empty").hidden = watched().length > 0;
     $("count").textContent = POS.length ? POS.length + " positions, " + (tot >= 0 ? "up " : "down ") + short(Math.abs(tot)) + " mesos" + (cost ? " (" + (tot >= 0 ? "+" : "") + Math.round(tot / cost * 100) + "%)" : "") + " against what you paid" : "";
   }
+  // ---- price alerts: a starred item listed at or under the price you set. A browser notification (when allowed)
+  // and the page's alert sound, once per listing.
+  function parseMesos(t) {
+    var m = /^\s*([\d.,]+)\s*([kmb])?\s*$/i.exec(String(t || "")); if (!m) return 0;
+    var v = parseFloat(m[1].replace(/,/g, "")); if (!isFinite(v)) return 0;
+    return Math.round(v * ({ k: 1e3, m: 1e6, b: 1e9 }[(m[2] || "").toLowerCase()] || 1));
+  }
+  function askNotify() { try { if (window.Notification && Notification.permission === "default") Notification.requestPermission(); } catch (e) {} }
+  var USEEN = loadLS("fm-under-seen", {}), uArmed = false;
+  function checkUnder() {
+    if (!D) return;
+    var hits = [];
+    Object.keys(WATCH).forEach(function (name) {
+      var w = WATCH[name], i = D.byName[name]; if (!w || !w.under || !i) return;
+      (i.buy || []).forEach(function (x) {
+        if (x.st === "gone" || x.u > w.under || Date.now() - x.t > 2 * H) return;
+        var k = name + "|" + String(x.s).toLowerCase() + "|" + x.u; if (USEEN[k]) return;
+        USEEN[k] = Date.now(); hits.push({ name: name, x: x });
+      });
+    });
+    Object.keys(USEEN).forEach(function (k) { if (Date.now() - USEEN[k] > 2 * DAY) delete USEEN[k]; });
+    saveLS("fm-under-seen", USEEN);
+    if (!uArmed) { uArmed = true; return; }          // listings already up when the page opened don't ping
+    hits.slice(0, 4).forEach(function (h) {
+      var body = h.x.s + " has it for " + fmt(h.x.u) + (where(h.x) ? " · " + where(h.x) : "");
+      try { if (window.Notification && Notification.permission === "granted") { var n = new Notification(showName(h.name) + " under your price", { body: body, icon: "og-icon.png?v=3", tag: h.name }); n.onclick = function () { window.focus(); pick(h.name); n.close(); }; } } catch (e) {}
+    });
+    if (hits.length) { if ($("sound").checked) beep(); clearInterval(titleTimer); var on = false, left = 20, n = hits.length;
+      titleTimer = setInterval(function () { on = !on; document.title = on ? "(" + n + ") Under your price" : baseTitle; if (--left <= 0 && document.hasFocus()) { clearInterval(titleTimer); document.title = baseTitle; } }, 1000); }
+  }
+
   // a starred item or a position moving past the threshold in a day pings, once per item, day and direction
   var wArmed = false;
   function renderWatchAlert() {
+    try { checkUnder(); } catch (e) {}
     var th = Math.max(3, +$("watch-th").value || 15) / 100, day = new Date().toDateString();
     var moved = watched().map(function (n) { return D.byName[n]; }).filter(function (i) { return i && i.mv[0] != null && Math.abs(i.mv[0]) >= th; })
       .sort(function (a, b) { return Math.abs(b.mv[0]) - Math.abs(a.mv[0]); });
