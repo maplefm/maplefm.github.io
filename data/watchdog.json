@@ -1,99 +1,125 @@
 {
- "at": 1792949788,
- "ok": false,
- "failing": [
-  "Contribute"
- ],
+ "at": 1792950196,
+ "ok": true,
+ "failing": [],
  "checks": [
   {
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 210,
+   "ms": 151,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 212,
+   "ms": 184,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 143,
+   "ms": 122,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 103,
+   "ms": 124,
    "fix": null
   },
   {
-   "name": "Contribute",
-   "ok": false,
-   "detail": "status 200, missing 'Contribute'",
-   "ms": 190,
+   "name": "Earn by scanning",
+   "ok": true,
+   "detail": "loads",
+   "ms": 170,
+   "fix": null
+  },
+  {
+   "name": "Maps and training",
+   "ok": true,
+   "detail": "loads",
+   "ms": 122,
+   "fix": null
+  },
+  {
+   "name": "Training guide",
+   "ok": true,
+   "detail": "loads",
+   "ms": 133,
+   "fix": null
+  },
+  {
+   "name": "Map page",
+   "ok": true,
+   "detail": "loads",
+   "ms": 109,
+   "fix": null
+  },
+  {
+   "name": "Weekly recap",
+   "ok": true,
+   "detail": "loads",
+   "ms": 120,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 388,
+   "ms": 218,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 164,
+   "ms": 103,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 103,
+   "ms": 137,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 97,
+   "ms": 99,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: typical 2K (2K to 3K) from 115 sales · cheapest now 2K · down 11% today · map",
-   "ms": 690,
+   "detail": "Work Gloves: typical 2K (2K to 3K) from 115 sales · cheapest now 2K · down 10% today · map",
+   "ms": 631,
    "fix": null
   },
   {
    "name": "!price (old address)",
    "ok": true,
-   "detail": "Work Gloves: typical 2K (2K to 3K) from 115 sales · cheapest now 2K · down 11% today · map",
-   "ms": 365,
+   "detail": "Work Gloves: typical 2K (2K to 3K) from 115 sales · cheapest now 2K · down 10% today · map",
+   "ms": 216,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated 1 min ago",
-   "ms": 154,
+   "detail": "updated 2 min ago",
+   "ms": 81,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
    "detail": "1363 items",
-   "ms": 146,
+   "ms": 135,
    "fix": null
   },
   {
@@ -112,7 +138,12 @@
     "Contribute"
    ],
    "repairs": []
+  },
+  {
+   "at": 1792950196,
+   "failing": [],
+   "repairs": []
   }
  ],
- "beat": 1792949788
+ "beat": 1792950196
 }
