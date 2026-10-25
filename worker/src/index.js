@@ -841,8 +841,32 @@ async function mkRows(env) {
   if (rows.length) { MKROWS = rows.map((x) => ({ item: x.item, typ: x.typ, n: x.n, equip: x.equip, vol: x.vol })); MKAT = Date.now(); }
   return MKROWS || [];
 }
+// every item name in the game, for telling "nobody sold one lately" apart from "no such item"
+let DBN = null;
+async function knownItem(env, q) {
+  if (!DBN) {
+    const r = await fetch((env && env.ITEMDB_URL) || "https://maplefm.gg/data/itemdb.json", { cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
+    const d = r && r.ok ? await r.json().catch(() => null) : null;
+    DBN = d && d.items ? d.items.map((x) => String(x[0])) : [];
+  }
+  q = String(q || "").toLowerCase().replace(/-/g, " ").trim();
+  if (q.length < 3) return "";
+  const norm = (n) => n.toLowerCase().replace(/-/g, " ");
+  const exact = DBN.find((n) => norm(n) === q);
+  if (exact) return exact;
+  // every word starts a word of exactly one item: "zakum helm" is Zakum Helmet
+  const qw = q.split(/\s+/).filter((w) => w.length >= 2);
+  if (qw.length < 2) return "";
+  const m = DBN.filter((n) => { const ws = norm(n).split(/[^a-z0-9%]+/); return qw.every((w) => ws.some((x) => x.startsWith(w))); });
+  return m.length === 1 ? m[0] : "";
+}
 async function summaryRows(env) {
-  const sm = await vaultJSON(env, "data/summary.json", 300).catch(() => null);
+  let sm = await vaultJSON(env, "data/summary.json", 300).catch(() => null);
+  // the vault copy is a few minutes fresher; the public copy keeps answers coming if the vault can't be read
+  if (!sm || !Array.isArray(sm.rows)) {
+    const r = await fetch(env.MARKET_ROWS_URL || "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json", { cf: { cacheTtl: 300, cacheEverything: true } }).catch(() => null);
+    sm = r && r.ok ? await r.json().catch(() => null) : null;
+  }
   return sm && Array.isArray(sm.rows) ? sm.rows.filter((r) => r && r.item && !/\u2026$|^scroll: |\|/i.test(r.item)) : [];
 }
 
@@ -865,7 +889,9 @@ function findRows(rows, q, abbr) {
     if (qw.every(hit)) return 4;
     // a typo or an extra word: most of the words still land
     const k = qw.filter(hit).length;
-    return qw.length >= 2 && k >= qw.length - 1 && k >= 1 ? 5 : 9;
+    // one word off is fine in a longer name ("dark crusadr chainmail"), but two words where only one lands
+    // ("zakum helm", "maple claw") is a different item, not a typo
+    return qw.length >= 3 && k >= qw.length - 1 ? 5 : 9;
   };
   const exact = (r) => { const words = shown(r.item).toLowerCase().split(/[^a-z0-9%]+/); return qw.filter((w) => words.includes(w)).length; };
   // misread one-off names (a single listing) sort under real items
@@ -941,6 +967,13 @@ async function priceLine(env, raw) {
     b0.push(sr.roll + " ones are priced by roll at maplefm.gg/#item=" + encodeURIComponent(r0.item));
     return b0.join(" ").slice(0, 390);
   }
+  // a real item nobody has sold lately ("ilbi", "zakum helm"): say so, instead of answering with a different item
+  const known = await knownItem(env, expandQuery(q, ab));
+  if (known && (!hits.length || hits[0].item.toLowerCase() !== known.toLowerCase())) {
+    return shown(known) + ": no sales caught in the last few days, so no price yet. Star it on maplefm.gg to get told when one shows up.";
+  }
+  // asked for a scroll, don't answer with a robe
+  if (hits.length && /\bscr(oll)?s?\b/i.test(q) && !/scroll/i.test(hits[0].item)) return "No recent listings for " + q + ". Try the full name, like gloves attack scroll 60, or check maplefm.gg";
   if (!hits.length) return "No recent listings for " + q + ". Check maplefm.gg";
   const r = hits[0], bits = [shown(r.item) + ":"];
   if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? " from " + (r.salesN || 0) + " sales" : " from asks"));
