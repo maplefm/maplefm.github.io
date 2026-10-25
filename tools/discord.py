@@ -336,14 +336,7 @@ def job_news(state_path, rng=None, digest=False):
         log = subprocess.run(["git", "log", "--reverse", "--format=%H%x1f%s%x1f%b%x1e", "--no-merges", rng],
                              capture_output=True, text=True, check=True).stdout
     except Exception as e:
-        # the remembered commit is gone (history rewritten by a rebase merge): fall back to the last day instead of
-        # stopping here for good, which is what silenced #site-updates after Oct 22
-        print("git log", e, "- using the last 26 hours")
-        try:
-            log = subprocess.run(["git", "log", "--reverse", "--format=%H%x1f%s%x1f%b%x1e", "--no-merges", "--since=26.hours", "HEAD"],
-                                 capture_output=True, text=True, check=True).stdout
-        except Exception as e2:
-            print("git log", e2); return
+        print("git log", e); return
     head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     commits = []
     for rec in log.split("\x1e"):
@@ -362,9 +355,7 @@ def job_news(state_path, rng=None, digest=False):
                               "description": "Running watchers update themselves within 15 minutes, nothing to do.\n" +
                                              "\n".join("• " + plain_change(c[1]) for c in rel if plain_change(c[1]))[:1500],
                               "url": f"{SITE}/contribute.html"}])
-    # behind-the-scenes work doesn't belong in #site-updates; players only hear about what they can see
-    INTERNAL = re.compile(r"\b(worker|pump|indexnow|minif|cache[ds]?|bundle|favicon|watchdog|address|helper|archive|snapshot|server-built|workflow|sitemap)\b", re.I)
-    site = [plain_change(c[1]) for c in commits if c not in rel and not INTERNAL.search(c[1]) and any(f.endswith((".html", ".css", ".js")) or f.startswith("tools/") for f in c[2])]
+    site = [plain_change(c[1]) for c in commits if c not in rel and any(f.endswith((".html", ".css", ".js")) or f.startswith("tools/") for f in c[2])]
     pending = [x for x in (st.get("pending") or []) + [x for x in site if x] if x]
     seen = set(); pending = [x for x in pending if not (x.lower() in seen or seen.add(x.lower()))]
     if digest and pending:
