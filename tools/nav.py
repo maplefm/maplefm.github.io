@@ -4,7 +4,7 @@ import os, re, sys
 
 LINKS = [("prices", "/", "Prices", "Prices"), ("items", "/items/", "All items", "Items"), ("market", "/market.html", "Player market", "Market"),
          ("quests", "/quests.html", "Quests", "Quests"),
-         ("maps", "/map.html", "Maps and training", "Maps"), ("earn", "/contribute.html", "Earn by scanning", "Earn")]
+         ("maps", "/map.html", "Training and maps", "Training"), ("earn", "/contribute.html", "Earn by scanning", "Earn")]
 
 
 def nav_html(active="", home=False):
