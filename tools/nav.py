@@ -2,7 +2,8 @@
 hand-written pages: it replaces whatever sits between <!--nav--> and <!--/nav--> with the current links."""
 import os, re, sys
 
-LINKS = [("prices", "/", "Prices", "Prices"), ("items", "/items/", "All items", "Items"), ("quests", "/quests.html", "Quests", "Quests"),
+LINKS = [("prices", "/", "Prices", "Prices"), ("items", "/items/", "All items", "Items"), ("market", "/market.html", "Player market", "Market"),
+         ("quests", "/quests.html", "Quests", "Quests"),
          ("maps", "/map.html", "Maps and training", "Maps"), ("earn", "/contribute.html", "Earn by scanning", "Earn")]
 
 
@@ -18,7 +19,7 @@ def nav_html(active="", home=False):
 
 
 NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=1">'
-PAGES = {"index.html": ("prices", True), "map.html": ("maps", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
+PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "map.html": ("maps", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
          "report.html": ("", False), "streamers.html": ("", False), "how-it-works.html": ("", False), "shortcuts.html": ("", False),
          "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("", False)}
 

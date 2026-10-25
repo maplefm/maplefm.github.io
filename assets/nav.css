@@ -1,4 +1,4 @@
-/* One site navigation for every page: the same five places, in the same spot, with the current one lit. */
+/* One site navigation for every page: the same six places, in the same spot, with the current one lit. */
 .sitenav{display:flex;align-items:center;justify-content:flex-start;width:100%;box-sizing:border-box;gap:10px 14px;flex-wrap:wrap;margin:0 0 14px;padding:10px 0 0;font-family:Inter,Nunito,system-ui,sans-serif}
 .sitenav .sn-brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink,#22183d);font:800 1.15rem/1 Outfit,"Fredoka",system-ui,sans-serif;white-space:nowrap}
 .sitenav .sn-brand img{height:28px;image-rendering:pixelated}
