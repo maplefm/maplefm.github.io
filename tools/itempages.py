@@ -77,7 +77,7 @@ def page(title, desc, canon, body, ld=None, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=3">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3">{ld or ''}</head><body><main>
 <div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><span class="nav"><a class="sm" href="/training/">Training</a><a class="sm" href="/quests.html">Quest log</a><a class="sm" href="/map.html">Maps</a><a class="go" href="/">Live price board</a></span></div>
 {body}
 <p class="foot">Prices come from sales that players running FM Watcher saw happen in Free Market shops, updated through the day. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
@@ -184,7 +184,8 @@ def main():
         nx = NX.get(name)
         rel = [x for x in bycat.get(r.get("cat") or "Other", []) if x["item"] != name][:8]
         rels = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in rel)
-        desc = f"{nm} price in MapleStory Classic: typically {full(r['typ'])} mesos ({rng}) {basis}. {r.get('salesN') or 0} sales seen recently on the Free Market."
+        desc = (f"{nm} sells for about {full(r['typ'])} mesos in MapleStory Classic" + (f", most sales {rng}" if " to " in rng else "") +
+                f". {r.get('salesN') or 0:,} Free Market sales seen, {'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily.")
         body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}</p></div></div>
 <p class="big"><span id="rng">{rng}</span>{chg}<small>mesos</small></p>
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
@@ -200,6 +201,12 @@ def main():
             {"@type": "ListItem", "position": 1, "name": "Club FM", "item": SITE + "/"},
             {"@type": "ListItem", "position": 2, "name": "Item prices", "item": SITE + "/items/"},
             {"@type": "ListItem", "position": 3, "name": nm, "item": f"{SITE}/item/{s}/"}]}) + "</script>"
+        # the share card doubles as the page's picture for search results
+        ld += '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": f"{nm} price", "url": f"{SITE}/item/{s}/",
+            "description": desc, "dateModified": datetime.date.today().isoformat(), "isPartOf": {"@type": "WebSite", "name": "Club FM", "url": SITE + "/"},
+            "primaryImageOfPage": {"@type": "ImageObject", "url": OG + s + ".png", "width": 1200, "height": 630}, "image": [OG + s + ".png", icon]}) + "</script>"
+        ld += f'<meta name="thumbnail" content="{OG}{s}.png">'
+
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png"))
         made.append((s, nm, r))
