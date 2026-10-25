@@ -4570,13 +4570,27 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     g.href = signedIn ? "contribute.html#earn" : ACCT + "/login?back=home";
   }
   function getBundle() {
-    return fetch(LIVE + "data/live.sig?t=" + Math.floor(Date.now() / 6e4), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (sig) {
-      var at = sig && sig.at || 0;
+    // the server's stamp of the newest upload: changes within seconds of a watcher publishing
+    return fetch(ACCT + "/data/sig", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (sig) {
+      if (sig && sig.v) return sig.v;
+      return fetch(LIVE + "data/live.sig?t=" + Math.floor(Date.now() / 6e4), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (s2) { return s2 && s2.at || 0; });
+    }).then(function (at) {
       if (BUNDLE && at === bundleAt) return BUNDLE;
       return fetch(ACCT + "/data/live", { credentials: "include", cache: "no-cache" }).then(function (r) {
         if (r.status === 401 || r.status === 403) { MEMBER = false; gateText(r.status === 403); $("gate").hidden = false; return null; }
         return r.ok ? r.json() : null;
       }).then(function (b) { if (b) { BUNDLE = b; bundleAt = at; MEMBER = true; $("gate").hidden = true; } return BUNDLE; }).catch(function () { return BUNDLE; });
+    });
+  }
+  // Club and Mega Deals: new listings every 15 seconds, so a deal shows up while it's still there to buy
+  setInterval(function () { if (DEALS_ON && D && !document.hidden) livePoll(); }, 15000);
+  function livePoll() {
+    getBundle().then(function (b) {
+      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
+      var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
+      var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
+      if (sig === lastSig) return;
+      lastSig = sig; scans = all; DIRTY = true; keepRows = $("rows").childElementCount; render(); keepRows = 0;
     });
   }
   function poll() {
