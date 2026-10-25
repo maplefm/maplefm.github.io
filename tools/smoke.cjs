@@ -12,7 +12,7 @@ const srv = http.createServer((q, r) => {
   r.writeHead(200, { "Content-Type": TYPES[p.split(".").pop()] || "application/octet-stream" }); fs.createReadStream(p).pipe(r);
 });
 const PAGES = [["/", ".sitenav"], ["/market.html", ".tabs"], ["/shop.html", "#q"], ["/map.html", ".sitenav"], ["/quests.html", ".sitenav"], ["/contribute.html", ".sitenav"],
-  ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"]];
+  ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"], ["/items/", ".sitenav"], ["/item/work-gloves/", ".crumbs"], ["/map/sleepywood/", ".crumbs"], ["/training/", ".crumbs"], ["/quests/", ".crumbs"]];
 const fails = []; let checks = 0;
 const ok = (c, name) => { checks++; if (!c) fails.push(name); };
 (async () => {
@@ -42,7 +42,20 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         return over + "px wider: " + bad.join(" ");
       });
       ok(!wide, `${tag} ${pg}: no sideways scroll ${wide}`);
-      ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length >= 6), `${tag} ${pg}: site menu`);
+      ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length === 5), `${tag} ${pg}: site menu`);
+      // all five menu links fit on screen, nothing hidden off the side
+      ok(await p.evaluate(() => [...document.querySelectorAll(".sitenav .sn-links a")].every((a) => { const r = a.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; })), `${tag} ${pg}: whole menu visible`);
+      ok(await p.evaluate(() => !!document.querySelector(".clubfoot .sf-cols a[href='/market.html']")), `${tag} ${pg}: site footer`);
+      ok(await p.evaluate(() => document.querySelectorAll(".clubfoot").length === 1 && !document.querySelector("footer.sitefoot")), `${tag} ${pg}: one footer`);
+      if (pg !== "/") {
+        ok(await p.evaluate(() => !!document.querySelector(".sitenav .sn-search input")), `${tag} ${pg}: price search in the menu`);
+        // the menu stays reachable: still there after scrolling down and back up a little
+        await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2)); await p.waitForTimeout(1200);
+        await p.mouse.move(w / 2, h / 2); await p.mouse.wheel(0, -300); await p.waitForTimeout(900);
+        const back = await p.evaluate(() => { const n = document.querySelector(".sitenav"), r = n.getBoundingClientRect(); return r.top >= -5 && r.top < 80 && r.bottom > 30 ? "" : [Math.round(r.top), Math.round(r.bottom), Math.round(scrollY), n.className, getComputedStyle(n).position].join(" "); });
+        ok(!back, `${tag} ${pg}: menu comes back on scroll up ${back}`);
+        await p.evaluate(() => window.scrollTo(0, 0));
+      }
       if (pg === "/") {
         for (const t of ["tab-sell", "tab-pos", "tab-deals", "tab-prices"]) {
           await p.evaluate((id) => document.getElementById(id).click(), t); await p.waitForTimeout(300);
@@ -75,6 +88,11 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         await p.waitForFunction(() => window.fmQA && window.fmQA.items().length > 100, null, { timeout: 30000 }).catch(() => {});
         await p.evaluate(() => window.fmQA.pick("Work Gloves")); await p.waitForTimeout(1500);
         ok(await p.evaluate(() => !!document.querySelector("#ip") && document.querySelector("#ip").textContent.indexOf("Work Gloves") >= 0), `${tag} search opens an item card`);
+      }
+      if (pg === "/market.html") {
+        await p.fill(".sitenav .sn-search input", "work gloves"); await p.keyboard.press("Enter");
+        await p.waitForFunction(() => document.querySelector("#ip") && /Work Gloves/.test(document.querySelector("#ip").textContent), null, { timeout: 30000 }).catch(() => {});
+        ok(await p.evaluate(() => location.pathname === "/" && !!document.querySelector("#ip") && /Work Gloves/.test(document.querySelector("#ip").textContent)), `${tag} menu search opens the item on the board`);
       }
       ok(!errs.length, `${tag} ${pg}: no page errors ${errs.slice(0, 2).join(" | ")}`);
       await ctx.close();

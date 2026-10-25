@@ -9,7 +9,7 @@ training/. Returns (from build()) the list of page paths for the sitemap. Plain 
 """
 import html, json, math, os, re, sys, datetime, shutil, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from nav import nav_html as NAV
+from nav import nav_html as NAV, foot_html as FOOT
 
 SITE = "https://maplefm.gg"
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/"
@@ -72,16 +72,20 @@ def page(title, desc, path, crumbs, body, og=None):
     canon = SITE + path
     ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": i + 1, "name": n, "item": SITE + u} for i, (n, u) in enumerate([("Club FM", "/")] + crumbs)]}
-    nav = " › ".join(f'<a href="{u}">{E(n)}</a>' for n, u in crumbs[:-1])
+    # the trail starts at the section in the menu: Training › Maps › Sleepywood, Quests › Quest guides › ...
+    root = ("Quests", "/quests.html") if path.startswith(("/quest", "/quests")) else ("Training", "/map.html")
+    trail = ([root] if crumbs and crumbs[0][0] != root[0] else []) + crumbs
+    nav = ' <i>›</i> '.join([f'<a href="{u}">{E(n)}</a>' for n, u in trail[:-1]] + ([f'<span aria-current="page">{E(trail[-1][0])}</span>'] if trail else []))
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/item/world.css?v=2"><link rel="stylesheet" href="/assets/nav.css?v=1">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/item/world.css?v=2"><link rel="stylesheet" href="/assets/nav.css?v=2">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("quests" if path.startswith(("/quest", "/quests")) else "maps")}
-{f'<p class="note" style="margin:0 0 8px">{nav}</p>' if nav else ''}<div class="card">{body}</div>
-<p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily. Prices from Free Market sales players watched. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
-</main><script src="/assets/hit.js" defer></script></body></html>"""
+
+{f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{body}</div>
+<p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
+</main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
 
 
 def write(out, path, text):
@@ -326,7 +330,7 @@ def build(world, guide, summary, notes, out):
         if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
         b += f'<p style="margin-top:16px"><a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>, which shows what you can take at your level and what to do next.</p><p class="note">Updated {built}.</p>'
         b += BOARD_CTA
-        crumbs = [("Quests", "/quests/"), (q["n"], f"/quest/{s}/")]
+        crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
         write(out, f"quest/{s}", page(f"{q['n']} · MapleStory Classic quest guide · Club FM", desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
 
     # ---------------------------------------------------------- training guides
@@ -356,7 +360,7 @@ def build(world, guide, summary, notes, out):
             b += f'<li>{mlink(p)} <small>· {st["eph"]:.1f} EXP per 100 HP · {st["n"]} monsters · about {fmt(cost)} mesos of potions a touch</small></li>'
         b += "</ol><h2>By class</h2><p>" + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
         b += '<p style="margin-top:16px"><a href="/map.html#train">Put in your exact level and class</a> for a personal list, with the route from where you stand.</p>'
-        crumbs = [("Training", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
+        crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
         desc = f"Best MapleStory Classic training spots from level {lo} to {hi}: " + ", ".join(list(picks)[:3]) + ", with monsters, EXP per HP and potion cost for each class."
         write(out, f"training/{s}", page(f"Where to train level {lo} to {hi} · MapleStory Classic training guide · Club FM", desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
         tr_links.append((lo, hi, s, list(picks)[:3]))
@@ -370,7 +374,7 @@ def build(world, guide, summary, notes, out):
             for sc, p, st, dmg, hit, cost in rank(L, cls, picks)[:3]:
                 b += pick_html(sc, p, st, dmg, hit, cost, cls, L, picks[p]["why"] if p in picks else "")
             b += f'<p class="note"><a href="/training/level-{lo}-{hi}/">All of level {lo} to {hi}</a></p>'
-        crumbs = [("Training", "/training/"), (cls, f"/training/{cls.lower()}/")]
+        crumbs = [("Training guide", "/training/"), (cls, f"/training/{cls.lower()}/")]
         write(out, f"training/{cls.lower()}", page(f"{cls} training guide · where to train at every level · MapleStory Classic · Club FM",
                                                     f"Where a {cls} should train in MapleStory Classic from level 1 to 100: the best maps at each level with monsters, EXP per HP and potion cost.", f"/training/{cls.lower()}/", crumbs, b))
         paths.append(f"/training/{cls.lower()}/")
@@ -383,7 +387,7 @@ def build(world, guide, summary, notes, out):
     if notes and notes.get("economy"): b += "<h2>Potions and money</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["economy"]) + "</ul>"
     if notes and notes.get("party"): b += "<h2>Party play</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["party"]) + "</ul>"
     b += '<p style="margin-top:16px"><a href="/map.html#train">Your level, your class: get a personal list</a></p>'
-    write(out, "training", page("MapleStory Classic training guide · where to train at every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps, monsters, EXP per HP and potion costs, updated daily.", "/training/", [("Training", "/training/")], b)); paths.append("/training/")
+    write(out, "training", page("MapleStory Classic training guide · where to train at every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps, monsters, EXP per HP and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
 
     regions = {}
     for p, m in M.items(): regions.setdefault(m.get("region") or "Other", []).append(p)
@@ -405,7 +409,7 @@ def build(world, guide, summary, notes, out):
     b += '<p>Want the ones open at your level? <a href="/quests.html">The Quest Log</a> reads your level from classicrank.com and tracks what you have done.</p>'
     for a in sorted(areas, key=lambda a: -len(areas[a])):
         b += f"<h2>{E(a)} <small>{len(areas[a])}</small></h2><ul class=\"toc\">" + "".join(f"<li>{qlink(q)} {('<small>· Lv ' + str(q['lv']) + '</small>') if q['lv'] else ''}</li>" for q in sorted(areas[a], key=lambda q: (q["lv"], q["n"]))) + "</ul>"
-    write(out, "quests", page("All MapleStory Classic quests · items, monsters and rewards · Club FM", "Every MapleStory Classic quest: level, who gives it, the items to bring, monsters to hunt and the rewards.", "/quests/", [("Quests", "/quests/")], b)); paths.append("/quests/")
+    write(out, "quests", page("All MapleStory Classic quests · items, monsters and rewards · Club FM", "Every MapleStory Classic quest: level, who gives it, the items to bring, monsters to hunt and the rewards.", "/quests/", [("Quest guides", "/quests/")], b)); paths.append("/quests/")
 
     open(os.path.join(out, "item", "world.css"), "w").write(CSS + "\n")
     # pages for things that left the data go away, so nothing stale sits in search

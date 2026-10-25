@@ -3288,7 +3288,7 @@
     if (!FEEDBACK.form) return;                                    // hidden until the form is set up
     var topic = "Idea", tp = $("fb-topic");
     ["Wrong price", "Bug", "Idea", "Other"].forEach(function (t) { var b = el("button", null, t); b.type = "button"; b.setAttribute("aria-pressed", t === topic); b.addEventListener("click", function () { topic = t; [].forEach.call(tp.children, function (c) { c.setAttribute("aria-pressed", c === b); }); }); tp.appendChild(b); });
-    var ctx = function () { return (state.tab === "deals" ? "Best deals" : state.tab === "sell" ? "Sell my items" : state.tab === "pos" ? "My positions" : "Prices") + (state.sel ? " · " + state.sel : ""); };
+    var ctx = function () { return (state.tab === "deals" ? "Best deals" : state.tab === "sell" ? "Sell my items" : state.tab === "pos" ? "My positions" : "Board") + (state.sel ? " · " + state.sel : ""); };
     $("fbwrap").hidden = false;
     var fbT = false; try { fbT = localStorage.getItem("fm-fb-tuck") === "1"; } catch (e) {}
     function fbTuck(on) { fbT = on; $("fbwrap").classList.toggle("tucked", on); $("fbtuck").textContent = on ? "💬" : "›"; $("fbtuck").title = on ? "Show the feedback button" : "Tuck away"; $("fbtuck").setAttribute("aria-label", on ? "Show the feedback button" : "Tuck the feedback button away"); try { localStorage.setItem("fm-fb-tuck", on ? "1" : ""); } catch (e) {} }
@@ -3327,6 +3327,23 @@
     d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
   });
   window.addEventListener("focus", function () { clearInterval(titleTimer); document.title = baseTitle; });
+  // the menu's search on every other page lands here as /?q=...: fill the search and open the best match
+  (function qParam() {
+    var q = ""; try { q = new URLSearchParams(location.search).get("q") || ""; } catch (e) {}
+    q = q.trim().slice(0, 80); if (!q) return;
+    try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
+    var tries = 0, t = setInterval(function () {
+      if (++tries > 120) return clearInterval(t);
+      if (!D || !D.list || !D.list.length) return;
+      clearInterval(t);
+      var box = document.getElementById("q"); if (box) box.value = q;
+      var hits = searchItems(q, 8);
+      if (hits.length) {
+        if (hits.length === 1 || hits[0].score - (hits[1] ? hits[1].score : 0) >= 100 || hits[0].it) pick(hits[0].n);
+        if (box) { box.dispatchEvent(new Event("input", { bubbles: true })); }
+      } else if (box) { box.focus(); box.dispatchEvent(new Event("input", { bubbles: true })); }
+    }, 250);
+  })();
   // "Log this sale in My positions" from a market listing: #positions&plog=s,price,qty,item opens the form filled in
   (function plogHash() {
     var m = /[#&]plog=([bs]),(\d+),(\d+),([^&]+)/.exec(location.hash); if (!m) return;
