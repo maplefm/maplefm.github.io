@@ -71,6 +71,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 .pre{font-size:.8rem;color:var(--muted);margin-top:6px}
 .fill{margin:-4px 0 12px;font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;color:var(--muted)}
 .fill button{font:inherit;font-weight:700;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;cursor:pointer}
+.fill input{font:inherit;padding:6px 10px;border-radius:10px;border:1.5px solid var(--line,#ddd);min-width:14em;background:var(--panel,#fff);color:inherit}
 .fill button.yes{background:#6d3fd1;border-color:#6d3fd1;color:#fff}
 .side{position:sticky;top:10px;display:grid;gap:12px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px}
@@ -110,6 +111,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 
 <div class="tabs" id="tabs"></div>
 <div class="fill" id="fill" hidden></div>
+<div class="fill" id="addq" hidden><span>Started a quest that isn't on this list?</span><input type="text" id="addn" maxlength="60" placeholder="Its name, as the game shows it" aria-label="Quest name"><button type="button" id="addb">Add to In progress</button></div>
 <div class="ctl">
   <input type="search" id="s" placeholder="Search a quest, item, NPC or mob: processed wood, Icarus, stirge" aria-label="Search quests">
   <select id="rg" aria-label="Region"><option value="">All regions</option></select>
@@ -164,7 +166,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     var after = {}, grow = true; Object.keys(LOG.doing).forEach(function (n) { Q.forEach(function (q) { if (q.n === n) after[q.id] = 1; }); });
     while (grow) { grow = false; Q.forEach(function (q) { if (!after[q.id] && q.pre.some(function (id) { return after[id]; })) { after[q.id] = 1; grow = true; } }); }
     return Q.filter(function (q) {
-      if (q.lv > lv || LOG.done[q.n] || LOG.doing[q.n] || after[q.id]) return false;
+      if (q.custom || q.lv > lv || LOG.done[q.n] || LOG.doing[q.n] || after[q.id]) return false;
       if (!q.jobs.length || q.jobs.indexOf(0) > -1) return true;
       return !!LOG.fam && q.jobs.some(function (j) { return Math.floor(j / 100) === LOG.fam; });
     });
@@ -183,6 +185,21 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     var n = el("button", null, "Cancel"); n.type = "button"; n.addEventListener("click", function () { fillBar(false); });
     f.appendChild(y); f.appendChild(n);
   }
+  // quests you track that our list doesn't have yet (brand-new ones): kept as plain cards so the log matches the game
+  function addCustoms() {
+    var have = {}; Q.forEach(function (q) { have[q.n.toLowerCase()] = 1; });
+    Object.keys(LOG.doing).concat(Object.keys(LOG.done)).forEach(function (n) {
+      if (have[n.toLowerCase()]) return; have[n.toLowerCase()] = 1;
+      var q = { id: -(Q.length + 1), n: n, lv: 0, g: "", gid: null, a: "", rep: 0, jobs: [], pre: [], need: [], kill: [], exp: 0, meso: 0, fame: 0, get: [], custom: 1 };
+      Q.push(q); BYID[q.id] = q;
+    });
+  }
+  $("addb").addEventListener("click", function () {
+    var n = $("addn").value.replace(/\s+/g, " ").trim(); if (n.length < 3) return;
+    var hit = Q.filter(function (q) { return q.n.toLowerCase() === n.toLowerCase(); })[0];
+    $("addn").value = ""; setState(hit ? hit.n : n, "doing"); addCustoms(); render();
+  });
+  $("addn").addEventListener("keydown", function (e) { if (e.key === "Enter") $("addb").click(); });
   function stateOf(n) { return LOG.done[n] ? "done" : LOG.doing[n] ? "doing" : ""; }
 
   var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, MOBIMG = {}, TAB = "open", FOCUS = 0, SHOWN = 120;
@@ -248,7 +265,8 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     q.get.forEach(function (x) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); if (IDS[x[0]]) s.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); a.appendChild(s); rw.appendChild(a); });
     if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); d.appendChild(s3); }
     if (q.pre.length) { var pids = q.pre.filter(function (id) { return BYID[id]; }); if (pids.length) { var pp = el("p", "pre", "After: "); pids.forEach(function (id, k) { if (k) pp.appendChild(document.createTextNode(", ")); pp.appendChild(questLink(BYID[id].n, id)); }); if (preDone(q)) pp.appendChild(document.createTextNode(" ✓")); d.appendChild(pp); } }
-    if (!q.need.length && !q.kill.length) d.appendChild(el("p", "talk", "Talk and deliver: no items to bring and nothing to hunt."));
+    if (q.custom) d.appendChild(el("p", "talk", "Not in our quest list yet, so there are no details. It's kept here so your log matches the game."));
+    else if (!q.need.length && !q.kill.length) d.appendChild(el("p", "talk", "Talk and deliver: no items to bring and nothing to hunt."));
     return d;
   }
   function render() {
@@ -260,7 +278,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", TAB === t[0]); b.appendChild(document.createTextNode(t[1])); b.appendChild(el("em", null, counts[t[0]] || 0));
       b.addEventListener("click", function () { TAB = t[0]; try { localStorage.setItem("fm-qtab", TAB); } catch (e) {} render(); }); T.appendChild(b);
     });
-    fillBar(false);
+    fillBar(false); $("addq").hidden = TAB !== "doing";
     var inRange = Q.filter(function (q) { return (!lv || q.lv <= lv) && buckets[q.id] !== "other"; }), doneIn = inRange.filter(function (q) { return LOG.done[q.n]; }).length;
     $("pbar").style.width = inRange.length ? Math.round(doneIn / inRange.length * 100) + "%" : "0";
     $("ptxt").textContent = lv ? doneIn + " of " + inRange.length + " quests up to level " + lv + " done." : "Set your level to see what's open.";
@@ -331,6 +349,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     var g = res[0]; G = g.items || {}; IDS = g.ids || {}; MOBIMG = g.mobimg || {}; Q = (g.quests || []).slice();
     Q.forEach(function (q) { BYID[q.id] = q; });
     Q.sort(function (a, b) { return a.lv - b.lv || a.n.localeCompare(b.n); });
+    Q.forEach(function (q) { BYID[q.id] = q; });
     ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) PRICE[r.item] = r.typ; });
     var a = res[2];
     if (a && a.signedIn) {
@@ -343,6 +362,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       if (Object.keys(up).length) push(up);
       saveLocal();
     }
+    addCustoms();
     accountLine();
     if (LOG.level) $("lv").value = LOG.level;
     meIgn.then(function (ign) { var saved = ""; try { saved = localStorage.getItem("fm-me") || ""; } catch (e) {} pullLevel(ign || saved); });

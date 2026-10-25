@@ -186,6 +186,19 @@ def main():
         for jn, jid in JOB.items():
             if jid in (q.get("jobs") or []): qid_by_norm.setdefault(norm(q["n"] + jn), q["id"])
 
+    # ---- wiki quests the game data doesn't list yet go in the quest log too (the Lith Harbor snail line, the
+    # Sleepywood rumor line...), with what the wiki knows: level, giver, region and the items it asks for
+    have = {norm(q["n"]) for q in allq}; have_id = {q["id"] for q in allq}
+    for w in wq:
+        nm, wid = str(w.get("name_en") or "").strip(), str(w.get("id") or "").strip()
+        if not nm or not wid.isdigit() or int(wid) in have_id or norm(nm) in have: continue
+        have.add(norm(nm))
+        allq.append({"id": int(wid), "n": nm, "lv": int(num(w.get("required_level"))), "g": w.get("giver") or "", "gid": npc_id.get(str(w.get("giver") or "").lower()),
+                     "a": w.get("region") or "", "rep": 1 if str(w.get("repeatable") or "0") == "1" else 0, "jobs": [], "pre": [],
+                     "need": [[str(r.get("item_id") or "").strip(), int(num(r.get("quantity")))] for r in wqi if str(r.get("quest_id") or "").strip().lower() == nm.lower() and int(num(r.get("quantity"))) > 0],
+                     "kill": [], "exp": 0, "meso": 0, "fame": 0, "get": [], "end": None, "wiki": 1})
+    print("quests in the log", len(allq))
+
     # ---- wiki quests the game data doesn't list yet (newly added ones)
     for r in wqi:
         qn, iname, cnt = str(r.get("quest_id") or "").strip(), str(r.get("item_id") or "").strip(), int(num(r.get("quantity")))
