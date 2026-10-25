@@ -206,6 +206,8 @@ for dest, dk in (("Perion", "philPerionFare"), ("Ellinia", "philElliniaFare"), (
     if F(dk): cabs.append(["Lith Harbor", dest, F(dk) // max(1, F("philLevel10To19Divisor", 2)), F(dk)])
 if ("Ellinia", "Lith Harbor") not in {(a, b) for a, b, _, _ in cabs} and F("philElliniaFare"):
     cabs.append(["Ellinia", "Lith Harbor", F("philElliniaFare") // 2, F("philElliniaFare")])
+# NPC rides that aren't cabs: Pason in Lith Harbor sails to Florina Beach and Pison brings you back (fare from the wiki's Pason page)
+boats = [["Lith Harbor", "Florina Beach", 1500, "Pason"], ["Florina Beach", "Lith Harbor", 0, "Pison"]]
 vip = [[t, "Ant Tunnel Park", F("vipCabFare", 10000), F("vipCabFare", 10000)] for t in ("Ellinia", "Lith Harbor") if F("vipCabFare")]
 scrolls = {}
 for s in shop_items:
@@ -272,7 +274,7 @@ for name, mb in mob.items():
                 im.save(path, format="PNG")   # served under the same name; browsers read the PNG inside
             except Exception as e:
                 print("wiki sprite", name, e)
-out = {"at": int(time.time()), "built": TODAY, "maps": M, "mobs": mob, "cabs": cabs, "vip": vip, "scrolls": scrolls, "pots": pots,
+out = {"at": int(time.time()), "built": TODAY, "maps": M, "mobs": mob, "cabs": cabs, "vip": vip, "boats": boats, "scrolls": scrolls, "pots": pots,
        "first": first, "unreleased": len(unreleased),
        "credit": "Maps, portals, spawns and shops: MapleStory Classic Wiki (CC BY-NC-SA 4.0). Minimaps, monster stats and sprites: Classic World game files via maplestory.io."}
 json.dump(out, open(os.path.join(OUT, "world.json"), "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)

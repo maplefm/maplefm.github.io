@@ -238,7 +238,7 @@ def build(world, guide, summary, notes, out):
             b += "<h2>NPCs</h2><ul>" + "".join(f"<li>{E(n[0])}{' · ' + E(n[3]) if n[3] else ''}</li>" for n in m["npcs"]) + "</ul>"
         if m.get("shops"): b += f'<p class="note">Shops here: {E(", ".join(m["shops"]))}.</p>'
         q_here = [q for q in QS if q.get("g") in {n[0] for n in m.get("npcs") or []}]
-        if q_here: b += "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· Lv {q['lv']}+ from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
+        if q_here: b += "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
         b += f'<p style="margin-top:16px"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p><p class="note">Updated {built}.</p>'
         crumbs = [("Maps", "/maps/"), (p, f"/map/{MSLUG[p]}/")]
         write(out, f"map/{MSLUG[p]}", page(f"{p} · MapleStory Classic map, portals and monsters · Club FM", desc, f"/map/{MSLUG[p]}/", crumbs, b, f"{OG}map/{MSLUG[p]}.png")); paths.append(f"/map/{MSLUG[p]}/")
@@ -268,7 +268,7 @@ def build(world, guide, summary, notes, out):
             seen = set(); rows = ""
             for q, c, why in sorted(qq, key=lambda x: x[0]["lv"]):
                 if (q["id"], why) in seen: continue
-                seen.add((q["id"], why)); rows += f"<li>{qlink(q)} <small>· Lv {q['lv']}+ · {E(why)} ×{c:,}</small></li>"
+                seen.add((q["id"], why)); rows += f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}{E(why)} ×{c:,}</small></li>"
             b += f"<h2>Quests that need it</h2><ul>{rows}</ul>"
         b += f'<p class="note">Updated {built}.</p>'
         crumbs = [("Monsters", "/monsters/"), (n, f"/monster/{BSLUG[n]}/")]
@@ -292,7 +292,7 @@ def build(world, guide, summary, notes, out):
         if where_g: b += f"<p>{E(q['g'])} stands in {', '.join(mlink(p) for p in where_g[:4])}.</p>"
         if q.get("pre"):
             pre = [QBYID[i] for i in q["pre"] if i in QBYID]
-            if pre: b += "<h2>Finish first</h2><ul>" + "".join(f"<li>{qlink(x)} <small>· Lv {x['lv']}+</small></li>" for x in pre) + "</ul>"
+            if pre: b += "<h2>Finish first</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in pre) + "</ul>"
         if q.get("kill"):
             b += "<h2>Hunt</h2><ul>" + "".join(
                 f"<li>{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mlink(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
@@ -306,7 +306,7 @@ def build(world, guide, summary, notes, out):
         if q.get("get"):
             b += "<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)}</li>" for i, c in q["get"]) + ("<li>" + fmt(q["exp"]) + " EXP</li>" if q.get("exp") else "") + ("<li>" + fmt(q["meso"]) + " mesos</li>" if q.get("meso") else "") + "</ul>"
         nx = nextq.get(q["id"], [])
-        if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} <small>· Lv {x['lv']}+</small></li>" for x in nx) + "</ul>"
+        if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
         b += f'<p style="margin-top:16px"><a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>, which shows what you can take at your level and what to do next.</p><p class="note">Updated {built}.</p>'
         crumbs = [("Quests", "/quests/"), (q["n"], f"/quest/{s}/")]
         write(out, f"quest/{s}", page(f"{q['n']} · MapleStory Classic quest guide · Club FM", desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
@@ -386,7 +386,7 @@ def build(world, guide, summary, notes, out):
     b = f"<h1>MapleStory Classic quests</h1><p class=\"sub\">{len(QS)} quests with what to bring, what to hunt and the rewards · updated {built}</p>"
     b += '<p>Want the ones open at your level? <a href="/quests.html">The Quest Log</a> reads your level from classicrank.com and tracks what you have done.</p>'
     for a in sorted(areas, key=lambda a: -len(areas[a])):
-        b += f"<h2>{E(a)} <small>{len(areas[a])}</small></h2><ul class=\"toc\">" + "".join(f"<li>{qlink(q)} <small>· Lv {q['lv']}</small></li>" for q in sorted(areas[a], key=lambda q: (q["lv"], q["n"]))) + "</ul>"
+        b += f"<h2>{E(a)} <small>{len(areas[a])}</small></h2><ul class=\"toc\">" + "".join(f"<li>{qlink(q)} {('<small>· Lv ' + str(q['lv']) + '</small>') if q['lv'] else ''}</li>" for q in sorted(areas[a], key=lambda q: (q["lv"], q["n"]))) + "</ul>"
     write(out, "quests", page("All MapleStory Classic quests · items, monsters and rewards · Club FM", "Every MapleStory Classic quest: level, who gives it, the items to bring, monsters to hunt and the rewards.", "/quests/", [("Quests", "/quests/")], b)); paths.append("/quests/")
 
     open(os.path.join(out, "item", "world.css"), "w").write(CSS + "\n")

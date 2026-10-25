@@ -180,9 +180,17 @@
     var pp = null; for (i = 1; i <= a.length; i++) { cur = [i]; var lo = i; for (j = 1; j <= b.length; j++) { cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], pp[j - 2] + 1); if (cur[j] < lo) lo = cur[j]; } if (lo > cap) return cap + 1; pp = prev; prev = cur; }
     return prev[b.length];
   }
+  var QROLL = null, PENDROLL = null;
   // returns [{n, score, why}] best first. strong matches score 450 and up; typo matches stay under 300.
   function searchItems(q, limit) {
     var ql = String(q || "").toLowerCase().trim(); if (!ql) return [];
+    // a roll typed with the item ("5 att wg", "work gloves +3 att") finds the item, then opens that roll's listings
+    var rm = /(^|\s)\+?(\d{1,2})\s*(att|watk|atk|matt|matk)\b/.exec(ql) || /(^|\s)(att|watk|atk|matt|matk)\s*\+(\d{1,2})\b/.exec(ql);
+    if (rm) {
+      var rk = /^m/.test(rm[3] && isNaN(rm[3]) ? rm[3] : rm[2]) ? "MATT" : "ATT", rv = +(isNaN(rm[2]) ? rm[3] : rm[2]);
+      var rest = ql.replace(rm[0], " ").replace(/\s+/g, " ").trim();
+      if (rest && rv > 0 && rv <= 30) { QROLL = { k: rk, v: rv, at: Date.now() }; ql = rest; }
+    }
     var tier = "";
     ql = ql.replace(/(^|[^0-9])(100|60|10)\s*%/, function (m, a, n) { tier = TIERPCT[n]; return a + " "; });
     if (!tier) { var bm = /(^|\s)(100|60|10)(\s|$)/.exec(ql); if (bm && ql.replace(bm[0], " ").trim()) { tier = TIERPCT[bm[2]]; ql = ql.replace(bm[0], " "); } }
@@ -1183,7 +1191,7 @@
     // the hook: the biggest sales caught, one at a time
     // skip one-off sales far above the item's normal price (a lucky roll or a typo reads as a mistake next to "about 2K")
     var sane = function (l) { var it = D.byName[l.i]; return !it || !it.typ || l.p <= it.typ * 8; };
-    var big = D.sales.filter(sane).sort(function (a, b) { return b.p - a.p; }).filter(function (l, n, arr) { return arr.findIndex(function (x) { return x.i === l.i; }) === n; }).slice(0, 5);
+    var seenBig = {}, big = D.sales.filter(sane).sort(function (a, b) { return b.p - a.p; }).filter(function (l) { if (seenBig[l.i]) return false; seenBig[l.i] = 1; return true; }).slice(0, 5);
     if (!big.length && k && k.big && sane(k.big)) big = [k.big];
     var hook = el("button", "st hook"); hook.type = "button"; c.appendChild(hook);
     function showHook() {
@@ -1937,6 +1945,8 @@
   function rollBasis(name, l) {
     var x = l && l.x; if (!x || x.g != null) return "";
     if (x._tip) {
+      // scrolled attack on gloves and other armour is what buyers shop by
+      if (category(name) !== "Weapons" && (x._tip.ATT || x._tip.MATT)) return x._tip.ATT ? "ATT" : "MATT";
       var kk = keyStat(name, x, l.xj); if (kk && x._tip[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return kk;
       var moved = Object.keys(x._tip).filter(function (k) { return x._tip[k]; });
       return moved.length === 1 ? moved[0] : moved.length ? "TOTAL" : "";
@@ -1954,6 +1964,7 @@
   function rollOf0(name, l) {
     var x = l && l.x; if (!x) return null;
     if (x.g != null) return x.g;
+    if (x._tip && category(name) !== "Weapons" && (x._tip.ATT || x._tip.MATT)) return x._tip.ATT || x._tip.MATT;
     if (x._tip) { var kk = keyStat(name, x, l.xj); if (kk && x._tip[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return x[kk] - x[kk + "_b"]; }
     if (x._tip) { var tot = 0; Object.keys(x._tip).forEach(function (k) { tot += x._tip[k]; }); return tot; }
     var k = keyStat(name, x, l.xj);
@@ -2069,6 +2080,7 @@
   // ---------- item panel
   function pick(name) {
     earnNudge(1);
+    PENDROLL = QROLL && Date.now() - QROLL.at < 15000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;
     document.body.classList.remove("noside");
     state.sel = name; state.list = "buy"; hideHov();
     try { history.replaceState(null, "", "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "")); } catch (e) {}
@@ -2283,6 +2295,7 @@
       return;
     }
     var i = state.sel && D.byName[state.sel];
+    if (i && !(i.typ > 0) && !i.asks.length && !i.sales.length) i = null;   // nothing priced yet: the "no price yet" card, not a 0
     if (!i && state.sel && dbRow(state.sel)) {
       var nr = dbRow(state.sel), nh = el("div", "ih"); nh.appendChild(iconBox(nr[0])); var nt = el("div"); nt.appendChild(el("h3", null, nr[0]));
       nt.appendChild(el("p", null, nr[4] ? "Cash item" : (nr[2] ? "Level " + nr[2] : "")));
@@ -2377,7 +2390,7 @@
       // the first hover can be a clean pair: gloves and other armour that gain attack from scrolls are grouped by
       // attack as soon as any listing shows some, and the clean ones count as attack 0
       var attX = withX.filter(function (x) { return x.x.ATT != null || x.x.MATT != null; })[0];
-      if (attX && ks !== "ATT" && ks !== "MATT" && ks !== "SUCCESS") ks = keyStat(i.item, attX.x, attX.xj);
+      if (attX && ks !== "ATT" && ks !== "MATT" && ks !== "SUCCESS") ks = attX.x.MATT != null && attX.x.ATT == null ? "MATT" : "ATT";
       var noBaseAtt = (ks === "ATT" || ks === "MATT") && category(i.item) !== "Weapons" && !(fullBase(i.item).s || {})[ks];
       var groups = {};
       withX.forEach(function (x) { var v = x.x[ks]; if (v == null && noBaseAtt && x.x.SLOTS != null) v = 0; if (v == null) return; var bv = baseOf(i.item, x.x, ks); if (ks !== "SUCCESS" && (v < 0 || (bv != null ? v > bv * 2 + 40 : v > 250))) return; (groups[v] || (groups[v] = [])).push(x); });   // a roll twice the base is a misread, not a scroll job
@@ -2432,6 +2445,13 @@
     var e = el("p", "iearn"); e.appendChild(document.createTextNode("Prices here come from players running FM Watcher while they shop. "));
     var ea = el("a", null, "Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea); f.appendChild(e);
     ip.appendChild(f);
+    // a roll asked for in the search: jump to its row in "Price by ATT", or say none has been seen
+    if (PENDROLL && PENDROLL.n === n) {
+      var want = PENDROLL.k + " " + PENDROLL.v, row = [].filter.call(ip.querySelectorAll(".pbs tr.jump"), function (tr) { return tr.firstChild && new RegExp("^" + want + "(\\D|$)").test(tr.firstChild.textContent); })[0];
+      PENDROLL = null;
+      if (row) setTimeout(function () { row.scrollIntoView({ block: "center" }); row.click(); }, 50);
+      else { var nn = el("p", "rollmiss", "No " + showName(n) + " with " + want + " seen yet. The rolls that have been seen are below."); ip.insertBefore(nn, ip.children[1] || null); }
+    }
   };
   function renderActivity() {
     var box = $("act"); if ($("activity").hidden) return; box.textContent = "";
@@ -2719,7 +2739,7 @@
   function render(rebuild) {
     if (rebuild === true || DIRTY || !D || Date.now() - lastBuild > 5 * 6e4) {
       if (!scans.length && !D) { var pv = loadPreview(); if (pv) { D = pv; lastBuild = Date.now(); DIRTY = false; } }
-      if (!D || scans.length || !D.preview) { D = build(); SIDX = null; DIRTY = false; lastBuild = Date.now(); if (D.list.length) setTimeout(saveSummary, 1500); }
+      if (!D || scans.length || !D.preview) { mark("buildA"); D = build(); mark("buildB"); SIDX = null; DIRTY = false; lastBuild = Date.now(); if (D.list.length) setTimeout(saveSummary, 1500); }
     }
     nxRate(); renderCards(); renderBoard(); renderTicker(); renderAlert(); renderWatchAlert(); if (RANKS && armed) seenTiers(); if ($("ranks").open) renderRanks();
     var nck = D.list.filter(function (i) { return i.check; }).length; $("m-check-n").textContent = nck ? nck : "";
@@ -3179,23 +3199,42 @@
     g.querySelector("i").textContent = signedIn ? "How to earn it" : "Sign in with Discord";
     g.href = signedIn ? "contribute.html#earn" : ACCT + "/login?back=home";
   }
+  // one request at a time: the early start below and the first poll share it
+  var BUNDLE_P = null;
   function getBundle() {
+    if (BUNDLE_P) return BUNDLE_P;
+    BUNDLE_P = getBundle0().then(function (b) { BUNDLE_P = null; return b; }, function () { BUNDLE_P = null; return BUNDLE; });
+    return BUNDLE_P;
+  }
+  function getBundle0() {
+    var cacheP = BUNDLE ? Promise.resolve() : bundleCached();   // the browser's saved copy is read while the stamp is fetched
     // the server's stamp of the newest upload: changes within seconds of a watcher publishing
     return fetch(ACCT + "/data/sig", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (sig) {
       if (sig && sig.v) return sig.v;
       return fetch(LIVE + "data/live.sig?t=" + Math.floor(Date.now() / 6e4), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (s2) { return s2 && s2.at || 0; });
     }).then(function (at) {
-      return BUNDLE ? at : bundleCached().then(function () { return at; });
+      return BUNDLE ? at : cacheP.then(function () { return at; });
     }).then(function (at) {
       if (BUNDLE && at === bundleAt) return BUNDLE;
       // after the first full load, ask only for uploads newer than what we hold (a few KB, not megabytes);
       // the bundle is kept in this browser, so a return visit loads only what's new; a full reload every 6 hours
       // picks up anything trimmed or rewritten on the server
-      var delta = BUNDLE && Date.now() - bundleFull < 6 * 36e5, since = delta ? bundleNewest() - 15 * 6e4 : 0;
+      var delta = BUNDLE && bundleFull && Date.now() - bundleFull < 6 * 36e5, since = delta ? bundleNewest() - 15 * 6e4 : 0;
+      // a first visit starts with the last 30 hours (what's for sale now, a fraction of the size), shows it, then the
+      // full history follows a few seconds later and fills in the weekly numbers
+      var first = !BUNDLE && !bundleFull;
+      if (first) { delta = true; since = Date.now() - 30 * 36e5; }
+      mark("liveReq");
       return fetch(ACCT + "/data/live" + (delta ? "?after=" + since : ""), { credentials: "include", cache: "no-cache" }).then(function (r) {
         if (r.status === 401 || r.status === 403) { MEMBER = false; gateText(r.status === 403); $("gate").hidden = false; return null; }
         return r.ok ? r.json() : null;
       }).then(function (b) {
+        mark("liveJson");
+        if (b && first) {
+          BUNDLE = b; bundleFull = 0; bundleAt = at; MEMBER = true; $("gate").hidden = true;
+          setTimeout(function () { bundleAt = -1; poll(); }, 2500);
+          return BUNDLE;
+        }
         if (b) {
           if (delta) {
             var nb = {};
@@ -3285,5 +3324,6 @@
   // shell shows at once and the data lands in one pass instead of three.
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
   mark("start"); render(); mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;
+  getBundle();   // start the listings download right away, alongside the item list
   dbReady.then(function () { poll(); setInterval(poll, 60000); }); setInterval(renderMaint, 60000);
 })();
