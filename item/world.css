@@ -1,0 +1,15 @@
+.wn{display:flex;gap:10px;flex-wrap:wrap;font-weight:700;font-size:.9rem}
+.mmap{position:relative;display:block;max-width:100%;background:#0c1220;border-radius:12px;padding:6px;margin:12px 0;box-sizing:border-box}
+.mmap .in{position:relative;margin:0 auto;max-width:100%}.mmap img{display:block;width:100%;height:100%;image-rendering:pixelated}
+.mk{position:absolute;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0008}
+.mk.p{width:10px;height:10px;background:#4fc3ff}.mk.h{width:11px;height:11px;border-radius:2px;background:#b45cff;transform:translate(-50%,-50%) rotate(45deg)}
+.mk.d{width:10px;height:10px;border-radius:2px;background:#ffb547}.mk.n{width:8px;height:8px;background:#ffe14d;border-width:1.5px}.mk.s{width:6px;height:6px;background:#ff5d5d;border:0;opacity:.8}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.mobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:8px 0}
+.mob{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:6px 10px 6px 6px;text-decoration:none;color:var(--ink)}
+.mob img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated}.mob b{display:block}.mob small{color:var(--muted)}
+.hid{background:#b45cff22;border-left:4px solid #b45cff;border-radius:10px;padding:8px 12px;margin:8px 0}
+.tip{background:var(--panel2);border-left:4px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0}
+.pick{border:1px solid var(--line2);border-radius:14px;padding:12px 14px;margin:10px 0;background:var(--panel2)}.pick h3{margin:0 0 4px;font-size:1.05rem}
+.toc{columns:2;column-gap:20px;padding-left:18px}@media (max-width:560px){.toc{columns:1}}.toc li{break-inside:avoid;margin:2px 0}
+.sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;background:var(--panel2);border-radius:14px;padding:6px}

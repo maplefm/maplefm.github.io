@@ -4,6 +4,7 @@
 <meta name="description" content="Where to train at your level in MapleStory Classic, what it costs in potions, and how to get anywhere on Victoria Island: the fastest route, the free route, hidden portals and in-game minimaps.">
 <link rel="canonical" href="https://maplefm.gg/map.html">
 <meta property="og:title" content="Maps and Training · MapleStory Classic · Club FM"><meta property="og:description" content="Where to train at your level, potion costs, and the fastest or free route to any map, with hidden portals on the in-game minimap."><meta property="og:image" content="https://maplefm.gg/og.png"><meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Club FM Maps and Training","url":"https://maplefm.gg/map.html","applicationCategory":"GameApplication","operatingSystem":"Any","description":"Where to train at your level in MapleStory Classic, potion costs, and the fastest or free route to any map with hidden portals on the in-game minimap.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 <link rel="icon" href="/og-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -103,7 +104,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 [hidden]{display:none!important}
 </style></head><body><main>
 <div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt=""> Club FM</a>
-<div class="navs"><a href="/quests.html">Quest log</a><a href="/items/">Item prices</a><a class="go" href="/">Price board</a></div></div>
+<div class="navs"><a href="/training/">Training guide</a><a href="/maps/">All maps</a><a href="/quests.html">Quest log</a><a href="/items/">Item prices</a><a class="go" href="/">Price board</a></div></div>
 
 <section class="hero">
   <div><h1>Maps and Training</h1><p>Where to train at your level, what it costs you in potions, and how to get anywhere on Victoria Island: the fastest way, the free way, and every hidden portal on the in-game minimap.</p></div>
@@ -457,8 +458,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     if (FROM) $("from").value = FROM;
     if (ME.lv) $("lv").value = ME.lv; if (ME.cls) $("cls").value = ME.cls;
     renderTrain();
-    var h = location.hash, mr = /^#route=([^|]+)\|(.+)$/.exec(h), mm = /^#map=(.+)$/.exec(h);
-    if (mr) { showTab("route"); $("from").value = decodeURIComponent(mr[1]); $("to").value = decodeURIComponent(mr[2]); findRoute(); }
+    var h = location.hash, mr = /^#route=([^|]*)\|(.+)$/.exec(h), mm = /^#map=(.+)$/.exec(h);
+    if (mr) { showTab("route"); $("from").value = decodeURIComponent(mr[1]) || FROM; $("to").value = decodeURIComponent(mr[2]); findRoute(); }
     else if (mm) showMap(decodeURIComponent(mm[1]));
     meIgn.then(function (ign) { var saved = ""; try { saved = localStorage.getItem("fm-me") || ""; } catch (e) {} if (ign || saved) { $("ign").value = ign || saved; pullLevel(ign || saved); } });
   }).catch(function (e) { $("v-train").appendChild(el("div", "card note", "Couldn't load the map data. Try again in a minute.")); console.error(e); });
