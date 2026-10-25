@@ -504,14 +504,22 @@ async function dataLive(req, env) {
   // ?after=<ms>: only the uploads newer than that, so an open board refreshes with a few KB instead of the whole bundle
   const after = Number(new URL(req.url).searchParams.get("after")) || 0;
   if (after > 0) {
-    let out = "{", first = true;
-    for (let i = 0; i < MEMBER_FILES.length; i++) {
-      if (!parts[i]) continue;
-      let arr; try { arr = JSON.parse(await parts[i].text()); } catch (e) { continue; }
-      const t = JSON.stringify(Array.isArray(arr) ? arr.filter((d) => d && Date.parse(d.at) > after) : []);
-      out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + (mk === null ? t : markTimes(t, mk)); first = false;
+    // the cut is rounded down to 10 minutes and kept per archive version, so first visits share one filtered copy
+    const ak = Math.floor(after / 6e5) * 6e5;
+    const ck = new Request("https://archive.cache/live-after?ref=" + (ref || "x") + "&after=" + ak);
+    let body = null; const hit = ref ? await caches.default.match(ck) : null;
+    if (hit) body = await hit.text();
+    else {
+      let out = "{", first = true;
+      for (let i = 0; i < MEMBER_FILES.length; i++) {
+        if (!parts[i]) continue;
+        let arr; try { arr = JSON.parse(await parts[i].text()); } catch (e) { continue; }
+        out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + JSON.stringify(Array.isArray(arr) ? arr.filter((d) => d && Date.parse(d.at) > ak) : []); first = false;
+      }
+      body = out + "}";
+      if (ref) await caches.default.put(ck, new Response(body, { headers: { "Cache-Control": "public, max-age=900" } })).catch(() => {});
     }
-    return new Response(out + "}", { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store", "X-Delta": "1" } });
+    return new Response(mk === null ? body : markTimes(body, mk), { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store", "X-Delta": hit ? "cached" : "1" } });
   }
   const { readable, writable } = new TransformStream();
   (async () => {

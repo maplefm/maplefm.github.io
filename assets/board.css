@@ -1113,3 +1113,4 @@ dialog h3 { color: var(--accent-ink); }
 .nudge .nx { position: absolute; top: 6px; right: 8px; border: 0; background: none; font-size: 1.2rem; line-height: 1; color: var(--muted); cursor: pointer; padding: 4px; }
 body.sheet .nudge { display: none; }
 @media (max-width: 700px) { .nudge { left: 16px; right: 16px; width: auto; bottom: 62px; } }
+.rollmiss { margin: 8px 0; padding: 8px 10px; border-radius: 10px; background: var(--panel2); font-weight: 700; font-size: .82rem; }

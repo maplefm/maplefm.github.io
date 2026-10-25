@@ -300,6 +300,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     });
     if (TOWNS[A]) W.cabs.forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 8 + travel(pos, centre(m)) * 0.5, mesos: L >= 20 ? c[3] : c[2], arrive: centre(MAPS[c[1]]), what: "Regular Cab" }); });
     (W.vip || []).forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 8, mesos: c[2], arrive: centre(MAPS[c[1]]), what: "VIP Cab" }); });
+    (W.boats || []).forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 10, mesos: c[2], arrive: centre(MAPS[c[1]]), what: c[3] }); });
     var sc = W.scrolls || {};
     if (sc.nearest && m.ret && m.ret !== A && MAPS[m.ret] && m.type !== "Town") out.push({ to: m.ret, kind: "scroll", t: 4, mesos: sc.nearest.price, arrive: centre(MAPS[m.ret]), what: sc.nearest.item });
     Object.keys(sc).forEach(function (t) { if (t !== "nearest" && t !== A && MAPS[t]) out.push({ to: t, kind: "scroll", t: 4, mesos: sc[t].price, arrive: centre(MAPS[t]), what: sc[t].item }); });
@@ -325,6 +326,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var t = 0, mesos = 0; steps.forEach(function (s) { t += s.e.t; mesos += s.e.mesos; });
     return { steps: steps, t: t, mesos: mesos, maps: steps.length };
   }
+  window.fmMapQA = { route: function (a, b, mode) { return route(a, b, mode); }, maps: function () { return MAPS; }, setLevel: function (l) { ME.lv = l; } };
   var ROUTES = null, RMODE = "fast";
   function findRoute() {
     var a = resolve($("from").value), b = resolve($("to").value), box = $("routes"); box.textContent = "";
@@ -333,11 +335,16 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     try { history.replaceState(null, "", "#route=" + encodeURIComponent(a) + "|" + encodeURIComponent(b)); } catch (e) {}
     if (a === b) { box.appendChild(el("div", "card note", "You're already there.")); return; }
     ROUTES = { fast: route(a, b, "fast"), value: route(a, b, "value"), free: route(a, b, "free") };
-    if (!ROUTES.fast && !ROUTES.free) { box.appendChild(el("div", "card note", "No known way between these two maps yet. Some maps are only reached by quest or event.")); return; }
+    if (!ROUTES.fast && !ROUTES.free) {
+      var why = MAPS[b].region === "Maple Island" ? "Maple Island is only for new characters: once you sail to Victoria Island you can't go back." :
+        MAPS[a].region === "Maple Island" ? "From Maple Island, take the ship at Southperry to Lith Harbor first, then route from there." :
+        "No walking route reaches " + MAPS[b].name + ". It's entered through an NPC, a quest or a jump quest" + (MAPS[b].near ? ", near " + MAPS[b].near : "") + ".";
+      box.appendChild(el("div", "card note", why)); return;
+    }
     var opts = el("div", "opts");
     [["fast", "Fastest", "Any cab or scroll that saves time"], ["value", "Quick and cheap", "Pays only when it saves real time"], ["free", "Free", "Walking only, no mesos"]].forEach(function (o) {
       var r = ROUTES[o[0]]; var b0 = el("button", "opt"); b0.type = "button"; b0.setAttribute("aria-pressed", RMODE === o[0]);
-      b0.appendChild(el("b", null, o[1])); b0.appendChild(el("span", null, r ? "about " + secs(r.t) + " · " + r.maps + (r.maps === 1 ? " step" : " steps") + " · " + (r.mesos ? fmt(r.mesos) + " mesos" : "free") : "No route")); b0.appendChild(el("span", null, ""));
+      b0.appendChild(el("b", null, o[1])); b0.appendChild(el("span", null, r ? "about " + secs(r.t) + " · " + r.maps + (r.maps === 1 ? " step" : " steps") + " · " + (r.mesos ? fmt(r.mesos) + " mesos" : "free") : (o[0] === "free" && ROUTES.fast ? "No free way: needs a paid ride" : "No route"))); b0.appendChild(el("span", null, ""));
       b0.lastChild.textContent = " " + o[2]; b0.lastChild.style.display = "block";
       b0.disabled = !r; b0.addEventListener("click", function () { RMODE = o[0]; findRoute(); }); opts.appendChild(b0);
     });
@@ -359,7 +366,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       } else {
         h.textContent = (s.e.kind === "cab" ? s.e.what + ": " : "Use a ") + (s.e.kind === "scroll" ? s.e.what + " → " : m.name + " → ") + MAPS[s.e.to].name;
         body.appendChild(h);
-        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to the " + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + fmt(s.e.mesos) + " mesos" + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." : "Use it anywhere: " + fmt(s.e.mesos) + " mesos from a potion shop. Buy it before you set out."));
+        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to " + (/Cab$/.test(s.e.what) ? "the " : "") + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + (s.e.mesos ? fmt(s.e.mesos) + " mesos" : "Free") + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." : "Use it anywhere: " + fmt(s.e.mesos) + " mesos from a potion shop. Buy it before you set out."));
       }
       d.appendChild(body); steps.appendChild(d);
     });
@@ -374,7 +381,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var v = $("mapview"); v.textContent = ""; var m = MAPS[pg]; if (!m) return;
     try { history.replaceState(null, "", "#map=" + encodeURIComponent(pg)); } catch (e) {}
     var c = el("div", "card"), g = el("div", "grid2"), left = el("div"), right = el("div");
-    var h = el("div", "row"); h.appendChild(el("h2", null, m.name)); if (m.type) h.appendChild(el("span", "chip", m.type)); if (m.region) h.appendChild(el("span", "chip", m.region)); if (m.lv[0]) h.appendChild(el("span", "chip gold", "Level " + m.lv[0] + (m.lv[1] ? "–" + m.lv[1] : "+")));
+    var h = el("div", "row"); h.appendChild(el("h2", null, pg)); if (m.type) h.appendChild(el("span", "chip", m.type)); if (m.region) h.appendChild(el("span", "chip", m.region)); if (m.lv[0]) h.appendChild(el("span", "chip gold", "Level " + m.lv[0] + (m.lv[1] ? "–" + m.lv[1] : "+")));
     left.appendChild(h);
     left.appendChild(minimap(m, { size: 640, maxh: 520, onPortal: function (to) { $("mapq").value = to; renderMap(to); } }));
     left.appendChild(legend());
