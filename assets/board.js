@@ -3415,7 +3415,7 @@
   SNAP_P.then(function (j) {
     var d = null; try { d = snapDecode(j); } catch (e) { d = null; }
     if (!d || hasRaw() || (D && !D.preview && !D.snap && D.list.length)) { getBundle(); return; }
-    if (Date.now() - d.snapAt > 30 * 6e4) { getBundle(); return; }   // stale copy: build it here instead
+    if (Date.now() - d.snapAt > 90 * 6e4) { getBundle(); return; }   // stale copy: build it here instead
     D = d; SNAP_OK = true; RAW_AFTER = Date.now() + 20000; lastBuild = Date.now(); DIRTY = false; SIDX = null; mark("snap"); render(); mark("live");
     setInterval(snapRefresh, 90000);
   });
