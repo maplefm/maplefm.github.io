@@ -1279,7 +1279,7 @@
   function ev(p) {
     try {
       if (EV_SEEN[p]) return; EV_SEEN[p] = 1;
-      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://clubfm-accounts.aaweaver93.workers.dev/hit";
+      var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://api.maplefm.gg/hit";
       if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" })); else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
     } catch (e) {}
   }
