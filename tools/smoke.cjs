@@ -18,12 +18,14 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
 (async () => {
   await new Promise((r) => srv.listen(PORT, r));
   const b = await chromium.launch();
-  for (const [w, h, tag] of [[1366, 900, "desktop"], [390, 844, "phone"]]) {
+  // the small phone uses a plain, wider font, the way a phone without our web fonts loaded sees the page
+  for (const [w, h, tag] of [[1366, 900, "desktop"], [390, 844, "phone"], [360, 780, "small phone"]]) {
     for (const [pg, must] of PAGES) {
       const ctx = await b.newContext({ viewport: { width: w, height: h } });
       // the live site's own address answers from this checkout, so absolute links and data paths work
       await ctx.route("https://maplefm.gg/**", (route) => route.continue({ url: route.request().url().replace("https://maplefm.gg", "http://localhost:" + PORT) }));
       await ctx.route(/fonts\.(googleapis|gstatic)\.com|googletagmanager|google-analytics/, (r) => r.abort());
+      if (tag === "small phone") await ctx.addInitScript(() => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = '*{font-family:"DejaVu Sans",Verdana,sans-serif!important}'; document.head.appendChild(st); }));
       const p = await ctx.newPage(), errs = [];
       p.on("pageerror", (e) => errs.push(e.message));
       await p.goto("http://localhost:" + PORT + pg, { waitUntil: "domcontentloaded" });
@@ -32,7 +34,10 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       ok(found, `${tag} ${pg}: shows ${must}`);
       const wide = await p.evaluate(() => {
         const over = document.documentElement.scrollWidth - window.innerWidth; if (over <= 1) return "";
-        const bad = [...document.querySelectorAll("body *")].filter((e) => { const r = e.getBoundingClientRect(); return r.width && r.right > window.innerWidth + 1 && getComputedStyle(e).position !== "fixed"; })
+        const bad = [...document.querySelectorAll("body *")].filter((e) => { const r = e.getBoundingClientRect(); if (!r.width || r.right <= window.innerWidth + 1 || getComputedStyle(e).position === "fixed") return false;
+          // clipped inside a scroller or a box that hides its overflow: that doesn't widen the page
+          for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if (o !== "visible") return false; }
+          return true; })
           .filter((e) => !e.closest("[hidden]")).slice(0, 4).map((e) => (e.id ? "#" + e.id : e.tagName.toLowerCase() + "." + String(e.className).split(" ")[0]) + "→" + Math.round(e.getBoundingClientRect().right));
         return over + "px wider: " + bad.join(" ");
       });
