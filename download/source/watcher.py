@@ -6,7 +6,7 @@ touches the game's files or memory.
   python watcher.py              run in the foreground (Ctrl+C to stop)
   python watcher.py --snapshot   save one annotated screenshot to the review folder and exit
 """
-import sys, os, json, time, threading, queue, hashlib, datetime, re, difflib, traceback, base64, urllib.request, urllib.error
+import sys, os, json, math, time, threading, queue, hashlib, datetime, re, difflib, traceback, base64, urllib.request, urllib.error
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE)
@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.5"
+VERSION = "2026.10.24.6"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -83,6 +83,30 @@ CFG_CHIME = [True]
 # refreshed every 20 minutes. The watcher never moves the mouse: it only tells you which row to rest it on.
 HW_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json"
 HW = {"items": {}, "at": 0.0}
+BOARD_TYP = {}      # the board's typical price per item, refreshed with the hover-wanted list
+# a weapon named on its own at a scroll's price is the scroll: "S> crossbow 90k" on a 5K bow
+WEAPON_SCROLL = {"Crossbow": "Crossbow Attack Scroll", "Pole Arm": "Polearm Attack Scroll", "Spear": "Spear Attack Scroll",
+                 "Dagger": "Dagger Attack Scroll", "Bow": "Bow Attack Scroll", "Wand": "Wand Magic Attack Scroll", "Staff": "Staff Magic Attack Scroll"}
+CONFUSE = set("3895602")    # digits the reader mixes up in chat bubbles: 9 and 3, 6 and 5, 8 and 3
+def chat_price(item, price):
+    """Fix the two misreads the board can catch: a price written without its k ("125 ea" on a 125K scroll),
+    and a weapon name standing in for its scroll. Returns (item, price)."""
+    hover_wanted()
+    t = BOARD_TYP.get(item) or 0
+    if price < 1000 and t >= 10000 and 0.3 <= price * 1000 / t <= 3:
+        price *= 1000
+    sc = WEAPON_SCROLL.get(item)
+    if sc and t and price > t * 8:
+        st = BOARD_TYP.get(sc + ": Intermediate") or 0
+        if st and 0.4 <= price / st <= 2.5:
+            item = sc + ": Intermediate"
+    return item, price
+def digit_twins(a, b):
+    """Two prices one misread digit apart: 30000 and 90000, 50000 and 60000."""
+    a, b = str(a), str(b)
+    if len(a) != len(b): return False
+    diff = [(x, y) for x, y in zip(a, b) if x != y]
+    return len(diff) == 1 and diff[0][0] in CONFUSE and diff[0][1] in CONFUSE
 NUDGED = {}
 def hover_wanted():
     if time.time() - HW["at"] > 1200:
@@ -92,6 +116,8 @@ def hover_wanted():
             with urllib.request.urlopen(req, timeout=20) as r:
                 j = json.loads(r.read().decode("utf-8"))
             HW["items"] = {str(x.get("i")): int(x.get("typ") or 0) for x in (j.get("hw") or j.get("items") or []) if x.get("i")}
+            BOARD_TYP.clear(); BOARD_TYP.update({str(x["item"]): int(x.get("typ") or 0) for x in (j.get("rows") or []) if x.get("item") and x.get("typ")})
+            fmparse.extend_aliases(list(BOARD_TYP))
         except Exception:
             pass
     return HW["items"]
@@ -535,6 +561,7 @@ class Store:
 
     def add_chat(self, player, side, item, price, x=None):
         now = time.time(); day = datetime.date.today().isoformat()
+        item, price = chat_price(item, price)
         with self.lock:
             key = json.dumps([day, player.lower(), side, item, price])
             o = self.d["chat"].setdefault(key, {"reads": 0, "first": now, "last_read": 0})
@@ -574,8 +601,8 @@ class Store:
             return item, player, price
 
     def _plausible(self, item, price):
-        ref = self.ref.get(item)
-        return ref is None or ref / 6.0 <= price <= ref * 6.0
+        ref = BOARD_TYP.get(item) or self.ref.get(item)
+        return ref is None or ref * 0.6 <= price <= ref * 6.0     # well under the going rate needs more readings
 
     def published_docs(self):
         cutoff = (datetime.date.today() - datetime.timedelta(days=self.keep_days)).isoformat()
@@ -608,7 +635,22 @@ class Store:
                 if o.get("xn"): row["xn"] = o["xn"]
                 row["t"] = int(o["last"])
                 doc["rows"].extend([dict(row, so=True)] * sold + [row] * opn)
+            # the same post read with one digit swapped (90K and 30K): keep the reading nearer the board's price
+            twins = set()
+            groups = {}
+            for key in self.d["chat"]:
+                day, player, side, item, price = json.loads(key)
+                groups.setdefault((day, player, side, item), []).append((price, key))
+            for (day, player, side, item), ps in groups.items():
+                ref = BOARD_TYP.get(item) or self.ref.get(item)
+                if not ref or len(ps) < 2: continue
+                for pa, ka in ps:
+                    for pb, kb in ps:
+                        if pa < pb and digit_twins(pa, pb):
+                            far = ka if abs(math.log(pa / ref)) > abs(math.log(pb / ref)) else kb
+                            twins.add(far)
             for key, o in self.d["chat"].items():
+                if key in twins: continue
                 day, player, side, item, price = json.loads(key)
                 need = 2 if self._plausible(item, price) else 4
                 if o["reads"] < need:
@@ -1090,6 +1132,7 @@ def worker(cfg, jobs, store):
                     if added:
                         log("sell list +" if added is True else "sell list (again)", tip["name"], " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
             elif kind == "board":
+                hover_wanted()
                 rh = quick_hash(extra["room"], (40, 8))
                 if rh != getattr(worker, "board_hash", None):
                     worker.board_hash = rh; worker.board_room = fmparse.read_room(extra["room"])
@@ -1102,6 +1145,7 @@ def worker(cfg, jobs, store):
                     review_save(cfg, "board", img, {"rows": [list(p[:4]) for p in posts]})
                     log(f"board {len(posts)} chalkboard posts: " + ", ".join(f"{p[0]} {p[2]} {p[3]:,}" for p in posts[:4]) + (" ..." if len(posts) > 4 else ""))
             else:
+                hover_wanted()
                 msgs = fmparse.read_chat(img)
                 found = []
                 for player, msg in msgs:
