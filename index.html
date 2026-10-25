@@ -157,6 +157,10 @@ button, input, select { font: inherit; color: inherit; }
 .alert .dot { width: 13px; height: 13px; border-radius: 50%; background: var(--hot); flex: 0 0 13px; animation: pulse 1s ease-in-out infinite; }
 .alert-new { background: var(--hot); color: #fff; font-family: var(--body); font-size: .7rem; font-weight: 900; letter-spacing: .08em; padding: 2px 7px; border-radius: 4px; animation: blink .8s steps(2, start) infinite; }
 .alert-list { display: grid; grid-template-columns: auto minmax(0, max-content) auto auto minmax(0, 1fr); gap: 3px 16px; margin-top: 8px; font-size: .86rem; }
+.alert-head .wall { margin-left: auto; font-family: var(--body); font-size: .78rem; font-weight: 800; color: var(--muted); padding: 3px 10px; border-radius: 999px; cursor: pointer; }
+.alert-head .wall:hover, .alert-head .wall:focus-visible { background: rgba(0,0,0,.08); color: var(--ink); outline: none; }
+.alert-row .wx { display: inline-grid; vertical-align: middle; margin: -3px 6px -3px -4px; width: 22px; height: 22px; place-items: center; border-radius: 50%; font-size: 1rem; font-weight: 900; line-height: 1; color: var(--muted); cursor: pointer; }
+.alert-row .wx:hover, .alert-row .wx:focus-visible { background: rgba(0,0,0,.08); color: var(--ink); outline: none; }
 .alert-row { display: contents; }
 .alert-row .n { color: var(--muted); }
 .alert-row .it { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 34ch; }
@@ -2969,20 +2973,32 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
 
   // a starred item or a position moving past the threshold in a day pings, once per item, day and direction
   var wArmed = false;
+  var WHIDE = loadLS("fm-watch-hide", {});
+  function pruneHide() { var keep = {}; Object.keys(WHIDE).forEach(function (k) { if (Date.now() - WHIDE[k] < 3 * DAY) keep[k] = WHIDE[k]; }); WHIDE = keep; return keep; }
   function renderWatchAlert() {
     try { checkUnder(); } catch (e) {}
     var th = Math.max(3, +$("watch-th").value || 15) / 100, day = new Date().toDateString();
-    var moved = watched().map(function (n) { return D.byName[n]; }).filter(function (i) { return i && i.mv[0] != null && Math.abs(i.mv[0]) >= th; })
+    var mkey = function (i) { return i.item + "|" + day + "|" + (i.mv[0] > 0 ? "up" : "down"); };
+    var moved = watched().map(function (n) { return D.byName[n]; }).filter(function (i) { return i && i.mv[0] != null && Math.abs(i.mv[0]) >= th && !WHIDE[mkey(i)]; })
       .sort(function (a, b) { return Math.abs(b.mv[0]) - Math.abs(a.mv[0]); });
     $("walert").hidden = !moved.length;
     if (!moved.length) return;
     $("walert-count").textContent = moved.length + (moved.length === 1 ? " item you're watching" : " items you're watching") + " moved more than " + Math.round(th * 100) + "% in a day";
+    var hx = $("walert-x"); if (!hx) { hx = el("span", "wx wall", "Clear all"); hx.id = "walert-x"; hx.setAttribute("role", "button"); hx.tabIndex = 0; $("walert").querySelector(".alert-head").appendChild(hx);
+      var all = function (e) { e.stopPropagation(); e.preventDefault(); (hx._moved || []).forEach(function (i) { WHIDE[mkey(i)] = Date.now(); }); saveLS("fm-watch-hide", pruneHide()); renderWatchAlert(); };
+      hx.addEventListener("click", all); hx.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") all(e); }); }
+    hx._moved = moved;
     var ul = $("walert-list"); ul.textContent = "";
     moved.slice(0, 8).forEach(function (i) {
       var li = el("span", "alert-row"); li.appendChild(el("span", "n", POS.some(function (p) { return p.i === i.item; }) ? "position" : "watching"));
       li.appendChild(el("span", "it", i.item)); li.appendChild(el("span", "pr", fmt(i.typ))); var m = moveTag(i.mv[0], "1d"); m.className += " pc"; li.appendChild(m);
       var p = POS.filter(function (x) { return x.i === i.item; })[0];
       li.appendChild(el("span", "wh", p ? "you paid " + fmt(p.paid) + ", " + (i.typ >= p.paid ? "up " : "down ") + short(Math.abs(i.typ - p.paid)) + " each" : ""));
+      // clear this one: it stays hidden until it moves again on another day or turns the other way
+      var x = el("span", "wx", "\u00d7"); x.setAttribute("role", "button"); x.tabIndex = 0; x.title = "Clear this alert"; x.setAttribute("aria-label", "Clear the alert for " + i.item);
+      var clear = function (e) { e.stopPropagation(); e.preventDefault(); WHIDE[mkey(i)] = Date.now(); saveLS("fm-watch-hide", pruneHide()); renderWatchAlert(); };
+      x.addEventListener("click", clear); x.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") clear(e); });
+      li.firstChild.insertBefore(x, li.firstChild.firstChild);
       ul.appendChild(li);
     });
     var fresh = moved.filter(function (i) { var k = i.item + "|" + day + "|" + (i.mv[0] > 0 ? "up" : "down"); if (WSEEN[k]) return false; WSEEN[k] = 1; return true; });
