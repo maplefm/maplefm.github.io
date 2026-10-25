@@ -78,6 +78,15 @@ for name, base in (("!price (api.maplefm.gg)", "https://api.maplefm.gg"), ("!pri
     ok = st == 200 and body.startswith("Work Gloves:")
     check(name, ok, body[:90] if ok else f"status {st} {body[:60]}", ms)
 
+# 2b. The server-built board first visits load: uploaded by the pump within the last half hour
+st, body, ms = get("https://api.maplefm.gg/data/snap-status")
+try:
+    sj = json.loads(body); sage = (NOW * 1000 - sj.get("at", 0)) / 60000
+    ok = bool(sj.get("ok")) and sage < 60
+    check("Server-built board", ok, f"uploaded {sage:.0f} min ago" if ok else f"last upload {sage:.0f} min ago, {sj.get('error') or 'not ok'}", ms, None if ok else "pump")
+except Exception:
+    check("Server-built board", False, f"no status (status {st})", ms)
+
 # 3. Fresh prices: the live pump signs the data every few minutes
 st, body, ms = get("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/live.sig?t=" + str(int(NOW)))
 age = None
