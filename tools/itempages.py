@@ -8,7 +8,7 @@ OUT_DIR/sitemap.xml. Pages are plain HTML with the numbers in them, no script ne
 """
 import urllib.parse, json, os, re, sys, html, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from nav import nav_html as NAV
+from nav import nav_html as NAV, foot_html as FOOT
 
 SITE = "https://maplefm.gg"
 TIER = {"Lesser": "100%", "Intermediate": "60%", "Greater": "10%"}
@@ -74,16 +74,22 @@ td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--mu
 OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
 
 
-def page(title, desc, canon, body, ld=None, og=None, active="items"):
+def crumbs_html(cr):
+    """Prices › All items › Work Gloves: where this page sits, each step a link back"""
+    if not cr: return ""
+    parts = [f'<a href="{u}">{html.escape(n)}</a>' for n, u in cr[:-1]] + [f'<span aria-current="page">{html.escape(cr[-1][0])}</span>']
+    return '<nav class="crumbs" aria-label="You are here">' + ' <i>›</i> '.join(parts) + '</nav>'
+
+
+def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None):
     t, d = html.escape(title), html.escape(desc)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=1">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
 {NAV(active)}
-{body}
-<p class="foot">Prices come from sales that players running FM Watcher saw happen in Free Market shops, updated through the day. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
-</main><script src="/assets/hit.js" defer></script></body></html>"""
+{crumbs_html(crumbs)}{body}
+</main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
 
 
 NX = {}
@@ -210,7 +216,7 @@ def main():
         ld += f'<meta name="thumbnail" content="{OG}{s}.png">'
 
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png"))
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png", crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
         made.append((s, nm, r))
     for name in extra:
         s = slug(name); nm = shown(name); g = GUIDE[name]
@@ -221,7 +227,7 @@ def main():
 <p class="note">No Free Market price yet: nobody has seen one sell. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} · quests, drops, crafting · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body))
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} · quests, drops, crafting · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
         made.append((s, nm, None))
     # the index: a searchable list, every item by category, biggest markets first; plain links so search engines read it
     secs = ""

@@ -1153,3 +1153,9 @@ body.sheet .nudge { display: none; }
 /* the stat strip wraps on narrow screens instead of pushing the page sideways ("Big sale caught: <long name> for 5.5M") */
 .strip .st { max-width: 100%; min-width: 0; }
 @media (max-width: 700px) { .strip .st, .strip .st * { white-space: normal; min-width: 0; } .strip .st { flex-wrap: wrap; text-align: left; } }
+
+/* "All items" left the menu; the board links to it right where people look for items */
+.plbl .allitems { display: block; margin-top: 4px; font-size: .72rem; letter-spacing: 0; text-transform: none; color: var(--accent, var(--wood)); text-decoration: none; font-weight: 800; }
+.plbl .allitems:hover { text-decoration: underline; }
+/* the shared footer clears the recent sales bar */
+.clubfoot { padding-bottom: 96px; }
