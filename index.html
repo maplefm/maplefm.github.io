@@ -1114,7 +1114,9 @@ dialog h3 { color: var(--accent-ink); }
   .htitle { font-size: 1.35rem; padding: 0 2px; }
   .hsearch { position: sticky; top: 0; z-index: 50; background: var(--bg, var(--panel)); padding: 6px 0; margin: -6px 0; }
   .hsearch .search input { font-size: 1rem; padding-top: 11px; padding-bottom: 11px; }
-  body.sheet .hsearch { position: static; }
+  /* with an item open, the search stays on top so the next search is one tap away; the card sits below it */
+  body.sheet .hsearch { position: fixed; top: 0; left: 0; right: 0; z-index: 60; padding: 8px 16px; margin: 0; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  body.sheet .side { max-height: calc(100dvh - 76px) !important; }
   .hrow { gap: 8px; }
   .plbl { width: 100%; }
   .pk { width: calc((100% - 32px) / 5); height: 64px; }
@@ -3517,7 +3519,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); });
     document.querySelectorAll('tbody tr[data-item="' + (window.CSS && CSS.escape ? CSS.escape(name) : name) + '"]').forEach(function (r) { r.classList.add("sel"); });
     renderItem(); ev("#open:" + name);
-    if (window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); }
+    if (window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); if (document.activeElement === $("q") && window.innerWidth <= 700) $("q").blur(); }
   }
   function rollBox(i) {
     var box = el("div", "rollbox"); box.appendChild(el("h4", null, "Price by roll"));
@@ -4456,6 +4458,9 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   $("sound").addEventListener("change", function () { if (this.checked) beep(); try { syncTouch("fm-sound"); localStorage.setItem("fm-sound", this.checked ? "1" : ""); } catch (e) {} });
   try { $("sound").checked = localStorage.getItem("fm-sound") === "1"; } catch (e) {}
   $("scrim").addEventListener("click", function () { document.body.classList.remove("sheet"); });
+  // searching again from an open item: start fresh instead of editing the last search
+  function freshQ() { if (document.body.classList.contains("sheet")) { var q = $("q"); q.select(); setTimeout(function () { q.select(); }, 0); } }
+  $("q").addEventListener("focus", freshQ); $("q").addEventListener("click", freshQ);
   // close the item panel: on a phone it slides the sheet away; on a wide screen it hides the panel and the price
   // list takes the full width until you pick another item
   $("sheetx").addEventListener("click", function () { document.body.classList.remove("sheet"); if (window.innerWidth > 1180) { document.body.classList.add("noside"); state.sel = null; document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); }); } });
