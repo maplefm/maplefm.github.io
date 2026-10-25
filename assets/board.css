@@ -1114,3 +1114,28 @@ dialog h3 { color: var(--accent-ink); }
 body.sheet .nudge { display: none; }
 @media (max-width: 700px) { .nudge { left: 16px; right: 16px; width: auto; bottom: 62px; } }
 .rollmiss { margin: 8px 0; padding: 8px 10px; border-radius: 10px; background: var(--panel2); font-weight: 700; font-size: .82rem; }
+/* My positions: scoreboard, trade form, holdings and trade history */
+.psum { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 8px; margin: 4px 0 12px; }
+.pcard { background: var(--panel2); border: 1px solid var(--line2); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; }
+.pcard small { color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.pcard b { font-family: var(--display); font-size: 1.25rem; font-weight: 800; }
+.pcard span { color: var(--muted); font-size: .75rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pcard.up { border-color: rgba(18,137,95,.35); } .pcard.down { border-color: rgba(208,64,47,.35); }
+.pform { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pform input { min-width: 0; }
+.pform #pos-item { flex: 2 1 200px; } .pform #pos-qty { width: 70px; flex: 0 0 auto; } .pform #pos-paid { flex: 1 1 150px; }
+.pside { display: inline-flex; background: var(--panel2); border: 1px solid var(--line2); border-radius: 999px; padding: 3px; }
+.pside button { border: 0; background: none; font: 800 .85rem var(--body); padding: 6px 12px; border-radius: 999px; color: var(--muted); cursor: pointer; }
+.pside button[aria-pressed="true"] { background: var(--accent, var(--wood)); color: #fff; }
+.pf-hint { margin: 6px 2px 0; min-height: 1em; }
+.ptools { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 10px 0 2px; }
+.ptools select, .ptools input { font: 700 .82rem var(--body); border: 1px solid var(--line2); background: var(--panel2); color: var(--ink); border-radius: 8px; padding: 3px 6px; }
+.ptools input { width: 58px; }
+.pside-tag { font-size: .72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+.pside-tag.buy { background: rgba(109,63,209,.12); color: var(--accent, var(--wood)); } .pside-tag.sell { background: rgba(18,137,95,.14); color: #12895f; }
+.ptable td.pwhen { white-space: nowrap; color: var(--muted); font-size: .8rem; }
+.ptable td.pact .pbtn { padding: 4px 10px; font-size: .8rem; }
+@media (max-width: 700px) { .psum { grid-template-columns: 1fr 1fr; } .pcard b { font-size: 1.1rem; } .pform #pos-item { flex-basis: 100%; } }
+.psum, .ptools { padding: 0 14px; } .pf-hint { padding: 0 14px; margin-top: 0; }
+.pform { padding-bottom: 4px; } .pform #pos-paid { width: auto; }
+.pcard b .pl { font-size: inherit; font-weight: inherit; }
