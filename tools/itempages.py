@@ -69,13 +69,16 @@ td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--mu
 .top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}"""
 
 
-def page(title, desc, canon, body, ld=None):
+OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
+
+
+def page(title, desc, canon, body, ld=None, og=None):
     t, d = html.escape(title), html.escape(desc)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
-<meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{SITE}/og.png"><meta property="og:type" content="website">
+<meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=3">{ld or ''}</head><body><main>
-<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><span class="nav"><a class="sm" href="/quests.html">Quest log</a><a class="sm" href="/map.html">Maps</a><a class="go" href="/">Live price board</a></span></div>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><span class="nav"><a class="sm" href="/training/">Training</a><a class="sm" href="/quests.html">Quest log</a><a class="sm" href="/map.html">Maps</a><a class="go" href="/">Live price board</a></span></div>
 {body}
 <p class="foot">Prices come from sales that players running FM Watcher saw happen in Free Market shops, updated through the day. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
 </main><script src="/assets/hit.js" defer></script></body></html>"""
@@ -87,9 +90,12 @@ NX = {}
 IDS = {}
 
 
+QSLUG, BSLUG, MSLUG = {}, {}, {}
+
+
 def qlink(qn, qid):
-    """a quest name that opens it in the Quest Log"""
-    href = f"/quests.html#q-{qid}" if qid else "/quests.html?q=" + urllib.parse.quote(qn)
+    """a quest name that opens its guide page, or the Quest Log when it has none"""
+    href = f"/quest/{QSLUG[qid]}/" if qid in QSLUG else f"/quests.html#q-{qid}" if qid else "/quests.html?q=" + urllib.parse.quote(qn)
     return f'<a href="{href}">{html.escape(qn)}</a>'
 
 
@@ -114,7 +120,9 @@ def guide_html(name, g, page_of):
         get += (f'<div class="craft"><p class="ch"><span class="tag">Crafted</span> <b>{html.escape(c[0])}</b> Lv {c[1]} · makes {c[4]:,} per craft</p>'
                 f'<table>{rows}</table></div>')
     if g.get("d"):
-        get += "<table>" + "".join(f"<tr><td><b>{html.escape(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>Dropped by{(' · ' + html.escape(d[4])) if d[4] else ''}{' · only while on the quest' if d[5] else ''}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
+        mob = lambda n: f'<a href="/monster/{BSLUG[n]}/">{html.escape(n)}</a>' if n in BSLUG else html.escape(n)
+        mp = lambda n: f'<a href="/map/{MSLUG[n]}/">{html.escape(n)}</a>' if n in MSLUG else html.escape(n)
+        get += "<table>" + "".join(f"<tr><td><b>{mob(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>Dropped by{(' · ' + mp(d[4])) if d[4] else ''}{' · only while on the quest' if d[5] else ''}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
     for x in g.get("g") or []:
         get += f'<p class="rc">{"Given by the NPC during" if x[2] == "given" else "Reward from the quest"} {qlink(x[0], x[1])}</p>'
     if g.get("s"):
@@ -137,6 +145,16 @@ def main():
     try: GUIDE = json.load(open(sys.argv[3], encoding="utf-8"))["items"] if len(sys.argv) > 3 else {}
     except Exception: GUIDE = {}
     summ = json.load(open(summ_path, encoding="utf-8"))
+    world_paths = []
+    if len(sys.argv) > 4 and os.path.exists(sys.argv[4]):
+        # map, monster, quest and training pages first, so item pages can link to them
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import worldpages
+        notes = json.load(open(sys.argv[5], encoding="utf-8")) if len(sys.argv) > 5 and os.path.exists(sys.argv[5]) else {}
+        gfull = json.load(open(sys.argv[3], encoding="utf-8")) if len(sys.argv) > 3 else {}
+        world_paths, qs, bs, ms = worldpages.build(json.load(open(sys.argv[4], encoding="utf-8")), gfull, summ, notes, out)
+        QSLUG.update(qs); BSLUG.update(bs); MSLUG.update(ms)
+        print(len(world_paths), "world pages")
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
     ids = {r[0]: r[1] for r in db}
     IDS.update(ids)
@@ -183,7 +201,7 @@ def main():
             {"@type": "ListItem", "position": 2, "name": "Item prices", "item": SITE + "/items/"},
             {"@type": "ListItem", "position": 3, "name": nm, "item": f"{SITE}/item/{s}/"}]}) + "</script>"
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld))
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png"))
         made.append((s, nm, r))
     for name in extra:
         s = slug(name); nm = shown(name); g = GUIDE[name]
@@ -226,7 +244,7 @@ def main():
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
     today = datetime.date.today().isoformat()
-    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/item/{s}/" for s, _, _ in made]
+    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
     open(os.path.join(out, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
                                                     "".join(f"<url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     print(len(made), "item pages")

@@ -21,8 +21,16 @@ jobs:
           git config user.email maplefm@users.noreply.github.com
           curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json -o /tmp/summary.json
           curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemguide.json -o /tmp/itemguide.json || echo '{"items":{}}' > /tmp/itemguide.json
-          python3 tools/itempages.py /tmp/summary.json . /tmp/itemguide.json
-          git add -A item items sitemap.xml
+          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/world.json -o /tmp/world.json || rm -f /tmp/world.json
+          python3 tools/itempages.py /tmp/summary.json . /tmp/itemguide.json /tmp/world.json assets/training-notes.json
+          python3 tools/recap.py /tmp/summary.json . /tmp/recap.json
+          # share images live on the data branch, redrawn only when an item's price line changes
+          pip install -q pillow
+          git fetch -q origin live
+          git worktree add -q /tmp/live origin/live
+          python3 tools/ogimages.py /tmp/summary.json /tmp/live /tmp/recap.json
+          (cd /tmp/live && git add og && (git diff --cached --quiet || (git commit -q -m "Share images" && for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done)))
+          git add -A item items map monster quest training maps monsters quests recap sitemap.xml
           git diff --cached --quiet && exit 0
           b=item-pages-$(date -u +%Y%m%d)
           git checkout -q -b "$b"
