@@ -10,3 +10,4 @@ data/*.json
 !data/nexon_news.json
 !data/*-icons.json
 !data/itemguide.json
+!data/world.json
