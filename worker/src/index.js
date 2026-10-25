@@ -88,7 +88,7 @@ async function route(req, env, url) {
   if (p === "/public/popular") return publicPopular(env);
   if (p === "/gone" && req.method === "POST") return gonePost(req, env);
   if (p === "/public/gone") return goneList(env);
-  if (p === "/admin/gone-need" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const n = Math.max(1, Math.min(20, Number(url.searchParams.get("n")) || 2)); await env.ACCOUNTS.put("gone:need", String(n)); return json({ need: n }); }
+  if (p === "/admin/gone-need" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const n = Math.max(1, Math.min(20, Number(url.searchParams.get("n")) || 3)); await env.ACCOUNTS.put("gone:need", String(n)); return json({ need: n }); }
   if (p === "/public/kofi-income") return kofiIncome(env);
   if (p === "/interactions" && req.method === "POST") return interactions(req, env);
   if (p === "/admin" && req.method === "GET") return admin(req, env);
@@ -514,6 +514,29 @@ async function dataSnap(env) {
   return new Response(hit.body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=30", "Access-Control-Allow-Origin": "*" } });
 }
 
+// Mega Deals holders see a deal first; everyone else gets it 10 minutes later. The board hides those listings on
+// the page too, but the raw data now leaves them out as well, so nobody can read them out of the download.
+const HOLD_S = 600, HOLD_CUT = 0.8;
+async function holdPrices(env) {
+  const rows = await summaryRows(env).catch(() => []), m = {};
+  rows.forEach((r) => { if (r.typ > 0) { m[r.item.toLowerCase()] = r.typ; m[shown(r.item).toLowerCase()] = r.typ; } });
+  return m;
+}
+function holdDeals(arr, typ) {
+  if (!Array.isArray(arr)) return arr;
+  const nowS = Math.floor(Date.now() / 1000), recent = Date.now() - 20 * 6e4;
+  for (const d of arr) {
+    if (!d || !Array.isArray(d.rows) || !(Date.parse(d.at) > recent)) continue;
+    d.rows = d.rows.filter((r) => {
+      if (!r || nowS - (r.t || 0) >= HOLD_S) return true;
+      const ty = typ[String(r.i || "").toLowerCase()]; if (!ty) return true;
+      const unit = (r.p || 0) / Math.max(1, r.q || 1);
+      return !(unit > 0 && unit < ty * HOLD_CUT);
+    });
+  }
+  return arr;
+}
+
 async function dataLive(req, env) {
   // Open to everyone: the board shows every listing without signing in. Discord sign-in is for contributing and
   // earning. Bulk pulling is still held back per address (and per account when signed in), and every copy carries
@@ -547,8 +570,10 @@ async function dataLive(req, env) {
       body = out + "}";
       if (ref) await caches.default.put(ck, new Response(body, { headers: { "Cache-Control": "public, max-age=900" } })).catch(() => {});
     }
+    if (!club) { const hp = await holdPrices(env); const o = JSON.parse(body); Object.keys(o).forEach((k) => holdDeals(o[k], hp)); body = JSON.stringify(o); }
     return new Response(mk === null ? body : markTimes(body, mk), { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store", "X-Delta": hit ? "cached" : "1" } });
   }
+  const hp = club ? null : await holdPrices(env);
   const { readable, writable } = new TransformStream();
   (async () => {
     const w = writable.getWriter(), enc = new TextEncoder();
@@ -557,7 +582,12 @@ async function dataLive(req, env) {
     for (let i = 0; i < MEMBER_FILES.length; i++) {
       if (!parts[i]) continue;
       await w.write(enc.encode((first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":")); first = false;
-      if (mk === null) { const rd = parts[i].body.getReader(); for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); } }
+      if (hp) {   // everyone but deal holders: fresh deals stay out for their first 10 minutes
+        let t = await parts[i].text();
+        try { const arr = JSON.parse(t); holdDeals(arr, hp); t = JSON.stringify(arr); } catch (e) {}
+        await w.write(enc.encode(mk === null ? t : markTimes(t, mk)));
+      }
+      else if (mk === null) { const rd = parts[i].body.getReader(); for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); } }
       else await w.write(enc.encode(markTimes(await parts[i].text(), mk)));
     }
     await w.write(enc.encode("}")); await w.close();
@@ -1055,7 +1085,7 @@ async function hit(req, env) {
 }
 // Sold buttons: players mark a listing in Where to buy as sold. One vote per person per listing (a scrambled
 // address, never the address itself). The site hides a listing once enough people mark it and no scan has seen it
-// since. How many it takes lives in KV gone:need (default 2), changed with POST /admin/gone-need?n=3.
+// since. How many it takes lives in KV gone:need (default 3), changed with POST /admin/gone-need?n=3.
 let GONE_READY = false;
 async function goneTable(env) {
   if (GONE_READY || !env.INBOX_DB) return;
@@ -1079,7 +1109,7 @@ async function gonePost(req, env) {
 }
 async function goneList(env) {
   const h = { "Access-Control-Allow-Origin": "*", "Cache-Control": "public, max-age=30" };
-  const need = Number(await env.ACCOUNTS.get("gone:need")) || 2, out = { need, items: {} };
+  const need = Number(await env.ACCOUNTS.get("gone:need")) || 3, out = { need, items: {} };
   if (env.INBOX_DB) {
     await goneTable(env);
     const r = await env.INBOX_DB.prepare("SELECT k, COUNT(*) n, MIN(t) t FROM gone WHERE t >= ? GROUP BY k").bind(Date.now() - 48 * 3600e3).all().catch(() => ({ results: [] }));
