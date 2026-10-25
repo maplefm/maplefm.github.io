@@ -67,6 +67,7 @@ async function route(req, env, url) {
   if (p === "/twitch/unlink" && req.method === "POST") return twitchUnlink(req, env);
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
   if (p === "/data/snap" && req.method === "GET") return dataSnap(env);
+  if (p === "/data/snap-status" && req.method === "GET") return json((await env.ACCOUNTS.get("snap:last", "json")) || {}, 200, { "Cache-Control": "no-store" });
   if (p === "/snap" && req.method === "POST") return snapPut(req, env);
   if (p === "/data/sig" && req.method === "GET") return dataSig(env);
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
@@ -492,11 +493,13 @@ async function same(a, b) {
 // live listings at once instead of building them on the phone. Same public view as /data/live.
 async function snapPut(req, env) {
   const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
-  if (!want || got !== want) return json({ error: "no" }, 403);
+  const note = (r) => env.ACCOUNTS.put("snap:last", JSON.stringify(Object.assign({ at: Date.now() }, r))).catch(() => {});
+  if (!want || got !== want) { await note({ error: "key" }); return json({ error: "no" }, 403); }
   const body = await req.text();
-  if (body.length < 1000 || body.length > 24e6) return json({ error: "size" }, 400);
-  try { const j = JSON.parse(body); if (j.v !== 1 || !j.L) throw 0; } catch (e) { return json({ error: "bad" }, 400); }
+  if (body.length < 1000 || body.length > 24e6) { await note({ error: "size", bytes: body.length }); return json({ error: "size" }, 400); }
+  try { const j = JSON.parse(body); if (j.v !== 2 || !j.cols) throw 0; } catch (e) { await note({ error: "bad", bytes: body.length }); return json({ error: "bad" }, 400); }
   await env.ACCOUNTS.put("snap:board", body);
+  await note({ ok: true, bytes: body.length });
   return json({ ok: true, bytes: body.length });
 }
 async function dataSnap(env) {
