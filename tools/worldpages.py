@@ -86,7 +86,11 @@ def build(world, guide, summary, notes, out):
     M, MOB, POTS = world["maps"], world["mobs"], world.get("pots", {})
     QS = guide.get("quests") or []; ITEMS = guide.get("items") or {}; IDS = guide.get("ids") or {}
     PRICE = {r["item"]: r["typ"] for r in (summary.get("rows") or []) if isinstance(r, dict) and r.get("item") and r.get("typ")}
-    ITEMPAGE = {n for n in PRICE} | {n for n, g in ITEMS.items() if g.get("q") or g.get("c") or g.get("d") or g.get("g") or g.get("u")}
+    # the same rule itempages.py uses, so every item link lands on a page that exists
+    try: DBIDS = {r[0] for r in json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]}
+    except Exception: DBIDS = set(IDS)
+    ITEMPAGE = {r["item"] for r in (summary.get("rows") or []) if isinstance(r, dict) and r.get("item") in DBIDS and (r.get("n") or 0) >= 5 and r.get("typ")}
+    ITEMPAGE |= {n for n, g in ITEMS.items() if n in DBIDS and (g.get("q") or g.get("c") or g.get("d") or g.get("g") or g.get("u"))}
     import itempages
     def ilink(n, c=None):
         t = E(itempages.shown(n)) + (f" ×{c:,}" if c else "")
