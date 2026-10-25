@@ -1531,28 +1531,90 @@
   function loadLS(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } }
   function saveLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} if (window.syncTouch) syncTouch(k); }
   var POS = loadLS("fm-pos", []), WATCH = loadLS("fm-watch", {}), WSEEN = loadLS("fm-watch-seen", {});
+  // ---------- My positions: a trade journal. Every buy and sell is logged; each sale is matched to the oldest copies
+  // still held (first in, first out), so a win or loss is counted once, and what's left is valued at today's price.
+  var TRADES = loadLS("fm-trades", null), PSIDE = "buy";
+  if (!Array.isArray(TRADES)) {   // the old list of positions becomes the first buys
+    TRADES = (POS || []).map(function (p, k) { return { id: "m" + k + "-" + (p.t || 0), i: p.i, side: "buy", q: p.q || 1, p: p.paid, t: p.t || Date.now() }; });
+    saveLS("fm-trades", TRADES);
+  }
+  function ledger() {
+    var fee = Math.max(0, +loadLS("fm-fee", 0) || 0) / 100, lots = {}, closed = [];
+    TRADES.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (tr) {
+      var L = lots[tr.i] || (lots[tr.i] = []);
+      if (tr.side === "buy") { L.push({ q: tr.q, p: tr.p, t: tr.t }); return; }
+      var left = tr.q, cost = 0, held = 0, got = 0;
+      while (left > 0 && L.length) { var lot = L[0], take = Math.min(left, lot.q); cost += take * lot.p; held += take * (tr.t - lot.t); got += take; lot.q -= take; left -= take; if (!lot.q) L.shift(); }
+      var net = tr.p * (1 - fee);
+      closed.push({ tr: tr, matched: got, cost: cost, pl: got ? net * got - cost : 0, held: got ? held / got : 0, unmatched: left });
+    });
+    var hold = Object.keys(lots).map(function (n) { var q = 0, c = 0, t0 = Infinity; lots[n].forEach(function (l) { q += l.q; c += l.q * l.p; t0 = Math.min(t0, l.t); }); return q ? { i: n, q: q, paid: c / q, cost: c, t: t0 } : null; }).filter(Boolean);
+    return { hold: hold, closed: closed, fee: fee };
+  }
+  // the board's own name for what was typed: exact, the shown scroll name ("Gloves Attack Scroll 60%"), or the best search hit
+  function posItem(n) {
+    if (!D || !n) return null; var lo = String(n).toLowerCase();
+    if (D.byName[n]) return D.byName[n];
+    var hit = D.list.filter(function (i) { return i.item.toLowerCase() === lo || String(showName(i.item)).toLowerCase() === lo; })[0];
+    if (hit) return hit;
+    try { var s = searchItems(n, 1)[0]; if (s && s.score >= 600 && D.byName[s.n]) return D.byName[s.n]; } catch (e) {}
+    return null;
+  }
+  function syncPOS() { POS = ledger().hold.map(function (h) { return { i: h.i, q: h.q, paid: Math.round(h.paid), t: h.t }; }); saveLS("fm-pos", POS); }
+  function saveTrades() { saveLS("fm-trades", TRADES); syncPOS(); }
+  syncPOS();
   function watched() { var w = {}; Object.keys(WATCH).forEach(function (k) { w[k] = 1; }); POS.forEach(function (p) { w[p.i] = 1; }); return Object.keys(w); }
   function plSpan(v) { return el("span", "num pl " + (v >= 0 ? "up" : "down"), (v >= 0 ? "+" : "−") + short(Math.abs(v))); }
   function renderPos() {
     fillNames();
-    var tb = $("pos-rows"); tb.textContent = ""; var tot = 0, cost = 0;
-    POS.forEach(function (p, k) {
-      var i = D.byName[p.i], tr = el("tr"); tr.dataset.item = p.i;
-      var now = i ? i.typ : 0, pl = now ? now - p.paid : 0;
-      if (i) tr.appendChild(nameCell(i)); else tr.appendChild(el("td", null, p.i));
-      tr.appendChild(el("td", null, fmt(p.q)));
-      var pc = el("td"); pc.appendChild(money(p.paid)); tr.appendChild(pc);
-      var nc = el("td"); if (now) nc.appendChild(money(now)); else nc.textContent = "No price yet"; tr.appendChild(nc);
+    var lg = ledger(), days = +($("pf-period").value || 0), since = days ? (days === 1 ? new Date(new Date().setHours(0, 0, 0, 0)).getTime() : Date.now() - days * DAY) : 0;
+    var tb = $("pos-rows"); tb.textContent = ""; var unreal = 0, inv = 0, worth = 0;
+    lg.hold.sort(function (a, b) { return b.cost - a.cost; }).forEach(function (h) {
+      var i = posItem(h.i), tr = el("tr"); tr.dataset.item = i ? i.item : h.i;
+      var now = i && i.typ ? i.typ : 0, pl = now ? (now * (1 - lg.fee) - h.paid) * h.q : 0;
+      if (i) tr.appendChild(nameCell(i)); else tr.appendChild(el("td", null, h.i));
+      tr.appendChild(el("td", null, fmt(h.q)));
+      var pc = el("td"); pc.appendChild(money(Math.round(h.paid))); tr.appendChild(pc);
+      var nc = el("td"); if (now) nc.appendChild(money(now)); else nc.appendChild(el("span", "tfd", "no price yet")); tr.appendChild(nc);
       var mc = el("td"); if (i && i.mv[0] != null) mc.appendChild(moveTag(i.mv[0], "1d")); else if (i && i.mv[1] != null) mc.appendChild(moveTag(i.mv[1], "3d")); tr.appendChild(mc);
-      var e1 = el("td"); if (now) { e1.appendChild(plSpan(pl)); e1.appendChild(el("small", null, " " + (pl >= 0 ? "+" : "") + Math.round(pl / p.paid * 100) + "%")); } tr.appendChild(e1);
-      var e2 = el("td"); if (now) e2.appendChild(plSpan(pl * p.q)); tr.appendChild(e2);
-      if (now) { tot += pl * p.q; cost += p.paid * p.q; }
-      if (now && (pl < 0 || (i.mv[0] != null && i.mv[0] < -0.05))) tr.classList.add("under");
-      var rc = el("td"), rm = el("button", "rm", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove " + p.i);
-      rm.addEventListener("click", function (e) { e.stopPropagation(); POS.splice(k, 1); saveLS("fm-pos", POS); render(); }); rc.appendChild(rm); tr.appendChild(rc);
-      tb.appendChild(tr);
+      var uc = el("td"); if (now) { uc.appendChild(plSpan(pl)); uc.appendChild(el("small", null, " " + (pl >= 0 ? "+" : "") + Math.round(pl / h.cost * 100) + "%")); } tr.appendChild(uc);
+      if (now) { unreal += pl; worth += now * h.q; } inv += h.cost;
+      if (now && pl < 0) tr.classList.add("under");
+      var ac = el("td", "pact"), sb = el("button", "pbtn", "Sell"); sb.type = "button";
+      sb.addEventListener("click", function (e) { e.stopPropagation(); pform("sell", h.i, h.q, now); });
+      ac.appendChild(sb); tr.appendChild(ac); tb.appendChild(tr);
     });
-    $("pos-empty").hidden = POS.length > 0;
+    $("pos-empty").hidden = lg.hold.length > 0;
+    // trades in the period, newest first, each sale with what it made
+    var tb2 = $("trade-rows"); tb2.textContent = "";
+    var byTr = {}; lg.closed.forEach(function (c) { byTr[c.tr.id] = c; });
+    var inP = TRADES.filter(function (t) { return t.t >= since; }).sort(function (a, b) { return b.t - a.t; });
+    inP.forEach(function (t) {
+      var tr = el("tr"), c = byTr[t.id];
+      tr.appendChild(el("td", "pwhen", new Date(t.t).toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + new Date(t.t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })));
+      var i = posItem(t.i); if (i) tr.appendChild(nameCell(i)); else tr.appendChild(el("td", null, t.i));
+      tr.appendChild(el("td", null, "")).appendChild(el("span", "pside-tag " + t.side, t.side === "buy" ? "Bought" : "Sold"));
+      tr.appendChild(el("td", null, fmt(t.q)));
+      var pc = el("td"); pc.appendChild(money(t.p)); tr.appendChild(pc);
+      var plc = el("td"); if (c && c.matched) { plc.appendChild(plSpan(c.pl)); plc.appendChild(el("small", null, " " + (c.pl >= 0 ? "+" : "") + Math.round(c.pl / c.cost * 100) + "%")); if (c.unmatched) plc.title = c.unmatched + " sold that weren't logged as bought, so they don't count"; } else if (c) plc.appendChild(el("small", "tfd", "no buy logged")); tr.appendChild(plc);
+      var rc = el("td"), rm = el("button", "rm", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Delete this trade");
+      rm.addEventListener("click", function (e) { e.stopPropagation(); TRADES = TRADES.filter(function (x) { return x.id !== t.id; }); saveTrades(); render(); }); rc.appendChild(rm); tr.appendChild(rc);
+      tb2.appendChild(tr);
+    });
+    $("trade-empty").hidden = inP.length > 0;
+    // the scoreboard
+    var sold = lg.closed.filter(function (c) { return c.matched && c.tr.t >= since; }), real = 0, wins = 0, best = null, worst = null, held = 0;
+    sold.forEach(function (c) { real += c.pl; if (c.pl > 0) wins++; if (!best || c.pl > best.pl) best = c; if (!worst || c.pl < worst.pl) worst = c; held += c.held; });
+    var sm = $("psum"); sm.textContent = "";
+    function card(lbl, val, sub, cls) { var d = el("div", "pcard" + (cls ? " " + cls : "")); d.appendChild(el("small", null, lbl)); var b = el("b"); if (typeof val === "number") b.appendChild(plSpan(val)); else b.textContent = val; d.appendChild(b); if (sub) d.appendChild(el("span", null, sub)); sm.appendChild(d); }
+    var pname = { 1: "today", 7: "7 days", 30: "30 days", 0: "all time" }[days];
+    card("Profit, " + pname, real, sold.length ? sold.length + (sold.length === 1 ? " sale" : " sales") : "no sales yet", real >= 0 ? "up" : "down");
+    card("Win rate", sold.length ? Math.round(wins / sold.length * 100) + "%" : "–", sold.length ? wins + " of " + sold.length + " sales made money" : "");
+    card("Holding", short(Math.round(inv)), lg.hold.length ? lg.hold.length + (lg.hold.length === 1 ? " item" : " items") + (worth ? " · worth " + short(Math.round(worth)) : "") : "nothing right now");
+    card("If you sold today", unreal, "on what you're holding", unreal >= 0 ? "up" : "down");
+    if (best && best.pl > 0) card("Best flip", best.pl, showName(best.tr.i));
+    if (worst && worst.pl < 0) card("Worst", worst.pl, showName(worst.tr.i));
+    if (sold.length) { var hh = held / sold.length / 36e5; card("Average hold", hh < 48 ? Math.round(hh) + " hours" : Math.round(hh / 24) + " days", "from buy to sale"); }
     var wb = $("watch-rows"); wb.textContent = "";
     watched().forEach(function (name) {
       var i = D.byName[name], tr = el("tr"); tr.dataset.item = name;
@@ -1575,7 +1637,7 @@
       tr.appendChild(rc); wb.appendChild(tr);
     });
     $("watch-empty").hidden = watched().length > 0;
-    $("count").textContent = POS.length ? POS.length + " positions, " + (tot >= 0 ? "up " : "down ") + short(Math.abs(tot)) + " mesos" + (cost ? " (" + (tot >= 0 ? "+" : "") + Math.round(tot / cost * 100) + "%)" : "") + " against what you paid" : "";
+    $("count").textContent = TRADES.length ? (sold.length ? (real >= 0 ? "Up " : "Down ") + short(Math.abs(Math.round(real))) + " on " + sold.length + (sold.length === 1 ? " sale" : " sales") + ", " + pname : "No sales " + (days ? "in this period" : "logged yet")) + (lg.hold.length ? " · holding " + lg.hold.length : "") : "";
   }
   // ---- price alerts: a starred item listed at or under the price you set. A browser notification (when allowed)
   // and the page's alert sound, once per listing.
@@ -2446,8 +2508,8 @@
     stb.addEventListener("click", function () { if (WATCH[i.item]) delete WATCH[i.item]; else WATCH[i.item] = { t: Date.now() }; saveLS("fm-watch", WATCH); render(); }); btns.appendChild(stb);
     var as = el("button", "pbtn", SELL.some(function (s) { return s.i === i.item; }) ? "In sell list ✓" : "+ Sell list"); as.type = "button";
     as.addEventListener("click", function () { addSell(i.item, 1); render(); }); btns.appendChild(as);
-    var pb = el("button", "pbtn", "+ Position"); pb.type = "button";
-    pb.addEventListener("click", function () { state.tab = "pos"; render(); $("pos-item").value = i.item; $("pos-paid").focus(); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); }); btns.appendChild(pb);
+    var pb = el("button", "pbtn", "+ Log a trade"); pb.type = "button"; pb.title = "Log that you bought or sold this, to track your profit in My positions";
+    pb.addEventListener("click", function () { state.tab = "pos"; render(); pform("buy", i.item, 1, 0); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); }); btns.appendChild(pb);
     ip.appendChild(btns);
     var mvs = el("div", "mvs"); [["1 day", 0], ["3 days", 1], ["7 days", 2]].forEach(function (x) { var s = el("span"); s.appendChild(el("span", "lbl", x[0] + " ")); if (i.mv[x[1]] != null) s.appendChild(moveTag(i.mv[x[1]])); else s.appendChild(el("span", "tfd", "n/a")); mvs.appendChild(s); });
     ip.appendChild(mvs);
@@ -2573,7 +2635,7 @@
   // Signed in, the board's own settings (watchlist, positions, filters, theme, club key...) are kept with the
   // account, so a cleared browser or another PC gets them back. Nothing is sent when you are not signed in.
   var ACCT = "https://api.maplefm.gg", ME_ACCT = null, syncTimer = null;
-  var SYNC_KEYS = ["fm-watch", "fm-watch-th", "fm-watch-seen", "fm-pos", "fm-sell", "fm-sell-hide", "fm-min-profit", "fm-night", "fm-activity", "fm-fast-pct", "fm-sound", "fm-me", "fm-sell-src", "fm-buy-sort", "fm-tiers-seen", "fm-club", "fm-fb-tuck", "fm-ranks-open", "fm-gatherer", "fm-upd-hide"];
+  var SYNC_KEYS = ["fm-watch", "fm-watch-th", "fm-watch-seen", "fm-pos", "fm-trades", "fm-fee", "fm-pf-period", "fm-sell", "fm-sell-hide", "fm-min-profit", "fm-night", "fm-activity", "fm-fast-pct", "fm-sound", "fm-me", "fm-sell-src", "fm-buy-sort", "fm-tiers-seen", "fm-club", "fm-fb-tuck", "fm-ranks-open", "fm-gatherer", "fm-upd-hide"];
   function syncBlob() { var o = {}; SYNC_KEYS.forEach(function (k) { try { var v = localStorage.getItem(k); if (v != null) o[k] = v; } catch (e) {} }); return o; }
   function syncPush() {
     if (!ME_ACCT) return;
@@ -2876,14 +2938,40 @@
   $("tab-deals").addEventListener("click", function () { state.tab = "deals"; state.dealTop = null; try { history.replaceState(null, "", "#deals"); } catch (e) {} render(); });
   $("tab-sell").addEventListener("click", function () { state.tab = "sell"; try { history.replaceState(null, "", "#sell"); } catch (e) {} render(); });
   $("tab-pos").addEventListener("click", function () { state.tab = "pos"; try { history.replaceState(null, "", "#positions"); } catch (e) {} render(); });
+  function pform(side, item, q, price) {
+    PSIDE = side; $("pf-buy").setAttribute("aria-pressed", side === "buy"); $("pf-sell").setAttribute("aria-pressed", side === "sell");
+    $("pos-add").textContent = side === "buy" ? "Log buy" : "Log sale";
+    if (item != null) { $("pos-item").value = item; $("pos-qty").value = q || 1; $("pos-paid").value = price ? short(price) : ""; }
+    pfHint(); $("pos-paid").focus();
+  }
+  function pfHint() {
+    var n = $("pos-item").value.trim(), i = n && posItem(n), h = $("pf-hint"), bits = [];
+    if (i && i.typ) bits.push("Typical " + fmt(i.typ) + (i.lo && i.hi && i.hi > i.lo ? " (most sales " + short(i.lo) + " to " + short(i.hi) + ")" : ""));
+    if (PSIDE === "sell" && i) { var held = ledger().hold.filter(function (x) { return x.i === i.item; })[0]; bits.push(held ? "You hold " + held.q + " at " + short(Math.round(held.paid)) + " each" : "Not logged as bought, so this sale won't count toward profit"); }
+    h.textContent = bits.join(" · ");
+  }
+  $("pf-buy").addEventListener("click", function () { pform("buy"); });
+  $("pf-sell").addEventListener("click", function () { pform("sell"); });
+  $("pos-item").addEventListener("input", pfHint);
   $("pos-add").addEventListener("click", function () {
-    var n = $("pos-item").value.trim(), q = Math.max(1, +$("pos-qty").value || 1), paid = +$("pos-paid").value;
-    if (!n || !(paid > 0)) { $("pos-paid").focus(); return; }
-    var hit = D.list.filter(function (i) { return i.item.toLowerCase() === n.toLowerCase(); })[0]; if (hit) n = hit.item;
-    POS.push({ i: n, q: q, paid: paid, t: Date.now() }); saveLS("fm-pos", POS);
-    $("pos-item").value = ""; $("pos-qty").value = 1; $("pos-paid").value = ""; render();
+    var n = $("pos-item").value.trim(), q = Math.max(1, Math.round(+$("pos-qty").value || 1)), p = parseMesos($("pos-paid").value);
+    if (!n) { $("pos-item").focus(); return; }
+    if (!(p > 0)) { $("pos-paid").focus(); return; }
+    var hit = posItem(n); if (hit) n = hit.item;
+    TRADES.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), i: n, side: PSIDE, q: q, p: p, t: Date.now() }); saveTrades();
+    $("pos-item").value = ""; $("pos-qty").value = 1; $("pos-paid").value = ""; $("pf-hint").textContent = ""; render();
   });
   $("pos-paid").addEventListener("keydown", function (e) { if (e.key === "Enter") $("pos-add").click(); });
+  $("pf-period").value = String(loadLS("fm-pf-period", 0));
+  $("pf-period").addEventListener("change", function () { saveLS("fm-pf-period", +this.value); render(); });
+  $("pf-fee").value = loadLS("fm-fee", 0);
+  $("pf-fee").addEventListener("change", function () { saveLS("fm-fee", Math.max(0, Math.min(50, +this.value || 0))); syncPOS(); render(); });
+  $("pf-csv").addEventListener("click", function () {
+    var lg = ledger(), byTr = {}; lg.closed.forEach(function (c) { byTr[c.tr.id] = c; });
+    var rows = [["date", "item", "side", "qty", "price each", "profit"]].concat(TRADES.slice().sort(function (a, b) { return a.t - b.t; }).map(function (t) { var c = byTr[t.id]; return [new Date(t.t).toISOString(), t.i, t.side, t.q, t.p, c && c.matched ? Math.round(c.pl) : ""]; }));
+    var csv = rows.map(function (r) { return r.map(function (v) { v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(","); }).join("\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "club-fm-trades.csv"; document.body.appendChild(a); a.click(); a.remove();
+  });
   $("watch-th").value = loadLS("fm-watch-th", 15);
   $("watch-th").addEventListener("change", function () { saveLS("fm-watch-th", +this.value || 15); render(); });
   $("walert").addEventListener("click", function () { $("walert-new").hidden = true; clearInterval(titleTimer); document.title = baseTitle; state.tab = "pos"; render(); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); });
