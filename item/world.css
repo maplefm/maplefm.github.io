@@ -13,3 +13,6 @@
 .pick{border:1px solid var(--line2);border-radius:14px;padding:12px 14px;margin:10px 0;background:var(--panel2)}.pick h3{margin:0 0 4px;font-size:1.05rem}
 .toc{columns:2;column-gap:20px;padding-left:18px}@media (max-width:560px){.toc{columns:1}}.toc li{break-inside:avoid;margin:2px 0}
 .sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;background:var(--panel2);border-radius:14px;padding:6px}
+.mk.you{width:14px;height:14px;background:#2ee08a;border:3px solid #fff;box-shadow:0 0 0 2px #0a5}
+a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
+.cta{margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2)}.cta a{font-weight:800}

@@ -163,10 +163,12 @@
       idx.set(l, n); return n++;
     }
     var keep = function (l) { return l.x || T - l.t <= 3 * DAY; };
+    // a fresh deal stays out of the public copy for its first 10 minutes, the same hold the page applies
+    var held = function (l) { var it = D.byName[l.i]; return !l.so && it && it.typ && l.u < it.typ * 0.8 && now - l.t < HOLD; };
     function enc(v, top) {
       if (v && typeof v === "object") {
-        if (isL.has(v)) return { "@": lref(v) };
-        if (Array.isArray(v)) { var a = v; if (!top && a.length && isL.has(a[0])) a = a.filter(keep); return a.map(function (x) { return enc(x); }); }
+        if (isL.has(v)) return held(v) ? null : { "@": lref(v) };
+        if (Array.isArray(v)) { var a = v; if (a.length && isL.has(a[0])) a = a.filter(function (l) { return !held(l) && (top || keep(l)); }); return a.map(function (x) { return enc(x); }); }
         var o = {}; Object.keys(v).forEach(function (k) { o[k] = enc(v[k]); });
         if (Array.isArray(v.asks) && typeof v.item === "string") o.asksN = v.asks.length;   // the card's count is of every listing
         return o;
