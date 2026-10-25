@@ -260,6 +260,16 @@ except (OSError, ValueError):
     pass
 _ALIAS = sorted(set(_ALIAS), key=lambda t: -len(t[0]))
 
+def extend_aliases(names):
+    """Every item on the price board, cash items included ("SuperstarHoodie 40k"), learned at run time."""
+    global _ALIAS
+    have = {k for k, _ in _ALIAS}
+    add = [(norm(n), n) for n in names if n and len(norm(n)) >= 5 and norm(n) not in have and ":" not in n
+           and "\u2026" not in n and norm(n) not in ("scroll", "scrolls", "coupon", "earring", "earrings")]
+    if add:
+        _ALIAS = sorted(set(_ALIAS + add), key=lambda t: -len(t[0]))
+    return len(add)
+
 _SIDE = re.compile(r"(?<![A-Za-z])(S\s?[>»<]|B\s?[>»<-]|WTS|WTB|Sell(?:ing|in)?\b|Buy(?:ing)?\b|T\s?[>»]|WTT|L\s?[>»]|LF\s?[>»]?)", re.I)
 _CPRICE = re.compile(
     r"(?<![A-Za-z0-9.+\-])(\d{1,3}(?:[.,]\d{1,3})?)\s?([kK]|[mM](?:il)?)(?![A-Za-z])(?:\d)?"      # 26k 1.5k 1m 3k5
@@ -270,10 +280,10 @@ _SCROLL_BASES = [
     ("Crossbow Attack Scroll", ["crossbow", "xbow"]), ("Dagger Attack Scroll", ["dagger"]),
     ("Spear Attack Scroll", ["spear"]), ("Staff Magic Attack Scroll", ["staff"]),
     ("Wand Magic Attack Scroll", ["wand"]), ("Gloves Magic Attack Scroll", ["glove m", "glove for m", "gma"]),
-    ("Earring STR Scroll", ["earring str", "earing str", "erring str", "str earring", "earrings for str", "earring for str"]),
-    ("Earring DEX Scroll", ["earring dex", "earing dex", "erring dex", "dex earring", "earringdex"]),
-    ("Earring INT Scroll", ["earring int", "earing int", "int earring", "earring for int"]),
-    ("Earring LUK Scroll", ["earring luk", "earing luk", "earning luk", "earing luck", "earring luck", "luk earring"]),
+    ("Earring STR Scroll", ["ear str", "earring 60% str", "earring 10% str", "earring 100% str", "earstr", "earrings str", "earings str", "earring str", "earing str", "erring str", "str earring", "earrings for str", "earring for str"]),
+    ("Earring DEX Scroll", ["ear dex", "earring 60% dex", "earring 10% dex", "earring 100% dex", "eardex", "earrings dex", "earings dex", "earring dex", "earing dex", "erring dex", "dex earring", "earringdex"]),
+    ("Earring INT Scroll", ["ear int", "earring 60% int", "earring 10% int", "earring 100% int", "earint", "earrings int", "earings int", "earring int", "earing int", "int earring", "earring for int"]),
+    ("Earring LUK Scroll", ["ear luk", "earring 60% luk", "earring 10% luk", "earring 100% luk", "earluk", "earrings luk", "earings luk", "earring luk", "earing luk", "earning luk", "earing luck", "earring luck", "luk earring"]),
     ("Hat Accuracy Scroll", ["hat acc", "helm acc"]), ("Cape STR Scroll", ["cape str"]),
     ("Pet Equip Speed Scroll", ["pet equip speed", "pet speed"]), ("Bow Attack Scroll", ["bow"]),
     ("Two-handed Sword Attack Scroll", ["2hsword", "2h sword", "2hs", "two handed sword", "two hand sword", "2 hand sword"]),
@@ -355,8 +365,10 @@ def parse_chat_message(msg):
     return [r[:3] for r in parse_chat_message_x(msg)]
 
 # only a grade in brackets counts: "(+3)" is a roll, a bare "+7" is usually how many scrolls passed
-_GRADE = re.compile(r"\(\s*([+-])\s?(\d{1,2})\s*\)()()")
-_STATV = re.compile(r"(?<![\d.])(\d{2,3})\s?(m\.?\s?att|matt|magic\s?att(?:ack)?|m\s?atk|w?att(?:ack)?|atk)\b|\b(m\.?\s?att|matt|magic\s?att(?:ack)?|w?att|atk)\s?:?\s?(\d{2,3})(?![\d%])", re.I)
+_GRADE = re.compile(r"\(\s*([+-])\s?(\d{1,2})\s*\)()()"
+                    r"|()()(?:(?<=^)|(?<=[\s>/]))([+])\s?(\d{1,2})(?![\d%kKmM.,])"          # "+2 pan lid", "S>+2 wand"
+                    r"|()()(?<=[A-Za-z])([+-])(\d{1,2})(?![\d%kKmM.,])")                    # "pan lid+2", "wand-3"
+_STATV = re.compile(r"(?<![\d.])(\d{2,3})\s?(m\.?\s?att|matt|magic\s?att(?:ack)?|m\s?atk|w?att(?:ack)?|w?atk)\b|\b(m\.?\s?att|matt|magic\s?att(?:ack)?|w?att|w?atk)\s?:?\s?(\d{2,3})(?![\d%])", re.I)
 
 def chat_roll(text):
     """The roll people write next to an equip: "(+3)", "-3", "55 att", "att65", "56 Magic Attack".
@@ -368,7 +380,7 @@ def chat_roll(text):
     if av and int(av.group(1)) <= 15:
         x["g"] = int(av.group(1)) * (1 if av.group(2).lower() in ("above", "over") else -1)
     elif g:
-        sign, n = (g.group(1), g.group(2)) if g.group(1) else (g.group(3), g.group(4))
+        gs = [v for v in g.groups() if v]; sign, n = gs[0], gs[1]
         if int(n) <= 15: x["g"] = int(n) * (1 if sign == "+" else -1)
     m = _STATV.search(t)
     if m:
@@ -376,6 +388,8 @@ def chat_roll(text):
         k = "MATT" if re.match(r"m|magic", k, re.I) else "ATT"
         if 5 <= int(v) <= 200: x[k] = int(v)
     if re.search(r"\bclean\b", t, re.I): x["clean"] = 1
+    # a bare "+7" next to a weapon with its attack written out is the upgrade count, not a grade
+    if "g" in x and g and not g.group(1) and not av and ("ATT" in x or "MATT" in x): del x["g"]
     return x or None
 
 def parse_chat_message_x(msg):
@@ -391,7 +405,12 @@ def parse_chat_message_x(msg):
         if not side:
             continue
         clause = msg[marks[k][1]:marks[k + 1][0]]
+        # "(2)" or "x2" is how many they have, never part of the price: "60% (2) 65k ea" is 65k each
+        clause = re.sub(r"\(\s*\d{1,3}\s*\)|\b[xX]\s?\d{1,2}\b(?=\s*[-:/]?\s*\d)", "  ", clause)
         items = _find_items(clause)
+        # "polearm atk 60%": the scroll, not the Pole Arm it's named after
+        scrolls = [it for it in items if "Scroll" in it[2]]
+        items = [it for it in items if "Scroll" in it[2] or not any(it[0] < sc[1] and sc[0] < it[1] for sc in scrolls)]
         prices = [(m.start(), m.end(), _price_val(m)) for m in _CPRICE.finditer(clause)]
         if not items or not prices:
             continue
@@ -400,7 +419,9 @@ def parse_chat_message_x(msg):
             if val < 10 or val > 50_000_000:
                 continue
             before = clause[max(0, ps - 14):ps]
-            if _BAD_CTX.search(before) or re.search(r"\d\s$", before):
+            if before.endswith("(") and ")" not in clause[pe:pe + 2]:
+                continue      # "(265k": a quantity in brackets that lost its ")" ran into the price, so it can't be trusted
+            if _BAD_CTX.search(before) or re.search(r"(?:^|[^+\-\d])\d\s$", before):
                 continue      # "c/o 5k" is a bid, and "1 6k" is a decimal point the reader lost
             each = bool(re.match(r"\s*(?:mesos?\s*)?(?:each|ea\b|/e)", clause[pe:pe + 14], re.I))
             prev_end = prices[pi - 1][1] if pi else 0

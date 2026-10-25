@@ -57,6 +57,55 @@ def find_bubbles(img, scale=1.0):
     return out
 
 
+# Chalkboards (the item) come in dark skins with light writing: black, brown wood and purple
+PALETTE = ((0, 0, 0), (150, 75, 40), (75, 55, 105))
+
+
+def find_dark_boards(img, scale=1.0):
+    """Dark chalkboards, as (x0, y0, x1, y1, background color)."""
+    a = np.asarray(img.convert("RGB")).astype(np.int16)
+    f = 3
+    H, W = a.shape[0] // f, a.shape[1] // f
+    sm = a[:H * f, :W * f].reshape(H, f, W, f, 3).mean((1, 3))
+    out = []
+    for col in PALETTE:
+        s = np.abs(sm - np.array(col)).max(2) < 40
+        seen = np.zeros((H, W), bool)
+        ys, xs = np.nonzero(s)
+        for y, x in zip(ys.tolist(), xs.tolist()):
+            if seen[y, x]:
+                continue
+            q = deque([(y, x)]); seen[y, x] = True
+            y0 = y1 = y; x0 = x1 = x; n = 0
+            while q:
+                cy, cx = q.popleft(); n += 1
+                if cy < y0: y0 = cy
+                if cy > y1: y1 = cy
+                if cx < x0: x0 = cx
+                if cx > x1: x1 = cx
+                for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                    if 0 <= ny < H and 0 <= nx < W and s[ny, nx] and not seen[ny, nx]:
+                        seen[ny, nx] = True; q.append((ny, nx))
+            w, h = (x1 - x0 + 1) * f, (y1 - y0 + 1) * f
+            if not (90 * scale <= w <= 320 * scale and 40 * scale <= h <= 320 * scale) or n * f * f / (w * h) < 0.45:
+                continue
+            bx = (x0 * f, y0 * f, (x1 + 1) * f, (y1 + 1) * f)
+            if bx[0] <= 2 or bx[2] >= img.width - 2 or bx[1] <= 2:
+                continue
+            inner = a[bx[1]:bx[3], bx[0]:bx[2]]
+            ink = (np.abs(inner - np.array(col)).max(2) > 100).mean()
+            if 0.04 < ink < 0.45:
+                out.append(bx + (col,))
+    return out
+
+
+def _ink(crop, bg):
+    """Light writing on a dark board as dark writing on white, so it reads like a speech bubble."""
+    a = np.asarray(crop.convert("RGB")).astype(np.int16)
+    d = np.abs(a - np.array(bg)).max(2)
+    return Image.fromarray((255 - np.clip(d * 1.6, 0, 255)).astype(np.uint8), "L")
+
+
 def _texts(crop, cuts=CUTS):
     sc = 4
     g = crop.convert("L").resize((crop.width * sc, crop.height * sc), Image.BICUBIC)
@@ -90,13 +139,14 @@ def read_bubble(crop):
     name, votes = first.most_common(1)[0]
     if votes < 3:                        # the name is spelled the same at three of the four cut-offs, or nothing
         return []
-    found = Counter(); clash = set()
+    found = Counter(); clash = set(); rolls = {}
     for r in reads:
         if not r or r[0][0] != name:
             continue
         got = {}
         for side, item, price, x in fmparse.parse_chat_message_x(r[0][1]):
             got[(side, item)] = price
+            if x: rolls.setdefault((side, item, price), []).append(json_key(x))
         for k, p in got.items():
             found[(k, p)] += 1
     by_item = {}
@@ -107,12 +157,23 @@ def read_bubble(crop):
         ps.sort(reverse=True)
         if len(ps) > 1 or ps[0][0] < 2:  # two readings saw a different price, or only one reading found it
             continue
-        out.append((name, side, item, ps[0][1], None))
+        xs = Counter(rolls.get((side, item, ps[0][1]), []))
+        x = None
+        if xs:
+            k, n = xs.most_common(1)[0]
+            if n >= 2: x = dict(k)          # the roll ("+2", "55 att") the same in two readings
+        out.append((name, side, item, ps[0][1], x))
     return out
+
+
+def json_key(x):
+    return tuple(sorted(x.items()))
 
 
 def read_boards(img, scale=1.0):
     out = []
     for b in find_bubbles(img, scale):
         out.extend(read_bubble(img.crop((b[0] + 1, b[1] + 1, b[2] - 1, b[3] - 1))))
+    for b in find_dark_boards(img, scale):
+        out.extend(read_bubble(_ink(img.crop((b[0] + 3, b[1] + 3, b[2] - 3, b[3] - 3)), b[4])))
     return out
