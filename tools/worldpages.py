@@ -60,14 +60,17 @@ def quest_slugs(quests):
     return out
 
 
-def page(title, desc, path, crumbs, body):
+OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
+
+
+def page(title, desc, path, crumbs, body, og=None):
     canon = SITE + path
     ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": i + 1, "name": n, "item": SITE + u} for i, (n, u) in enumerate([("Club FM", "/")] + crumbs)]}
     nav = " › ".join(f'<a href="{u}">{E(n)}</a>' for n, u in crumbs[:-1])
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
-<meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{SITE}/og.png"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/item/world.css?v=1">
 <script type="application/ld+json">{json.dumps(ld)}</script></head><body><main>
 <div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><span class="nav"><a class="sm" href="/training/">Training</a><a class="sm" href="/maps/">Maps</a><a class="sm" href="/quests/">Quests</a><a class="go" href="/">Price board</a></span></div>
@@ -238,7 +241,7 @@ def build(world, guide, summary, notes, out):
         if q_here: b += "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· Lv {q['lv']}+ from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
         b += f'<p style="margin-top:16px"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p><p class="note">Updated {built}.</p>'
         crumbs = [("Maps", "/maps/"), (p, f"/map/{MSLUG[p]}/")]
-        write(out, f"map/{MSLUG[p]}", page(f"{p} · MapleStory Classic map, portals and monsters · Club FM", desc, f"/map/{MSLUG[p]}/", crumbs, b)); paths.append(f"/map/{MSLUG[p]}/")
+        write(out, f"map/{MSLUG[p]}", page(f"{p} · MapleStory Classic map, portals and monsters · Club FM", desc, f"/map/{MSLUG[p]}/", crumbs, b, f"{OG}map/{MSLUG[p]}.png")); paths.append(f"/map/{MSLUG[p]}/")
 
     # ---------------------------------------------------------- monster pages
     for n, mb in MOB.items():
@@ -269,7 +272,7 @@ def build(world, guide, summary, notes, out):
             b += f"<h2>Quests that need it</h2><ul>{rows}</ul>"
         b += f'<p class="note">Updated {built}.</p>'
         crumbs = [("Monsters", "/monsters/"), (n, f"/monster/{BSLUG[n]}/")]
-        write(out, f"monster/{BSLUG[n]}", page(f"{n} · MapleStory Classic drops, stats and location · Club FM", desc, f"/monster/{BSLUG[n]}/", crumbs, b)); paths.append(f"/monster/{BSLUG[n]}/")
+        write(out, f"monster/{BSLUG[n]}", page(f"{n} · MapleStory Classic drops, stats and location · Club FM", desc, f"/monster/{BSLUG[n]}/", crumbs, b, f"{OG}monster/{BSLUG[n]}.png" if mb.get("id") else None)); paths.append(f"/monster/{BSLUG[n]}/")
 
     # ---------------------------------------------------------- quest pages
     def jobs_text(js):

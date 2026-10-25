@@ -501,6 +501,18 @@ async function dataLive(req, env) {
   const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60, ref).catch(() => null)));
   if (!parts.some(Boolean)) return json({ error: "not ready" }, 503);
   const mk = await markKey(env, id || "ip:" + ip);
+  // ?after=<ms>: only the uploads newer than that, so an open board refreshes with a few KB instead of the whole bundle
+  const after = Number(new URL(req.url).searchParams.get("after")) || 0;
+  if (after > 0) {
+    let out = "{", first = true;
+    for (let i = 0; i < MEMBER_FILES.length; i++) {
+      if (!parts[i]) continue;
+      let arr; try { arr = JSON.parse(await parts[i].text()); } catch (e) { continue; }
+      const t = JSON.stringify(Array.isArray(arr) ? arr.filter((d) => d && Date.parse(d.at) > after) : []);
+      out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + (mk === null ? t : markTimes(t, mk)); first = false;
+    }
+    return new Response(out + "}", { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store", "X-Delta": "1" } });
+  }
   const { readable, writable } = new TransformStream();
   (async () => {
     const w = writable.getWriter(), enc = new TextEncoder();
