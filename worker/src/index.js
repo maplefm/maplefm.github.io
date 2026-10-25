@@ -66,6 +66,7 @@ async function route(req, env, url) {
   if (p === "/twitch/callback") return twitchCallback(req, env, url);
   if (p === "/twitch/unlink" && req.method === "POST") return twitchUnlink(req, env);
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
+  if (p === "/data/sig" && req.method === "GET") return dataSig(env);
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
@@ -403,13 +404,31 @@ async function kofiIncome(env) {
 const ARCH_RAW = "https://raw.githubusercontent.com/maplefm/clubfm-archive/live/";
 const LIVE_RAW = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
 // one cached copy per file for ttl seconds, shared by every member on this Cloudflare location
-async function archFetch(env, path, ttl = 60) {
-  const key = new Request("https://archive.cache/" + path + "?b=" + Math.floor(Date.now() / 1000 / ttl));
+// The archive's newest commit, checked at most every 10 seconds. Files are then read at that exact commit, so a
+// watcher's upload reaches the site within seconds instead of waiting out GitHub's 5-minute raw file cache.
+async function archSig(env) {
+  const key = new Request("https://archive.cache/sig?b=" + Math.floor(Date.now() / 10000));
+  const cache = caches.default;
+  const hit = await cache.match(key);
+  if (hit) return (await hit.text()) || null;
+  if (!env.ARCHIVE_READ) return null;
+  const r = await fetch("https://api.github.com/repos/maplefm/clubfm-archive/commits/live", { headers: { Authorization: "token " + env.ARCHIVE_READ, Accept: "application/vnd.github.sha", "User-Agent": "clubfm-worker" } }).catch(() => null);
+  const sha = r && r.ok ? (await r.text()).trim().slice(0, 40) : "";
+  if (!/^[0-9a-f]{40}$/.test(sha)) return null;
+  await cache.put(key, new Response(sha, { headers: { "Cache-Control": "public, max-age=10" } }));
+  return sha;
+}
+async function dataSig(env) {
+  const sha = await archSig(env).catch(() => null);
+  return json({ v: sha ? sha.slice(0, 12) : "", at: Date.now() }, 200, { "Cache-Control": "no-store" });
+}
+async function archFetch(env, path, ttl = 60, ref = null) {
+  const key = new Request("https://archive.cache/" + path + (ref ? "?ref=" + ref : "?b=" + Math.floor(Date.now() / 1000 / ttl)));
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit) return hit;
   if (!env.ARCHIVE_READ) return null;
-  const r = await fetch(ARCH_RAW + path, { headers: { Authorization: "token " + env.ARCHIVE_READ, "User-Agent": "clubfm-worker" } });
+  const r = await fetch((ref ? ARCH_RAW.replace("/live/", "/" + ref + "/") : ARCH_RAW) + path, { headers: { Authorization: "token " + env.ARCHIVE_READ, "User-Agent": "clubfm-worker" } });
   if (!r.ok) return null;
   const res = new Response(r.body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=" + ttl } });
   await cache.put(key, res.clone());
@@ -475,9 +494,11 @@ async function dataLive(req, env) {
   const acct = id ? await env.ACCOUNTS.get("acct:" + id, "json") : null;
   if (acct && acct.locked) return json({ error: "locked" }, 403, { "Cache-Control": "no-store" });
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if ((id && overLimit("a:" + id, 30, 600)) || overLimit("i:" + ip, id ? 60 : 24, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
-  if (env.RL) { try { const ok = await env.RL.limit({ key: id ? "a:" + id : "i:" + ip }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
-  const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60).catch(() => null)));
+  const club = acct ? await isClub(acct, env) : false;     // Club and Mega Deals refresh every 15 seconds for deals
+  if ((id && overLimit("a:" + id, club ? 90 : 30, 600)) || overLimit("i:" + ip, club ? 120 : id ? 60 : 24, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
+  if (env.RL && !club) { try { const ok = await env.RL.limit({ key: id ? "a:" + id : "i:" + ip }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
+  const ref = await archSig(env).catch(() => null);
+  const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60, ref).catch(() => null)));
   if (!parts.some(Boolean)) return json({ error: "not ready" }, 503);
   const mk = await markKey(env, id || "ip:" + ip);
   const { readable, writable } = new TransformStream();
