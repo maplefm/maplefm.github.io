@@ -324,6 +324,8 @@ def plain_change(subj):
     t = re.sub(r"\([^)]*\)", "", subj)                                  # brackets hold the technical part
     t = re.sub(r"\b\S*[/_.]\S*\b", "", t)                                # paths, file names, dotted names
     t = re.sub(r"\b[a-z]+[A-Z]\w*\b", "", t)                             # camelCase identifiers
+    t = re.sub(r"^\s*FM Watcher\s*:\s*", "", t)                          # the release post already says which watcher
+    t = re.sub(r"\s+(and|or|with|the)\s*$", "", t)                       # a removed file name can leave a dangling word
     t = re.sub(r"\s*[:;]\s*$", "", re.sub(r"\s{2,}", " ", t)).strip(" ,.-")
     return t[:1].upper() + t[1:140] if t else ""
 
