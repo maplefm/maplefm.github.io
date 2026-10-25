@@ -313,7 +313,7 @@
     n = n.replace(/\s+(?:to|t0|TO|T0)\s+S\w{0,3}\s*$/, "");                               // "Garnet TO SELL" from chat
     n = n.replace(/\bBott\w*?ear\b/g, "Bottomwear").replace(/\b([A-Z])\1(?=[a-z]{2})/g, "$1");
     // letters the screen reader swaps in known names: Retum, Eartings, Paletie, Alfac, Cal's Eye
-    n = n.replace(/\bRetum\b/g, "Return").replace(/\bEartings?\b/g, "Earrings").replace(/\bPaletie\b/g, "Palette").replace(/\bAlfac/g, "Attac").replace(/\bCal's Eye\b/g, "Cat's Eye").replace(/\bAtlack\b/g, "Attack");
+    n = n.replace(/\bRetum\b/g, "Return").replace(/\bEartings?\b/g, "Earrings").replace(/\bPaletie\b/g, "Palette").replace(/\bAlfac/g, "Attac").replace(/\bCal's Eye\b/g, "Cat's Eye").replace(/\bAtlack\b/g, "Attack").replace(/\bAltack\b/g, "Attack");
     n = n.replace(/\s+/g, " ").trim();
     if (/\sScr\w*(\s+\S{1,3})?$/.test(n) && !/Scroll:/.test(n)) { n = n.replace(/\sScr\w*(\s+\S{1,3})?$/, " Scroll"); tl = true; }
     if (/ Scroll$/.test(n) && !/^Return Scroll/i.test(n) && tieredBase(n)) tl = true;   // SP Reset Scroll has no tiers; its tier is never "cut off"
@@ -382,9 +382,9 @@
   // hour, so a name's place can still change as more spellings of it come in.
   var CNC = { cl: {}, out: {}, db: -1, at: 0 }, NAMES_IN = null;
   // bump when cleanName or the name resolver changes, so a published names.json from older rules is not reused
-  var CLEANV = 2;
+  var CLEANV = 3;
   window.fmClean = function () { return { cl: CNC.cl, out: CNC.out, v: CLEANV }; };
-  window.fmQA = { pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
+  window.fmQA = { canonAll: function (r) { return canonAll(r); }, pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
   // the server runs this same page and publishes the tidied spelling of every raw name it saw; seeded here, the
   // first build only has to tidy names that are new since
   function seedNames() { if (NAMES_IN && NAMES_IN.v === CLEANV && DBN && !Object.keys(CNC.cl).length) { CNC = { cl: NAMES_IN.cl, out: NAMES_IN.out || {}, db: DBK.length, at: Date.now() }; NAMES_IN = null; } }
@@ -404,7 +404,9 @@
         if (lk.length >= 10 && !DB[lk] && !known[lk]) {
           var starts = function (pre) { return (DBB[pre.slice(0, 2)] || []).filter(function (t) { return t.indexOf(pre) === 0 && t !== lk; }); };
           // also with a short scrap of junk on the end dropped ("Horny Mushroom G")
-          if (starts(lk).length === 1 || (/\s\S{1,2}$/.test(lk) && starts(lk.replace(/\s\S{1,2}$/, " ")).length === 1)) c.cut = true;
+          // or several, all tiers of one scroll ("One-Handed Axe Attack S"): cut off, tier unknown
+          var oneBase = function (a) { return a.length > 1 && a.every(function (t) { return / scroll: /.test(t) && t.split(": ")[0] === a[0].split(": ")[0]; }); };
+          if (starts(lk).length === 1 || (lk.split(" ").length >= 3 && oneBase(starts(lk))) || (/\s\S{1,2}$/.test(lk) && starts(lk.replace(/\s\S{1,2}$/, " ")).length === 1)) c.cut = true;
         }
       }
       if (c.cut) return;
@@ -482,6 +484,9 @@
         if (got) res = got;
         else if (/[|*\\{}\[\]<>=]/.test(c.s) || (/\)/.test(c.s) && !/\(/.test(c.s)) || /^[^A-Za-z0-9]/.test(c.s)) { out[r] = { n: c.s + "\u2026", tl: false }; return; }
       }
+      // a one-off scrap that matches nothing real ("Green Mushro a", "Selectve 5-slot Caaf us") stays out of
+      // search and the item lists until it has been seen a few times
+      if (!DB[res] && !known[res] && !solidSet[res]) { out[r] = { n: c.s + "\u2026", tl: false }; return; }
       var nm = display(res);
       out[r] = { n: nm, tl: c.tl && !/: (Lesser|Intermediate|Greater|Superior)$/i.test(nm) };
       if (out[r].tl) out[r].n = nm.replace(/: .*$/, "");
@@ -3322,6 +3327,15 @@
     d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
   });
   window.addEventListener("focus", function () { clearInterval(titleTimer); document.title = baseTitle; });
+  // "Log this sale in My positions" from a market listing: #positions&plog=s,price,qty,item opens the form filled in
+  (function plogHash() {
+    var m = /[#&]plog=([bs]),(\d+),(\d+),([^&]+)/.exec(location.hash); if (!m) return;
+    var item = ""; try { item = decodeURIComponent(m[4]); } catch (e) { return; }
+    setTimeout(function () {
+      try { pform(m[1] === "s" ? "sell" : "buy", item, +m[3], +m[2]); } catch (e) {}
+      try { history.replaceState(null, "", location.pathname + "#positions"); } catch (e) {}
+    }, 900);
+  })();
   (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; if (/positions/.test(h)) state.tab = "pos"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
 
   // ---------- data loading

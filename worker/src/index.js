@@ -17,7 +17,7 @@
 // Storage (KV): acct:<discord id> -> account JSON; code:<link code> -> discord id; watcher:<hid> -> discord id
 // Nothing here holds a watcher's real id or key: the watcher sends hid (its hashed id), and keys are masked.
 
-import { marketRoute, marketSync, marketCheck } from "./market.js";
+import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
 const DAY = 86400;
@@ -67,6 +67,9 @@ async function route(req, env, url) {
   if (p === "/twitch/login") return twitchLogin(req, env, url);
   if (p === "/twitch/callback") return twitchCallback(req, env, url);
   if (p === "/twitch/unlink" && req.method === "POST") return twitchUnlink(req, env);
+  if (p === "/market/stats" && req.method === "GET") return json(await marketStats(env, Number(url.searchParams.get("days") || 7)), 200, { "Cache-Control": "public, max-age=300", "Access-Control-Allow-Origin": "*" });
+  if (p.startsWith("/l/") && req.method === "GET") return marketShare(env, p.slice(3));
+  if (p === "/shop" && req.method === "GET") return shopGet(env, url);
   if (p === "/market" || p.startsWith("/market/")) return marketRoute(req, env, url, p, Object.assign(mkCtx(env), { rows: await mkRows(env) }));
   if (p === "/admin/market" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketCheck(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market/sync" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketSync(env, mkCtx(env))); }
@@ -502,9 +505,12 @@ async function snapPut(req, env) {
   if (!want || got !== want) { await note({ error: "key" }); return json({ error: "no" }, 403); }
   const body = await req.text();
   if (body.length < 1000 || body.length > 24e6) { await note({ error: "size", bytes: body.length }); return json({ error: "size" }, 400); }
-  try { const j = JSON.parse(body); if (j.v !== 2 || !j.cols) throw 0; } catch (e) { await note({ error: "bad", bytes: body.length }); return json({ error: "bad" }, 400); }
+  let sj = null;
+  try { sj = JSON.parse(body); if (sj.v !== 2 || !sj.cols) throw 0; } catch (e) { await note({ error: "bad", bytes: body.length }); return json({ error: "bad" }, 400); }
   await env.ACCOUNTS.put("snap:board", body);
-  await note({ ok: true, bytes: body.length });
+  // shops by owner for the shop pages, and "Seen in game" on market listings
+  const shopsN = await snapShops(env, sj).catch((e) => "error " + (e && e.message || e));
+  await note({ ok: true, bytes: body.length, seen: shopsN });
   return json({ ok: true, bytes: body.length });
 }
 async function dataSnap(env) {
@@ -820,7 +826,9 @@ function expandQuery(q, abbr) {
   return tier ? base.replace(/\s*scroll:?.*$/, "") + " scroll: " + tier : base;
 }
 // what the market needs from here: the item list it checks names against, and the chat matcher for #selling posts
-function mkCtx(env) { return { whoami, isAdmin, overLimit, findRows, splitRoll, rows: () => mkRows(env), abbr: abbrMap }; }
+function mkCtx(env) { return { whoami, isAdmin, overLimit, findRows, splitRoll, rows: () => mkRows(env), abbr: abbrMap,
+  dmAdmins: async (m) => wdDM(env, await wdAdmins(env), [{ description: String(m).slice(0, 3900), color: 0xe74c3c, title: "Club FM market" }]) }; }
+setRows((env) => mkRows(env));
 let MKROWS = null, MKAT = 0;
 async function mkRows(env) {
   if (MKROWS && Date.now() - MKAT < 600e3) return MKROWS;
@@ -830,7 +838,7 @@ async function mkRows(env) {
     const d = r && r.ok ? await r.json().catch(() => null) : null;
     rows = d && Array.isArray(d.rows) ? d.rows.filter((x) => x && x.item && !/\u2026$|^scroll: |\|/i.test(x.item)) : [];
   }
-  if (rows.length) { MKROWS = rows.map((x) => ({ item: x.item, typ: x.typ, n: x.n, equip: x.equip })); MKAT = Date.now(); }
+  if (rows.length) { MKROWS = rows.map((x) => ({ item: x.item, typ: x.typ, n: x.n, equip: x.equip, vol: x.vol })); MKAT = Date.now(); }
   return MKROWS || [];
 }
 async function summaryRows(env) {
@@ -873,11 +881,13 @@ async function interactions(req, env) {
   const opt = ((it.data && it.data.options) || []).find((o) => o.name === "item");
   const q = opt ? String(opt.value || "") : "";
   if (it.type === 4) {                                   // autocomplete: the closest item names
-    const rows = await summaryRows(env), ab = await abbrMap();
+    const rows = await mkRows(env), ab = await abbrMap();
     // nothing typed yet: the busiest items, so the list shows as soon as the box opens
     const pick = q.trim() ? findRows(rows, q, ab) : rows.filter((r) => (r.n || 0) >= 2).sort((a, b) => (b.vol || b.n || 0) - (a.vol || a.n || 0));
     return json({ type: 8, data: { choices: pick.slice(0, 25).map((r) => ({ name: shown(r.item).slice(0, 100), value: r.item.slice(0, 100) })) } });
   }
+  if (it.type === 2 && it.data && (it.data.name === "market" || it.data.name === "sell"))
+    return json(await marketCommand(env, it, Object.assign(mkCtx(env), { rows: await mkRows(env), abbr: await abbrMap() })));
   if (it.type === 2 && it.data && it.data.name === "price") {
     const rows = await summaryRows(env), ab = await abbrMap(), sr = splitRoll(q);
     const hits = findRows(rows, sr.q, ab);
@@ -1300,9 +1310,9 @@ async function wdDM(env, ids, embeds) {
   const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
   let sent = 0;
   for (const id of ids) {
-    const c = await (await fetch(DISCORD + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
+    const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
     if (!c || !c.id) continue;
-    const r = await fetch(DISCORD + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds }) });
+    const r = await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds }) });
     if (r.ok) sent++;
   }
   return sent;
@@ -1487,7 +1497,16 @@ async function setupCommands(env) {
   const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
   const cmds = [{ name: "price", description: "Price check a MapleStory Classic item from Club FM's watched sales",
     integration_types: [0, 1], contexts: [0, 1, 2],
-    options: [{ type: 3, name: "item", description: "Item name or chat shortcut (gfa 60, wg), start typing for suggestions", required: true, autocomplete: true }] }];
+    options: [{ type: 3, name: "item", description: "Item name or chat shortcut (gfa 60, wg), start typing for suggestions", required: true, autocomplete: true }] },
+    { name: "market", description: "What Club FM members are selling, cheapest first", integration_types: [0, 1], contexts: [0, 1, 2],
+      options: [{ type: 3, name: "item", description: "An item, or leave empty for the newest listings", required: false, autocomplete: true }] },
+    { name: "sell", description: "List an item for sale on maplefm.gg and in #selling", integration_types: [0], contexts: [0],
+      options: [{ type: 3, name: "item", description: "The item, start typing for suggestions", required: true, autocomplete: true },
+        { type: 3, name: "price", description: "Price each in mesos, like 15m or 800k", required: true },
+        { type: 4, name: "qty", description: "How many (default 1)", required: false, min_value: 1, max_value: 9999 },
+        { type: 3, name: "ign", description: "Your in-game name (saved from the site if you set one)", required: false },
+        { type: 3, name: "stats", description: "Equip stats, like +5 ATT", required: false },
+        { type: 3, name: "note", description: "Anything a buyer should know", required: false }] }];
   const g = await fetch(DISCORD + "/applications/" + APP_ID + "/commands", { method: "PUT", headers: H, body: JSON.stringify(cmds) });
   const clear = await fetch(DISCORD + "/applications/" + APP_ID + "/guilds/" + GUILD + "/commands", { method: "PUT", headers: H, body: "[]" });
   const inst = { scopes: ["applications.commands"], permissions: "0" };

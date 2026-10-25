@@ -58,6 +58,8 @@ PAGES = [
     ("Quest log", "/quests.html", "Quest"),
     ("Earn by scanning", "/contribute.html", "Earn by"),
     ("Maps and training", "/map.html", "Maps and Training"),
+    ("Player market", "/market.html", "Player market"),
+    ("Shops", "/shop.html", "Shops"),
     ("Training guide", "/training/", "training guide"),
     ("Map page", "/map/sleepywood/", "Sleepywood"),
     ("Weekly recap", "/recap/", "This week on the"),
@@ -86,6 +88,16 @@ try:
     check("Server-built board", ok, f"uploaded {sage:.0f} min ago" if ok else f"last upload {sage:.0f} min ago, {sj.get('error') or 'not ok'}", ms, None if ok else "pump")
 except Exception:
     check("Server-built board", False, f"no status (status {st})", ms)
+
+# 2c. The player market: listings answer, and the #selling sync has run in the last half hour
+st, body, ms = get("https://api.maplefm.gg/market/stats")
+try:
+    mj = json.loads(body); sy = mj.get("sync") or {}; mage = (NOW - sy.get("at", 0)) / 60
+    err = (sy.get("out") or {}).get("error")
+    ok = st == 200 and mage < 30 and not err
+    check("Player market", ok, f"{mj.get('open', 0)} open listings, #selling synced {mage:.0f} min ago" if ok else (f"#selling sync: {err}" if err else f"#selling last synced {mage:.0f} min ago"), ms)
+except Exception:
+    check("Player market", False, f"no answer (status {st})", ms)
 
 # 3. Fresh prices: the live pump signs the data every few minutes
 st, body, ms = get("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/live.sig?t=" + str(int(NOW)))

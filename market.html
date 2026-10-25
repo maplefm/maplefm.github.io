@@ -67,6 +67,10 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 .offer b{font:800 1.05rem Outfit}.offer .sp{flex:1}
 .note{white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:8px 10px;font-size:.9rem}
 .trust{margin:14px 0 0;font-size:.82rem;color:var(--muted)}
+.tag.seen{background:var(--ok-soft);color:var(--ok)}.tag.rep{background:var(--gold-soft);color:var(--warn)}
+.box{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);background:var(--bg)}
+.box.admin{border-color:var(--bad)}
+.copied{color:var(--ok);font-weight:700;font-size:.85rem}
 .foot{margin-top:24px;font-size:.78rem;color:var(--muted)}
 @media (max-width:600px){.hero h1{font-size:1.55rem}.panel{padding:14px}.btn{padding:9px 12px}}
 </style>
@@ -103,6 +107,14 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     if (Math.abs(d) < 0.03) return el("span", "tag", "about typical");
     return el("span", "tag " + (d < 0 ? "under" : "over"), Math.round(Math.abs(d) * 100) + "% " + (d < 0 ? "under" : "over") + " typical");
   }
+  function tradesTag(sel) { return sel.trades ? el("span", "tag rep", sel.trades + (sel.trades === 1 ? " trade" : " trades") + " confirmed") : null; }
+  function seenTag(l) {
+    if (!l.seen) return null;
+    var t = el("span", "tag seen", "✓ Seen in game");
+    t.title = "A Club FM scanner saw " + (l.ign || "this seller") + "'s shop with this item" + (l.seen.price ? " at " + meso(l.seen.price) : "") + ", " + ago(l.seen.at) + ".";
+    return t;
+  }
+  function plog(side, l, price) { return "/#positions&plog=" + side + "," + Math.round(price || l.price) + "," + (l.qty || 1) + "," + encodeURIComponent(l.item); }
   function msg(box, text, ok) { var m = box.querySelector(".msg"); if (!m) { m = el("p"); box.appendChild(m); } m.className = "msg " + (ok ? "ok" : "err"); m.textContent = text; m.hidden = !text; }
 
   // ---- loading
@@ -110,8 +122,9 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
   function loadMine() { return api("/market?mine=1").then(function (j) { MINE = j.signedIn ? j : null; ME = j.signedIn ? j.me : null; who(); }); }
   function who() {
     var w = $("who"); w.textContent = "";
-    if (ME) { var m = el("span", "me", ME.name + (ME.ign ? " · " + ME.ign : "")); w.appendChild(m); var n = el("a", "btn gold", "+ List an item"); n.href = "#new"; w.appendChild(n); }
+    if (ME) { var m = el("span", "me", ME.name + (ME.ign ? " · " + ME.ign : "") + (MINE && MINE.trades ? " · " + MINE.trades + (MINE.trades === 1 ? " trade" : " trades") : "")); w.appendChild(m); var n = el("a", "btn gold", "+ List an item"); n.href = "#new"; w.appendChild(n); }
     else w.appendChild(signIn());
+    var sp = el("a", "btn", ME && ME.ign ? "My shop" : "Find a shop"); sp.href = "/shop.html" + (ME && ME.ign ? "#" + encodeURIComponent(ME.ign) : ""); w.appendChild(sp);
   }
   // item names and typical prices, for the picker and the "under typical" tags
   var rowsP = fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
@@ -159,6 +172,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     if (l.status === "pending") t.appendChild(el("span", "tag hold", "Buyer on it"));
     else if (l.status !== "active") t.appendChild(el("span", "tag closed", { sold: "Sold", cancelled: "Taken down", expired: "Ended" }[l.status] || l.status));
     if (l.source === "discord") t.appendChild(el("span", "tag", "From #selling"));
+    var sn = seenTag(l); if (sn) t.appendChild(sn); var tt = tradesTag(l.seller); if (tt) t.appendChild(tt);
     if (t.firstChild) c.appendChild(t);
     var s = el("div", "seller"); if (l.seller.avatar) { var im = el("img"); im.src = l.seller.avatar; im.alt = ""; s.appendChild(im); }
     s.appendChild(document.createTextNode((l.ign || l.seller.name) + " · " + ago(l.created))); c.appendChild(s);
@@ -226,12 +240,17 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
       var pr = el("div", "price", meso(l.price)); if (l.qty > 1) pr.appendChild(el("small", null, " each · " + l.qty + " for sale")); p.appendChild(pr);
       var t = el("div", "tags"); if (l.stats) t.appendChild(el("span", "tag", l.stats)); var vt = vsTyp(l); if (vt) t.appendChild(vt);
       var stt = { active: ["Listed · " + left(l.expires), "tag"], pending: ["Buyer on it", "tag hold"], sold: ["Sold", "tag closed"], cancelled: ["Taken down", "tag closed"], expired: ["Ended", "tag closed"] }[l.status] || [l.status, "tag"];
-      t.appendChild(el("span", stt[1], stt[0])); if (l.source === "discord") t.appendChild(el("span", "tag", "From #selling")); p.appendChild(t);
-      var kv = el("dl", "kv"); [["Seller", (l.seller.name || "") + (l.ign ? " · in game: " + l.ign : "")], ["Listed", ago(l.created)], ["Typical on the board", ROWS[l.item] && ROWS[l.item].typ ? meso(ROWS[l.item].typ) + (l.stats ? " (clean)" : "") : "not enough sales yet"]].forEach(function (x) { kv.appendChild(el("dt", null, x[0])); kv.appendChild(el("dd", null, x[1])); });
+      t.appendChild(el("span", stt[1], stt[0])); if (l.source === "discord") t.appendChild(el("span", "tag", "From #selling"));
+      var sn = seenTag(l); if (sn) t.appendChild(sn); var tt = tradesTag(l.seller); if (tt) t.appendChild(tt); p.appendChild(t);
+      var kv = el("dl", "kv"); [["Seller", (l.seller.name || "") + (l.ign ? " · in game: " + l.ign : "") + (l.seller.trades ? " · " + l.seller.trades + (l.seller.trades === 1 ? " confirmed trade" : " confirmed trades") : " · no confirmed trades yet")], ["Listed", ago(l.created)], ["Typical on the board", ROWS[l.item] && ROWS[l.item].typ ? meso(ROWS[l.item].typ) + (l.stats ? " (clean)" : "") : "not enough sales yet"]].forEach(function (x) { kv.appendChild(el("dt", null, x[0])); kv.appendChild(el("dd", null, x[1])); });
       p.appendChild(kv);
       if (l.note) { p.appendChild(el("h3", null, "Seller's note")); p.appendChild(el("div", "note", l.note)); }
       var bl = el("p", "hint"); var ba = el("a", null, "See " + shown(l.item) + " on the price board →"); ba.href = "/#item=" + encodeURIComponent(l.item); bl.appendChild(ba); p.appendChild(bl);
+      if (l.ign) { var sh = el("p", "hint"), sa = el("a", null, "See " + l.ign + "'s shop as our scanners saw it →"); sa.href = "/shop.html#" + encodeURIComponent(l.ign); sh.appendChild(sa); p.appendChild(sh); }
       if (l.mine) ownerTools(p, l); else buyerTools(p, l);
+      shareTools(p, l);
+      if (!l.mine && ME && l.status !== "deleted") reportTools(p, l);
+      if (l.admin) adminTools(p, l);
     });
   }
   function discordLinks(box, l) {
@@ -242,6 +261,18 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
   }
   function buyerTools(p, l) {
     var open = l.status === "active" || l.status === "pending";
+    if (l.iAmBuyer && l.status === "sold") {
+      var cb = el("div", "box");
+      if (l.confirmed === 0 || l.confirmed == null) {
+        cb.appendChild(el("p", null, "The seller marked this sold to you for " + meso(l.dealPrice || l.price) + ". Did you get it?"));
+        var ca = el("div", "acts"), yes = el("button", "btn ok", "Yes, I got it"), no = el("button", "btn bad", "No, it didn't happen"); yes.type = no.type = "button";
+        var ans = function (v) { yes.disabled = no.disabled = true; api("/market/" + l.id + "/confirm", { ok: v }).then(function (j) { if (!j.ok) { yes.disabled = no.disabled = false; return msg(cb, j.error); } refresh().then(function () { detail(l.id); }); }); };
+        yes.addEventListener("click", function () { ans(true); }); no.addEventListener("click", function () { ans(false); });
+        ca.appendChild(yes); ca.appendChild(no); cb.appendChild(ca);
+      } else cb.appendChild(el("p", null, l.confirmed === 1 ? "You confirmed this trade. Thanks." : "You said this trade didn't happen. Club FM has been told."));
+      if (l.confirmed !== -1) { var lg = el("a", "btn", "Log this buy in My positions →"); lg.href = plog("b", l, l.dealPrice); var la = el("div", "acts"); la.appendChild(lg); cb.appendChild(la); }
+      p.appendChild(cb); return;
+    }
     if (!open) { p.appendChild(el("p", "msg err", "This listing isn't for sale anymore.")); return; }
     if (!ME) { var s = el("div", "acts"); s.appendChild(signIn()); p.appendChild(s); p.appendChild(el("p", "hint", "Sign in to buy it now or make an offer. The seller gets a Discord DM.")); discordLinks(p, l); return; }
     if (!ME.ok) { p.appendChild(el("p", "msg err", ME.why)); discordLinks(p, l); return; }
@@ -318,7 +349,8 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
       a.appendChild(confirmBtn("Delete", "bad", "Tap again to delete", "/delete", function () { location.hash = ""; }));
       p.appendChild(a);
     } else {
-      p.appendChild(el("p", "hint", l.status === "sold" ? "Sold. Nice trade." : "This listing is down. Renew it to put it back up for a week."));
+      p.appendChild(el("p", "hint", l.status === "sold" ? "Sold. Nice trade." + (l.confirmed === 1 ? " Your buyer confirmed it, so it counts on your record." : l.confirmed === 0 ? " Waiting on your buyer to confirm it for your record." : l.confirmed === -1 ? " Your buyer said it didn't happen; Club FM will look into it." : "") : "This listing is down. Renew it to put it back up for a week."));
+      if (l.status === "sold") { var lg = el("a", "btn", "Log this sale in My positions →"); lg.href = plog("s", l, l.dealPrice); var la = el("div", "acts"); la.appendChild(lg); p.appendChild(la); }
       var a2 = el("div", "acts");
       if (l.status !== "sold") a2.appendChild(confirmBtn("Renew for a week", "go", null, "/renew"));
       a2.appendChild(confirmBtn("Delete", "bad", "Tap again to delete", "/delete", function () { location.hash = ""; }));
@@ -339,6 +371,33 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     if (l.thread) { var th = el("p", "hint"), ta = el("a", null, "Open the #selling post on Discord →"); ta.href = l.thread; ta.target = "_blank"; ta.rel = "noopener"; th.appendChild(ta); p.appendChild(th); }
   }
 
+  function shareTools(p, l) {
+    var a = el("div", "acts"), b = el("button", "btn", "Share listing"), done = el("span", "copied"); b.type = "button";
+    var link = "https://api.maplefm.gg/l/" + l.id;
+    b.addEventListener("click", function () {
+      var ok = function () { done.textContent = "Link copied. It shows the item and price when pasted in Discord."; };
+      if (navigator.share && /Mobi|iPhone|Android/i.test(navigator.userAgent)) { navigator.share({ title: shown(l.item) + " · " + meso(l.price), url: link }).catch(function () {}); return; }
+      if (navigator.clipboard) navigator.clipboard.writeText(link).then(ok, function () { done.textContent = link; }); else done.textContent = link;
+    });
+    a.appendChild(b); a.appendChild(done); p.appendChild(a);
+  }
+  function reportTools(p, l) {
+    if (l.reported) { p.appendChild(el("p", "hint", "You reported this listing. Thanks.")); return; }
+    var d = el("details"), s0 = el("summary", "hint", "Report this listing"); s0.style.cursor = "pointer"; d.appendChild(s0);
+    var f = el("div", "form"), lb = el("label", "wide", "What's wrong with it?"), ta = el("textarea"); ta.maxLength = 300; ta.placeholder = "Fake, a scam, wrong item, already sold..."; lb.appendChild(ta); f.appendChild(lb);
+    var go = el("button", "btn bad", "Send report"); go.type = "button"; var ga = el("div", "acts"); ga.appendChild(go); f.appendChild(ga); d.appendChild(f);
+    go.addEventListener("click", function () { go.disabled = true; api("/market/" + l.id + "/report", { why: ta.value }).then(function (j) { go.disabled = false; if (!j.ok) return msg(d, j.error || "That didn't send."); d.textContent = ""; d.appendChild(el("p", "msg ok", "Reported. Club FM will take a look.")); }); });
+    p.appendChild(d);
+  }
+  function adminTools(p, l) {
+    var b = el("div", "box admin"); b.appendChild(el("b", null, "Admin"));
+    (l.reports || []).forEach(function (r) { b.appendChild(el("p", "hint", "Report " + ago(r.created) + ": " + r.why)); });
+    if (!(l.reports || []).length) b.appendChild(el("p", "hint", "No reports."));
+    var a = el("div", "acts");
+    if (l.status === "active" || l.status === "pending") { var c = el("button", "btn bad", "Admin: take it down"); c.type = "button"; c.addEventListener("click", function () { c.disabled = true; api("/market/" + l.id + "/cancel", {}).then(function (j) { if (!j.ok) { c.disabled = false; return msg(b, j.error); } refresh().then(function () { detail(l.id); }); }); }); a.appendChild(c); }
+    var d = el("button", "btn bad", "Admin: delete"); d.type = "button"; d.addEventListener("click", function () { if (d.dataset.arm !== "1") { d.dataset.arm = "1"; d.textContent = "Tap again to delete"; return; } api("/market/" + l.id + "/delete", {}).then(function (j) { if (!j.ok) return msg(b, j.error); refresh().then(function () { location.hash = ""; }); }); }); a.appendChild(d);
+    b.appendChild(a); p.appendChild(b);
+  }
   function refresh() { return Promise.all([loadAll(), loadMine()]); }
   function route() {
     var h = location.hash, m;
