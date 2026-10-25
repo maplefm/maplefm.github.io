@@ -344,15 +344,40 @@ function embed(l) {
     footer: { text: "Listed on maplefm.gg · listings never change the board's prices" } };
 }
 
-async function forumTag(env) {
-  const c = await (await fetch(api(env) + "/channels/" + SELL_FORUM, { headers: H(env) })).json().catch(() => null);
-  if (!c || !Array.isArray(c.available_tags) || !c.available_tags.length) return [];
-  const t = c.available_tags.find((x) => /sell|wts|sale/i.test(x.name)) || ((c.flags & 16) ? c.available_tags[0] : null);
+// #selling sorts posts by tag (Weapon, Armor, Accessory, Scroll, Etc, Sold) and requires one: pick by what the item is
+let KINDS = null;
+async function kindOf(env, item) {
+  if (!KINDS) {
+    const r = await fetch(env.ITEMDB_URL || SITE_URL + "/data/itemdb.json", { cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
+    const d = r && r.ok ? await r.json().catch(() => null) : null;
+    KINDS = {}; if (d && d.items) d.items.forEach((x) => { KINDS[String(x[0]).toLowerCase()] = x[4] ? "Cash" : d.kinds[x[5]] || ""; });
+  }
+  return KINDS[String(item).toLowerCase()] || "";
+}
+const WEAPON = /Sword|Axe|Blunt|Dagger|Wand|Staff|Spear|Pole Arm|Bow|Crossbow|Claw/;
+export async function tagName(env, item) {
+  const k = await kindOf(env, item);
+  if (/ Scroll(:|$| \d)/.test(item) || /scroll/i.test(item)) return "Scroll";
+  if (/^Equip:/.test(k) && !/Cash/.test(k)) {
+    if (WEAPON.test(k)) return "Weapon";
+    if (/Accessory|Eye|Earrings|Ring|Pendant|Face$/.test(k)) return "Accessory";
+    return "Armor";
+  }
+  return "Etc";
+}
+let FORUM = null;
+async function forumTags(env, item, sold) {
+  if (!FORUM || Date.now() - FORUM.at > 3600e3) {
+    const c = await (await fetch(api(env) + "/channels/" + SELL_FORUM, { headers: H(env) })).json().catch(() => null);
+    FORUM = { at: Date.now(), tags: c && Array.isArray(c.available_tags) ? c.available_tags : [] };
+  }
+  const want = sold ? "Sold" : await tagName(env, item);
+  const t = FORUM.tags.find((x) => x.name.toLowerCase() === want.toLowerCase()) || FORUM.tags.find((x) => /^etc/i.test(x.name)) || FORUM.tags.find((x) => !/sold/i.test(x.name));
   return t ? [t.id] : [];
 }
 async function threadOpen(env, l) {
   if (!env.DISCORD_BOT_TOKEN) return null;
-  const body = { name: title(l), message: { content: "", embeds: [embed(l)], allowed_mentions: { parse: [] } }, applied_tags: await forumTag(env) };
+  const body = { name: title(l), message: { content: "", embeds: [embed(l)], allowed_mentions: { parse: [] } }, applied_tags: await forumTags(env, l.item, false) };
   const r = await fetch(api(env) + "/channels/" + SELL_FORUM + "/threads", { method: "POST", headers: H(env), body: JSON.stringify(body) });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error("forum post " + r.status + " " + (d.message || ""));
@@ -375,6 +400,8 @@ async function threadSay(env, l, msg) {
 async function threadClose(env, l, msg) {
   if (!env.DISCORD_BOT_TOKEN || !l.thread_id) return;
   await threadSay(env, l, msg);
+  // a sale gets the Sold tag first: tags can't change once the post is archived
+  if (/^Sold/.test(msg)) await fetch(api(env) + "/channels/" + l.thread_id, { method: "PATCH", headers: H(env), body: JSON.stringify({ applied_tags: await forumTags(env, l.item, true) }) });
   await fetch(api(env) + "/channels/" + l.thread_id, { method: "PATCH", headers: H(env), body: JSON.stringify(l.source === "site" ? { archived: true, locked: true } : { archived: true }) });
 }
 async function dm(env, id, content) {
