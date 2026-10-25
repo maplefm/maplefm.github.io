@@ -830,8 +830,8 @@ async function interactions(req, env) {
     return json({ type: 8, data: { choices: pick.slice(0, 25).map((r) => ({ name: shown(r.item).slice(0, 100), value: r.item.slice(0, 100) })) } });
   }
   if (it.type === 2 && it.data && it.data.name === "price") {
-    const rows = await summaryRows(env), ab = await abbrMap();
-    const hits = findRows(rows, q, ab);
+    const rows = await summaryRows(env), ab = await abbrMap(), sr = splitRoll(q);
+    const hits = findRows(rows, sr.q, ab);
     if (!hits.length) return json({ type: 4, data: { content: "No listings for **" + q.slice(0, 60) + "** in the last few days. Try a shorter name, or check https://maplefm.gg", flags: 64 } });
     const r = hits[0];
     const link = "https://maplefm.gg/#item=" + encodeURIComponent(r.item);
@@ -843,6 +843,7 @@ async function interactions(req, env) {
     const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
     if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
     else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
+    if (sr.roll) lines.push(sr.roll + " ones: see **Price by " + sr.roll.split(" ")[1] + "** on the item's card, [open it here](" + link + ")");
     lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
     const more = hits.slice(1, 4).map((h) => shown(h.item)).join(", ");
     return json({ type: 4, data: { embeds: [{ title: shown(r.item), description: lines.join("\n"), url: link, color: 0x5b4bdb, footer: { text: (more ? "Also matched: " + more + " · " : "") + "Club FM, priced by watched sales · add /price: maplefm.gg/bot" } }] } });
@@ -860,12 +861,27 @@ async function chatPrice(req, env, url) {
   logHit(env, "!price", "", "", ip).catch(() => {});
   return txt(await priceLine(env, String(url.searchParams.get("q") || "")));
 }
+// "5 att wg", "work gloves +3 att": the roll comes off before the name is matched, and the answer points at the
+// board's price-by-attack table for that item
+function splitRoll(q) {
+  const m = /(^|\s)\+?(\d{1,2})\s*(att|watk|atk|matt|matk)\b/i.exec(q) || /(^|\s)(att|watk|atk|matt|matk)\s*\+(\d{1,2})\b/i.exec(q);
+  if (!m) return { q, roll: "" };
+  const stat = isNaN(m[2]) ? m[2] : m[3], v = isNaN(m[2]) ? m[3] : m[2], rest = q.replace(m[0], " ").replace(/\s+/g, " ").trim();
+  return rest ? { q: rest, roll: v + " " + (/^m/i.test(stat) ? "MATT" : "ATT") } : { q, roll: "" };
+}
 async function priceLine(env, raw) {
   let q = raw; try { q = decodeURIComponent(raw); } catch (e) {}
   q = q.replace(/^!?(price|pc|fm)\s*/i, "").trim().slice(0, 80);
   if (!q) return "Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg";
+  const sr = splitRoll(q); q = sr.q;
   const rows = await summaryRows(env), ab = await abbrMap();
   const hits = findRows(rows, q, ab);
+  if (hits.length && sr.roll) {
+    const r0 = hits[0], b0 = [shown(r0.item) + ":"];
+    if (r0.typ) b0.push("clean typical " + meso(r0.typ) + ".");
+    b0.push(sr.roll + " ones are priced by roll at maplefm.gg/#item=" + encodeURIComponent(r0.item));
+    return b0.join(" ").slice(0, 390);
+  }
   if (!hits.length) return "No recent listings for " + q + ". Check maplefm.gg";
   const r = hits[0], bits = [shown(r.item) + ":"];
   if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? " from " + (r.salesN || 0) + " sales" : " from asks"));
