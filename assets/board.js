@@ -2568,15 +2568,41 @@
   // under the card: the item's full page (price history, quests, drops) and, quietly, where the price came from
   var ITEMPAGES = {};
   function itemSlug(n) { return String(showName(n)).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  // the player market: one small list for the whole board, fetched when an item is first opened
+  var MKT = { at: 0, L: null, p: null };
+  function mktLoad() {
+    if (MKT.L && Date.now() - MKT.at < 60000) return Promise.resolve(MKT.L);
+    if (MKT.p) return MKT.p;
+    MKT.p = fetch("https://api.maplefm.gg/market").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { MKT.p = null; MKT.at = Date.now(); MKT.L = j && j.listings || []; return MKT.L; })
+      .catch(function () { MKT.p = null; return MKT.L || []; });
+    return MKT.p;
+  }
   var renderItemBody = renderItem0;
   renderItem0 = function () {
     renderItemBody();
     var n = state.sel, ip = $("ip"); if (!n || !ip || !ip.firstChild) return;
     var f = el("div", "ifoot");
     if (ITEMPAGES[n] && idOf(n)) { var a = el("a", "ifull", "Price history, quests and drops →"); a.href = "/item/" + itemSlug(n) + "/"; f.appendChild(a); }
+    var sl = el("a", "ifull isell", "Have one to sell? List it on maplefm.gg →"); sl.href = "/market.html#new=" + encodeURIComponent(n); f.appendChild(sl);
     var e = el("p", "iearn"); e.appendChild(document.createTextNode("Prices here come from players running FM Watcher while they shop. "));
     var ea = el("a", null, "Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea); f.appendChild(e);
     ip.appendChild(f);
+    // members' own listings for this item: shown apart from the shop listings and never counted in the price
+    mktLoad().then(function (L) {
+      if (state.sel !== n || !ip.isConnected || ip.querySelector(".mkt")) return;
+      var mine = L.filter(function (l) { return l.item === n; }).sort(function (a, b) { return (a.status === "pending") - (b.status === "pending") || a.price - b.price; });
+      if (!mine.length) return;
+      var box = el("div", "mkt"), h = el("div", "mkh"); h.appendChild(el("b", null, "Listed on maplefm.gg")); h.appendChild(el("span", null, mine.length + (mine.length === 1 ? " member listing" : " member listings") + " · not counted in the price"));
+      box.appendChild(h);
+      mine.slice(0, 5).forEach(function (l) {
+        var r = el("a", "mkr"); r.href = "/market.html#l=" + l.id;
+        r.appendChild(el("b", null, short(l.price) + (l.qty > 1 ? " ea" : "")));
+        r.appendChild(el("span", "mkw", [l.stats, l.qty > 1 ? "x" + l.qty : "", l.ign || l.seller.name, l.status === "pending" ? "buyer on it" : ""].filter(Boolean).join(" · ")));
+        r.appendChild(el("span", "mkv", "View listing →")); box.appendChild(r);
+      });
+      if (mine.length > 5) { var m = el("a", "mkr mkmore", "All " + mine.length + " listings →"); m.href = "/market.html#q=" + encodeURIComponent(showName(n)); box.appendChild(m); }
+      ip.insertBefore(box, ip.children[1] || null);
+    });
     // a roll asked for in the search: jump to its row in "Price by ATT", or say none has been seen
     if (PENDROLL && PENDROLL.n === n) {
       var want = PENDROLL.k + " " + PENDROLL.v, row = [].filter.call(ip.querySelectorAll(".pbs tr.jump"), function (tr) { return tr.firstChild && new RegExp("^" + want + "(\\D|$)").test(tr.firstChild.textContent); })[0];

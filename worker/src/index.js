@@ -17,6 +17,7 @@
 // Storage (KV): acct:<discord id> -> account JSON; code:<link code> -> discord id; watcher:<hid> -> discord id
 // Nothing here holds a watcher's real id or key: the watcher sends hid (its hashed id), and keys are masked.
 
+import { marketRoute, marketSync, marketCheck } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
 const DAY = 86400;
@@ -31,6 +32,7 @@ export default {
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
     ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
     ctx.waitUntil(trafficPost(env).catch(() => {}));
+    ctx.waitUntil(marketSync(env, mkCtx(env)).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
   },
   async fetch(req, env) {
@@ -65,6 +67,9 @@ async function route(req, env, url) {
   if (p === "/twitch/login") return twitchLogin(req, env, url);
   if (p === "/twitch/callback") return twitchCallback(req, env, url);
   if (p === "/twitch/unlink" && req.method === "POST") return twitchUnlink(req, env);
+  if (p === "/market" || p.startsWith("/market/")) return marketRoute(req, env, url, p, Object.assign(mkCtx(env), { rows: await mkRows(env) }));
+  if (p === "/admin/market" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketCheck(env), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/market/sync" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketSync(env, mkCtx(env))); }
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
   if (p === "/data/snap" && req.method === "GET") return dataSnap(env);
   if (p === "/data/snap-status" && req.method === "GET") return json((await env.ACCOUNTS.get("snap:last", "json")) || {}, 200, { "Cache-Control": "no-store" });
@@ -121,7 +126,7 @@ function login(req, env, url) {
   back.searchParams.set("prompt", "none");
   const h = new Headers({ Location: back.toString() });
   h.append("Set-Cookie", `fm_state=${state}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
-  h.append("Set-Cookie", `fm_back=${["home", "quests"].includes(url.searchParams.get("back")) ? url.searchParams.get("back") : "earn"}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
+  h.append("Set-Cookie", `fm_back=${["home", "quests", "market"].includes(url.searchParams.get("back")) ? url.searchParams.get("back") : "earn"}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
 }
 
@@ -152,7 +157,7 @@ async function callback(req, env, url) {
   if (!acct.code) acct.code = await newCode(env, u.id);
   await env.ACCOUNTS.put(key, JSON.stringify(acct));
   const session = await sign(env.SESSION_SECRET, u.id + "|" + (now() + 30 * DAY));
-  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in" }[cookie(req, "fm_back")] || "/earn.html#signed-in") + "&fmt=" + encodeURIComponent(session) });
+  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in", market: "/market.html#signed-in" }[cookie(req, "fm_back")] || "/earn.html#signed-in") + "&fmt=" + encodeURIComponent(session) });
   h.append("Set-Cookie", `${COOKIE}=${session}; Path=/; Max-Age=${30 * DAY}; Secure; HttpOnly; SameSite=None`);
   h.append("Set-Cookie", `fm_state=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
@@ -798,7 +803,7 @@ async function abbrMap() {
 // trade-chat words the item names spell out: "glove for att 60" is Gloves Attack Scroll 60%
 const FILLER = new Set(["for", "of", "the", "a", "an", "to", "scroll", "scrolls", "scr"]);
 const SYN = { att: "attack", atk: "attack", attk: "attack", matt: "magic attack", matk: "magic attack", ma: "magic attack", acc: "accuracy",
-  luk: "luck", avoid: "avoidability", avo: "avoidability", spd: "speed", jmp: "jump", wep: "weapon", wpn: "weapon", crit: "crit", ohs: "one-handed sword",
+  luck: "luk", avoid: "avoidability", avo: "avoidability", spd: "speed", jmp: "jump", wep: "weapon", wpn: "weapon", crit: "crit", ohs: "one-handed sword",
   ths: "two-handed sword", glove: "gloves", shoe: "shoes", earrings: "earring", topwear: "topwear", ovr: "overall", ova: "overall" };
 function expandQuery(q, abbr) {
   q = String(q || "").toLowerCase().replace(/[%]/g, " ").replace(/\s+/g, " ").trim();
@@ -813,6 +818,20 @@ function expandQuery(q, abbr) {
     base = abbr[joined] ? String(abbr[joined]).toLowerCase() : joined || base;
   }
   return tier ? base.replace(/\s*scroll:?.*$/, "") + " scroll: " + tier : base;
+}
+// what the market needs from here: the item list it checks names against, and the chat matcher for #selling posts
+function mkCtx(env) { return { whoami, isAdmin, overLimit, findRows, splitRoll, rows: () => mkRows(env), abbr: abbrMap }; }
+let MKROWS = null, MKAT = 0;
+async function mkRows(env) {
+  if (MKROWS && Date.now() - MKAT < 600e3) return MKROWS;
+  let rows = env ? await summaryRows(env).catch(() => []) : [];
+  if (!rows.length) {
+    const r = await fetch((env && env.MARKET_ROWS_URL) || "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json", { cf: { cacheTtl: 600, cacheEverything: true } }).catch(() => null);
+    const d = r && r.ok ? await r.json().catch(() => null) : null;
+    rows = d && Array.isArray(d.rows) ? d.rows.filter((x) => x && x.item && !/\u2026$|^scroll: |\|/i.test(x.item)) : [];
+  }
+  if (rows.length) { MKROWS = rows.map((x) => ({ item: x.item, typ: x.typ, n: x.n, equip: x.equip })); MKAT = Date.now(); }
+  return MKROWS || [];
 }
 async function summaryRows(env) {
   const sm = await vaultJSON(env, "data/summary.json", 300).catch(() => null);

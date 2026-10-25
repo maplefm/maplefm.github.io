@@ -1104,6 +1104,14 @@ dialog h3 { color: var(--accent-ink); }
 @media (prefers-reduced-motion: reduce) { .strip .hook > span { animation: none; } .pk { transition: none; } }
 .ifoot { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--line2); display: grid; gap: 6px; }
 .ifoot .ifull { font-weight: 800; font-size: .86rem; text-decoration: none; color: var(--accent, var(--wood)); }
+.mkt { margin: 10px 0; border: 1.5px solid var(--accent, var(--wood)); border-radius: 12px; padding: 8px 10px; display: grid; gap: 4px; background: var(--panel, transparent); }
+.mkt .mkh { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: .86rem; }
+.mkt .mkh b { color: var(--accent, var(--wood)); }
+.mkt .mkh span { color: var(--muted); font-size: .74rem; font-weight: 600; }
+.mkt .mkr { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; text-decoration: none; color: inherit; padding: 5px 2px; border-top: 1px dashed var(--line2); font-size: .86rem; }
+.mkt .mkr b { font-weight: 900; }
+.mkt .mkw { color: var(--muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mkt .mkv, .mkt .mkmore { color: var(--accent, var(--wood)); font-weight: 800; font-size: .8rem; }
 .ifoot .iearn { margin: 0; color: var(--muted); font-size: .72rem; font-weight: 600; }
 .ifoot .iearn a { color: inherit; font-weight: 800; }
 .nudge { position: fixed; z-index: 46; right: 16px; bottom: 64px; width: min(360px, calc(100% - 32px)); display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: center;

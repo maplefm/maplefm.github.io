@@ -1,0 +1,357 @@
+<!doctype html><html lang="en"><head>
+<script src="/assets/api.js?v=2"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player Market · MapleStory Classic · Club FM</title>
+<meta name="description" content="Buy and sell MapleStory Classic items with other players for mesos. List an item with your Discord sign-in, take Buy it now or offers, and get a Discord DM when someone wants it.">
+<link rel="canonical" href="https://maplefm.gg/market.html">
+<meta property="og:title" content="Player Market · MapleStory Classic · Club FM"><meta property="og:description" content="Items Club FM members are selling for mesos. Buy it now or make an offer; the seller gets a Discord DM.">
+<meta property="og:url" content="https://maplefm.gg/market.html"><meta property="og:image" content="https://maplefm.gg/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://api.maplefm.gg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1;--soft:#efe8ff;--gold:#e0a91c;--gold-soft:#fff3d1;--ok:#12895f;--ok-soft:#dcf5ea;--warn:#b0570a;--bad:#c0392b;--bad-soft:#fde7e4;--shadow:0 2px 0 rgba(60,30,120,.06),0 8px 24px rgba(60,30,120,.08)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f12;--ok:#4ade80;--ok-soft:#173326;--warn:#f0a35a;--bad:#ff8a7a;--bad-soft:#3a1d1d;--shadow:0 2px 0 rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f12;--ok:#4ade80;--ok-soft:#173326;--warn:#f0a35a;--bad:#ff8a7a;--bad-soft:#3a1d1d;--shadow:0 2px 0 rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
+a{color:var(--accent)}
+main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+.hero{background:linear-gradient(135deg,#3b1a7a,#6d3fd1 60%,#8b5cf6);color:#fff;border-radius:18px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.hero h1{font:800 1.9rem/1.1 Outfit,sans-serif;margin:0}
+.hero p{margin:6px 0 0;opacity:.92;max-width:620px}
+.hero .who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{font:700 .9rem Inter,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.gold{background:#ffd34d;border-color:#ffd34d;color:#2b2140}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.bad{color:var(--bad);border-color:var(--bad)}
+.btn.arm{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.55;cursor:default}
+.hero .btn{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff}.hero .btn.gold{background:#ffd34d;color:#2b2140;border-color:#ffd34d}
+.me{font-weight:700;display:flex;gap:6px;align-items:center}.me img{width:26px;height:26px;border-radius:50%}
+.tabs{display:flex;gap:6px;margin:16px 0 10px;flex-wrap:wrap}
+.tabs button{font:700 .9rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tabs button em{font-style:normal;background:var(--soft);color:var(--accent);border-radius:99px;padding:0 8px;font-size:.8rem}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs button[aria-pressed="true"] em{background:rgba(255,255,255,.25);color:#fff}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ctl input,.ctl select{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.ctl input[type=search]{flex:1 1 240px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;display:grid;gap:6px;text-decoration:none;color:inherit;cursor:pointer}
+.card:hover{border-color:var(--accent)}
+.card h3{margin:0;font:700 1.05rem/1.25 Outfit,sans-serif;display:flex;gap:8px;align-items:center}
+.card h3 img,.dt h2 img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated;flex:0 0 auto}
+.price{font:800 1.35rem Outfit,sans-serif}.price small{font:600 .8rem Inter;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent)}
+.tag.under{background:var(--ok-soft);color:var(--ok)}.tag.over{background:var(--gold-soft);color:var(--warn)}.tag.hold{background:var(--gold-soft);color:var(--warn)}
+.tag.closed{background:var(--bad-soft);color:var(--bad)}
+.seller{display:flex;gap:6px;align-items:center;font-size:.85rem;color:var(--muted)}.seller img{width:20px;height:20px;border-radius:50%}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:22px;text-align:center;color:var(--muted)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:12px}
+.panel h2{margin:0 0 8px;font:800 1.35rem Outfit,sans-serif;display:flex;gap:10px;align-items:center}
+.panel h3{margin:14px 0 6px;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.back{display:inline-block;margin:14px 0 8px;font-weight:700;text-decoration:none}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.form label{display:grid;gap:4px;font-size:.8rem;font-weight:700;color:var(--muted)}
+.form label.wide{grid-column:1/-1}
+.form input,.form textarea{font:inherit;font-size:.95rem;font-weight:500;color:var(--ink);padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);width:100%}
+.form textarea{min-height:60px;resize:vertical}
+.hint{font-size:.8rem;color:var(--muted);font-weight:600;margin:4px 0 0}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.msg{margin:10px 0 0;padding:9px 12px;border-radius:10px;font-weight:600;font-size:.9rem}
+.msg.err{background:var(--bad-soft);color:var(--bad)}.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.92rem}.kv dt{color:var(--muted);font-weight:600}.kv dd{margin:0;font-weight:700}
+.offers{display:grid;gap:6px}.offer{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--line);border-radius:12px}
+.offer b{font:800 1.05rem Outfit}.offer .sp{flex:1}
+.note{white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:8px 10px;font-size:.9rem}
+.trust{margin:14px 0 0;font-size:.82rem;color:var(--muted)}
+.foot{margin-top:24px;font-size:.78rem;color:var(--muted)}
+@media (max-width:600px){.hero h1{font-size:1.55rem}.panel{padding:14px}.btn{padding:9px 12px}}
+</style>
+<link rel="stylesheet" href="/assets/nav.css?v=1"></head><body>
+<main>
+<!--nav--><nav class="sitenav" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/items/"><span class="sn-l">All items</span><span class="sn-s">Items</span></a><a href="/market.html" aria-current="page"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Maps and training</span><span class="sn-s">Maps</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><!--/nav-->
+<section class="hero">
+  <div><h1>Player market</h1><p>Items Club FM members are selling for mesos. Buy it now or make an offer and the seller gets a Discord DM. Listings never change the board's prices: those only come from shops seen in game.</p></div>
+  <div class="who" id="who"></div>
+</section>
+<div id="view"></div>
+<p class="foot">Trades happen in game, between players. Club FM never holds items or mesos and never sells anything for real money. Posts in the #selling forum on the <a href="https://discord.gg/cXnVBTUUPk" rel="noopener">Club FM Discord</a> show up here too. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
+</main>
+<script>
+(function () {
+  var API = "https://api.maplefm.gg", L = [], ME = null, MINE = null, ROWS = {}, NAMES = [], TAB = "all";
+  function $(id) { return document.getElementById(id); }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function meso(n) { n = +n || 0; return n >= 999.5e6 ? +(n / 1e9).toFixed(2) + "B" : n >= 999.5e3 ? +(n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + "M" : n >= 999.5 ? Math.round(n / 1e3) + "K" : String(Math.round(n)); }
+  function shown(n) { return String(n || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, function (m, t) { return " Scroll " + { Lesser: "100%", Intermediate: "60%", Greater: "10%" }[t]; }); }
+  function ago(t) { var s = Date.now() / 1000 - t; return s < 90 ? "just now" : s < 5400 ? Math.round(s / 60) + " min ago" : s < 129600 ? Math.round(s / 3600) + "h ago" : Math.round(s / 86400) + "d ago"; }
+  function left(t) { var s = t - Date.now() / 1000; return s <= 0 ? "ended" : s < 5400 ? Math.round(s / 60) + " min left" : s < 129600 ? Math.round(s / 3600) + "h left" : Math.round(s / 86400) + "d left"; }
+  function api(path, body) {
+    var o = { credentials: "include", cache: "no-store" };
+    if (body !== undefined) { o.method = "POST"; o.headers = { "Content-Type": "application/json" }; o.body = JSON.stringify(body); }
+    return fetch(API + path, o).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j = j || {}; j._s = r.status; return j; }); })
+      .catch(function () { return { _s: 0, error: "Couldn't reach Club FM. Check your connection and try again." }; });
+  }
+  function signIn() { var a = el("a", "btn gold", "Sign in with Discord"); a.href = API + "/login?back=market"; return a; }
+  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; i.onerror = function () { i.remove(); }; return i; }
+  function vsTyp(l) {
+    var r = ROWS[l.item]; if (!r || !r.typ || l.stats) return null;
+    var d = l.price / r.typ - 1;
+    if (Math.abs(d) < 0.03) return el("span", "tag", "about typical");
+    return el("span", "tag " + (d < 0 ? "under" : "over"), Math.round(Math.abs(d) * 100) + "% " + (d < 0 ? "under" : "over") + " typical");
+  }
+  function msg(box, text, ok) { var m = box.querySelector(".msg"); if (!m) { m = el("p"); box.appendChild(m); } m.className = "msg " + (ok ? "ok" : "err"); m.textContent = text; m.hidden = !text; }
+
+  // ---- loading
+  function loadAll() { return api("/market?t=" + Date.now()).then(function (j) { L = j.listings || []; }); }
+  function loadMine() { return api("/market?mine=1").then(function (j) { MINE = j.signedIn ? j : null; ME = j.signedIn ? j.me : null; who(); }); }
+  function who() {
+    var w = $("who"); w.textContent = "";
+    if (ME) { var m = el("span", "me", ME.name + (ME.ign ? " · " + ME.ign : "")); w.appendChild(m); var n = el("a", "btn gold", "+ List an item"); n.href = "#new"; w.appendChild(n); }
+    else w.appendChild(signIn());
+  }
+  // item names and typical prices, for the picker and the "under typical" tags
+  var rowsP = fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
+    (s && s.rows || []).forEach(function (r) { if (r && r.item && !/…$|^scroll: |\|/i.test(r.item)) { ROWS[r.item] = r; NAMES.push(r.item); } });
+  }).catch(function () {});
+  // item pictures: ids from the board's item list, drawn as the cards come in
+  var IDS = {}, idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
+
+  // ---- the list
+  function list() {
+    var v = $("view"); v.textContent = "";
+    var tabs = el("div", "tabs"), mineN = MINE ? MINE.listings.filter(function (l) { return l.status === "active" || l.status === "pending"; }).length : 0;
+    [["all", "All listings", L.length], ["mine", "My listings", mineN], ["offers", "My offers", MINE ? MINE.offers.filter(function (o) { return o.status === "open"; }).length : 0]].forEach(function (t) {
+      var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", TAB === t[0]); b.appendChild(document.createTextNode(t[1] + " ")); b.appendChild(el("em", null, String(t[2])));
+      b.addEventListener("click", function () { TAB = t[0]; list(); }); tabs.appendChild(b);
+    });
+    v.appendChild(tabs);
+    if (TAB !== "all" && !MINE) { var e0 = el("div", "empty"); e0.appendChild(el("p", null, "Sign in with Discord to see your listings and offers.")); e0.appendChild(signIn()); v.appendChild(e0); return; }
+    if (TAB === "offers") return offersTab(v);
+    var ctl = el("div", "ctl"), q = el("input"); q.type = "search"; q.placeholder = "Search items, like work gloves or claw 60"; q.value = list.q || "";
+    var so = el("select"); [["new", "Newest"], ["cheap", "Cheapest"], ["deal", "Furthest under typical"]].forEach(function (x) { var o = el("option", null, x[1]); o.value = x[0]; so.appendChild(o); }); so.value = list.s || "new";
+    ctl.appendChild(q); ctl.appendChild(so); v.appendChild(ctl);
+    var g = el("div", "grid"); v.appendChild(g);
+    function draw() {
+      list.q = q.value; list.s = so.value; g.textContent = "";
+      var src = TAB === "mine" ? MINE.listings : L, words = q.value.toLowerCase().replace(/%/g, "").split(/\s+/).filter(Boolean);
+      var rows = src.filter(function (l) { var t = (shown(l.item) + " " + l.item + " " + (l.stats || "") + " " + (l.seller.name || "") + " " + (l.ign || "")).toLowerCase().replace(/%/g, ""); return words.every(function (w) { return t.indexOf(w) >= 0; }); });
+      var deal = function (l) { var r = ROWS[l.item]; return r && r.typ && !l.stats ? l.price / r.typ : 9; };
+      rows.sort(so.value === "cheap" ? function (a, b) { return a.price - b.price; } : so.value === "deal" ? function (a, b) { return deal(a) - deal(b); } : function (a, b) { return b.created - a.created; });
+      if (!rows.length) {
+        var e = el("div", "empty");
+        e.appendChild(el("p", null, TAB === "mine" ? "You haven't listed anything yet." : words.length ? "Nothing listed matches that yet." : "Nothing listed yet. Be the first."));
+        if (ME) { var a = el("a", "btn go", "+ List an item"); a.href = "#new"; e.appendChild(a); } else e.appendChild(signIn());
+        g.appendChild(e); return;
+      }
+      rows.slice(0, 300).forEach(function (l) { g.appendChild(card(l)); });
+    }
+    q.addEventListener("input", draw); so.addEventListener("change", draw); draw();
+  }
+  function card(l) {
+    var c = el("a", "card"); c.href = "#l=" + l.id;
+    var h = el("h3"), ic = icon(l.item); if (ic) h.appendChild(ic); else h.dataset.ic = l.item; h.appendChild(document.createTextNode(shown(l.item))); c.appendChild(h);
+    var p = el("div", "price", meso(l.price)); if (l.qty > 1) p.appendChild(el("small", null, " each · " + l.qty + " for sale")); c.appendChild(p);
+    var t = el("div", "tags"); if (l.stats) t.appendChild(el("span", "tag", l.stats)); var vt = vsTyp(l); if (vt) t.appendChild(vt);
+    if (l.status === "pending") t.appendChild(el("span", "tag hold", "Buyer on it"));
+    else if (l.status !== "active") t.appendChild(el("span", "tag closed", { sold: "Sold", cancelled: "Taken down", expired: "Ended" }[l.status] || l.status));
+    if (l.source === "discord") t.appendChild(el("span", "tag", "From #selling"));
+    if (t.firstChild) c.appendChild(t);
+    var s = el("div", "seller"); if (l.seller.avatar) { var im = el("img"); im.src = l.seller.avatar; im.alt = ""; s.appendChild(im); }
+    s.appendChild(document.createTextNode((l.ign || l.seller.name) + " · " + ago(l.created))); c.appendChild(s);
+    return c;
+  }
+  function offersTab(v) {
+    var mine = MINE.offers;
+    if (!mine.length) { v.appendChild(el("div", "empty", "You haven't made any offers yet.")); return; }
+    var box = el("div", "offers");
+    mine.forEach(function (o) {
+      var r = el("div", "offer"); r.appendChild(el("b", null, meso(o.price))); var a = el("a", null, shown(o.item)); a.href = "#l=" + o.listing; r.appendChild(a);
+      r.appendChild(el("span", "sp")); r.appendChild(el("span", "tag" + (o.status === "accepted" ? " under" : o.status === "declined" ? " closed" : ""), { open: "Waiting on the seller", accepted: "Accepted: message the seller", declined: "Declined", withdrawn: "Withdrawn", replaced: "Replaced by a newer offer", closed: "Listing closed" }[o.status] || o.status));
+      box.appendChild(r);
+    });
+    v.appendChild(box);
+  }
+
+  // ---- new listing
+  function newForm(pre) {
+    var v = $("view"); v.textContent = "";
+    var b = el("a", "back", "← All listings"); b.href = "#"; v.appendChild(b);
+    var p = el("section", "panel"); v.appendChild(p); p.appendChild(el("h2", null, "List an item"));
+    if (!ME) { p.appendChild(el("p", null, "Sign in with Discord to list an item. It's free, and buyers reach you by Discord DM.")); p.appendChild(signIn()); return; }
+    if (!ME.ok) { p.appendChild(el("p", "msg err", ME.why)); return; }
+    var f = el("form", "form"); p.appendChild(f);
+    var dl = el("datalist"); dl.id = "names"; NAMES.slice().sort(function (a, b) { return (ROWS[b].n || 0) - (ROWS[a].n || 0); }).forEach(function (n) { var o = el("option"); o.value = shown(n); dl.appendChild(o); }); f.appendChild(dl);
+    function fld(lbl, name, attrs, wide) { var l = el("label", wide ? "wide" : null, lbl), i = el(attrs.tag || "input"); i.name = name; Object.keys(attrs).forEach(function (k) { if (k !== "tag") i.setAttribute(k, attrs[k]); }); l.appendChild(i); f.appendChild(l); return i; }
+    var it = fld("Item", "item", { list: "names", placeholder: "Start typing, like work gloves", autocomplete: "off", required: "" }, true);
+    var hint = el("p", "hint"); it.parentNode.appendChild(hint);
+    var pr = fld("Price each (mesos)", "price", { placeholder: "15m, 800k, 1.2b", inputmode: "decimal", required: "" });
+    var qt = fld("How many", "qty", { type: "number", min: "1", max: "9999", value: "1" });
+    var st = fld("Stats (equips)", "stats", { placeholder: "+5 ATT, 4 slots, clean", maxlength: "60" });
+    var ig = fld("Your in-game name", "ign", { value: ME.ign || "", placeholder: "IGN", maxlength: "12", required: "" });
+    var nt = fld("Note (optional)", "note", { tag: "textarea", maxlength: "200", placeholder: "When you're on, which channel, anything a buyer should know" }, true);
+    function pick() { var v0 = it.value.trim().toLowerCase(); return NAMES.filter(function (n) { return shown(n).toLowerCase() === v0 || n.toLowerCase() === v0; })[0] || ""; }
+    function sync() { var n = pick(), r = ROWS[n]; hint.textContent = n ? (r && r.typ ? "Typical on the board: " + meso(r.typ) + (r.equip ? " for a clean one" : "") : "No typical price yet for this one.") : it.value ? "Pick a name from the list so it lines up with the board." : ""; st.parentNode.hidden = !!(n && r && !r.equip); }
+    it.addEventListener("input", sync); it.addEventListener("change", sync);
+    if (pre) { it.value = shown(pre); }
+    var go = el("button", "btn go", "Post listing"); go.type = "submit";
+    var acts = el("div", "acts"); acts.appendChild(go); f.appendChild(acts); f.appendChild(el("p", "trust wide", "Your listing also goes up in the #selling forum on Discord. It runs a week and you can renew it, change the price or take it down any time. Listings never change the board's prices."));
+    f.addEventListener("submit", function (e) {
+      e.preventDefault(); var n = pick();
+      if (!n) return msg(p, "Pick the item from the list so it matches the board.");
+      go.disabled = true; msg(p, "");
+      api("/market", { item: n, price: pr.value, qty: qt.value === "" ? 1 : Number(qt.value), stats: st.parentNode.hidden ? "" : st.value, ign: ig.value.trim(), note: nt.value }).then(function (j) {
+        go.disabled = false;
+        if (!j.ok) return msg(p, j.error || "That didn't save. Try again.");
+        L.unshift(j.listing); refresh().then(function () { location.hash = "#l=" + j.listing.id + "&new"; });
+      });
+    });
+    rowsP.then(function () { if (!dl.firstChild) NAMES.forEach(function (n) { var o = el("option"); o.value = shown(n); dl.appendChild(o); }); sync(); });
+    it.focus();
+  }
+
+  // ---- one listing
+  function detail(id, fresh) {
+    var v = $("view"); v.textContent = "";
+    var b = el("a", "back", "← All listings"); b.href = "#"; v.appendChild(b);
+    var p = el("section", "panel dt"); v.appendChild(p); p.appendChild(el("p", "hint", "Loading…"));
+    api("/market/" + id).then(function (l) {
+      p.textContent = "";
+      if (l._s !== 200) { p.appendChild(el("h2", null, "Listing not found")); p.appendChild(el("p", null, l.error || "It may have been taken down.")); return; }
+      if (fresh) msg(p, "Your listing is up, here and in #selling on Discord.", true);
+      var h = el("h2"), ic = icon(l.item); if (ic) h.appendChild(ic); else h.dataset.ic = l.item; h.appendChild(document.createTextNode(shown(l.item))); p.appendChild(h);
+      var pr = el("div", "price", meso(l.price)); if (l.qty > 1) pr.appendChild(el("small", null, " each · " + l.qty + " for sale")); p.appendChild(pr);
+      var t = el("div", "tags"); if (l.stats) t.appendChild(el("span", "tag", l.stats)); var vt = vsTyp(l); if (vt) t.appendChild(vt);
+      var stt = { active: ["Listed · " + left(l.expires), "tag"], pending: ["Buyer on it", "tag hold"], sold: ["Sold", "tag closed"], cancelled: ["Taken down", "tag closed"], expired: ["Ended", "tag closed"] }[l.status] || [l.status, "tag"];
+      t.appendChild(el("span", stt[1], stt[0])); if (l.source === "discord") t.appendChild(el("span", "tag", "From #selling")); p.appendChild(t);
+      var kv = el("dl", "kv"); [["Seller", (l.seller.name || "") + (l.ign ? " · in game: " + l.ign : "")], ["Listed", ago(l.created)], ["Typical on the board", ROWS[l.item] && ROWS[l.item].typ ? meso(ROWS[l.item].typ) + (l.stats ? " (clean)" : "") : "not enough sales yet"]].forEach(function (x) { kv.appendChild(el("dt", null, x[0])); kv.appendChild(el("dd", null, x[1])); });
+      p.appendChild(kv);
+      if (l.note) { p.appendChild(el("h3", null, "Seller's note")); p.appendChild(el("div", "note", l.note)); }
+      var bl = el("p", "hint"); var ba = el("a", null, "See " + shown(l.item) + " on the price board →"); ba.href = "/#item=" + encodeURIComponent(l.item); bl.appendChild(ba); p.appendChild(bl);
+      if (l.mine) ownerTools(p, l); else buyerTools(p, l);
+    });
+  }
+  function discordLinks(box, l) {
+    var a = el("div", "acts");
+    var dm = el("a", "btn", "Message seller on Discord"); dm.href = "https://discord.com/users/" + l.seller.id; dm.target = "_blank"; dm.rel = "noopener"; a.appendChild(dm);
+    if (l.thread) { var th = el("a", "btn", "Open the #selling post"); th.href = l.thread; th.target = "_blank"; th.rel = "noopener"; a.appendChild(th); }
+    box.appendChild(a);
+  }
+  function buyerTools(p, l) {
+    var open = l.status === "active" || l.status === "pending";
+    if (!open) { p.appendChild(el("p", "msg err", "This listing isn't for sale anymore.")); return; }
+    if (!ME) { var s = el("div", "acts"); s.appendChild(signIn()); p.appendChild(s); p.appendChild(el("p", "hint", "Sign in to buy it now or make an offer. The seller gets a Discord DM.")); discordLinks(p, l); return; }
+    if (!ME.ok) { p.appendChild(el("p", "msg err", ME.why)); discordLinks(p, l); return; }
+    if (l.iAmBuyer) p.appendChild(el("p", "msg ok", "You're the buyer on this one. The seller has your message: meet them in game, or message them below."));
+    var f = el("form", "form"); p.appendChild(el("h3", null, "Buy or offer"));
+    var lab = el("label", null, "Your in-game name"), ig = el("input"); ig.value = ME.ign || ""; ig.maxLength = 12; ig.placeholder = "IGN"; lab.appendChild(ig); f.appendChild(lab);
+    var lo = el("label", null, "Your offer (each)"), of = el("input"); of.placeholder = "Under " + meso(l.price) + ", like " + meso(Math.round(l.price * 0.9)); of.inputMode = "decimal"; lo.appendChild(of); f.appendChild(lo);
+    var qi = null; if (l.qty > 1) { var lq = el("label", null, "How many"); qi = el("input"); qi.type = "number"; qi.min = "1"; qi.max = String(l.qty); qi.value = String(l.qty); lq.appendChild(qi); f.appendChild(lq); }
+    p.appendChild(f);
+    var a = el("div", "acts"), buy = el("button", "btn go", "Buy it now · " + meso(l.price)), off = el("button", "btn", "Send offer");
+    buy.type = off.type = "button"; if (l.status === "pending") { buy.disabled = true; buy.textContent = "Someone's buying this"; }
+    a.appendChild(buy); a.appendChild(off); p.appendChild(a);
+    buy.addEventListener("click", function () {
+      if (buy.dataset.arm !== "1") { buy.dataset.arm = "1"; buy.textContent = "Tap again to buy for " + meso(l.price); return; }
+      buy.disabled = true;
+      api("/market/" + l.id + "/buy", { ign: ig.value.trim() }).then(function (j) {
+        if (!j.ok) { buy.disabled = false; buy.dataset.arm = ""; buy.textContent = "Buy it now · " + meso(l.price); return msg(p, j.error || "That didn't go through."); }
+        msg(p, j.dm ? "Done. " + (l.seller.name || "The seller") + " got a Discord DM with your name. Message them to set up the trade." : "Done, it's held for you. The seller has Discord DMs closed, so message them on Discord or catch " + (l.ign || "them") + " in game.", true);
+        buy.textContent = "Held for you"; refresh();
+      });
+    });
+    off.addEventListener("click", function () {
+      off.disabled = true;
+      api("/market/" + l.id + "/offer", { price: of.value, qty: qi ? Number(qi.value) : undefined, ign: ig.value.trim() }).then(function (j) {
+        off.disabled = false;
+        if (!j.ok) return msg(p, j.error || "That didn't go through.");
+        msg(p, "Offer sent: " + meso(j.offer.price) + ". " + (j.dm ? "The seller got a Discord DM." : "The seller has Discord DMs closed; they'll see it here.") + " You'll get a DM when they answer.", true);
+        of.value = ""; refresh();
+      });
+    });
+    discordLinks(p, l);
+    var mo = (l.myOffers || []).filter(function (o) { return o.status === "open"; });
+    if (mo.length) {
+      p.appendChild(el("h3", null, "Your offer"));
+      var box = el("div", "offers"); mo.forEach(function (o) {
+        var r = el("div", "offer"); r.appendChild(el("b", null, meso(o.price))); r.appendChild(el("span", "sp", (o.qty > 1 ? "for " + o.qty + " · " : "") + ago(o.created)));
+        var w = el("button", "btn bad", "Withdraw"); w.type = "button"; w.addEventListener("click", function () { w.disabled = true; api("/market/" + l.id + "/offer/" + o.id + "/withdraw", {}).then(function (j) { if (!j.ok) { w.disabled = false; return msg(p, j.error); } r.remove(); refresh(); }); });
+        r.appendChild(w); box.appendChild(r);
+      }); p.appendChild(box);
+    }
+  }
+  function ownerTools(p, l) {
+    var open = l.status === "active" || l.status === "pending";
+    function act(path, body, done) { return api("/market/" + l.id + path, body || {}).then(function (j) { if (!j.ok) { msg(p, j.error || "That didn't go through."); return; } refresh().then(function () { done ? done(j) : detail(l.id); }); }); }
+    function confirmBtn(label, cls, sure, path, done) {
+      var b = el("button", "btn " + cls, label); b.type = "button";
+      b.addEventListener("click", function () { if (sure && b.dataset.arm !== "1") { b.dataset.arm = "1"; b.textContent = sure; b.className = "btn arm"; setTimeout(function () { b.dataset.arm = ""; b.textContent = label; b.className = "btn " + cls; }, 4000); return; } b.disabled = true; act(path, {}, done); });
+      return b;
+    }
+    if (l.status === "pending" && l.buyer) {
+      var hb = el("p", "msg ok"); hb.textContent = "On hold for " + (l.buyer.name || "a buyer") + " (in game: " + (l.buyer.ign || "?") + ") at " + meso(l.dealPrice || l.price) + ". Message them on Discord, trade in game, then mark it sold.";
+      p.appendChild(hb);
+      var ba = el("div", "acts"), dm = el("a", "btn", "Message buyer on Discord"); dm.href = "https://discord.com/users/" + l.buyer.id; dm.target = "_blank"; dm.rel = "noopener"; ba.appendChild(dm);
+      ba.appendChild(confirmBtn("Buyer backed out: put it back up", "", null, "/release")); p.appendChild(ba);
+    }
+    if (open) {
+      p.appendChild(el("h3", null, "Change your listing"));
+      var f = el("form", "form");
+      function fld(lbl, val, attrs) { var la = el("label", null, lbl), i = el(attrs && attrs.tag || "input"); i.value = val == null ? "" : val; if (attrs) Object.keys(attrs).forEach(function (k) { if (k !== "tag") i.setAttribute(k, attrs[k]); }); la.appendChild(i); f.appendChild(la); return i; }
+      var pr = fld("Price each", meso(l.price), { inputmode: "decimal" }), qt = fld("How many", l.qty, { type: "number", min: "1", max: "9999" }), st = fld("Stats", l.stats, { maxlength: "60" }), ig = fld("In-game name", l.ign, { maxlength: "12" });
+      var nt = fld("Note", l.note, { tag: "textarea", maxlength: "200" }); nt.parentNode.className = "wide";
+      var sv = el("button", "btn go", "Save changes"); sv.type = "submit"; var fa = el("div", "acts"); fa.appendChild(sv); f.appendChild(fa); p.appendChild(f);
+      f.addEventListener("submit", function (e) {
+        e.preventDefault(); sv.disabled = true;
+        api("/market/" + l.id + "/edit", { price: pr.value, qty: qt.value === "" ? 1 : Number(qt.value), stats: st.value, ign: ig.value.trim(), note: nt.value }).then(function (j) {
+          sv.disabled = false; if (!j.ok) return msg(p, j.error || "That didn't save.");
+          refresh().then(function () { detail(l.id); setTimeout(function () { var dp = document.querySelector(".dt"); if (dp) msg(dp, j.unchanged ? "Nothing changed." : "Saved. The #selling post is updated too.", true); }, 400); });
+        });
+      });
+      var a = el("div", "acts");
+      a.appendChild(confirmBtn("Mark sold", "ok", "Tap again: sold", "/sold"));
+      if (l.status === "active") a.appendChild(confirmBtn("Renew for a week", "", null, "/renew"));
+      a.appendChild(confirmBtn("Take it down", "bad", "Tap again to take it down", "/cancel"));
+      a.appendChild(confirmBtn("Delete", "bad", "Tap again to delete", "/delete", function () { location.hash = ""; }));
+      p.appendChild(a);
+    } else {
+      p.appendChild(el("p", "hint", l.status === "sold" ? "Sold. Nice trade." : "This listing is down. Renew it to put it back up for a week."));
+      var a2 = el("div", "acts");
+      if (l.status !== "sold") a2.appendChild(confirmBtn("Renew for a week", "go", null, "/renew"));
+      a2.appendChild(confirmBtn("Delete", "bad", "Tap again to delete", "/delete", function () { location.hash = ""; }));
+      p.appendChild(a2);
+    }
+    var offs = l.offers || [];
+    if (open) {
+      p.appendChild(el("h3", null, offs.length ? "Offers" : "No offers yet"));
+      var box = el("div", "offers"); offs.forEach(function (o) {
+        var r = el("div", "offer"); r.appendChild(el("b", null, meso(o.price))); r.appendChild(el("span", "sp", (o.buyer.name || "") + " · in game: " + (o.buyer.ign || "?") + (o.qty > 1 ? " · for " + o.qty : "") + " · " + ago(o.created)));
+        var ok = el("button", "btn ok", "Accept"), no = el("button", "btn bad", "Decline"); ok.type = no.type = "button";
+        if (l.status !== "active") { ok.disabled = true; ok.title = "Put it back up first to take a different buyer"; }
+        ok.addEventListener("click", function () { ok.disabled = no.disabled = true; act("/offer/" + o.id + "/accept"); });
+        no.addEventListener("click", function () { ok.disabled = no.disabled = true; act("/offer/" + o.id + "/decline"); });
+        r.appendChild(ok); r.appendChild(no); box.appendChild(r);
+      }); p.appendChild(box);
+    }
+    if (l.thread) { var th = el("p", "hint"), ta = el("a", null, "Open the #selling post on Discord →"); ta.href = l.thread; ta.target = "_blank"; ta.rel = "noopener"; th.appendChild(ta); p.appendChild(th); }
+  }
+
+  function refresh() { return Promise.all([loadAll(), loadMine()]); }
+  function route() {
+    var h = location.hash, m;
+    if ((m = /^#l=([0-9a-f]{10})(&new)?/.exec(h))) return detail(m[1], !!m[2]);
+    if ((m = /^#new(?:=(.+))?/.exec(h))) return rowsP.then(function () { newForm(m[1] ? decodeURIComponent(m[1]) : ""); });
+    if (h === "#mine") TAB = "mine";
+    if ((m = /^#q=(.+)/.exec(h))) { TAB = "all"; try { list.q = decodeURIComponent(m[1]); } catch (e) {} }
+    list();
+  }
+  window.addEventListener("hashchange", function () { route(); window.scrollTo(0, 0); });
+  if (/signed-in/.test(location.hash)) try { history.replaceState(null, "", location.pathname); } catch (e) {}
+  Promise.all([refresh(), rowsP]).then(function () { idsP.then(function () {}); route(); });
+  window.fmMarket = { reload: function () { return refresh().then(route); } };
+})();
+</script>
+</body></html>
