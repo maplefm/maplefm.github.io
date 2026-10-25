@@ -19,3 +19,12 @@ td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--mu
 .craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
 .ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
 .gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}
+#q{width:100%;box-sizing:border-box;font:600 1.05rem Inter,system-ui,sans-serif;padding:12px 14px;margin:14px 0 8px;border:3px solid var(--accent);border-radius:14px;background:var(--bg);color:var(--ink)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.chips{display:flex;gap:6px;flex-wrap:wrap}
+.cc{font:700 .82rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer}.cc.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.srt{font-size:.82rem;font-weight:700;color:var(--muted)}.srt select{font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);border-radius:8px;padding:4px 6px}
+.cat h2 small{color:var(--muted);font-size:.8rem}.its{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}@media (max-width:600px){.its{grid-template-columns:1fr}}
+.it{display:grid;grid-template-columns:28px minmax(0,1fr) auto 46px;gap:8px;align-items:center;padding:5px 6px;border-radius:10px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line2)}.it:hover{background:var(--panel2)}
+.it img{width:28px;height:28px;object-fit:contain}.it .nm{font-weight:600;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}.it .pr{font-size:.95rem}.mv{font-size:.74rem;font-weight:800;text-align:right}.mv.up{color:var(--up)}.mv.down{color:var(--down)}
+.more{margin:8px 0 0;font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--accent);padding:6px 12px;border-radius:10px;cursor:pointer}
+.top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}

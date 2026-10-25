@@ -57,7 +57,16 @@ h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}
 td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
 .craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
 .ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
-.gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}"""
+.gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}
+#q{width:100%;box-sizing:border-box;font:600 1.05rem Inter,system-ui,sans-serif;padding:12px 14px;margin:14px 0 8px;border:3px solid var(--accent);border-radius:14px;background:var(--bg);color:var(--ink)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.chips{display:flex;gap:6px;flex-wrap:wrap}
+.cc{font:700 .82rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer}.cc.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.srt{font-size:.82rem;font-weight:700;color:var(--muted)}.srt select{font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);border-radius:8px;padding:4px 6px}
+.cat h2 small{color:var(--muted);font-size:.8rem}.its{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}@media (max-width:600px){.its{grid-template-columns:1fr}}
+.it{display:grid;grid-template-columns:28px minmax(0,1fr) auto 46px;gap:8px;align-items:center;padding:5px 6px;border-radius:10px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line2)}.it:hover{background:var(--panel2)}
+.it img{width:28px;height:28px;object-fit:contain}.it .nm{font-weight:600;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}.it .pr{font-size:.95rem}.mv{font-size:.74rem;font-weight:800;text-align:right}.mv.up{color:var(--up)}.mv.down{color:var(--down)}
+.more{margin:8px 0 0;font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--accent);padding:6px 12px;border-radius:10px;cursor:pointer}
+.top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}"""
 
 
 def page(title, desc, canon, body, ld=None):
@@ -65,8 +74,8 @@ def page(title, desc, canon, body, ld=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{SITE}/og.png"><meta property="og:type" content="website">
-<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=2">{ld or ''}</head><body><main>
-<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><a class="go" href="/">Open the live price board</a></div>
+<link rel="icon" href="/og-icon.png?v=3"><link rel="stylesheet" href="/item/item.css?v=3">{ld or ''}</head><body><main>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><span class="nav"><a class="sm" href="/quests.html">Quest log</a><a class="sm" href="/map.html">Maps</a><a class="go" href="/">Live price board</a></span></div>
 {body}
 <p class="foot">Prices come from sales that players running FM Watcher saw happen in Free Market shops, updated through the day. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
 </main><script src="/assets/hit.js" defer></script></body></html>"""
@@ -187,12 +196,23 @@ def main():
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} · quests, drops, crafting · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body))
         made.append((s, nm, None))
-    # the index: every item by category, biggest markets first
+    # the index: a searchable list, every item by category, biggest markets first; plain links so search engines read it
     secs = ""
-    for cat in sorted(bycat, key=lambda c: -sum(x.get("vol") or 0 for x in bycat[c])):
-        items = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in bycat[cat])
-        secs += f'<h2>{html.escape(CATS.get(cat, cat))}</h2><div class="rel">{items}</div>'
-    idx = f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub">{len(rows)} items priced from watched Free Market sales · updated {when}</p>{secs}</div>'
+    order = sorted(bycat, key=lambda c: -sum(x.get("vol") or 0 for x in bycat[c]))
+    chips = '<button type="button" class="cc on" data-c="">All</button>' + "".join(f'<button type="button" class="cc" data-c="{html.escape(c)}">{html.escape(CATS.get(c, c))}</button>' for c in order)
+    for cat in order:
+        li = ""
+        for x in bycat[cat]:
+            mv = (x.get("mv") or [None])[0]
+            ch = f'<span class="mv {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"}{abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else '<span class="mv"></span>'
+            li += (f'<a class="it" href="/item/{slug(x["item"])}/" data-n="{html.escape(shown(x["item"]).lower())}" data-p="{int(x["typ"])}" data-v="{int(x.get("vol") or 0)}" data-m="{round(mv or 0, 3) if isinstance(mv, (int, float)) else 0}" data-k="{html.escape(x["item"])}">'
+                   f'<img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr">{meso(x["typ"])}</b>{ch}</a>')
+        secs += f'<section class="cat" data-c="{html.escape(cat)}"><h2>{html.escape(CATS.get(cat, cat))} <small>{len(bycat[cat])}</small></h2><div class="its">{li}</div><button type="button" class="more" hidden>Show all {len(bycat[cat])}</button></section>'
+    idx = (f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub"><span id="cnt">{len(rows)}</span> items priced from Free Market sales players watched · <span id="upd">updated {when}</span></p>'
+           f'<input id="q" type="search" placeholder="Find an item: work gloves, GFA 60, white label ring" autocomplete="off" aria-label="Find an item">'
+           f'<div class="bar"><div class="chips">{chips}</div><label class="srt">Sort <select id="sort"><option value="v">Most traded</option><option value="m">Biggest movers</option><option value="p">Highest price</option><option value="a">A to Z</option></select></label></div>'
+           f'<p class="note" id="none" hidden>No priced item matches that. <a id="board" href="/">Search the live board</a> for listings.</p>{secs}</div>'
+           '<script src="/items/index.js" defer></script>')
     os.makedirs(os.path.join(out, "items"), exist_ok=True)
     open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx))
     # remove pages for items that dropped out, so stale prices don't linger in search
@@ -206,7 +226,7 @@ def main():
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
     today = datetime.date.today().isoformat()
-    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/item/{s}/" for s, _, _ in made]
+    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/item/{s}/" for s, _, _ in made]
     open(os.path.join(out, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
                                                     "".join(f"<url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     print(len(made), "item pages")

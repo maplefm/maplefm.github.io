@@ -188,7 +188,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   }
   function sprite(name) {
     var b = el("div", "sp"), m = W.mobs[name]; if (!m || !m.id) return b;
-    var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = IO + "mob/" + m.id + "/render/stand"; im.onerror = function () { im.remove(); }; b.appendChild(im); return b;
+    var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = LIVE + "data/sprite/" + m.id + ".gif"; im.onerror = function () { if (im.dataset.f) { im.remove(); return; } im.dataset.f = 1; im.src = IO + "mob/" + m.id + "/render/stand"; }; b.appendChild(im); return b;
   }
 
   // ---------------------------------------------------------------- what a touch costs

@@ -23,7 +23,8 @@ jobs:
           git config user.email maplefm@users.noreply.github.com
           git fetch -q origin live
           git worktree add -q /tmp/live origin/live
-          mkdir -p /tmp/live/data/minimap /tmp/w
+          mkdir -p /tmp/live/data/minimap /tmp/live/data/sprite /tmp/w
+          pip install -q pillow
           python3 tools/world.py /tmp/w /tmp/live/data/world.json
           python3 - <<'PY'
           import json, sys
@@ -36,9 +37,10 @@ jobs:
           PY
           cp /tmp/w/world.json /tmp/live/data/world.json
           cp /tmp/w/minimap/*.png /tmp/live/data/minimap/ 2>/dev/null || true
+          cp /tmp/w/sprite/*.gif /tmp/live/data/sprite/ 2>/dev/null || true
           ch=$(python3 -c "import json;c=json.load(open('/tmp/w/world_changes.json'));m=c.get('new_maps') or [];b=c.get('new_mobs') or [];print(('New maps: '+', '.join(m[:15]) if m else '')+('\\\\n' if m and b else '')+('New monsters: '+', '.join(b[:15]) if b else ''))")
           cd /tmp/live
-          git add data/world.json data/minimap
+          git add data/world.json data/minimap data/sprite
           git diff --cached --quiet && exit 0
           git commit -q -m "Refresh map and training data"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

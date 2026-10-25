@@ -63,7 +63,7 @@ try: prev = json.load(open(PREV, encoding="utf-8"))
 except Exception: pass
 
 # ------------------------------------------------------------------ the wiki
-maps = cargo("maps", ["_pageName=page", "id", "name_en", "region", "map_type", "recommended_level_min", "recommended_level_max", "nearest_town", "return_map", "game_version"])
+maps = cargo("maps", ["_pageName=page", "id", "name_en", "region", "map_type", "recommended_level_min", "recommended_level_max", "nearest_town", "return_map", "game_version", "image", "origin_x", "origin_y", "render_width", "render_height"])
 portals = cargo("portals", ["_pageName=src", "to_map", "portal_name", "direction", "portal_type", "requires_level", "x", "y"])
 spawns = cargo("monster_spawns", ["monster_id", "map_id", "spawn_count", "respawn_seconds", "variant"])
 mons = cargo("monsters", ["id", "name_en", "level", "hp", "mp", "exp", "weapon_attack", "magic_attack", "physical_defense", "magic_defense", "accuracy", "avoidability", "knockback", "element_weak", "element_resist", "boss", "undead", "variant"])
@@ -115,6 +115,7 @@ for mp in maps:
     M[page] = {"id": num(mp.get("id")) or None, "name": mp.get("name_en") or page, "region": mp.get("region") or "",
                "type": mp.get("map_type") or "", "lv": [num(mp.get("recommended_level_min")) or None, num(mp.get("recommended_level_max")) or None],
                "near": mp.get("nearest_town") or "", "ret": mp.get("return_map") or "", "portals": [], "mobs": [], "npcs": [], "shops": []}
+IMG = {mp["page"]: [mp.get("image") or "", num(mp.get("origin_x")), num(mp.get("origin_y")), num(mp.get("render_width")), num(mp.get("render_height"))] for mp in maps if mp.get("image")}
 for p in portals:
     s, t = p.get("src"), p.get("to_map")
     if s in M and t:
@@ -156,6 +157,32 @@ for page, m in M.items():
         if not isinstance(x, dict) or x.get("hidden"): continue
         n = npc_by_id.get(x.get("id"))
         if n: m["npcs"].append([n.get("name_en") or n["page"], x.get("x"), x.get("y"), n.get("role") or ""])
+# maps the game-file source doesn't have yet (new content): shrink the wiki's full map render into a stand-in minimap
+OLD = os.path.dirname(os.path.abspath(PREV))
+need = [p for p, m in M.items() if not m.get("mm") and IMG.get(p) and IMG[p][3] and IMG[p][4]]
+urls = {}
+for i in range(0, len(need), 40):
+    j = get(WIKI + "?" + urllib.parse.urlencode({"action": "query", "format": "json", "prop": "imageinfo", "iiprop": "url", "titles": "|".join("File:" + IMG[p][0] for p in need[i:i + 40])}))
+    for pg in ((j or {}).get("query") or {}).get("pages", {}).values():
+        if pg.get("imageinfo"): urls[pg["title"][5:].replace("_", " ")] = pg["imageinfo"][0]["url"]
+try:
+    from PIL import Image
+    import io as _io
+except Exception:
+    Image = None
+for p in need:
+    m, (img, ox, oy, rw, rh) = M[p], IMG[p]
+    path = os.path.join(OUT, "minimap", f"{m['id']}.png"); old = os.path.join(OLD, "minimap", f"{m['id']}.png")
+    if not os.path.exists(path) and os.path.exists(old) and prev.get("maps", {}).get(p, {}).get("mm", [0, 0, 0])[2] == 3:
+        open(path, "wb").write(open(old, "rb").read())
+    if not os.path.exists(path):
+        if not Image or img.replace("_", " ") not in urls: continue
+        try:
+            raw = urllib.request.urlopen(urllib.request.Request(urls[img.replace("_", " ")], headers=UA), timeout=60).read()
+            im = Image.open(_io.BytesIO(raw)).convert("RGB"); im = im.resize((max(1, rw // 8), max(1, rh // 8)), Image.LANCZOS); im.save(path, optimize=True)
+        except Exception as e:
+            print("map render", p, e); continue
+    m["mm"] = [ox, oy, 3, rw, rh]; m["w"], m["h"] = rw, rh; n_mm += 1
 print("maps", len(M), "minimaps", n_mm)
 mob_id_name = {v["id"]: k for k, v in mob.items() if v.get("id")}
 
@@ -217,11 +244,34 @@ for n in POTS:
 first = {k: v for k, v in (prev.get("first") or {}).items()}
 for page in M: first.setdefault("map:" + page, TODAY)
 for name in mob: first.setdefault("mob:" + name, TODAY)
-new_maps = [p for p in M if first.get("map:" + p) == TODAY and prev.get("maps")]
-new_mobs = [n for n in mob if first.get("mob:" + n) == TODAY and prev.get("mobs")]
+new_maps = [p for p in M if prev.get("maps") and p not in prev["maps"]]
+new_mobs = [n for n in mob if prev.get("mobs") and n not in prev["mobs"]]
 for page, m in M.items(): m["since"] = first.get("map:" + page)
 unreleased = sorted(m["name"] for m in io_list if isinstance(m, dict) and m.get("id") not in {v["id"] for v in M.values()})
 
+# monster sprites, hosted with the data so the page doesn't wait on the sprite renderer
+os.makedirs(os.path.join(OUT, "sprite"), exist_ok=True)
+for name, mb in mob.items():
+    if not mb.get("id"): continue
+    path = os.path.join(OUT, "sprite", f"{mb['id']}.gif"); old = os.path.join(OLD, "sprite", f"{mb['id']}.gif")
+    if os.path.exists(old): open(path, "wb").write(open(old, "rb").read()); continue
+    try:
+        raw = urllib.request.urlopen(urllib.request.Request(f"{IO}/mob/{mb['id']}/render/stand", headers=UA), timeout=60).read()
+        if raw[:3] == b"GIF": open(path, "wb").write(raw)
+    except Exception as e:
+        print("sprite", name, e)
+    time.sleep(0.2)
+    if not os.path.exists(path) and Image:
+        # new monsters aren't in the sprite renderer yet: use the wiki's picture
+        j = get(WIKI + "?" + urllib.parse.urlencode({"action": "query", "format": "json", "prop": "imageinfo", "iiprop": "url", "titles": f"File:{name}.png"}))
+        for pg in ((j or {}).get("query") or {}).get("pages", {}).values():
+            if not pg.get("imageinfo"): continue
+            try:
+                raw = urllib.request.urlopen(urllib.request.Request(pg["imageinfo"][0]["url"], headers=UA), timeout=60).read()
+                im = Image.open(_io.BytesIO(raw)).convert("RGBA"); im.thumbnail((120, 120))
+                im.save(path, format="PNG")   # served under the same name; browsers read the PNG inside
+            except Exception as e:
+                print("wiki sprite", name, e)
 out = {"at": int(time.time()), "built": TODAY, "maps": M, "mobs": mob, "cabs": cabs, "vip": vip, "scrolls": scrolls, "pots": pots,
        "first": first, "unreleased": len(unreleased),
        "credit": "Maps, portals, spawns and shops: MapleStory Classic Wiki (CC BY-NC-SA 4.0). Minimaps, monster stats and sprites: Classic World game files via maplestory.io."}
