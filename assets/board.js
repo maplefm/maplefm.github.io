@@ -140,6 +140,74 @@
   }
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
   var T0 = { rows: 0, live: 0 };   // startup timing, readable as FM_T0 in the console
+  // ---------- the finished board, built on the server: a first visit shows live listings without building anything
+  // The pump runs this same page on the server, calls fmSnap(), and the Worker serves the result at /data/snap.
+  var SNAP_DROP = { raw: 1, sk: 1, xt: 1, tl: 1, tx: 1 };
+  // Listings are stored by column: text values point into a per-column word list, true/false become 1/0, and
+  // times are seconds after the newest. Per-item listing lists keep the last 3 days plus anything with stats
+  // (the counts and prices on each item were worked out from everything); the board-wide lists stay whole.
+  function snapEncode() {
+    if (!D || D.preview || D.snap) return null;
+    var isL = new Set(D.L), idx = new Map(), n = 0, cols = {}, words = {}, wix = {}, now = Date.now(), T = D.latest || now;
+    function put(k, v) {
+      if (SNAP_DROP[k] || v === undefined || v === null || v === false || v === "") return;
+      var c = cols[k] || (cols[k] = []);
+      if (typeof v === "string") { var w = words[k] || (words[k] = []), m = wix[k] || (wix[k] = {}); if (m[v] == null) { m[v] = w.length; w.push(v); } c[n] = m[v] + 1; }
+      else if (v === true) c[n] = 1;
+      else if (k === "t" && typeof v === "number") c[n] = Math.round((T - v) / 1000);
+      else c[n] = v;
+    }
+    function lref(l) {
+      if (idx.has(l)) return idx.get(l);
+      Object.keys(l).forEach(function (k) { put(k, l[k]); });
+      idx.set(l, n); return n++;
+    }
+    var keep = function (l) { return l.x || T - l.t <= 3 * DAY; };
+    function enc(v, top) {
+      if (v && typeof v === "object") {
+        if (isL.has(v)) return { "@": lref(v) };
+        if (Array.isArray(v)) { var a = v; if (!top && a.length && isL.has(a[0])) a = a.filter(keep); return a.map(function (x) { return enc(x); }); }
+        var o = {}; Object.keys(v).forEach(function (k) { o[k] = enc(v[k]); });
+        if (Array.isArray(v.asks) && typeof v.item === "string") o.asksN = v.asks.length;   // the card's count is of every listing
+        return o;
+      }
+      return v;
+    }
+    var out = {}; Object.keys(D).forEach(function (k) { if (k !== "L" && k !== "byName") out[k] = enc(D[k], true); });
+    Object.keys(cols).forEach(function (k) { var c = cols[k]; for (var i = 0; i < n; i++) if (c[i] === undefined) c[i] = 0; });
+    var kinds = {}; Object.keys(cols).forEach(function (k) { kinds[k] = words[k] ? "w" : k === "t" ? "t" : "v"; });
+    return JSON.stringify({ v: 2, at: now, T: T, n: n, cols: cols, words: words, kinds: kinds, D: out });
+  }
+  window.fmSnap = snapEncode; window.fmSnapDec = function (j) { return snapDecode(j); };
+  function snapDecode(j) {
+    if (!j || j.v !== 2 || !j.cols || !j.D) return null;
+    var L = new Array(j.n);
+    for (var i = 0; i < j.n; i++) L[i] = {};
+    Object.keys(j.cols).forEach(function (k) {
+      var c = j.cols[k], kind = j.kinds[k], w = j.words[k];
+      for (var i = 0; i < j.n; i++) {
+        var v = c[i];
+        if (kind === "w") { if (v) L[i][k] = w[v - 1]; }
+        else if (kind === "t") L[i][k] = j.T - v * 1000;
+        else if (v !== 0) L[i][k] = v === 1 && /^(so|b|chat|stream|tl|scaled|pricey|spot|ci)$/.test(k) ? true : v;
+      }
+    });
+    L.forEach(function (l) { if (l.x === undefined) l.x = null; ["so", "b", "chat", "stream"].forEach(function (k) { if (l[k] === undefined) l[k] = false; }); if (l.n === undefined) l.n = 0; if (l.c === undefined) l.c = 0; if (l.q === undefined) l.q = 1; });
+    function dec(v) {
+      if (v && typeof v === "object") {
+        if (!Array.isArray(v) && v["@"] != null && Object.keys(v).length === 1) return L[v["@"]];
+        if (Array.isArray(v)) { for (var i = 0; i < v.length; i++) v[i] = dec(v[i]); return v; }
+        Object.keys(v).forEach(function (k) { v[k] = dec(v[k]); }); return v;
+      }
+      return v;
+    }
+    var d = dec(j.D); d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; }); d.snap = true; d.snapAt = j.at;
+    return d;
+  }
+  var SNAP_P = null;
+  try {
+    SNAP_P = fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  } catch (e) { SNAP_P = Promise.resolve(null); }
   function mark(k) { if (!T0[k]) T0[k] = Math.round(performance.now()); }
   function loadDB() {
     fetch("data/abbr.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; SIDX = null; } }).catch(function () {});
@@ -314,7 +382,7 @@
   // bump when cleanName or the name resolver changes, so a published names.json from older rules is not reused
   var CLEANV = 2;
   window.fmClean = function () { return { cl: CNC.cl, out: CNC.out, v: CLEANV }; };
-  window.fmQA = { pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; } };
+  window.fmQA = { pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
   // the server runs this same page and publishes the tidied spelling of every raw name it saw; seeded here, the
   // first build only has to tidy names that are new since
   function seedNames() { if (NAMES_IN && NAMES_IN.v === CLEANV && DBN && !Object.keys(CNC.cl).length) { CNC = { cl: NAMES_IN.cl, out: NAMES_IN.out || {}, db: DBK.length, at: Date.now() }; NAMES_IN = null; } }
@@ -2310,7 +2378,7 @@
     if (idOf(i.item)) { var a = el("a", null, "Item data: maplestory.io"); a.href = IO + idOf(i.item); a.target = "_blank"; a.rel = "noopener"; $("wiki").appendChild(a); }
     $("wiki").appendChild(shareBox(i));
     var hd = el("div", "ih"); hd.appendChild(iconBox(i.item)); var ht = el("div"); ht.appendChild(el("h3", null, showName(i.item)));
-    ht.appendChild(el("p", null, fmt(i.asks.length) + " listings · " + fmt(i.salesN) + " sales"));
+    ht.appendChild(el("p", null, fmt(i.asksN != null ? i.asksN : i.asks.length) + " listings · " + fmt(i.salesN) + " sales"));
     var ll = levelLine(i); if (ll) ht.appendChild(el("p", null, ll));
     if (i.equip) { var bt = baseText(i.item); if (bt) { var bl = el("p", "baseln"); bl.appendChild(el("b", null, "Base ")); bl.appendChild(document.createTextNode(bt.t)); bl.title = "The stats this item comes with, before any roll. From the item database" + (bt.from === "hovers" ? "; attack from hovers in the game where the data leaves it out (a ? means only one hover so far)" : "") + "."; ht.appendChild(bl); } }
     var vp = vendor(i.item), nxp = nxOf(i.item);
@@ -2731,15 +2799,17 @@
       if (sm && sm.rows) sm.rows.forEach(function (r) { if (r && r.item && r.typ && (r.n || 0) >= 5) ITEMPAGES[r.item] = 1; });
       mark("sumIn"); if (!sm || !sm.rows || sm.at <= lat) return;
       saveLS("fm-summary", sm);
-      if (scans.length) return;   // the real build already landed
+      if (scans.length || (D && D.snap)) return;   // the real build (or the server's) already landed
       var pv = previewFrom(sm); if (!pv) return;
       D = pv; lastBuild = Date.now(); DIRTY = false; SIDX = null; render(); mark("pv");
     }).catch(function () {});
   }
+  function hasRaw() { return scans.length > base.length; }
   function render(rebuild) {
     if (rebuild === true || DIRTY || !D || Date.now() - lastBuild > 5 * 6e4) {
       if (!scans.length && !D) { var pv = loadPreview(); if (pv) { D = pv; lastBuild = Date.now(); DIRTY = false; } }
-      if (!D || scans.length || !D.preview) { mark("buildA"); D = build(); mark("buildB"); SIDX = null; DIRTY = false; lastBuild = Date.now(); if (D.list.length) setTimeout(saveSummary, 1500); }
+      if (D && D.snap && !hasRaw()) { DIRTY = false; lastBuild = Date.now(); }
+      else if (!D || scans.length || !D.preview) { mark("buildA"); D = build(); mark("buildB"); SIDX = null; DIRTY = false; lastBuild = Date.now(); if (D.list.length) setTimeout(saveSummary, 1500); }
     }
     nxRate(); renderCards(); renderBoard(); renderTicker(); renderAlert(); renderWatchAlert(); if (RANKS && armed) seenTiers(); if ($("ranks").open) renderRanks();
     var nck = D.list.filter(function (i) { return i.check; }).length; $("m-check-n").textContent = nck ? nck : "";
@@ -3207,6 +3277,13 @@
     return BUNDLE_P;
   }
   function getBundle0() {
+    // wait briefly for the server's finished board; when it landed, the raw listings wait until the page is idle
+    return Promise.race([SNAP_P, new Promise(function (ok) { setTimeout(ok, 2500); })]).then(function () {
+      if (SNAP_OK && !DEALS_ON) return BUNDLE;   // the server's board keeps refreshing on its own (snapRefresh)
+      return getBundle1();
+    });
+  }
+  function getBundle1() {
     var cacheP = BUNDLE ? Promise.resolve() : bundleCached();   // the browser's saved copy is read while the stamp is fetched
     // the server's stamp of the newest upload: changes within seconds of a watcher publishing
     return fetch(ACCT + "/data/sig", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (sig) {
@@ -3324,6 +3401,23 @@
   // shell shows at once and the data lands in one pass instead of three.
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
   mark("start"); render(); mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;
-  getBundle();   // start the listings download right away, alongside the item list
+  // the server's finished board first; the raw listings follow when the page is idle (straight away for deal holders)
+  var SNAP_OK = false, RAW_AFTER = 0;
+  // a newer copy of the server's board replaces this one, unless this browser has moved on to the raw listings
+  function snapRefresh() {
+    if (!SNAP_OK || hasRaw() || DEALS_ON || document.hidden) return;
+    fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !D || !D.snap || j.at <= D.snapAt || hasRaw()) return;
+      var d = snapDecode(j); if (!d) return;
+      D = d; lastBuild = Date.now(); DIRTY = false; SIDX = null; keepRows = $("rows").childElementCount; render(); keepRows = 0;
+    }).catch(function () {});
+  }
+  SNAP_P.then(function (j) {
+    var d = null; try { d = snapDecode(j); } catch (e) { d = null; }
+    if (!d || hasRaw() || (D && !D.preview && !D.snap && D.list.length)) { getBundle(); return; }
+    if (Date.now() - d.snapAt > 30 * 6e4) { getBundle(); return; }   // stale copy: build it here instead
+    D = d; SNAP_OK = true; RAW_AFTER = Date.now() + 20000; lastBuild = Date.now(); DIRTY = false; SIDX = null; mark("snap"); render(); mark("live");
+    setInterval(snapRefresh, 90000);
+  });
   dbReady.then(function () { poll(); setInterval(poll, 60000); }); setInterval(renderMaint, 60000);
 })();

@@ -66,6 +66,8 @@ async function route(req, env, url) {
   if (p === "/twitch/callback") return twitchCallback(req, env, url);
   if (p === "/twitch/unlink" && req.method === "POST") return twitchUnlink(req, env);
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
+  if (p === "/data/snap" && req.method === "GET") return dataSnap(env);
+  if (p === "/snap" && req.method === "POST") return snapPut(req, env);
   if (p === "/data/sig" && req.method === "GET") return dataSig(env);
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
@@ -484,6 +486,29 @@ async function inboxPull(req, env, url) {
 async function same(a, b) {
   const h = async (x) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(x)));
   const x = await h(a), y = await h(b); let d = 0; for (let i = 0; i < x.length; i++) d |= x[i] ^ y[i]; return d === 0;
+}
+
+// The finished price board, built by the pump running the page itself (tools/snapshot.py), so a first visit shows
+// live listings at once instead of building them on the phone. Same public view as /data/live.
+async function snapPut(req, env) {
+  const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
+  if (!want || got !== want) return json({ error: "no" }, 403);
+  const body = await req.text();
+  if (body.length < 1000 || body.length > 24e6) return json({ error: "size" }, 400);
+  try { const j = JSON.parse(body); if (j.v !== 1 || !j.L) throw 0; } catch (e) { return json({ error: "bad" }, 400); }
+  await env.ACCOUNTS.put("snap:board", body);
+  return json({ ok: true, bytes: body.length });
+}
+async function dataSnap(env) {
+  const ck = new Request("https://archive.cache/snap?b=" + Math.floor(Date.now() / 30000));
+  let hit = await caches.default.match(ck);
+  if (!hit) {
+    const body = await env.ACCOUNTS.get("snap:board");
+    if (!body) return json({ error: "not ready" }, 404, { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" });
+    hit = new Response(body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=30" } });
+    await caches.default.put(ck, hit.clone()).catch(() => {});
+  }
+  return new Response(hit.body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=30", "Access-Control-Allow-Origin": "*" } });
 }
 
 async function dataLive(req, env) {
