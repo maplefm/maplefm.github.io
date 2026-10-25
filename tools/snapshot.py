@@ -54,6 +54,9 @@ with sync_playwright() as p:
         s = pg.evaluate("(function(){var t=window.FM_T0||{}; if(!t.live) return null; var at=performance.timeOrigin+t.live; try{var x=localStorage.getItem('fm-summary'); return x&&JSON.parse(x).at>=at?x:null}catch(e){return null}})()")
         if s: break
         time.sleep(0.5)
+    snap = None
+    try: snap = pg.evaluate("window.fmSnap ? window.fmSnap() : null")
+    except Exception as e: print("snap", e)
     names = pg.evaluate("(function(){var cn=window.fmNames?window.fmNames():{}, m=window.fmClean?window.fmClean():{cl:{},out:{}}, cl={}, out={}; Object.keys(cn).forEach(function(k){ if(m.cl[k]) cl[k]=m.cl[k]; if(m.out[k]) out[k]=m.out[k]; }); return JSON.stringify({at:Date.now(), v:m.v||0, cl:cl, out:out});})()")
     b.close()
     if not s:
@@ -69,6 +72,15 @@ with sync_playwright() as p:
     hw = j.get("hw") or []
     json.dump({"at": int(time.time()), "items": hw}, open(os.path.join(os.path.dirname(OUT) or ".", "hoverwanted.json"), "w", encoding="utf-8"), separators=(",", ":"))
     print("hover wanted: %d items" % len(hw))
+    # the finished board for first visits: the Worker keeps it and serves it at /data/snap
+    key = os.environ.get("INBOX_PULL_KEY") or ""
+    if snap and key:
+        import urllib.request
+        try:
+            r = urllib.request.urlopen(urllib.request.Request(WORKER + "snap", snap.encode("utf-8"), {"Authorization": "Bearer " + key, "Content-Type": "application/json", "User-Agent": "maplefm pump"}), timeout=60)
+            print("board snapshot: %d bytes, %s" % (len(snap), r.status))
+        except Exception as e: print("board snapshot upload", e)
+    elif snap: print("board snapshot built, %d bytes (no key to upload)" % len(snap))
     # the tidied spelling of every raw name, so visitors' first build skips that work
     nj = json.loads(names)
     print("names: %d, %d bytes" % (len(nj.get("cl") or {}), len(names)))
