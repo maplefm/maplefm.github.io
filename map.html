@@ -1,0 +1,468 @@
+<!doctype html><html lang="en"><head>
+<script src="/assets/api.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maps and Training · MapleStory Classic · Club FM</title>
+<meta name="description" content="Where to train at your level in MapleStory Classic, what it costs in potions, and how to get anywhere on Victoria Island: the fastest route, the free route, hidden portals and in-game minimaps.">
+<link rel="canonical" href="https://maplefm.gg/map.html">
+<meta property="og:title" content="Maps and Training · MapleStory Classic · Club FM"><meta property="og:description" content="Where to train at your level, potion costs, and the fastest or free route to any map, with hidden portals on the in-game minimap."><meta property="og:image" content="https://maplefm.gg/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/og-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1;--soft:#efe8ff;--gold:#e0a91c;--gold-soft:#fff3d1;--ok:#12895f;--ok-soft:#dcf5ea;--warn:#b0570a;--bad:#c2410c;--hid:#9d3ff0;--shadow:0 2px 0 rgba(60,30,120,.06),0 8px 24px rgba(60,30,120,.08)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f10;--ok:#4ade80;--ok-soft:#14321f;--warn:#fbbf24;--bad:#fb923c;--hid:#d8b4fe;--shadow:0 8px 24px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f10;--ok:#4ade80;--ok-soft:#14321f;--warn:#fbbf24;--bad:#fb923c;--hid:#d8b4fe}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
+a{color:var(--accent)}
+main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.brand{font:800 1.25rem Outfit,sans-serif;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}
+.brand img{height:30px;image-rendering:pixelated}
+.navs{display:flex;gap:8px;flex-wrap:wrap}
+.navs a{font-weight:700;font-size:.85rem;text-decoration:none;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.navs a.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.hero{background:linear-gradient(135deg,#123a2f,#1d7a5a 55%,#3fb489);color:#fff;border-radius:18px;padding:18px 20px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.hero h1{font:800 1.9rem/1.1 Outfit,sans-serif;margin:0}
+.hero p{margin:6px 0 0;opacity:.92}
+.me{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 12px;min-width:260px;display:grid;gap:6px}
+.me label{display:flex;align-items:center;gap:8px;font-weight:700;flex-wrap:wrap}
+.me input,.me select{font:700 1rem Inter;border:0;border-radius:10px;padding:5px 8px;background:rgba(255,255,255,.92);color:#1c2b25}
+.me input#lv{width:64px;text-align:center;font:800 1.15rem Outfit}
+.me input#ign{width:9em}
+.me small{opacity:.88;font-size:.78rem}.me small a{color:#ffe08a}
+.tabs{display:flex;gap:6px;margin:16px 0 12px;flex-wrap:wrap}
+.tabs button{font:700 .95rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 16px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 6px;font:800 1.15rem Outfit,sans-serif}
+.card h3{margin:0;font:700 1.08rem Outfit,sans-serif}
+.note{color:var(--muted);font-size:.85rem}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent);white-space:nowrap;max-width:100%}
+.chip.wrap{white-space:normal}
+.chip.gold{background:var(--gold-soft);color:var(--warn)}.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.bad{background:#fde3d3;color:var(--bad)}.chip.hid{background:#f3e3ff;color:var(--hid)}
+:root[data-theme="dark"] .chip.bad,:root[data-theme="dark"] .chip.hid{background:var(--soft)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.bad,:root:not([data-theme="light"]) .chip.hid{background:var(--soft)}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2>*,.pick>*{min-width:0}.grid2{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}.hero{grid-template-columns:1fr}}
+.pick{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px}
+@media (max-width:700px){.pick{grid-template-columns:1fr}}
+.mobs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.mob{display:grid;grid-template-columns:52px auto;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px 6px 6px;font-size:.8rem}
+.mob .sp{width:52px;height:52px;display:grid;place-items:center;overflow:hidden}
+.mob .sp img{max-width:52px;max-height:52px;image-rendering:pixelated}
+.mob b{font-size:.86rem}.mob small{display:block;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0}
+.stat{background:var(--bg);border-radius:12px;padding:8px 10px}
+.stat b{display:block;font:800 1.1rem Outfit,sans-serif}.stat small{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.why{margin:6px 0 0;font-size:.9rem}
+.btn{font:700 .85rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+/* minimap */
+.mm{position:relative;display:inline-block;box-sizing:border-box;background:#0c1220;border-radius:12px;padding:6px;line-height:0;max-width:100%}
+.mm img.base{image-rendering:pixelated;display:block;max-width:100%;height:auto}
+.mm .mk{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:auto}
+.mk.p{width:9px;height:9px;border-radius:50%;background:#4fc3ff;border:2px solid #fff;box-shadow:0 0 0 1px #0008}
+.mk.h{width:10px;height:10px;background:var(--hid);border:2px solid #fff;transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 0 1px #0008}
+.mk.d{width:9px;height:9px;border-radius:2px;background:#ffb547;border:2px solid #fff}
+.mk.npc{width:8px;height:8px;border-radius:50%;background:#ffe14d;border:1.5px solid #6b5300}
+.mk.spawn{width:6px;height:6px;border-radius:50%;background:#ff5d5d;opacity:.85}
+.mk.you{width:14px;height:14px;border-radius:50%;background:#2ee08a;border:3px solid #fff;box-shadow:0 0 0 2px #0a5}
+.mk.exit{width:22px;height:22px;border-radius:50%;border:3px solid #ffd34d;box-shadow:0 0 0 3px rgba(255,211,77,.35);animation:pulse 1.4s ease-in-out infinite}
+.mk.exit.hidden{border-color:var(--hid);box-shadow:0 0 0 3px rgba(157,63,240,.35)}
+@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.25)}}
+@media (prefers-reduced-motion:reduce){.mk.exit{animation:none}}
+.mk .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);white-space:nowrap;background:#000c;color:#fff;font:600 .72rem Inter;padding:3px 7px;border-radius:6px;z-index:5}
+.mk:hover .tip,.mk:focus .tip{display:block}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.76rem;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+/* routes */
+.picker{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:end}
+@media (max-width:760px){.picker{grid-template-columns:1fr}}
+.picker label{display:grid;gap:4px;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.picker input{font:600 1rem Inter;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:100%}
+.swap{font:800 1.1rem Inter;width:40px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.opt{border:2px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;background:var(--card);text-align:left;font:inherit;color:inherit}
+.opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,63,209,.15)}
+.opt b{font:800 1.05rem Outfit,sans-serif;display:block}.opt span{color:var(--muted);font-size:.84rem}
+.steps{display:grid;gap:10px}
+.step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font:800 .9rem Outfit}
+.step.cab .n{background:var(--gold)}.step.scroll .n{background:var(--ok)}
+.step h4{margin:0 0 4px;font:700 1rem Outfit,sans-serif}
+.step .mm{margin-top:8px}
+.list{display:grid;gap:4px;margin:6px 0 0;padding:0;list-style:none;font-size:.88rem}
+.list li{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:5px 0}
+.list li:first-child{border-top:0}
+.sugg{position:absolute;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);max-height:300px;overflow:auto;min-width:100%;margin-top:2px}
+.sugg div{padding:7px 10px;cursor:pointer;font-size:.9rem}.sugg div small{color:var(--muted);margin-left:6px}
+.sugg div[aria-selected="true"],.sugg div:hover{background:var(--soft)}
+.fld{position:relative}
+.warn{border-left:4px solid var(--gold);background:var(--gold-soft);border-radius:10px;padding:8px 10px;font-size:.88rem;margin:8px 0}
+.foot{color:var(--muted);font-size:.78rem;margin-top:20px}
+[hidden]{display:none!important}
+</style></head><body><main>
+<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt=""> Club FM</a>
+<div class="navs"><a href="/quests.html">Quest log</a><a href="/items/">Item prices</a><a class="go" href="/">Price board</a></div></div>
+
+<section class="hero">
+  <div><h1>Maps and Training</h1><p>Where to train at your level, what it costs you in potions, and how to get anywhere on Victoria Island: the fastest way, the free way, and every hidden portal on the in-game minimap.</p></div>
+  <div class="me">
+    <label>Level <input type="number" id="lv" min="1" max="200" placeholder="?"> <select id="cls" aria-label="Class"><option value="">Class</option><option>Warrior</option><option>Magician</option><option>Bowman</option><option>Thief</option><option>Beginner</option></select></label>
+    <label>IGN <input type="text" id="ign" maxlength="16" placeholder="fills your level" autocomplete="off"></label>
+    <small id="lvsrc">Your level and class come from classicrank.com when you enter your character name.</small>
+  </div>
+</section>
+
+<div class="tabs" role="tablist">
+  <button type="button" data-t="train" aria-pressed="true">Where to train</button>
+  <button type="button" data-t="route" aria-pressed="false">Get somewhere</button>
+  <button type="button" data-t="maps" aria-pressed="false">Map browser</button>
+</div>
+
+<section id="v-train"></section>
+<section id="v-route" hidden>
+  <div class="card">
+    <div class="picker">
+      <label class="fld">I'm in<input id="from" placeholder="Map you're on: Henesys, Ant Tunnel III..." autocomplete="off"></label>
+      <button type="button" class="swap" id="swap" title="Swap" aria-label="Swap start and destination">⇄</button>
+      <label class="fld">I want to go to<input id="to" placeholder="Any map" autocomplete="off"></label>
+      <button type="button" class="btn pri" id="go" style="height:44px">Find route</button>
+    </div>
+    <p class="note" style="margin:8px 0 0">There's no map navigation in game, so this walks the real portal connections, cabs and return scrolls. Times are estimates; cab fares use your level.</p>
+  </div>
+  <div id="routes"></div>
+</section>
+<section id="v-maps" hidden>
+  <div class="card"><label class="fld" style="display:block"><input id="mapq" placeholder="Find any map: Sleepywood, Line 1 (Area 2), Hidden Street..." autocomplete="off" style="font:600 1rem Inter;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:100%"></label>
+  <p class="note" id="newmaps" style="margin:8px 0 0"></p></div>
+  <div id="mapview"></div>
+</section>
+<p class="foot" id="credit"></p>
+</main>
+<script>
+(function () {
+  "use strict";
+  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/", IO = "https://maplestory.io/api/MCW/1/";
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
+  function short(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "K" : fmt(n); }
+  function secs(t) { t = Math.round(t); return t < 60 ? t + "s" : Math.floor(t / 60) + "m " + (t % 60 < 10 ? "0" : "") + (t % 60) + "s"; }
+  var W = null, NOTES = null, PRICE = {}, MAPS = {}, PAGES = [], BYID = {};
+  var ME = { lv: 0, cls: "" }; try { var s0 = JSON.parse(localStorage.getItem("fm-map-me") || "{}"); ME.lv = s0.lv || 0; ME.cls = s0.cls || ""; var q0 = JSON.parse(localStorage.getItem("fm-qlog") || "{}"); if (!ME.lv && q0.level) ME.lv = q0.level; } catch (e) {}
+  function saveMe() { try { localStorage.setItem("fm-map-me", JSON.stringify(ME)); } catch (e) {} }
+  var TAB = "train", FROM = "", TO = "";
+  try { FROM = localStorage.getItem("fm-map-from") || ""; } catch (e) {}
+
+  // ---------------------------------------------------------------- the in-game minimap with markers
+  // A minimap pixel is (x + centerX) / 2^magnification of the map's own coordinates.
+  function mmPos(m, x, y) { var mm = m.mm, s = Math.pow(2, mm[2]); return [(x + mm[0]) / s, (y + mm[1]) / s]; }
+  function minimap(m, o) {
+    o = o || {};
+    var box = el("div", "mm"); if (!m || !m.mm) { var n = el("div", "note", "No minimap for this map yet."); n.style.cssText = "color:#ccc;padding:20px;line-height:1.4"; box.appendChild(n); return box; }
+    var s = Math.pow(2, m.mm[2]), w = m.mm[3] / s, h = m.mm[4] / s, scale = o.size ? Math.min(o.size / w, (o.maxh || o.size * 1.6) / h) : Math.min(3, 300 / w);
+    var wrap = el("div"); wrap.style.cssText = "position:relative;width:" + Math.round(w * scale) + "px;max-width:100%;aspect-ratio:" + w + "/" + h;
+    var img = new Image(); img.className = "base"; img.alt = "Minimap of " + m.name; img.src = LIVE + "data/minimap/" + m.id + ".png"; img.style.cssText = "width:100%;height:100%"; img.loading = "lazy"; wrap.appendChild(img);
+    function mark(cls, x, y, tip, extra) {
+      var p = mmPos(m, x, y), k = el("span", "mk " + cls); k.style.left = (p[0] / w * 100) + "%"; k.style.top = (p[1] / h * 100) + "%";
+      if (tip) { k.tabIndex = 0; k.setAttribute("aria-label", tip); k.appendChild(el("span", "tip", tip)); }
+      if (extra) extra(k); wrap.appendChild(k); return k;
+    }
+    if (o.mobs !== false) (m.mobpos || []).forEach(function (p) { mark("spawn", p[1], p[2], null); });
+    (m.npcs || []).forEach(function (n) { mark("npc", n[1], n[2], n[0] + (n[3] ? " (" + n[3] + ")" : "")); });
+    m.portals.forEach(function (p, i) {
+      if (o.exit === i) return;
+      var t = p[1] === "hidden" ? "h" : p[1] === "door" ? "d" : "p";
+      mark(t, p[2], p[3], (p[1] === "hidden" ? "Hidden portal to " : "To ") + p[0] + (p[5] ? " (level " + p[5] + "+)" : ""), function (k) { if (o.onPortal) { k.style.cursor = "pointer"; k.addEventListener("click", function () { o.onPortal(p[0]); }); } });
+    });
+    if (o.you) mark("you", o.you[0], o.you[1], "You arrive here");
+    if (o.exit != null && m.portals[o.exit]) { var ep = m.portals[o.exit]; mark("exit" + (ep[1] === "hidden" ? " hidden" : ""), ep[2], ep[3], (ep[1] === "hidden" ? "Hidden portal: stand here and press up" : "Exit to " + ep[0])); }
+    box.appendChild(wrap);
+    return box;
+  }
+  function legend() {
+    var l = el("div", "legend");
+    [["#4fc3ff", "Portal"], ["#9d3ff0", "Hidden portal"], ["#ffb547", "Door"], ["#ffe14d", "NPC"], ["#ff5d5d", "Monster spawn"]].forEach(function (x) { var s = el("span"); var i = el("i"); i.style.background = x[0]; s.appendChild(i); s.appendChild(document.createTextNode(x[1])); l.appendChild(s); });
+    return l;
+  }
+  function sprite(name) {
+    var b = el("div", "sp"), m = W.mobs[name]; if (!m || !m.id) return b;
+    var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = IO + "mob/" + m.id + "/render/stand"; im.onerror = function () { im.remove(); }; b.appendChild(im); return b;
+  }
+
+  // ---------------------------------------------------------------- what a touch costs
+  // Damage taken: Raw = attack x 1.2-1.4; Taken = Raw x (1 - DEF/(DEF+300+2Raw)) - (DEF/25 + level/10).
+  // Typical gear by class for the defense and avoid; the hit chance compares the monster's accuracy with your avoid.
+  var GEAR = { Warrior: [3.5, function (L) { return 8 + 0.2 * L; }], Magician: [1.2, function (L) { return 10 + 0.4 * L; }], Bowman: [2.2, function (L) { return 15 + 0.6 * L; }], Thief: [2.2, function (L) { return 25 + 1.3 * L; }], Beginner: [1.0, function (L) { return 6 + 0.2 * L; }] };
+  function touch(mob, L, cls) {
+    var g = GEAR[cls] || GEAR.Bowman, DEF = g[0] * L, raw = mob.atk * 1.3;
+    var dmg = Math.max(1, raw * (1 - DEF / (DEF + 300 + 2 * raw)) - (DEF / 25 + L / 10));
+    var G = Math.max(0, L - mob.lv), A = mob.acc * 100 / (5 * (G + 51)), eva = g[1](L), E = eva / (1 + eva / 80) / (1 + G / 40), D = A - E, f = 0.15 + 0.2 / (1 + Math.exp(D / 12)), c;
+    if (E > A * (1 + f)) c = Math.min(0.03, Math.max(0.02, Math.exp((A - E) / 18) * 0.03)); else { var q = E / A; c = q <= 1 - f ? 1 : q >= 1 + f ? 0 : (1 + f - q) / (2 * f); }
+    return { dmg: dmg, hit: c + (1 - c) * 0.08 };
+  }
+  // cheapest HP and MP right now: the lower of the NPC price and the Free Market typical, per point restored
+  function bestPot(kind) {
+    var best = null;
+    Object.keys(W.pots).forEach(function (n) { var p = W.pots[n]; if (!p[kind] || p.pct) return; var fm = PRICE[n], price = Math.min(p.npc || 1e9, fm || 1e9); if (price >= 1e9) return; var per = price / p[kind]; if (!best || per < best.per) best = { name: n, per: per, price: price, fm: fm && fm < (p.npc || 1e9) }; });
+    return best || { name: "Red Potion", per: 0.5, price: 50 };
+  }
+
+  // ---------------------------------------------------------------- where to train
+  function mapStats(m) {
+    var tot = 0, e = 0, hp = 0, lv = 0, maxlv = 0, worst = null;
+    m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; tot += x[1]; e += mb.exp * x[1]; hp += mb.hp * x[1]; lv += mb.lv * x[1]; maxlv = Math.max(maxlv, mb.lv); if (!worst || mb.atk > worst.atk) { worst = mb; worst.name = x[0]; } });
+    if (!tot) return null;
+    return { n: tot, exp: e / tot, hp: hp / tot, lv: lv / tot, maxlv: maxlv, eph: e / hp * 100, worst: worst };
+  }
+  function bracket(L) { var b = null; (NOTES && NOTES.brackets || []).forEach(function (x) { if (L >= x.lo && L < x.hi + (x.hi >= 100 ? 1 : 0)) b = x; }); return b || (NOTES && NOTES.brackets ? NOTES.brackets[NOTES.brackets.length - 1] : null); }
+  function renderTrain() {
+    var v = $("v-train"); v.textContent = "";
+    var L = ME.lv, cls = ME.cls || "Bowman";
+    if (!L) { var c0 = el("div", "card"); c0.appendChild(el("h2", null, "Set your level")); c0.appendChild(el("p", "note", "Type your level and class at the top, or your character name and it fills in from classicrank.com.")); v.appendChild(c0); return; }
+    var hpPot = bestPot("hp"), mpPot = bestPot("mp"), br = bracket(L);
+    var head = el("div", "card");
+    head.appendChild(el("h2", null, "Level " + L + (ME.cls ? " " + ME.cls : "") + ": where to train"));
+    head.appendChild(el("p", "note", "Ranked by EXP for the HP you have to chew through, how many monsters the map holds, and what getting hit costs you. Spots players recommend for your level get a boost."));
+    var pr = el("div", "row"); pr.style.marginTop = "6px";
+    pr.appendChild(el("span", "chip ok wrap", "Cheapest HP now: " + hpPot.name + " · " + hpPot.per.toFixed(2) + " mesos per HP" + (hpPot.fm ? " on the Free Market" : " at the NPC")));
+    pr.appendChild(el("span", "chip wrap", "Cheapest MP now: " + mpPot.name + " · " + mpPot.per.toFixed(2) + " per MP" + (mpPot.fm ? " on the Free Market" : " at the NPC")));
+    head.appendChild(pr);
+    if (br) br.tips.forEach(function (t) { head.appendChild(el("div", "warn", t)); });
+    v.appendChild(head);
+    var picks = {}; (br ? br.picks : []).forEach(function (p) { if (!p.classes || !ME.cls || p.classes.indexOf(ME.cls) >= 0) picks[p.map] = p; });
+    var cand = [];
+    Object.keys(MAPS).forEach(function (pg) {
+      var m = MAPS[pg]; if (m.type === "Town" || !m.mobs.length) return;
+      var st = mapStats(m); if (!st) return;
+      if (st.lv < L - 9 || st.lv > L + 4 || st.maxlv > L + 12) { if (!picks[pg]) return; }
+      var t = touch(st.worst, L, cls), cost = t.dmg * t.hit * hpPot.per;
+      var score = st.eph * Math.sqrt(st.n) / (1 + cost / 120) * (picks[pg] ? 1.6 : 1) * (st.lv > L + 2 ? 0.8 : 1);
+      cand.push({ pg: pg, m: m, st: st, t: t, cost: cost, score: score, pick: picks[pg] });
+    });
+    cand.sort(function (a, b) { return b.score - a.score; });
+    cand.slice(0, 7).forEach(function (c, i) { v.appendChild(trainCard(c, i, L, hpPot)); });
+    if (!cand.length) v.appendChild(el("div", "card note", "Nothing on the map fits this level yet."));
+    var side = el("div", "card"); side.appendChild(el("h2", null, "Potions and money"));
+    var ul = el("ul", "list"); (NOTES ? NOTES.economy : []).forEach(function (t) { ul.appendChild(el("li", null, t)); }); side.appendChild(ul);
+    side.appendChild(el("h3", null, "Price check")); side.lastChild.style.marginTop = "10px";
+    var pl = el("ul", "list");
+    ["Red Potion", "Meat", "Orange Potion", "White Potion", "Unagi", "Elixir", "Lemon", "Blue Potion", "Pure Water", "Mana Elixir"].forEach(function (n) {
+      var p = W.pots[n]; if (!p) return; var li = el("li"); var a = el("span"); a.appendChild(el("b", null, n)); a.appendChild(document.createTextNode(" " + (p.hp ? p.hp + (p.pct ? "% HP" : " HP") : "") + (p.hp && p.mp ? " · " : "") + (p.mp && !(p.hp && p.pct) ? p.mp + (p.pct ? "% MP" : " MP") : "")));
+      li.appendChild(a); li.appendChild(el("span", "note", (p.npc ? "NPC " + fmt(p.npc) : "no NPC") + (PRICE[n] ? " · FM " + fmt(PRICE[n]) : ""))); pl.appendChild(li);
+    });
+    side.appendChild(pl);
+    if (NOTES && NOTES.party) { side.appendChild(el("h3", null, "Party play")); side.lastChild.style.marginTop = "10px"; var pu = el("ul", "list"); NOTES.party.forEach(function (t) { pu.appendChild(el("li", null, t)); }); side.appendChild(pu); }
+    if (NOTES && NOTES.upcoming) { var up = (NOTES.upcoming || []).filter(function (u) { return u.date >= new Date().toISOString().slice(0, 10); }); if (up.length) { side.appendChild(el("h3", null, "Coming soon")); side.lastChild.style.marginTop = "10px"; var uu = el("ul", "list"); up.forEach(function (u) { uu.appendChild(el("li", null, u.name + " · " + u.date + ". " + u.note)); }); side.appendChild(uu); } }
+    side.appendChild(el("p", "note", "Player notes re-checked " + (NOTES ? NOTES.updated : "") + ". Map and monster data refreshed " + W.built + "."));
+    v.appendChild(side);
+  }
+  function trainCard(c, i, L, hpPot) {
+    var m = c.m, st = c.st, card = el("div", "card"), g = el("div", "pick"), left = el("div");
+    var h = el("div", "row"); h.appendChild(el("span", "chip gold", "#" + (i + 1))); h.appendChild(el("h3", null, m.name)); if (c.pick) h.appendChild(el("span", "chip ok", "Players recommend")); if (st.worst && st.worst.undead) h.appendChild(el("span", "chip", "Undead: Heal hurts them"));
+    var weak = {}; m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (mb && mb.weak) weak[mb.weak] = 1; }); Object.keys(weak).forEach(function (k) { h.appendChild(el("span", "chip", "Weak to " + k.toLowerCase())); });
+    if (m.since && Date.now() - Date.parse(m.since) < 14 * 864e5 && m.since > (W.first0 || "")) h.appendChild(el("span", "chip gold", "New"));
+    left.appendChild(h);
+    left.appendChild(el("div", "note", (m.region || "") + (m.near ? " · nearest town " + m.near : "")));
+    if (c.pick) left.appendChild(el("p", "why", c.pick.why));
+    var ms = el("div", "mobs");
+    m.mobs.slice().sort(function (a, b) { return b[1] - a[1]; }).forEach(function (x) {
+      var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; var d = el("div", "mob"); d.appendChild(sprite(x[0]));
+      var t = el("div"); t.appendChild(el("b", null, x[0] + " ×" + x[1])); t.appendChild(el("small", null, "Lv " + mb.lv + " · " + fmt(mb.hp) + " HP · " + fmt(mb.exp) + " EXP")); d.appendChild(t); ms.appendChild(d);
+    });
+    left.appendChild(ms);
+    var sts = el("div", "stats");
+    [[st.eph.toFixed(1), "EXP per 100 HP"], [st.n, "Monsters on the map"], [fmt(c.t.dmg), "Hits you for, typical gear"], [fmt(c.cost) + " mesos", "Potions per touch"]].forEach(function (x) { var s = el("div", "stat"); s.appendChild(el("b", null, String(x[0]))); s.appendChild(el("small", null, x[1])); sts.appendChild(s); });
+    left.appendChild(sts);
+    left.appendChild(el("p", "note", "A touch from " + st.worst.name + " (" + st.worst.atk + " attack) at level " + L + " with typical " + (ME.cls || "Bowman").toLowerCase() + " gear: about " + fmt(c.t.dmg) + " damage, landing " + Math.round(c.t.hit * 100) + "% of the time, which is " + fmt(c.cost) + " mesos of " + hpPot.name + ". An estimate: your own gear changes it."));
+    var b = el("div", "row"); b.style.marginTop = "6px";
+    var r = el("button", "btn pri", "Route here"); r.type = "button"; r.addEventListener("click", function () { TO = c.pg; showTab("route"); $("to").value = c.pg; if (FROM) findRoute(); else $("from").focus(); });
+    var o = el("button", "btn", "Open map"); o.type = "button"; o.addEventListener("click", function () { showMap(c.pg); });
+    b.appendChild(r); b.appendChild(o); left.appendChild(b);
+    g.appendChild(left);
+    var right = el("div"); right.appendChild(minimap(m, { size: 220, maxh: 260 })); g.appendChild(right);
+    card.appendChild(g); return card;
+  }
+
+  // ---------------------------------------------------------------- routes
+  var SPEED = 125, CLIMB = 90, LOAD = 2.5;
+  function travel(a, b) { return Math.abs(a[0] - b[0]) / SPEED + Math.abs(a[1] - b[1]) / CLIMB; }
+  function centre(m) { if (!m.portals.length) return [0, 0]; var x = 0, y = 0; m.portals.forEach(function (p) { x += p[2]; y += p[3]; }); return [x / m.portals.length, y / m.portals.length]; }
+  function arrival(B, fromPage) { var m = MAPS[B]; for (var i = 0; i < m.portals.length; i++) if (m.portals[i][0] === fromPage) return [m.portals[i][2], m.portals[i][3]]; return centre(m); }
+  var TOWNS = { "Henesys": 1, "Ellinia": 1, "Perion": 1, "Kerning City": 1, "Lith Harbor": 1, "Sleepywood": 1 };
+  function edges(A, pos) {
+    var m = MAPS[A], out = [], L = ME.lv || 1;
+    m.portals.forEach(function (p, i) {
+      if (!MAPS[p[0]] || p[0] === A) return; if (p[5] && L < p[5]) return;
+      out.push({ to: p[0], kind: "walk", portal: i, t: travel(pos, [p[2], p[3]]) + LOAD, mesos: 0, arrive: arrival(p[0], A) });
+    });
+    if (TOWNS[A]) W.cabs.forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 8 + travel(pos, centre(m)) * 0.5, mesos: L >= 20 ? c[3] : c[2], arrive: centre(MAPS[c[1]]), what: "Regular Cab" }); });
+    (W.vip || []).forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 8, mesos: c[2], arrive: centre(MAPS[c[1]]), what: "VIP Cab" }); });
+    var sc = W.scrolls || {};
+    if (sc.nearest && m.ret && m.ret !== A && MAPS[m.ret] && m.type !== "Town") out.push({ to: m.ret, kind: "scroll", t: 4, mesos: sc.nearest.price, arrive: centre(MAPS[m.ret]), what: sc.nearest.item });
+    Object.keys(sc).forEach(function (t) { if (t !== "nearest" && t !== A && MAPS[t]) out.push({ to: t, kind: "scroll", t: 4, mesos: sc[t].price, arrive: centre(MAPS[t]), what: sc[t].item }); });
+    return out;
+  }
+  function route(from, to, mode) {
+    // Dijkstra over (map, where you stand); weight is seconds, plus mesos converted to seconds for "value", no paid edges for "free"
+    var lam = mode === "value" ? 1 / 40 : 0, best = {}, prev = {}, heap = [];
+    function push(k, w) { heap.push([w, k]); var i = heap.length - 1; while (i > 0) { var p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; var t = heap[p]; heap[p] = heap[i]; heap[i] = t; i = p; } }
+    function pop() { var top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; var i = 0; for (;;) { var l = 2 * i + 1, r = l + 1, s = i; if (l < heap.length && heap[l][0] < heap[s][0]) s = l; if (r < heap.length && heap[r][0] < heap[s][0]) s = r; if (s === i) break; var t = heap[s]; heap[s] = heap[i]; heap[i] = t; i = s; } } return top; }
+    var start = from + "|start", POS = {}; POS[start] = centre(MAPS[from]); best[start] = 0; push(start, 0); var hit = null, n = 0;
+    while (heap.length && n++ < 40000) {
+      var top = pop(), w = top[0], k = top[1]; if (w > best[k]) continue;
+      var A = k.split("|")[0]; if (A === to) { hit = k; break; }
+      edges(A, POS[k]).forEach(function (e) {
+        if (mode === "free" && e.mesos) return;
+        var nk = e.to + "|" + (e.kind === "walk" ? A : e.kind), nw = w + e.t + e.mesos * lam;
+        if (best[nk] == null || nw < best[nk]) { best[nk] = nw; prev[nk] = { k: k, e: e, from: A }; POS[nk] = e.arrive; push(nk, nw); }
+      });
+    }
+    if (!hit) return null;
+    var steps = [], c = hit; while (prev[c]) { steps.unshift({ from: prev[c].from, e: prev[c].e, pos: POS[prev[c].k] }); c = prev[c].k; }
+    var t = 0, mesos = 0; steps.forEach(function (s) { t += s.e.t; mesos += s.e.mesos; });
+    return { steps: steps, t: t, mesos: mesos, maps: steps.length };
+  }
+  var ROUTES = null, RMODE = "fast";
+  function findRoute() {
+    var a = resolve($("from").value), b = resolve($("to").value), box = $("routes"); box.textContent = "";
+    if (!a || !b) { box.appendChild(el("div", "card note", !a ? "Pick where you are from the list." : "Pick where you're going from the list.")); return; }
+    $("from").value = a; $("to").value = b; FROM = a; TO = b; try { localStorage.setItem("fm-map-from", a); } catch (e) {}
+    try { history.replaceState(null, "", "#route=" + encodeURIComponent(a) + "|" + encodeURIComponent(b)); } catch (e) {}
+    if (a === b) { box.appendChild(el("div", "card note", "You're already there.")); return; }
+    ROUTES = { fast: route(a, b, "fast"), value: route(a, b, "value"), free: route(a, b, "free") };
+    if (!ROUTES.fast && !ROUTES.free) { box.appendChild(el("div", "card note", "No known way between these two maps yet. Some maps are only reached by quest or event.")); return; }
+    var opts = el("div", "opts");
+    [["fast", "Fastest", "Any cab or scroll that saves time"], ["value", "Quick and cheap", "Pays only when it saves real time"], ["free", "Free", "Walking only, no mesos"]].forEach(function (o) {
+      var r = ROUTES[o[0]]; var b0 = el("button", "opt"); b0.type = "button"; b0.setAttribute("aria-pressed", RMODE === o[0]);
+      b0.appendChild(el("b", null, o[1])); b0.appendChild(el("span", null, r ? "about " + secs(r.t) + " · " + r.maps + (r.maps === 1 ? " step" : " steps") + " · " + (r.mesos ? fmt(r.mesos) + " mesos" : "free") : "No route")); b0.appendChild(el("span", null, ""));
+      b0.lastChild.textContent = " " + o[2]; b0.lastChild.style.display = "block";
+      b0.disabled = !r; b0.addEventListener("click", function () { RMODE = o[0]; findRoute(); }); opts.appendChild(b0);
+    });
+    box.appendChild(opts);
+    var r = ROUTES[RMODE] || ROUTES.fast || ROUTES.free; if (!ROUTES[RMODE]) RMODE = ROUTES.fast ? "fast" : "free";
+    var same = ROUTES.fast && ROUTES.free && ROUTES.fast.mesos === 0; if (same) box.appendChild(el("p", "note", "Walking is already the fastest way here: no fare saves time."));
+    var steps = el("div", "steps");
+    r.steps.forEach(function (s, i) {
+      var m = MAPS[s.from], d = el("div", "step" + (s.e.kind !== "walk" ? " " + s.e.kind : "")); d.appendChild(el("div", "n", String(i + 1)));
+      var body = el("div"), h = el("h4");
+      if (s.e.kind === "walk") {
+        var p = m.portals[s.e.portal], dir = p[2] > s.pos[0] + 60 ? "right" : p[2] < s.pos[0] - 60 ? "left" : "", up = p[3] < s.pos[1] - 80 ? "up" : p[3] > s.pos[1] + 80 ? "down" : "";
+        h.textContent = m.name + " → " + MAPS[p[0]].name;
+        body.appendChild(h);
+        var t = (p[1] === "hidden" ? "Hidden portal: nothing glows in game. Go " : "Walk ") + [dir, up].filter(Boolean).join(" and ") + (dir || up ? " to the " : "to the ") + (p[1] === "hidden" ? "marked spot and press up." : "portal marked in gold" + (p[1] === "door" ? " (a door: press up)" : "") + ".");
+        body.appendChild(el("div", "note", t + " About " + secs(s.e.t) + "."));
+        if (p[1] === "hidden") body.firstChild.appendChild(el("span", "chip hid", "Hidden"));
+        body.appendChild(minimap(m, { you: s.pos, exit: s.e.portal, mobs: false, size: 300, maxh: 300 }));
+      } else {
+        h.textContent = (s.e.kind === "cab" ? s.e.what + ": " : "Use a ") + (s.e.kind === "scroll" ? s.e.what + " → " : m.name + " → ") + MAPS[s.e.to].name;
+        body.appendChild(h);
+        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to the " + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + fmt(s.e.mesos) + " mesos" + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." : "Use it anywhere: " + fmt(s.e.mesos) + " mesos from a potion shop. Buy it before you set out."));
+      }
+      d.appendChild(body); steps.appendChild(d);
+    });
+    var last = el("div", "step"); last.appendChild(el("div", "n", "✓")); var lb = el("div"); lb.appendChild(el("h4", null, "You're in " + MAPS[b].name)); lb.appendChild(minimap(MAPS[b], { you: r.steps.length ? r.steps[r.steps.length - 1].e.arrive : centre(MAPS[b]), size: 300, maxh: 300 })); last.appendChild(lb); steps.appendChild(last);
+    box.appendChild(steps); box.appendChild(legend());
+  }
+  function resolve(v) { v = String(v || "").trim(); if (!v) return null; if (MAPS[v]) return v; var lo = v.toLowerCase(); var hit = PAGES.filter(function (p) { return p.toLowerCase() === lo || MAPS[p].name.toLowerCase() === lo; })[0]; return hit || PAGES.filter(function (p) { return p.toLowerCase().indexOf(lo) === 0; })[0] || null; }
+
+  // ---------------------------------------------------------------- map browser
+  function showMap(pg) { showTab("maps"); $("mapq").value = pg; renderMap(pg); }
+  function renderMap(pg) {
+    var v = $("mapview"); v.textContent = ""; var m = MAPS[pg]; if (!m) return;
+    try { history.replaceState(null, "", "#map=" + encodeURIComponent(pg)); } catch (e) {}
+    var c = el("div", "card"), g = el("div", "grid2"), left = el("div"), right = el("div");
+    var h = el("div", "row"); h.appendChild(el("h2", null, m.name)); if (m.type) h.appendChild(el("span", "chip", m.type)); if (m.region) h.appendChild(el("span", "chip", m.region)); if (m.lv[0]) h.appendChild(el("span", "chip gold", "Level " + m.lv[0] + (m.lv[1] ? "–" + m.lv[1] : "+")));
+    left.appendChild(h);
+    left.appendChild(minimap(m, { size: 640, maxh: 520, onPortal: function (to) { $("mapq").value = to; renderMap(to); } }));
+    left.appendChild(legend());
+    left.appendChild(el("p", "note", "Click a portal on the minimap to jump to that map."));
+    var st = mapStats(m);
+    if (st) {
+      var ms = el("div", "mobs");
+      m.mobs.slice().sort(function (a, b) { return b[1] - a[1]; }).forEach(function (x) { var mb = W.mobs[x[0]]; if (!mb) return; var d = el("div", "mob"); d.appendChild(sprite(x[0])); var t = el("div"); t.appendChild(el("b", null, x[0] + " ×" + x[1])); t.appendChild(el("small", null, "Lv " + mb.lv + " · " + fmt(mb.hp) + " HP · " + fmt(mb.exp) + " EXP · " + mb.atk + " attack" + (mb.weak ? " · weak to " + mb.weak.toLowerCase() : "") + (mb.undead ? " · undead" : ""))); d.appendChild(t); ms.appendChild(d); });
+      left.appendChild(el("h3", null, "Monsters")); left.appendChild(ms);
+    }
+    var pl = el("ul", "list");
+    m.portals.forEach(function (p) { var li = el("li"); var a = el("a", null, p[0]); a.href = "#map=" + encodeURIComponent(p[0]); a.addEventListener("click", function (e) { e.preventDefault(); if (MAPS[p[0]]) { $("mapq").value = p[0]; renderMap(p[0]); } }); li.appendChild(a); var tg = el("span", "chip" + (p[1] === "hidden" ? " hid" : ""), p[1] === "hidden" ? "Hidden portal" : p[1] === "door" ? "Door" : "Portal"); if (p[5]) tg.textContent += " · Lv " + p[5] + "+"; li.appendChild(tg); pl.appendChild(li); });
+    right.appendChild(el("h3", null, "Exits")); right.appendChild(pl);
+    if (m.npcs.length) { right.appendChild(el("h3", null, "NPCs")); right.lastChild.style.marginTop = "10px"; var nl = el("ul", "list"); m.npcs.forEach(function (n) { nl.appendChild(el("li", null, n[0] + (n[3] ? " · " + n[3] : ""))); }); right.appendChild(nl); }
+    if (m.shops.length) right.appendChild(el("p", "note", "Shops: " + m.shops.join(", ")));
+    var b = el("div", "row"); b.style.marginTop = "10px";
+    var r1 = el("button", "btn pri", "Route here"); r1.type = "button"; r1.addEventListener("click", function () { showTab("route"); $("to").value = pg; if (FROM) findRoute(); else $("from").focus(); });
+    var r2 = el("button", "btn", "I'm here"); r2.type = "button"; r2.addEventListener("click", function () { FROM = pg; try { localStorage.setItem("fm-map-from", pg); } catch (e) {} $("from").value = pg; r2.textContent = "Saved as your spot"; });
+    b.appendChild(r1); b.appendChild(r2); right.appendChild(b);
+    if (m.since) right.appendChild(el("p", "note", "In our map data since " + m.since + "."));
+    g.appendChild(left); g.appendChild(right); c.appendChild(g); v.appendChild(c);
+  }
+
+  // ---------------------------------------------------------------- map search boxes
+  function suggest(input, onPick) {
+    var box = el("div", "sugg"); box.hidden = true; input.parentNode.appendChild(box); var hits = [], at = -1;
+    function show() {
+      var v = input.value.trim().toLowerCase(); box.textContent = ""; at = -1; if (!v) { box.hidden = true; return; }
+      hits = PAGES.filter(function (p) { return p.toLowerCase().indexOf(v) >= 0 || MAPS[p].name.toLowerCase().indexOf(v) >= 0; }).sort(function (a, b) { return (a.toLowerCase().indexOf(v) - b.toLowerCase().indexOf(v)) || a.length - b.length; }).slice(0, 12);
+      hits.forEach(function (p, i) { var d = el("div", null, p); d.appendChild(el("small", null, (MAPS[p].type || "") + (MAPS[p].near && MAPS[p].near !== p ? " · near " + MAPS[p].near : ""))); d.addEventListener("mousedown", function (e) { e.preventDefault(); input.value = p; box.hidden = true; onPick(p); }); box.appendChild(d); });
+      box.hidden = !hits.length;
+    }
+    input.addEventListener("input", show); input.addEventListener("focus", show); input.addEventListener("blur", function () { setTimeout(function () { box.hidden = true; }, 150); });
+    input.addEventListener("keydown", function (e) {
+      if (box.hidden) { if (e.key === "Enter") onPick(resolve(input.value)); return; }
+      if (e.key === "ArrowDown") { e.preventDefault(); at = Math.min(hits.length - 1, at + 1); } else if (e.key === "ArrowUp") { e.preventDefault(); at = Math.max(0, at - 1); } else if (e.key === "Enter") { e.preventDefault(); var p = hits[at < 0 ? 0 : at]; if (p) { input.value = p; box.hidden = true; onPick(p); } return; } else if (e.key === "Escape") { box.hidden = true; return; } else return;
+      [].forEach.call(box.children, function (c, i) { c.setAttribute("aria-selected", i === at); });
+    });
+  }
+
+  // ---------------------------------------------------------------- level and class from classicrank
+  var JOBCLS = { Warrior: "Warrior", Magician: "Magician", Bowman: "Bowman", Thief: "Thief", Pirate: "Warrior", Beginner: "Beginner" };
+  function pullLevel(ign) {
+    ign = String(ign || "").trim(); if (!/^[A-Za-z0-9]{2,16}$/.test(ign)) return;
+    fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(ign) + "?fields=name,level,job,family").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var d = j && j.data; if (!d || !d.level) { $("lvsrc").textContent = "No character named " + ign + " on classicrank.com yet."; return; }
+      try { localStorage.setItem("fm-me", d.name); } catch (e) {}
+      $("ign").value = d.name; ME.lv = d.level; ME.cls = JOBCLS[d.family] || ME.cls; $("lv").value = ME.lv; $("cls").value = ME.cls; saveMe();
+      $("lvsrc").textContent = d.name + ", " + (d.job || d.family) + ", level " + d.level + " on classicrank.com";
+      renderTrain();
+    }).catch(function () {});
+  }
+  $("ign").addEventListener("change", function () { pullLevel(this.value); });
+  $("lv").addEventListener("change", function () { ME.lv = Math.max(1, Math.min(200, parseInt(this.value, 10) || 0)); saveMe(); renderTrain(); if (TAB === "route" && $("routes").childNodes.length) findRoute(); });
+  $("cls").addEventListener("change", function () { ME.cls = this.value; saveMe(); renderTrain(); });
+
+  function showTab(t) {
+    TAB = t; [].forEach.call(document.querySelectorAll(".tabs button"), function (b) { b.setAttribute("aria-pressed", b.dataset.t === t); });
+    $("v-train").hidden = t !== "train"; $("v-route").hidden = t !== "route"; $("v-maps").hidden = t !== "maps";
+    if (t === "train") try { history.replaceState(null, "", "#train"); } catch (e) {}
+  }
+  [].forEach.call(document.querySelectorAll(".tabs button"), function (b) { b.addEventListener("click", function () { showTab(b.dataset.t); }); });
+  $("swap").addEventListener("click", function () { var a = $("from").value; $("from").value = $("to").value; $("to").value = a; findRoute(); });
+  $("go").addEventListener("click", findRoute);
+
+  var meIgn = fetch(window.FM_API + "/me", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { return m && m.signedIn && m.account ? m.account.ign || "" : ""; }).catch(function () { return ""; });
+  Promise.all([
+    fetch(LIVE + "data/world.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
+    fetch("/assets/training-notes.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+  ]).then(function (res) {
+    W = res[0]; NOTES = res[1]; MAPS = W.maps; PAGES = Object.keys(MAPS).sort();
+    W.first0 = Object.keys(W.first || {}).map(function (k) { return W.first[k]; }).sort()[0] || "";
+    ((res[2] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) PRICE[r.item] = r.typ; });
+    $("credit").textContent = W.credit + " Training notes summarize what players report; potion costs are estimates.";
+    var recent = PAGES.filter(function (p) { return MAPS[p].since && MAPS[p].since > W.first0 && Date.now() - Date.parse(MAPS[p].since) < 14 * 864e5; });
+    $("newmaps").textContent = PAGES.length + " maps" + (recent.length ? " · new lately: " + recent.slice(0, 6).join(", ") : "") + ". Updated " + W.built + ".";
+    suggest($("from"), function (p) { if (p) { FROM = p; if ($("to").value) findRoute(); else $("to").focus(); } });
+    suggest($("to"), function (p) { if (p && $("from").value) findRoute(); });
+    suggest($("mapq"), function (p) { if (p) renderMap(p); });
+    if (FROM) $("from").value = FROM;
+    if (ME.lv) $("lv").value = ME.lv; if (ME.cls) $("cls").value = ME.cls;
+    renderTrain();
+    var h = location.hash, mr = /^#route=([^|]+)\|(.+)$/.exec(h), mm = /^#map=(.+)$/.exec(h);
+    if (mr) { showTab("route"); $("from").value = decodeURIComponent(mr[1]); $("to").value = decodeURIComponent(mr[2]); findRoute(); }
+    else if (mm) showMap(decodeURIComponent(mm[1]));
+    meIgn.then(function (ign) { var saved = ""; try { saved = localStorage.getItem("fm-me") || ""; } catch (e) {} if (ign || saved) { $("ign").value = ign || saved; pullLevel(ign || saved); } });
+  }).catch(function (e) { $("v-train").appendChild(el("div", "card note", "Couldn't load the map data. Try again in a minute.")); console.error(e); });
+})();
+</script>
+<script src="/assets/hit.js" defer></script>
+</body></html>

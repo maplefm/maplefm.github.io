@@ -1,0 +1,45 @@
+name: Maps and training data
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/world.py, .github/workflows/world.yml]
+  schedule:
+    - cron: "41 10 * * *"
+concurrency: world
+permissions:
+  contents: write
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      # maps, portals, spawns, cabs and minimaps for map.html go to the data branch; new maps or monsters are announced
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin live
+          git worktree add -q /tmp/live origin/live
+          mkdir -p /tmp/live/data/minimap /tmp/w
+          python3 tools/world.py /tmp/w /tmp/live/data/world.json
+          python3 - <<'PY'
+          import json, sys
+          new = json.load(open('/tmp/w/world.json'))
+          try: old = json.load(open('/tmp/live/data/world.json'))
+          except Exception: old = {"maps": {}}
+          # never swap good data for a half-empty pull
+          if len(new.get("maps", {})) < 0.8 * len(old.get("maps", {})) or len(new.get("maps", {})) < 100:
+              sys.exit("map pull looks short (%d maps, had %d); keeping the old data" % (len(new.get("maps", {})), len(old.get("maps", {}))))
+          PY
+          cp /tmp/w/world.json /tmp/live/data/world.json
+          cp /tmp/w/minimap/*.png /tmp/live/data/minimap/ 2>/dev/null || true
+          ch=$(python3 -c "import json;c=json.load(open('/tmp/w/world_changes.json'));m=c.get('new_maps') or [];b=c.get('new_mobs') or [];print(('New maps: '+', '.join(m[:15]) if m else '')+('\\\\n' if m and b else '')+('New monsters: '+', '.join(b[:15]) if b else ''))")
+          cd /tmp/live
+          git add data/world.json data/minimap
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Refresh map and training data"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
+          if [ -n "$ch" ]; then cd "$GITHUB_WORKSPACE"; python3 tools/discord.py note "New in the game: maps and training updated" "$ch\nSee them on https://maplefm.gg/map.html" || true; fi
