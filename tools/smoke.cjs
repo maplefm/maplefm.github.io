@@ -30,7 +30,13 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       const found = await p.waitForSelector(must, { timeout: 15000 }).then(() => true, () => false);
       await p.waitForTimeout(pg === "/" ? 5000 : 1500);
       ok(found, `${tag} ${pg}: shows ${must}`);
-      ok((await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)) <= 1, `${tag} ${pg}: no sideways scroll`);
+      const wide = await p.evaluate(() => {
+        const over = document.documentElement.scrollWidth - window.innerWidth; if (over <= 1) return "";
+        const bad = [...document.querySelectorAll("body *")].filter((e) => { const r = e.getBoundingClientRect(); return r.width && r.right > window.innerWidth + 1 && getComputedStyle(e).position !== "fixed"; })
+          .filter((e) => !e.closest("[hidden]")).slice(0, 4).map((e) => (e.id ? "#" + e.id : e.tagName.toLowerCase() + "." + String(e.className).split(" ")[0]) + "→" + Math.round(e.getBoundingClientRect().right));
+        return over + "px wider: " + bad.join(" ");
+      });
+      ok(!wide, `${tag} ${pg}: no sideways scroll ${wide}`);
       ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length >= 6), `${tag} ${pg}: site menu`);
       if (pg === "/") {
         for (const t of ["tab-sell", "tab-pos", "tab-deals", "tab-prices"]) {
