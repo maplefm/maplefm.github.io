@@ -1555,8 +1555,9 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   }
   function where(l) { return [l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "", roomLabel(l.r) + (l.r && l.ri ? " (likely)" : "")].filter(Boolean).join(", "); }
   // Where to buy: where to walk to, in plain words; says so when the room hasn't been seen yet
+  function placed(l) { return !l.chat && !!l.c && !l.ci && /^FM\d+$/.test(l.r || ""); }
   function buyWhere(l) {
-    if (l.chat) return "trade chat";
+    if (l.chat) return "whisper them, posted in chat";
     var room = l.r && l.r !== "chat" ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
     if (!ch && !room) return "location not seen yet";
@@ -2296,8 +2297,11 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
         var gv = GONE.items[soldKey(x)]; x.sold = gv && gv[1] > x.t ? gv[0] : 0;
         if (x.sold >= GONE.need || (MYSOLD[soldKey(x)] || 0) > x.t) x.st = "sold";
       });
-      it.buy = fresh;
-      var still = fresh.filter(function (x) { return x.st !== "gone" && x.st !== "sold"; });
+      // Where to buy, Cheapest now and deals use only shops you can walk to: an FM room on a channel a scanner actually
+      // read. Trade chat, megaphones, FM Entrance boards and streams without a room still feed the prices in the
+      // background. Club and Mega Deals also see chat posts there, since a seller's name is enough to whisper.
+      it.buy = fresh.filter(function (x) { return placed(x) || (DEALS_ON && x.chat); });
+      var still = it.buy.filter(function (x) { return x.st !== "gone" && x.st !== "sold"; });
       it.bestL = still[0] || null;
       it.best = it.bestL ? it.bestL.u : 0;
       // A deal needs a typical that rests on sales: 3+ in the last 3 days. Asking prices and a lone old sale don't count.
@@ -3775,7 +3779,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
       ls.appendChild(li);
     });
-    if (!rows.length) { var e0 = el("div", "li"); e0.appendChild(el("small", null, state.list === "buy" ? "Nothing seen for sale in the last day." : "No sales seen yet.")); ls.appendChild(e0); }
+    if (!rows.length) { var e0 = el("div", "li"); e0.appendChild(el("small", null, state.list === "buy" ? "No shop with a known channel and room has it right now. Its price still counts posts from trade chat and streams." : "No sales seen yet.")); ls.appendChild(e0); }
     ip.appendChild(ls);
     // our extras: watch, sell, positions, moves, offers, base stats, price by roll
     var btns = el("div", "panelbtns");
