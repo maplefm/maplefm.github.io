@@ -3185,10 +3185,13 @@
       if (sig && sig.v) return sig.v;
       return fetch(LIVE + "data/live.sig?t=" + Math.floor(Date.now() / 6e4), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (s2) { return s2 && s2.at || 0; });
     }).then(function (at) {
+      return BUNDLE ? at : bundleCached().then(function () { return at; });
+    }).then(function (at) {
       if (BUNDLE && at === bundleAt) return BUNDLE;
       // after the first full load, ask only for uploads newer than what we hold (a few KB, not megabytes);
-      // a full reload every 30 minutes picks up anything trimmed or rewritten on the server
-      var delta = BUNDLE && Date.now() - bundleFull < 30 * 6e4, since = delta ? bundleNewest() - 15 * 6e4 : 0;
+      // the bundle is kept in this browser, so a return visit loads only what's new; a full reload every 6 hours
+      // picks up anything trimmed or rewritten on the server
+      var delta = BUNDLE && Date.now() - bundleFull < 6 * 36e5, since = delta ? bundleNewest() - 15 * 6e4 : 0;
       return fetch(ACCT + "/data/live" + (delta ? "?after=" + since : ""), { credentials: "include", cache: "no-cache" }).then(function (r) {
         if (r.status === 401 || r.status === 403) { MEMBER = false; gateText(r.status === 403); $("gate").hidden = false; return null; }
         return r.ok ? r.json() : null;
@@ -3205,13 +3208,33 @@
             });
             BUNDLE = nb;
           } else { BUNDLE = b; bundleFull = Date.now(); }
-          bundleAt = at; MEMBER = true; $("gate").hidden = true;
+          bundleAt = at; MEMBER = true; $("gate").hidden = true; bundleSave();
         }
         return BUNDLE;
       }).catch(function () { return BUNDLE; });
     });
   }
-  var bundleFull = 0;
+  var bundleFull = 0, bundleTried = false, saveT = null;
+  function idb(mode, fn) {
+    return new Promise(function (ok) {
+      try {
+        var rq = indexedDB.open("clubfm", 1);
+        rq.onupgradeneeded = function () { rq.result.createObjectStore("kv"); };
+        rq.onsuccess = function () { try { var tx = rq.result.transaction("kv", mode); var r = fn(tx.objectStore("kv")); tx.oncomplete = function () { ok(r && r.result); }; tx.onerror = tx.onabort = function () { ok(null); }; } catch (e) { ok(null); } };
+        rq.onerror = function () { ok(null); };
+      } catch (e) { ok(null); }
+    });
+  }
+  function bundleCached() {
+    if (bundleTried) return Promise.resolve(); bundleTried = true;
+    return Promise.race([idb("readonly", function (st) { return st.get("bundle"); }), new Promise(function (ok) { setTimeout(ok, 1500); })]).then(function (c) {
+      if (c && c.b && c.full && Date.now() - c.full < 6 * 36e5 && !BUNDLE) { BUNDLE = c.b; bundleFull = c.full; }
+    });
+  }
+  function bundleSave() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () { var b = BUNDLE, f = bundleFull; if (b) idb("readwrite", function (st) { return st.put({ b: b, full: f, at: Date.now() }, "bundle"); }); }, 3000);
+  }
   function bundleNewest() {
     var m = 0; Object.keys(BUNDLE || {}).forEach(function (k) { (BUNDLE[k] || []).forEach(function (d) { var t = Date.parse(d && d.at); if (t > m) m = t; }); });
     return m || Date.now() - 36e5;
