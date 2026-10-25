@@ -3936,7 +3936,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     if (ME_ACCT) { fetch(ACCT + "/logout", { method: "POST", credentials: "include" }).then(function () { ME_ACCT = null; acctMenu(); }); }
     else location.href = ACCT + "/login?back=home";
   });
-  if (location.hash === "#signed-in") history.replaceState(null, "", location.pathname);
+  if (/^#signed-in/.test(location.hash)) history.replaceState(null, "", location.pathname);
   acctLoad();
 
   // Club lock: deal alerts, the Best deals tab, Cheapest now and Where to buy are for club members.

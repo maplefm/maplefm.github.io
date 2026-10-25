@@ -543,7 +543,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
     fetch(SRC[i], { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!j || !j.weeks) return load(i + 1); C = j; if (j.weeks[0] && j.weeks[0].math.unlock_verified) UNLOCK = j.weeks[0].math.unlock_verified; rules(); show(); }).catch(function () { load(i + 1); });
   }
   load(0); accounts();
-  if (location.hash === "#signed-in") { history.replaceState(null, "", "#earn"); var e = $("earn"); if (e) e.scrollIntoView(); }
+  if (/^#signed-in/.test(location.hash)) { history.replaceState(null, "", "#earn"); var e = $("earn"); if (e) e.scrollIntoView(); }
 })();
 </script>
 <div class="kofitab" id="kofitab"><button type="button" class="kx" aria-label="Hide for now" onclick="this.parentNode.hidden=true">×</button><a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener" title="Support Club FM on Ko-fi"><i>☕</i><b>Support Club FM</b><span>Donations pay the FM Watchers who scan the market.</span></a></div>
