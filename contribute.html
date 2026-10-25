@@ -4,11 +4,11 @@
 <script src="/assets/api.js?v=2"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contribute and Earn · Club FM</title>
-<meta name="description" content="Run Club FM Watcher, add the Free Market prices you see, climb the Scanner Ranks and get paid per 100 verified sales once you clear the bar. It only reads your screen.">
+<title>Earn by Scanning · Club FM</title>
+<meta name="description" content="Earn by scanning: get paid for the MapleStory Classic Free Market shops you already browse. Up to $50 a week on PayPal. Free, Windows, only reads your screen.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Contribute and Earn · Club FM">
-<meta property="og:description" content="Run Club FM Watcher while you play, add the Free Market prices you see, climb the ranks and earn. It only reads your screen.">
+<meta property="og:title" content="Earn by Scanning · Club FM">
+<meta property="og:description" content="Get paid for the Free Market shops you already browse. Up to $50 a week on PayPal. Free, Windows, only reads your screen.">
 <meta property="og:image" content="https://maplefm.gg/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="og-icon.png?v=3">
@@ -42,6 +42,10 @@ a { color: var(--accent-ink); }
 .hero h1 { font: 700 clamp(1.8rem, 5vw, 2.8rem)/1.1 var(--display); margin: 0 0 10px; }
 .hero h1 b { color: var(--gold-hi); font-weight: 700; }
 .hero p { margin: 0; max-width: 680px; color: #e8dcff; font-size: 1.05rem; }
+.hero .pitch { font-size: 1.15rem; color: #fff; margin: 0 0 8px; }
+.hero .pitch b { color: var(--gold-hi); }
+.trust { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
+.trust span { font: 700 .8rem var(--body); color: #fff3c4; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,243,196,.3); }
 .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .jump a { color: #fff3c4; text-decoration: none; font: 700 .86rem var(--body); padding: 6px 12px; border-radius: 999px; border: 1.5px solid rgba(255,243,196,.45); background: rgba(255,255,255,.08); }
 .jump a:hover { background: rgba(255,255,255,.16); }
@@ -181,8 +185,10 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
   </div>
 
   <div class="hero">
-    <h1>Contribute and <b>earn</b></h1>
+    <h1>Earn by <b>scanning</b></h1>
+    <p class="pitch"><b>Get paid for the shops you already browse.</b> Up to $50 a week, paid on PayPal.</p>
     <p>Run Club FM Watcher while you play and every shop you open becomes a price on the site, for everyone. Climb the Scanner Ranks as you go, and once you've cleared the bar, every 100 verified sales you catch pays.</p>
+    <div class="trust"><span>Free</span><span>Windows</span><span>Never touches your game</span><span>Pay starts at 2,000 verified sales</span><span id="trial" hidden>Trial: the numbers are real, payouts start when it ends</span><span id="wk" hidden></span></div>
     <div class="jump"><a href="#download">Download</a><a href="#gatherer">Becoming an intel gatherer</a><a href="#earn">Earn</a><a href="#safety">Safe to run</a><a href="#setup">Setup</a></div>
   </div>
 
@@ -353,7 +359,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     <ul class="log" id="log"></ul>
   </section>
 </div>
-<footer class="sitefoot"><nav class="fnav"><a href="index.html">Price board</a> · <a href="contribute.html">Contribute and Earn</a> · <a href="report.html">Market close</a> · <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Discord</a> · <a href="terms.html">Terms of Use</a> · <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">☕ Support</a></nav>
+<footer class="sitefoot"><nav class="fnav"><a href="index.html">Price board</a> · <a href="contribute.html">Earn by scanning</a> · <a href="report.html">Market close</a> · <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Discord</a> · <a href="terms.html">Terms of Use</a> · <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">☕ Support</a></nav>
 Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON. MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" target="_blank" rel="noopener">maplestory.io</a> · character pictures from <a href="https://classicrank.com" target="_blank" rel="noopener">classicrank.com</a> · prices scanned by our contributors and from public streams.<br>
 Price data © Club FM. No scraping, bulk copying or AI training without permission. See the <a href="terms.html">Terms of Use</a>.</footer>
 <script>
@@ -425,6 +431,15 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   var SRC = ["https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/credits.json", "data/credits.json"];
   var API = "https://api.maplefm.gg";   // the accounts service
   var C = null, W = 0, LINKS = {}, ME = null;
+  // the hero's live line: this week's real numbers, and the trial note while no money moves
+  function trustLine(j) {
+    if (j.trial) $("trial").hidden = false;
+    var w = (j.weeks || []).filter(function (x) { return x.current; })[0] || j.weeks[0]; if (!w || !w.rows) return;
+    var rows = w.rows.filter(function (r) { return r.credits > 0 && !r.owner; }).sort(function (a, b) { return b.credits - a.credits; });
+    if (rows.length < 2) return;
+    $("wk").textContent = "This week: " + rows.length + " scanners earning · top " + rows[0].name + " with " + num(Math.round(rows[0].credits)) + " credits";
+    $("wk").hidden = false;
+  }
   function api(path, opts) { return fetch(API + path, Object.assign({ credentials: "include" }, opts || {})).then(function (r) { return r.json(); }); }
   function showAccount(a) {
     ME = a || null; $("account").hidden = !a; if (!a) return;
@@ -540,7 +555,7 @@ Price data © Club FM. No scraping, bulk copying or AI training without permissi
   }
   function load(i) {
     if (i >= SRC.length) { $("board").textContent = "Credits are not published yet."; return; }
-    fetch(SRC[i], { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!j || !j.weeks) return load(i + 1); C = j; if (j.weeks[0] && j.weeks[0].math.unlock_verified) UNLOCK = j.weeks[0].math.unlock_verified; rules(); show(); }).catch(function () { load(i + 1); });
+    fetch(SRC[i], { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!j || !j.weeks) return load(i + 1); C = j; if (j.weeks[0] && j.weeks[0].math.unlock_verified) UNLOCK = j.weeks[0].math.unlock_verified; rules(); show(); trustLine(j); }).catch(function () { load(i + 1); });
   }
   load(0); accounts();
   if (/^#signed-in/.test(location.hash)) { history.replaceState(null, "", "#earn"); var e = $("earn"); if (e) e.scrollIntoView(); }

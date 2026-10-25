@@ -28,7 +28,7 @@ jobs:
           pip install -q pillow
           git fetch -q origin live
           git worktree add -q /tmp/live origin/live
-          python3 tools/ogimages.py /tmp/summary.json /tmp/live /tmp/recap.json
+          python3 tools/ogimages.py /tmp/summary.json /tmp/live /tmp/recap.json /tmp/world.json
           (cd /tmp/live && git add og && (git diff --cached --quiet || (git commit -q -m "Share images" && for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done)))
           git add -A item items map monster quest training maps monsters quests recap sitemap.xml
           git diff --cached --quiet && exit 0
