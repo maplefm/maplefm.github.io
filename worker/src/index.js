@@ -149,7 +149,7 @@ async function callback(req, env, url) {
   if (!acct.code) acct.code = await newCode(env, u.id);
   await env.ACCOUNTS.put(key, JSON.stringify(acct));
   const session = await sign(env.SESSION_SECRET, u.id + "|" + (now() + 30 * DAY));
-  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in" }[cookie(req, "fm_back")] || "/earn.html#signed-in") });
+  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in" }[cookie(req, "fm_back")] || "/earn.html#signed-in") + "&fmt=" + encodeURIComponent(session) });
   h.append("Set-Cookie", `${COOKIE}=${session}; Path=/; Max-Age=${30 * DAY}; Secure; HttpOnly; SameSite=None`);
   h.append("Set-Cookie", `fm_state=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
@@ -162,7 +162,7 @@ function logout() {
 }
 
 async function whoami(req, env) {
-  const c = cookie(req, COOKIE);
+  const c = sessTok(req);
   if (!c) return null;
   const payload = await verify(env.SESSION_SECRET, c);
   if (!payload) return null;
@@ -451,7 +451,7 @@ function overLimit(key, max, windowSec) {
   return n > max;
 }
 async function sessionId(req, env) {
-  const c = cookie(req, COOKIE); if (!c) return null;
+  const c = sessTok(req); if (!c) return null;
   const payload = await verify(env.SESSION_SECRET, c); if (!payload) return null;
   const [id, exp] = payload.split("|");
   return id && Number(exp) >= now() ? id : null;
@@ -1475,11 +1475,17 @@ async function kofi(req, env) {
 // ---------------------------------------------------------------- helpers
 function corsHeaders(env, origin) {
   const ok = origin === env.SITE || origin === "https://maplefm.github.io";
-  return ok ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Credentials": "true", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Vary": "Origin" } : {};
+  return ok ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Credentials": "true", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Vary": "Origin" } : {};
 }
 function json(obj, status = 200, extra = {}) { return new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json", ...extra } }); }
 function text(s, status = 200) { return new Response(s, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } }); }
 function now() { return Math.floor(Date.now() / 1000); }
+// the session: the cookie, or the same signed token sent as a header. Browsers that block cross-site cookies
+// (Safari, iPhones, Chrome with third-party cookies off) keep the sign-in through the header instead.
+function sessTok(req) {
+  const c = cookie(req, COOKIE); if (c) return c;
+  const m = /^Bearer\s+(\S+)$/.exec(req.headers.get("Authorization") || ""); return m ? m[1] : "";
+}
 function cookie(req, name) { const m = (req.headers.get("Cookie") || "").match(new RegExp("(?:^|;\\s*)" + name + "=([^;]*)")); return m ? decodeURIComponent(m[1]) : ""; }
 function randomHex(n) { const b = new Uint8Array(n); crypto.getRandomValues(b); return [...b].map(x => x.toString(16).padStart(2, "0")).join(""); }
 function randomCode() { const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const b = new Uint8Array(6); crypto.getRandomValues(b); return [...b].map(x => A[x % A.length]).join(""); }
