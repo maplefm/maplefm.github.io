@@ -1147,3 +1147,6 @@ body.sheet .nudge { display: none; }
 .psum, .ptools { padding: 0 14px; } .pf-hint { padding: 0 14px; margin-top: 0; }
 .pform { padding-bottom: 4px; } .pform #pos-paid { width: auto; }
 .pcard b .pl { font-size: inherit; font-weight: inherit; }
+/* the open menu sits above the phone's sticky search bar */
+.top:has(.menu:not([hidden])) { z-index: 90; }
+.menu:not([hidden]) { z-index: 90; }

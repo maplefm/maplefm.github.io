@@ -42,6 +42,25 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
           ok(await p.evaluate((d) => !!document.getElementById(d).open, dlg), `${tag} menu opens ${dlg}`);
           await p.evaluate((d) => document.getElementById(d).close && document.getElementById(d).close(), dlg);
         }
+        // anything open on top must really be on top: sample points across the menu and make sure nothing sticky covers it,
+        // at the top of the page and scrolled down
+        for (const y of [0, 600]) {
+          await p.evaluate((y) => window.scrollTo(0, y), y); await p.waitForTimeout(200);
+          await p.evaluate(() => { const m = document.getElementById("menu"); if (m.hidden) document.getElementById("menubtn").click(); }); await p.waitForTimeout(300);
+          const cover = await p.evaluate(() => {
+            const m = document.getElementById("menu"), r = m.getBoundingClientRect(), bad = [];
+            for (let i = 1; i < 10; i++) for (let j = 1; j < 4; j++) {
+              const x = r.left + (r.width * j) / 4, yy = r.top + (r.height * i) / 10;
+              if (yy < 0 || yy > innerHeight || x < 0 || x > innerWidth) continue;
+              const e = document.elementFromPoint(x, yy);
+              if (e && !m.contains(e)) bad.push((e.id || e.className || e.tagName) + "");
+            }
+            return [...new Set(bad)].slice(0, 3);
+          });
+          ok(!cover.length, `${tag} menu not covered (scroll ${y}) ${cover.join(",")}`);
+          await p.evaluate(() => { const m = document.getElementById("menu"); if (!m.hidden) document.getElementById("menubtn").click(); });
+        }
+        await p.evaluate(() => window.scrollTo(0, 0));
         await p.waitForFunction(() => window.fmQA && window.fmQA.items().length > 100, null, { timeout: 30000 }).catch(() => {});
         await p.evaluate(() => window.fmQA.pick("Work Gloves")); await p.waitForTimeout(1500);
         ok(await p.evaluate(() => !!document.querySelector("#ip") && document.querySelector("#ip").textContent.indexOf("Work Gloves") >= 0), `${tag} search opens an item card`);
