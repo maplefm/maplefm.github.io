@@ -1,5 +1,5 @@
 """Turn game screen crops into price rows. No Windows-only code in this file."""
-import re, json, os, difflib
+import re, json, os, time, difflib
 from PIL import Image, ImageChops, ImageOps
 from ocrlib import min_channel, ocr_lines
 
@@ -71,6 +71,52 @@ def _words_agree(a, b):
         return difflib.SequenceMatcher(None, a.replace(" ", ""), b.replace(" ", "")).ratio() >= 0.93
     return all(x == y or (len(x) >= 4 and difflib.SequenceMatcher(None, x, y).ratio() >= 0.75) for x, y in zip(wa, wb))
 
+# Items the game added after our item list: learned from their tooltips while scanning ("Painting of Zombie
+# Mushmom"), kept in learned_items.json, and matched like any other item from then on.
+LEARNED_FILE = os.path.join(HERE, "learned_items.json")
+LEARNED = {}
+try:
+    LEARNED = json.load(open(LEARNED_FILE, encoding="utf-8"))
+except (OSError, ValueError):
+    LEARNED = {}
+for _n in LEARNED: _ITEM_NORM[norm(_n)] = _n
+
+def learn_item(name):
+    if norm(name) in _ITEM_NORM: return False
+    LEARNED[name] = int(time.time())
+    _ITEM_NORM[norm(name)] = name
+    try: json.dump(LEARNED, open(LEARNED_FILE, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    except OSError: pass
+    return True
+
+def learned_match(core):
+    """A misread or cut-off shop name that starts like a learned item ("Painting of Zombie Mu ba")."""
+    nc = norm(core)
+    if len(nc) < 10: return None
+    hits = [n for n in LEARNED if difflib.SequenceMatcher(None, nc, norm(n)[:len(nc)]).ratio() >= 0.85]
+    return hits[0] if len(hits) == 1 else None
+
+def tooltip_title(img, prefix):
+    """The full name of an item we don't know yet, off its tooltip: the line that starts the way the shop row's
+    cut-off name does ("Painting of Zombie Mush..." -> "Painting of Zombie Mushmom"). None when unsure."""
+    pw = [w.lower() for w in re.findall(r"[A-Za-z']+", prefix)]
+    if len(pw) < 2: return None
+    m = min_channel(img)
+    g = m.point(lambda v: 255 if v <= 140 else 0 if v >= 215 else int(255 - (v - 140) * 3.4))
+    g = g.resize((g.width * 3, g.height * 3), Image.BICUBIC)
+    for l in ocr_lines(g, 3, 6):
+        words = re.findall(r"[A-Za-z][A-Za-z'-]*", l["text"])
+        lw = [w.lower() for w in words]
+        for k in range(len(lw)):
+            # every whole word of the prefix matches, and its last (maybe cut) word starts the next one
+            if lw[k:k + len(pw) - 1] == pw[:-1] and k + len(pw) - 1 < len(lw) and lw[k + len(pw) - 1].startswith(pw[-1][:3]):
+                full = words[k:]
+                while full and (len(full[-1]) < 3 or full[-1].islower() and len(full) > len(pw)):
+                    full = full[:-1]                  # stray letters after the name ("Mushmom re")
+                if len(full) >= len(pw) and len(full) <= len(pw) + 3 and len(full[-1]) >= 3:
+                    return " ".join(full)
+    return None
+
 def clean_item(raw):
     """Snap an OCR'd shop item name to a known item where it is clearly the same one."""
     raw = re.sub(r"^[^A-Za-z0-9\[]+", "", raw).strip()
@@ -102,6 +148,9 @@ def clean_item(raw):
         sb = [v for k, v in _SB_NORM.items() if k.startswith(n)]
         if len(sb) == 1:
             return sb[0] + " (tier cut off)", True
+    lm = learned_match(core)
+    if lm:
+        return lm, True
     if cut:
         # a cut-off name that is the start of exactly one known item is that item
         starts = [v for k, v in _ITEM_NORM.items() if k.startswith(n) and len(n) >= 10]
