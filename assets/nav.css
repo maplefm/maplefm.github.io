@@ -1,0 +1,21 @@
+/* One site navigation for every page: the same five places, in the same spot, with the current one lit. */
+.sitenav{display:flex;align-items:center;justify-content:flex-start;width:100%;box-sizing:border-box;gap:10px 14px;flex-wrap:wrap;margin:0 0 14px;padding:10px 0 0;font-family:Inter,Nunito,system-ui,sans-serif}
+.sitenav .sn-brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink,#22183d);font:800 1.15rem/1 Outfit,"Fredoka",system-ui,sans-serif;white-space:nowrap}
+.sitenav .sn-brand img{height:28px;image-rendering:pixelated}
+.sitenav .sn-brand b{color:var(--accent,#6d3fd1)}
+.sitenav .sn-links{display:flex;gap:4px;align-items:center;flex:0 1 auto;min-width:0;padding:4px;border-radius:999px;background:var(--card,var(--panel,#fff));border:1px solid var(--line,var(--line2,#e6ddf6));box-shadow:0 2px 10px rgba(60,30,120,.06)}
+.sitenav .sn-links a{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.9rem;line-height:1.1;color:var(--ink,#22183d);white-space:nowrap}
+.sitenav .sn-links a:hover{background:var(--soft,var(--panel2,rgba(109,63,209,.08)))}
+.sitenav .sn-links a[aria-current="page"]{background:var(--accent,#6d3fd1);color:#fff}
+.sitenav .sn-links .sn-earn{margin-left:auto;color:var(--accent,#6d3fd1);border:1.5px solid currentColor}
+.sitenav .sn-links .sn-earn[aria-current="page"]{color:#fff;border-color:transparent}
+.sitenav .sn-s{display:none}
+.sitenav.sn-home .sn-brand{display:none}
+@media (max-width:700px){
+  .sitenav{gap:8px;margin-bottom:10px}
+  .sitenav .sn-links{flex:1 1 100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .sitenav .sn-links::-webkit-scrollbar{display:none}
+  .sitenav .sn-links a{padding:7px 11px;font-size:.86rem}
+  .sitenav .sn-l{display:none}.sitenav .sn-s{display:inline}
+  .sitenav .sn-links .sn-earn{margin-left:0}
+}

@@ -8,6 +8,8 @@ Writes OUT_DIR/map/<slug>/, monster/<slug>/, quest/<slug>/, training/<slug>/ and
 training/. Returns (from build()) the list of page paths for the sitemap. Plain HTML: the facts are in the page, no script needed.
 """
 import html, json, math, os, re, sys, datetime, shutil, urllib.parse
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from nav import nav_html as NAV
 
 SITE = "https://maplefm.gg"
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/"
@@ -74,9 +76,9 @@ def page(title, desc, path, crumbs, body, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/item/world.css?v=2">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/item/world.css?v=2"><link rel="stylesheet" href="/assets/nav.css?v=1">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
-<div class="top"><a class="brand" href="/"><img src="/assets/superstar@4x.png" alt="" style="height:1.15em;vertical-align:-0.2em;image-rendering:pixelated"> Club FM</a><span class="nav"><a class="sm" href="/training/">Training</a><a class="sm" href="/maps/">Maps</a><a class="sm" href="/quests/">Quests</a><a class="go" href="/">Price board</a></span></div>
+{NAV("quests" if path.startswith(("/quest", "/quests")) else "maps")}
 {f'<p class="note" style="margin:0 0 8px">{nav}</p>' if nav else ''}<div class="card">{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily. Prices from Free Market sales players watched. Club FM is a fan site and not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
 </main><script src="/assets/hit.js" defer></script></body></html>"""

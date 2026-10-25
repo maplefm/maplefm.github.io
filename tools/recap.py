@@ -40,7 +40,7 @@ def main():
     b += '<p style="margin-top:16px">Prices change all day. <a href="/">See them live on the price board</a>, or <a href="/items/">browse every item</a>.</p>'
     b += f'<p class="note">Compares each item\'s typical sale price now with the same figure about a week ago. Only items with at least 8 sales seen are counted. Updated {end.strftime("%B %-d, %Y")}.</p></div>'
     desc = f"MapleStory Classic Free Market, {rng}: " + (", ".join(f"{itempages.shown(x['item'])} {'up' if x['chg'] > 0 else 'down'} {abs(round(x['chg'] * 100))}%" for x in (up[:2] + down[:2])) or "the week's prices") + "."
-    pg = itempages.page("This week on the MapleStory Classic Free Market · Club FM", desc, itempages.SITE + "/recap/", b, None, itempages.OG + "recap.png")
+    pg = itempages.page("This week on the MapleStory Classic Free Market · Club FM", desc, itempages.SITE + "/recap/", b, None, itempages.OG + "recap.png", active="prices")
     os.makedirs(os.path.join(out, "recap"), exist_ok=True)
     open(os.path.join(out, "recap", "index.html"), "w", encoding="utf-8").write(pg)
     et = end - datetime.timedelta(hours=4)
