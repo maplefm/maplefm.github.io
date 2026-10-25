@@ -19,7 +19,7 @@ def nav_html(active="", home=False):
 
 
 NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=1">'
-PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "map.html": ("maps", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
+PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "shop.html": ("market", False), "map.html": ("maps", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
          "report.html": ("", False), "streamers.html": ("", False), "how-it-works.html": ("", False), "shortcuts.html": ("", False),
          "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("", False)}
 

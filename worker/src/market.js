@@ -48,17 +48,33 @@ async function ensure(env) {
       price INTEGER, qty INTEGER, created INTEGER, status TEXT)`),
     env.INBOX_DB.prepare(`CREATE INDEX IF NOT EXISTS market_offer_l ON market_offers (listing_id, status)`),
     env.INBOX_DB.prepare(`CREATE TABLE IF NOT EXISTS market_seen (thread_id TEXT PRIMARY KEY, at INTEGER, why TEXT)`),
+    env.INBOX_DB.prepare(`CREATE TABLE IF NOT EXISTS market_reports (id TEXT PRIMARY KEY, listing_id TEXT, reporter_id TEXT, why TEXT, created INTEGER)`),
   ]);
+  // columns added after launch; adding one that's already there just fails quietly
+  for (const c of ["confirmed INTEGER", "seen_at INTEGER", "seen_price INTEGER", "deal_sent INTEGER", "sold_at INTEGER"])
+    await env.INBOX_DB.prepare("ALTER TABLE market_listings ADD COLUMN " + c).run().catch(() => {});
   READY = true;
 }
 const one = async (env, sql, ...b) => env.INBOX_DB.prepare(sql).bind(...b).first();
 const all = async (env, sql, ...b) => ((await env.INBOX_DB.prepare(sql).bind(...b).all()).results || []);
 const run = async (env, sql, ...b) => env.INBOX_DB.prepare(sql).bind(...b).run();
 
+// trades both sides confirmed, by Discord id: a seller's track record
+let TRADES = null;
+async function trades(env) {
+  if (TRADES && Date.now() - TRADES.at < 60e3) return TRADES.m;
+  const m = {};
+  (await all(env, "SELECT seller_id AS u, COUNT(*) AS n FROM market_listings WHERE confirmed = 1 GROUP BY seller_id")).forEach((r) => { m[r.u] = (m[r.u] || 0) + r.n; });
+  (await all(env, "SELECT buyer_id AS u, COUNT(*) AS n FROM market_listings WHERE confirmed = 1 AND buyer_id IS NOT NULL GROUP BY buyer_id")).forEach((r) => { m[r.u] = (m[r.u] || 0) + r.n; });
+  TRADES = { at: Date.now(), m };
+  return m;
+}
+const SEEN_FOR = 3 * DAY;
 // what anyone may see of a listing
-function pub(l) {
+function pub(l, T) {
   return { id: l.id, item: l.item, qty: l.qty, price: l.price, stats: l.stats || "", note: l.note || "", ign: l.ign || "",
-    seller: { id: l.seller_id, name: l.seller_name || "", avatar: l.seller_avatar || "" }, created: l.created, updated: l.updated, expires: l.expires,
+    seller: { id: l.seller_id, name: l.seller_name || "", avatar: l.seller_avatar || "", trades: (T && T[l.seller_id]) || 0 },
+    seen: l.seen_at && now() - l.seen_at < SEEN_FOR ? { at: l.seen_at, price: l.seen_price || 0 } : null, created: l.created, updated: l.updated, expires: l.expires,
     status: l.status, source: l.source, thread: l.thread_id ? "https://discord.com/channels/" + GUILD + "/" + l.thread_id : "", url: listingUrl(l.id) };
 }
 
@@ -88,6 +104,8 @@ export async function marketRoute(req, env, url, p, ctx) {
       return owner || admin ? close(env, l, act, me, owner) : j({ error: "Only the seller can change this listing." }, 403);
     case "buy": return buy(env, me, l, b);
     case "offer": return offer(env, me, l, b);
+    case "confirm": return confirm(env, me, l, b, ctx);
+    case "report": return report(env, me, l, b, ctx);
   }
   return j({ error: "not found" }, 404);
 }
@@ -102,15 +120,18 @@ async function marketList(req, env, url, ctx) {
     const ids = ls.filter((l) => ST_OPEN.includes(l.status)).map((l) => l.id);
     const offs = ids.length ? await all(env, `SELECT * FROM market_offers WHERE status = 'open' AND listing_id IN (${ids.map(() => "?").join(",")})`, ...ids) : [];
     const made = await all(env, "SELECT o.*, l.item AS item FROM market_offers o JOIN market_listings l ON l.id = o.listing_id WHERE o.buyer_id = ? ORDER BY o.created DESC LIMIT 100", me.id);
+    const T = await trades(env);
     return j({ signedIn: true, me: { id: me.id, name: me.name || me.username || "", ign: me.ign || "", ok: acctOk(me) === "" , why: acctOk(me) },
-      listings: ls.map((l) => Object.assign(pub(l), { buyer: l.buyer_id ? { id: l.buyer_id, name: l.buyer_name, ign: l.buyer_ign } : null, dealPrice: l.deal_price || 0, closed: l.closed_reason || "", offers: offs.filter((o) => o.listing_id === l.id).map(offPub) })),
+      trades: T[me.id] || 0,
+      listings: ls.map((l) => Object.assign(pub(l, T), { buyer: l.buyer_id ? { id: l.buyer_id, name: l.buyer_name, ign: l.buyer_ign } : null, dealPrice: l.deal_price || 0, closed: l.closed_reason || "", offers: offs.filter((o) => o.listing_id === l.id).map(offPub) })),
       offers: made.map((o) => Object.assign(offPub(o), { item: o.item })) });
   }
   const item = url.searchParams.get("item");
   const ls = item
     ? await all(env, "SELECT * FROM market_listings WHERE status IN ('active','pending') AND item = ? ORDER BY price ASC LIMIT 200", item)
     : await all(env, "SELECT * FROM market_listings WHERE status IN ('active','pending') ORDER BY created DESC LIMIT 2000");
-  return new Response(JSON.stringify({ at: now(), listings: ls.map(pub) }), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=15" } });
+  const T = await trades(env);
+  return new Response(JSON.stringify({ at: now(), listings: ls.map((l) => pub(l, T)) }), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=15" } });
 }
 const offPub = (o) => ({ id: o.id, listing: o.listing_id, price: o.price, qty: o.qty, created: o.created, status: o.status, buyer: { id: o.buyer_id, name: o.buyer_name, ign: o.buyer_ign } });
 
@@ -119,7 +140,8 @@ async function marketOne(req, env, id, ctx) {
   const l = await one(env, "SELECT * FROM market_listings WHERE id = ?", id);
   if (!l || l.status === "deleted") return j({ error: "That listing doesn't exist anymore." }, 404);
   const me = await ctx.whoami(req, env);
-  const out = pub(l);
+  const out = pub(l, await trades(env));
+  if (me && ctx.isAdmin(me, env)) { out.admin = true; out.reports = (await all(env, "SELECT why, created FROM market_reports WHERE listing_id = ? ORDER BY created DESC LIMIT 20", id)); }
   if (me && String(me.id) === String(l.seller_id)) {
     out.mine = true;
     out.offers = (await all(env, "SELECT * FROM market_offers WHERE listing_id = ? AND status = 'open' ORDER BY price DESC", id)).map(offPub);
@@ -128,7 +150,10 @@ async function marketOne(req, env, id, ctx) {
   } else if (me) {
     out.myOffers = (await all(env, "SELECT * FROM market_offers WHERE listing_id = ? AND buyer_id = ? ORDER BY created DESC", id, me.id)).map(offPub);
     out.iAmBuyer = l.buyer_id === me.id;
+    out.reported = !!(await one(env, "SELECT id FROM market_reports WHERE listing_id = ? AND reporter_id = ?", id, String(me.id)));
   }
+  // a sale waits on the buyer saying they got it: 0 waiting, 1 confirmed, -1 the buyer says no
+  if (l.status === "sold" && l.buyer_id && me && (out.mine || out.iAmBuyer || out.admin)) { out.confirmed = l.confirmed == null ? null : l.confirmed; out.dealPrice = l.deal_price || l.price; }
   out.closed = l.closed_reason || "";
   return j(out);
 }
@@ -205,6 +230,8 @@ async function edit(env, l, b, ctx) {
   keys.forEach((k) => { l[k] = f[k]; });
   l.updated = now();
   await run(env, `UPDATE market_listings SET ${keys.map((k) => k + " = ?").join(", ")}, updated = ? WHERE id = ?`, ...keys.map((k) => l[k]), l.updated, l.id);
+  // a price cut can make it a deal now: check it again on the next sync
+  if (keys.includes("price") && l.price < old.price && !l.deal_sent) await run(env, "UPDATE market_listings SET deal_sent = NULL WHERE id = ?", l.id);
   const what = keys.includes("price") ? "Price changed from " + meso(old.price) + " to " + meso(l.price) + " each." : "Listing details updated.";
   await safe(threadEdit(env, l, what));
   return j({ ok: true, listing: pub(l) });
@@ -241,7 +268,9 @@ async function close(env, l, act, me, owner) {
   }
   if (!ST_OPEN.includes(was)) return j({ error: "This listing is already " + was + "." }, 409);
   const st = act === "sold" ? "sold" : "cancelled";
-  await run(env, "UPDATE market_listings SET status = ?, updated = ?, closed_reason = ? WHERE id = ?", st, t, (st === "sold" ? "sold" : "cancelled by " + who), l.id);
+  await run(env, "UPDATE market_listings SET status = ?, updated = ?, closed_reason = ?, sold_at = ?, confirmed = ? WHERE id = ?", st, t, (st === "sold" ? "sold" : "cancelled by " + who), st === "sold" ? t : null, st === "sold" && l.buyer_id ? 0 : null, l.id);
+  if (st === "sold" && l.buyer_id) await safe(dm(env, l.buyer_id, (l.seller_name || "The seller") + " marked " + label(l) + " as sold to you for " + meso(l.deal_price || l.price) +
+    ". Did you get it? Confirm here so it counts on their record: " + listingUrl(l.id)));
   await run(env, "UPDATE market_offers SET status = 'closed' WHERE listing_id = ? AND status = 'open'", l.id);
   await safe(threadClose(env, l, st === "sold" ? "Sold. Thanks for trading through Club FM." : "The seller took this listing down."));
   return j({ ok: true, listing: pub(Object.assign(l, { status: st, updated: t })) });
@@ -316,6 +345,32 @@ async function offerAct(env, me, l, oid, act, owner) {
     return j({ ok: true, buyer: { id: o.buyer_id, name: o.buyer_name, ign: o.buyer_ign } });
   }
   return j({ error: "not found" }, 404);
+}
+
+// the buyer says whether the trade really happened; only confirmed trades count on anyone's record
+async function confirm(env, me, l, b, ctx) {
+  if (l.buyer_id !== String(me.id)) return j({ error: "Only the buyer can confirm this trade." }, 403);
+  if (l.status !== "sold") return j({ error: "The seller hasn't marked this sold yet." }, 409);
+  if (l.confirmed === 1 || l.confirmed === -1) return j({ error: "You already answered for this trade." }, 409);
+  const yes = b.ok === true;
+  await run(env, "UPDATE market_listings SET confirmed = ? WHERE id = ?", yes ? 1 : -1, l.id);
+  TRADES = null;
+  if (yes) await safe(dm(env, l.seller_id, "Your buyer confirmed the trade for " + label(l) + ". It's on your Club FM record now."));
+  else await safe(ctx.dmAdmins("A buyer says a market trade didn't happen: " + label(l) + " from <@" + l.seller_id + "> (" + (l.ign || "?") + ") to <@" + me.id + ">. " + listingUrl(l.id)));
+  return j({ ok: true, confirmed: yes ? 1 : -1 });
+}
+
+async function report(env, me, l, b, ctx) {
+  if (String(l.seller_id) === String(me.id)) return j({ error: "That's your own listing." }, 400);
+  const why = clean(b.why, 300);
+  if (why.length < 3) return j({ error: "Say what's wrong with it, in a few words." }, 400);
+  if (await one(env, "SELECT id FROM market_reports WHERE listing_id = ? AND reporter_id = ?", l.id, String(me.id))) return j({ error: "You already reported this one. Thanks, we're on it." }, 409);
+  const n = await one(env, "SELECT COUNT(*) AS n FROM market_reports WHERE reporter_id = ? AND created > ?", String(me.id), now() - DAY);
+  if (n && n.n >= 10) return j({ error: "That's a lot of reports today. Try again tomorrow." }, 429);
+  await run(env, "INSERT INTO market_reports (id, listing_id, reporter_id, why, created) VALUES (?,?,?,?,?)", rid(), l.id, String(me.id), why, now());
+  await safe(ctx.dmAdmins("Market report from <@" + me.id + "> on " + label(l) + " at " + meso(l.price) + " by <@" + l.seller_id + "> (" + (l.ign || "?") + "):\n> " + why +
+    "\nOpen it and tap Take it down if it's bad: " + listingUrl(l.id)));
+  return j({ ok: true });
 }
 
 // listings that ran their week
@@ -490,8 +545,192 @@ export async function marketSync(env, ctx) {
     await run(env, "UPDATE market_offers SET status = 'closed' WHERE listing_id = ? AND status = 'open'", k.id);
     out.closed++;
   }
+  out.deals = await dealAlerts(env, ctx).catch((e) => "error " + (e && e.message || e));
+  await env.ACCOUNTS.put("mk:sync", JSON.stringify({ at: now(), out })).catch(() => {});
   return out;
 }
+
+// ---------------------------------------------------------------- deal alerts
+// A member listing 20% or more under the board's typical goes to #mega-deals right away, and to everyone who stars
+// that item on the board. Equips listed with stats aren't compared: their typical is for a clean one.
+const DEAL_CUT = 0.8;
+async function channelByName(env, name) {
+  const k = "ch:" + name; let id = await env.ACCOUNTS.get(k);
+  if (id) return id === "-" ? "" : id;
+  const cs = await (await fetch(api(env) + "/guilds/" + GUILD + "/channels", { headers: H(env) })).json().catch(() => null);
+  const c = Array.isArray(cs) ? cs.find((x) => x.name === name) : null;
+  id = c ? c.id : "";
+  await env.ACCOUNTS.put(k, id || "-", { expirationTtl: id ? 7 * DAY : 3600 });
+  return id;
+}
+export async function dealAlerts(env, ctx) {
+  const cand = await all(env, "SELECT * FROM market_listings WHERE status = 'active' AND deal_sent IS NULL AND updated > ? LIMIT 30", now() - DAY);
+  if (!cand.length) return 0;
+  const rows = await ctx.rows(), by = {}; rows.forEach((r) => { by[r.item] = r; });
+  const deals = [];
+  for (const l of cand) {
+    const r = by[l.item];
+    const isDeal = r && r.typ && !l.stats && l.price <= r.typ * DEAL_CUT;
+    await run(env, "UPDATE market_listings SET deal_sent = ? WHERE id = ?", isDeal ? 1 : 0, l.id);
+    if (isDeal) deals.push(Object.assign({}, l, { typ: r.typ, off: 1 - l.price / r.typ }));
+  }
+  if (!deals.length) return 0;
+  const ch = await channelByName(env, env.MEGA_CHANNEL || "mega-deals");
+  for (const d of deals) {
+    const emb = { title: "Member listing: " + shown(d.item) + (d.qty > 1 ? " x" + d.qty : ""), url: listingUrl(d.id), color: 0x2ecc71,
+      description: "**" + meso(d.price) + "**" + (d.qty > 1 ? " each" : "") + " · " + Math.round(d.off * 100) + "% under typical " + meso(d.typ) +
+        "\nListed on maplefm.gg by " + (d.ign || d.seller_name || "a member") + ". Buy it now or make an offer there; the seller gets a DM.",
+      footer: { text: "Member listings never change the board's prices" } };
+    if (ch) await safe(fetch(api(env) + "/channels/" + ch + "/messages", { method: "POST", headers: H(env), body: JSON.stringify({ embeds: [emb] }) }));
+  }
+  // everyone who stars one of these items on the board, except the seller
+  const names = new Set(deals.map((d) => d.item.toLowerCase()));
+  let cursor, dms = 0;
+  do {
+    const page = await env.ACCOUNTS.list({ prefix: "settings:", cursor });
+    for (const k of page.keys) {
+      const id = k.name.slice(9);
+      const st = await env.ACCOUNTS.get(k.name, "json");
+      let watch = {}; try { watch = JSON.parse((st && st.settings && st.settings["fm-watch"]) || "{}"); } catch (e) {}
+      const mine = Object.keys(watch || {}).map((n) => n.toLowerCase()).filter((n) => names.has(n));
+      if (!mine.length) continue;
+      for (const d of deals) {
+        if (d.seller_id === id || !mine.includes(d.item.toLowerCase())) continue;
+        const key = "mkdm:" + id + ":" + d.id;
+        if (await env.ACCOUNTS.get(key)) continue;
+        await env.ACCOUNTS.put(key, "1", { expirationTtl: 7 * DAY });
+        if (await dm(env, id, "Watchlist deal from a member: **" + shown(d.item) + "** for **" + meso(d.price) + "**" + (d.qty > 1 ? " each" : "") + ", " + Math.round(d.off * 100) + "% under typical. " + listingUrl(d.id))) dms++;
+      }
+    }
+    cursor = page.list_complete ? null : page.cursor;
+  } while (cursor);
+  return { posted: deals.length, dms, channel: ch ? "ok" : "not found" };
+}
+
+// ---------------------------------------------------------------- shops, as the scanners saw them
+// Every shop the FM Watchers walked past, by owner: what it held on the last visit, for how much, in which FM room and
+// channel. Built when the pump uploads the board, kept in KV, read by the shop page and by "Seen in game".
+const STATN = { WDEF: "W.DEF", MDEF: "M.DEF", MATT: "MATT", ATT: "ATT", ACC: "ACC", AVOID: "AVOID", SPEED: "SPEED", JUMP: "JUMP", HP: "HP", MP: "MP", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK" };
+export function statText(x) {
+  if (!x || typeof x !== "object") return "";
+  const out = [];
+  Object.keys(STATN).forEach((k) => { if (typeof x[k] === "number" && typeof x[k + "_b"] === "number" && x[k] !== x[k + "_b"]) { const d = x[k] - x[k + "_b"]; out.push((d > 0 ? "+" : "") + d + " " + STATN[k]); } });
+  if (typeof x.SLOTS === "number" && typeof x.SLOTS_b === "number" && x.SLOTS !== x.SLOTS_b) out.push(x.SLOTS + " slots");
+  return out.join(", ");
+}
+export function shopIndex(snap) {
+  const c = snap.cols, w = snap.words, T = snap.T || snap.at, by = {};
+  if (!c || !c.i || !c.s) return by;
+  const word = (k, i) => (c[k] && c[k][i] && w[k] ? w[k][c[k][i] - 1] : "");
+  const cut = Date.now() / 1000 - SEEN_FOR;
+  for (let i = 0; i < snap.n; i++) {
+    const item = word("i", i), sel = word("s", i), st = word("st", i);
+    if (!item || !sel || st === "gone" || /\u2026$/.test(item)) continue;
+    const t = Math.floor((T - (c.t ? c.t[i] || 0 : 0) * 1000) / 1000);
+    if (t < cut) continue;
+    const k = sel.toLowerCase(), s0 = by[k] || (by[k] = { name: sel, t: 0, room: "", ch: 0, rows: [] });
+    const x = c.x ? c.x[i] : 0;
+    s0.rows.push([item, (c.u && c.u[i]) || (c.p && c.p[i]) || 0, (c.q && c.q[i]) || 1, statText(x), t]);
+    if (t > s0.t) { s0.t = t; s0.room = word("r", i) || s0.room; s0.ch = (c.c && c.c[i]) || s0.ch; }
+  }
+  // what the shop held on its latest visit: rows within two hours of the newest, one per item, stats and price
+  Object.keys(by).forEach((k) => {
+    const s0 = by[k], seen = new Set();
+    s0.rows = s0.rows.filter((r) => s0.t - r[4] <= 7200).sort((a, b) => b[4] - a[4]).filter((r) => { const key = r[0] + "|" + r[1] + "|" + r[3]; if (seen.has(key)) return false; seen.add(key); return true; }).slice(0, 40);
+  });
+  return by;
+}
+let SHOPS = null;
+async function shops(env) {
+  if (SHOPS && Date.now() - SHOPS.at < 60e3) return SHOPS.by;
+  const by = (await env.ACCOUNTS.get("snap:shops", "json")) || {};
+  SHOPS = { at: Date.now(), by };
+  return by;
+}
+export async function shopGet(env, url) {
+  const ign = String(url.searchParams.get("ign") || "").trim().toLowerCase();
+  const by = await shops(env);
+  const hdr = { "Content-Type": "application/json", "Cache-Control": "public, max-age=30" };
+  if (url.searchParams.get("q") != null) {
+    const q = String(url.searchParams.get("q")).trim().toLowerCase();
+    const names = q.length < 2 ? [] : Object.keys(by).filter((k) => k.startsWith(q)).sort((a, b) => by[b].t - by[a].t).slice(0, 12).map((k) => ({ name: by[k].name, t: by[k].t, n: by[k].rows.length }));
+    return new Response(JSON.stringify({ shops: names, total: Object.keys(by).length }), { headers: hdr });
+  }
+  if (!/^[a-z0-9]{2,12}$/.test(ign)) return new Response(JSON.stringify({ error: "Enter an in-game name." }), { status: 400, headers: hdr });
+  const s0 = by[ign];
+  if (!s0) return new Response(JSON.stringify({ found: false, ign }), { headers: hdr });
+  return new Response(JSON.stringify({ found: true, name: s0.name, t: s0.t, room: s0.room, ch: s0.ch, rows: s0.rows.map((r) => ({ item: r[0], price: r[1], qty: r[2], stats: r[3], t: r[4] })) }), { headers: hdr });
+}
+
+// ---------------------------------------------------------------- seen in game
+// An open listing whose seller's shop (by in-game name) showed the same item in the last 3 days is marked
+// "Seen in game": a scanner saw that shop really holding it.
+export async function snapShops(env, snap) {
+  const by = shopIndex(snap);
+  await env.ACCOUNTS.put("snap:shops", JSON.stringify(by));
+  SHOPS = { at: Date.now(), by };
+  return marketSeen(env, by);
+}
+export async function marketSeen(env, by) {
+  await ensure(env);
+  const open = await all(env, "SELECT id, item, ign FROM market_listings WHERE status IN ('active','pending') AND ign != ''");
+  let n = 0;
+  for (const l of open) {
+    const s0 = by[String(l.ign).toLowerCase()]; if (!s0) continue;
+    const r = s0.rows.filter((x) => x[0].toLowerCase() === l.item.toLowerCase()).sort((a, b) => b[4] - a[4])[0];
+    if (!r) continue;
+    await run(env, "UPDATE market_listings SET seen_at = ?, seen_price = ? WHERE id = ?", r[4], r[1], l.id); n++;
+  }
+  return n;
+}
+
+// ---------------------------------------------------------------- share links
+// api.maplefm.gg/l/<id>: a page with the listing's own preview for Discord, Reddit and texts, then on to the listing
+export async function marketShare(env, id) {
+  await ensure(env);
+  const l = /^[0-9a-f]{10}$/.test(id) ? await one(env, "SELECT * FROM market_listings WHERE id = ?", id) : null;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const to = l && l.status !== "deleted" ? listingUrl(l.id) : SITE_URL + "/market.html";
+  let title = "Player market · Club FM", desc = "Items Club FM members are selling for mesos.", img = SITE_URL + "/og.png", card = "summary_large_image";
+  if (l && l.status !== "deleted") {
+    title = shown(l.item) + (l.stats ? " (" + l.stats + ")" : "") + " · " + meso(l.price) + (l.qty > 1 ? " each" : "") + " on Club FM";
+    desc = (l.status === "active" ? "For sale" : l.status === "pending" ? "On hold for a buyer" : l.status === "sold" ? "Sold" : "No longer listed") + " by " + (l.ign || l.seller_name || "a member") +
+      (l.qty > 1 ? " · " + l.qty + " available" : "") + ". Buy it now or make an offer; the seller gets a Discord DM." + (l.note ? " " + l.note : "");
+    const k = await kindId(env, l.item);
+    if (k) { img = "https://maplestory.io/api/MCW/1/item/" + k + "/icon"; card = "summary"; }
+  }
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
+<meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:image" content="${esc(img)}">
+<meta property="og:url" content="${esc(to)}"><meta property="og:site_name" content="Club FM"><meta name="twitter:card" content="${card}"><meta name="theme-color" content="#6d3fd1">
+<meta http-equiv="refresh" content="0;url=${esc(to)}"><link rel="canonical" href="${esc(to)}"></head><body><a href="${esc(to)}">Open the listing on maplefm.gg</a></body></html>`;
+  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=120" } });
+}
+let IDS = null;
+async function kindId(env, item) {
+  if (!IDS) {
+    const r = await fetch(env.ITEMDB_URL || SITE_URL + "/data/itemdb.json", { cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
+    const d = r && r.ok ? await r.json().catch(() => null) : null;
+    IDS = {}; if (d && d.items) d.items.forEach((x) => { IDS[String(x[0]).toLowerCase()] = x[1]; });
+  }
+  return IDS[String(item).toLowerCase()] || 0;
+}
+
+// ---------------------------------------------------------------- weekly numbers, for the recap and the watchdog
+export async function marketStats(env, days) {
+  await ensure(env);
+  const since = now() - Math.max(1, Math.min(31, days || 7)) * DAY;
+  const n = await one(env, "SELECT SUM(created > ?) AS listed, SUM(status = 'sold' AND sold_at > ?) AS sold, SUM(confirmed = 1 AND sold_at > ?) AS confirmed, SUM(status IN ('active','pending')) AS open, SUM(source = 'discord' AND created > ?) AS fromDiscord, COUNT(DISTINCT CASE WHEN created > ? THEN seller_id END) AS sellers FROM market_listings", since, since, since, since, since);
+  const rows = await mkRowsFrom(env);
+  const by = {}; rows.forEach((r) => { by[r.item] = r; });
+  const open = await all(env, "SELECT id, item, price, qty, stats, ign FROM market_listings WHERE status = 'active' AND created > ?", since);
+  const best = open.map((l) => { const r = by[l.item]; return r && r.typ && !l.stats ? { item: shown(l.item), price: l.price, typ: r.typ, off: 1 - l.price / r.typ, url: listingUrl(l.id) } : null; })
+    .filter((x) => x && x.off >= 0.1).sort((a, b) => b.off - a.off).slice(0, 5);
+  const sync = (await env.ACCOUNTS.get("mk:sync", "json")) || null;
+  return { days: days || 7, listed: n.listed || 0, sold: n.sold || 0, confirmed: n.confirmed || 0, open: n.open || 0, fromDiscord: n.fromDiscord || 0, sellers: n.sellers || 0, best, sync };
+}
+let ROWS_FN = null;
+export function setRows(fn) { ROWS_FN = fn; }
+const mkRowsFrom = async (env) => (ROWS_FN ? await ROWS_FN(env) : []);
 
 async function importOne(env, th, ps, body) {
   const uid = th.owner_id;
@@ -523,4 +762,42 @@ export async function marketCheck(env) {
   const n = await one(env, "SELECT COUNT(*) AS n, SUM(status IN ('active','pending')) AS open, SUM(source = 'discord') AS fromDiscord, SUM(dsc_err IS NOT NULL) AS errs FROM market_listings");
   const errs = await all(env, "SELECT id, dsc_err FROM market_listings WHERE dsc_err IS NOT NULL ORDER BY created DESC LIMIT 5");
   return { forum: { name: c.name, type: c.type, flags: c.flags, tags: (c.available_tags || []).map((t) => t.name), error: c.message || c.error || "" }, bot: await botId(env), listings: n, errs };
+}
+
+// ---------------------------------------------------------------- /sell and /market in Discord
+// ctx here: { rows: [item rows], findRows, abbr, overLimit, isAdmin }
+export async function marketCommand(env, it, ctx) {
+  await ensure(env);
+  const u = (it.member && it.member.user) || it.user || {};
+  const opts = {}; ((it.data && it.data.options) || []).forEach((o) => { opts[o.name] = o.value; });
+  const say = (content, pub) => ({ type: 4, data: Object.assign({ content: String(content).slice(0, 1900), allowed_mentions: { parse: [] } }, pub ? {} : { flags: 64 }) });
+  if (it.data.name === "market") {
+    let item = "";
+    if (opts.item) { const ex = ctx.rows.find((r) => r.item === opts.item); item = ex ? ex.item : ((ctx.findRows(ctx.rows, String(opts.item), ctx.abbr)[0] || {}).item || ""); }
+    const ls = item
+      ? await all(env, "SELECT * FROM market_listings WHERE status = 'active' AND item = ? ORDER BY price ASC LIMIT 8", item)
+      : await all(env, "SELECT * FROM market_listings WHERE status = 'active' ORDER BY created DESC LIMIT 8");
+    if (!ls.length) return say(item ? "Nobody has **" + shown(item) + "** listed right now. Have one? `/sell` it, or list it at " + SITE_URL + "/market.html#new=" + encodeURIComponent(item) : "Nothing listed right now. Be the first: `/sell`", true);
+    const T = await trades(env), by = {}; ctx.rows.forEach((r) => { by[r.item] = r; });
+    const lines = ls.map((l) => { const r = by[l.item], off = r && r.typ && !l.stats ? Math.round((1 - l.price / r.typ) * 100) : null;
+      return "**" + meso(l.price) + "**" + (l.qty > 1 ? " ea x" + l.qty : "") + " · " + (item ? "" : shown(l.item) + " · ") + (l.stats ? l.stats + " · " : "") + (l.ign || l.seller_name) +
+        (T[l.seller_id] ? " (" + T[l.seller_id] + " trades)" : "") + (off != null && off >= 5 ? " · " + off + "% under typical" : "") + " · [view](" + listingUrl(l.id) + ")"; });
+    return { type: 4, data: { embeds: [{ title: item ? shown(item) + " for sale by members" : "Newest member listings", url: SITE_URL + "/market.html" + (item ? "#q=" + encodeURIComponent(shown(item)) : ""), color: 0xffb020,
+      description: lines.join("\n"), footer: { text: "Buy it now or offer on maplefm.gg · the seller gets a DM" } }], allowed_mentions: { parse: [] } } };
+  }
+  if (it.data.name === "sell") {
+    if (!u.id) return say("Couldn't tell who you are. Try again.");
+    const acct = (await env.ACCOUNTS.get("acct:" + u.id, "json")) || {};
+    const me = Object.assign({ id: u.id, name: u.global_name || u.username || "", username: u.username || "", ign: "", discordCreated: Number((BigInt(u.id) >> 22n) + 1420070400000n) / 1000 | 0,
+      avatar: u.avatar ? "https://cdn.discordapp.com/avatars/" + u.id + "/" + u.avatar + ".png?size=64" : "" }, acct, { id: String(u.id) });
+    let item = String(opts.item || "");
+    const ex = ctx.rows.find((r) => r.item === item);
+    if (!ex) { const h = ctx.findRows(ctx.rows, item, ctx.abbr)[0]; if (h) item = h.item; }
+    const r = await create(env, me, { item, price: opts.price, qty: opts.qty, stats: opts.stats, note: opts.note, ign: opts.ign }, ctx);
+    const d = await r.json();
+    if (!d.ok) return say(d.error + (d.id ? " " + listingUrl(d.id) : ""));
+    return say("Listed **" + shown(d.listing.item) + "**" + (d.listing.stats ? " (" + d.listing.stats + ")" : "") + " at **" + meso(d.listing.price) + "**" + (d.listing.qty > 1 ? " each x" + d.listing.qty : "") +
+      ". It's up on maplefm.gg and in #selling, and you'll get a DM when someone buys or offers.\nChange the price or take it down here: " + d.listing.url);
+  }
+  return say("Unknown command");
 }

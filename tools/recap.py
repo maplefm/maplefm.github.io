@@ -37,6 +37,20 @@ def main():
     if up: b += f"<h2>Biggest risers</h2>{table(up)}"
     if down: b += f"<h2>Biggest drops</h2>{table(down)}"
     if hot: b += "<h2>Most traded</h2><table><tr><th>Item</th><th>Typical</th><th>Sales seen</th></tr>" + "".join(f'<tr><td>{link(r["item"])}</td><td><b>{itempages.meso(r["typ"])}</b></td><td>{r.get("salesN") or 0:,}</td></tr>' for r in hot) + "</table>"
+    # the player market's week: listings, trades, and the best member deals still up
+    mk = None
+    try:
+        import urllib.request
+        mk = json.load(urllib.request.urlopen(urllib.request.Request("https://api.maplefm.gg/market/stats?days=7", headers={"User-Agent": "clubfm-recap"}), timeout=20))
+    except Exception as e:
+        print("market stats unavailable:", e)
+    if mk and (mk.get("listed") or mk.get("open")):
+        b += (f'<h2>Player market</h2><p>{mk.get("listed", 0):,} items listed by {mk.get("sellers", 0):,} members this week, {mk.get("sold", 0):,} sold'
+              f'{" (" + format(mk.get("confirmed", 0), ",") + " confirmed by the buyer)" if mk.get("confirmed") else ""}, {mk.get("open", 0):,} up for sale now. '
+              '<a href="/market.html">See the player market</a>.</p>')
+        if mk.get("best"):
+            b += "<table><tr><th>Member deal</th><th>Price</th><th>Typical</th><th>Under</th></tr>" + "".join(
+                f'<tr><td><a href="{E(d["url"])}">{E(d["item"])}</a></td><td><b>{itempages.meso(d["price"])}</b></td><td>{itempages.meso(d["typ"])}</td><td>{round(d["off"] * 100)}%</td></tr>' for d in mk["best"]) + "</table>"
     b += '<p style="margin-top:16px">Prices change all day. <a href="/">See them live on the price board</a>, or <a href="/items/">browse every item</a>.</p>'
     b += f'<p class="note">Compares each item\'s typical sale price now with the same figure about a week ago. Only items with at least 8 sales seen are counted. Updated {end.strftime("%B %-d, %Y")}.</p></div>'
     desc = f"MapleStory Classic Free Market, {rng}: " + (", ".join(f"{itempages.shown(x['item'])} {'up' if x['chg'] > 0 else 'down'} {abs(round(x['chg'] * 100))}%" for x in (up[:2] + down[:2])) or "the week's prices") + "."
@@ -47,7 +61,7 @@ def main():
     if et.weekday() == 6:   # Sunday: keep a dated copy
         dd = os.path.join(out, "recap", et.strftime("%Y-%m-%d")); os.makedirs(dd, exist_ok=True)
         open(os.path.join(dd, "index.html"), "w", encoding="utf-8").write(pg.replace(itempages.SITE + "/recap/\"", itempages.SITE + "/recap/" + et.strftime("%Y-%m-%d") + "/\""))
-    json.dump({"range": rng, "up": up, "down": down}, open(sys.argv[3], "w"))
+    json.dump({"range": rng, "up": up, "down": down, "market": mk}, open(sys.argv[3], "w"))
     print("recap", len(up), "up", len(down), "down")
 
 
