@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.6"
+VERSION = "2026.10.24.7"
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -101,6 +101,31 @@ def chat_price(item, price):
         if st and 0.4 <= price / st <= 2.5:
             item = sc + ": Intermediate"
     return item, price
+CUTMARK = re.compile(r"\s*\((?:name|tier) cut off\)$")
+NEWSEEN = {}; NEWTRY = {}
+def relearn(item):
+    """A cut-off or misread name saved before its item was learned gets the full name when it goes out."""
+    if not CUTMARK.search(item) and fmparse.norm(item) in fmparse._ITEM_NORM: return item
+    return fmparse.learned_match(CUTMARK.sub("", item)) or item
+def learn_new(res, tip_img):
+    """A shop row we can't name (a brand-new item) plus its tooltip on screen: read the full name off the
+    tooltip, learn it, and from then on that item is read, priced and uploaded with its icon like any other."""
+    for row in res["rows"]:
+        if row.get("known"): continue
+        pre = CUTMARK.sub("", row["i"])
+        hit = fmparse.learned_match(pre)
+        if not hit and not CUTMARK.search(row["i"]): continue      # a full name we can read already goes up as is
+        if not hit:
+            if time.time() - NEWTRY.get(pre, 0) < 3: continue      # one tooltip read every few seconds per row
+            NEWTRY[pre] = time.time()
+            full = fmparse.tooltip_title(tip_img, pre)
+            if not full: continue
+            NEWSEEN[full] = NEWSEEN.get(full, 0) + 1
+            if NEWSEEN[full] < (1 if len(pre.split()) >= 3 else 2): continue
+            if fmparse.learn_item(full):
+                log(f"new item: learned {full} from its tooltip. It goes on the board with its icon from now on.")
+            hit = full
+        row["i"] = hit; row["known"] = True
 def digit_twins(a, b):
     """Two prices one misread digit apart: 30000 and 90000, 50000 and 60000."""
     a, b = str(a), str(b)
@@ -118,6 +143,9 @@ def hover_wanted():
             HW["items"] = {str(x.get("i")): int(x.get("typ") or 0) for x in (j.get("hw") or j.get("items") or []) if x.get("i")}
             BOARD_TYP.clear(); BOARD_TYP.update({str(x["item"]): int(x.get("typ") or 0) for x in (j.get("rows") or []) if x.get("item") and x.get("typ")})
             fmparse.extend_aliases(list(BOARD_TYP))
+            # names other scanners taught the board (new items included) help this watcher finish cut-off names too
+            for n in BOARD_TYP:
+                if " " in n and "cut off" not in n and "\u2026" not in n: fmparse._ITEM_NORM.setdefault(fmparse.norm(n), n)
         except Exception:
             pass
     return HW["items"]
@@ -547,8 +575,8 @@ class Store:
     def add_icons(self, img, res):
         """Keep one icon per known item, from a row that is not greyed out. A frame with a skipped row
         may have the item popup over it, so those frames are not used."""
-        if res["dropped"]:
-            return
+        if res["dropped"] and res.get("hovering"):
+            return                      # an item popup may be covering a row
         icons = self.d.setdefault("icons", {})
         for r in res["rows"]:
             clean = re.fullmatch(r"[A-Z][A-Za-z0-9' &:.-]{2,40}", r["i"]) and not re.search(r"[VY][VWY]|¥", r["i"])
@@ -626,7 +654,7 @@ class Store:
                     sold, opn = (o["n"], 0) if o["so"] else (0, o["n"])
                 doc = docs.setdefault((day, "shop"), {"last": 0, "rows": []})
                 doc["last"] = max(doc["last"], o["last"])
-                row = {"s": seller, "i": item, "p": price, "q": qty}
+                row = {"s": seller, "i": relearn(item), "p": price, "q": qty}
                 if o.get("r"): row["r"] = o["r"]
                 if o.get("c"): row["c"] = o["c"]
                 if o.get("v"): row["v"] = o["v"]; row["vt"] = o.get("vt", 0)
@@ -1082,7 +1110,7 @@ def worker(cfg, jobs, store):
                             if rh == worker.room_hash: res["room"] = worker.room_text
                             else: res["room"] = fmparse.read_room(extra["room"]); worker.room_hash, worker.room_text = rh, res["room"]
                     except Exception: res["room"] = ""
-                    res["tip"] = None
+                    res["tip"] = None; res["hovering"] = extra.get("tip") is not None
                     if extra.get("tip") is not None:
                         try:
                             tip = fmparse.read_tooltip(extra["tip"])
@@ -1099,6 +1127,9 @@ def worker(cfg, jobs, store):
                     review_save(cfg, kind, img, res)
                     if extra.get("room") is not None and res["room"] != getattr(worker, "last_room", None):
                         worker.last_room = res["room"]; review_save(cfg, "room", extra["room"], {"room": res["room"]})
+                    if res["rows"] and extra.get("tip") is not None:
+                        try: learn_new(res, extra["tip"])
+                        except Exception as e: log("new item error:", e)
                     if res["rows"]:
                         store.add_shop(res)
                         if res["tip"]:

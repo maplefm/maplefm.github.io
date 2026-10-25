@@ -1,10 +1,15 @@
 {
- "version": "2026.10.24.6",
- "date": "2026-10-25T02:31:51+00:00",
- "notes": "FM Entrance reading: dark chalkboards (black, brown, purple) are read now, rolls like +2 or 65 watk are kept, (2) is read as how many they have, prices without a k are fixed, and a post read with one digit wrong (90K vs 30K) keeps the right one. Close your watcher and open start.bat to update.",
- "sha256": "62c1754dce18b71a8c1c495e879a59fcf157dcac8c81958e74e522da78301f69",
- "size": 63952,
+ "version": "2026.10.24.7",
+ "date": "2026-10-25T02:41:24+00:00",
+ "notes": "New items: when a shop has an item the watcher has never seen, hovering it once reads its full name off the tooltip, and from then on that item is read, priced and uploaded with its icon. Cut-off names also finish themselves from items other scanners found. Close your watcher and open start.bat to update.",
+ "sha256": "e51d4c54277cb1774de8454b8a1160abef0637bcc5d3f190e8173db1d7010180",
+ "size": 65426,
  "history": [
+  {
+   "version": "2026.10.24.7",
+   "date": "2026-10-24",
+   "notes": "New items: when a shop has an item the watcher has never seen, hovering it once reads its full name off the tooltip, and from then on that item is read, priced and uploaded with its icon. Cut-off names also finish themselves from items other scanners found. Close your watcher and open start.bat to update."
+  },
   {
    "version": "2026.10.24.6",
    "date": "2026-10-24",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.5",
    "date": "2026-10-20",
    "notes": "Small fixes."
-  },
-  {
-   "version": "2026.10.20.4",
-   "date": "2026-10-20",
-   "notes": "Faster, lighter uploads and small fixes."
   }
  ],
  "pip": [],
- "sig": "c0db42e3450386228634de1718444407acf74a2c33db3a85e5699e7e113705430b50d62b4a0c52f48be13fc3c0dfd9a5241aa5e9eec458da4c8a29b843a278be3b74fe06ba2979c43d268670d2c9980f413163e302acb95d9b8a0058264176bd1b41a4964d912c95b611a5f1ecd60168aa2dc8b2928938ccb23a2b3ec0306bae3f33ae6986c8fb87aa906258b7de61e5ce9d735db357491ebaab2eb18a9a2b5121295cda3e04541cb21674cdb9f5bfaf764bd3b813dd142e6d89745650e4b690b754e04d17333f24790c1d25e83c7c9bfb52f33678e382ee42156b490cc1be5448062a1206dc22e7a13ac5e4897b01856c276fdfd80fa8c873161cd8d535b537"
+ "sig": "630be26b1c8f4aa0eb404075b6b108c207c5fcfd5c1900662340d1fc1b50ce738962d3674fb0ce66995e8a3b9581b221949b19b0d68c037da77fde1e2f7b1ef1200b97e940e6201658e58cbb08f0088ab172124403f0257bb6db778b9d416a4c24f5aa60bb93973310bfb936778040175da4850def40aaa33c14df7bb3ebd5b156f6fd63b4e57777bead633c4b27f99038b7f1da29415fe14a0b5a8a656f68f7a5e99943165385db742241b2c62fc840e62df7514d5c44e8d8d5b605e1d526cd8c43a1f0fd9b2a588370e4436a0cd30c6025dfeb4a9c8b2826df8d401eaf27caec5da26f213fe87fa35f70e65052cbc06222ba2151e1b606aa59d55796e6877e"
 }
