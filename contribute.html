@@ -185,7 +185,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
   <div class="hero">
     <h1>Earn by <b>scanning</b></h1>
     <p class="pitch"><b>Get paid for the shops you already browse.</b> Up to $50 a week, paid on PayPal.</p>
-    <p>Run Club FM Watcher while you play and every shop you open becomes a price on the site, for everyone. Climb the Scanner Ranks as you go, and once you've cleared the bar, every 100 verified sales you catch pays.</p>
+    <p>Run Club FM Watcher while you play and every shop you open becomes a price on the site, for everyone. Climb the Scanner Ranks as you go, and once you've cleared the bar, everything you've built up pays out.</p>
     <div class="trust"><span>Free</span><span>Windows</span><span>Never touches your game</span><span>Pay starts at 2,000 verified sales</span><span id="trial" hidden>Trial: the numbers are real, payouts start when it ends</span><span id="wk" hidden></span></div>
     <div class="jump"><a href="#download">Download</a><a href="#gatherer">Becoming an intel gatherer</a><a href="#earn">Earn</a><a href="#safety">Safe to run</a><a href="#setup">Setup</a></div>
   </div>
@@ -265,7 +265,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       <div><b>1. Scan</b><p>Run FM Watcher while you shop.</p></div>
       <div><b>2. Clear the bar</b><p><span id="barn">2,000</span> verified sales, all time.</p></div>
       <div><b>3. Link</b><p>Sign in with Discord, link your watcher, add PayPal.</p></div>
-      <div><b>4. Get paid</b><p>Every Monday, per 100 sales caught.</p></div>
+      <div><b>4. Get paid</b><p>Your whole balance, then it starts again from 0.</p></div>
     </div>
     <p style="margin:14px 0 0"><a class="btn small" id="signin" aria-disabled="true" href="#" onclick="return false">Sign in with Discord</a> <a class="btn small ghost" href="#download">Get FM Watcher</a></p>
 
@@ -290,7 +290,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     </div>
     <aside class="earnrank" aria-labelledby="er-t">
       <h3 id="er-t" style="margin:0 0 4px">Earnings ranking</h3>
-      <p class="note" style="margin:0 0 10px">What this week's scanning would pay at the posted rate, everyone who scanned, with their progress to the pay bar.</p>
+      <p class="note" style="margin:0 0 10px">What each scanner is owed: everything they've earned since their last payout, with their progress to the pay bar.</p>
       <div class="topl" id="top"></div>
       <p class="note" id="topnote"></p>
     </aside>
@@ -300,8 +300,8 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     <ul class="checks">
       <li><b>A bar of <span id="barn2">2,000</span></b>, built from verified sales (one each) and unverified sales (a quarter each), all time. Verified means another person's watcher or a stream saw it too.</li>
       <li><b>A linked account</b> with a PayPal email, 18 or older, linked at least 7 days.</li>
-      <li><b>At least $5 in the week.</b> Less rolls into next week.</li>
-      <li><b>Under the caps:</b> <span id="capd">$10</span> a day, <span id="capw">$50</span> a week per person. Past the weekly budget the rate scales down for everyone.</li>
+      <li><b>At least $5 owed.</b> Less stays in your balance until the next payout.</li>
+      <li><b>Under the weekly cap:</b> <span id="capw">$50</span> a week per person<span id="capnote"> until Ko-fi support reaches $250 a month</span>. Past the weekly budget the rate scales down for everyone.</li>
       <li><b>Your first two payouts</b> are checked by a person before they send.</li>
     </ul>
 
@@ -475,45 +475,49 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     $("logout").addEventListener("click", function () { api("/logout", { method: "POST" }).then(function () { location.reload(); }); });
   }
   function nameOf(r) { return LINKS[r.tag] || r.name; }
+  // balances: what each person is owed since their last payout, all time
+  function balOf(r) { var b = (C && C.balances) || []; for (var i = 0; i < b.length; i++) if (b[i].person === r.person || b[i].name === r.name) return b[i]; return null; }
   function status(r) {
-    if (r.owner) return usd(r.uncapped) + " not taken";
-    if (r.unlocked === false) return "locked · " + num(Math.floor(r.bar != null ? r.bar : r.lifetime_verified)) + " of " + num(UNLOCK) + " on the bar";
-    return usd(r.pays) + (r.capped ? " (capped)" : "");
+    var b = balOf(r), owed = b ? b.owed : (r.uncapped || 0);
+    if (r.owner) return usd(owed) + " not taken";
+    if (r.unlocked === false) return usd(owed) + " owed · locked";
+    return usd(owed) + " owed";
   }
   function topEarners(w) {
     var box = $("top"); box.textContent = "";
-    var rows = w.rows.slice().sort(function (a, b) { return (b.uncapped || 0) - (a.uncapped || 0) || b.credits - a.credits; });
+    var rows = (C.balances && C.balances.length ? C.balances.filter(function (b) { return b.owed > 0 || b.paid > 0; }) : w.rows).slice().sort(function (a, b) { return (b.owed != null ? b.owed : b.uncapped || 0) - (a.owed != null ? a.owed : a.uncapped || 0); });
     var me = (ME && ME.ign || "").toLowerCase();
     rows.slice(0, 25).forEach(function (r, i) {
       var d = el("div", "er" + (me && nameOf(r).toLowerCase() === me ? " me" : "")); d.appendChild(el("b", "pos", "#" + (i + 1)));
       var n = el("span", "nm"); n.appendChild(el("b", null, nameOf(r)));
       var lv = r.bar != null ? r.bar : r.lifetime_verified != null ? r.lifetime_verified : r.verified, pct = Math.min(100, Math.round(100 * lv / UNLOCK));
-      var sub = r.owner ? "site owner, not paid" : r.unlocked === false ? num(Math.floor(lv)) + " of " + num(UNLOCK) + " on the bar" : "pay unlocked · " + num(r.lifetime_verified || 0) + " verified";
+      var sub = r.owner ? "site owner, not paid" : r.unlocked === false ? num(Math.floor(lv)) + " of " + num(UNLOCK) + " on the bar" : "pay unlocked" + (r.paid ? " · " + usd(r.paid) + " paid out" : "");
       n.appendChild(el("small", null, sub));
       var bar = el("span", "bar"); var fill = el("i", r.unlocked === false ? "lock" : ""); fill.style.width = pct + "%"; bar.appendChild(fill); n.appendChild(bar);
       d.appendChild(n);
-      var a = el("span", "amt"); a.appendChild(el("b", null, usd(r.uncapped || 0))); a.appendChild(el("small", null, r.owner ? "would pay" : r.unlocked === false ? "would pay, locked" : (r.capped ? "pays " + usd(r.pays) + ", capped" : "pays"))); d.appendChild(a);
+      var owed = r.owed != null ? r.owed : r.uncapped || 0;
+      var a = el("span", "amt"); a.appendChild(el("b", null, usd(owed))); a.appendChild(el("small", null, r.owner ? "not taken" : r.unlocked === false ? "owed, locked" : r.payable ? "owed, ready" : "owed")); d.appendChild(a);
       box.appendChild(d);
     });
-    $("topnote").textContent = rows.length ? "Credits this week at " + usd(w.math.rate_per_100) + " per 100. The bar fills toward " + num(UNLOCK) + " verified sales; past it the amount pays out, up to the daily and weekly caps." : "No scans this week yet.";
+    $("topnote").textContent = rows.length ? usd(w.math.rate_per_100) + " per 100 credits, all time. Once the bar reaches " + num(UNLOCK) + ", the whole balance pays out and starts again from 0." : "No scans yet.";
   }
   function kpi(label, val, sub) { var k = el("div", "kpi"); k.appendChild(el("small", null, label)); k.appendChild(el("b", null, val)); if (sub) k.appendChild(el("span", null, sub)); return k; }
   function show() {
     var w = C.weeks[W], m = w.math, k = $("kpis"); k.textContent = "";
     if (m.unlock_verified) { UNLOCK = m.unlock_verified; ladder(null); }
     k.appendChild(kpi("Rate", usd(m.rate_per_100) + " per 100", m.scaled ? "scaled to " + usd(m.effective_rate) + " this week to hold the budget" : "verified sales, half for unverified"));
-    k.appendChild(kpi("The bar", num(UNLOCK) + " verified", "sales caught all time before pay starts"));
-    k.appendChild(kpi("Per person", usd(m.daily_cap) + " a day", "and " + usd(m.weekly_cap) + " a week, most anyone can earn"));
+    k.appendChild(kpi("The bar", num(UNLOCK) + " verified", "once, all time; after that every payout sends your whole balance"));
+    k.appendChild(kpi("Weekly cap", m.cap_on === false ? "None" : usd(m.weekly_cap), m.cap_on === false ? "lifted: Ko-fi support covers it" : "per person, until Ko-fi support reaches " + usd(m.uncap_kofi_month || 250) + " a month"));
     k.appendChild(kpi("Weekly budget", usd(m.weekly_budget), m.scaled ? "reached: rate scaled this week" : (m.kofi_28d > 250 ? "follows Ko-fi support, " : "") + usd(m.paying) + " used so far this week"));
     k.appendChild(kpi("Week", w.start + " to " + w.end, w.current ? "in progress, Eastern time" : "closed"));
-    $("capd").textContent = usd(m.daily_cap); $("capw").textContent = usd(m.weekly_cap);
+    $("capw").textContent = m.cap_on === false ? "no cap" : usd(m.weekly_cap); $("capnote").hidden = m.cap_on === false;
     $("verify").textContent = "Watcher posts are signed and checked on arrival. Credits and flags are recomputed every half hour and a week is re-checked in full before approval. A listing pays once, to whoever caught it first.";
     var wk = $("wk"); wk.textContent = "";
     C.weeks.forEach(function (x, i) { var b = el("button", null, x.current ? "This week" : "Week of " + x.start); b.type = "button"; b.setAttribute("aria-pressed", i === W); b.addEventListener("click", function () { W = i; show(); }); wk.appendChild(b); });
     var box = $("board"); box.textContent = "";
     if (!w.rows.length) { box.appendChild(el("p", "note", "No watcher scans this week yet.")); return; }
     var t = el("table"), h = el("tr");
-    [["Scanner", ""], ["Credits", "n"], ["Verified", "n"], ["Unverified", "n"], ["Not watched", "n"], ["Stats read", "n"], ["Witnessed", "n"], ["Cold rooms", "n"], ["Hours", "n"], ["All-time verified", "n"], ["Pays", "n"], ["Flags", ""]].forEach(function (c) { h.appendChild(el("th", c[1], c[0])); });
+    [["Scanner", ""], ["Credits", "n"], ["Verified", "n"], ["Unverified", "n"], ["Not watched", "n"], ["Stats read", "n"], ["Witnessed", "n"], ["Cold rooms", "n"], ["Hours", "n"], ["All-time verified", "n"], ["Owed", "n"], ["Flags", ""]].forEach(function (c) { h.appendChild(el("th", c[1], c[0])); });
     t.appendChild(h);
     w.rows.forEach(function (r) {
       var tr = el("tr");
@@ -532,20 +536,21 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       t.appendChild(tr);
     });
     box.appendChild(t);
-    box.appendChild(el("p", "note", "Generated " + new Date(C.generated).toLocaleString("en-US") + ". Updates every half hour while the pump runs. Payouts under " + usd(m.min_payout) + " roll into the next week."));
+    box.appendChild(el("p", "note", "Generated " + new Date(C.generated).toLocaleString("en-US") + ". Updates every half hour while the pump runs. Owed is everything earned since the last payout, all time. Balances under " + usd(m.min_payout) + " wait for the next payout."));
     topEarners(w);
   }
   function rules() {
     var r = C.rules, o = $("rules");
     ["A credit is a sale your watcher watched happen: you saw the listing open, came back, and it was sold, or someone else also saw it sold. A slot that was already grey when you walked in still counts for your rank, but not for pay" + (r.strict ? "." : " once strict mode is on."),
      "Verified means another person's watcher, or a Twitch stream, saw that listing within a day of the sale. Two watchers on one account never verify each other.",
-     "Nothing pays until your bar reaches " + num(UNLOCK) + ". A verified sale moves it by one, an unverified sale by " + (r.self_to_bar || 0) + ". Credits before that still show here and still climb your rank.",
+     "Your balance builds from every credit you earn, all time, including before you reach the bar. Nothing pays until your bar reaches " + num(UNLOCK) + " once; a verified sale moves it by one, an unverified sale by " + (r.self_to_bar || 0) + ".",
+     "A payout sends your whole balance. It goes back to 0 and builds again from there.",
      "Verified sales earn the full rate. Unverified sales earn " + (r.self_rate * 100) + "% while few people scan; that share goes up as the scanner base grows.",
      "When your watcher confirms someone else's sale, you earn " + (r.witness_credit || 0) + " of a credit for it, up to two witnesses per sale. Scanning the same room as someone else is worth doing.",
      "The first scanner to hover an equip and capture its stats earns " + (r.hover_credit || 0) + " of a credit for it. That is what prices gear by roll.",
      "Cold-room bounty: a watched sale caught in a room and channel nobody else has read in the past day earns an extra " + (r.cold_bonus || 0) + " of a credit. The coverage map on the board shows which spots are cold right now.",
      "Only names the game has earn. A misread the reader could not match to a real item shows on the board as a scrap, never as a credit.",
-     "Each person earns at most the daily and weekly caps shown above, however much they scan.",
+     "Each person earns at most the weekly cap shown above, however much they scan, until Ko-fi support reaches $250 a month. Then the cap lifts.",
      "Watcher shop scans earn. Stream captures earn only for streamers who connected their Twitch on this page; other streams witness. Trade chat feeds the board but earns nothing.",
      "A sale earns only if it went for more than an NPC shop would pay for the item" + (r.min_price ? ", or at least " + r.min_price + " meso when the item has no NPC price" : "") + ". It still shows on the price board, it just doesn't pay.",
      "One seller's shop yields at most " + r.shop_cap_per_day + " credits a day across everyone. A shop built to farm credits runs dry fast.",
