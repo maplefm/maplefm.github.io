@@ -18,3 +18,16 @@ jobs:
         with: { node-version: 22 }
       - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: node tools/smoke.cjs
+      - name: Every indexable page names its canonical address
+        run: |
+          python3 - <<'PY'
+          import glob, re, sys
+          bad = []
+          for f in glob.glob("*.html") + glob.glob("*/index.html") + glob.glob("*/*/index.html"):
+              s = open(f, encoding="utf-8").read()
+              if f.startswith(("download/", "assets/")) or re.search(r'name="robots" content="noindex', s) or "google-site-verification" in s or f.startswith("google"):
+                  continue
+              if 'rel="canonical"' not in s: bad.append(f)
+          print("pages missing a canonical link:", bad or "none")
+          sys.exit(1 if bad else 0)
+          PY
