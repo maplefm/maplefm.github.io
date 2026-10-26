@@ -17,12 +17,14 @@ def main():
     for r in summ.get("rows") or []:
         if not isinstance(r, dict) or not r.get("typ") or (r.get("salesN") or 0) < 8 or r.get("kind") != "sale": continue
         dl = [d for d in (r.get("daily") or []) if d and d[1]]
-        old = [d for d in dl if now - d[0] / 1000 >= 5.5 * 86400]
+        # a week ago = the middle of the daily prices 5.5 to 8.5 days back, so one odd day can't fake a move
+        old = sorted(d[1] for d in dl if 5.5 * 86400 <= now - d[0] / 1000 <= 8.5 * 86400)
         if not old: continue
-        base = old[-1] if now - old[-1][0] / 1000 <= 8.5 * 86400 else None
-        if not base: continue
-        chg = r["typ"] / base[1] - 1
-        x = {"item": r["item"], "now": r["typ"], "then": base[1], "chg": chg, "vol": r.get("vol") or 0, "cat": r.get("cat") or ""}
+        then = old[len(old) // 2]
+        chg = r["typ"] / then - 1
+        # 4x up or down in a week is almost always a misread (a stack price, a wrong item), not a market move
+        if chg > 3 or chg < -0.75: continue
+        x = {"item": r["item"], "now": r["typ"], "then": then, "chg": chg, "vol": r.get("vol") or 0, "cat": r.get("cat") or ""}
         rows.append(x)
     up = sorted([x for x in rows if x["chg"] >= 0.08], key=lambda x: -x["chg"])[:10]
     down = sorted([x for x in rows if x["chg"] <= -0.08], key=lambda x: x["chg"])[:10]
