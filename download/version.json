@@ -1,10 +1,15 @@
 {
- "version": "2026.10.26.7",
- "date": "2026-10-26T16:27:45+00:00",
- "notes": "Equip stats read much more reliably: the watcher now reads only the item popup itself, so the chat box or players behind it no longer get in the way. Scrolled (orange) item names are read too.",
- "sha256": "b6612fe5c8a5b22c12ff99e8b41651223a9a9d263a6b523df402290360ac7a36",
- "size": 101332,
+ "version": "2026.10.26.8",
+ "date": "2026-10-26T16:38:10+00:00",
+ "notes": "Shorter equip stats tips in the README.",
+ "sha256": "593bbc5541e98fdd2c3db90713b6867fd8fffab2aa23dcd6b0a7faa5b3dfcd03",
+ "size": 101264,
  "history": [
+  {
+   "version": "2026.10.26.8",
+   "date": "2026-10-26",
+   "notes": "Shorter equip stats tips in the README."
+  },
   {
    "version": "2026.10.26.7",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.21.3",
    "date": "2026-10-21",
    "notes": "Adds export.bat, which writes everything you've scanned to a spreadsheet file."
-  },
-  {
-   "version": "2026.10.21.2",
-   "date": "2026-10-21",
-   "notes": "Sends your saved scans from the past week the first time it starts."
   }
  ],
  "pip": [],
- "sig": "c741d12511cb31cfb61628109c70f326d57009f2e669d32d67bbe52772c9305251698f541bd4c59061e8b56bde0f619cf1d82dc334cb4aba305680f82e6e6d03b3b201679d296231af6a4d30e73a0c41b7dd5dbb73ef1c0bafbf71cd7f6dc19f62a23f5196893003a4dcddcf1cc55d3cd5abbb4746b97adb27e519aef3c554c9898f82d806197dc539e3507875c551e60eaf0a11a8dc2febe22b616b8374a62c03d0575a8cb23161248e08af11157436d0dca6c4ebb64b11038b84311453b4fe399ee98e2454cbd4e5c1c27cb2537cab7ef89232d273b6c5cc051c3d4cbd5e94d7ea604c04f8de9a74402ec58165002f063dbfe0e12c1a286defdad96dc78e22"
+ "sig": "31c04e4fbfbf6ff3573c0f014b333bab6b71fa0c4f7357e6009fa26f9e0f3a438476ce3622341b9583bd704039dafc178c2c4901b5baff8d72facd0061d9fc7e74e604fe3a5d7d617007b4e58f303bbe718e6e68b6af6cffa7dd126094bebbc5b3f020724dfe52564f4e2b9d986e7bc1b7e904464bdad3101d6931c9f7901e758cf0d6271a1b52dde00bd8ad682c69760eb6901f3337c2bd5cf5012734675845d67dda6ba22b915004911c92d211c52a442b29c857308e88539e007df078fa025672032e6e97a61d6d703b43087763f53d198b529a114d0054e4189a41051dd90f9658a3a6947147421e084e80982a4ddde31688941be1cc3a6c97fafd68f974"
 }
