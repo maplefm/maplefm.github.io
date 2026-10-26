@@ -646,36 +646,75 @@ class Store:
             if x: o["x"] = x                    # the roll written in the message, like (+3) or 55 att
             self.dirty = True
 
-    def add_chat_tip(self, tip):
-        """Stats of an item linked in trade chat and clicked open: attach them to the newest chat post for that item
-        from the last few minutes."""
-        name = re.sub(r"\s*\(\+\d+\)\s*$", "", tip["name"] or "").strip()
-        tn = fmparse.norm(fmparse._known_name(name) or name)
-        if len(tn) < 4:
-            return None
-        now = time.time(); best = None
+    def add_chat_mentions(self, player, msg):
+        """Items named in a chat message, priced or not. A post like "S> Emerald Earrings 3 dex c/o 2m" has no price
+        we can use, but it's still the post a hovered link belongs to, so the reason a hover can't attach is clear."""
+        now = time.time()
+        try: items = fmparse._find_items(msg)
+        except Exception: return
         with self.lock:
-            for key, o in self.d["chat"].items():
-                day, player, side, item, price = json.loads(key)
-                if now - o.get("last", 0) > 300:
-                    continue
-                ni = fmparse.norm(item)
-                if ni == tn or (len(ni) >= 8 and (tn.startswith(ni) or ni.startswith(tn))):
-                    if best is None or o.get("last", 0) > best[1].get("last", 0):
-                        best = (key, o)
-            if not best:
-                return None
-            key, o = best
-            stats = stats_fit(json.loads(key)[3], {k: v for k, v in tip["stats"].items() if k != "REQLV"})
-            if stats is None:
-                return None
-            if stats:
-                x = dict(o.get("x") or {}); x.update(stats); o["x"] = x
-            if tip.get("lines"): o["xt"] = tip["lines"]
-            if tip.get("job"): o["xj"] = tip["job"]
-            self.dirty = True
+            m = self.__dict__.setdefault("mentions", {})
+            for it in items:
+                m[fmparse.norm(it[2])] = (player, now)
+            for k in [k for k, v in m.items() if now - v[1] > 1800]:
+                del m[k]
+
+    def _chat_match(self, tn, now, within):
+        best = None
+        for key, o in self.d["chat"].items():
             day, player, side, item, price = json.loads(key)
-            return item, player, price
+            if now - o.get("last", 0) > within:
+                continue
+            ni = fmparse.norm(fmparse._known_name(item) or item)
+            if ni == tn or (len(ni) >= 8 and (tn.startswith(ni) or ni.startswith(tn))):
+                if best is None or o.get("last", 0) > best[1].get("last", 0):
+                    best = (key, o)
+        return best
+
+    def _attach_chat(self, key, o, tip, stats):
+        if stats:
+            x = dict(o.get("x") or {}); x.update(stats); o["x"] = x
+        if tip.get("lines"): o["xt"] = tip["lines"]
+        if tip.get("job"): o["xj"] = tip["job"]
+        self.dirty = True
+        day, player, side, item, price = json.loads(key)
+        return item, player, price
+
+    def add_chat_tip(self, tip):
+        """Stats of an item linked in trade chat and clicked open: attach them to the newest priced chat post for that
+        item from the last 15 minutes. If none is there yet, hold the stats for 10 minutes in case the post is read
+        later. Returns (item, player, price) on a hit, or a reason string."""
+        name = re.sub(r"\s*\(\+\d+\)\s*$", "", tip["name"] or "").strip()
+        known = fmparse._known_name(name) or name
+        tn = fmparse.norm(known)
+        if len(tn) < 4:
+            return "unreadable name"
+        stats = stats_fit(known, {k: v for k, v in tip["stats"].items() if k != "REQLV"})
+        if stats is None:
+            return "stats that item can't have, so the popup was misread"
+        now = time.time()
+        with self.lock:
+            best = self._chat_match(tn, now, 900)
+            if best:
+                return self._attach_chat(best[0], best[1], tip, stats)
+            self.__dict__.setdefault("chat_pending", {})[tn] = (now, tip, stats)
+            seen = self.__dict__.get("mentions", {}).get(tn)
+        if seen:
+            return f"{seen[0]}'s post for it has no price (offers or c/o), held 10 min in case a priced post shows"
+        return "chat post for it not read yet, held 10 min in case it shows"
+
+    def flush_chat_pending(self):
+        """Attach held chat-link stats once the priced post they belong to is read."""
+        hits = []; now = time.time()
+        with self.lock:
+            cp = self.__dict__.get("chat_pending") or {}
+            for tn, (when, tip, stats) in list(cp.items()):
+                if now - when > 600:
+                    del cp[tn]; continue
+                best = self._chat_match(tn, now, 900)
+                if best:
+                    del cp[tn]; hits.append(self._attach_chat(best[0], best[1], tip, stats))
+        return hits
 
     def _plausible(self, item, price):
         ref = BOARD_TYP.get(item) or self.ref.get(item)
@@ -1206,8 +1245,10 @@ def worker(cfg, jobs, store):
                 if tip:
                     review_save(cfg, "chattip", img, tip)
                     hit = store.add_chat_tip(tip)
-                    if hit: log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,}: " + " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
-                    else: log(f"chat  read {tip['name']} but no recent chat post for it")
+                    if isinstance(hit, tuple):
+                        log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,}: " + " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
+                        chime(True)
+                    else: log(f"chat  read {tip['name']}: {hit}")
             elif kind == "inv":
                 tip = fmparse.read_tooltip(img, need_stats=False)
                 if tip:
@@ -1225,6 +1266,8 @@ def worker(cfg, jobs, store):
                 posts = boards.read_boards(img, scale=img.height / 1080)
                 for player, side, item, price, x in posts:
                     store.add_chat(player, side, item, price, x)
+                for hit in store.flush_chat_pending():
+                    log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,} (from an earlier click)")
                 if posts:
                     review_save(cfg, "board", img, {"rows": [list(p[:4]) for p in posts]})
                     log(f"board {len(posts)} chalkboard posts: " + ", ".join(f"{p[0]} {p[2]} {p[3]:,}" for p in posts[:4]) + (" ..." if len(posts) > 4 else ""))
@@ -1233,11 +1276,15 @@ def worker(cfg, jobs, store):
                 msgs = fmparse.read_chat(img)
                 found = []
                 for player, msg in msgs:
+                    store.add_chat_mentions(player, msg)
                     for side, item, price, x in fmparse.parse_chat_message_x(msg):
                         store.add_chat(player, side, item, price, x); found.append([player, side, item, price] + ([x] if x else []))
                 review_save(cfg, kind, img, {"messages": msgs, "rows": found})
                 if found:
                     log(f"chat  {len(found)} priced messages")
+                for hit in store.flush_chat_pending():
+                    log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,} (from an earlier click)")
+                    chime(True)
         except Exception:
             log("reader error:", traceback.format_exc().splitlines()[-1])
         finally:

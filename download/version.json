@@ -1,14 +1,14 @@
 {
  "version": "2026.10.26.4",
- "date": "2026-10-26T04:36:54+00:00",
- "notes": "Hourly scan stats now show equip stats read: listings whose stats you captured by hovering, the work that earns hover credit.",
- "sha256": "369bb448f3157d314e84eeb8286b8952c26fd5f3d17cd46e143793d9bde2998f",
- "size": 98706,
+ "date": "2026-10-26T04:47:02+00:00",
+ "notes": "Clicked chat links: stats now attach to posts up to 15 minutes old, wait 10 minutes for a post read late, and the log says why when they can't (no price in the post, or stats the item can't have). Scan stats now count equip stats read.",
+ "sha256": "6f886475d1f1288c33fabc9167630c36f72057ecd1ff9e288b64c45bd801e130",
+ "size": 99369,
  "history": [
   {
    "version": "2026.10.26.4",
    "date": "2026-10-26",
-   "notes": "Hourly scan stats now show equip stats read: listings whose stats you captured by hovering, the work that earns hover credit."
+   "notes": "Clicked chat links: stats now attach to posts up to 15 minutes old, wait 10 minutes for a post read late, and the log says why when they can't (no price in the post, or stats the item can't have). Scan stats now count equip stats read."
   },
   {
    "version": "2026.10.26.3",
@@ -157,5 +157,5 @@
   }
  ],
  "pip": [],
- "sig": "9cf4c1e47ee5ad53cef2286449c0e49cfcdc018a51fe2ed003aa2dd6393cf4e76f1b7a880a087b8c0c05d61111562c8a9c1ee86d61281662dd6cbcd8534af2aca962eeae0bc60468f29afde1679cb26398734ee3f13b9e13d269debf731725c76254cee679cd0c6149646d7b2f20eff63f911e74dc42d4d855d2d8904c851e4d2373026903e0f58bf892662dc2f713d286622ded529592dcc1d1022417fbddff366f427c6520fa0ed8c4fd8441a4487f289062eb7f08dce2075fc1f29bd0208e153e81e15a45bd24973acc7981cefe7e81afa817b03b9f14330702ba67daec541ae382f1af26ef972c2601cae0365b3fff1c28a3d3e4c6892861714a43051664"
+ "sig": "66f9276462854b44d500f21529a0b353d5913716ab16b6a41dc0e54e4cdd5774ec9f27cc5fa827c4711d697e85a30042f42a25022e1d35d34031358013a0f8d5a062fd2c9e23ffd70169b0136b32b4b0e38046505fc26455e67e746cc040df7271f60f7d6f04f8dae69038d271c60eec07ecac7f2912d19002997f40b0ac849250be13fafcedb335675971d09fe4ffe264906def7ee3df267383a1b5e0683ac19abd54a69b4030be5b06eb389b7f0f7697d2f4d4ad46bc1f8ac8394285fe5f38dee55230b2a726f78c0723a35d44d33f8843d523e0b6a6c89d0edd598303a657759b6096c6a9df502241a9f784ec963610bcd00aa2dfe456313f26ac23d18ebc"
 }
