@@ -1159,3 +1159,5 @@ body.sheet .nudge { display: none; }
 .plbl .allitems:hover { text-decoration: underline; }
 /* the shared footer clears the recent sales bar */
 .clubfoot { padding-bottom: 96px; }
+/* the count badge on the picked category stays readable: white on the accent, not dark on dark */
+.cchip[aria-pressed="true"] em { background: #6d3fd1; color: #fff; }

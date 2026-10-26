@@ -19,9 +19,9 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
   await new Promise((r) => srv.listen(PORT, r));
   const b = await chromium.launch();
   // the small phone uses a plain, wider font, the way a phone without our web fonts loaded sees the page
-  for (const [w, h, tag] of [[1366, 900, "desktop"], [390, 844, "phone"], [360, 780, "small phone"]]) {
+  for (const [w, h, tag] of [[1366, 900, "desktop"], [390, 844, "phone"], [360, 780, "small phone"], [1366, 900, "dark desktop"]]) {
     for (const [pg, must] of PAGES) {
-      const ctx = await b.newContext({ viewport: { width: w, height: h } });
+      const ctx = await b.newContext({ viewport: { width: w, height: h }, colorScheme: tag.startsWith("dark") ? "dark" : "light" });
       // the live site's own address answers from this checkout, so absolute links and data paths work
       await ctx.route("https://maplefm.gg/**", (route) => route.continue({ url: route.request().url().replace("https://maplefm.gg", "http://localhost:" + PORT) }));
       await ctx.route(/fonts\.(googleapis|gstatic)\.com|googletagmanager|google-analytics/, (r) => r.abort());
@@ -46,6 +46,19 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       // all five menu links fit on screen, nothing hidden off the side
       ok(await p.evaluate(() => [...document.querySelectorAll(".sitenav .sn-links a")].every((a) => { const r = a.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; })), `${tag} ${pg}: whole menu visible`);
       ok(await p.evaluate(() => !!document.querySelector(".clubfoot .sf-cols a[href='/market.html']")), `${tag} ${pg}: site footer`);
+      // the menu's text stays readable on its own background (dark pages, light pages)
+      const contrast = await p.evaluate(() => {
+        const rgb = (c) => (c.match(/[\d.]+/g) || []).map(Number);
+        const lum = (c) => { const [r, g, b] = rgb(c).slice(0, 3).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const bgOf = (e) => { for (let a = e; a; a = a.parentElement) { const c = getComputedStyle(a).backgroundColor; const v = rgb(c); if (v.length && (v.length < 4 || v[3] > 0.5)) return c; } return "rgb(255,255,255)"; };
+        const out = [];
+        document.querySelectorAll(".sitenav .sn-brand, .sitenav .sn-links a:not([aria-current]), .crumbs a").forEach((e) => {
+          const a = lum(getComputedStyle(e).color), b = lum(bgOf(e)), r = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+          if (r < 3) out.push((e.className || e.textContent.trim()).slice(0, 20) + " " + r.toFixed(1));
+        });
+        return out.slice(0, 3).join(", ");
+      });
+      ok(!contrast, `${tag} ${pg}: menu text readable ${contrast}`);
       ok(await p.evaluate(() => document.querySelectorAll(".clubfoot").length === 1 && !document.querySelector("footer.sitefoot")), `${tag} ${pg}: one footer`);
       if (pg !== "/") {
         ok(await p.evaluate(() => !!document.querySelector(".sitenav .sn-search input")), `${tag} ${pg}: price search in the menu`);
@@ -57,6 +70,15 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         await p.evaluate(() => window.scrollTo(0, 0));
       }
       if (pg === "/") {
+        // the picked category's count badge is readable
+        const chipC = await p.evaluate(() => {
+          const e = document.querySelector('.cchip[aria-pressed="true"] em'); if (!e) return "";
+          const rgb = (c) => (c.match(/[\d.]+/g) || []).map(Number);
+          const lum = (c) => { const [r, g, b] = rgb(c).slice(0, 3).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+          const a = lum(getComputedStyle(e).color), b = lum(getComputedStyle(e).backgroundColor), r = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+          return r < 3 ? r.toFixed(1) : "";
+        });
+        ok(!chipC, `${tag} picked category count readable ${chipC}`);
         for (const t of ["tab-sell", "tab-pos", "tab-deals", "tab-prices"]) {
           await p.evaluate((id) => document.getElementById(id).click(), t); await p.waitForTimeout(300);
           ok(await p.evaluate((id) => document.getElementById(id).getAttribute("aria-selected") === "true" || document.getElementById(id).classList.contains("on") || document.getElementById(id).getAttribute("aria-pressed") === "true", t), `${tag} board tab ${t} switches`);
