@@ -86,7 +86,7 @@ def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=4"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
@@ -98,7 +98,7 @@ NX = {}
 IDS = {}
 
 
-QSLUG, BSLUG, MSLUG = {}, {}, {}
+QSLUG, BSLUG, MSLUG, MOBID = {}, {}, {}, {}
 
 
 def qlink(qn, qid):
@@ -128,9 +128,11 @@ def guide_html(name, g, page_of):
         get += (f'<div class="craft"><p class="ch"><span class="tag">Crafted</span> <b>{html.escape(c[0])}</b> Lv {c[1]} · makes {c[4]:,} per craft</p>'
                 f'<table>{rows}</table></div>')
     if g.get("d"):
-        mob = lambda n: f'<a href="/monster/{BSLUG[n]}/">{html.escape(n)}</a>' if n in BSLUG else html.escape(n)
+        pic = lambda n: f'<img class="mobpic" src="https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/sprite/{MOBID[n]}.gif" alt="" loading="lazy" onerror="this.remove()">' if n in MOBID else ''
+        mob = lambda n: (f'<a class="mobl" href="/monster/{BSLUG[n]}/">{pic(n)}{html.escape(n)}</a>' if n in BSLUG else pic(n) + html.escape(n))
         mp = lambda n: f'<a href="/map/{MSLUG[n]}/">{html.escape(n)}</a>' if n in MSLUG else html.escape(n)
-        get += "<table>" + "".join(f"<tr><td><b>{mob(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>Dropped by{(' · ' + mp(d[4])) if d[4] else ''}{' · only while on the quest' if d[5] else ''}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
+        get += "<h3 class=\"dropby\">Dropped by</h3>"
+        get += "<table>" + "".join(f"<tr><td><b>{mob(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>{' · '.join(x for x in [mp(d[4]) if d[4] else '', 'only while on the quest' if d[5] else ''] if x)}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
     for x in g.get("g") or []:
         get += f'<p class="rc">{"Given by the NPC during" if x[2] == "given" else "Reward from the quest"} {qlink(x[0], x[1])}</p>'
     if g.get("s"):
@@ -160,8 +162,10 @@ def main():
         import worldpages
         notes = json.load(open(sys.argv[5], encoding="utf-8")) if len(sys.argv) > 5 and os.path.exists(sys.argv[5]) else {}
         gfull = json.load(open(sys.argv[3], encoding="utf-8")) if len(sys.argv) > 3 else {}
-        world_paths, qs, bs, ms = worldpages.build(json.load(open(sys.argv[4], encoding="utf-8")), gfull, summ, notes, out)
+        wj = json.load(open(sys.argv[4], encoding="utf-8"))
+        world_paths, qs, bs, ms = worldpages.build(wj, gfull, summ, notes, out)
         QSLUG.update(qs); BSLUG.update(bs); MSLUG.update(ms)
+        MOBID.update({n: m["id"] for n, m in (wj.get("mobs") or {}).items() if m.get("id")})
         print(len(world_paths), "world pages")
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
     ids = {r[0]: r[1] for r in db}
