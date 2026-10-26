@@ -25,12 +25,14 @@ Your config.json and saved prices are kept.
 While you shop
 1. Open the Change Channel window once, so listings carry your channel.
 2. Keep the minimap in view. It tells us which FM room you're in.
-3. Hover an equip's row for a second to read its stats. It just reads the tooltip the game shows you.
+3. Equip stats: drag the shop window up high, then rest your mouse on each equip's icon for about a second.
+   Keep the whole item popup on clear ground, not over the chat box. You'll hear a chime and see "read" when it has the stats.
+   Full guide with pictures: maplefm.gg/contribute.html#stats
 
 Stop it by closing the window.
 
 Reviewing your own data
 Double-click export.bat. It writes my_scans.csv in this folder with every listing this watcher has seen.
 
-Your scan stats: double-click stats.bat any time to see new listings, shops and sales caught in the last hour and today, with your pace per active hour. The watcher window also prints the same line at the top of every hour.
+Your scan stats: double-click stats.bat any time to see new listings, shops, sales caught and equip stats read in the last hour and today, with your pace per active hour. The watcher window also prints the same line at the top of every hour.
 Open it in Excel or Google Sheets.
