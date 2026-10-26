@@ -1,10 +1,15 @@
 {
- "version": "2026.10.26.2",
- "date": "2026-10-26T04:16:25+00:00",
- "notes": "Works with VPN and proxy apps that switch on a SOCKS system proxy: start.bat and install.bat go around it, and start.bat installs any missing Python package itself. Hover stats are checked against what the item can carry before they're kept.",
- "sha256": "fb348a8ff40e5ee2f493c73aa15e3165c96011cfa69867639c613baf0a7dff9d",
- "size": 98381,
+ "version": "2026.10.26.3",
+ "date": "2026-10-26T04:22:09+00:00",
+ "notes": "A config.json with a typo no longer stops the watcher: it's set aside as config-broken.json and fresh settings are used. Works with VPN and proxy apps that switch on a SOCKS system proxy.",
+ "sha256": "d9191ecec3d02f95e4359dad7595bab7b63b0be390aa5a405e70b8e03e515d0e",
+ "size": 98529,
  "history": [
+  {
+   "version": "2026.10.26.3",
+   "date": "2026-10-26",
+   "notes": "A config.json with a typo no longer stops the watcher: it's set aside as config-broken.json and fresh settings are used. Works with VPN and proxy apps that switch on a SOCKS system proxy."
+  },
   {
    "version": "2026.10.26.2",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.8",
    "date": "2026-10-20",
    "notes": "Small fixes."
-  },
-  {
-   "version": "2026.10.20.7",
-   "date": "2026-10-20",
-   "notes": "Better equipment stat reading."
   }
  ],
  "pip": [],
- "sig": "a854815f19f05cacdbe6afed33bf77eabc7b2109b2a0f91e5caf3a95c396a753ecc0d6b275152c19bbec86f06e9edfd5ea108a02f432e85da54236a01726071d8e60bd7c047791d29666321cae0eca371327ecc55e4e7a037b7966a36f61dbada10cac9e82e563a8eaa792075894195ab86305eb63cdc39ff0ab860128f60e6d5acd3075c5aaebb882b788c503797964426651c3c929068d39bcd91aaaa0c6155cc490c61576fff688db6387cfcffa29f3af96c1ba77d1d808460667a6d339d4c0211c2d16884e4b076a4614d28edf5e94f8399a33816e6d17c982fe269e42b699526e953b22800fe3010711c45b9ce53d56b6720aece788358bdbde32e92b06"
+ "sig": "a090438ddd8cfc28bc1063b32fc83fd8e1cc3a130ad31955d3058085375cc9d256ecffc9b10470391f8ae530ba3ad589d4003e93d02378692df1171211c25a1f3d2d0d61502ee420a3b1d13ce3a19f824312f2ed80de230084eb1c8fc8cab00a774fc32d846d8a50a9e36529ca22772d762171b61526636839911fc9f5741b41c800c7bc3782a279a13f802b14b2d860db59b85e948fc50d114b1cc78f343333af64ea6f78cc4ceb601003ad68b224e40ea54895ba336fbad9ead04c7a81ef4955de8c7337dde8042fb6bb7f731df212eaa48aa8a34debab5921b968ad2cf91d5f9afe4e3acaf1b793eb5710c4af8a5505cf190d1dffe105ec5648b6993e5f3e"
 }

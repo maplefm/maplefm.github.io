@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.26.2"
+VERSION = "2026.10.26.3"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -85,7 +85,15 @@ def load_config():
     cfg = dict(DEFAULTS)
     p = os.path.join(HERE, "config.json")
     if os.path.exists(p):
-        cfg.update(json.load(open(p, encoding="utf-8")))
+        try:
+            cfg.update(json.load(open(p, encoding="utf-8")))
+        except ValueError as e:
+            # a typo from editing it by hand: set it aside, start with fresh settings, and say so
+            bad = os.path.join(HERE, "config-broken.json")
+            try: os.replace(p, bad)
+            except OSError: pass
+            json.dump(DEFAULTS, open(p, "w", encoding="utf-8"), indent=2)
+            print("[Club FM] config.json had a typo (" + str(e).split(":")[0] + "), so it was set aside as config-broken.json and a fresh one was made.", flush=True)
         # Older versions wrote "publish": false into a new config.json, which quietly kept every price on the PC.
         # Sharing is now on unless review_mode is set on purpose.
         if not cfg.get("publish") and not cfg.get("review_mode"):
