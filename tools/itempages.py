@@ -77,6 +77,7 @@ h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;l
 .sg{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px}.sg b{display:block;font-size:1.35rem;font-weight:900;line-height:1.1}.sg span{color:var(--muted);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 .sg.key{border-color:var(--accent);background:linear-gradient(0deg,rgba(109,63,209,.10),rgba(109,63,209,.10)),var(--panel2)}.sg.key b{color:var(--accent)}
 .ctaw{margin:18px 0 4px}.cta{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:800;text-decoration:none;padding:10px 18px;border-radius:999px}.cta span{font-size:1.1rem}
+.mobrow{display:flex;align-items:center;gap:10px}.mobpic{width:40px;height:40px;object-fit:contain;flex:none}
 @media (max-width:520px){.dr{grid-template-columns:78px 1fr auto 54px;gap:8px;font-size:.85rem}}
 #q{width:100%;box-sizing:border-box;font:600 1.05rem Inter,system-ui,sans-serif;padding:12px 14px;margin:14px 0 8px;border:3px solid var(--accent);border-radius:14px;background:var(--bg);color:var(--ink)}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -104,7 +105,7 @@ def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
@@ -201,10 +202,10 @@ def guide_html(name, g, page_of):
                 f'<table>{rows}</table></div>')
     if g.get("d"):
         pic = lambda n: f'<img class="mobpic" src="https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/sprite/{MOBID[n]}.gif" alt="" loading="lazy" onerror="this.remove()">' if n in MOBID else ''
-        mob = lambda n: (f'<a class="mobl" href="/monster/{BSLUG[n]}/">{pic(n)}{html.escape(n)}</a>' if n in BSLUG else pic(n) + html.escape(n))
+        mob = lambda n: (f'<a href="/monster/{BSLUG[n]}/">{html.escape(n)}</a>' if n in BSLUG else html.escape(n))
         mp = lambda n: f'<a href="/map/{MSLUG[n]}/">{html.escape(n)}</a>' if n in MSLUG else html.escape(n)
         get += "<h3 class=\"dropby\">Dropped by</h3>"
-        get += "<table>" + "".join(f"<tr><td><b>{mob(d[0])}</b>{f' (Lv {d[1]})' if d[1] else ''}<br><small>{' · '.join(x for x in [mp(d[4]) if d[4] else '', 'only while on the quest' if d[5] else ''] if x)}</small></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else 'drops'}</td></tr>" for d in g["d"]) + "</table>"
+        get += "<table>" + "".join(f"<tr><td><div class=\"mobrow\">{pic(d[0])}<div><b>{mob(d[0])}</b>{f' <small>Lv {d[1]}</small>' if d[1] else ''}<br><small>{' · '.join(x for x in [mp(d[4]) if d[4] else '', 'only while on the quest' if d[5] else ''] if x)}</small></div></div></td><td class=n>{(str(d[2]) + '%') if d[2] is not None else ''}</td></tr>" for d in g["d"]) + "</table>"
     for x in g.get("g") or []:
         get += f'<p class="rc">{"Given by the NPC during" if x[2] == "given" else "Reward from the quest"} {qlink(x[0], x[1])}</p>'
     if g.get("s"):
