@@ -103,6 +103,9 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 .warn{border-left:4px solid var(--gold);background:var(--gold-soft);border-radius:10px;padding:8px 10px;font-size:.88rem;margin:8px 0}
 .foot{color:var(--muted);font-size:.78rem;margin-top:20px}
 [hidden]{display:none!important}
+  .facts { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+  .facts li { margin: 2px 0; }
+  .facts li.lw { color: var(--warn); font-weight: 600; }
 </style><link rel="stylesheet" href="/assets/nav.css?v=2"></head><body><main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html" aria-current="page"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 
@@ -227,7 +230,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var hpPot = bestPot("hp"), mpPot = bestPot("mp"), br = bracket(L);
     var head = el("div", "card");
     head.appendChild(el("h2", null, "Level " + L + (ME.cls ? " " + ME.cls : "") + ": where to train"));
-    head.appendChild(el("p", "note", "Every map that fits your level, with the EXP and mesos an hour you can expect there and what potions cost you. Pick how to rank them below."));
+    head.appendChild(el("p", "note", "Maps for your level, ranked. EXP and mesos an hour, potions included."));
     var pr = el("div", "row"); pr.style.marginTop = "6px";
     pr.appendChild(el("span", "chip ok wrap", "Cheapest HP now: " + hpPot.name + " · " + hpPot.per.toFixed(2) + " mesos per HP" + (hpPot.fm ? " on the Free Market" : " at the NPC")));
     pr.appendChild(el("span", "chip wrap", "Cheapest MP now: " + mpPot.name + " · " + mpPot.per.toFixed(2) + " per MP" + (mpPot.fm ? " on the Free Market" : " at the NPC")));
@@ -243,7 +246,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       var st = mapStats(m); if (!st) return;
       if (st.lv < L - 9 || st.lv > L + 4 || st.maxlv > L + 12) { if (!picks[pg]) return; }
       var t = touch(st.worst, L, cls), cost = t.dmg * t.hit * hpPot.per;
-      cand.push(hourly({ pg: pg, m: m, st: st, t: t, cost: cost, pick: picks[pg] }, L, cls, hpPot));
+      var hc = hourly({ pg: pg, m: m, st: st, t: t, cost: cost, pick: picks[pg] }, L, cls, hpPot); if (hc.kph > 0) cand.push(hc);
     });
     var KEY = { exp: "eph", meso: "mph", safe: "safe" };
     function order(k) { return cand.slice().sort(function (a, b) { return k === "safe" ? (a.potHr - b.potHr) || (b.eph - a.eph) : b[KEY[k]] - a[KEY[k]]; }); }
@@ -261,7 +264,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
         sb.appendChild(b);
       });
       top.appendChild(sb);
-      top.appendChild(el("p", "note", "Estimates for level " + L + " " + cls.toLowerCase() + " with typical gear, solo, never stopping. Your own damage, skills and party change the numbers, but the order between maps holds."));
+      top.appendChild(el("p", "note", "Level " + L + " " + cls.toLowerCase() + ", typical gear, solo, nonstop. Your gear shifts the numbers, not the order."));
       v.appendChild(top);
     }
     var list = order(SORT), shown = 8;
@@ -284,14 +287,46 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     v.appendChild(side);
   }
   // ---------------------------------------------------------------- an hour of training, estimated
-  // Your damage: typical damage a second at a level for each class, from players' reported numbers with common gear.
-  // A kill takes the monster's HP over that, plus walking to the next one (less on a crowded map).
-  // Touches: melee classes stand next to monsters, so they get touched more often than ranged ones.
-  var DPS = { Warrior: 1.45, Magician: 1.3, Bowman: 1.3, Thief: 1.4, Beginner: 0.8 }, TOUCH = { Warrior: 0.35, Beginner: 0.35, Magician: 0.15, Bowman: 0.15, Thief: 0.2 };
+  // Classic formulas (meowdb, henesys.gg, maplestory.quest). Damage: main skill per hit, typical gear, scaled from level 30 and 50 benchmarks.
+  // Defense: damage x 100/(DEF+100). Higher-level monster: /(1+gap²x0.005) under 10 levels, /(1+gap x0.05) from 10.
+  // Accuracy: class formula with typical stats; hit chance from ACC x100/(10 x gap+255) against the monster's avoid.
+  var SKILL = { Warrior: [672, 1427, 0.6, 80, "wdef"], Thief: [643, 1238, 0.72, 100, "wdef"], Bowman: [620, 1314, 0.7, 85, "wdef"], Magician: [383, 789, 0.92, 74, "mdef"], Beginner: [235, 500, 0.6, 70, "wdef"] },
+      TOUCH = { Warrior: 0.35, Beginner: 0.35, Magician: 0.15, Bowman: 0.15, Thief: 0.2 };
+  function perHit(cls, L) {
+    var k = SKILL[L < 10 ? "Beginner" : cls] || SKILL.Bowman, a = k[0] * k[2], e = Math.log(k[1] / k[0]) / Math.log(50 / 30);
+    var h = L >= 30 ? a * Math.pow(L / 30, e) : a * Math.pow(L / 30, 1.3);
+    return Math.max(12 + 5 * L, h);
+  }
+  function myAcc(cls, L) {
+    if (L < 10) cls = "Beginner";
+    if (cls === "Warrior") return Math.floor((1.2 * (20 + 0.4 * L) + 2 * L + 2.4) / 2.5 + 10) + 0.15 * L;
+    if (cls === "Thief") return Math.floor((1.2 * (25 + 0.5 * L) + 2 * L + 2.4 * L) / 4 + 15) + 0.4 * L;
+    if (cls === "Bowman") return Math.floor((1.2 * Math.max(25, 4.5 * L) + 2 * L + 2.4) / 4.8 + 20) + 0.3 * L;
+    if (cls === "Magician") return Math.floor((1.2 * (5 * L + 5) + 2 * L + 0.6 * (4 + 0.5 * L)) / 5.1 + 20);
+    return Math.floor((1.2 * (4 + L) + 2 * L + 2.4) / 2.5 + 5);
+  }
+  function hitChance(acc, L, mb) {
+    var G = Math.max(0, mb.lv - L), A = acc * 100 / (10 * G + 255), av = mb.eva || 0;
+    if (!av || A - av >= 25 + G * (L / 2 + 15)) return 1;
+    var f = 0.15 + 0.2 / (1 + Math.exp((A - av) / 12)), q = av / A;
+    return q <= 1 - f ? 1 : q >= 1 + f ? 0 : (1 + f - q) / (2 * f);
+  }
+  function dmgOn(mb, cls, L) {
+    var k = SKILL[L < 10 ? "Beginner" : cls] || SKILL.Bowman, d = perHit(cls, L) * 100 / ((mb[k[4]] || 0) + 100), g = mb.lv - L;
+    if (g >= 10) d /= 1 + g * 0.05; else if (g > 0) d /= 1 + g * g * 0.005;
+    return Math.max(1, d);
+  }
+  // seconds to kill one monster: hits needed, missed swings, the attack speed of the class's main skill
+  function killTime(mb, cls, L) {
+    var k = SKILL[L < 10 ? "Beginner" : cls] || SKILL.Bowman, hc = hitChance(myAcc(cls, L), L, mb);
+    if (hc < 0.05) return { s: Infinity, hc: hc };
+    return { s: Math.ceil(mb.hp / dmgOn(mb, cls, L)) / hc * 60 / k[3], hc: hc };
+  }
+  function accNeeded(L, mb) { for (var a = 1; a < 400; a++) if (hitChance(a, L, mb) >= 1) return a; return 400; }
   function mobMesos(n, mb) {
     var x = MOBX[n], z = x && x[5];
     if (z && z[1]) return { v: (z[0] + z[1]) / 2 * (z[2] || 70) / 100, rep: true };
-    return { v: (2.05 * mb.lv + 4) * 0.7, rep: false };  // fitted to the monsters players have reported; mesos drop about 70% of kills
+    return { v: (Math.floor(2.1 * mb.lv) + 3) * 0.7, rep: false };  // Classic meso formula (meowdb); mesos drop about 70% of kills
   }
   function mobDrops(n) {
     var x = MOBX[n], d = x && x[6], v = 0; if (!d) return 0;
@@ -299,15 +334,20 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     d.forEach(function (it) { if (PRICE[it[0]] && !EQUIP[it[0]] && it[1] >= 1) v += it[1] / 100 * PRICE[it[0]]; }); return v;
   }
   function hourly(c, L, cls, hpPot) {
-    var m = c.m, dps = (DPS[cls] || 1.3) * Math.pow(Math.max(L, 5), 1.6);
-    var tot = 0, exp = 0, hp = 0, mz = 0, dv = 0, rep = 0;
-    m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; var k = x[1]; tot += k; exp += mb.exp * k; hp += mb.hp * k; var mm = mobMesos(x[0], mb); mz += mm.v * k; if (mm.rep) rep += k; dv += mobDrops(x[0]) * k; });
-    exp /= tot; hp /= tot; mz /= tot; dv /= tot;
-    var walk = 1.5 + 25 / Math.sqrt(tot), kill = hp / dps + walk;
-    var kph = Math.min(3600 / kill, tot * 3600 / 8 * 0.6);    // the map only refills so fast
+    var m = c.m, tot = 0, all = 0, exp = 0, mz = 0, dv = 0, rep = 0, ks = 0, acc = myAcc(cls, L), low = null;
+    m.mobs.forEach(function (x) {
+      var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; var k = x[1], kt = killTime(mb, cls, L); all += k;
+      if (kt.hc < 1 && (!low || kt.hc < low.hc)) low = { name: x[0], hc: kt.hc, need: accNeeded(L, mb) };
+      if (!isFinite(kt.s)) return;   // can't hit it yet: walk past it
+      tot += k; exp += mb.exp * k; ks += kt.s * k; var mm = mobMesos(x[0], mb); mz += mm.v * k; if (mm.rep) rep += k; dv += mobDrops(x[0]) * k; });
+    c.acc = acc; c.low = low;
+    if (!tot) { c.kph = 0; c.eph = 0; c.mph = 0; c.mpk = 0; c.mesoKill = 0; c.dropKill = 0; c.mesoRep = 0; c.potHr = 0; c.potCost = 0; c.safe = 0; c.killsPerPot = 0; return c; }
+    exp /= tot; mz /= tot; dv /= tot; ks /= tot;
+    var walk = 0.8 + 12 / Math.sqrt(all), kill = ks + walk;
+    var kph = Math.min(3600 / kill, tot * 0.75 * 3600 / 7.56 * 0.8);   // the map refills every 7.5 s, 3 of 4 spawn points when solo
     var hpHr = kph * (TOUCH[cls] || 0.2) * c.t.hit * c.t.dmg;
     var potHr = hpHr / (W.pots[hpPot.name] && W.pots[hpPot.name].hp || 100), potCost = hpHr * hpPot.per;
-    c.kph = kph; c.eph = kph * exp; c.mpk = mz + dv; c.mesoKill = mz; c.dropKill = dv; c.mesoRep = rep / tot;
+    c.kph = kph; c.eph = kph * exp; c.mpk = mz + dv; c.mesoKill = mz; c.dropKill = dv; c.mesoRep = rep / tot; c.ks = ks;
     c.potHr = potHr; c.potCost = potCost; c.mph = kph * (mz + dv) - potCost; c.safe = -potHr;
     c.killsPerPot = potHr > 0 ? kph / potHr : 0;
     return c;
@@ -332,10 +372,11 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
      [fmt(c.mpk), "Mesos a kill" + (c.dropKill >= 1 ? ", drops included" : "")], [c.potHr < 0.5 ? "under 1" : fmt(c.potHr), pn + "s an hour", SORT === "safe"], [fmt(c.cost), "Mesos of potion a touch"]].forEach(function (x) {
       var s = el("div", "stat" + (x[2] ? " hi" : "")); s.appendChild(el("b", null, String(x[0]))); s.appendChild(el("small", null, x[1])); sts.appendChild(s); });
     left.appendChild(sts);
-    left.appendChild(el("p", "note", "About " + fmt(c.kph) + " kills an hour at level " + L + " with typical " + (ME.cls || "Bowman").toLowerCase() + " gear. " +
-      "A touch from " + st.worst.name + " hits for about " + fmt(c.t.dmg) + " and lands " + Math.round(c.t.hit * 100) + "% of the time: " + fmt(c.cost) + " mesos of " + pn +
-      (c.killsPerPot >= 1 ? ", or one " + pn + " every " + fmt(c.killsPerPot) + " kills." : ".") +
-      " Mesos a kill: " + fmt(c.mesoKill) + " dropped" + (c.mesoRep < 0.5 ? " (estimated from level)" : "") + (c.dropKill >= 1 ? " plus " + fmt(c.dropKill) + " in etc items and potions at today's Free Market prices" : "") + ". Equipment and rare scrolls aren't counted: they're a bonus."));
+    var nl = el("ul", "facts");
+    nl.appendChild(el("li", null, "Touch from " + st.worst.name + ": ~" + fmt(c.t.dmg) + " HP, lands " + Math.round(c.t.hit * 100) + "%" + (c.killsPerPot >= 1.5 ? " · 1 " + pn + " per " + fmt(c.killsPerPot) + " kills" : c.killsPerPot > 0 ? " · about 1 " + pn + " a kill" : "")));
+    nl.appendChild(el("li", null, "Mesos a kill: " + fmt(c.mesoKill) + (c.mesoRep < 0.5 ? " (level estimate)" : "") + (c.dropKill >= 1 ? " + " + fmt(c.dropKill) + " etc and potions" : "") + " · equips not counted"));
+    if (c.low) nl.appendChild(el("li", "lw", c.low.name + ": " + (c.low.hc < 0.05 ? "you can't hit it yet" : "you hit " + Math.round(c.low.hc * 100) + "%") + " · needs " + c.low.need + " ACC, you ~" + Math.round(c.acc)));
+    left.appendChild(nl);
     var b = el("div", "row"); b.style.marginTop = "6px";
     var r = el("button", "btn pri", "Route here"); r.type = "button"; r.addEventListener("click", function () { TO = c.pg; showTab("route"); $("to").value = c.pg; if (FROM) findRoute(); else $("from").focus(); });
     var o = el("button", "btn", "Open map"); o.type = "button"; o.addEventListener("click", function () { showMap(c.pg); });
