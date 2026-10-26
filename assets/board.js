@@ -3445,6 +3445,8 @@
       if (!hit) { var h = searchItems(name, 1); if (h.length) hit = h[0].n; }
       if (hit && (hit !== state.sel || !document.querySelector("#ip"))) { try { pick(hit); jumpToCard(); } catch (e) {} }
       else if (hit) { try { jumpToCard(); } catch (e) {} }
+      // the page may already show this item from the saved state; on a phone the card only shows as a sheet
+      if (hit && window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); }
     }, 250);
   }
   itemHash();
