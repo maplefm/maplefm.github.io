@@ -110,6 +110,10 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         await p.waitForFunction(() => window.fmQA && window.fmQA.items().length > 100, null, { timeout: 30000 }).catch(() => {});
         await p.evaluate(() => window.fmQA.pick("Work Gloves")); await p.waitForTimeout(1500);
         ok(await p.evaluate(() => !!document.querySelector("#ip") && document.querySelector("#ip").textContent.indexOf("Work Gloves") >= 0), `${tag} search opens an item card`);
+        // stats an item can't have never count as its roll
+        const sf = await p.evaluate(() => [JSON.stringify(window.fmQA.statsFix("Emerald Earrings", { ATT: 50, ATT_b: 47, SLOTS: 5 })),
+          JSON.stringify(window.fmQA.statsFix("Work Gloves", { ATT: 5, WDEF: 6, SLOTS: 2 })), JSON.stringify(window.fmQA.statsFix("Korean Fan", { ATT: 58, ATT_b: 55, LUK: 70, SLOTS: 7 }))]);
+        ok(sf[0] === "null" && sf[1] === '{"ATT":5,"WDEF":6,"SLOTS":2}' && sf[2] === '{"ATT":58,"ATT_b":55,"SLOTS":7}', `${tag} impossible stats are thrown out, real ones kept ${sf.join(" ")}`);
         // searching from another tab lands back on the board
         await p.evaluate(() => document.getElementById("tab-pos").click()); await p.waitForTimeout(300);
         await p.fill("#q", "pan lid"); await p.waitForTimeout(500); await p.keyboard.press("Enter"); await p.waitForTimeout(900);
