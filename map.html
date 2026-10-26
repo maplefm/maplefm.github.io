@@ -238,6 +238,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var cand = [];
     Object.keys(MAPS).forEach(function (pg) {
       var m = MAPS[pg]; if (m.type === "Town" || !m.mobs.length) return;
+      // not a training spot: a boss room or quest map (Mushmom's house), or test monsters
+      if (m.mobs.some(function (x) { var mb = W.mobs[x[0]]; return !mb || mb.boss || mb.lv >= 150 || !mb.hp; })) return;
       var st = mapStats(m); if (!st) return;
       if (st.lv < L - 9 || st.lv > L + 4 || st.maxlv > L + 12) { if (!picks[pg]) return; }
       var t = touch(st.worst, L, cls), cost = t.dmg * t.hit * hpPot.per;
@@ -513,6 +515,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   ]).then(function (res) {
     MOBX = res[3] || {};
     W = res[0]; NOTES = res[1]; MAPS = W.maps; PAGES = Object.keys(MAPS).sort();
+    // one row per monster: the game lists some spawn groups twice ("Iron Hog x12" and "Iron Hog x1")
+    PAGES.forEach(function (pg) { var m = MAPS[pg], by = {}, out = []; (m.mobs || []).forEach(function (x) { if (by[x[0]]) by[x[0]][1] += x[1]; else { by[x[0]] = [x[0], x[1]]; out.push(by[x[0]]); } }); m.mobs = out; });
     W.first0 = Object.keys(W.first || {}).map(function (k) { return W.first[k]; }).sort()[0] || "";
     ((res[2] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) { PRICE[r.item] = r.typ; if (r.equip) EQUIP[r.item] = 1; } });
     $("credit").textContent = W.credit + " Training notes summarize what players report; potion costs are estimates.";
