@@ -3429,7 +3429,7 @@
   })();
   (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; if (/positions/.test(h)) state.tab = "pos"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
   // "See X on the price board" links (#item=Name): once prices load, open that item's card and scroll to it
-  (function itemHash() {
+  function itemHash() {
     var m = /item=([^&]+)/.exec(location.hash); if (!m) return;
     var name = ""; try { name = decodeURIComponent(m[1]); } catch (e) { return; }
     var tries = 0, t = setInterval(function () {
@@ -3439,9 +3439,12 @@
       var hit = null;
       for (var i = 0; i < D.list.length; i++) if (D.list[i].item === name) { hit = name; break; }
       if (!hit) { var h = searchItems(name, 1); if (h.length) hit = h[0].n; }
-      if (hit) { try { pick(hit); jumpToCard(); } catch (e) {} }
+      if (hit && (hit !== state.sel || !document.querySelector("#ip"))) { try { pick(hit); jumpToCard(); } catch (e) {} }
+      else if (hit) { try { jumpToCard(); } catch (e) {} }
     }, 250);
-  })();
+  }
+  itemHash();
+  window.addEventListener("hashchange", itemHash);
 
   // ---------- data loading
   // The GitHub API answers with the newest copy right away, and a "not changed" answer costs nothing
