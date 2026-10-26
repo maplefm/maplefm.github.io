@@ -1,10 +1,15 @@
 {
- "version": "2026.10.26.5",
- "date": "2026-10-26T15:15:56+00:00",
- "notes": "Fixes the game window not being found on some PCs (an 'int too long to convert' error repeating in the window).",
- "sha256": "11c780ce342de1d4c87e8d7f1a0666cf98462cb4838ea7e9131a9a576f5b1b0f",
- "size": 99839,
+ "version": "2026.10.26.6",
+ "date": "2026-10-26T16:08:47+00:00",
+ "notes": "README: how to read equip stats best (shop window high, popup off the chat box).",
+ "sha256": "00ac4cb142982f517302a237d38438d177fd1fe206a919b006054696c9aca68e",
+ "size": 99941,
  "history": [
+  {
+   "version": "2026.10.26.6",
+   "date": "2026-10-26",
+   "notes": "README: how to read equip stats best (shop window high, popup off the chat box)."
+  },
   {
    "version": "2026.10.26.5",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.21.1",
    "date": "2026-10-21",
    "notes": "Better at telling which items sold."
-  },
-  {
-   "version": "2026.10.20.10",
-   "date": "2026-10-20",
-   "notes": "Reads stats of items linked in trade chat."
   }
  ],
  "pip": [],
- "sig": "9f11f34523aa41b2c84c7e728d0e25c00d53e61c03214e49de297f3aebf9d45959b77d79438ea7694a2603b9e3dd9a97c880fd5f81eff2ace7d0e940f4150316a700b7210f705b74cf12ddbce2c261559807a78b9a13967dd79b57acfa9967c29ca2c278f606edb79e057d915171e65ab8f1f91554b2113207c67000f7c7000f4cc261af4e54a2fd5f6bec4f68ca32becf55f887587aac1382862941d188893c119760010dff1776ac08bd66c97dbf1dbb4737fe8b249effcb1aefc2db1ba3385566fb73ea4a343114206a876684698d8bca6b0e750de029b80bb0a755ed4ecf5a2ec322540c6ba643d5861aba500aac60d374157c6bb3c263ed0b4287d00c9b"
+ "sig": "bf05e308c39faeb327d2084a6dbef5bf53be4e109f3d00a14d73426fa1bd2dad1daaa377cb36273640994b50efe4d989f40ec4b8e99691d4d56ba6f2ea6a13b65925a91fb25d25302f1d436bd5708f3ccae44f8f082b12b2f1ca4b78220c96c34c45601d0c8b46056a21a0a604f9667fca86b23e4ae837a152dc26a22763904d6bbfbf79cd9d212413ab062420414ced954761565b37937ac2ba1b350ce35799d0d40ec952f9e512dae12f8ee4ffdf764562b8153371d0659a620230439b8a588a03514044049edcb395e4bebf22b9b76aebc1ed11c30095379b31d575d207326765cd46b7d727abaf8e7feb19b25354095374e838e251c36bf6f537c0d7d0f4"
 }
