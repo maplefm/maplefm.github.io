@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.26.4"
+VERSION = "2026.10.26.5"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -225,30 +225,54 @@ def log(*a):
 
 # ------------------------------------------------------------------ screen (Windows only)
 
+_W32 = []
+def _w32():
+    """user32 and kernel32 with their argument types declared. Without them ctypes passes a window handle as a
+    32-bit int, and on some PCs Windows hands out handles too big for that ("int too long to convert")."""
+    if _W32: return _W32[0]
+    import ctypes
+    from ctypes import wintypes
+    u = ctypes.WinDLL("user32", use_last_error=True); k = ctypes.WinDLL("kernel32", use_last_error=True)
+    H = wintypes.HWND
+    for name, args, res in [("IsWindowVisible", [H], wintypes.BOOL), ("IsIconic", [H], wintypes.BOOL),
+                            ("GetWindowTextLengthW", [H], ctypes.c_int), ("GetWindowTextW", [H, wintypes.LPWSTR, ctypes.c_int], ctypes.c_int),
+                            ("GetClientRect", [H, ctypes.POINTER(wintypes.RECT)], wintypes.BOOL),
+                            ("ClientToScreen", [H, ctypes.POINTER(wintypes.POINT)], wintypes.BOOL),
+                            ("GetWindowThreadProcessId", [H, ctypes.POINTER(wintypes.DWORD)], wintypes.DWORD),
+                            ("EnumWindows", [ctypes.c_void_p, wintypes.LPARAM], wintypes.BOOL)]:
+        f = getattr(u, name); f.argtypes = args; f.restype = res
+    k.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]; k.OpenProcess.restype = wintypes.HANDLE
+    k.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    k.QueryFullProcessImageNameW.restype = wintypes.BOOL
+    k.CloseHandle.argtypes = [wintypes.HANDLE]; k.CloseHandle.restype = wintypes.BOOL
+    _W32.append((u, k)); return _W32[0]
+
 def _exe_of(hwnd):
     import ctypes
     from ctypes import wintypes
+    user32, kernel32 = _w32()
     pid = wintypes.DWORD()
-    ctypes.windll.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-    h = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid.value)   # PROCESS_QUERY_LIMITED_INFORMATION
+    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+    h = kernel32.OpenProcess(0x1000, False, pid.value)   # PROCESS_QUERY_LIMITED_INFORMATION
     if not h:
         return ""
     try:
         buf = ctypes.create_unicode_buffer(520); n = wintypes.DWORD(520)
-        if ctypes.windll.kernel32.QueryFullProcessImageNameW(h, 0, buf, ctypes.byref(n)):
+        if kernel32.QueryFullProcessImageNameW(h, 0, buf, ctypes.byref(n)):
             return buf.value.lower()
         return ""
     finally:
-        ctypes.windll.kernel32.CloseHandle(h)
+        kernel32.CloseHandle(h)
 
 def find_game(title, exe="maplestory.exe"):
     """Return (left, top, width, height) of the game window's client area in screen pixels, or None."""
     import ctypes
     from ctypes import wintypes
-    user32 = ctypes.windll.user32
+    user32 = _w32()[0]
     found = []
     @ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
     def cb(hwnd, _):
+      try:
         if not user32.IsWindowVisible(hwnd) or user32.IsIconic(hwnd):
             return True
         n = user32.GetWindowTextLengthW(hwnd)
@@ -262,7 +286,9 @@ def find_game(title, exe="maplestory.exe"):
             if rc.right > 600 and rc.bottom > 400:
                 found.append((pt.x, pt.y, rc.right, rc.bottom))
         return True
-    user32.EnumWindows(cb, 0)
+      except Exception:
+        return True                     # one odd window must never stop the search
+    user32.EnumWindows(ctypes.cast(cb, ctypes.c_void_p), 0)
     return found[0] if found else None
 
 def place(cfg, game):

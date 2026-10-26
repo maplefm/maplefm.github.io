@@ -1,10 +1,15 @@
 {
- "version": "2026.10.26.4",
- "date": "2026-10-26T04:47:02+00:00",
- "notes": "Clicked chat links: stats now attach to posts up to 15 minutes old, wait 10 minutes for a post read late, and the log says why when they can't (no price in the post, or stats the item can't have). Scan stats now count equip stats read.",
- "sha256": "6f886475d1f1288c33fabc9167630c36f72057ecd1ff9e288b64c45bd801e130",
- "size": 99369,
+ "version": "2026.10.26.5",
+ "date": "2026-10-26T15:15:56+00:00",
+ "notes": "Fixes the game window not being found on some PCs (an 'int too long to convert' error repeating in the window).",
+ "sha256": "11c780ce342de1d4c87e8d7f1a0666cf98462cb4838ea7e9131a9a576f5b1b0f",
+ "size": 99839,
  "history": [
+  {
+   "version": "2026.10.26.5",
+   "date": "2026-10-26",
+   "notes": "Fixes the game window not being found on some PCs (an 'int too long to convert' error repeating in the window)."
+  },
   {
    "version": "2026.10.26.4",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.10",
    "date": "2026-10-20",
    "notes": "Reads stats of items linked in trade chat."
-  },
-  {
-   "version": "2026.10.20.9",
-   "date": "2026-10-20",
-   "notes": "Reads shops faster."
   }
  ],
  "pip": [],
- "sig": "66f9276462854b44d500f21529a0b353d5913716ab16b6a41dc0e54e4cdd5774ec9f27cc5fa827c4711d697e85a30042f42a25022e1d35d34031358013a0f8d5a062fd2c9e23ffd70169b0136b32b4b0e38046505fc26455e67e746cc040df7271f60f7d6f04f8dae69038d271c60eec07ecac7f2912d19002997f40b0ac849250be13fafcedb335675971d09fe4ffe264906def7ee3df267383a1b5e0683ac19abd54a69b4030be5b06eb389b7f0f7697d2f4d4ad46bc1f8ac8394285fe5f38dee55230b2a726f78c0723a35d44d33f8843d523e0b6a6c89d0edd598303a657759b6096c6a9df502241a9f784ec963610bcd00aa2dfe456313f26ac23d18ebc"
+ "sig": "9f11f34523aa41b2c84c7e728d0e25c00d53e61c03214e49de297f3aebf9d45959b77d79438ea7694a2603b9e3dd9a97c880fd5f81eff2ace7d0e940f4150316a700b7210f705b74cf12ddbce2c261559807a78b9a13967dd79b57acfa9967c29ca2c278f606edb79e057d915171e65ab8f1f91554b2113207c67000f7c7000f4cc261af4e54a2fd5f6bec4f68ca32becf55f887587aac1382862941d188893c119760010dff1776ac08bd66c97dbf1dbb4737fe8b249effcb1aefc2db1ba3385566fb73ea4a343114206a876684698d8bca6b0e750de029b80bb0a755ed4ecf5a2ec322540c6ba643d5861aba500aac60d374157c6bb3c263ed0b4287d00c9b"
 }
