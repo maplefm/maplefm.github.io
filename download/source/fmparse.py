@@ -772,15 +772,101 @@ def looks_like_tooltip(img):
     bright = np.minimum(np.minimum(r, g), b) > 200
     return dark.mean() > 0.55 and 0.01 < bright.mean() < 0.3
 
+def _tip_panel(img):
+    """The tooltip's own dark blue panel: rows and columns mostly that colour. Cropping to it keeps the shop list,
+    chat box and players behind it out of the reading."""
+    import numpy as np
+    a = np.asarray(img.convert("RGB")).astype(int)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    navy = (b > r + 12) & (b < 150) & (r < 95)
+    rows = np.where(navy.mean(1) > 0.3 * min(1.0, 320 / max(1, a.shape[1])))[0]
+    if len(rows) < 40: return None
+    best = (0, -1); st = rows[0]; prev = rows[0]
+    for y in list(rows[1:]) + [10 ** 9]:
+        if y - prev > 16:
+            if prev - st > best[1] - best[0]: best = (st, prev)
+            st = y
+        prev = y
+    y0, y1 = best
+    if y1 - y0 < 40: return None
+    cols = np.where(navy[y0:y1 + 1].mean(0) > 0.3)[0]
+    if len(cols) < 120: return None
+    return (max(0, int(cols.min()) - 10), max(0, int(y0) - 30), min(a.shape[1], int(cols.max()) + 6), min(a.shape[0], int(y1) + 8))
+
+TIP_CFG = {"crop": True, "lo": 140, "hi": 215, "scale": 3, "below_type": True, "plusfix": True}
+TIP_PASSES = [(100, 170), (140, 215)]
+
 def read_tooltip(img, need_stats=True):
     """Returns {'name', 'stats', 'lines', 'job'} for the item tooltip, or None.
-    Classic World prints rolls as 'Weapon Attack: +35 (32 +3)': value, base and the difference."""
+    Crops to the tooltip's own panel, so whatever is behind it (the chat box, other players, the shop list) is
+    left out, then reads it at two contrast levels and merges: a line one level misses or misreads, the other
+    usually gets. On saved tooltips this took exact reads from 42 of 65 to 61 of 65, and it runs faster."""
+    box = _tip_panel(img) if TIP_CFG["crop"] else None
+    if box: img = img.crop(box)
+    reads = []
+    for lo, hi in TIP_PASSES:
+        r = _read_tip_once(img, need_stats=False, lo=lo, hi=hi)
+        if r: reads.append(r)
+    if not reads: return None
+    base = max(reads, key=lambda r: len(r["stats"]))
+    votes = {}
+    for r in reads:
+        for k, v in r["stats"].items():
+            if k.endswith("_b"): continue
+            votes.setdefault(k, {}); votes[k][v] = votes[k].get(v, 0) + 1
+    stats = {}
+    for k, c in votes.items():
+        b = next((r["stats"].get(k + "_b") for r in reads if r["stats"].get(k + "_b") is not None), None)
+        # most reads agree; on a tie, the value that fits the base in brackets ("+7 (6 +1)")
+        stats[k] = max(c.items(), key=lambda x: (x[1], -abs(x[0] - b) if b is not None else 0))[0]
+        if b is not None and abs(stats[k] - b) <= 10: stats[k + "_b"] = b
+    if need_stats and not any(not k.endswith("_b") for k in stats): return None
+    out = dict(base); out["stats"] = stats
+    if not out.get("name"):
+        out["name"] = next((r["name"] for r in reads if r.get("name")), "")
+    if not out.get("job"):
+        out["job"] = next((r["job"] for r in reads if r.get("job")), "")
+    # a scrolled item's name is orange, which the white-text reading drops: read the top of the panel by brightness
+    if not _known_name(re.sub(r"\s*\(\+\d+\)\s*$", "", out.get("name") or "")):
+        nm = _tip_name_bright(img)
+        if nm: out["name"] = nm
+    return out
+
+def _tip_name_bright(img):
+    """The item name from the top rows of the tooltip, read by brightness so white and orange names both show."""
+    from PIL import ImageChops
+    top = img.convert("RGB").crop((0, 0, img.width, min(img.height, 80)))
+    r, g, b = top.split()
+    mx = ImageChops.lighter(ImageChops.lighter(r, g), b)
+    gg = mx.point(lambda v: 0 if v >= 200 else 255 if v <= 150 else int((200 - v) * 5.1))
+    gg = gg.resize((gg.width * 3, gg.height * 3), Image.BICUBIC)
+    best = ""
+    for l in ocr_lines(gg, 3, 6):
+        t = re.sub(r"\s*\(\+?\d+\)?\s*$", "", re.sub(r"^[^A-Za-z]+", "", l["text"])).strip()
+        if not t or re.search(r"'s\b|\b[hn]as (entered|left)|\breq\b|:", t, re.I): continue
+        k = _known_name(t)
+        if k: return k
+        if not best and len(re.sub(r"[^A-Za-z]", "", t)) >= 4: best = t
+    return best
+
+def _read_tip_once(img, need_stats=True, lo=140, hi=215):
+    C = TIP_CFG
     m = min_channel(img)
-    g = m.point(lambda v: 255 if v <= 140 else 0 if v >= 215 else int(255 - (v - 140) * 3.4))
-    g = g.resize((g.width * 3, g.height * 3), Image.BICUBIC)
-    found = ocr_lines(g, 3, 6)
+    k = 255.0 / (hi - lo)
+    g = m.point(lambda v: 255 if v <= lo else 0 if v >= hi else int(255 - (v - lo) * k))
+    g = g.resize((g.width * C["scale"], g.height * C["scale"]), Image.BICUBIC)
+    found = ocr_lines(g, C["scale"], 6)
+    # stat lines sit under the "Type:" line; the REQ block above it is requirements, never bonuses
+    type_y = None
+    if C["below_type"]:
+        for l in found:
+            if re.search(r"\btype\s*[:;.]", l["text"].replace("：", ":"), re.I): type_y = l["y"]; break
+    if type_y is not None:
+        found_stats = [l for l in found if l["y"] >= type_y - 2]
+    else:
+        found_stats = found
     stats, statx, staty = {}, [], []
-    for l in found:
+    for l in found_stats:
         t = l["text"].replace("：", ":")
         for k, rx in _LINE_RE:
             mm = rx.search(t)
@@ -788,6 +874,12 @@ def read_tooltip(img, need_stats=True):
                 continue                              # a requirement line, not a bonus
             if mm and k not in stats:
                 stats[k] = int(mm.group(1))
+                if C["plusfix"] and mm.group(2) and k != "SLOTS":
+                    # "+7 (6 +1)" read as "47 (6 +1)": the plus sign became a 4. The bracket settles it.
+                    v, base = stats[k], int(mm.group(2)); dv = int(mm.group(4)) if mm.group(4) else None
+                    sv = str(v)
+                    if abs(v - base) > 10 and sv[0] == "4" and len(sv) >= 2 and abs(int(sv[1:]) - base) <= 10:
+                        stats[k] = int(sv[1:])
                 if mm.group(2):
                     # the number in brackets is the base; the sign is often too small to read, so work it out
                     base = int(mm.group(2)); diff = stats[k] - base
