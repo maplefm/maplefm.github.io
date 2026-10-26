@@ -168,10 +168,6 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
 .sitefoot .fnav { margin-bottom: 6px; font-size: .8rem; }
 .kofitab { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: calc((100vw - 980px) / 2 - 28px); max-width: 150px; z-index: 45; display: none; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 16px 10px; border-radius: 16px 0 0 16px; text-decoration: none; color: #fff; background: linear-gradient(180deg, rgba(255,138,101,.85), rgba(226,87,122,.85)); border: 1px solid rgba(255,255,255,.35); border-right: 0; box-shadow: 0 8px 26px rgba(120,30,60,.22); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: .85; transition: opacity .15s, transform .15s; }
 @media (min-width: 1280px) { .kofitab { display: flex; } }
-.hguide { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 10px 0 4px; }
-.hguide figure { margin: 0; }
-.hguide img { width: 100%; height: auto; border-radius: 12px; display: block; border: 1px solid rgba(0,0,0,.12); }
-.hguide figcaption { font-size: .82rem; opacity: .8; margin-top: 5px; line-height: 1.35; }
 .kofitab:hover { opacity: 1; transform: translateY(-50%) translateX(-2px); }
 .kofitab i { font-style: normal; font-size: 1.6rem; line-height: 1; }
 .kofitab b { display: block; font: 800 .9rem/1.2 var(--body, system-ui); }
@@ -216,21 +212,15 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     <ol class="steps">
       <li>Keep the minimap in view. It tells us which FM room you're in.</li>
       <li>Scroll through each shop to the bottom, about a second per scroll is plenty. Every row gets read.</li>
-      <li>Rest your mouse on each equip for a second so the watcher can read its stats. The best way is just below.</li>
     </ol>
-    <h3 id="stats" style="margin-top:16px">Reading equip stats: the best way</h3>
-    <p class="note" style="margin:0 0 8px">A scrolled glove or weapon is priced by its stats, so these reads matter most. The first scanner to capture an equip's stats earns a tenth of a credit for it, and your stats.bat counts them as "equip stats read".</p>
+    <h3 id="stats" style="margin-top:16px">Reading equip stats</h3>
+    <p class="note" style="margin:0 0 8px">Gear is priced by its stats, and the first scanner to capture an equip's stats earns a tenth of a credit.</p>
     <ol class="steps">
-      <li><b>Drag the shop window up</b> by its title bar so it sits high on the screen, well above the chat box. The item popup opens below and to the right of your mouse, so it needs room.</li>
-      <li><b>Rest the mouse on the item's icon for about one second.</b> The watcher reads the popup several times and keeps the numbers that agree. You'll hear a chime and its window says <code>read</code> when it has the stats.</li>
-      <li><b>Keep the whole popup on the screen.</b> It can sit over the chat box or other players; the watcher reads only the popup itself. If it runs off the bottom of the screen, scroll the shop so that item sits higher in the list.</li>
-      <li><b>One equip at a time, top to bottom.</b> Skip scrolls, potions and etc items, which have no stats to read.</li>
-      <li><b>Linked items in trade chat count too.</b> Click an item someone linked in chat to open its popup, and the stats attach to their post.</li>
+      <li><b>Rest the mouse on the item's icon for about a second</b>, until you hear the chime and the watcher window says <code>read</code>.</li>
+      <li><b>Keep the whole popup on screen.</b> If its bottom runs off the screen, scroll that item higher in the list first.</li>
+      <li><b>Equips only.</b> Scrolls, potions and etc items have no stats to read.</li>
+      <li><b>Trade chat links count too.</b> Click an item someone linked in chat and its stats attach to their post.</li>
     </ol>
-    <div class="hguide">
-      <figure><img src="/assets/guide/hover-good.png" alt="An item popup fully visible over plain background next to an open shop" width="500" height="576" loading="lazy"><figcaption>Every line readable: type, attack, accuracy and slots all captured.</figcaption></figure>
-      <figure><img src="/assets/guide/hover-bad.png" alt="An item popup over the colored chat box, still read cleanly" width="500" height="546" loading="lazy"><figcaption>Over the chat box is fine now too: the watcher reads only the popup, so this one read every line.</figcaption></figure>
-    </div>
     <p class="note">Your prices show on the site within about 15 minutes.</p>
     <p class="note">Club FM is free for everyone and always will be. If it helps you, you can <a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener">support it on Ko-fi</a>; that's what funds the contributor payouts.</p>
   </section>
@@ -246,7 +236,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
           <li><i>🛒</i><div><b>Shop scans</b><span>Open shops and scroll to the bottom. Every row is a price, every sold slot is a sale caught. This is what climbs the ranks and what pays.</span></div></li>
           <li><i>✅</i><div><b>Verified sales</b><span>A sale another contributor's watcher or a Twitch stream also saw. These count toward the pay bar and earn the full rate.</span></div></li>
           <li><i>📺</i><div><b>Streaming</b><span>Stream MapleStory Classic on Twitch with Classic in the title and the Stream Reader catches your FM trips. Connect your Twitch in the earn section and those catches earn as yours.</span></div></li>
-          <li><i>🔎</i><div><b>Equip tooltips</b><span>Rest your mouse on an equip's icon for a second so the site can price it by its stats. <a href="#stats">How to do it best</a>.</span></div></li>
+          <li><i>🔎</i><div><b>Equip tooltips</b><span>Rest your mouse on an equip's icon for a second so the site can price it by its stats. <a href="#stats">How</a>.</span></div></li>
           <li><i>💬</i><div><b>Trade chat</b><span>Posts you see in the chat box feed the price board. They don't earn, they just make the prices sharper.</span></div></li>
           <li><i>🗺️</i><div><b>Coverage</b><span>Keep the minimap in view and open Change Channel once, so we know which room and channel you're scanning.</span></div></li>
         </ul>
