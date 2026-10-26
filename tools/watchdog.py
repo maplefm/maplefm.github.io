@@ -123,6 +123,9 @@ if TOKEN:
     recent = [r for r in runs if NOW - calendar.timegm(time.strptime(r["created_at"], "%Y-%m-%dT%H:%M:%SZ")) < 3 * 3600]
     latest = {}
     for r in runs:
+        # pull request runs test a branch, not the live site; the item pages bot merges its PR before its run starts
+        if r.get("event") == "pull_request":
+            continue
         latest.setdefault(r["name"], r)
     bad = [r for r in latest.values() if r.get("conclusion") in ("failure", "timed_out", "startup_failure") and r in recent]
     for r in bad:
