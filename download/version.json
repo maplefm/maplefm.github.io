@@ -1,10 +1,15 @@
 {
- "version": "2026.10.26.6",
- "date": "2026-10-26T16:08:47+00:00",
- "notes": "README: how to read equip stats best (shop window high, popup off the chat box).",
- "sha256": "00ac4cb142982f517302a237d38438d177fd1fe206a919b006054696c9aca68e",
- "size": 99941,
+ "version": "2026.10.26.7",
+ "date": "2026-10-26T16:27:45+00:00",
+ "notes": "Equip stats read much more reliably: the watcher now reads only the item popup itself, so the chat box or players behind it no longer get in the way. Scrolled (orange) item names are read too.",
+ "sha256": "b6612fe5c8a5b22c12ff99e8b41651223a9a9d263a6b523df402290360ac7a36",
+ "size": 101332,
  "history": [
+  {
+   "version": "2026.10.26.7",
+   "date": "2026-10-26",
+   "notes": "Equip stats read much more reliably: the watcher now reads only the item popup itself, so the chat box or players behind it no longer get in the way. Scrolled (orange) item names are read too."
+  },
   {
    "version": "2026.10.26.6",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.21.2",
    "date": "2026-10-21",
    "notes": "Sends your saved scans from the past week the first time it starts."
-  },
-  {
-   "version": "2026.10.21.1",
-   "date": "2026-10-21",
-   "notes": "Better at telling which items sold."
   }
  ],
  "pip": [],
- "sig": "bf05e308c39faeb327d2084a6dbef5bf53be4e109f3d00a14d73426fa1bd2dad1daaa377cb36273640994b50efe4d989f40ec4b8e99691d4d56ba6f2ea6a13b65925a91fb25d25302f1d436bd5708f3ccae44f8f082b12b2f1ca4b78220c96c34c45601d0c8b46056a21a0a604f9667fca86b23e4ae837a152dc26a22763904d6bbfbf79cd9d212413ab062420414ced954761565b37937ac2ba1b350ce35799d0d40ec952f9e512dae12f8ee4ffdf764562b8153371d0659a620230439b8a588a03514044049edcb395e4bebf22b9b76aebc1ed11c30095379b31d575d207326765cd46b7d727abaf8e7feb19b25354095374e838e251c36bf6f537c0d7d0f4"
+ "sig": "c741d12511cb31cfb61628109c70f326d57009f2e669d32d67bbe52772c9305251698f541bd4c59061e8b56bde0f619cf1d82dc334cb4aba305680f82e6e6d03b3b201679d296231af6a4d30e73a0c41b7dd5dbb73ef1c0bafbf71cd7f6dc19f62a23f5196893003a4dcddcf1cc55d3cd5abbb4746b97adb27e519aef3c554c9898f82d806197dc539e3507875c551e60eaf0a11a8dc2febe22b616b8374a62c03d0575a8cb23161248e08af11157436d0dca6c4ebb64b11038b84311453b4fe399ee98e2454cbd4e5c1c27cb2537cab7ef89232d273b6c5cc051c3d4cbd5e94d7ea604c04f8de9a74402ec58165002f063dbfe0e12c1a286defdad96dc78e22"
 }

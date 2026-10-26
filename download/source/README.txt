@@ -26,7 +26,7 @@ While you shop
 1. Open the Change Channel window once, so listings carry your channel.
 2. Keep the minimap in view. It tells us which FM room you're in.
 3. Equip stats: drag the shop window up high, then rest your mouse on each equip's icon for about a second.
-   Keep the whole item popup on clear ground, not over the chat box. You'll hear a chime and see "read" when it has the stats.
+   Keep the whole item popup on the screen; it's fine over the chat box. You'll hear a chime and see "read" when it has the stats.
    Full guide with pictures: maplefm.gg/contribute.html#stats
 
 Stop it by closing the window.
