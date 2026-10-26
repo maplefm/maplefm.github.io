@@ -123,6 +123,10 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         await p.fill(".sitenav .sn-search input", "work gloves"); await p.keyboard.press("Enter");
         await p.waitForFunction(() => document.querySelector("#ip") && /Work Gloves/.test(document.querySelector("#ip").textContent), null, { timeout: 30000 }).catch(() => {});
         ok(await p.evaluate(() => location.pathname === "/" && !!document.querySelector("#ip") && /Work Gloves/.test(document.querySelector("#ip").textContent)), `${tag} menu search opens the item on the board`);
+        // "See X on the price board" from a listing opens that item's card
+        await p.goto("http://localhost:" + PORT + "/#item=" + encodeURIComponent("Pan Lid"), { waitUntil: "domcontentloaded" });
+        await p.waitForFunction(() => document.querySelector("#ip") && /Pan Lid/.test(document.querySelector("#ip").textContent), null, { timeout: 30000 }).catch(() => {});
+        ok(await p.evaluate(() => !!document.querySelector("#ip") && /Pan Lid/.test(document.querySelector("#ip").textContent)), `${tag} a #item= link opens the item card`);
       }
       ok(!errs.length, `${tag} ${pg}: no page errors ${errs.slice(0, 2).join(" | ")}`);
       await ctx.close();
