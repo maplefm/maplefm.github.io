@@ -37,20 +37,20 @@ a { color: var(--accent); }
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 <div class="card">
 <h1>/price in any Discord</h1>
-<p class="lead">Type <code>/price</code> and an item. Club FM answers with the typical price from sales players watched happen, the cheapest ask right now, and how it moved today. Only you see the answer.</p>
+<p class="lead">Type <code>/price</code> and an item for its typical sale price, cheapest ask and today's move. Only you see the answer.</p>
 <div class="demo">
 <div><span class="cmd">/price</span> glove for att 60</div>
-<div class="emb"><b>Gloves Attack Scroll 60%</b><br>Typical, range, cheapest ask and the 24h move, with a link to every listing on the board.</div>
+<div class="emb"><b>Gloves Attack Scroll 60%</b><br>Typical, range, cheapest ask, 24h move and a link to every listing.</div>
 </div>
 <div class="btns">
-<a class="btn" href="https://discord.com/oauth2/authorize?client_id=1562655420441694289&amp;integration_type=0&amp;scope=applications.commands" target="_blank" rel="noopener"><b>Add to your server</b><span>For guild owners. Everyone in the server gets /price.</span></a>
+<a class="btn" href="https://discord.com/oauth2/authorize?client_id=1562655420441694289&amp;integration_type=0&amp;scope=applications.commands" target="_blank" rel="noopener"><b>Add to your server</b><span>Guild owners. Everyone in the server gets /price.</span></a>
 <a class="btn alt" href="https://discord.com/oauth2/authorize?client_id=1562655420441694289&amp;integration_type=1&amp;scope=applications.commands" target="_blank" rel="noopener"><b>Add to my apps</b><span>Just you, in any server, DM or group chat.</span></a>
 </div>
 <h2>Good to know</h2>
 <ol>
 <li>It asks for no permissions. It can't read your messages; it only answers <code>/price</code>.</li>
 <li>Suggestions pop up as you type. Chat shortcuts work too: <code>gfa 60</code>, <code>wg</code>, <code>glove for att 10</code>. <a href="/shortcuts.html">Every shortcut</a>.</li>
-<li>Prices come from <a href="/contribute.html">FM Watcher</a> scanners and streams. More scanners means more items priced.</li>
+<li>Prices come from <a href="/contribute.html">FM Watcher</a> scanners and streams.</li>
 </ol>
 <p>Want deal alerts and the weekly digest too? <a href="https://discord.gg/cXnVBTUUPk" target="_blank" rel="noopener">Join the Club FM Discord</a>.</p>
 </div>

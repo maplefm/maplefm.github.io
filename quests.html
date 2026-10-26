@@ -101,7 +101,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html" aria-current="page"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 
 <section class="hero">
-  <div><h1>Quest Log</h1><p>Every MapleStory Classic quest: what's open at your level, what you've started, what's next, and exactly what each one needs, where it drops and what it costs to just buy.</p></div>
+  <div><h1>Quest Log</h1><p>Every MapleStory Classic quest: what's open at your level, what each needs, where it drops and what it costs to buy.</p></div>
   <div class="me">
     <div class="lvrow">My level <input type="number" id="lv" min="1" max="250" placeholder="?"><span class="ign" id="ignbox"><input type="text" id="ign" placeholder="or your IGN" maxlength="16" autocomplete="off" aria-label="Your character name, to pull your level from classicrank.com"></span></div>
     <small id="lvsrc" hidden></small>
@@ -122,11 +122,11 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 <div class="layout">
   <div id="qs"><p class="empty">Loading quests…</p></div>
   <aside class="side">
-    <div class="panel" id="shop"><h2>Shopping list</h2><p class="note">Start a quest and everything it needs adds up here, with what it costs on the Free Market.</p></div>
-    <div class="panel"><h2>How it works</h2><p class="note">Mark quests Started or Done here. Sign in with Discord and your log follows you to any browser. Coming soon: FM Watcher reads your in-game quest window and fills this in for you.</p></div>
+    <div class="panel" id="shop"><h2>Shopping list</h2><p class="note">Start a quest and its items add up here with Free Market costs.</p></div>
+    <div class="panel"><h2>How it works</h2><p class="note">Mark quests Started or Done. Sign in with Discord to keep your log on any browser. Coming soon: FM Watcher fills it in from your quest window.</p></div>
   </aside>
 </div>
-<p class="foot">Quests and rewards from the MapleStory Classic game data (pictures via maplestory.io). Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0); drop rates are measured by players. Prices are typical Free Market sales on Club FM. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
+<p class="foot">Quests and rewards: MapleStory Classic game data, pictures via maplestory.io. Givers, drops, crafting and shops: <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a>, CC BY-NC-SA 4.0. Drop rates measured by players. Prices: typical Club FM sales. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
 </main>
 <script>
 (function () {
@@ -232,7 +232,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     if (out.childNodes.length) wrap.appendChild(out);
     if (g.c && g.c.length) { var c = g.c[0]; c.__name = name; wrap.appendChild(craftBox(c, qty, g.c.length - 1)); }
     (g.g || []).slice(0, 2).forEach(function (x) { var p = el("div", "qsrc"); p.appendChild(document.createTextNode(x[2] === "given" ? "Given to you during " : "Reward from ")); p.appendChild(questLink(x[0], x[1])); wrap.appendChild(p); });
-    if (!wrap.childNodes.length && g.t) wrap.appendChild(el("div", "qsrc", "Quest item, found while doing the quest: “" + g.t + "”"));
+    if (!wrap.childNodes.length && g.t) wrap.appendChild(el("div", "qsrc", "Found during the quest: “" + g.t + "”"));
     return wrap.childNodes.length ? wrap : null;
   }
   function needRow(name, qty) {
@@ -267,7 +267,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     q.get.forEach(function (x) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); if (IDS[x[0]]) s.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); a.appendChild(s); rw.appendChild(a); });
     if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); d.appendChild(s3); }
     if (q.pre.length) { var pids = q.pre.filter(function (id) { return BYID[id]; }); if (pids.length) { var pp = el("p", "pre", "After: "); pids.forEach(function (id, k) { if (k) pp.appendChild(document.createTextNode(", ")); pp.appendChild(questLink(BYID[id].n, id)); }); if (preDone(q)) pp.appendChild(document.createTextNode(" ✓")); d.appendChild(pp); } }
-    if (q.custom) d.appendChild(el("p", "talk", "Not in our quest list yet, so there are no details. It's kept here so your log matches the game."));
+    if (q.custom) d.appendChild(el("p", "talk", "Not in our quest list yet, so no details. Kept so your log matches the game."));
     else if (!q.need.length && !q.kill.length) d.appendChild(el("p", "talk", "Talk and deliver: no items to bring and nothing to hunt."));
     return d;
   }
@@ -297,7 +297,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     if (sort === "exp") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || b.exp - a.exp; });
     else if (sort === "cost") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || costOf(a) - costOf(b); });
     var box = $("qs"); box.textContent = "";
-    if (!list.length) box.appendChild(el("p", "empty", TAB === "doing" ? "Nothing started yet. Hit Start on a quest and it shows here, with a shopping list on the side." : TAB === "done" ? "No quests marked done yet." : "No quests match."));
+    if (!list.length) box.appendChild(el("p", "empty", TAB === "doing" ? "Nothing started yet. Hit Start on a quest to track it here." : TAB === "done" ? "No quests marked done yet." : "No quests match."));
     list.slice(0, SHOWN).forEach(function (q) { box.appendChild(card(q)); });
     if (list.length > SHOWN) { var mb = el("button", "more", "Show " + Math.min(120, list.length - SHOWN) + " more of " + list.length); mb.type = "button"; mb.addEventListener("click", function () { SHOWN += 120; render(); }); box.appendChild(mb); }
     // shopping list for started quests
@@ -305,7 +305,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     var mine = Q.filter(function (q) { return LOG.doing[q.n]; }), need = {};
     mine.forEach(function (q) { q.need.forEach(function (x) { need[x[0]] = (need[x[0]] || 0) + x[1]; }); });
     var keys = Object.keys(need).sort(), tot = 0;
-    if (!keys.length) P.appendChild(el("p", "note", "Start a quest and everything it needs adds up here, with what it costs on the Free Market."));
+    if (!keys.length) P.appendChild(el("p", "note", "Start a quest and its items add up here with Free Market costs."));
     keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = "/item/" + slug(n) + "/"; r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
     if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
   }

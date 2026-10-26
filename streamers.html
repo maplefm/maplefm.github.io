@@ -60,19 +60,19 @@ a{color:var(--accent)}
 </div></div>
 
 <h2 class="s">Questions</h2>
-<details><summary>Does it cost anything?</summary><p>No. Club FM is free for everyone, with no ads and no sign-up needed to look up prices.</p></details>
-<details><summary>Is it safe for my stream and my viewers?</summary><p>Yes. The command only fetches one line of text from our server, the same as any !weather or !uptime command. It can't post anything on its own, and it doesn't see who asked. Viewers who click a link just land on a public web page.</p></details>
-<details><summary>Where do the prices come from?</summary><p>Players who shop in the Free Market and real sales seen in shops and trade chat. Equips are priced by their stats. <a href="/how-it-works.html">Full details on how the data comes in</a>.</p></details>
-<details><summary>Who runs Club FM?</summary><p>A player who loves the game. It's community-run and not for profit, paid for out of pocket. Donations go back to the players who scan prices. <a href="/how-it-works.html#who">More about the project</a>.</p></details>
+<details><summary>Does it cost anything?</summary><p>No. Free, no ads, no sign up to look up prices.</p></details>
+<details><summary>Is it safe for my stream and my viewers?</summary><p>Yes. It only fetches one line of text, like !weather or !uptime. It can't post on its own and doesn't see who asked. Links go to a public web page.</p></details>
+<details><summary>Where do the prices come from?</summary><p>Real sales seen in Free Market shops and trade chat by players who scan. Equips are priced by stats. <a href="/how-it-works.html">Full details</a>.</p></details>
+<details><summary>Who runs Club FM?</summary><p>One player, not for profit, paid out of pocket. Donations go to the players who scan. <a href="/how-it-works.html#who">More</a>.</p></details>
 
-<p class="foot">Want help setting it up, or a feature for your stream? Message Maya in the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a>.</p>
+<p class="foot">Need help or a feature? Message Maya in the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a>.</p>
 </main>
 <script>
 var API = "https://api.maplefm.gg";
 var CMDS = {
-  nb: ["!commands add !price $(urlfetch " + API + "/chat/price?q=$(querystring))", "Paste it into your own chat while live or offline. Nightbot needs to be a mod."],
-  se: ["!command add !price ${customapi." + API + "/chat/price?q=${queryescape ${1:}}}", "Paste it into your own chat. StreamElements needs to be in your channel."],
-  fb: ["$(customapi " + API + "/chat/price?q=$(querystring))", "In Fossabot, make a command named !price and paste this as the response."]
+  nb: ["!commands add !price $(urlfetch " + API + "/chat/price?q=$(querystring))", "Paste it in your chat. Nightbot needs to be a mod."],
+  se: ["!command add !price ${customapi." + API + "/chat/price?q=${queryescape ${1:}}}", "Paste it in your chat. StreamElements needs to be in your channel."],
+  fb: ["$(customapi " + API + "/chat/price?q=$(querystring))", "In Fossabot, make a !price command with this as the response."]
 };
 var cur = "nb";
 function show(k) { cur = k; document.getElementById("cmd").textContent = CMDS[k][0]; document.getElementById("how").textContent = CMDS[k][1];
