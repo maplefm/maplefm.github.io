@@ -1219,12 +1219,19 @@ async function trafficStats(env, from, to) {
 }
 function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.views + "** views · **" + pc + "** !price"; }
 function trafficEmbed(st, prev, title, from, to, extra) {
-  const d = (a, b) => (b == null ? "" : a === b ? " (same as yesterday)" : " (" + (a > b ? "+" : "") + (a - b) + " vs yesterday)");
+  // change against the same hours yesterday, as a count and a percent: "(+12, ▲ 25% vs yesterday)"
+  const d = (a, b) => {
+    if (b == null) return "";
+    if (a === b) return " (same as yesterday)";
+    const pct = b > 0 ? Math.round((a - b) / b * 100) : null;
+    return " (" + (a > b ? "+" : "") + (a - b) + (pct == null ? ", new" : ", " + (pct >= 0 ? "▲ " : "▼ ") + Math.abs(pct) + "%") + " vs yesterday)";
+  };
   const f = [];
   f.push({ name: "Visitors", value: "**" + st.visitors + "**" + d(st.visitors, prev && prev.visitors), inline: true });
   f.push({ name: "Page views", value: "**" + st.views + "**" + d(st.views, prev && prev.views), inline: true });
   const pc = st.price.reduce((s, r) => s + r.n, 0);
-  f.push({ name: "!price answers", value: "**" + pc + "**", inline: true });
+  const ppc = prev && prev.price ? prev.price.reduce((s, r) => s + r.n, 0) : null;
+  f.push({ name: "!price answers", value: "**" + pc + "**" + d(pc, ppc), inline: true });
   if (st.pages.length) f.push({ name: "Top pages", value: st.pages.map((x) => x[0] + " · " + x[1]).join("\n") + (st.items.length ? "\nMost viewed items: " + st.items.join(", ") : "") });
   if (st.opens && st.opens.length) f.push({ name: "Most opened on the board", value: st.opens.map((x) => x.i + " · " + x.n).join("\n") + "\nSearches " + st.finds + " · quick picks clicked " + st.picks });
   if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });
