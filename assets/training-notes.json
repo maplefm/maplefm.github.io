@@ -1,81 +1,274 @@
 {
- "updated": "2026-10-25",
+ "updated": "2026-10-26",
  "note": "What players report, by level, in our own words. Map stats on the page come from the game data and update daily; these notes are re-checked against the community every week.",
  "brackets": [
-  {"lo": 1, "hi": 10, "tips": [
+  {
+   "lo": 1,
+   "hi": 10,
+   "tips": [
     "Do every Maple Island quest first. You leave around level 8 with free potions and a chair.",
-    "Warriors can basic attack all the way here and spend almost nothing on potions."],
+    "Warriors can basic attack all the way here and spend almost nothing on potions."
+   ],
    "picks": [
-    {"map": "L Forest I", "why": "Ribbon Pigs, usually quiet."},
-    {"map": "The Tree That Grew II", "why": "The Slime tree north of Ellinia. Packed and safe."},
-    {"map": "Henesys Hunting Ground III", "why": "Slimes and mushrooms next to Henesys."}]},
-  {"lo": 10, "hi": 15, "tips": [
-    "Pick maps where you kill in one or two hits; extra hits are where potions go."],
+    {
+     "map": "L Forest I",
+     "why": "Ribbon Pigs, usually quiet."
+    },
+    {
+     "map": "The Tree That Grew II",
+     "why": "The Slime tree north of Ellinia. Packed and safe."
+    },
+    {
+     "map": "Henesys Hunting Ground III",
+     "why": "Slimes and mushrooms next to Henesys."
+    }
+   ]
+  },
+  {
+   "lo": 10,
+   "hi": 15,
+   "tips": [
+    "Pick maps where you kill in one or two hits; extra hits are where potions go."
+   ],
    "picks": [
-    {"map": "Tree Dungeon, Forest Up North IV", "why": "Green Mushrooms and Slimes in the Ellinia tree dungeons. Players report coming out meso positive."},
-    {"map": "Line 1 (Area 1)", "why": "Bubblings under Kerning City, the densest one-monster map for the range."},
-    {"map": "West Rocky Mountain III", "why": "Low traffic and a known money map from 15 to 30."},
-    {"map": "Caution Falling Down", "why": "Octopus near Kerning City."}]},
-  {"lo": 15, "hi": 21, "tips": [
-    "Stay off Dangerous Croko I and II: level 52 Crocos walk through them."],
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "why": "Green Mushrooms and Slimes in the Ellinia tree dungeons. Players report coming out meso positive."
+    },
+    {
+     "map": "Caution Falling Down",
+     "why": "Octopus near Kerning City."
+    }
+   ]
+  },
+  {
+   "lo": 15,
+   "hi": 21,
+   "tips": [
+    "Stay off Dangerous Croko I and II: level 52 Crocos walk through them."
+   ],
    "picks": [
-    {"map": "Transfer Area", "why": "Stirges from about 20, for magicians, thieves and bowmen. Warriors usually skip Stirges. Crowded.", "classes": ["Magician", "Thief", "Bowman"]},
-    {"map": "Dangerous Steam", "why": "More Stirges, same advice.", "classes": ["Magician", "Thief", "Bowman"]},
-    {"map": "Damp Forest", "why": "Jr. Neckis from 21, called the safest Necki map. A common pick for mesos and EXP until 30 to 35."}]},
-  {"lo": 21, "hi": 30, "tips": [
-    "Kerning PQ (level 21+, party of 4) is the most recommended option for this range.",
-    "Melee profit in the Ant Tunnels is disputed: several warriors said it was their first meso-negative map; ranged classes report profit."],
+    {
+     "map": "Line 1 (Area 1)",
+     "why": "Bubblings under Kerning City. Dense and flat, but they hit hard: go once you kill in 1 or 2 hits."
+    },
+    {
+     "map": "Transfer Area",
+     "why": "Stirges from about 20, for magicians, thieves and bowmen. Warriors usually skip Stirges. Crowded.",
+     "classes": [
+      "Magician",
+      "Thief",
+      "Bowman"
+     ]
+    },
+    {
+     "map": "Dangerous Steam",
+     "why": "More Stirges, same advice.",
+     "classes": [
+      "Magician",
+      "Thief",
+      "Bowman"
+     ]
+    },
+    {
+     "map": "Damp Forest",
+     "why": "Jr. Neckis from 21, called the safest Necki map. A common pick for mesos and EXP until 30 to 35."
+    }
+   ]
+  },
+  {
+   "lo": 21,
+   "hi": 30,
+   "tips": [
+    "Kerning PQ (21+, party of 4) is fun, but most guides say party grinding gives more EXP: about half a level a run at 21 to 22.",
+    "Iron Hogs: 500 physical defense, so physical attacks do about a sixth of normal damage. Mages with lightning do best.",
+    "Melee profit in the Ant Tunnels is disputed: several warriors said it was their first meso-negative map; ranged classes report profit."
+   ],
    "picks": [
-    {"map": "Ant Tunnel III", "why": "Zombie and Horny Mushrooms, the classic 21 to 30 map."},
-    {"map": "Ant Tunnel Park", "why": "Has a shop on the map, so refills cost no walking."},
-    {"map": "Deep Ant Tunnel I", "why": "Ant Tunnel with Evil Eyes mixed in."},
-    {"map": "Dark Cave", "why": "Stirges with mushrooms."},
-    {"map": "The Land of Wild Boar II", "why": "The alternative for warriors and crossbowmen.", "classes": ["Warrior", "Bowman"]}]},
-  {"lo": 30, "hi": 40, "tips": [
-    "Jr. Wraiths need roughly 82 accuracy to hit reliably.",
-    "Cold Eyes are reported as expensive on potions and a long walk."],
+    {
+     "map": "Ant Tunnel III",
+     "why": "Zombie and Horny Mushrooms, the classic 21 to 30 map."
+    },
+    {
+     "map": "Ant Tunnel Park",
+     "why": "Has a shop on the map, so refills cost no walking."
+    },
+    {
+     "map": "Deep Ant Tunnel I",
+     "why": "Ant Tunnel with Evil Eyes mixed in."
+    },
+    {
+     "map": "Dark Cave",
+     "why": "Stirges with mushrooms."
+    },
+    {
+     "map": "The Land of Wild Boar II",
+     "why": "The alternative for warriors and crossbowmen.",
+     "classes": [
+      "Warrior",
+      "Bowman"
+     ]
+    }
+   ]
+  },
+  {
+   "lo": 30,
+   "hi": 40,
+   "tips": [
+    "Jr. Wraiths need roughly 82 accuracy to hit reliably."
+   ],
    "picks": [
-    {"map": "Line 2 (Area 1)", "why": "Jr. Wraiths under Kerning, the densest map for the range. Best for clerics.", "classes": ["Magician", "Thief", "Bowman", "Warrior"]},
-    {"map": "Tree Dungeon, Forest Up North IX", "why": "Curse Eyes. Players measured it as the top solo warrior map at 35 to 44.", "classes": ["Warrior"]},
-    {"map": "The Burnt Land V", "why": "Fire Boars, best for ice and lightning magicians; warriors and bowmen do well too. Its Lupins use magic, so watch MP.", "classes": ["Magician", "Warrior", "Bowman"]},
-    {"map": "Lorang Lorang", "why": "Lorangs at 36 to 40, best with lightning."}]},
-  {"lo": 40, "hi": 50, "tips": [
-    "The Wraith lines are a long walk from Kerning City: carry plenty of potions."],
+    {
+     "map": "Line 2 (Area 1)",
+     "why": "Jr. Wraiths under Kerning, the densest map for the range. Best for clerics.",
+     "classes": [
+      "Magician",
+      "Thief",
+      "Bowman",
+      "Warrior"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "why": "Fire Boars, weak to ice: best for ice and lightning magicians; warriors and bowmen do well too.",
+     "classes": [
+      "Magician",
+      "Warrior",
+      "Bowman"
+     ]
+    },
+    {
+     "map": "Lorang Lorang",
+     "why": "Lorangs at 36 to 40, best with lightning."
+    },
+    {
+     "map": "The Swamp of Despair II",
+     "why": "Ligators, Horny Mushrooms and Jr. Neckis at 30 to 36. One of the densest early-30s maps."
+    },
+    {
+     "map": "A Look-Out Shed Around the Beach",
+     "why": "Lorangs at 36 to 42, weak to lightning. One portal from potions."
+    }
+   ]
+  },
+  {
+   "lo": 40,
+   "hi": 50,
+   "tips": [
+    "The Wraith lines are a long walk from Kerning City: carry plenty of potions.",
+    "Wraiths hit hard: clerics turn Magic Guard on here."
+   ],
    "picks": [
-    {"map": "Monkey Swamp III", "why": "Zombie Lupins at 41 to 45: undead, low defense, good drops. Clerics love it."},
-    {"map": "Line 2 (Area 3)", "why": "Wraiths from about 46."},
-    {"map": "Dangerous Valley", "why": "Ice and lightning magicians report strong party rates.", "classes": ["Magician"]},
-    {"map": "Drake Hunting Ground", "why": "Measured as a top warrior map from 45.", "classes": ["Warrior"]},
-    {"map": "Hot Sand", "why": "Torties."}]},
-  {"lo": 50, "hi": 60, "tips": [
-    "Sleepy Dungeon V is disputed: one database ranks it first, players and spawn data favor other maps, and its spawns were lowered at launch."],
+    {
+     "map": "Monkey Swamp III",
+     "why": "Zombie Lupins at 41 to 45: undead, low defense, good drops. Clerics love it."
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "why": "Wraiths from about 46."
+    },
+    {
+     "map": "Dangerous Valley",
+     "why": "Ice and lightning magicians report strong party rates.",
+     "classes": [
+      "Magician"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "why": "Torties."
+    },
+    {
+     "map": "Line 2 (Area 2)",
+     "why": "Jr. Wraiths and Wraiths at 44 to 55. Top Victoria Island map for the range in two guides."
+    },
+    {
+     "map": "The Tunnel That Lost Light I",
+     "why": "Cold Eyes and Drakes at 40 to 46. Long walk, few players. Cold Eyes are weak to fire."
+    }
+   ]
+  },
+  {
+   "lo": 50,
+   "hi": 60,
+   "tips": [
+    "Sleepy Dungeon V is disputed: one database ranks it first, players and spawn data favor other maps, and its spawns were lowered at launch."
+   ],
    "picks": [
-    {"map": "Sleepy Dungeon IV", "why": "Measured as the top thief party map at 50 to 59.", "classes": ["Thief"]},
-    {"map": "The Forest of Evil II", "why": "Maladies and Zombie Lupins; strong for thieves and melee from 55."},
-    {"map": "Remains (Tomb) I", "why": "The new Excavation Site tombs."},
-    {"map": "Line 2 (Area 3)", "why": "Wraiths are still the densest fallback."}]},
-  {"lo": 60, "hi": 100, "tips": [
-    "Every source calls this range thin: slow respawns, and some maps are held by groups or bots."],
+    {
+     "map": "The Forest of Evil II",
+     "why": "Maladies and Zombie Lupins; strong for thieves and melee from 55."
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "why": "The new Excavation Site tombs."
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "why": "Wraiths are still the densest fallback."
+    },
+    {
+     "map": "Lorang and Clang",
+     "why": "Clangs at 47 to 55, the Wraith alternative. Lightning magicians do best."
+    },
+    {
+     "map": "Dangerous Croko II",
+     "why": "Crocos at 52 to 58. Weak to fire, resist ice; need about 101 accuracy."
+    },
+    {
+     "map": "Golem's Temple III",
+     "why": "Stone Golems at 55 to 62. Small maps, fine for a duo."
+    }
+   ]
+  },
+  {
+   "lo": 60,
+   "hi": 100,
+   "tips": [
+    "Every source calls this range thin: slow respawns, and some maps are held by groups or bots."
+   ],
    "picks": [
-    {"map": "Camp 3", "why": "Officer Skeletons, built for the low 60s."},
-    {"map": "Remains (Cliff)", "why": "Commander Skeletons, level 73."},
-    {"map": "Dangerous Valley II", "why": "Red Drakes. Slow respawns."},
-    {"map": "Sanctuary Entrance I", "why": "Tauromacis and Taurospear. Slow respawns."}]}
+    {
+     "map": "Wild Kargo's Area",
+     "why": "Wild Kargos at 58 to 68 when the Drake maps are crowded. Need about 117 accuracy."
+    },
+    {
+     "map": "Dangerous Valley II",
+     "why": "Red Drakes. Slow respawns."
+    },
+    {
+     "map": "Sanctuary Entrance I",
+     "why": "Tauromacis and Taurospear. Slow respawns."
+    }
+   ]
+  }
  ],
  "economy": [
   "HP costs about half a meso per HP: Meat and Red Potions are the best value. MP costs about one meso per MP: Lemons, or Pure Water bought on the Free Market.",
+  "Cake restores 100 HP and 100 MP for 150 mesos: the best NPC item for both.",
   "White and Blue Potions are poor value. Unagi, Pure Water and Elixirs are often cheaper on the Free Market than at the NPC.",
-  "Do every quest: together they hand out a lot of potions and about 212K mesos.",
-  "Magicians: skip Magic Guard; refilling MP costs more than refilling HP.",
-  "Dying costs 10% of your level's EXP. There are no EXP events in Classic World."
+  "Citizenship from level 12 (Henesys or Kerning): 5% to 25% off shops and taxis, plus Supreme Sniper Potions or Wolbis.",
+  "Monsters at 10 to 30 drop more potions in Classic.",
+  "Magicians: put 3 points in Magic Guard to unlock Magic Armor. Keep it off while grinding, on for bosses and Wraiths.",
+  "Ice-weak: Fire Boar, Copper Drake, Red Drake, Tauromacis. Ice-resistant: Ligator, Cold Eye, Drake, Croco. Lightning-weak: Iron Hog, Lorang, Clang.",
+  "Most mid-level monsters give 5 to 10% less EXP than old GMS and have a little more avoid."
  ],
  "party": [
-  "Kerning PQ: level 21+, no upper limit in Classic, party of 4, 30 minutes, three players can finish. Most players say it beats grinding until 30 to 35.",
-  "Party EXP bonus is reported as 10%, 20% and 30% for 2, 3 and 4+ members (test server figures; not confirmed for launch).",
+  "Kerning PQ: level 21+, no upper limit in Classic, party of 4, 30 minutes, three players can finish. Most guides say party grinding gives more EXP.",
+  "Party EXP bonus: sources disagree. Reported from +10% for 2 members up to 30% or more for 4 to 6.",
+  "To share EXP you must be on the map and have attacked, been hit or used a skill in the last 10 seconds.",
   "Mesos are split in a party, not increased."
  ],
  "upcoming": [
-  {"name": "Forgotten Hollow", "date": "2026-11-18", "note": "New area with Glowshrooms, Raffles, Golden Stirges and more. Shows up here automatically once it is in the game."},
-  {"name": "Forgotten Hollow party quest", "date": "2026-12-09", "note": "Level 41+."}
+  {
+   "name": "Forgotten Hollow",
+   "date": "2026-11-18",
+   "note": "New area with Glowshrooms, Raffles, Golden Stirges and more. Shows up here automatically once it is in the game."
+  },
+  {
+   "name": "Forgotten Hollow party quest",
+   "date": "2026-12-09",
+   "note": "Level 41+."
+  }
  ]
 }
