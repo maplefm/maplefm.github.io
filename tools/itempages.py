@@ -24,12 +24,17 @@ def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", shown(name).lower().replace("%", "")).strip("-")
 
 
+def _trim(s):
+    # 1.50 -> 1.5, 2.00 -> 2; never touch whole numbers, or 100 would become 1
+    return s.rstrip("0").rstrip(".") if "." in s else s
+
+
 def meso(n):
     n = float(n or 0)
-    if n >= 999.5e6: return f"{n / 1e9:.2f}".rstrip("0").rstrip(".") + "B"
-    if n >= 999.5e3: return (f"{n / 1e6:.1f}" if n >= 9.95e6 else f"{n / 1e6:.2f}").rstrip("0").rstrip(".") + "M"
-    if n >= 1e4: return (f"{n / 1e3:.0f}" if n >= 99.95e3 else f"{n / 1e3:.1f}").rstrip("0").rstrip(".") + "K"
-    return f"{n:,.0f}" if n >= 10 else f"{n:.1f}".rstrip("0").rstrip(".")
+    if n >= 999.5e6: return _trim(f"{n / 1e9:.2f}") + "B"
+    if n >= 999.5e3: return _trim(f"{n / 1e6:.1f}" if n >= 9.95e6 else f"{n / 1e6:.2f}") + "M"
+    if n >= 1e4: return _trim(f"{n / 1e3:.0f}" if n >= 99.95e3 else f"{n / 1e3:.1f}") + "K"
+    return f"{n:,.0f}" if n >= 10 else _trim(f"{n:.1f}")
 
 
 def full(n): return f"{float(n or 0):,.0f}"
