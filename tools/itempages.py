@@ -111,6 +111,35 @@ def facts(name, GUIDE):
     return out
 
 
+STATN = {"ATT": "Weapon attack", "MATT": "Magic attack", "STR": "STR", "DEX": "DEX", "INT": "INT", "LUK": "LUK", "HP": "Max HP", "MP": "Max MP",
+         "WDEF": "Weapon defense", "MDEF": "Magic defense", "ACC": "Accuracy", "AVOID": "Avoidability", "SPEED": "Speed", "JUMP": "Jump"}
+
+
+def equip_html(row, kinds):
+    """Base stats of a piece of equipment, as it drops: type, level needed, stats and upgrade slots."""
+    if not row or len(row) < 6: return ""
+    kind = kinds[row[5]] if row[5] < len(kinds) else ""
+    if not kind.startswith("Equip:") or row[4]: return ""
+    base = row[7] if len(row) > 7 and isinstance(row[7], dict) else {}
+    tr = [("Type", html.escape(kind.split(":", 1)[1]))]
+    if row[2]: tr.append(("Level needed", str(row[2])))
+    for k, lab in STATN.items():
+        if base.get(k): tr.append((lab, f"+{base[k]}"))
+    if base.get("SLOTS") is not None: tr.append(("Upgrade slots", str(base["SLOTS"])))
+    if len(tr) < 2: return ""
+    return "<h2>Item stats</h2><table>" + "".join(f"<tr><td>{a}</td><td>{b}</td></tr>" for a, b in tr) + "</table><p class=\"note\">Clean stats, before scrolls. Listings on the board show each roll.</p>"
+
+
+def eq_line(row, kinds):
+    """A short stat line for search results: level, type and the main stat."""
+    if not row or len(row) < 6 or row[4]: return ""
+    kind = kinds[row[5]] if row[5] < len(kinds) else ""
+    if not kind.startswith("Equip:"): return ""
+    base = row[7] if len(row) > 7 and isinstance(row[7], dict) else {}
+    main = [f"{v} {k}" for k, v in base.items() if k != "SLOTS" and v][:2]
+    return " " + ", ".join(x for x in [f"Level {row[2]} {kind.split(':', 1)[1].lower()}" if row[2] else kind.split(':', 1)[1], *main, f"{base['SLOTS']} slots" if base.get("SLOTS") else ""] if x) + "."
+
+
 def aliases(name, base):
     """Trade chat shorthand for an item, like GFA 60 for Gloves Attack Scroll 60%."""
     tier = re.search(r" (\d+)%$", shown(name))
@@ -198,6 +227,9 @@ def main():
     ids = {r[0]: r[1] for r in db}
     IDS.update(ids)
     vendor = {r[0]: r[6] for r in db if len(r) > 6}
+    dbrow = {}
+    for r in db: dbrow.setdefault(r[0], r)
+    KINDS = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json"))).get("kinds") or []
     rows = [r for r in (summ.get("rows") or []) if isinstance(r, dict) and r.get("item") in ids and (r.get("n") or 0) >= 5 and r.get("typ")]
     when = datetime.datetime.fromtimestamp((summ.get("at") or 0) / 1000, datetime.timezone.utc).strftime("%B %-d, %Y")
     bycat = {}
@@ -229,7 +261,7 @@ def main():
         price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
         if price_first or not fx:
             desc = (f"{nm} {price_txt} in MapleStory Classic. {r.get('salesN') or 0:,} Free Market sales seen, "
-                    f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else ""))
+                    f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
             title = f"{nm} price · MapleStory Classic · Club FM" if not nx else f"{nm} price · Cash Shop · MapleStory Classic · Club FM"
         else:
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
@@ -240,6 +272,7 @@ def main():
 <div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {f'<h2>Typical price by day</h2><table><tr><th>Day</th><th>Typical, mesos</th></tr>{dtab}</table>' if dtab else ''}
+{equip_html(dbrow.get(name), KINDS)}
 <p style="margin-top:16px"><a href="/#item={html.escape(name)}">See live listings, rolls and recent sales for {html.escape(nm)} on the board →</a></p>
 {guide_html(name, GUIDE.get(name), page_of)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
@@ -265,6 +298,7 @@ def main():
         desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
         body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
 <p class="note">No Free Market price yet: nobody has seen one sell. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
+{equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} · quests, drops, crafting · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
@@ -286,6 +320,39 @@ def main():
            f'<div class="bar"><div class="chips">{chips}</div><label class="srt">Sort <select id="sort"><option value="v">Most traded</option><option value="m">Biggest movers</option><option value="p">Highest price</option><option value="a">A to Z</option></select></label></div>'
            f'<p class="note" id="none" hidden>No priced item matches that. <a id="board" href="/">Search the live board</a> for listings.</p>{secs}</div>'
            '<script src="/items/index.js" defer></script>')
+    # one page per category, so "maplestory classic scroll prices" has a page that is about exactly that
+    HUB = {"Scrolls": ("scrolls", "scroll prices", "Every scroll players trade, 10% to 100%, with today's typical price and how many sales back it up."),
+           "Equips": ("equipment", "equipment prices", "Hats, tops, gloves, earrings, capes and shoes: what clean and scrolled gear sells for."),
+           "Weapons": ("weapons", "weapon prices", "Swords, claws, bows, wands and every other weapon, priced from sales players watched."),
+           "Cash": ("cash-shop", "Cash Shop item prices", "NX cosmetics and Cash Shop items sold for mesos on the Free Market."),
+           "Etc": ("etc", "etc item and ore prices", "Monster drops, ores and crafting materials: what they sell for and where they drop."),
+           "Use": ("potions", "potion and use item prices", "Potions, food and other use items, next to their NPC prices."),
+           "Stars": ("throwing-stars", "throwing star prices", "Throwing stars for thieves, from Subis to Ilbis.")}
+    hubs = []
+    for cat, (hs, what, intro) in HUB.items():
+        lst = bycat.get(cat) or []
+        if len(lst) < 5: continue
+        trs = ""
+        for x in lst:
+            mv = (x.get("mv") or [None])[0]
+            ch = (f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else "")
+            trs += (f'<tr><td><a href="/item/{slug(x["item"])}/"><img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="{html.escape(shown(x["item"]))}" width="24" height="24" loading="lazy"> {html.escape(shown(x["item"]))}</a></td>'
+                    f'<td class="n">{meso(x["typ"])} {ch}</td><td class="n">{full(x.get("salesN") or 0)}</td></tr>')
+        others = " · ".join(f'<a href="/items/{v[0]}/">{html.escape(v[1][0].upper() + v[1][1:])}</a>' for k, v in HUB.items() if k != cat and len(bycat.get(k) or []) >= 5)
+        body = (f'<div class="card"><h1>MapleStory Classic {html.escape(what)}</h1><p class="sub">{len(lst)} items · updated {when}</p><p>{html.escape(intro)} '
+                f'Prices are the typical price from Free Market sales that players caught with the FM Watcher, most traded first. Open any item for its price history, drops and quests.</p>'
+                f'<table><tr><th>Item</th><th>Typical, mesos</th><th>Sales seen</th></tr>{trs}</table>'
+                f'<p class="note" style="margin-top:14px">More prices: {others} · <a href="/items/">All items</a> · <a href="/">Live board</a></p></div>')
+        d = os.path.join(out, "items", hs); os.makedirs(d, exist_ok=True)
+        title = f"MapleStory Classic {what} · Club FM"
+        desc = f"{what[0].upper() + what[1:]} in MapleStory Classic, updated {when}: {len(lst)} items with the typical Free Market price from real sales. " + intro
+        ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Club FM", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "Item prices", "item": SITE + "/items/"},
+            {"@type": "ListItem", "position": 3, "name": what[0].upper() + what[1:], "item": f"{SITE}/items/{hs}/"}]}) + "</script>"
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(title, desc, f"{SITE}/items/{hs}/", body, ld, crumbs=[("Prices", "/"), ("All items", "/items/"), (what[0].upper() + what[1:], "")]))
+        hubs.append((hs, what))
+    hublinks = '<p class="note" style="margin:6px 0 10px">By category: ' + " · ".join(f'<a href="/items/{h}/">{html.escape(w[0].upper() + w[1:])}</a>' for h, w in hubs) + "</p>"
+    idx = idx.replace('<input id="q"', hublinks + '<input id="q"', 1)
     os.makedirs(os.path.join(out, "items"), exist_ok=True)
     open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx))
     # remove pages for items that dropped out, so stale prices don't linger in search
@@ -299,7 +366,7 @@ def main():
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
     today = datetime.date.today().isoformat()
-    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
+    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
     # lastmod only moves when a page's content does: item prices daily, world pages when the game data changed
     wbuilt = (WBUILT[0] or today)[:10]
     world = {SITE + p for p in world_paths}
