@@ -137,6 +137,14 @@ def update():
 for _k in ("ALL_PROXY", "all_proxy", "HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy"):
     if "socks" in os.environ.get(_k, "").lower():
         os.environ.pop(_k, None)
+# The same app can switch on Windows' own system proxy with SOCKS. Go around it: everything we fetch is public.
+try:
+    import urllib.request as _ur
+    if any("socks" in str(v).lower() for v in _ur.getproxies().values()):
+        os.environ["NO_PROXY"] = os.environ["no_proxy"] = "*"
+        _ur.install_opener(_ur.build_opener(_ur.ProxyHandler({})))
+except Exception:
+    pass
 
 NEEDS = ["pillow", "mss", "numpy", "rapidocr-onnxruntime"]
 

@@ -1,10 +1,15 @@
 {
- "version": "2026.10.26.1",
- "date": "2026-10-26T04:01:37+00:00",
- "notes": "Hover stats are checked before they're kept: attack on earrings, boots or hats means the popup belonged to another item and is skipped, and a requirement read as a bonus is dropped. start.bat now installs any missing Python package itself, and works with VPN or proxy apps that broke the install (SOCKS). Updates itself.",
- "sha256": "8d1fd01f80e9f9961fd7c7cde47921cc405d15e5d2073fba4854925954870753",
- "size": 98105,
+ "version": "2026.10.26.2",
+ "date": "2026-10-26T04:16:25+00:00",
+ "notes": "Works with VPN and proxy apps that switch on a SOCKS system proxy: start.bat and install.bat go around it, and start.bat installs any missing Python package itself. Hover stats are checked against what the item can carry before they're kept.",
+ "sha256": "fb348a8ff40e5ee2f493c73aa15e3165c96011cfa69867639c613baf0a7dff9d",
+ "size": 98381,
  "history": [
+  {
+   "version": "2026.10.26.2",
+   "date": "2026-10-26",
+   "notes": "Works with VPN and proxy apps that switch on a SOCKS system proxy: start.bat and install.bat go around it, and start.bat installs any missing Python package itself. Hover stats are checked against what the item can carry before they're kept."
+  },
   {
    "version": "2026.10.26.1",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.7",
    "date": "2026-10-20",
    "notes": "Better equipment stat reading."
-  },
-  {
-   "version": "2026.10.20.6",
-   "date": "2026-10-20",
-   "notes": "Fixes uploads that stopped when you scan a lot of shops."
   }
  ],
  "pip": [],
- "sig": "628985e7d16b818140c94788f193d27f4273a7c9f0f763bec2da58e6207131241aecbb24378373a541472e1cc236b673552d809fc05f513f92056ce62e149c676dc0da267eb2c60ed0a2aa53b354ac6ab2fa4de26447f3d68176cee5bf293921fb0bbb3385c163f53340af436e57a8128ab92010e04a0cb82705136d28c595bb56fb2e0f54aefe6b77472a2553963a6fd886a260b850275f0dd1e22eceef298509764697d6f42fb1fb220ee89e7a1b5e665fe109de1858e592c069dfacb92ab0377af5e4173c75456d305d5e4ab8e1a9d798638d76b0e54c873dbbdfb7782d42daee650086e3dcdfb152966f14f5a25e9f4797e3b204090225a7e38018c6ff76"
+ "sig": "a854815f19f05cacdbe6afed33bf77eabc7b2109b2a0f91e5caf3a95c396a753ecc0d6b275152c19bbec86f06e9edfd5ea108a02f432e85da54236a01726071d8e60bd7c047791d29666321cae0eca371327ecc55e4e7a037b7966a36f61dbada10cac9e82e563a8eaa792075894195ab86305eb63cdc39ff0ab860128f60e6d5acd3075c5aaebb882b788c503797964426651c3c929068d39bcd91aaaa0c6155cc490c61576fff688db6387cfcffa29f3af96c1ba77d1d808460667a6d339d4c0211c2d16884e4b076a4614d28edf5e94f8399a33816e6d17c982fe269e42b699526e953b22800fe3010711c45b9ce53d56b6720aece788358bdbde32e92b06"
 }

@@ -47,6 +47,8 @@ echo Installing Python packages...
 rem A VPN or proxy app can leave a SOCKS proxy setting that pip can't use ("Missing dependencies for SOCKS
 rem support"). Clear it for this window only; nothing on the PC is changed.
 for %%V in (ALL_PROXY all_proxy HTTP_PROXY http_proxy HTTPS_PROXY https_proxy) do call :clearsocks %%V
+rem The same app can turn on Windows' own system proxy with SOCKS; go around it for this window.
+reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v ProxyServer 2>nul | findstr /i "socks" >nul && set "NO_PROXY=*"
 "%PY%" -m pip install --upgrade pip
 "%PY%" -m pip install pillow mss numpy rapidocr-onnxruntime
 "%PY%" -c "import PIL, mss, numpy" 2>nul
