@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.26.3"
+VERSION = "2026.10.26.4"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -544,6 +544,7 @@ class Store:
                 for k, v in rd.items():
                     vote.setdefault(k, {}); vote[k][v] = vote[k].get(v, 0) + 1
             o["x"] = {k: max(c, key=lambda v: (c[v], v)) for k, c in vote.items()}
+            if o["x"] and not o.get("xat"): o["xat"] = time.time()   # first time this listing's stats were read
             if not o.get("xt") or len(tip["lines"]) >= len(o.get("xt", [])): o["xt"] = tip["lines"]
             if tip.get("job"): o["xj"] = tip["job"]
             # a cut-off name: the tooltip shows the whole thing, so use it from now on
@@ -943,13 +944,16 @@ def scan_stats(store, now=None):
         sellers = {json.loads(k)[1] for k, o in rows}
         sales = sum(o.get("ns", 0) + o.get("sb", 0) for k, o in rows)
         active = sum(1 for m in mins if int(m) * 60 >= t0)
-        return {"listings": len(rows), "shops": len(sellers), "sales": sales, "active": active,
+        # equip stats read: listings whose stats were first captured in this window (what earns hover credit)
+        stats = sum(1 for k, o in shop if o.get("x") and (o.get("xat") or o.get("first", 0)) >= t0)
+        return {"listings": len(rows), "shops": len(sellers), "sales": sales, "active": active, "stats": stats,
                 "pace": round(len(rows) / (active / 60)) if active >= 5 else None}
     midnight = time.mktime(datetime.date.fromtimestamp(now).timetuple())
     return {"hour": window(now - 3600), "today": window(midnight), "at": now}
 def stats_text(st):
     def line(w):
         return (f"{w['listings']:,} new listings · {w['shops']:,} shops · {w['sales']:,} sales caught · "
+                f"{w.get('stats', 0):,} equip stats read · "
                 f"{w['active']} active min" + (f" · {w['pace']:,} listings per active hour" if w["pace"] else ""))
     return "last hour: " + line(st["hour"]) + "\n         today:     " + line(st["today"])
 def show_stats(cfg):
@@ -959,6 +963,7 @@ def show_stats(cfg):
     print("  Last hour: " + stats_text(st).split("\n")[0][len("last hour: "):])
     print("  Today:     " + stats_text(st).split("\n")[1].strip()[len("today:"):].strip())
     print("  Active minutes count only time spent reading shops. The site's Scanner Ranks show your all-time totals.")
+    print("  Equip stats read: listings whose stats you captured by hovering. Being first to capture a listing's stats earns hover credit.")
 
 def export_csv(cfg):
     """Write everything this watcher has seen to my_scans.csv, one row per listing, for Excel or Google Sheets."""

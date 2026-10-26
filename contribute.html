@@ -505,7 +505,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     var box = $("board"); box.textContent = "";
     if (!w.rows.length) { box.appendChild(el("p", "note", "No watcher scans this week yet.")); return; }
     var t = el("table"), h = el("tr");
-    [["Scanner", ""], ["Credits", "n"], ["Verified", "n"], ["Unverified", "n"], ["Not watched", "n"], ["Hovers", "n"], ["Witnessed", "n"], ["Cold rooms", "n"], ["Hours", "n"], ["All-time verified", "n"], ["Pays", "n"], ["Flags", ""]].forEach(function (c) { h.appendChild(el("th", c[1], c[0])); });
+    [["Scanner", ""], ["Credits", "n"], ["Verified", "n"], ["Unverified", "n"], ["Not watched", "n"], ["Stats read", "n"], ["Witnessed", "n"], ["Cold rooms", "n"], ["Hours", "n"], ["All-time verified", "n"], ["Pays", "n"], ["Flags", ""]].forEach(function (c) { h.appendChild(el("th", c[1], c[0])); });
     t.appendChild(h);
     w.rows.forEach(function (r) {
       var tr = el("tr");
