@@ -252,6 +252,21 @@ def main():
         if iname and mob and (iname, mob.lower()) not in have_drop:
             have_drop.add((iname, mob.lower()))
             g(iname)["d"].append([mob, mon_lv.get(mob, 0), None, 0, mon_where.get(mob, ""), 1, mob_id.get(mob.lower())])
+    # ---- player-reported drops (tools/drops_reported.json): who drops what in Classic, confirmed by players' votes.
+    # Fills in the many monsters the wiki hasn't measured yet; no rate, just "drops".
+    rp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "drops_reported.json")
+    if os.path.exists(rp):
+        wiki_mob = {k.lower(): k for k in mon_lv}
+        added = 0
+        for mob, m in json.load(open(rp, encoding="utf-8")).items():
+            wm = wiki_mob.get(mob.lower(), mob)
+            for gid, nm in m["d"]:
+                iname = names.get(int(gid)) or nm
+                if (iname, wm.lower()) in have_drop: continue
+                have_drop.add((iname, wm.lower()))
+                g(iname)["d"].append([wm, mon_lv.get(wm) or m.get("lv", 0), None, 0, mon_where.get(wm, ""), 0, mob_id.get(wm.lower())])
+                added += 1
+        print("player-reported drops added", added)
     for q in allq:
         for x in q["get"]:
             g(x[0]).setdefault("g", []).append([q["n"], q["id"], "reward"])

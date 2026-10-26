@@ -143,7 +143,7 @@ def guide_html(name, g, page_of):
         get += f'<p class="rc">Quest item, found while doing the quest. In game: <i>{html.escape(g["t"])}</i></p>'
     if get: out += f"<h2>Where to get {html.escape(shown(name))}</h2>{get}"
     if g.get("u"): out += f'<p class="note">Used in {g["u"]} crafting recipe{"s" if g["u"] != 1 else ""}.</p>'
-    if out: out += '<p class="note src">Quests from the game data. Givers, drops, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0). Drop rates are measured by players.</p>'
+    if out: out += '<p class="note src">Quests from the game data. Givers, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0). Drops are reported by players; a rate shows where enough kills were counted.</p>'
     return out
 
 
