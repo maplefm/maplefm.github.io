@@ -17,7 +17,39 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.24.7"
+VERSION = "2026.10.26.1"
+
+# Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
+# hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
+# doesn't have ("LUK 70" on a claw) is a requirement line read as a bonus and is dropped on its own.
+_SCROLLABLE = {"Earrings": "STR DEX INT LUK AVOID", "Glove": "ATT MATT ACC", "Hat": "ACC HP MP", "Cape": "ACC DEX INT LUK MDEF STR WDEF", "Top": "WDEF HP MP",
+               "Bottom": "WDEF HP MP", "Overall": "WDEF DEX INT LUK STR", "Shield": "ACC WDEF", "Shoes": "AVOID JUMP SPEED", "Pet Equipment": "JUMP SPEED", "Wand": "MATT", "Staff": "MATT"}
+_WEAPON = re.compile(r"Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun")
+_STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP"]
+_SMALL = {"STR": 15, "DEX": 15, "INT": 15, "LUK": 15, "ACC": 15, "AVOID": 15, "SPEED": 15, "JUMP": 15, "HP": 60, "MP": 60, "WDEF": 40, "MDEF": 40}
+try:
+    _FIT = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "statfit.json"), encoding="utf-8"))
+except (OSError, ValueError):
+    _FIT = {}
+_FIT_LOW = {k.lower(): v for k, v in _FIT.items()}
+
+def stats_fit(name, stats):
+    """The stats this item can really have, or None when the popup was clearly another item's."""
+    f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(name)).strip().lower())
+    if not f or not stats: return stats
+    sub, base, cash = f
+    allow = set(base)
+    if not cash: allow |= set((_SCROLLABLE.get(sub) or ("ATT" if _WEAPON.search(sub) else "")).split())
+    out = dict(stats)
+    for k in _STATS:
+        if not stats.get(k): continue
+        if k in allow and k not in base and stats[k] > _SMALL.get(k, 999) and not (stats.get(k + "_b") is not None and stats[k + "_b"] < stats[k]):
+            out.pop(k, None); out.pop(k + "_b", None); continue    # a requirement line on a stat only scrolls give
+        if k in allow: continue
+        if k in ("ATT", "MATT"): return None
+        if stats[k] > _SMALL.get(k, 0):
+            out.pop(k, None); out.pop(k + "_b", None)
+    return out
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -485,6 +517,12 @@ class Store:
                 if not any(a[:10] and a[:10] in fmparse.norm(l) for l in tip["lines"]):
                     return None
             tip = dict(tip, name=r["i"])
+        # the stats have to be ones this item can carry, or the popup was another item's
+        fixed = stats_fit(r["i"], tip["stats"])
+        if fixed is None:
+            log("hover skipped: those stats can't be on", r["i"])
+            return None
+        tip = dict(tip, stats=fixed)
         key = json.dumps([day, seller, r["i"], r["p"], r["q"]])
         with self.lock:
             o = self.d["shop"].get(key)
@@ -619,7 +657,9 @@ class Store:
             if not best:
                 return None
             key, o = best
-            stats = {k: v for k, v in tip["stats"].items() if k != "REQLV"}
+            stats = stats_fit(json.loads(key)[3], {k: v for k, v in tip["stats"].items() if k != "REQLV"})
+            if stats is None:
+                return None
             if stats:
                 x = dict(o.get("x") or {}); x.update(stats); o["x"] = x
             if tip.get("lines"): o["xt"] = tip["lines"]

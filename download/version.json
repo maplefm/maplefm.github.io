@@ -1,10 +1,15 @@
 {
- "version": "2026.10.24.7",
- "date": "2026-10-25T02:41:24+00:00",
- "notes": "New items: when a shop has an item the watcher has never seen, hovering it once reads its full name off the tooltip, and from then on that item is read, priced and uploaded with its icon. Cut-off names also finish themselves from items other scanners found. Close your watcher and open start.bat to update.",
- "sha256": "e51d4c54277cb1774de8454b8a1160abef0637bcc5d3f190e8173db1d7010180",
- "size": 65426,
+ "version": "2026.10.26.1",
+ "date": "2026-10-26T04:01:37+00:00",
+ "notes": "Hover stats are checked before they're kept: attack on earrings, boots or hats means the popup belonged to another item and is skipped, and a requirement read as a bonus is dropped. start.bat now installs any missing Python package itself, and works with VPN or proxy apps that broke the install (SOCKS). Updates itself.",
+ "sha256": "8d1fd01f80e9f9961fd7c7cde47921cc405d15e5d2073fba4854925954870753",
+ "size": 98105,
  "history": [
+  {
+   "version": "2026.10.26.1",
+   "date": "2026-10-26",
+   "notes": "Hover stats are checked before they're kept: attack on earrings, boots or hats means the popup belonged to another item and is skipped, and a requirement read as a bonus is dropped. start.bat now installs any missing Python package itself, and works with VPN or proxy apps that broke the install (SOCKS). Updates itself."
+  },
   {
    "version": "2026.10.24.7",
    "date": "2026-10-24",
@@ -149,13 +154,8 @@
    "version": "2026.10.20.6",
    "date": "2026-10-20",
    "notes": "Fixes uploads that stopped when you scan a lot of shops."
-  },
-  {
-   "version": "2026.10.20.5",
-   "date": "2026-10-20",
-   "notes": "Small fixes."
   }
  ],
  "pip": [],
- "sig": "630be26b1c8f4aa0eb404075b6b108c207c5fcfd5c1900662340d1fc1b50ce738962d3674fb0ce66995e8a3b9581b221949b19b0d68c037da77fde1e2f7b1ef1200b97e940e6201658e58cbb08f0088ab172124403f0257bb6db778b9d416a4c24f5aa60bb93973310bfb936778040175da4850def40aaa33c14df7bb3ebd5b156f6fd63b4e57777bead633c4b27f99038b7f1da29415fe14a0b5a8a656f68f7a5e99943165385db742241b2c62fc840e62df7514d5c44e8d8d5b605e1d526cd8c43a1f0fd9b2a588370e4436a0cd30c6025dfeb4a9c8b2826df8d401eaf27caec5da26f213fe87fa35f70e65052cbc06222ba2151e1b606aa59d55796e6877e"
+ "sig": "628985e7d16b818140c94788f193d27f4273a7c9f0f763bec2da58e6207131241aecbb24378373a541472e1cc236b673552d809fc05f513f92056ce62e149c676dc0da267eb2c60ed0a2aa53b354ac6ab2fa4de26447f3d68176cee5bf293921fb0bbb3385c163f53340af436e57a8128ab92010e04a0cb82705136d28c595bb56fb2e0f54aefe6b77472a2553963a6fd886a260b850275f0dd1e22eceef298509764697d6f42fb1fb220ee89e7a1b5e665fe109de1858e592c069dfacb92ab0377af5e4173c75456d305d5e4ab8e1a9d798638d76b0e54c873dbbdfb7782d42daee650086e3dcdfb152966f14f5a25e9f4797e3b204090225a7e38018c6ff76"
 }
