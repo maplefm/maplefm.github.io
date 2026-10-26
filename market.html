@@ -71,6 +71,9 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 .box{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);background:var(--bg)}
 .box.admin{border-color:var(--bad)}
 .copied{color:var(--ok);font-weight:700;font-size:.85rem}
+.shot{display:grid;gap:6px;justify-items:start;padding:12px;border:1.5px dashed var(--line);border-radius:12px;background:var(--bg)}
+.shot.over{border-color:var(--accent);background:var(--soft)}
+.shot .hint{margin:0}
 .foot{margin-top:24px;font-size:.78rem;color:var(--muted)}
 @media (max-width:600px){.hero h1{font-size:1.55rem}.panel{padding:14px}.btn{padding:9px 12px}}
 </style>
@@ -131,7 +134,8 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     (s && s.rows || []).forEach(function (r) { if (r && r.item && !/…$|^scroll: |\|/i.test(r.item)) { ROWS[r.item] = r; NAMES.push(r.item); } });
   }).catch(function () {});
   // item pictures: ids from the board's item list, drawn as the cards come in
-  var IDS = {}, idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
+  var BASES = {};
+  var IDS = {}, idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; if (r[7] && typeof r[7] === "object") BASES[r[0].toLowerCase()] = r[7]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
 
   // ---- the list
   function list() {
@@ -202,6 +206,35 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     function fld(lbl, name, attrs, wide) { var l = el("label", wide ? "wide" : null, lbl), i = el(attrs.tag || "input"); i.name = name; Object.keys(attrs).forEach(function (k) { if (k !== "tag") i.setAttribute(k, attrs[k]); }); l.appendChild(i); f.appendChild(l); return i; }
     var it = fld("Item", "item", { list: "names", placeholder: "Start typing, like work gloves", autocomplete: "off", required: "" }, true);
     var hint = el("p", "hint"); it.parentNode.appendChild(hint);
+    // a screenshot of the item's tooltip fills in the item and its stats; the picture never leaves the browser
+    var shot = el("div", "shot wide"), sbtn = el("button", "btn", "📷 Read it from a screenshot"), sfile = el("input"), sst = el("p", "hint");
+    sbtn.type = "button"; sfile.type = "file"; sfile.accept = "image/*"; sfile.hidden = true;
+    shot.appendChild(sbtn); shot.appendChild(el("span", "hint", "Hover the item in game, take a screenshot, and drop, paste or pick it here. We fill in the item and its stats; you add the price.")); shot.appendChild(sfile); shot.appendChild(sst);
+    f.insertBefore(shot, it.parentNode);
+    sbtn.addEventListener("click", function () { sfile.click(); });
+    sfile.addEventListener("change", function () { if (sfile.files[0]) readShot(sfile.files[0]); sfile.value = ""; });
+    shot.addEventListener("dragover", function (e) { e.preventDefault(); shot.classList.add("over"); });
+    shot.addEventListener("dragleave", function () { shot.classList.remove("over"); });
+    shot.addEventListener("drop", function (e) { e.preventDefault(); shot.classList.remove("over"); var fl = e.dataTransfer && e.dataTransfer.files[0]; if (fl) readShot(fl); });
+    var onPaste = function (e) { if (!document.body.contains(f)) return document.removeEventListener("paste", onPaste); var its = e.clipboardData && e.clipboardData.items || []; for (var i = 0; i < its.length; i++) if (its[i].type.indexOf("image") === 0) { e.preventDefault(); readShot(its[i].getAsFile()); return; } };
+    document.addEventListener("paste", onPaste);
+    function readShot(file) {
+      if (!file || !/^image\//.test(file.type)) { sst.className = "msg err"; sst.textContent = "That isn't a picture."; return; }
+      sbtn.disabled = true; sst.className = "hint"; sst.textContent = "Reading the screenshot…";
+      var go = function () {
+        window.fmReadTip(file, { names: NAMES, base: function (n) { return BASES[String(n).toLowerCase()] || null; }, progress: function (p) { sst.textContent = "Reading the screenshot… " + Math.round(p * 100) + "%"; } }).then(function (r) {
+          sbtn.disabled = false;
+          if (!r.name && !r.statsText) { sst.className = "msg err"; sst.textContent = "Couldn't find an item tooltip in that picture. Hover the item so its stats show, then screenshot again, or fill it in below."; return; }
+          if (r.name) { it.value = shown(r.name); sync(); }
+          if (r.statsText && !st.parentNode.hidden) st.value = r.statsText;
+          sst.className = "msg ok";
+          sst.textContent = (r.name ? "Read " + shown(r.name) : "Couldn't make out the name, so pick it below") + (r.statsText ? " · " + r.statsText : "") + ". Check it, then add your price.";
+          pr.focus();
+        }).catch(function (e) { sbtn.disabled = false; sst.className = "msg err"; sst.textContent = (e && e.message) || "Couldn't read that picture."; });
+      };
+      if (window.fmReadTip) go();
+      else { var sc = document.createElement("script"); sc.src = "/assets/tipread.js?v=1"; sc.onload = go; sc.onerror = function () { sbtn.disabled = false; sst.className = "msg err"; sst.textContent = "Couldn't load the reader. Check your connection."; }; document.head.appendChild(sc); }
+    }
     var pr = fld("Price each (mesos)", "price", { placeholder: "15m, 800k, 1.2b", inputmode: "decimal", required: "" });
     var qt = fld("How many", "qty", { type: "number", min: "1", max: "9999", value: "1" });
     var st = fld("Stats (equips)", "stats", { placeholder: "+5 ATT, 4 slots, clean", maxlength: "60" });
