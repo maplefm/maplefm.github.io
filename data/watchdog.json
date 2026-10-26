@@ -1,5 +1,5 @@
 {
- "at": 1792975293,
+ "at": 1793014186,
  "ok": true,
  "failing": [],
  "checks": [
@@ -7,147 +7,147 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 247,
+   "ms": 329,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 428,
+   "ms": 192,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 161,
+   "ms": 222,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 225,
+   "ms": 158,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 246,
+   "ms": 213,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 145,
+   "ms": 155,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 162,
+   "ms": 140,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 183,
+   "ms": 156,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 125,
+   "ms": 185,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 151,
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 125,
+   "ms": 131,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 182,
+   "ms": 199,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 133,
+   "ms": 126,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 176,
+   "ms": 307,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 136,
+   "ms": 127,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: typical 2K (2K to 3K) from 125 sales · cheapest now 1K · down 6% today · mapl",
-   "ms": 429,
+   "detail": "Work Gloves: typical 2K (1K to 2K) from 145 sales · cheapest now 1K · maplefm.gg/item/work",
+   "ms": 835,
    "fix": null
   },
   {
    "name": "!price (old address)",
    "ok": true,
-   "detail": "Work Gloves: typical 2K (2K to 3K) from 125 sales · cheapest now 1K · down 6% today · mapl",
-   "ms": 400,
+   "detail": "Work Gloves: typical 2K (1K to 2K) from 145 sales · cheapest now 1K · maplefm.gg/item/work",
+   "ms": 346,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded 1 min ago",
-   "ms": 86,
+   "detail": "uploaded 2 min ago",
+   "ms": 187,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "0 open listings, #selling synced 1 min ago",
-   "ms": 638,
+   "detail": "1 open listings, #selling synced 4 min ago",
+   "ms": 484,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated 1 min ago",
-   "ms": 146,
+   "detail": "updated 2 min ago",
+   "ms": 136,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1362 items",
-   "ms": 402,
+   "detail": "1395 items",
+   "ms": 225,
    "fix": null
   },
   {
@@ -173,5 +173,5 @@
    "repairs": []
   }
  ],
- "beat": 1792975293
+ "beat": 1793014186
 }
