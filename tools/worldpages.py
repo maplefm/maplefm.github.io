@@ -120,8 +120,8 @@ def build(world, guide, summary, notes, out):
     def sprite_url(n): return f"{LIVE}data/sprite/{MOB[n]['id']}.gif" if n in MOB and MOB[n].get("id") else ""
     built = world.get("built") or datetime.date.today().isoformat()
     paths = []
-    BOARD_CTA = ('<div class="cta"><b>What does it sell for right now?</b> The live price board shows every Free Market listing players have seen today, '
-                 'with the channel and room to buy it in. <a href="/">Open the price board</a></div>')
+    BOARD_CTA = ('<div class="cta"><b>What does it sell for right now?</b> Every Free Market listing seen today, with channel and room. '
+                 '<a href="/">Open the price board</a></div>')
 
     # mesos each monster drops, as players report it (tools/mesos_reported.json: name -> [min, max, chance %])
     mp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mesos_reported.json")
@@ -231,13 +231,13 @@ def build(world, guide, summary, notes, out):
                 (f"{len(hid)} hidden portal{'s' if len(hid) != 1 else ''}, " if hid else "") + "the in-game minimap and every exit.")
         b = f'<h1>{E(p)}</h1><p class="sub">MapleStory Classic · {E(m.get("region") or "")}{" · " + E(m["type"]) if m.get("type") else ""}{" · " + lvtxt.capitalize() if lvtxt else ""}</p>'
         intro = []
-        if m.get("near") and m["near"] != p: intro.append(f"The nearest town is {mlink(m['near'])}.")
-        if m.get("ret") and m["ret"] != p and m["ret"] != m.get("near"): intro.append(f"A Return Scroll to the nearest town takes you to {mlink(m['ret'])}.")
-        if st: intro.append(f"It holds {st['n']} monsters at once, averaging level {st['lv']:.0f}, worth {st['eph']:.1f} EXP for every 100 HP you chew through.")
+        if m.get("near") and m["near"] != p: intro.append(f"Nearest town: {mlink(m['near'])}.")
+        if m.get("ret") and m["ret"] != p and m["ret"] != m.get("near"): intro.append(f"Return Scroll goes to {mlink(m['ret'])}.")
+        if st: intro.append(f"{st['n']} monsters at once, average level {st['lv']:.0f}, {st['eph']:.1f} EXP per 100 HP.")
         if intro: b += f'<p>{" ".join(intro)}</p>'
         b += minimap(m)
         if hid:
-            b += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: nothing glows here. Stand on the purple spot ({where(m, x[2], x[3]) or "see the minimap"}) and press up.{f" Needs level {x[5]}." if x[5] else ""}</div>' for x in hid)
+            b += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: stand on the purple spot ({where(m, x[2], x[3]) or "see the minimap"}) and press up.{f" Needs level {x[5]}." if x[5] else ""}</div>' for x in hid)
         if m["portals"]:
             b += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th></tr>" + "".join(
                 f'<tr><td>{mlink(x[0])}</td><td>{"Hidden portal" if x[1] == "hidden" else "Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{where(m, x[2], x[3])}</small></td></tr>' for x in m["portals"]) + "</table>"
@@ -273,14 +273,14 @@ def build(world, guide, summary, notes, out):
         b += ('<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
             ("HP", fmt(mb["hp"])), ("EXP", fmt(mb["exp"])), ("Attack", fmt(mb["atk"])), ("Accuracy", fmt(mb.get("acc"))), ("Avoid", fmt(mb.get("eva"))),
             ("Defense", f'{fmt(mb.get("wdef"))} / {fmt(mb.get("mdef"))} magic'), ("Weak to", E(mb.get("weak") or "Nothing")), ("Resists", E(mb.get("resist") or "Nothing"))]) + "</div>")
-        b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (f" Its drops are worth about {meso(ev)} mesos a kill at today's Free Market prices, counting only drops that sell." if ev >= 1 else "") + (" Heal damages it, since it is undead." if mb.get("undead") else "") + "</p>"
+        b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (f" Drops worth about {meso(ev)} mesos a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
         if homes.get(n):
             b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>How many</th><th>Level range</th></tr>" + "".join(
                 f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
         if drops.get(n):
             b += "<h2>Drops</h2><table><tr><th>Item</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
                 f'<tr><td>{ilink(i)}{live(i)}{" <small>(only while on the quest)</small>" if qo else ""}</td><td>{f"{r:g}%" if r is not None else ""}</td><td class="n">{meso(PRICE[i]) if i in PRICE else ""}</td></tr>'
-                for i, r, qo in sorted(drops[n], key=lambda x: -(PRICE.get(x[0], 0) * (x[1] or 0)))) + "</table><p class=\"note\">Drop rates are measured by players on the wiki.</p>"
+                for i, r, qo in sorted(drops[n], key=lambda x: -(PRICE.get(x[0], 0) * (x[1] or 0)))) + "</table><p class=\"note\">Drop rates measured by players on the wiki.</p>"
         qq = [(q, c, "Hunt") for q, c in qkill.get(n, [])] + [(q, c, "Bring " + i) for i, _, _ in drops.get(n, []) for q, c in qneed.get(i, [])]
         if qq:
             seen = set(); rows = ""
@@ -331,7 +331,7 @@ def build(world, guide, summary, notes, out):
             b += "<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)}</li>" for i, c in q["get"]) + ("<li>" + fmt(q["exp"]) + " EXP</li>" if q.get("exp") else "") + ("<li>" + fmt(q["meso"]) + " mesos</li>" if q.get("meso") else "") + "</ul>"
         nx = nextq.get(q["id"], [])
         if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
-        b += f'<p style="margin-top:16px"><a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>, which shows what you can take at your level and what to do next.</p><p class="note">Updated {built}.</p>'
+        b += f'<p style="margin-top:16px"><a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a></p><p class="note">Updated {built}.</p>'
         b += BOARD_CTA
         crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
         write(out, f"quest/{s}", page(f"{q['n']} · MapleStory Classic quest guide · Club FM", desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
@@ -343,7 +343,7 @@ def build(world, guide, summary, notes, out):
         mobs = "".join(mobcard(n, f" ×{c}") for n, c in sorted(m["mobs"], key=lambda x: -x[1]) if n in MOB and not MOB[n].get("boss"))
         return (f'<div class="pick"><h3>{mlink(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} monsters · {st["eph"]:.1f} EXP per 100 HP</p>'
                 + (f"<p>{E(why)}</p>" if why else "") + f'<div class="mobs">{mobs}</div>'
-                f'<p class="note">A touch from {blink(st["worst"])} hits a level {L} {cls.lower()} in typical gear for about {fmt(dmg)}, landing {round(hit * 100)}% of the time: about {fmt(cost)} mesos of {E(HP[0])} each time. Your own gear changes it.</p></div>')
+                f'<p class="note">Touch from {blink(st["worst"])}: about {fmt(dmg)} damage to a level {L} {cls.lower()} in typical gear, hits {round(hit * 100)}% of the time, about {fmt(cost)} mesos of {E(HP[0])} each. Varies with your gear.</p></div>')
     tr_links = []
     for br in brackets:
         lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
@@ -358,18 +358,18 @@ def build(world, guide, summary, notes, out):
             if not st: continue
             dmg, hit = touch(MOB[st["worst"]], L, "Bowman")
             b += pick_html(0, x["map"], st, dmg, hit, dmg * hit * HP[1], "Bowman", L, x["why"] + (f" Best for: {', '.join(x['classes'])}." if x.get("classes") else ""))
-        b += f"<h2>Best maps by the numbers at level {L}</h2><p>Ranked by EXP for the HP you have to get through, how many monsters the map holds, and what getting hit costs in potions.</p><ol>"
+        b += f"<h2>Best maps by the numbers at level {L}</h2><p>Ranked by EXP per HP, monster count and potion cost of getting hit.</p><ol>"
         for sc, p, st, dmg, hit, cost in rank(L, "Bowman", picks)[:10]:
             b += f'<li>{mlink(p)} <small>· {st["eph"]:.1f} EXP per 100 HP · {st["n"]} monsters · about {fmt(cost)} mesos of potions a touch</small></li>'
         b += "</ol><h2>By class</h2><p>" + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
-        b += '<p style="margin-top:16px"><a href="/map.html#train">Put in your exact level and class</a> for a personal list, with the route from where you stand.</p>'
+        b += '<p style="margin-top:16px"><a href="/map.html#train">Enter your level and class</a> for a personal list and route.</p>'
         crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
         desc = f"Best MapleStory Classic training spots from level {lo} to {hi}: " + ", ".join(list(picks)[:3]) + ", with monsters, EXP per HP and potion cost for each class."
         write(out, f"training/{s}", page(f"Where to train level {lo} to {hi} · MapleStory Classic training guide · Club FM", desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
         tr_links.append((lo, hi, s, list(picks)[:3]))
     for cls in CLASSES:
         b = f"<h1>{cls} training guide for MapleStory Classic</h1><p class=\"sub\">Where a {cls.lower()} should train at every level · updated {built}</p>"
-        b += f"<p>The top maps for a {cls.lower()} at each stage, ranked by EXP for the HP you chew through, monster count, and what getting hit costs a {cls.lower()} in typical gear. Spots players recommend for {cls}s get a boost.</p>"
+        b += f"<p>Top maps at each stage, ranked by EXP per HP, monster count and potion cost for a {cls.lower()} in typical gear. Spots players recommend for {cls}s rank higher.</p>"
         for br in brackets:
             lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
             picks = {x["map"]: x for x in br.get("picks") or [] if not x.get("classes") or cls in x["classes"]}
@@ -384,7 +384,7 @@ def build(world, guide, summary, notes, out):
 
     # ---------------------------------------------------------- hubs
     b = "<h1>MapleStory Classic training guide</h1><p class=\"sub\">Where to train at every level, for every class · updated " + built + "</p>"
-    b += "<p>Built from the game's own monster and spawn data and what players report, re-checked every week. Every spot shows the monsters, EXP for the HP you have to chew through, and what getting hit costs in potions at today's Free Market prices.</p>"
+    b += "<p>From the game's monster and spawn data plus player reports, re-checked weekly. Each spot shows monsters, EXP per HP and potion cost at today's Free Market prices.</p>"
     b += "<h2>By level</h2><ul>" + "".join(f'<li><a href="/training/{s}/">Level {lo} to {hi}</a> <small>· {E(", ".join(p))}</small></li>' for lo, hi, s, p in tr_links) + "</ul>"
     b += "<h2>By class</h2><ul>" + "".join(f'<li><a href="/training/{c.lower()}/">{c}</a></li>' for c in CLASSES) + "</ul>"
     if notes and notes.get("economy"): b += "<h2>Potions and money</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["economy"]) + "</ul>"
@@ -396,7 +396,7 @@ def build(world, guide, summary, notes, out):
     for p, m in M.items(): regions.setdefault(m.get("region") or "Other", []).append(p)
     b = "<h1>MapleStory Classic maps</h1><p class=\"sub\">" + f"{len(M)} maps with minimaps, hidden portals, monsters and exits · updated {built}</p>"
     hidc = sum(1 for m in M.values() for x in m["portals"] if x[1] == "hidden")
-    b += f"<p>Every map in MapleStory Classic World with its in-game minimap. {hidc} hidden portals are marked, so you know where to press up when nothing glows. Need directions? <a href=\"/map.html#train\">The route finder</a> gives you the fastest way and the free way.</p>"
+    b += f"<p>Every map with its in-game minimap. {hidc} hidden portals marked. <a href=\"/map.html#train\">The route finder</a> gives the fastest way and the free way.</p>"
     for r in sorted(regions, key=lambda r: -len(regions[r])):
         b += f"<h2>{E(r)} <small>{len(regions[r])}</small></h2><ul class=\"toc\">" + "".join(
             f'<li>{mlink(p)}{" <small>· Lv " + str(M[p]["lv"][0]) + "+</small>" if M[p].get("lv") and M[p]["lv"][0] else ""}</li>' for p in sorted(regions[r])) + "</ul>"
@@ -409,7 +409,7 @@ def build(world, guide, summary, notes, out):
     areas = {}
     for q in QS: areas.setdefault(q.get("a") or "Other", []).append(q)
     b = f"<h1>MapleStory Classic quests</h1><p class=\"sub\">{len(QS)} quests with what to bring, what to hunt and the rewards · updated {built}</p>"
-    b += '<p>Want the ones open at your level? <a href="/quests.html">The Quest Log</a> reads your level from classicrank.com and tracks what you have done.</p>'
+    b += '<p><a href="/quests.html">The Quest Log</a> shows what is open at your level and tracks what you have done.</p>'
     for a in sorted(areas, key=lambda a: -len(areas[a])):
         b += f"<h2>{E(a)} <small>{len(areas[a])}</small></h2><ul class=\"toc\">" + "".join(f"<li>{qlink(q)} {('<small>· Lv ' + str(q['lv']) + '</small>') if q['lv'] else ''}</li>" for q in sorted(areas[a], key=lambda q: (q["lv"], q["n"]))) + "</ul>"
     write(out, "quests", page("All MapleStory Classic quests · items, monsters and rewards · Club FM", "Every MapleStory Classic quest: level, who gives it, the items to bring, monsters to hunt and the rewards.", "/quests/", [("Quest guides", "/quests/")], b)); paths.append("/quests/")

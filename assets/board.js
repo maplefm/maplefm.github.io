@@ -1374,7 +1374,7 @@
   function openSources() {
     var box = $("crew"); box.textContent = "";
     D.who.forEach(function (w, k) { var d = el("div", k === 0 ? "crowned" : ""); d.appendChild(avatarBadged(w, k + 1)); var t = el("span"); var nb = el("b", null, ""); if (w.stream) { var a = el("a", null, w.name); a.href = "https://www.twitch.tv/" + encodeURIComponent(w.name); a.target = "_blank"; a.rel = "noopener"; nb.appendChild(a); } else nb.appendChild(document.createTextNode(w.name)); t.appendChild(nb); var bl = el("span", "fsub"); bl.appendChild(tierBadge(w)); if (w.club) bl.appendChild(el("span", "clubtag", "Club")); t.appendChild(bl); t.appendChild(el("small", null, fmt(w.sales) + " sales · " + fmt(w.shopsN) + " shops · " + w.daysN + (w.daysN === 1 ? " day" : " days") + (w.stream ? " · stream" : ""))); d.appendChild(t); box.appendChild(d); });
-    $("crew-note").textContent = D.who.length ? "Top 10 of everyone scanning, club watchers and streams, most sales caught of all time. Number one wears the Crown. Tiers: Scout, Apprentice at 10 sales, Merchant 50, Trader 150, Broker 400, Tycoon 1,000, Royal 2,500, Monarch 5,000, Legend 10,000, Immortal 25,000, Titan 50,000, Mythic 100,000. Titan unlocks Mega Deals." : "No scans in the current time range.";
+    $("crew-note").textContent = D.who.length ? "Top 10 scanners and streams by sales caught, all time. Number one wears the Crown. Tiers: Scout, Apprentice 10, Merchant 50, Trader 150, Broker 400, Tycoon 1,000, Royal 2,500, Monarch 5,000, Legend 10,000, Immortal 25,000, Titan 50,000, Mythic 100,000. Titan unlocks Mega Deals." : "No scans in the current time range.";
     $("sources").showModal();
   }
 
@@ -1817,7 +1817,7 @@
     $("count").textContent = rows.length ? rows.length + " items, about " + short(total) + " mesos at sell fast prices" : "";
     $("sell-clear").disabled = !rows.length;
     if (SELL_NEW) { SELL_NEW = null; var ja = tb.querySelector("tr.justadded"); if (ja && ja.getBoundingClientRect().top < 0) ja.scrollIntoView({ block: "center", behavior: "smooth" }); }
-    $("sell-help").textContent = "To fill this from the game: pick your watcher above, keep it running, then hover each item in your inventory for a second. They show up here within a few minutes." + (junk ? " " + junk + (junk === 1 ? " hovered item was" : " hovered items were") + " left out because the name didn't read cleanly; hover those again." : "");
+    $("sell-help").textContent = "From the game: pick your watcher, then hover each inventory item for a second. They show up within minutes." + (junk ? " " + junk + (junk === 1 ? " hovered item" : " hovered items") + " didn't read cleanly; hover again." : "");
   }
   var SELL_NEW = null;
   function addSell(name, q) {
@@ -1861,7 +1861,7 @@
       tb.appendChild(tr);
     });
     $("deal-empty").hidden = list.length > 0;
-    var dn = $("deal-note"); if (dn) { dn.textContent = "Equips are judged by roll against that roll's own sales, so only listings someone hovered can show here. Roll prices sharpen as more scanners hover items."; dn.hidden = false; }
+    var dn = $("deal-note"); if (dn) { dn.textContent = "Equips are matched by roll, so only hovered listings show here."; dn.hidden = false; }
     // searching on this tab: say which matching items exist but aren't under typical right now, so none seem missing
     var also = $("deal-also"); also.textContent = ""; also.hidden = true;
     if ($("q").value.trim()) {
@@ -2443,7 +2443,7 @@
       any = true;
       g.g.forEach(function (x) { var rc = el("div", "rc"); rc.appendChild(document.createTextNode(x[2] === "given" ? "Given by the NPC during " : "Reward from the quest ")); var a = el("a", null, x[0]); a.href = x[1] ? "quests.html#q-" + x[1] : "quests.html?q=" + encodeURIComponent(x[0]); rc.appendChild(a); get.appendChild(rc); });
     }
-    if (!any && g.t) { any = true; get.appendChild(el("div", "rc", "Quest item, found while doing the quest. In game: \u201c" + g.t + "\u201d")); }
+    if (!any && g.t) { any = true; get.appendChild(el("div", "rc", "Found during the quest. In game: \u201c" + g.t + "\u201d")); }
     if (g.s) {
       any = true; var st = el("table");
       g.s.forEach(function (x) { var tr = el("tr"), c = el("td"); c.appendChild(el("b", null, x[0])); c.appendChild(el("small", null, ["Sold by NPC", x[1]].filter(Boolean).join(" · "))); tr.appendChild(c); var n = el("td", "n"); if (x[3]) n.textContent = fmt(x[2]) + " " + x[3]; else n.appendChild(money(x[2])); tr.appendChild(n); st.appendChild(tr); });
@@ -2478,7 +2478,7 @@
       ip.appendChild(el("p", "pvbig", short(pi.typ)));
       if (pi.hi > pi.lo && short(pi.lo) !== short(pi.hi)) ip.appendChild(el("p", "note", "Typical price. Recent sales ran " + short(pi.lo) + " to " + short(pi.hi) + "."));
       var mv = pi.mv && pi.mv[0]; if (typeof mv === "number" && Math.abs(mv) >= 0.01) ip.appendChild(el("p", "note", (mv > 0 ? "Up " : "Down ") + Math.round(Math.abs(mv) * 100) + "% in the last 24 hours"));
-      var gate = el("a", "gate"); gate.href = ACCT + "/login?back=home"; gate.appendChild(el("b", null, "Live listings for this item")); gate.appendChild(el("span", null, "Who's selling it right now, for how much, the rolls and the recent sales. A Mega Deals perk.")); gate.appendChild(el("i", null, "Sign in with Discord")); ip.appendChild(gate);
+      var gate = el("a", "gate"); gate.href = ACCT + "/login?back=home"; gate.appendChild(el("b", null, "Live listings for this item")); gate.appendChild(el("span", null, "Sellers, prices, rolls and recent sales. A Mega Deals perk.")); gate.appendChild(el("i", null, "Sign in with Discord")); ip.appendChild(gate);
       return;
     }
     var i = state.sel && D.byName[state.sel];
@@ -2489,7 +2489,7 @@
       if (/^Equip/.test(DBK[nr[5]] || "") && !nr[4]) { var nbt = baseText(nr[0]); if (nbt) { var nbl = el("p", "baseln"); nbl.appendChild(el("b", null, "Base ")); nbl.appendChild(document.createTextNode(nbt.t)); nt.appendChild(nbl); } }
       var nv = vendor(nr[0]); if (nv) { var nvl = el("p", "vend"); nvl.appendChild(document.createTextNode("Vendor price ")); nvl.appendChild(money(nv)); nvl.appendChild(document.createTextNode(" each")); nt.appendChild(nvl); }
       nh.appendChild(nt); ip.appendChild(nh);
-      ip.appendChild(el("p", "note", "Nobody has seen this one in the Free Market in the time range you picked, so there's no price yet. Try Last 30 days in Filters, or be the first: open a shop that sells it with FM Watcher running."));
+      ip.appendChild(el("p", "note", "No price in this time range. Try Last 30 days in Filters, or open a shop that sells it with FM Watcher running."));
       if (nr[1]) { var na = el("a", null, "Item data: maplestory.io"); na.href = IO + nr[1]; na.target = "_blank"; na.rel = "noopener"; $("wiki").appendChild(na); }
       return;
     }
@@ -2514,7 +2514,7 @@
     var tnote = el("p", "note", "typical " + fmt(i.typ) + " from " + why);
     var cb1 = confBadge(i, true); if (cb1) { tnote.appendChild(document.createTextNode(" ")); tnote.appendChild(cb1); }
     ip.appendChild(tnote);
-    if (i.equip) { var rn2 = el("p", "note", "Equips are priced by roll: each roll against its own sales. This sharpens as more scanners hover items."); rn2.style.opacity = ".8"; ip.appendChild(rn2); }
+    if (i.equip) { var rn2 = el("p", "note", "Equips are priced by roll, each against its own sales."); rn2.style.opacity = ".8"; ip.appendChild(rn2); }
     var st = el("div", "stats");
     [[i.lastSale ? i.lastSale.u : 0, "Last sale"], [i.last3, "Last 3 avg"], [null, "Sales" + (i.saleDays ? " · " + i.saleDays + (i.saleDays === 1 ? " day" : " days") : ""), i.salesN]].forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "None")); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
     ip.appendChild(st);
@@ -2555,7 +2555,7 @@
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
       ls.appendChild(li);
     });
-    if (!rows.length) { var e0 = el("div", "li"); e0.appendChild(el("small", null, state.list === "buy" ? "No shop with a known channel and room has it right now. Its price still counts posts from trade chat and streams." : "No sales seen yet.")); ls.appendChild(e0); }
+    if (!rows.length) { var e0 = el("div", "li"); e0.appendChild(el("small", null, state.list === "buy" ? "None up in a known channel and room. Its price still counts trade chat and streams." : "No sales seen yet.")); ls.appendChild(e0); }
     ip.appendChild(ls);
     // our extras: watch, sell, positions, moves, offers, base stats, price by roll
     var btns = el("div", "panelbtns");
@@ -2597,7 +2597,7 @@
           tr.addEventListener("click", function () { jumpToStat(i, v, newest, ks); });
           tb.appendChild(tr);
         });
-        sec.appendChild(tb); sec.appendChild(el("p", "note", "From tooltips: hover an item in a shop for a second and its stats are read. Weapons group by attack, other equips by the main stat of the class that wears them.")); ip.appendChild(sec);
+        sec.appendChild(tb); sec.appendChild(el("p", "note", "Read from hovered tooltips. Weapons group by attack, other equips by their class's main stat.")); ip.appendChild(sec);
       }
     }
   }
@@ -2721,8 +2721,8 @@
     }
     var hours = []; for (var h = 0; h < 24; h++) hours.push(h);
     var charts = el("div", "charts");
-    charts.appendChild(bars("When the market trades, by hour", "Taller bar, more mesos changed hands at that hour, your local time. The gold bar is the busiest hour.", hours, byH, function (k, full) { return full || k % 3 === 0 ? hr(k) : ""; }, ph));
-    charts.appendChild(bars("By day of the week", "Which days the FM moves the most mesos. The gold bar is the busiest day.", [0, 1, 2, 3, 4, 5, 6], byD, function (k) { return WD[k]; }, bd));
+    charts.appendChild(bars("When the market trades, by hour", "Mesos traded per hour, your local time. Gold is the busiest.", hours, byH, function (k, full) { return full || k % 3 === 0 ? hr(k) : ""; }, ph));
+    charts.appendChild(bars("By day of the week", "Mesos traded per day. Gold is the busiest.", [0, 1, 2, 3, 4, 5, 6], byD, function (k) { return WD[k]; }, bd));
     box.appendChild(charts);
     var rh = el("div", "acthead"); rh.appendChild(el("b", null, "Recent sales")); rh.appendChild(el("small", null, "item · who sold it · when")); rh.appendChild(el("small", "r", "price each")); box.appendChild(rh);
     var rows = el("div", "actrows");
@@ -3507,7 +3507,7 @@
   function gateText(signedIn) {
     var g = $("gate"); if (!g) return;
     g.querySelector("b").textContent = signedIn ? "Live listings and deals are a Mega Deals perk" : "See every live listing, seller, roll and deal";
-    g.querySelector("span").textContent = signedIn ? "Prices are open to everyone. Mega Deals unlocks at 50,000 sales caught with FM Watcher, or with the $100 Ko-fi tier." : "Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.";
+    g.querySelector("span").textContent = signedIn ? "Prices are free for everyone. Mega Deals unlocks at 50,000 sales caught or the $100 Ko-fi tier." : "Prices are free for everyone. Listings and deals need Mega Deals.";
     g.querySelector("i").textContent = signedIn ? "How to earn it" : "Sign in with Discord";
     g.href = signedIn ? "contribute.html#earn" : ACCT + "/login?back=home";
   }

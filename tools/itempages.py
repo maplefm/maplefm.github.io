@@ -186,7 +186,7 @@ def guide_html(name, g, page_of):
     if g.get("q"):
         tot = sum(q[2] for q in g["q"])
         rows = "".join(f"<tr><td><b>{qlink(q[0], q[7] if len(q) > 7 else None)}</b><br><small>{html.escape(' · '.join(x for x in [('from ' + q[3]) if q[3] else '', q[4], f'Lv {q[1]}+' if q[1] else '', 'repeatable' if q[5] else ''] if x))}</small></td><td class=n>×{q[2]:,}</td></tr>" for q in g["q"])
-        out += f'<h2>Quests that need {html.escape(shown(name))}</h2><p class="note">{len(g["q"])} quest{"s" if len(g["q"]) != 1 else ""}{f", {tot:,} in all" if len(g["q"]) > 1 else ""}. Tap a quest to open it in the <a href="/quests.html">Quest Log</a>.</p><table>{rows}</table>'
+        out += f'<h2>Quests that need {html.escape(shown(name))}</h2><p class="note">{len(g["q"])} quest{"s" if len(g["q"]) != 1 else ""}{f", {tot:,} in all" if len(g["q"]) > 1 else ""}. Tap one to open it in the <a href="/quests.html">Quest Log</a>.</p><table>{rows}</table>'
     get = ""
     for c in g.get("c") or []:
         rows = "".join(f'<tr><td>{ico(x[0])} {link(x[0])}</td><td class=n>×{x[1]:,}</td></tr>' for x in c[2])
@@ -207,10 +207,10 @@ def guide_html(name, g, page_of):
     for x in g.get("r") or []:
         get += f'<p class="rc">From {html.escape(x[0])}{f" ({x[1]}%)" if x[1] is not None else ""}{(" · during " + html.escape(x[2])) if x[2] else ""}</p>'
     if not get and g.get("t"):
-        get += f'<p class="rc">Quest item, found while doing the quest. In game: <i>{html.escape(g["t"])}</i></p>'
+        get += f'<p class="rc">Found during the quest. In game: <i>{html.escape(g["t"])}</i></p>'
     if get: out += f"<h2>Where to get {html.escape(shown(name))}</h2>{get}"
     if g.get("u"): out += f'<p class="note">Used in {g["u"]} crafting recipe{"s" if g["u"] != 1 else ""}.</p>'
-    if out: out += '<p class="note src">Quests from the game data. Givers, crafting and shops from the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0). Drops are reported by players; a rate shows where enough kills were counted.</p>'
+    if out: out += '<p class="note src">Quests: game data. Givers, crafting and shops: <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a>, CC BY-NC-SA 4.0. Drops reported by players, with rates where enough kills were counted.</p>'
     return out
 
 
@@ -324,7 +324,7 @@ def main():
         qn = len(g.get("q") or [])
         desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
         body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
-<p class="note">No Free Market price yet: nobody has seen one sell. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
+<p class="note">No Free Market sales seen yet. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
 {equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
@@ -367,7 +367,7 @@ def main():
                     f'<td class="n">{meso(x["typ"])} {ch}</td><td class="n">{full(x.get("salesN") or 0)}</td></tr>')
         others = " · ".join(f'<a href="/items/{v[0]}/">{html.escape(v[1][0].upper() + v[1][1:])}</a>' for k, v in HUB.items() if k != cat and len(bycat.get(k) or []) >= 5)
         body = (f'<div class="card"><h1>MapleStory Classic {html.escape(what)}</h1><p class="sub">{len(lst)} items · updated {when}</p><p>{html.escape(intro)} '
-                f'Prices are the typical price from Free Market sales that players caught with the FM Watcher, most traded first. Open any item for its price history, drops and quests.</p>'
+                f'Typical prices from watched Free Market sales, most traded first.</p>'
                 f'<table><tr><th>Item</th><th>Typical, mesos</th><th>Sales seen</th></tr>{trs}</table>'
                 f'<p class="note" style="margin-top:14px">More prices: {others} · <a href="/items/">All items</a> · <a href="/">Live board</a></p></div>')
         d = os.path.join(out, "items", hs); os.makedirs(d, exist_ok=True)

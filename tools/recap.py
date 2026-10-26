@@ -45,14 +45,14 @@ def main():
     except Exception as e:
         print("market stats unavailable:", e)
     if mk and (mk.get("listed") or mk.get("open")):
-        b += (f'<h2>Player market</h2><p>{mk.get("listed", 0):,} items listed by {mk.get("sellers", 0):,} members this week, {mk.get("sold", 0):,} sold'
-              f'{" (" + format(mk.get("confirmed", 0), ",") + " confirmed by the buyer)" if mk.get("confirmed") else ""}, {mk.get("open", 0):,} up for sale now. '
-              '<a href="/market.html">See the player market</a>.</p>')
+        b += (f'<h2>Player market</h2><p>{mk.get("listed", 0):,} listed by {mk.get("sellers", 0):,} members · {mk.get("sold", 0):,} sold'
+              f'{" · " + format(mk.get("confirmed", 0), ",") + " buyer confirmed" if mk.get("confirmed") else ""} · {mk.get("open", 0):,} up now. '
+              '<a href="/market.html">See the market</a></p>')
         if mk.get("best"):
             b += "<table><tr><th>Member deal</th><th>Price</th><th>Typical</th><th>Under</th></tr>" + "".join(
                 f'<tr><td><a href="{E(d["url"])}">{E(d["item"])}</a></td><td><b>{itempages.meso(d["price"])}</b></td><td>{itempages.meso(d["typ"])}</td><td>{round(d["off"] * 100)}%</td></tr>' for d in mk["best"]) + "</table>"
-    b += '<p style="margin-top:16px">Prices change all day. <a href="/">See them live on the price board</a>, or <a href="/items/">browse every item</a>.</p>'
-    b += f'<p class="note">Compares each item\'s typical sale price now with the same figure about a week ago. Only items with at least 8 sales seen are counted. Updated {end.strftime("%B %-d, %Y")}.</p></div>'
+    b += '<p style="margin-top:16px"><a href="/">Live prices</a> · <a href="/items/">Every item</a></p>'
+    b += f'<p class="note">Typical sale now against about a week ago. Items with 8 or more sales only. Updated {end.strftime("%B %-d, %Y")}.</p></div>'
     desc = f"MapleStory Classic Free Market, {rng}: " + (", ".join(f"{itempages.shown(x['item'])} {'up' if x['chg'] > 0 else 'down'} {abs(round(x['chg'] * 100))}%" for x in (up[:2] + down[:2])) or "the week's prices") + "."
     pg = itempages.page("This week on the MapleStory Classic Free Market · Club FM", desc, itempages.SITE + "/recap/", b, None, itempages.OG + "recap.png", active="prices")
     os.makedirs(os.path.join(out, "recap"), exist_ok=True)

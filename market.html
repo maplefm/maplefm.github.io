@@ -81,11 +81,11 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 <main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html" aria-current="page"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 <section class="hero">
-  <div><h1>Player market</h1><p>Items Club FM members are selling for mesos. Buy it now or make an offer and the seller gets a Discord DM. Listings never change the board's prices: those only come from shops seen in game.</p></div>
+  <div><h1>Player market</h1><p>Members selling for mesos. Buy it now or make an offer and the seller gets a Discord DM. Listings never change board prices.</p></div>
   <div class="who" id="who"></div>
 </section>
 <div id="view"></div>
-<p class="foot">Trades happen in game, between players. Club FM never holds items or mesos and never sells anything for real money. Posts in the #selling forum on the <a href="https://discord.gg/cXnVBTUUPk" rel="noopener">Club FM Discord</a> show up here too. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
+<p class="foot">Trades happen in game between players. Club FM never holds items or mesos and never sells for real money. #selling posts on the <a href="https://discord.gg/cXnVBTUUPk" rel="noopener">Club FM Discord</a> show here too. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
 </main>
 <script>
 (function () {
@@ -199,7 +199,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     var v = $("view"); v.textContent = "";
     var b = el("a", "back", "← All listings"); b.href = "#"; v.appendChild(b);
     var p = el("section", "panel"); v.appendChild(p); p.appendChild(el("h2", null, "List an item"));
-    if (!ME) { p.appendChild(el("p", null, "Sign in with Discord to list an item. It's free, and buyers reach you by Discord DM.")); p.appendChild(signIn()); return; }
+    if (!ME) { p.appendChild(el("p", null, "Sign in with Discord to list for free. Buyers reach you by Discord DM.")); p.appendChild(signIn()); return; }
     if (!ME.ok) { p.appendChild(el("p", "msg err", ME.why)); return; }
     var f = el("form", "form"); p.appendChild(f);
     var dl = el("datalist"); dl.id = "names"; NAMES.slice().sort(function (a, b) { return (ROWS[b].n || 0) - (ROWS[a].n || 0); }).forEach(function (n) { var o = el("option"); o.value = shown(n); dl.appendChild(o); }); f.appendChild(dl);
@@ -209,7 +209,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     // a screenshot of the item's tooltip fills in the item and its stats; the picture never leaves the browser
     var shot = el("div", "shot wide"), sbtn = el("button", "btn", "📷 Read it from a screenshot"), sfile = el("input"), sst = el("p", "hint");
     sbtn.type = "button"; sfile.type = "file"; sfile.accept = "image/*"; sfile.hidden = true;
-    shot.appendChild(sbtn); shot.appendChild(el("span", "hint", "Hover the item in game, take a screenshot, and drop, paste or pick it here. We fill in the item and its stats; you add the price.")); shot.appendChild(sfile); shot.appendChild(sst);
+    shot.appendChild(sbtn); shot.appendChild(el("span", "hint", "Screenshot the item's tooltip and drop, paste or pick it here. We fill in the item and stats.")); shot.appendChild(sfile); shot.appendChild(sst);
     f.insertBefore(shot, it.parentNode);
     sbtn.addEventListener("click", function () { sfile.click(); });
     sfile.addEventListener("change", function () { if (sfile.files[0]) readShot(sfile.files[0]); sfile.value = ""; });
@@ -224,7 +224,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
       var go = function () {
         window.fmReadTip(file, { names: NAMES, base: function (n) { return BASES[String(n).toLowerCase()] || null; }, progress: function (p) { sst.textContent = "Reading the screenshot… " + Math.round(p * 100) + "%"; } }).then(function (r) {
           sbtn.disabled = false;
-          if (!r.name && !r.statsText) { sst.className = "msg err"; sst.textContent = "Couldn't find an item tooltip in that picture. Hover the item so its stats show, then screenshot again, or fill it in below."; return; }
+          if (!r.name && !r.statsText) { sst.className = "msg err"; sst.textContent = "No item tooltip found. Hover the item so its stats show and screenshot again, or fill it in below."; return; }
           if (r.name) { it.value = shown(r.name); sync(); }
           if (r.statsText && !st.parentNode.hidden) st.value = r.statsText;
           sst.className = "msg ok";
@@ -245,7 +245,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     it.addEventListener("input", sync); it.addEventListener("change", sync);
     if (pre) { it.value = shown(pre); }
     var go = el("button", "btn go", "Post listing"); go.type = "submit";
-    var acts = el("div", "acts"); acts.appendChild(go); f.appendChild(acts); f.appendChild(el("p", "trust wide", "Your listing also goes up in the #selling forum on Discord. It runs a week and you can renew it, change the price or take it down any time. Listings never change the board's prices."));
+    var acts = el("div", "acts"); acts.appendChild(go); f.appendChild(acts); f.appendChild(el("p", "trust wide", "Also posted in #selling on Discord. Runs a week. Renew, reprice or take it down any time."));
     f.addEventListener("submit", function (e) {
       e.preventDefault(); var n = pick();
       if (!n) return msg(p, "Pick the item from the list so it matches the board.");

@@ -91,7 +91,7 @@
   <div class="main">
     <section class="window" aria-labelledby="ptitle">
       <div class="wtitle"><h2 id="ptitle">Price Board</h2><span class="meta"><span class="badge" title="Typical prices come from sales we saw, not asking prices">FROM SALES</span></span></div>
-      <a class="gate" id="gate" hidden href="https://api.maplefm.gg/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are open to everyone. Listings and deals are for Mega Deals holders: sign in with Discord to check yours.</span><i>Sign in with Discord</i></a>
+      <a class="gate" id="gate" hidden href="https://api.maplefm.gg/login?back=home"><b>See every live listing, seller, roll and deal</b><span>Prices are free for everyone. Listings and deals need Mega Deals.</span><i>Sign in with Discord</i></a>
       <div class="tabs" role="tablist" aria-label="Views">
         <button role="tab" id="tab-prices" aria-selected="true">Board</button>
         <button role="tab" id="tab-deals" aria-selected="false">Best deals</button>
@@ -160,13 +160,13 @@
           <label class="note" title="What the game keeps from a sale, if anything. Your profit is counted after it.">Sale fee <input type="number" id="pf-fee" min="0" max="50" step="0.5" value="0" aria-label="Sale fee percent">%</label>
           <button type="button" class="pbtn" id="pf-csv">Export CSV</button>
         </div>
-        <h3 class="subh">Holding now <small class="note" style="font-weight:600">Worth now is the typical sale price. Tap Sell when it goes.</small></h3>
+        <h3 class="subh">Holding now <small class="note" style="font-weight:600">Worth now is the typical sale price.</small></h3>
         <div class="tbox scroll">
           <table class="ptable">
             <thead><tr><th>Item</th><th>Qty</th><th>Avg cost</th><th>Worth now</th><th>Move</th><th>Unrealized</th><th></th></tr></thead>
             <tbody id="pos-rows"></tbody>
           </table>
-          <div class="empty" id="pos-empty"><strong>Nothing held</strong>Log what you buy and what you sell. Club FM matches each sale to what you paid for it and keeps your wins and losses.</div>
+          <div class="empty" id="pos-empty"><strong>Nothing held</strong>Log your buys and sells to track profit.</div>
         </div>
         <h3 class="subh">Trades</h3>
         <div class="tbox scroll">
@@ -184,15 +184,15 @@
             <thead><tr><th>Item</th><th>Qty</th><th>Paid</th><th>Worth now</th><th>Move</th><th>P/L each</th><th>P/L total</th><th></th></tr></thead>
             <tbody id="pos-rows"></tbody>
           </table>
-          <div class="empty" id="pos-empty"><strong>No positions yet</strong>Add what you bought and what you paid, and you'll see if you're winning or losing as prices move.</div>
+          <div class="empty" id="pos-empty"><strong>No positions yet</strong>Add what you bought and what you paid to track profit.</div>
         </div>
-        <h3 class="subh">Watchlist <small class="note" style="font-weight:600">Set an alert price and this browser tells you when someone lists it at or under it. Mega Deals holders also get a Discord DM on deals. Sign in with Discord so your stars follow you.</small></h3>
+        <h3 class="subh">Watchlist <small class="note" style="font-weight:600">Alerts when it's listed at or under your price. Mega Deals adds a Discord DM.</small></h3>
         <div class="tbox scroll">
           <table>
             <thead><tr><th>Item</th><th>Typical</th><th>1 day</th><th>3 days</th><th>7 days</th><th class="clubonly">Cheapest now</th><th title="Get a notification when someone lists it at or under this price">Alert under</th><th></th></tr></thead>
             <tbody id="watch-rows"></tbody>
           </table>
-          <div class="empty" id="watch-empty"><strong>Nothing starred</strong>Click the star in an item's panel to follow it. Your positions are watched automatically.</div>
+          <div class="empty" id="watch-empty"><strong>Nothing starred</strong>Star an item in its panel to follow it. Positions are watched automatically.</div>
         </div>
       </div>
 
@@ -208,7 +208,7 @@
           <label class="fastpct">Sell fast at <input type="number" id="fast-pct" min="0" max="50" step="1" aria-label="Percent under typical"> % under typical</label>
           <button type="button" class="pbtn" id="sell-refresh" title="Pull the newest items your watcher saw you hover">↻ Load hovered items</button>
           <button type="button" class="pbtn" id="sell-clear">Clear list</button>
-          <p class="note sellhelp" id="sell-help">To fill this from the game: pick your watcher above, keep it running, then hover each item in your inventory for a second. They show up here within a few minutes.</p>
+          <p class="note sellhelp" id="sell-help">From the game: pick your watcher, then hover each inventory item for a second. They show up within minutes.</p>
         </div>
         <div class="tbox scroll">
           <table>
@@ -217,7 +217,7 @@
             </tr></thead>
             <tbody id="sell-rows"></tbody>
           </table>
-          <div class="empty" id="sell-empty"><strong>Nothing added yet</strong>Add the items in your inventory you want to sell and you'll get a price to list each one at.</div>
+          <div class="empty" id="sell-empty"><strong>Nothing added yet</strong>Add items to sell and get a list price for each.</div>
         </div>
       </div>
 
@@ -235,7 +235,7 @@
             </tr></thead>
             <tbody id="deal-rows"></tbody>
           </table>
-          <div class="empty" id="deal-empty" hidden><strong>No deals in view</strong>Nothing still for sale has been seen under its typical price in the last day.</div>
+          <div class="empty" id="deal-empty" hidden><strong>No deals in view</strong>Nothing for sale under typical in the last day.</div>
           <p class="note" id="deal-note" hidden></p>
           <div class="dealalso" id="deal-also" hidden></div>
         </div>
@@ -266,12 +266,17 @@
 <dialog id="help" aria-labelledby="help-t">
   <div class="wtitle"><h2 id="help-t">About this site</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
-    <p>This page shows what items really sell for in the MapleStory Classic Free Market, read off the screen by players running Club FM Watcher while they shop. Pick an item to see its typical price and recent sales. It updates itself every minute. Anyone can add prices from the Earn by scanning page.</p>
-    <p><b>Prices are real sales.</b> A sale is a shop row seen greyed out, which means someone paid the price printed on it. Asking prices of rows still for sale are shown apart and are never counted as sales.</p>
-    <p><b>Typical</b> leans on the present: the middle price of the last 24 hours of sales when 5 or more sold in them, otherwise of the last 3 days. If even that is thin, it uses the last 10 sales, and if today's asking prices sit well above those it follows today's asks instead and says <b>Rising</b>. The <b>typical range</b> is the middle half of those same sales. Items with fewer than 3 sales fall back to asking prices and say <b>Ask</b>, and items seen fewer than 5 times say <b>Low data</b>.</p>
-    <p><b>24h</b> is the typical sale of the last 24 hours against the 24 hours before it. <span class="clubonly"><b>Cheapest now</b> is the lowest listing still up from the last day. In the item panel, a listing is <b>likely still up</b> when it was seen in the last 3 hours, and crossed out when the same shop was seen again later without it.</span></p>
-    <p><b>Sell my items</b> prices what you're holding. <b>My positions</b> tracks what you bought to flip, and the star in an item's panel watches it; both ping you when the price moves past your set percent in a day. They're saved in this browser only.</p>
-    <p>Press <kbd>/</kbd> to search. Search understands chat shortcuts like GFA 60, WG or WLR, and scroll percents.</p>
+    <p>Real MapleStory Classic Free Market sale prices, read off screen by players running Club FM Watcher. Updates every minute.</p>
+    <ul>
+      <li><b>Sale:</b> a shop row seen greyed out, so someone paid that price. Asking prices are shown apart and never count as sales.</li>
+      <li><b>Typical:</b> middle price of the last 24 hours of sales if 5 or more sold, else the last 3 days, else the last 10 sales. If today's asks sit well above those, it follows the asks and says <b>Rising</b>.</li>
+      <li><b>Typical range:</b> the middle half of those same sales.</li>
+      <li><b>Ask:</b> under 3 sales, so asking prices are used. <b>Low data:</b> seen under 5 times.</li>
+      <li><b>24h:</b> typical of the last 24 hours against the 24 before.</li>
+      <li class="clubonly"><b>Cheapest now:</b> lowest listing still up from the last day. <b>Likely still up:</b> seen in the last 3 hours. Crossed out once the shop is seen again without it.</li>
+      <li><b>Sell my items</b> prices what you hold. <b>My positions</b> tracks your flips. Starred items and positions ping you past your daily percent. Saved in this browser only.</li>
+      <li>Press <kbd>/</kbd> to search. Chat shortcuts work: GFA 60, WG, WLR.</li>
+    </ul>
   </div>
 </dialog>
 
@@ -279,11 +284,14 @@
   <div class="wtitle"><h2 id="src-t">Where prices come from</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
     <h3>How the prices are read</h3>
-    <p>Every price comes from players running FM Watcher while they play (anyone can, from the Earn by scanning page), and from public MapleStory Classic streams our Stream Reader watches. The program finds Free Market shop windows on screen, reads each row's item and price, and checks them against consistency rules before anything is published.</p>
-    <p>A <b>sale</b> is a shop row seen greyed out, or a row whose stock dropped between visits, at the price printed on it. Coverage depends on where we walked, so some items only have a few sales.</p>
-    <p>Streamers who would rather be left out can say so with the Feedback button and their channel is skipped from then on.</p>
-    <p>No footage is stored or hosted. Seller names are the shop owners' in-game names, as anyone in the Free Market could see them.</p>
-    <p>Item details, icons, levels and classes come from <a href="https://maplestory.io" target="_blank" rel="noopener">maplestory.io</a>.</p>
+    <ul>
+      <li><b>Sources:</b> players running FM Watcher, and public MapleStory Classic streams read by our Stream Reader.</li>
+      <li><b>Checks:</b> every row's item and price passes consistency rules before it's published.</li>
+      <li><b>Sale:</b> a row seen greyed out, or whose stock dropped between visits, at its printed price. Some items have few sales because coverage depends on where we walked.</li>
+      <li><b>Streamers</b> can opt out with the Feedback button.</li>
+      <li><b>No footage</b> is stored. Seller names are in-game shop names anyone can see.</li>
+      <li>Item details and icons: <a href="https://maplestory.io" target="_blank" rel="noopener">maplestory.io</a></li>
+    </ul>
     <h3>Thanks to the people scanning</h3>
     <div class="crew" id="crew"></div>
     <p class="note" id="crew-note"></p>
@@ -294,7 +302,7 @@
 <dialog id="feedback" aria-labelledby="fb-t">
   <div class="wtitle"><h2 id="fb-t">Send feedback</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
-    <p class="note">Anonymous: no name, login or account is sent. Wrong price, a bug, an idea, anything. We read every one.</p>
+    <p class="note">Anonymous, no login sent. Wrong price, bug or idea: we read every one.</p>
     <div class="fbtopics" id="fb-topic" role="radiogroup" aria-label="What it's about"></div>
     <textarea id="fb-text" maxlength="1500" rows="6" placeholder="What should we fix or add?"></textarea>
     <label class="fbctx"><input type="checkbox" id="fb-ctx" checked> Include what I'm looking at (<span id="fb-ctxv"></span>)</label>
@@ -312,7 +320,7 @@
       </div>
       <aside class="covside">
         <h3 class="covh">Cold rooms right now</h3>
-        <p class="note">Nobody has read these in the past day. A watched sale caught in a cold spot earns extra credit, the cold-room bounty. Walk in, open shops, hover gear.</p>
+        <p class="note">Unread for a day. Sales caught here earn the cold-room bounty.</p>
         <div class="cold" id="covcold"></div>
       </aside>
     </div>
@@ -326,13 +334,13 @@
     <div class="ladder" id="rk-ladder"></div></details>
     <div class="podium" id="rk-pod"></div>
     <div class="rk-list" id="rk-list"></div>
-    <p class="note">Every sale your watcher or stream catches counts, forever. Number one wears the Crown. Want in? <a href="contribute.html">Start scanning</a>.</p>
+    <p class="note">Number one wears the Crown. <a href="contribute.html">Start scanning</a>.</p>
   </div>
 </dialog>
 <dialog id="clubdlg" aria-labelledby="cl-t">
   <div class="wtitle"><h2 id="cl-t">Club member sign in</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
-    <p class="note">Prices, Cheapest now and Where to buy are open to everyone. Best deals are open too, 10 minutes after Mega Deals holders see them. Live deal alerts are for Mega Deals holders. Sign in with Discord to earn by scanning and keep your watchlist on any browser.</p>
+    <p class="note">Open to all: prices, Cheapest now, Where to buy, and Best deals 10 minutes late. Live deal alerts: Mega Deals holders. Sign in with Discord to earn and sync your watchlist.</p>
     <input type="password" id="club-key" autocomplete="off" placeholder="Club key">
     <div class="fbrow"><span class="note" id="club-msg"></span><button type="button" class="cta" id="club-go">Sign in</button></div>
   </div>
@@ -340,7 +348,9 @@
 <dialog id="datacheck" aria-labelledby="dc-t">
   <div class="wtitle"><h2 id="dc-t">Data check</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
-    <p>Every time the prices refresh, each item is checked against the rest of the data: tiers that look mixed up, our watchers and the streams disagreeing, a price that jumped or crashed in a week, everyone listing far under typical, and bundles that don't match singles. Items that fail show <b>⚠ Check</b>, and their deals never ping.</p>
+    <p>Each refresh checks every item for:</p>
+    <ul><li>tiers that look mixed up</li><li>watchers and streams disagreeing</li><li>a price that jumped or crashed in a week</li><li>everyone listing far under typical</li><li>bundles that don't match singles</li></ul>
+    <p>Items that fail show <b>⚠ Check</b> and their deals never ping.</p>
     <div class="dclist" id="dclist"></div>
   </div>
 </dialog>
@@ -348,7 +358,7 @@
 <dialog id="contrib" aria-labelledby="con-t">
   <div class="wtitle"><h2 id="con-t">Record your shopping</h2><button class="x" data-close aria-label="Close">×</button></div>
   <div class="dbody">
-    <p>Walk the Free Market with FM Watcher running and it reads the shops for you. Every shop you open adds sales and listings here within a few minutes.</p>
+    <p>Walk the Free Market with FM Watcher running. Every shop you open shows up here within minutes.</p>
     <h3>Get set up</h3>
     <ol>
       <li>Download FM Watcher from the Earn by scanning page and run install.bat.</li>
@@ -356,18 +366,18 @@
     </ol>
     <h3>While you shop</h3>
     <ol>
-      <li>Open the channel menu once, or type your channel in channel.txt, so listings show the channel.</li>
+      <li>Open the channel menu once, or put your channel in channel.txt.</li>
       <li>Keep the minimap in view. It tells us which Free Market room you're in.</li>
       <li>Scroll each shop slowly to the bottom so every row is read.</li>
-      <li>Keep the cursor off the item prices, except to hover an item for a second when you want its stats read.</li>
+      <li>Keep the cursor off prices. Hover an item for a second to read its stats.</li>
     </ol>
     <h3>Streaming instead?</h3>
-    <p>If you stream MapleStory Classic on Twitch with Classic in your title, the Stream Reader can read your Free Market trips too. Say so on the Club FM Discord if you'd rather be left out.</p>
+    <p>Stream on Twitch with Classic in the title and the Stream Reader reads your FM trips. Opt out on the Club FM Discord.</p>
   </div>
 </dialog>
 <script id="scan-data" type="application/json">[]</script>
 <script id="icon-ids" type="application/json">{"Adamantium Ore":4010003,"Amethyst Ore":4020001,"Angel Halo":1002367,"Angel Wand":1702004,"Animal Fur Bundle":"icons/animal-fur-bundle.png","Aquamarine":4021002,"Aquamarine Ore":4020002,"Arrows for Bows":2060000,"Arrows for Crossbows":2061000,"Baby Angel Wings":1102005,"Battle Axe":1312001,"Beetle Long Sleeve":1042032,"Beige Nitty":1072023,"Beige Plain Robe":1050008,"Beret":1001013,"Black Knucklevest Pants":1060052,"Black Sunglasses":1022004,"Blue Bucket Hat":1002298,"Blue Cap":1002237,"Blue Guise":1002172,"Blue Headband":1002069,"Blue Mushroom Cap":4000009,"Blue Pao":1040042,"Blue Qi Pao":1041040,"Blue Qi Pao Pants":1061033,"Blue Snail Shell":4000000,"Blue Training Shirt":1040004,"Blue Watch":1082171,"Blue Wizardry Hat":1002072,"Bronze Aroa Boots":1072008,"Bronze Helmet":1002039,"Bronze Ingot":4011000,"Bronze Koif":1002043,"Bronze Ore":4010000,"Brown Bamboo Hat":1002026,"Brown Hard Leather Boots":1072015,"Brown Lamelle":1041021,"Bubbling's Huge Bubble":4000037,"Bunny Earmuffs":1002738,"Bunny Ears":1003050,"Butterfly Skirt":1061129,"Cat Hat":1002031,"Cat Suit":1051002,"Charm of the Undead":4000008,"Cherub's Bow":1702025,"Chocolate Label Ring":1112113,"Composite Bow":1452003,"Cutlus":1302004,"Diamond Ore":4020007,"Dollish Pink":1012083,"Double Axe":1312000,"Emerald Ore":4020003,"Emerald Staff":1382005,"Firewood":4000018,"Fish Spear":1432008,"Fork on a Stick":1432001,"Fragment of Magic":"icons/fragment-of-magic.png","Fruit Knife":1332007,"Garnet":4021000,"Garnet Ore":4020000,"Gold Kitty Slippers":"icons/gold-kitty-slippers.png","Gold Ore":4010006,"Green Armine Skirt":1061011,"Green Bennis Chainmail":1040022,"Green Feather Hat":1002114,"Green Mushroom Cap":4000012,"Green Woodsman Boots":1072016,"Grey Able Armor":1041063,"Hat Accuracy Scroll: Lesser":"icons/hat-accuracy-scroll-lesser.png","Horny Mushroom Cap":4000015,"Iron Ball":1442006,"Iron Dagger":1332010,"Iron Ingot":4011001,"Iron Ore":4010001,"Jr. Necki Skin":4000034,"Kitty Chat Ring":"icons/kitty-chat-ring.png","Leaf":4000005,"Leaf Earrings":1032025,"Leather":4000021,"Lemon":2010004,"Lemona":1082019,"Lined Hip-Hop Pants":1062005,"Long Sword":1302007,"Meshcap":1002429,"Metal Axe":1412001,"Metal Gear":1002001,"Mithril Ore":4010002,"Mithril Pole Arm":1442001,"Mushroom Spore":4000011,"Nakamaki":1432003,"Octopus Leg":4000006,"Opal Ore":4020004,"Orange Baseball Jacket":1040005,"Orange Hooded Shirt":1042066,"Orange Mushroom Balloon":1102137,"Orange Mushroom Cap":4000001,"Orange Split Piece":1040019,"Orange Toy Hammer":1702010,"Orihalcon Ore":4010005,"Pan Lid":1092008,"Patissier Hat":1002443,"Patissier Uniform":1052037,"Pig Illustrated":1322031,"Pig's Head":4000017,"Pig's Ribbon":4000002,"Pink Allstar":1042040,"Pole Arm":1442000,"Pure Water":2022000,"Purple Dorothy Dress":1051173,"Rainbow Knit":1041125,"Red Bandana":1002080,"Red Hwarang Shirt":1040021,"Red Loosecap":1002127,"Red Ninja Sandals":1072031,"Red Sailor Shirt":1041009,"Red Sailor Skirt":1061007,"Red Snail Shell":4000016,"Red Thief Hood":1002107,"Red Trainer Jacket":1041109,"Red Trainer Pants":1061072,"Reggae Hat":1002501,"Ribboned Pig Headband":1002441,"Ripped Jeans":1062015,"Sailor Hat":1002943,"Sailor Outfit":1050152,"Sandblasted Jeans":1062001,"Sapphire Ore":4020005,"Selective 5-slot Coupon":"icons/selective-5-slot-coupon.png","Set of Match Cards":4080100,"Silver Ore":4010004,"Slime & Mushroom Omok (name cut off)":4080000,"Slime & Octopus Omok Set":4080001,"Slime & Pig Omok Set":4080002,"Slime Bubble":4000010,"Slime Earrings":1032052,"Slime Slippers":1072235,"Slime T-Shirt":1042030,"Snail Shell":4000019,"Spear":1432000,"Squishy Liquid":4000004,"Steel Fingerless Gloves":1082000,"Steel Shield":1092000,"Stiff Feather":4003004,"Stirge Wing":4000042,"Stolen Fence":1092003,"Sword":1302000,"Toga":1052030,"Topaz Ore":4020006,"Tourist T":1042086,"Tree Branch":4000003,"Triangular Zamadar":1332000,"Weighted Earrings":1032000,"White Gomushin":1072004,"White Hooded Vest":1042042,"White Jeans":1062039,"White Label Ring":1112100,"White Ribboned Sailor D (name cut off)":1051139,"White Ribboned Sailor Dr (name cut off)":1051139,"Wooden Buckler":1092005,"Wooden Club":1322005,"Wooden Mallet":1422000,"Wooden Staff":1382000,"Work Gloves":1082002,"Yellow Bandana":1002082,"Yellow Rainbow Sneaks":1072379,"Yellow Spatula":1702012,"Yellow Square":1032009}</script>
-<script src="/assets/board.min.js?v=ab572f9e"></script>
+<script src="/assets/board.min.js?v=6e498777"></script>
 <div class="legendbox" id="legendbox"><b>Legend <button type="button" id="legendx" aria-label="Collapse the legend">–</button></b>
   <span class="lg" title="Fresh sales caught by two trusted scanners, or a scanner and a stream"><img src="assets/emoji/verified.png" alt="">Verified · 2 scanners</span>
   <span class="lg" title="Fresh sales caught by one trusted scanner"><img src="assets/emoji/scanner.png" alt="">Watched · 1 scanner</span>

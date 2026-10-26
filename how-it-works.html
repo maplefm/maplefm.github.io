@@ -19,33 +19,33 @@ h2{font:700 1.2rem Outfit,sans-serif;margin:0 0 6px}ol{padding-left:20px;margin:
 </style><link rel="stylesheet" href="/assets/nav.css?v=2"></head><body><main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 <h1>How Club FM works</h1>
-<p class="lead">The full picture, for anyone who wants to look under the hood.</p>
+<p class="lead">Under the hood.</p>
 <nav class="toc"><a href="#sources">Where prices come from</a><a href="#math">How a price is set</a><a href="#data">What we collect</a><a href="#safe">Safety</a><a href="#who">Who runs it</a></nav>
 
 <section id="sources"><h2>Where prices come from</h2>
 <ol>
-<li><b>Players in the Free Market.</b> Volunteers run FM Watcher, a free Windows program, while they shop. It reads the shop windows on their own screen: item names, prices, quantities and sold slots. Resting the mouse on an equip lets it read the item's stats.</li>
-<li><b>Trade chat and chalkboards.</b> Buy and sell posts seen in chat, and chalkboards in the Free Market Entrance, count as asking prices.</li>
-<li><b>Public Twitch streams.</b> When a MapleStory Classic stream shows Free Market shops, those shops are read the same way and credited to the channel.</li>
+<li><b>Players in the Free Market.</b> Volunteers run FM Watcher, a free Windows program, while they shop. It reads item names, prices, quantities and sold slots off their screen, and equip stats on hover.</li>
+<li><b>Trade chat and chalkboards.</b> Chat posts and Free Market Entrance chalkboards count as asking prices.</li>
+<li><b>Public Twitch streams.</b> Shops shown on MapleStory Classic streams are read the same way and credited to the channel.</li>
 </ol>
-<p class="muted">Everything comes from what any player can see in game. There is no hacking, packet reading or access to Nexon's servers.</p>
+<p class="muted">Only what any player can see in game. No hacking, packet reading or access to Nexon's servers.</p>
 </section>
 
 <section id="math"><h2>How a price is set</h2>
 <ol>
-<li>The <b>typical price</b> is the middle of recent real sales, a slot that sold out between two scans. Asking prices are only used when there are no sales yet.</li>
-<li><b>Equips are priced by their roll.</b> A 10 attack Work Gloves and a clean pair are judged against sales of the same stats and slots used.</li>
-<li>Odd outliers and misreads are filtered out, and a <b>check mark</b> means a second scanner or a stream saw the same sale.</li>
-<li>Prices refresh about every 15 minutes. They can still be wrong or late, so check before a big trade.</li>
+<li><b>Typical price:</b> the middle of recent real sales, slots that sold out between two scans. Asking prices only when there are no sales yet.</li>
+<li><b>Equips are priced by roll.</b> 10 attack Work Gloves and a clean pair are each judged against sales with the same stats and slots.</li>
+<li><b>Filtered:</b> outliers and misreads. A <b>check mark</b> means a second scanner or a stream saw the same sale.</li>
+<li><b>Refresh:</b> about every 15 minutes. Prices can be wrong or late, so check before a big trade.</li>
 </ol>
 </section>
 
 <section id="data"><h2>What we collect</h2>
 <ol>
-<li>From the game screen: items, prices, stats, the shop owner's in-game name as shown in the Free Market, channel, room and time. Nothing else on a scanner's screen leaves their PC.</li>
-<li>From visitors: a visit count only. Each page view records the page, the site you came from and the day, with a scrambled daily ID so one visitor counts once a day. No cookies, no account, and your IP address is never stored. Your watchlist and settings stay in your browser.</li>
-<li>From the !price chat command: only the item name typed. We never see who asked.</li>
-<li>Contributors who want credit sign in with Discord. That's used for ranks and payouts only.</li>
+<li><b>Game screen:</b> items, prices, stats, the shop owner's in-game name, channel, room and time. Nothing else leaves a scanner's PC.</li>
+<li><b>Visitors:</b> a visit count only. Each view logs the page, referring site and day, with a scrambled daily ID so you count once a day. No cookies, no account, no stored IP. Watchlist and settings stay in your browser.</li>
+<li><b>!price command:</b> only the item name typed. We never see who asked.</li>
+<li><b>Contributors:</b> Discord sign in, used for ranks and payouts only.</li>
 </ol>
 <p class="muted">Full legal wording is in the <a href="/terms.html">Terms of Use</a>.</p>
 </section>
@@ -53,17 +53,19 @@ h2{font:700 1.2rem Outfit,sans-serif;margin:0 0 6px}ol{padding-left:20px;margin:
 <section id="safe"><h2>Safety</h2>
 <ol>
 <li><b>Viewers:</b> the board is a public web page. No downloads, no logins, no ads.</li>
-<li><b>Streamers:</b> the !price command only fetches a line of text, like any !weather command. It can't post on its own or touch your channel settings.</li>
-<li><b>Scanners:</b> FM Watcher only reads the screen, the same way streaming software captures it. It never clicks, types, moves your character, or touches the game's files or memory. Club FM isn't approved by Nexon, so we can't promise zero risk, but the watcher does nothing to the game.</li>
+<li><b>Streamers:</b> !price only fetches a line of text, like !weather. It can't post on its own or touch channel settings.</li>
+<li><b>Scanners:</b> FM Watcher only reads the screen, like streaming software. It never clicks, types, moves your character, or touches game files or memory. Club FM isn't approved by Nexon, so we can't promise zero risk, but the watcher does nothing to the game.</li>
 <li><b>Game rules:</b> Club FM never buys or sells mesos, items, accounts or access for real money.</li>
 </ol>
 </section>
 
 <section id="who"><h2>Who runs it</h2>
-<p>Club FM is built by one player who loves the game, and it's run for the community, not for profit. The developer pays the costs out of pocket. There are no investors, no ads and no outside owners.</p>
-<p>Donations on <a href="https://ko-fi.com/maplefm">Ko-fi</a> go back to the players who scan prices, through the <a href="/contribute.html">Earn by scanning</a> program. The goal is a site that pays for itself and answers only to its players.</p>
-<p>Some streamers who use Club FM on stream are sponsored, and sponsored streams say so.</p>
-<p>Questions or ideas? Ask in the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a>.</p>
+<ol>
+<li>Built by one player, run for the community, not for profit. Costs paid out of pocket. No investors, ads or outside owners.</li>
+<li><a href="https://ko-fi.com/maplefm">Ko-fi</a> donations go to the players who scan, through <a href="/contribute.html">Earn by scanning</a>.</li>
+<li>Some streamers are sponsored, and sponsored streams say so.</li>
+<li>Questions or ideas? Ask in the <a href="https://discord.gg/cXnVBTUUPk">Club FM Discord</a>.</li>
+</ol>
 </section>
 </main><script src="/assets/hit.js" defer></script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Play</b><a href="/quests.html">Quest log</a><a href="/training/">Training guide</a><a href="/map.html">Maps and routes</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>
