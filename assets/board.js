@@ -384,7 +384,7 @@
   // bump when cleanName or the name resolver changes, so a published names.json from older rules is not reused
   var CLEANV = 3;
   window.fmClean = function () { return { cl: CNC.cl, out: CNC.out, v: CLEANV }; };
-  window.fmQA = { canonAll: function (r) { return canonAll(r); }, pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
+  window.fmQA = { statsFit: function (n, x) { return statsFit(n, x); }, statsFix: function (n, x) { return statsFix(n, x); }, canonAll: function (r) { return canonAll(r); }, pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
   // the server runs this same page and publishes the tidied spelling of every raw name it saw; seeded here, the
   // first build only has to tidy names that are new since
   function seedNames() { if (NAMES_IN && NAMES_IN.v === CLEANV && DBN && !Object.keys(CNC.cl).length) { CNC = { cl: NAMES_IN.cl, out: NAMES_IN.out || {}, db: DBK.length, at: Date.now() }; NAMES_IN = null; } }
@@ -780,6 +780,7 @@
       });
     }
     L.forEach(tipStats);
+    sanitizeStats(L);
     learnBase(L);
     missingLines(L);
     // Spot holders: junk listed at a silly price just to keep a shop up (a Mushroom Spore for 50,000).
@@ -1316,7 +1317,9 @@
     });
     return b;
   }
+  // a search or a popular pick always lands on the board, whatever tab was open (My positions, Best deals...)
   function jumpToCard() {
+    if (state.tab !== "prices") $("tab-prices").click();
     if (window.innerWidth <= 1180) return;   // phones and tablets get the card as a sheet
     var m = document.querySelector(".main"); if (m && m.getBoundingClientRect().top > window.innerHeight * 0.5) m.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -1924,6 +1927,33 @@
     if (r[7] && typeof r[7] === "object") return r[7];
     if (r.length > 8) { var o = {}; if (r[7]) o.ATT = r[7]; if (r[8]) o.MATT = r[8]; return o; }    // older list: attack only
     return null;
+  }
+  // A tooltip read off the screen can belong to the item next to it. Before any stat counts toward a roll, it has to
+  // be one this item can carry: one of its base stats, or one a scroll for its slot adds (no attack on earrings).
+  var SCROLLABLE = { Earrings: "STR DEX INT LUK AVOID", Glove: "ATT MATT ACC", Hat: "ACC HP MP", Cape: "ACC DEX INT LUK MDEF STR WDEF", Top: "WDEF HP MP",
+    Bottom: "WDEF HP MP", Overall: "WDEF DEX INT LUK STR", Shield: "ACC WDEF", Shoes: "AVOID JUMP SPEED", "Pet Equipment": "JUMP SPEED", Wand: "MATT", Staff: "MATT" };
+  var WEAPONS = /Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun/;
+  // returns the stats this item can really have: attack where the slot can't have attack means the whole tooltip was
+  // another item's (null); a stray stat line (a requirement read as a bonus, "LUK 70" on a claw) is dropped on its own
+  function statsFix(name, x) {
+    if (!x || typeof x !== "object") return x;
+    var r = dbRow(name); if (!r) return x;
+    var kind = DBK[r[5]] || "", sub = kind.split(":")[1] || "", base = dbBase(name) || {};
+    if (!/^Equip/.test(kind)) return x;        // a scroll's tooltip lists what it adds; that's not a roll
+    var allow = {}; Object.keys(base).forEach(function (k) { allow[k] = 1; });
+    if (!r[4]) (SCROLLABLE[sub] || (WEAPONS.test(sub) ? "ATT" : "")).split(" ").forEach(function (k) { if (k) allow[k] = 1; });
+    var out = x, foreign = false;
+    BSTATS.forEach(function (k) {
+      if (!x[k] || allow[k]) return;
+      if (k === "ATT" || k === "MATT") { foreign = true; return; }
+      if (out === x) out = Object.assign({}, x);
+      delete out[k]; delete out[k + "_b"]; if (out._tip) { out._tip = Object.assign({}, out._tip); delete out._tip[k]; }
+    });
+    return foreign ? null : out;
+  }
+  function statsFit(name, x) { return statsFix(name, x) === x; }
+  function sanitizeStats(L) {
+    L.forEach(function (l) { if (!l.x) return; var f = statsFix(l.i, l.x); if (f !== l.x) { l.xbad = l.x; l.x = f; } });
   }
   function learnBase(L) {
     LB = {};
@@ -2582,6 +2612,32 @@
       .catch(function () { MKT.p = null; return MKT.L || []; });
     return MKT.p;
   }
+  var MOBS = null, MOBS_P = null;
+  function mobsLoad() { if (MOBS) return Promise.resolve(MOBS); if (!MOBS_P) MOBS_P = fetch("/data/mobs.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (j) { MOBS = j || {}; return MOBS; }); return MOBS_P; }
+  function dropsBox(n, ip) {
+    var g = guideFor(n); if (!g || !g.d || !g.d.length) return;
+    mobsLoad().then(function (M) {
+      if (state.sel !== n || !ip.isConnected || ip.querySelector(".drops")) return;
+      // the regular drops first (best rate first), quest-only drops after
+      var list = g.d.slice().sort(function (a, b) { return (a[5] || 0) - (b[5] || 0) || (b[2] || 0) - (a[2] || 0) || (a[1] || 0) - (b[1] || 0); });
+      var box = el("div", "drops"), h = el("div", "dh"); h.appendChild(el("b", null, "Dropped by")); h.appendChild(el("span", null, list.length === 1 ? "where to farm it" : list.length + " monsters · where to farm it")); box.appendChild(h);
+      var row = el("div", "dmobs");
+      list.slice(0, 8).forEach(function (d) {
+        var m = M[d[0]], a = el(m ? "a" : "div", "dmob");
+        if (m) { a.href = "/monster/" + m[2] + "/"; a.title = d[0] + " · see its drops, stats and maps"; }
+        var pic = el("span", "dpic");
+        if (m && m[0]) { var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = LIVE + "data/sprite/" + m[0] + ".gif"; im.onerror = function () { im.remove(); }; pic.appendChild(im); }
+        a.appendChild(pic);
+        var t = el("span", "dtx"); t.appendChild(el("b", null, d[0]));
+        var lv = d[1] || (m && m[1]) || 0, where = (m && m[3]) || d[4] || "";
+        t.appendChild(el("small", null, [lv ? "Lv " + lv : "", d[2] != null ? d[2] + "%" : "", d[5] ? "on the quest" : "", where].filter(Boolean).join(" · ")));
+        a.appendChild(t); row.appendChild(a);
+      });
+      box.appendChild(row);
+      if (list.length > 8) box.appendChild(el("small", "dmore", "+" + (list.length - 8) + " more in Where to get it below"));
+      var mk = ip.querySelector(".mkt"); ip.insertBefore(box, mk ? mk.nextSibling : (ip.children[1] || null));
+    });
+  }
   var renderItemBody = renderItem0;
   renderItem0 = function () {
     renderItemBody();
@@ -2608,6 +2664,8 @@
       if (mine.length > 5) { var m = el("a", "mkr mkmore", "All " + mine.length + " listings →"); m.href = "/market.html#q=" + encodeURIComponent(showName(n)); box.appendChild(m); }
       ip.insertBefore(box, ip.children[1] || null);
     });
+    // where to farm it: the monsters that drop it, with their picture, up near the price
+    dropsBox(n, ip);
     // a roll asked for in the search: jump to its row in "Price by ATT", or say none has been seen
     if (PENDROLL && PENDROLL.n === n) {
       var want = PENDROLL.k + " " + PENDROLL.v, row = [].filter.call(ip.querySelectorAll(".pbs tr.jump"), function (tr) { return tr.firstChild && new RegExp("^" + want + "(\\D|$)").test(tr.firstChild.textContent); })[0];
@@ -3339,7 +3397,7 @@
       var box = document.getElementById("q"); if (box) box.value = q;
       var hits = searchItems(q, 8);
       if (hits.length) {
-        if (hits.length === 1 || hits[0].score - (hits[1] ? hits[1].score : 0) >= 100 || hits[0].it) pick(hits[0].n);
+        if (hits.length === 1 || hits[0].score - (hits[1] ? hits[1].score : 0) >= 100 || hits[0].it) { pick(hits[0].n); jumpToCard(); }
         if (box) { box.dispatchEvent(new Event("input", { bubbles: true })); }
       } else if (box) { box.focus(); box.dispatchEvent(new Event("input", { bubbles: true })); }
     }, 250);

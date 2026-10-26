@@ -110,6 +110,10 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         await p.waitForFunction(() => window.fmQA && window.fmQA.items().length > 100, null, { timeout: 30000 }).catch(() => {});
         await p.evaluate(() => window.fmQA.pick("Work Gloves")); await p.waitForTimeout(1500);
         ok(await p.evaluate(() => !!document.querySelector("#ip") && document.querySelector("#ip").textContent.indexOf("Work Gloves") >= 0), `${tag} search opens an item card`);
+        // searching from another tab lands back on the board
+        await p.evaluate(() => document.getElementById("tab-pos").click()); await p.waitForTimeout(300);
+        await p.fill("#q", "pan lid"); await p.waitForTimeout(500); await p.keyboard.press("Enter"); await p.waitForTimeout(900);
+        ok(await p.evaluate(() => document.getElementById("tab-prices").getAttribute("aria-selected") === "true"), `${tag} search from My positions switches to the board`);
       }
       if (pg === "/market.html") {
         await p.fill(".sitenav .sn-search input", "work gloves"); await p.keyboard.press("Enter");

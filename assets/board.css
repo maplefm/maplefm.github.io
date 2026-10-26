@@ -1161,3 +1161,17 @@ body.sheet .nudge { display: none; }
 .clubfoot { padding-bottom: 96px; }
 /* the count badge on the picked category stays readable: white on the accent, not dark on dark */
 .cchip[aria-pressed="true"] em { background: #6d3fd1; color: #fff; }
+
+/* "Dropped by": the monsters to farm for this item, with their pictures */
+.drops { margin: 10px 0; padding: 8px 10px; border: 1.5px solid var(--line2, var(--line)); border-radius: 12px; display: grid; gap: 6px; }
+.drops .dh { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: .86rem; }
+.drops .dh span { color: var(--muted); font-size: .74rem; font-weight: 600; }
+.drops .dmobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.drops .dmob { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 10px; background: var(--panel2); text-decoration: none; color: inherit; min-width: 0; }
+.drops a.dmob:hover { outline: 1.5px solid var(--accent, var(--wood)); }
+.drops .dpic { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; overflow: hidden; }
+.drops .dpic img { max-width: 44px; max-height: 44px; object-fit: contain; image-rendering: auto; }
+.drops .dtx { display: grid; min-width: 0; }
+.drops .dtx b { font-size: .84rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drops .dtx small { font-size: .7rem; color: var(--muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drops .dmore { color: var(--muted); font-size: .72rem; }
