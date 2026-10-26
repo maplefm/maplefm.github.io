@@ -1,6 +1,6 @@
 {
  "rate_per_100": 0.5,
- "daily_cap": 10,
+ "daily_cap": 0,
  "weekly_cap": 50,
  "weekly_budget": 250,
  "min_payout": 5,
@@ -14,5 +14,6 @@
   "share": 1.0,
   "max": 1000
  },
- "cold_bonus": 0.5
+ "cold_bonus": 0.5,
+ "uncap_kofi_month": 250
 }

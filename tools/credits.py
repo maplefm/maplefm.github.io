@@ -234,16 +234,72 @@ def tally(kept, obs, start, end, life=None):
         shown = next((LINKS[TAGS[n]] for n in names if TAGS.get(n) and LINKS.get(TAGS[n])), names[0])
         if shown.startswith("stream:"): shown = shown[7:]
         tag = TAGS.get(names[0]) or names[0].lower()
-        rows.append({"name": shown, "tag": tag, "watchers": names, "credits": round(c["credits"], 1), "hovers": c["hovers"], "witnessed": c["witnessed"], "cold": c["cold"], "days": {d: round(v, 1) for d, v in c["days"].items()}, "verified": c["verified"], "self": c["self"], "dropped": c["dropped"], "hours": hrs,
+        rows.append({"name": shown, "person": who, "tag": tag, "watchers": names, "credits": round(c["credits"], 1), "hovers": c["hovers"], "witnessed": c["witnessed"], "cold": c["cold"], "days": {d: round(v, 1) for d, v in c["days"].items()}, "verified": c["verified"], "self": c["self"], "dropped": c["dropped"], "hours": hrs,
                      "volume": c["volume"], "top_seller": c["sellers"].most_common(1)[0][0] if c["sellers"] else None,
                      "witnesses": len(c["witnesses"]), "ghost": round(c["ghost"], 2), "flags": flags, "owner": shown.lower() in OWNER or any(n.lower() in OWNER for n in names),
                      "lifetime_verified": int(life.get(who, 0)), "bar": round(float(life.get(who, 0)), 1)})
     rows.sort(key=lambda r: (-r["credits"], r["name"].lower()))
     return rows
 
+def cap_on(pool):
+    """The weekly cap holds until Ko-fi support reaches uncap_kofi_month (dollars over the last 28 days)."""
+    line = float(pool.get("uncap_kofi_month") or 0)
+    return not (line and KOFI.get("total") is not None and float(KOFI.get("total") or 0) >= line)
+
+def balances(all_rows, ledger, window_start, pool, life, payouts):
+    """What each person is owed: every credit they've earned, all time, at the posted rate (weekly cap while it
+    holds, scaled down for a week that would pass the budget), less what has been paid out. A payout sends the
+    whole balance, so it goes back to 0 and builds again. Pay unlocks once, when the bar reaches unlock_verified."""
+    rate = float(pool.get("rate_per_100") or 0); wcap = float(pool.get("weekly_cap") or 0) if cap_on(pool) else 0.0
+    budget = float(pool.get("weekly_budget") or 0); unlock = int(pool.get("unlock_verified") or 0)
+    kb = pool.get("kofi_budget") or {}
+    if kb and KOFI.get("total") is not None:
+        try: budget = max(budget, min(float(kb.get("max") or 1000), max(0.0, float(KOFI.get("total") or 0)) * float(kb.get("share", 1.0))))
+        except (TypeError, ValueError): pass
+    minp = float(pool.get("min_payout") or 5)
+    cut = datetime.datetime.fromtimestamp(window_start, ET).date().isoformat()
+    days = collections.defaultdict(dict); meta = {}
+    for r in all_rows:
+        meta[r["person"]] = r
+        for d, v in r["days"].items(): days[r["person"]][d] = v
+    for p, old in (ledger.get("cred") or {}).items():
+        for d, v in old.items():
+            if d < cut: days[p][d] = max(days[p].get(d, 0), float(v))
+    ledger["cred"] = {p: {d: round(v, 2) for d, v in dd.items()} for p, dd in days.items()}
+    def wk(d): dt = datetime.date.fromisoformat(d); return (dt - datetime.timedelta(days=dt.weekday())).isoformat()
+    owners = {p for p, r in meta.items() if r.get("owner")}
+    per = collections.defaultdict(lambda: collections.defaultdict(float))     # person -> week -> dollars
+    for p, dd in days.items():
+        for d, v in dd.items(): per[p][wk(d)] += v / 100 * rate
+    weeks = sorted({w for p in per for w in per[p]})
+    for w in weeks:
+        if wcap:
+            for p in per:
+                if w in per[p]: per[p][w] = min(per[p][w], wcap)
+        tot = sum(per[p].get(w, 0) for p in per if p not in owners)
+        if budget and tot > budget:
+            f = budget / tot
+            for p in per:
+                if w in per[p]: per[p][w] *= f
+    paid_map = {str(k).lower(): v for k, v in (payouts or {}).items()}
+    out = []
+    for p in per:
+        r = meta.get(p, {"name": p, "tag": p.lower(), "owner": p.lower() in OWNER})
+        earned = round(sum(per[p].values()), 2)
+        hist = paid_map.get(p.lower()) or paid_map.get(str(r.get("name", "")).lower()) or paid_map.get(str(r.get("tag", "")).lower()) or []
+        paid = round(sum(float(x.get("amount") or 0) for x in hist), 2)
+        owed = round(max(0.0, earned - paid), 2)
+        bar = round(float(life.get(p, 0)), 1); unlocked = bar >= unlock
+        out.append({"name": r.get("name", p), "person": p, "tag": r.get("tag"), "owner": bool(r.get("owner")), "earned": earned, "paid": paid, "owed": owed,
+                    "bar": bar, "unlocked": unlocked, "payable": (not r.get("owner")) and unlocked and owed >= minp,
+                    "last_paid": max((x.get("date") for x in hist), default=None)})
+    out.sort(key=lambda x: (-x["owed"], x["name"].lower()))
+    return out
+
 def payout(rows, pool):
     rate = float(pool.get("rate_per_100") or 0)
     dcap, wcap = float(pool.get("daily_cap") or 0), float(pool.get("weekly_cap") or 0)
+    if not cap_on(pool): wcap = 0.0
     budget = float(pool.get("weekly_budget") or 0)
     # the budget follows Ko-fi support once support passes it: the last 4 weeks of income, times "share" (1.0 pays
     # out everything that came in over those weeks each week; 0.25 pays out a week's worth)
@@ -277,7 +333,7 @@ def payout(rows, pool):
     paying = sum(r["pays"] for r in rows)
     return {"rate_per_100": rate, "effective_rate": round(eff, 4), "daily_cap": dcap, "weekly_cap": wcap, "weekly_budget": budget, "kofi_28d": KOFI.get("total"),
             "bill": round(bill, 2), "paying": round(paying, 2), "scaled": scaled, "total_credits": total,
-            "min_payout": float(pool.get("min_payout") or 5), "unlock_verified": unlock}
+            "min_payout": float(pool.get("min_payout") or 5), "unlock_verified": unlock, "cap_on": cap_on(pool), "uncap_kofi_month": float(pool.get("uncap_kofi_month") or 0)}
 
 if __name__ == "__main__":
     data_dir, out = sys.argv[1], sys.argv[2]
@@ -303,7 +359,12 @@ if __name__ == "__main__":
     this_wk = week_start(now); last_wk = this_wk - datetime.timedelta(days=7)
     obs = observations(data_dir)
     window_start = int((now - datetime.timedelta(days=12)).timestamp())   # the inbox keeps 14 days; trust the last 12 as complete
-    life = lifetime_verified(credits(obs, 0, int((this_wk + datetime.timedelta(days=7)).timestamp())), ledger, window_start)
+    end_all = int((this_wk + datetime.timedelta(days=7)).timestamp())
+    kept_all = credits(obs, 0, end_all)
+    life = lifetime_verified(kept_all, ledger, window_start)
+    # what has been paid out, per person: data/payouts.json next to pay.json, {"Name": [{"date": "2026-11-02", "amount": 12.5}]}
+    payouts = load(sys.argv[8] if len(sys.argv) > 8 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "payouts.json"), {})
+    bal = balances(tally(kept_all, obs, 0, end_all, life), ledger, window_start, pool, life, payouts)
     if ledger_path:
         ledger["updated"] = now.isoformat()
         json.dump(ledger, open(ledger_path, "w", encoding="utf-8"), separators=(",", ":"), sort_keys=True)
@@ -315,7 +376,7 @@ if __name__ == "__main__":
                       "current": a == this_wk, "math": payout(rows, pool), "rows": rows})
     json.dump({"generated": now.isoformat(), "trial": True,
                "rules": {"min_price": MIN_PRICE, "vendor_floor": bool(VEND), "shop_cap_per_day": SHOP_CAP, "self_rate": SELF_RATE, "witnesses": "another person's watcher or a stream capture, within a day of the sale", "earns": "watcher shop scans only", "strict": STRICT, "known_items_only": bool(KNOWN), "hover_credit": HOVER_RATE, "witness_credit": WITNESS_RATE, "self_to_bar": SELF_TO_BAR, "cold_bonus": COLD_BONUS},
-               "weeks": weeks}, open(out, "w", encoding="utf-8"), separators=(",", ":"))
+               "weeks": weeks, "balances": bal}, open(out, "w", encoding="utf-8"), separators=(",", ":"))
     w = weeks[0]
     print("week of %s: %d contributors, %d credits" % (w["start"], len(w["rows"]), w["math"]["total_credits"]))
     for r in w["rows"][:8]: print("  %-18s %7.1f credits  %4d verified %4d self %4d dropped %3d h  $%.2f %s" % (r["name"], r["credits"], r["verified"], r["self"], r["dropped"], r["hours"], r["pays"], ", ".join(r["flags"])))
