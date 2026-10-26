@@ -168,7 +168,11 @@
     function enc(v, top) {
       if (v && typeof v === "object") {
         if (isL.has(v)) return held(v) ? null : { "@": lref(v) };
-        if (Array.isArray(v)) { var a = v; if (a.length && isL.has(a[0])) a = a.filter(function (l) { return !held(l) && (top || keep(l)); }); return a.map(function (x) { return enc(x); }); }
+        if (Array.isArray(v)) {
+          var a = v; if (a.length && isL.has(a[0])) a = a.filter(function (l) { return !held(l) && (top || keep(l)); });
+          // a wrapper around a held listing ({l: listing, g: roll}) is left out whole, not sent with an empty listing
+          return a.filter(function (x) { return !(x && typeof x === "object" && !Array.isArray(x) && x.l && isL.has(x.l) && held(x.l)); }).map(function (x) { return enc(x); });
+        }
         var o = {}; Object.keys(v).forEach(function (k) { o[k] = enc(v[k]); });
         if (Array.isArray(v.asks) && typeof v.item === "string") o.asksN = v.asks.length;   // the card's count is of every listing
         return o;
@@ -203,7 +207,7 @@
       }
       return v;
     }
-    var d = dec(j.D); d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; }); d.snap = true; d.snapAt = j.at;
+    var d = dec(j.D); d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; if (Array.isArray(i.rolls)) i.rolls = i.rolls.filter(function (r) { return r && r.l; }); }); d.snap = true; d.snapAt = j.at;
     return d;
   }
   var SNAP_P = null;
