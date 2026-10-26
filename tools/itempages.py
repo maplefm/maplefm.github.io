@@ -53,7 +53,7 @@ h1{margin:0;font-size:1.6rem;line-height:1.15}.sub{color:var(--muted);font-weigh
 .note{color:var(--muted);font-size:.9rem;margin:6px 0 0}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.grid div{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px}.grid b{display:block;font-size:1.2rem}.grid span{color:var(--muted);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 table{width:100%;border-collapse:collapse;margin-top:6px}td,th{padding:6px 8px;border-bottom:1px solid var(--line2);text-align:left;font-size:.92rem}th{color:var(--muted);font-size:.75rem;text-transform:uppercase}
-h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink)}
+h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px 4px 6px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink);display:inline-flex;align-items:center;gap:6px}.rel a img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated}
 .foot{color:var(--muted);font-size:.82rem;margin-top:22px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
 td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
@@ -86,7 +86,7 @@ def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=4"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=5"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
@@ -254,7 +254,7 @@ def main():
         vp = vp if vp > 1 else 0
         nx = NX.get(name)
         rel = [x for x in bycat.get(r.get("cat") or "Other", []) if x["item"] != name][:8]
-        rels = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in rel)
+        rels = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="" width="22" height="22" loading="lazy">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in rel)
         # equipment and scrolls are searched for their price; materials, potions and cosmetics for what they are and where they drop
         price_first = bool(r.get("equip")) or "Scroll" in name
         fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
@@ -374,7 +374,7 @@ def main():
                                                     "".join(f"<url><loc>{u}</loc><lastmod>{wbuilt if u in world else today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     # the home page is a script-built board; give search engines plain links to the most traded items
     top = sorted(rows, key=lambda r: -(r.get("vol") or 0))[:40]
-    links = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))}</a>' for x in top)
+    links = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="" width="18" height="18" loading="lazy">{html.escape(shown(x["item"]))}</a>' for x in top)
     ip = os.path.join(out, "index.html")
     if os.path.exists(ip):
         h = open(ip, encoding="utf-8").read()
