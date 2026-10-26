@@ -60,6 +60,19 @@ td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--mu
 .craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
 .ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
 .gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}
+h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;left:0;top:.2em;bottom:.2em;width:4px;border-radius:4px;background:var(--accent)}
+.days{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.dr{display:grid;grid-template-columns:92px 1fr auto 62px;align-items:center;gap:10px;font-size:.92rem}
+.dr .dd{color:var(--muted);font-weight:700}.dr.today .dd{color:var(--ink);font-weight:900}
+.dr .track{height:10px;background:var(--panel2);border-radius:999px;overflow:hidden}.dr .track i{display:block;height:100%;background:var(--line2);border-radius:999px}
+.dr.today .track i{background:var(--accent)}.dr b{font-size:1rem;font-weight:900;text-align:right}
+.dc{font-size:.78rem;font-weight:800;text-align:right;color:var(--muted)}.dc.up{color:var(--up)}.dc.down{color:var(--down)}
+.eqhead{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.pill{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:3px 12px;font-weight:800;font-size:.85rem}.pill.lv{background:var(--accent);border-color:var(--accent);color:#fff}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.sg{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px}.sg b{display:block;font-size:1.35rem;font-weight:900;line-height:1.1}.sg span{color:var(--muted);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.sg.key{border-color:var(--accent);background:linear-gradient(0deg,rgba(109,63,209,.10),rgba(109,63,209,.10)),var(--panel2)}.sg.key b{color:var(--accent)}
+.ctaw{margin:18px 0 4px}.cta{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:800;text-decoration:none;padding:10px 18px;border-radius:999px}.cta span{font-size:1.1rem}
+@media (max-width:520px){.dr{grid-template-columns:78px 1fr auto 54px;gap:8px;font-size:.85rem}}
 #q{width:100%;box-sizing:border-box;font:600 1.05rem Inter,system-ui,sans-serif;padding:12px 14px;margin:14px 0 8px;border:3px solid var(--accent);border-radius:14px;background:var(--bg);color:var(--ink)}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.chips{display:flex;gap:6px;flex-wrap:wrap}
 .cc{font:700 .82rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer}.cc.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -86,7 +99,7 @@ def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=5"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
@@ -121,13 +134,14 @@ def equip_html(row, kinds):
     kind = kinds[row[5]] if row[5] < len(kinds) else ""
     if not kind.startswith("Equip:") or row[4]: return ""
     base = row[7] if len(row) > 7 and isinstance(row[7], dict) else {}
-    tr = [("Type", html.escape(kind.split(":", 1)[1]))]
-    if row[2]: tr.append(("Level needed", str(row[2])))
+    cells = []
     for k, lab in STATN.items():
-        if base.get(k): tr.append((lab, f"+{base[k]}"))
-    if base.get("SLOTS") is not None: tr.append(("Upgrade slots", str(base["SLOTS"])))
-    if len(tr) < 2: return ""
-    return "<h2>Item stats</h2><table>" + "".join(f"<tr><td>{a}</td><td>{b}</td></tr>" for a, b in tr) + "</table><p class=\"note\">Clean stats, before scrolls. Listings on the board show each roll.</p>"
+        if base.get(k): cells.append((f"+{base[k]}", lab, k in ("ATT", "MATT")))
+    if base.get("SLOTS") is not None: cells.append((str(base["SLOTS"]), "Upgrade slots", False))
+    if not cells and not row[2]: return ""
+    head = f'<p class="eqhead"><span class="pill">{html.escape(kind.split(":", 1)[1])}</span>' + (f'<span class="pill lv">Level {row[2]}</span>' if row[2] else "") + "</p>"
+    grid = "".join(f'<div class="sg{" key" if key else ""}"><b>{v}</b><span>{lab}</span></div>' for v, lab, key in cells)
+    return f'<h2>Item stats</h2>{head}<div class="sgrid">{grid}</div><p class="note">Clean stats before scrolls. The board shows each listing\'s roll.</p>'
 
 
 def eq_line(row, kinds):
@@ -249,7 +263,20 @@ def main():
         basis = "from sales players watched happen" if r.get("kind") == "sale" else "from asking prices; few sales seen yet"
         icon = f"https://maplestory.io/api/MCW/1/item/{ids[name]}/icon"
         daily = [d for d in (r.get("daily") or []) if d and d[1]][-7:]
-        dtab = "".join(f"<tr><td>{datetime.datetime.fromtimestamp(d[0] / 1000, datetime.timezone.utc).strftime('%a %b %-d')}</td><td>{full(d[1])}</td></tr>" for d in reversed(daily))
+        dtab = ""
+        if daily:
+            top = max(d[1] for d in daily) or 1
+            rv = list(reversed(daily))
+            for k, d in enumerate(rv):
+                prev = rv[k + 1][1] if k + 1 < len(rv) else None
+                ch = ""
+                if prev:
+                    pc = round((d[1] - prev) / prev * 100)
+                    if pc: ch = f'<span class="dc {"up" if pc > 0 else "down"}">{"▲" if pc > 0 else "▼"} {abs(pc)}%</span>'
+                    else: ch = '<span class="dc">same</span>'
+                lab = datetime.datetime.fromtimestamp(d[0] / 1000, datetime.timezone.utc).strftime('%a %b %-d')
+                dtab += (f'<div class="dr{" today" if k == 0 else ""}"><span class="dd">{"Today" if k == 0 else lab}</span>'
+                         f'<span class="track"><i style="width:{max(4, round(d[1] / top * 100))}%"></i></span><b title="{full(d[1])} mesos">{meso(d[1])}</b>{ch}</div>')
         vp = vendor.get(name) or 0
         vp = vp if vp > 1 else 0
         nx = NX.get(name)
@@ -271,9 +298,9 @@ def main():
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
 <div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
-{f'<h2>Typical price by day</h2><table><tr><th>Day</th><th>Typical, mesos</th></tr>{dtab}</table>' if dtab else ''}
+{f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
 {equip_html(dbrow.get(name), KINDS)}
-<p style="margin-top:16px"><a href="/#item={html.escape(name)}">See live listings, rolls and recent sales for {html.escape(nm)} on the board →</a></p>
+<p class="ctaw"><a class="cta" href="/#item={html.escape(name)}">See live listings and recent sales <span>→</span></a></p>
 {guide_html(name, GUIDE.get(name), page_of)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
 <p class="note" id="upd">Updated {when}.</p></div>
