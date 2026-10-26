@@ -1935,6 +1935,11 @@
   var WEAPONS = /Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun/;
   // returns the stats this item can really have: attack where the slot can't have attack means the whole tooltip was
   // another item's (null); a stray stat line (a requirement read as a bonus, "LUK 70" on a claw) is dropped on its own
+  // Our item list doesn't know every item's base stats (Red Cross Earrings carry +5 HP, Bronze Helmet +4 STR). A stat
+  // the list doesn't have still counts when it's small and two or more hovers show the same base for it; a big one
+  // ("LUK 70" on a claw) is a requirement read as a bonus, and attack where the slot can't have attack means the
+  // tooltip was another item's.
+  var CONS = {}, SMALL = { STR: 15, DEX: 15, INT: 15, LUK: 15, ACC: 15, AVOID: 15, SPEED: 15, JUMP: 15, HP: 60, MP: 60, WDEF: 40, MDEF: 40 };
   function statsFix(name, x) {
     if (!x || typeof x !== "object") return x;
     var r = dbRow(name); if (!r) return x;
@@ -1946,6 +1951,8 @@
     BSTATS.forEach(function (k) {
       if (!x[k] || allow[k]) return;
       if (k === "ATT" || k === "MATT") { foreign = true; return; }
+      var bv = x[k + "_b"] != null ? x[k + "_b"] : x[k];
+      if (x[k] <= (SMALL[k] || 0) && (CONS[name + "|" + k + "|" + bv] || 0) >= 2) return;   // a base stat our list is missing
       if (out === x) out = Object.assign({}, x);
       delete out[k]; delete out[k + "_b"]; if (out._tip) { out._tip = Object.assign({}, out._tip); delete out._tip[k]; }
     });
@@ -1953,8 +1960,11 @@
   }
   function statsFit(name, x) { return statsFix(name, x) === x; }
   function sanitizeStats(L) {
+    CONS = {};
+    L.forEach(function (l) { var x = l.x; if (!x) return; BSTATS.forEach(function (k) { if (x[k]) { var bv = x[k + "_b"] != null ? x[k + "_b"] : x[k], key = l.i + "|" + k + "|" + bv; CONS[key] = (CONS[key] || 0) + 1; } }); });
     L.forEach(function (l) { if (!l.x) return; var f = statsFix(l.i, l.x); if (f !== l.x) { l.xbad = l.x; l.x = f; } });
   }
+  window.fmQA && (window.fmQA.cons = function (L) { sanitizeStats(L); return CONS; });
   function learnBase(L) {
     LB = {};
     L.forEach(function (l) {
