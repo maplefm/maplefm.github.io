@@ -93,6 +93,30 @@ def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None
 
 
 NX = {}
+ABBR = {}
+WBUILT = [""]
+
+
+def facts(name, GUIDE):
+    """Short facts from the item guide, leading the description: where it drops, quests and recipes that use it."""
+    g = GUIDE.get(name) or {}
+    out = []
+    mobs = []
+    for d in g.get("d") or []:
+        if d[0] not in mobs: mobs.append(d[0])
+    if mobs: out.append("Dropped by " + ", ".join(mobs[:2]) + (f" and {len(mobs) - 2} more" if len(mobs) > 2 else ""))
+    qn = len({q[0] for q in g.get("q") or []})
+    if qn: out.append(f"needed for {qn} quest{'s' if qn != 1 else ''}")
+    if g.get("u"): out.append(f"used in {g['u']} recipe{'s' if g['u'] != 1 else ''}")
+    return out
+
+
+def aliases(name, base):
+    """Trade chat shorthand for an item, like GFA 60 for Gloves Attack Scroll 60%."""
+    tier = re.search(r" (\d+)%$", shown(name))
+    out = [k for k, v in ABBR.items() if v in (name, base) and len(k) <= 12]
+    out = sorted(set(out), key=lambda k: (len(k), k))[:5]
+    return [(k.upper() if len(k) <= 4 else k) + (" " + tier.group(1) if tier else "") for k in out]
 
 
 IDS = {}
@@ -164,10 +188,13 @@ def main():
         gfull = json.load(open(sys.argv[3], encoding="utf-8")) if len(sys.argv) > 3 else {}
         wj = json.load(open(sys.argv[4], encoding="utf-8"))
         world_paths, qs, bs, ms = worldpages.build(wj, gfull, summ, notes, out)
+        WBUILT[0] = str(wj.get("built") or "")
         QSLUG.update(qs); BSLUG.update(bs); MSLUG.update(ms)
         MOBID.update({n: m["id"] for n, m in (wj.get("mobs") or {}).items() if m.get("id")})
         print(len(world_paths), "world pages")
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
+    try: ABBR.update(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "abbr.json"))))
+    except Exception: pass
     ids = {r[0]: r[1] for r in db}
     IDS.update(ids)
     vendor = {r[0]: r[6] for r in db if len(r) > 6}
@@ -196,9 +223,18 @@ def main():
         nx = NX.get(name)
         rel = [x for x in bycat.get(r.get("cat") or "Other", []) if x["item"] != name][:8]
         rels = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in rel)
-        desc = (f"{nm} sells for about {full(r['typ'])} mesos in MapleStory Classic" + (f", most sales {rng}" if " to " in rng else "") +
-                f". {r.get('salesN') or 0:,} Free Market sales seen, {'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily.")
-        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}</p></div></div>
+        # equipment and scrolls are searched for their price; materials, potions and cosmetics for what they are and where they drop
+        price_first = bool(r.get("equip")) or "Scroll" in name
+        fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
+        price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
+        if price_first or not fx:
+            desc = (f"{nm} {price_txt} in MapleStory Classic. {r.get('salesN') or 0:,} Free Market sales seen, "
+                    f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else ""))
+            title = f"{nm} price · MapleStory Classic · Club FM" if not nx else f"{nm} price · Cash Shop · MapleStory Classic · Club FM"
+        else:
+            desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
+            title = f"{nm} · price, drops & quests · MapleStory Classic · Club FM" if not nx else f"{nm} · Cash Shop and FM price · MapleStory Classic · Club FM"
+        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng">{rng}</span>{chg}<small>mesos</small></p>
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
 <div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
@@ -215,19 +251,19 @@ def main():
             {"@type": "ListItem", "position": 3, "name": nm, "item": f"{SITE}/item/{s}/"}]}) + "</script>"
         # the share card doubles as the page's picture for search results
         ld += '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": f"{nm} price", "url": f"{SITE}/item/{s}/",
-            "description": desc, "dateModified": datetime.date.today().isoformat(), "isPartOf": {"@type": "WebSite", "name": "Club FM", "url": SITE + "/"},
+            "description": desc, "dateModified": datetime.date.today().isoformat(), **({"alternateName": al} if al else {}), "isPartOf": {"@type": "WebSite", "name": "Club FM", "url": SITE + "/"},
             "primaryImageOfPage": {"@type": "ImageObject", "url": OG + s + ".png", "width": 1200, "height": 630}, "image": [OG + s + ".png", icon]}) + "</script>"
         ld += f'<meta name="thumbnail" content="{OG}{s}.png">'
 
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} price · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png", crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(title, desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png", crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
         made.append((s, nm, r))
     for name in extra:
         s = slug(name); nm = shown(name); g = GUIDE[name]
         icon = f"https://maplestory.io/api/MCW/1/item/{ids[name]}/icon"
         qn = len(g.get("q") or [])
         desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
-        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
+        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
 <p class="note">No Free Market price yet: nobody has seen one sell. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
@@ -243,7 +279,7 @@ def main():
             mv = (x.get("mv") or [None])[0]
             ch = f'<span class="mv {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"}{abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else '<span class="mv"></span>'
             li += (f'<a class="it" href="/item/{slug(x["item"])}/" data-n="{html.escape(shown(x["item"]).lower())}" data-p="{int(x["typ"])}" data-v="{int(x.get("vol") or 0)}" data-m="{round(mv or 0, 3) if isinstance(mv, (int, float)) else 0}" data-k="{html.escape(x["item"])}">'
-                   f'<img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr">{meso(x["typ"])}</b>{ch}</a>')
+                   f'<img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="{html.escape(shown(x["item"]))}" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr">{meso(x["typ"])}</b>{ch}</a>')
         secs += f'<section class="cat" data-c="{html.escape(cat)}"><h2>{html.escape(CATS.get(cat, cat))} <small>{len(bycat[cat])}</small></h2><div class="its">{li}</div><button type="button" class="more" hidden>Show all {len(bycat[cat])}</button></section>'
     idx = (f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub"><span id="cnt">{len(rows)}</span> items priced from Free Market sales players watched · <span id="upd">updated {when}</span></p>'
            f'<input id="q" type="search" placeholder="Find an item: work gloves, GFA 60, white label ring" autocomplete="off" aria-label="Find an item">'
@@ -264,8 +300,20 @@ def main():
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
     today = datetime.date.today().isoformat()
     urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
+    # lastmod only moves when a page's content does: item prices daily, world pages when the game data changed
+    wbuilt = (WBUILT[0] or today)[:10]
+    world = {SITE + p for p in world_paths}
     open(os.path.join(out, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-                                                    "".join(f"<url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
+                                                    "".join(f"<url><loc>{u}</loc><lastmod>{wbuilt if u in world else today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
+    # the home page is a script-built board; give search engines plain links to the most traded items
+    top = sorted(rows, key=lambda r: -(r.get("vol") or 0))[:40]
+    links = "".join(f'<a href="/item/{slug(x["item"])}/">{html.escape(shown(x["item"]))}</a>' for x in top)
+    ip = os.path.join(out, "index.html")
+    if os.path.exists(ip):
+        h = open(ip, encoding="utf-8").read()
+        block = f'<!--toplinks--><nav class="toplinks" aria-label="Most traded items"><h2>Most traded today</h2>{links}<a href="/items/">All item prices →</a></nav><!--/toplinks-->'
+        h2 = re.sub(r"<!--toplinks-->.*?<!--/toplinks-->", lambda m: block, h, flags=re.S)
+        if h2 != h: open(ip, "w", encoding="utf-8").write(h2)
     print(len(made), "item pages")
 
 
