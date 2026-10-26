@@ -123,6 +123,9 @@ def build(world, guide, summary, notes, out):
     BOARD_CTA = ('<div class="cta"><b>What does it sell for right now?</b> The live price board shows every Free Market listing players have seen today, '
                  'with the channel and room to buy it in. <a href="/">Open the price board</a></div>')
 
+    # mesos each monster drops, as players report it (tools/mesos_reported.json: name -> [min, max, chance %])
+    mp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mesos_reported.json")
+    MESOS = json.load(open(mp, encoding="utf-8")) if os.path.exists(mp) else {}
     # who drops what, where each monster lives, which quests send you after it
     drops = {}
     for item, g in ITEMS.items():
@@ -424,7 +427,12 @@ def build(world, guide, summary, notes, out):
     for n, mb in MOB.items():
         if not mb.get("id") or n not in BSLUG: continue
         best = max(homes.get(n, []), key=lambda x: x[1], default=None)
-        mobs_out[n] = [mb["id"], mb.get("lv") or 0, BSLUG[n], best[0] if best else "", MSLUG.get(best[0], "") if best else ""]
+        # 5: mesos a kill drops [min, max, chance %] as players report it; 6: drops with a measured rate [[item, %]]
+        mz = list(MESOS.get(n) or []) or 0
+        rated = [[i, r] for i, r, qo in drops.get(n, []) if r and not qo and i != "Meso"]
+        mrate = [r for i, r, qo in drops.get(n, []) if i == "Meso" and r]
+        if mz: mz[2] = round(mrate[0]) if mrate else 70     # how often mesos drop at all: the wiki's kill counts, else about 70%
+        mobs_out[n] = [mb["id"], mb.get("lv") or 0, BSLUG[n], best[0] if best else "", MSLUG.get(best[0], "") if best else "", mz, rated]
     os.makedirs(os.path.join(out, "data"), exist_ok=True)
     json.dump(mobs_out, open(os.path.join(out, "data", "mobs.json"), "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
     return paths, QSLUG, BSLUG, MSLUG
