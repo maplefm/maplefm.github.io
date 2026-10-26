@@ -44,8 +44,26 @@ exit /b
 echo Tesseract found.
 echo.
 echo Installing Python packages...
+rem A VPN or proxy app can leave a SOCKS proxy setting that pip can't use ("Missing dependencies for SOCKS
+rem support"). Clear it for this window only; nothing on the PC is changed.
+for %%V in (ALL_PROXY all_proxy HTTP_PROXY http_proxy HTTPS_PROXY https_proxy) do call :clearsocks %%V
 "%PY%" -m pip install --upgrade pip
 "%PY%" -m pip install pillow mss numpy rapidocr-onnxruntime
+"%PY%" -c "import PIL, mss, numpy" 2>nul
+if errorlevel 1 (
+  echo.
+  echo The Python packages did not install. If you use a VPN or proxy app, turn it off for a minute
+  echo and run install.bat again. Then double click start.bat.
+  pause
+  exit /b
+)
 echo.
 echo Done. Close this window, then double click start.bat
 pause
+exit /b
+
+:clearsocks
+call set "VAL=%%%1%%"
+if not defined VAL goto :eof
+echo %VAL% | findstr /i "socks" >nul && set "%1="
+goto :eof

@@ -132,9 +132,30 @@ def update():
     say("Update complete. You're on " + want + ". Your settings are kept.")
 
 
+# A VPN or proxy app can leave a SOCKS proxy setting behind that neither pip nor the update check can use. It is cleared
+# for the watcher's own window only; nothing on the PC is changed.
+for _k in ("ALL_PROXY", "all_proxy", "HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy"):
+    if "socks" in os.environ.get(_k, "").lower():
+        os.environ.pop(_k, None)
+
+NEEDS = ["pillow", "mss", "numpy", "rapidocr-onnxruntime"]
+
+def ensure_packages():
+    """Install any missing package the watcher needs, instead of stopping with 'No module named ...'."""
+    ok = subprocess.call([sys.executable, "-c", "import PIL, mss, numpy"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    if ok: return True
+    say("Installing the Python packages the watcher needs (one time, about a minute)...")
+    subprocess.call([sys.executable, "-m", "pip", "install", "--user", "--disable-pip-version-check"] + NEEDS)
+    ok = subprocess.call([sys.executable, "-c", "import PIL, mss, numpy"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    if not ok:
+        say("The packages didn't install. If you use a VPN or proxy app, turn it off for a minute and open start.bat again.")
+    return ok
+
 def main():
     args = [a for a in sys.argv[1:] if a != "--no-update"]
     env = dict(os.environ); env["FM_LAUNCHER"] = "1"
+    if not ensure_packages():
+        return
     first = True
     while True:
         if "--no-update" not in sys.argv or not first:

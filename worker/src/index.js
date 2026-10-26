@@ -17,6 +17,7 @@
 // Storage (KV): acct:<discord id> -> account JSON; code:<link code> -> discord id; watcher:<hid> -> discord id
 // Nothing here holds a watcher's real id or key: the watcher sends hid (its hashed id), and keys are masked.
 
+import { statReport } from "./statcheck.js";
 import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
@@ -33,6 +34,7 @@ export default {
     ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
     ctx.waitUntil(trafficPost(env).catch(() => {}));
     ctx.waitUntil(marketSync(env, mkCtx(env)).catch(() => {}));
+    ctx.waitUntil(statReport(env, { dm: (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") }).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
   },
   async fetch(req, env) {
@@ -71,6 +73,7 @@ async function route(req, env, url) {
   if (p.startsWith("/l/") && req.method === "GET") return marketShare(env, p.slice(3));
   if (p === "/shop" && req.method === "GET") return shopGet(env, url);
   if (p === "/market" || p.startsWith("/market/")) return marketRoute(req, env, url, p, Object.assign(mkCtx(env), { rows: await mkRows(env) }));
+  if (p === "/admin/stats-report") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await statReport(env, { force: true, dm: url.searchParams.get("dm") ? (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") : null }), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketCheck(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market/sync" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketSync(env, mkCtx(env))); }
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
@@ -827,7 +830,7 @@ function expandQuery(q, abbr) {
 }
 // what the market needs from here: the item list it checks names against, and the chat matcher for #selling posts
 function mkCtx(env) { return { whoami, isAdmin, overLimit, findRows, splitRoll, rows: () => mkRows(env), abbr: abbrMap,
-  dmAdmins: async (m) => wdDM(env, await wdAdmins(env), [{ description: String(m).slice(0, 3900), color: 0xe74c3c, title: "Club FM market" }]) }; }
+  dmAdmins: async (m, title) => wdDM(env, await wdAdmins(env), [{ description: String(m).slice(0, 3900), color: 0xe74c3c, title: title || "Club FM market" }]) }; }
 setRows((env) => mkRows(env));
 let MKROWS = null, MKAT = 0;
 async function mkRows(env) {

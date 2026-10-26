@@ -1949,7 +1949,13 @@
     if (!r[4]) (SCROLLABLE[sub] || (WEAPONS.test(sub) ? "ATT" : "")).split(" ").forEach(function (k) { if (k) allow[k] = 1; });
     var out = x, foreign = false;
     BSTATS.forEach(function (k) {
-      if (!x[k] || allow[k]) return;
+      if (!x[k]) return;
+      // a stat only scrolls give this item, showing a big plain number ("LUK 30" on an overall): a requirement line
+      if (allow[k] && base[k] == null && SMALL[k] && x[k] > SMALL[k] && !(x[k + "_b"] != null && x[k + "_b"] < x[k])) {
+        if (out === x) out = Object.assign({}, x);
+        delete out[k]; delete out[k + "_b"]; return;
+      }
+      if (allow[k]) return;
       if (k === "ATT" || k === "MATT") { foreign = true; return; }
       var bv = x[k + "_b"] != null ? x[k + "_b"] : x[k];
       if (x[k] <= (SMALL[k] || 0) && (CONS[name + "|" + k + "|" + bv] || 0) >= 2) return;   // a base stat our list is missing
