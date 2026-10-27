@@ -23,7 +23,13 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
     for (const [pg, must] of PAGES) {
       const ctx = await b.newContext({ viewport: { width: w, height: h }, colorScheme: tag.startsWith("dark") ? "dark" : "light" });
       // the live site's own address answers from this checkout, so absolute links and data paths work
-      await ctx.route("https://maplefm.gg/**", (route) => route.continue({ url: route.request().url().replace("https://maplefm.gg", "http://localhost:" + PORT) }));
+      // answered straight from this checkout: switching an https request to http isn't allowed for every request type
+      await ctx.route("https://maplefm.gg/**", (route) => {
+        let f = decodeURIComponent(new URL(route.request().url()).pathname); if (f.endsWith("/")) f += "index.html";
+        const p = path.join(ROOT, f);
+        if (!p.startsWith(ROOT) || !fs.existsSync(p) || !fs.statSync(p).isFile()) return route.fulfill({ status: 404, body: "nf" });
+        return route.fulfill({ status: 200, contentType: TYPES[p.split(".").pop()] || "application/octet-stream", body: fs.readFileSync(p) });
+      });
       await ctx.route(/fonts\.(googleapis|gstatic)\.com|googletagmanager|google-analytics/, (r) => r.abort());
       if (tag === "small phone") await ctx.addInitScript(() => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = '*{font-family:"DejaVu Sans",Verdana,sans-serif!important}'; document.head.appendChild(st); }));
       const p = await ctx.newPage(), errs = [];
