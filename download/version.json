@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.8",
- "date": "2026-10-27T17:38:48+00:00",
- "notes": "49 new items the game added (Lakelis Statue, King Slime Balloon, Hero's set and more); the item list now refreshes from the site daily",
- "sha256": "12ee8b41e7fbab27985d520c7ecbb6f097f163a77947c54edc91efffe093d98c",
- "size": 142907,
+ "version": "2026.10.27.9",
+ "date": "2026-10-27T18:02:19+00:00",
+ "notes": "stats.bat keeps every day: items scanned, items with stats read, total scans, saved in scan_history.csv",
+ "sha256": "1ee0e92633325ddb4817c96eac14d4745a2400720002305365b012cf5571fe4d",
+ "size": 143779,
  "history": [
+  {
+   "version": "2026.10.27.9",
+   "date": "2026-10-27",
+   "notes": "stats.bat keeps every day: items scanned, items with stats read, total scans, saved in scan_history.csv"
+  },
   {
    "version": "2026.10.27.8",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.22.3",
    "date": "2026-10-22",
    "notes": "Reminds you every 10 minutes to open the Change Channel window when no channel is known yet."
-  },
-  {
-   "version": "2026.10.22.2",
-   "date": "2026-10-22",
-   "notes": "Startup text and README: your in-game name is read off the screen, nothing to type."
   }
  ],
  "pip": [],
- "sig": "522da9644221676d9b4cd8da437af9b3828a8075423997ad5eb3eb81b8c95e97bc7ea2fa9837b6278793359964deebdaae154f8c9b69dcc3842caf76bbcd5f01ea970f12632da4c26c0a4d13af5a0205617441cbd85c46fd4c256aea2aec68292e38ab74250ed39b11a34029da3050aada525dfceae2c2134477c74b13887c57daf891cef085b38915f18ae64a55c14e3cee4108ec6aed9397b7c53ec23e16f55304333731774a82add566eb892c21cc3f757c3614f413825bbe1ba021587427e9e5f51a4d3da453419a1708d775d36706d3bcdec9b6f7700ebef0307c16c9387f726c6d6b912a61dfaebfdfa3f55db2d932c1a992734b11e6453e993547d67b"
+ "sig": "5684c8a0a7f7a7feecd6256db9f5965e3f19cf9231a05801a7aaf56478d928d4aba7a822dc1ec18347c29a71d8c2b86fce5f75a2280cece4e00e7589e3dd8e4effd4e10642be27131b80a5de066c7278e7fa0f545447e801655c53343336c1a9b9d9fde888e1aa76a1eb8d99b5c4a18c001239ecddd61b18cf90b2dcbc617e8cf79952bfb88c3c732489a8a75687c4cfd343f7f5e1d95202eb5be5d87d6b79d116b4a752b9de1b3fa4d84b3cab917951679643586aee1a6059a32fd06370eaf09aeb1f37a5edc81753eefd95b0e992e9ef5ac926b521fe4654ea09109f9395cf9e9e9b4c420865778fd44f849700c18e63c3209438147a80f23734aba0732df9"
 }
