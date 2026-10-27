@@ -1968,6 +1968,7 @@ async function kofi(req, env) {
   const log = (await env.ACCOUNTS.get(logKey, "json")) || [];
   log.push({ t: now(), a: amount, m: d.is_subscription_payment ? "sub" : "tip" });
   await env.ACCOUNTS.put(logKey, JSON.stringify(log.slice(-5000)), { expirationTtl: 400 * DAY });
+  await kofiAlert(env, d, amount, id).catch(() => {});
   if (!id) return json({ ok: true, unlinked: true });   // a tip without Discord linked on Ko-fi can't earn a role
   const key = "kofi:" + id;
   const total = Number(await env.ACCOUNTS.get(key) || 0) + amount;
@@ -1980,7 +1981,68 @@ async function kofi(req, env) {
     const mega = Array.isArray(roles) ? roles.find(r => r.name.toLowerCase() === "mega deals") : null;
     if (mega) await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + id + "/roles/" + mega.id, { method: "PUT", headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN } });
   }
+  await kofiWelcome(env, d, id, total).catch(() => {});
   return json({ ok: true });
+}
+
+// What each Ko-fi tier gets, word for word with the tier list on ko-fi.com/maplefm/tiers. A tier includes every
+// tier below it, so the welcome lists the whole stack.
+const KOFI_PERKS = [
+  ["Suuushi", "Suuushi role in the Club FM Discord, with a name color", ["Supporter heart next to your name on the ranks board at maplefm.gg", "Your name on the supporters wall"]],
+  ["curryishott", "curryishott role in the Club FM Discord, with a name color, sitting above Suuushi", ["A vote on every new custom server emoji"]],
+  ["Tiger", "Tiger role in the Club FM Discord, with a name color", ["Mega Deals: underpriced listings the moment a watcher catches them, on maplefm.gg and in the private #mega-deals channel, while your membership runs", "One custom server emoji of your choosing", "Your name in the nightly market close once a month"]],
+  ["FangBlade", "FangBlade role, shown at the top of the member list", ["A server sticker of your character", "A shoutout in #announcements"]],
+  ["Beta Tester", "Beta Tester role, at the very top of the member list", ["Your character featured on the supporters wall at maplefm.gg", "Mega Deals for good: $100 of lifetime support keeps it even after you cancel"]],
+];
+function kofiTier(d) {
+  const n = String(d.tier_name || "").replace(/\s*tier$/i, "").trim().toLowerCase();
+  return KOFI_PERKS.findIndex(t => t[0].toLowerCase() === n);
+}
+// The owner hears about every payment right away: who, how much, which tier, and whether the supporter can be reached.
+async function kofiAlert(env, d, amount, id) {
+  if (!env.DISCORD_BOT_TOKEN) return;
+  const ti = kofiTier(d), tier = ti >= 0 ? KOFI_PERKS[ti][0] : "";
+  const kind = d.is_subscription_payment ? (d.is_first_subscription_payment ? "New member" : "Membership renewed") : "New tip";
+  const lines = [
+    "**" + String(d.from_name || "Someone").slice(0, 60) + "**, $" + amount + (tier ? ", " + tier + " tier" : ""),
+    id ? "Discord linked: <@" + id + ">. The Club FM bot sent the thank-you and perks, and gave the roles." : "Discord not linked on Ko-fi, so the bot can't reach them. Ko-fi showed them the tier's welcome message; a personal note goes through ko-fi.com, Messages.",
+  ];
+  if (d.message) lines.push("Their message: " + String(d.message).slice(0, 300));
+  await wdDM(env, await wdAdmins(env), [{ title: "💛 " + kind + " on Ko-fi", color: 0xf6c94a, description: lines.join("\n"), url: "https://ko-fi.com/manage/supportreceived" }]);
+}
+// A supporter who linked Discord on Ko-fi gets a thank-you DM from the bot with every perk of their tier, and their
+// roles straight away (Ko-fi's own bot hands out the tier roles too; this covers a slow or missed hand-off). Once per
+// supporter per tier, on the first payment, so renewals don't repeat it.
+async function kofiWelcome(env, d, id, total) {
+  if (!env.DISCORD_BOT_TOKEN || !id) return;
+  const ti = kofiTier(d), sub = !!d.is_subscription_payment;
+  if (sub && ti < 0) return;
+  const seen = "kofi-welcomed:" + id + ":" + (sub ? KOFI_PERKS[ti][0] : "tip");
+  if (await env.ACCOUNTS.get(seen)) return;
+  await env.ACCOUNTS.put(seen, "1", { expirationTtl: 400 * DAY });
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
+  const roles = await (await fetch(DISCORD + "/guilds/" + GUILD + "/roles", { headers: H })).json().catch(() => []);
+  const rid = (n) => (Array.isArray(roles) ? (roles.find(r => r.name.toLowerCase() === n.toLowerCase()) || {}).id : null);
+  const mega = sub ? ti >= 2 : total >= KOFI_MEGA;
+  const give = sub ? [KOFI_PERKS[ti][0]] : []; if (mega) give.push("Mega Deals");
+  for (const n of give) { const r = rid(n); if (r) await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + id + "/roles/" + r, { method: "PUT", headers: H }); }
+  let desc;
+  if (sub) {
+    const t = KOFI_PERKS[ti], perks = [];
+    // the tier's own role, then its perks, then every lower tier's perks (one role: the tier's own)
+    perks.push(t[1]);
+    for (let i = ti; i >= 0; i--) for (const p of KOFI_PERKS[i][2]) if (!(/^Mega Deals/.test(p) && perks.some(x => /^Mega Deals/.test(x)))) perks.push(p);
+    desc = "Thank you so much for joining the **" + t[0] + " tier**. It keeps the FM Watchers scanning, and it honestly means a lot.\n\n" +
+      (mega ? "🔔 **Congrats, you just unlocked Mega Deals.** Open the private #mega-deals channel, or sign in with Discord on maplefm.gg to see them on the board.\n\n" : "") +
+      "**Everything you get**\n" + perks.map((p, i) => (i + 1) + ". " + p).join("\n") +
+      (ti >= 2 ? "\n\nReply here or DM Maya with the emoji you want added" + (ti >= 3 ? " and a picture of your character for the sticker" : "") + "." : "") +
+      "\n\nYour roles are on now. Thanks again, see you in the FM.\nMaya";
+  } else {
+    desc = "Thank you so much for the support on Ko-fi. It keeps the FM Watchers scanning, and it honestly means a lot." +
+      (mega ? "\n\n🔔 **Congrats, your support passed $100, so Mega Deals is yours for good.** Open the private #mega-deals channel, or sign in with Discord on maplefm.gg to see them on the board." : "") +
+      "\n\nSee you in the FM.\nMaya";
+  }
+  await wdDM(env, [id], [{ title: "💛 Thank you from Club FM", color: 0xf6c94a, description: desc.slice(0, 4000), url: "https://maplefm.gg/?ref=kofi" }]);
 }
 
 // ---------------------------------------------------------------- helpers
