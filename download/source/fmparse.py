@@ -803,10 +803,13 @@ def read_tooltip(img, need_stats=True):
     usually gets. On saved tooltips this took exact reads from 42 of 65 to 61 of 65, and it runs faster."""
     box = _tip_panel(img) if TIP_CFG["crop"] else None
     if box: img = img.crop(box)
-    reads = []
-    for lo, hi in TIP_PASSES:
-        r = _read_tip_once(img, need_stats=False, lo=lo, hi=hi)
-        if r: reads.append(r)
+    # both contrast passes at once: the text reader is a separate program, so two run side by side in about the time of one
+    if len(TIP_PASSES) > 1:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(len(TIP_PASSES)) as ex:
+            reads = [r for r in ex.map(lambda p: _read_tip_once(img, need_stats=False, lo=p[0], hi=p[1]), TIP_PASSES) if r]
+    else:
+        reads = [r for r in (_read_tip_once(img, need_stats=False, lo=lo, hi=hi) for lo, hi in TIP_PASSES) if r]
     if not reads: return None
     base = max(reads, key=lambda r: len(r["stats"]))
     votes = {}

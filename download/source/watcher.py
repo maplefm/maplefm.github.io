@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.26.8"
+VERSION = "2026.10.27.1"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -334,7 +334,7 @@ def hovered_row(game, shop_box):
 
 def tip_ready(game, shop_box, t, st={"pos": None, "since": 0, "shots": 0}):
     """While the pointer rests on a shop row, say when to read the item's tooltip: at about half a second (the game
-    shows the tooltip after a short delay), then again at 1.2 and 2.5 seconds so the stats get voted on.
+    shows the tooltip after a short delay), then again at 1 and 2 seconds so the stats get voted on.
     A shop window that doesn't change on screen never triggers a normal read, so without this a hover could go unread."""
     c = cursor_pos()
     idx, tbox = hovered_row(game, shop_box)
@@ -343,7 +343,7 @@ def tip_ready(game, shop_box, t, st={"pos": None, "since": 0, "shots": 0}):
     p = st["pos"]
     if p is None or abs(p[0] - c[0]) > 3 or abs(p[1] - c[1]) > 3:
         st.update(pos=(c[0], c[1]), since=t, shots=0); return None
-    due = (0.45, 1.2, 2.5)
+    due = (0.45, 1.0, 2.0)
     if st["shots"] < len(due) and t - st["since"] >= due[st["shots"]]:
         st["shots"] += 1; return idx, tbox
     return None
@@ -1217,7 +1217,15 @@ def worker(cfg, jobs, store):
         kind, img, extra = jobs.get()
         try:
             if kind == "shop":
-                res = fmparse.read_shop_checked(img)
+                # a hover over a shop that hasn't changed since the last read: reuse that read and go straight to the
+                # popup, so the "read" chime comes as soon as the stats are in (the shop list itself takes a while)
+                sh = quick_hash(img, (40, 66))
+                last = getattr(worker, "last_shop", None)
+                if extra and extra.get("tip") is not None and last and last[0] == sh and time.time() - last[1] < 120:
+                    import copy; res = copy.deepcopy(last[2])
+                else:
+                    res = fmparse.read_shop_checked(img)
+                    if res and res.get("rows"): import copy; worker.last_shop = (sh, time.time(), copy.deepcopy(res))
                 if res:
                     extra = extra or {}
                     # the minimap title barely changes between frames: read it once per look, not once per shop frame
