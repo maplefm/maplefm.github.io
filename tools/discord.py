@@ -367,16 +367,102 @@ def job_news(state_path, rng=None, digest=False):
                               "description": "Running watchers update themselves within 15 minutes, nothing to do.\n" +
                                              "\n".join("• " + plain_change(c[1]) for c in rel if plain_change(c[1]))[:1500],
                               "url": f"{SITE}/contribute.html"}])
-    site = [plain_change(c[1]) for c in commits if c not in rel and any(f.endswith((".html", ".css", ".js")) or f.startswith("tools/") for f in c[2])]
+    sitec = [c for c in commits if c not in rel and any(f.endswith((".html", ".css", ".js")) or f.startswith("tools/") for f in c[2])]
+    site = [plain_change(c[1]) for c in sitec]
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import siteshots
+    pages = list(st.get("pending_pages") or [])
+    for c in sitec:
+        for pg in siteshots.pages_for(c[2]):
+            if pg not in pages: pages.append(pg)
     pending = [x for x in (st.get("pending") or []) + [x for x in site if x] if x]
     seen = set(); pending = [x for x in pending if not (x.lower() in seen or seen.add(x.lower()))]
     if digest and pending:
-        if post("site", embeds=[{"title": "What changed on the site today", "color": PURPLE,
-                                 "description": "\n".join("• " + x for x in pending[:12])[:1500], "url": SITE}]):
-            pending = []
+        if digest_post(st, pending, pages):
+            st["week"] = (st.get("week") or []) + [{"day": datetime.datetime.now(ET).date().isoformat(), "changes": pending[:12], "pages": pages[:3]}]
+            pending, pages = [], []
+    if digest: kofi_week(st)
     st["pending"] = pending[-30:]
+    st["pending_pages"] = pages[:10]
     st["news_sha"] = head
     save(state_path, st)
+
+SHOTS = os.environ.get("SHOTS_DIR", "")
+
+def post_files(kind, files, embeds):
+    """a webhook post with several pictures; each embed shows its own with attachment://name"""
+    url = hooks().get(kind)
+    if not url: return False
+    b = "----clubfm" + str(int(time.time() * 1000))
+    body = (f"--{b}\r\nContent-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n"
+            + json.dumps({"allowed_mentions": {"parse": []}, "embeds": embeds[:10]}) + "\r\n").encode()
+    for i, (fname, png) in enumerate(files[:10]):
+        body += (f"--{b}\r\nContent-Disposition: form-data; name=\"files[{i}]\"; filename=\"{fname}\"\r\nContent-Type: image/png\r\n\r\n").encode() + png + b"\r\n"
+    body += f"--{b}--\r\n".encode()
+    req = urllib.request.Request(url + "?wait=true", body, {"Content-Type": "multipart/form-data; boundary=" + b, "User-Agent": "maplefm.gg"})
+    for i in range(3):
+        try:
+            urllib.request.urlopen(req, timeout=60).read(); return True
+        except urllib.error.HTTPError as e:
+            if e.code == 429: time.sleep(2 + i * 3); continue
+            print("discord", kind, e.code, e.read()[:200]); return False
+        except Exception as e:
+            print("discord", kind, e); time.sleep(2)
+    return False
+
+def digest_post(st, pending, pages):
+    """The day's site changes as one post: the list, then a before and now picture of up to three pages that
+    changed. Without a browser (or the shots folder) it is the list alone."""
+    import siteshots
+    day = datetime.datetime.now(ET).date().isoformat()
+    emb = {"title": "What changed on the site today", "color": PURPLE, "url": SITE,
+           "description": "\n".join("• " + x for x in pending[:12])[:1500]}
+    files, embeds = [], [emb]
+    if SHOTS and pages:
+        try:
+            shots = siteshots.shoot(pages[:3])
+            for name, png in shots.items():
+                before = siteshots.latest(SHOTS, name, day)
+                siteshots.keep(SHOTS, day, name, png)
+                label = siteshots.PAGES[name][1]
+                fn = f"{name}-{day}.png"
+                files.append((fn, siteshots.before_after(before, png, label + " · " + day)))
+                e = {"color": PURPLE, "title": label, "url": SITE + siteshots.PAGES[name][0], "image": {"url": "attachment://" + fn}}
+                if len(embeds) == 1 and "image" not in emb: emb["image"] = e["image"]; emb.setdefault("fields", []).append({"name": "Pictured", "value": label, "inline": True})
+                else: embeds.append(e)
+        except Exception as e:
+            print("shots", e)
+    return post_files("site", files, embeds) if files else post("site", embeds=embeds)
+
+def kofi_week(st):
+    """Sunday's digest also leaves the week's update for Ko-fi in the shots folder: one picture of the pages that
+    changed and the text. The Worker sends both to the owner to approve; nothing goes on Ko-fi by itself."""
+    import siteshots
+    now = datetime.datetime.now(ET)
+    day = now.date().isoformat()
+    if now.weekday() != 6 or not SHOTS or st.get("kofi_week") == day: return
+    week = st.get("week") or []
+    if not week: return
+    shots, seenp = [], set()
+    for w in reversed(week):
+        for pg in w.get("pages") or []:
+            f = os.path.join(SHOTS, w["day"], pg + ".png")
+            if pg not in seenp and os.path.exists(f):
+                seenp.add(pg); shots.append((siteshots.PAGES[pg][1], open(f, "rb").read()))
+    changes = []
+    for w in week:
+        for c in w.get("changes") or []:
+            if c.lower() not in {x.lower() for x in changes}: changes.append(c)
+    start = (now.date() - datetime.timedelta(days=6)).strftime("%b %d").replace(" 0", " ")
+    title = "Club FM this week: " + start + " to " + now.strftime("%b %d").replace(" 0", " ")
+    text = ("Here's what changed on maplefm.gg this week, thanks to everyone scanning and supporting.\n\n"
+            + "\n".join(f"{i + 1}. {c}" for i, c in enumerate(changes[:10]))
+            + "\n\nEvery update with pictures is in #site-updates on the Club FM Discord.")
+    png = siteshots.grid(shots, title) if shots else None
+    if png: open(os.path.join(SHOTS, "kofi-week.png"), "wb").write(png)
+    json.dump({"day": day, "title": title, "text": text, "png": bool(png)}, open(os.path.join(SHOTS, "kofi-week.json"), "w"))
+    st["kofi_week"] = day
+    st["week"] = []
 
 # ---------------------------------------------------------------- mega deals
 # The private #mega-deals channel gets the same flips the board's deal alert shows club members: a listing from
