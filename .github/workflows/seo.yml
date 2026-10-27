@@ -19,7 +19,7 @@ jobs:
           git config user.email maplefm@users.noreply.github.com
           git fetch -q origin main && git worktree add -q /tmp/main origin/main
           python3 /tmp/main/tools/seocheck.py data/seo.json
-          git add data/seo.json
+          git add -f data/seo.json
           git diff --cached --quiet && exit 0
           git commit -q -m "Search check"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
