@@ -178,9 +178,10 @@ def make(today):
 past = old.get("days", {})
 for d in days:
     past[d] = make(d)          # recomputed while the raw data is still around; older days are kept as they were
-# the day being closed: today in Eastern time, or yesterday if the job runs in the first hours after midnight
+# the day being closed: today in Eastern time, or yesterday when the run lands after midnight. GitHub often starts
+# the 11:55 PM run hours late, so any run before noon closes the day before.
 now = datetime.datetime.now(ET)
-close = (now.date() - datetime.timedelta(days=1 if now.hour < 4 else 0)).isoformat()
+close = (now.date() - datetime.timedelta(days=1 if now.hour < 12 else 0)).isoformat()
 latest = close if close in past else max(d for d in past if d <= close) if any(d <= close for d in past) else days[-1]
 
 # ---- a lasting store of each item's daily price and each day's sales, so long ranges outlive the raw data
