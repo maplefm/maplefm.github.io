@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.1"
+VERSION = "2026.10.27.2"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -332,21 +332,41 @@ def hovered_row(game, shop_box):
     box = [max(0, cx - 10), max(0, cy - 340), min(game[2], cx + 380), min(game[3], cy + 520)]
     return idx, box
 
-def tip_ready(game, shop_box, t, st={"pos": None, "since": 0, "shots": 0}):
-    """While the pointer rests on a shop row, say when to read the item's tooltip: at about half a second (the game
-    shows the tooltip after a short delay), then again at 1 and 2 seconds so the stats get voted on.
-    A shop window that doesn't change on screen never triggers a normal read, so without this a hover could go unread."""
-    c = cursor_pos()
+def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots": 0, "fired": 0, "check": 0}):
+    """While the pointer rests on a shop row, say when to read the item's tooltip. The loop runs ten times a second
+    while a shop is open, and the moment the game's popup panel is on screen it is read: no fixed wait, so a quick
+    half-second hover is enough. Then again about 0.6 and 1.5 seconds later so the stats get voted on.
+    Small wiggles of the pointer on the same row keep the hover; moving to another row starts over."""
     idx, tbox = hovered_row(game, shop_box)
-    if not c or idx is None:
-        st["pos"] = None; return None
-    p = st["pos"]
-    if p is None or abs(p[0] - c[0]) > 3 or abs(p[1] - c[1]) > 3:
-        st.update(pos=(c[0], c[1]), since=t, shots=0); return None
-    due = (0.45, 1.0, 2.0)
-    if st["shots"] < len(due) and t - st["since"] >= due[st["shots"]]:
-        st["shots"] += 1; return idx, tbox
+    if idx is None:
+        st["row"] = None; return None
+    if st["row"] != idx:
+        st.update(row=idx, since=t, shots=0, fired=0, check=0); return None
+    if st["shots"] == 0:
+        if t - st["since"] < 0.12 or t - st["check"] < 0.08: return None
+        st["check"] = t
+        seen = False
+        if sct is not None:
+            try: seen = fmparse._tip_panel(grab(sct, game, tbox)) is not None
+            except Exception: seen = False
+        if seen or t - st["since"] >= 1.0:      # the panel is up (or a second has passed: read anyway)
+            st["shots"] = 1; st["fired"] = t; tip_ready.early = seen; return idx, tbox
+        return None
+    due = (0.6, 1.5)
+    if st["shots"] <= len(due) and t - st["fired"] >= due[st["shots"] - 1]:
+        st["shots"] += 1; tip_ready.early = False; return idx, tbox
     return None
+tip_ready.early = False
+
+def masked_hash(img, game, box, size=(40, 66)):
+    """The shop's fingerprint with the pointer blanked out, so moving the mouse over the list isn't a change."""
+    c = cursor_pos()
+    if c:
+        from PIL import ImageDraw
+        cx, cy = c[0] - game[0] - box[0], c[1] - game[1] - box[1]
+        if -40 <= cx <= img.width + 40 and -40 <= cy <= img.height + 40:
+            img = img.copy(); ImageDraw.Draw(img).rectangle([cx - 6, cy - 6, cx + 30, cy + 40], fill=(0, 0, 0))
+    return quick_hash(img, size)
 
 def inv_ready(game, t, state={"pos": None, "since": 0, "done": None}):
     """True once the pointer has rested on one spot inside the game for most of a second, once per spot."""
@@ -1219,7 +1239,7 @@ def worker(cfg, jobs, store):
             if kind == "shop":
                 # a hover over a shop that hasn't changed since the last read: reuse that read and go straight to the
                 # popup, so the "read" chime comes as soon as the stats are in (the shop list itself takes a while)
-                sh = quick_hash(img, (40, 66))
+                sh = (extra or {}).get("h") or quick_hash(img, (40, 66))
                 last = getattr(worker, "last_shop", None)
                 if extra and extra.get("tip") is not None and last and last[0] == sh and time.time() - last[1] < 120:
                     import copy; res = copy.deepcopy(last[2])
@@ -1376,6 +1396,7 @@ def main():
         open(cp, "w", encoding="utf-8").write("")
     log("channel:", current_channel(cfg) or "not known yet. Open the Change Channel window once and it is picked up.")
     last_shop_hash = last_chat_hash = None
+    last_shop_read = shop_seen = 0.0
     nudge_at = 0.0
     last_chat = last_save = last_board = 0.0
     last_pub = time.time()
@@ -1402,15 +1423,19 @@ def main():
                             time.sleep(0.25); continue
                     shop = grab(sct, game, shop_box)
                     if fmparse.looks_like_shop(shop):
-                        h = quick_hash(shop, (40, 66))
-                        tr = tip_ready(game, shop_box, t)
-                        if (h != last_shop_hash or tr) and not jobs.full():
+                        shop_seen = t
+                        h = masked_hash(shop, game, shop_box)
+                        tr = tip_ready(game, shop_box, t, sct)
+                        # a changed shop is read at most once a second; a hover is read right away
+                        if ((h != last_shop_hash and t - last_shop_read >= 0.9) or tr) and not jobs.full():
+                            last_shop_read = t
                             extra = {"room": grab(sct, game, cfg["room_region"]), "ch": current_channel(cfg)}
                             if extra["ch"] is None and t - nudge_at > 600:
                                 nudge_at = t; log("No channel known yet: open the Change Channel window once (Esc, then Change Channel) so these scans land on the right channel.")
                             idx, tbox = tr if tr else hovered_row(game, shop_box)
                             if idx is not None:
-                                extra["row"] = idx; extra["tip"] = grab(sct, game, tbox); extra["hover"] = bool(tr)
+                                extra["row"] = idx; extra["tip"] = grab(sct, game, tbox); extra["hover"] = bool(tr) and not tip_ready.early   # a first quick look that misses stays quiet
+                            extra["h"] = h
                             last_shop_hash = h; jobs.put(("shop", shop, extra))
                     elif cfg.get("sell_hover", True) and inv_ready(game, t) is not None and not jobs.full():
                         cx, cy = inv_ready.at
@@ -1470,7 +1495,9 @@ def main():
                 break
             except Exception:
                 log("loop error:", traceback.format_exc().splitlines()[-1]); time.sleep(3)
-            time.sleep(max(0.05, cfg["shop_every_seconds"] - (time.time() - t)))
+            # ten looks a second while a shop is open (cheap: one small screenshot), so hovers are caught quickly
+            period = 0.1 if time.time() - shop_seen < 3 else cfg["shop_every_seconds"]
+            time.sleep(max(0.03, period - (time.time() - t)))
     store.save()
 
 if __name__ == "__main__":

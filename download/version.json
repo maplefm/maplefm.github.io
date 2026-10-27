@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.1",
- "date": "2026-10-27T03:34:54+00:00",
- "notes": "Faster equip stats: the two reading passes run side by side and a hover no longer re-reads the whole shop, so the read chime comes about twice as fast",
- "sha256": "035e1f57941c0948be8e541db4766343f8b360b12b438cab772ae1537b484bef",
- "size": 101602,
+ "version": "2026.10.27.2",
+ "date": "2026-10-27T03:54:35+00:00",
+ "notes": "Hovers read the moment the item popup appears, even quick half-second hovers. Faster shop checks while a shop is open.",
+ "sha256": "78e3be3d06e7dce40220ecddb4022b415d610a769ab2755c1aee1d9399f95064",
+ "size": 102164,
  "history": [
+  {
+   "version": "2026.10.27.2",
+   "date": "2026-10-26",
+   "notes": "Hovers read the moment the item popup appears, even quick half-second hovers. Faster shop checks while a shop is open."
+  },
   {
    "version": "2026.10.27.1",
    "date": "2026-10-26",
@@ -149,13 +154,8 @@
    "version": "2026.10.21.5",
    "date": "2026-10-21",
    "notes": "Updates itself while running. No more reopening start.bat."
-  },
-  {
-   "version": "2026.10.21.4",
-   "date": "2026-10-21",
-   "notes": "Reads the new 40-channel window and FM rooms up to 20."
   }
  ],
  "pip": [],
- "sig": "1b7b0d68597d276b45171611d8ca7a43411ffbdfa54d41e08cfdc26a173445596df267d3330d964137a2f4a12a7a5c3dbbc43e82c64ffd72d8389026e47e7e5778c1198e7fe41d93d146d8903a450fa3e10b9e8ed7e5628795bddb1d41ff43ded186728022155cd520a50a575afb4b8abb111ad50a349631662a3e2eb5c02f46f53f2bf710aada67fafe06e410d79ffcf597f9ec7c4da2eb82efc0033be29fa93d8a387686832f3945a9578ebffff5499c6c69ce527159068131df5eb5d43071cea5e28f370308171263e4d4d8c9f4264b5f46d78badb00e8738dc84bc4e170110c73cfc53bbd186fece25743d8daf2a5c170a44b5cdb321592b98e87b9a0175"
+ "sig": "7f97b68406e8fe8921d4bdf9e993edb1db9c99f7fa82f1bf1b51b3d1b562e033034c47701e875c1341383cbf58b55cc99df173d9828c656b89cf3ab3b587f5691fd1dc40c7f5d2d8a71ed63bcae4562ced6c5cdb025f420cf1f328f256bf5fb27af601baf6264a50123be5e350b8085ac9beecaa926fee9cacfe09b5ba884048c3ae7ab3cd385830abdee5f202306d7d56b112395b930601e47202389e73cfd363d1cae97c2b396a20695a4237efa3440c4c3456327ccee3b1b5d0a7e6d294108907bc775b69e518a12cefc9d05cd46018d3506d7bec0c1d53729ebcb6fc706b8a8fd46d4211aa55a51eaee8193435156ceaa117cbb2b4ad5985533aa6a24deb"
 }
