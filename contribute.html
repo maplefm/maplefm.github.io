@@ -236,7 +236,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
           <li><i>🛒</i><div><b>Shop scans</b><span>Open shops and scroll to the bottom. Every sold slot is a sale caught. This climbs the ranks and pays.</span></div></li>
           <li><i>✅</i><div><b>Verified sales</b><span>Also seen by another watcher or a Twitch stream. A full credit each.</span></div></li>
           <li><i>📺</i><div><b>Streaming</b><span>Stream on Twitch with Classic in the title. Connect Twitch below and your catches earn as yours.</span></div></li>
-          <li><i>🔎</i><div><b>Equip tooltips</b><span>Hover an equip's icon for a second so it's priced by stats. <a href="#stats">How</a>.</span></div></li>
+          <li><i>🔎</i><div><b>Equip tooltips</b><span>Hover an equip's icon for a second so it's priced by stats. Pays the most of anything. <a href="#stats">How</a>.</span></div></li>
           <li><i>💬</i><div><b>Trade chat</b><span>Chat posts sharpen prices. They don't earn.</span></div></li>
           <li><i>🗺️</i><div><b>Coverage</b><span>Keep the minimap in view and open Change Channel once.</span></div></li>
         </ul>
@@ -526,7 +526,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       tr.appendChild(el("td", "n", String(r.verified)));
       tr.appendChild(el("td", "n", String(r.self)));
       var dr = el("td", "n dim", String(r.dropped || 0)); dr.title = "Sold slots that were already grey when the scanner walked in and nobody else saw sell. They count for rank, not for pay."; tr.appendChild(dr);
-      var hv = el("td", "n", String(r.hovers || 0)); hv.title = "Equips whose stats this scanner was first to capture by hovering them in game; each earns a tenth of a credit"; tr.appendChild(hv);
+      var hv = el("td", "n", String(r.hovers || 0)); hv.title = "Equips whose stats this scanner was first to capture by hovering them in game"; tr.appendChild(hv);
       var wi = el("td", "n", String(r.witnessed || 0)); wi.title = "Other people's sales this scanner's watcher confirmed; each earns a quarter credit"; tr.appendChild(wi);
       var cd = el("td", "n", String(r.cold || 0)); cd.title = "Watched sales caught in a room and channel nobody else had read in the past day; each earns extra credit"; tr.appendChild(cd);
       tr.appendChild(el("td", "n", String(r.hours)));
@@ -547,7 +547,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
      "A payout sends your whole balance, which resets to 0.",
      "Verified sales earn the full rate. Unverified sales earn " + (r.self_rate * 100) + "% while few people scan; that share rises as more people scan.",
      "Confirming someone else's sale earns you " + (r.witness_credit || 0) + " of a credit, up to two witnesses per sale.",
-     "First to hover an equip and capture its stats earns " + (r.hover_credit || 0) + " of a credit. That's what prices gear by roll.",
+     "First to hover an equip and capture its stats earns " + (r.hover_credit || 0) + " credits, " + ((r.hover_credit || 0) >= 2 ? (r.hover_credit) + "x a verified sale" : "") + (r.hover_min_price ? " on gear listed at " + num(r.hover_min_price) + "+ mesos" : "") + ". That's what prices gear by roll, so it pays the most.",
      "Cold-room bounty: a watched sale in a room and channel nobody read in the past day earns an extra " + (r.cold_bonus || 0) + " of a credit. The board's coverage map shows cold spots.",
      "Only real item names earn. Misreads show on the board as scraps, never credits.",
      "Each person earns at most the weekly cap above until Ko-fi support reaches $250 a month.",

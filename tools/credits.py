@@ -63,6 +63,7 @@ def week_start(dt):
 
 HOVERS = {}                # listing key -> (t, scanner) of the first stats capture (an equip hovered in game)
 HOVER_RATE = 0.1           # credit for being the first to capture an equip's stats; the owner sets it in pay.json
+HOVER_MIN = 0              # a hovered listing must be priced at least this (pay.json hover_min_price), so junk gear can't farm it
 WITNESS_RATE = 0.25        # credit for confirming someone else's sale (max WITNESS_MAX witnesses per sale); streams get none
 WITNESS_MAX = 2
 SELF_TO_BAR = 0.25         # an unverified sale counts this much toward the unlock bar (pay for it stays SELF_RATE)
@@ -193,7 +194,7 @@ def tally(kept, obs, start, end, life=None):
     # the first scanner to hover an equip and capture its stats: the work behind every roll price on the board
     hov_day = collections.Counter()
     for key, (t, who) in HOVERS.items():
-        if not (start <= t < end) or not price_ok(key[1], key[2]): continue
+        if not (start <= t < end) or not price_ok(key[1], key[2]) or key[2] < HOVER_MIN: continue
         day = datetime.datetime.fromtimestamp(t, ET).date().isoformat()
         if hov_day[(key[0], day)] >= SHOP_CAP: continue
         hov_day[(key[0], day)] += 1
@@ -350,6 +351,7 @@ if __name__ == "__main__":
         for r in (load(sys.argv[4], {}).get("items") or []): KNOWN.add(str(r[0]).lower())
     STRICT = bool(pool.get("strict"))
     if "hover_credit" in pool: HOVER_RATE = float(pool.get("hover_credit") or 0)
+    if "hover_min_price" in pool: HOVER_MIN = int(pool.get("hover_min_price") or 0)
     if "witness_credit" in pool: WITNESS_RATE = float(pool.get("witness_credit") or 0)
     if "self_to_bar" in pool: SELF_TO_BAR = float(pool.get("self_to_bar") or 0)
     if "cold_bonus" in pool: COLD_BONUS = float(pool.get("cold_bonus") or 0)
@@ -377,7 +379,7 @@ if __name__ == "__main__":
         weeks.append({"start": a.date().isoformat(), "end": (b - datetime.timedelta(days=1)).date().isoformat(),
                       "current": a == this_wk, "math": payout(rows, pool), "rows": rows})
     json.dump({"generated": now.isoformat(), "trial": True,
-               "rules": {"min_price": MIN_PRICE, "vendor_floor": bool(VEND), "shop_cap_per_day": SHOP_CAP, "self_rate": SELF_RATE, "witnesses": "another person's watcher or a stream capture, within a day of the sale", "earns": "watcher shop scans only", "strict": STRICT, "known_items_only": bool(KNOWN), "hover_credit": HOVER_RATE, "witness_credit": WITNESS_RATE, "self_to_bar": SELF_TO_BAR, "cold_bonus": COLD_BONUS},
+               "rules": {"min_price": MIN_PRICE, "vendor_floor": bool(VEND), "shop_cap_per_day": SHOP_CAP, "self_rate": SELF_RATE, "witnesses": "another person's watcher or a stream capture, within a day of the sale", "earns": "watcher shop scans only", "strict": STRICT, "known_items_only": bool(KNOWN), "hover_credit": HOVER_RATE, "hover_min_price": HOVER_MIN, "witness_credit": WITNESS_RATE, "self_to_bar": SELF_TO_BAR, "cold_bonus": COLD_BONUS},
                "weeks": weeks, "balances": bal}, open(out, "w", encoding="utf-8"), separators=(",", ":"))
     w = weeks[0]
     print("week of %s: %d contributors, %d credits" % (w["start"], len(w["rows"]), w["math"]["total_credits"]))

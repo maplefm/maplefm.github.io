@@ -5,7 +5,7 @@
  "weekly_budget": 250,
  "min_payout": 5,
  "unlock_verified": 2000,
- "hover_credit": 0.1,
+ "hover_credit": 2,
  "strict": true,
  "witness_credit": 0.25,
  "self_to_bar": 0.25,
@@ -15,5 +15,6 @@
   "max": 1000
  },
  "cold_bonus": 0.5,
- "uncap_kofi_month": 250
+ "uncap_kofi_month": 250,
+ "hover_min_price": 10000
 }
