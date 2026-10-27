@@ -88,7 +88,7 @@ async function route(req, env, url) {
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
-  if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; if (url.searchParams.get("log")) return json((await env.ACCOUNTS.get("reddit:log", "json")) || []); return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); { const n = Date.now(), e = etParts(n); return json(await trafficSend(env, n - 3600e3, n, "Traffic, last hour (test)", n - (e.hour * 60 + e.minute) * 60e3)); } }
   if (p === "/r" && req.method === "POST") return refHit(req, env, url);
@@ -1202,7 +1202,50 @@ async function refStats(env, url) {
 // so Maya can answer while the post is fresh. Reads Reddit's public feeds only; nothing is posted or voted.
 const REDDIT_CRON = "2-59/5 * * * *";
 const REDDIT_SUBS = ["MSClassicWorld", "MapleStoryClassic"];
-const REDDIT_HIT = /\b(price[sd]?|pricing|pc|price ?check|worth|value[sd]?|how much|free ?market|fm|meso(s|\s?market)?|sell(ing|s)?|buy(ing|s)?|wts|wtb|wtt|trad(e|ing|ed)|flip(ping|ped|s)?|merch(ing)?|shop(s|ping)?|market|economy|inflation|scroll(s|ing|ed)?|nx|marketplace|auction|cheap|expensive|overpriced|underpriced|deal(s)?)\b/i;
+// What counts as a price or Free Market post. One loose word ("scroll", "shop", "worth", "pc", "deal") used to be enough,
+// which flagged build questions, cash shop chatter and "is it worth it" posts. Now a post needs one clear market signal
+// (price check, WTS/WTB, how much is, free market, an amount in mesos next to a trade word...) or two weaker ones
+// together with an amount. Talk about classes, bosses, training and the game client is left out.
+const RD_STRONG = [
+  [/\b(price ?check|pc ?(pls|please|plz|\?))|^\s*\[?pc\]?\s*[:\-]/i, "price check"],
+  [/\b(wts|wtb|wtt|lf seller|lf buyer)\b/i, "WTS/WTB"],
+  [/\bhow much (is|are|for|would|do|does|should|to|can|did)\b/i, "how much"],
+  [/\bwhat(?:'s| is| are|s)? (?:the |a |an )?(?:going |market |fair |current )?(?:price|rate|value)\b/i, "what's the price"],
+  [/\b(fair|good|bad|current|market|going|fm|average|typical|asking|selling|buying|sale|sold for|lowball|low ?ball)\s+price[sd]?\b/i, "price"],
+  [/\bprice[sd]?\s+(check|of|for|on|range|history|trend|drop|crash|went|go(ing)? (up|down))\b/i, "price"],
+  [/\b(pricing|overpriced|underpriced|price ?gouging)\b/i, "pricing"],
+  [/\bfree ?market\b|\bin (the )?fm\b|\bfm (price|prices|shop|shops|room|merch|flipping|sniping)\b/i, "free market"],
+  [/\b(merch(ing|ant)?s?|flipp(ing|ed|er)|snip(ing|ed)|hired merchant|player shops?)\b/i, "merching"],
+  [/\b(economy|inflation|deflation|meso (market|value|price|rate)|mesos? per (nx|hour)|nx (rate|to mesos?)|mesos? (crash|inflat))/i, "economy"],
+  [/\b\d+(\.\d+)?\s?(k|m|mil|mill|million|b|bil)\b[^.?!\n]{0,40}\b(each|ea|for it|offer|sold|selling|buy|bought|asking|price)\b|\b(sold|bought|selling|buying|offer(ed)?|asking)\b[^.?!\n]{0,40}\b\d+(\.\d+)?\s?(k|m|mil|mill|million|b|bil)\b/i, "amount"],
+  [/\b(going|goes|go|sells?|selling|sold|worth|priced)\s+(for\s+|at\s+|around\s+|about\s+)?\d+(\.\d+)?\s?(k|m|mil|mill|million|b|bil|mesos?)\b/i, "amount"],
+  [/\b(make|making|farm(ing)?|earn(ing)?)\s+(more\s+|some\s+|good\s+)?mesos?\b|\bmesos?\s+(making|farm(ing)?|per hour|an hour|\/\s?h(ou)?r)\b/i, "making mesos"],
+  [/\b(maplefm|club ?fm|fm watcher)\b/i, "Club FM"]
+];
+const RD_WEAK = /\b(sell(ing|s)?|buy(ing|s)?|trad(e|ing|ed)|worth|value|cheap|expensive|deal|market|mesos?|scroll(s|ed)?|\d+% ?scroll|gfa|gfdex|ggl?|clean|slots?|att(ack)?|nx)\b/gi;
+const RD_AMOUNT = /\b\d+(\.\d+)?\s?(k|m|mil|mill|million|b|bil|mesos?)\b/i;
+// "worth it", "worth leveling", cash-shop-only and game-client posts read like market talk but aren't
+const RD_NOT = /\b(worth (it|playing|leveling|levell?ing|the grind|maining|trying|getting into|returning)|is (it|this|classic) worth|cash shop (sale|update|items? (are|is) (back|out))|pc (specs?|build|crash(es)?|lag|requirements?|version|client|players?|gaming)|on (my|a|the) pc|gaming pc|new pc|mac|steam deck|controller)\b/i;
+function redditScore(title, flair, body) {
+  const head = (title || "") + " " + (flair || ""), text = head + " " + String(body || "").slice(0, 3000);
+  if (/\b(price ?check|market|trading|economy|buying|selling|wts|wtb)\b/i.test(flair || "")) return { hit: true, why: "flair: " + flair };
+  for (const [re, why] of RD_STRONG) {
+    const m = re.exec(text); if (!m) continue;
+    // a strong word only in the body of a post whose title says it's about something else still counts, unless the
+    // only hit is a "worth it"-type phrase
+    if (RD_NOT.test(head) && !re.test(head)) continue;
+    return { hit: true, why: why + ": " + m[0].trim().slice(0, 40) };
+  }
+  const weak = new Set((text.match(RD_WEAK) || []).map((w) => w.toLowerCase()));
+  if (weak.size >= 2 && RD_AMOUNT.test(text) && !RD_NOT.test(head)) return { hit: true, why: [...weak].slice(0, 3).join(", ") + " + amount" };
+  return { hit: false, why: weak.size ? [...weak].slice(0, 3).join(", ") : "" };
+}
+// every post the watch looked at, with the call it made, for /admin/reddit (the last 200)
+async function redditLog(env, rows) {
+  if (!rows.length) return;
+  const cur = (await env.ACCOUNTS.get("reddit:log", "json")) || [];
+  await env.ACCOUNTS.put("reddit:log", JSON.stringify(rows.concat(cur).slice(0, 200)));
+}
 async function redditFeed(sub) {
   const H = { "User-Agent": "web:gg.maplefm.redditwatch:v1 (by Club FM)", Accept: "application/json" };
   for (const u of ["https://www.reddit.com/r/" + sub + "/new.json?limit=25&raw_json=1", "https://old.reddit.com/r/" + sub + "/new.json?limit=25&raw_json=1"]) {
@@ -1231,17 +1274,19 @@ async function redditPush(req, env) {
   const body = await req.json().catch(() => null);
   const posts = body && Array.isArray(body.posts) ? body.posts.slice(0, 60) : [];
   const st = (await env.ACCOUNTS.get("reddit:state", "json")) || { seen: [] };
-  const seen = new Set(st.seen || []), first = !(st.seen || []).length, hits = [];
+  const seen = new Set(st.seen || []), first = !(st.seen || []).length, hits = [], log = [];
   for (const p of posts) {
     if (!p || !p.id || seen.has(p.id)) continue;
     seen.add(p.id);
     if (first || Date.now() / 1000 - (Number(p.created_utc) || 0) > 6 * 3600) continue;
     const text = (p.title || "") + " " + (p.link_flair_text || "") + " " + String(p.selftext || "").slice(0, 3000);
     const sub = String(p.sub || "MSClassicWorld");
-    if (/^maplestory$/i.test(sub) && !/\b(classic|mscw|classic ?world)\b/i.test(text)) continue;   // the main sub is mostly the modern game
-    const m = REDDIT_HIT.exec(text);
-    if (m) hits.push({ sub, p, why: m[0] });
+    if (/^maplestory$/i.test(sub) && !/\b(classic|mscw|classic ?world)\b/i.test(text)) { log.push({ t: Date.now(), sub, title: String(p.title || "").slice(0, 140), hit: false, why: "modern game sub" }); continue; }   // the main sub is mostly the modern game
+    const sc = redditScore(p.title, p.link_flair_text, p.selftext);
+    log.push({ t: Date.now(), sub, id: p.id, title: String(p.title || "").slice(0, 140), hit: sc.hit, why: sc.why });
+    if (sc.hit) hits.push({ sub, p, why: sc.why });
   }
+  await redditLog(env, log);
   st.seen = [...seen].slice(-600); st.at = Date.now(); st.lastOk = Date.now(); st.status = 200; st.fails = 0; st.via = "pc";
   await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
   if (hits.length) await wdDM(env, await wdAdmins(env), redditEmbeds(hits));
@@ -1268,9 +1313,8 @@ async function redditWatch(env) {
       if (!p.id || seen.has(p.id)) continue;
       seen.add(p.id);
       if (first || Date.now() / 1000 - (p.created_utc || 0) > 6 * 3600) continue;   // the first run only learns what is already there
-      const text = (p.title || "") + " " + (p.link_flair_text || "") + " " + (p.selftext || "").slice(0, 3000);
-      const m = REDDIT_HIT.exec(text);
-      if (m) hits.push({ sub, p, why: m[0] });
+      const sc = redditScore(p.title, p.link_flair_text, p.selftext);
+      if (sc.hit) hits.push({ sub, p, why: sc.why });
     }
   }
   st.seen = [...seen].slice(-400); st.at = Date.now(); st.lastOk = ok ? Date.now() : st.lastOk; st.status = ok ? 200 : status;
