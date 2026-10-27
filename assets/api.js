@@ -1,9 +1,9 @@
 // Club FM talks to its server at api.maplefm.gg (same site as maplefm.gg, so phones keep the sign-in). Some networks
 // can't find that address yet; then every call quietly goes to the server's other address instead, links included,
-// and the page remembers that for six hours before trying api.maplefm.gg again.
+// and the page remembers that for ten minutes before trying api.maplefm.gg again.
 (function () {
   var A = "https://api.maplefm.gg", B = "https://clubfm-accounts.aaweaver93.workers.dev", alt = false;
-  try { var t = +localStorage.getItem("fm-api-alt") || 0; alt = Date.now() - t < 6 * 36e5; } catch (e) {}
+  try { var t = +localStorage.getItem("fm-api-alt") || 0; alt = Date.now() - t < 10 * 60e3; } catch (e) {}
   window.FM_API = alt ? B : A;
   var f0 = window.fetch.bind(window);
   // The sign-in also comes back as a token in the address (#signed-in&fmt=...). It is kept in this browser and sent with

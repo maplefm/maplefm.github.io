@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head>
-<script src="/assets/api.js?v=2"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/assets/api.js?v=3"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quest Log · MapleStory Classic · Club FM</title>
 <meta name="description" content="Your MapleStory Classic quest log: what's open at your level, what you've started, what's next, and exactly what each quest needs, where it drops and what it costs on the Free Market.">
 <link rel="canonical" href="https://maplefm.gg/quests.html">
@@ -142,7 +142,9 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     i.onerror = function () { if (alt && i.src.indexOf(alt) < 0) { i.src = alt; return; } if (i.parentNode) i.parentNode.replaceChild(ph(i.dataset.ph), i); }; return i; }
   function mobImg(id, name) { var k = MOBIMG[String(id)]; var i = img(IO + "mob/" + id + "/" + (k || "icon"), null, IO + "mob/" + id + "/render/move"); i.dataset.ph = (name || "?").charAt(0); return i; }
   function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) { var i = img(IO + "item/" + id + "/icon"); i.dataset.ph = name.charAt(0); b.appendChild(i); } else b.appendChild(ph(name.charAt(0))); return b; }
-  function itemHref(name) { return IDS[name] || PRICE[name] != null ? "/item/" + slug(name) + "/" : "/?q=" + encodeURIComponent(name); }
+  // only items with an item page link to one (5+ prices seen); the rest open a board search
+  var PAGE = {};
+  function itemHref(name) { return PAGE[name] ? "/item/" + slug(name) + "/" : "/?q=" + encodeURIComponent(name); }
   function itemLink(name, txt) { var a = el("a", null, txt || shown(name)); a.href = itemHref(name); return a; }
   function questLink(qn, qid) { var a = el("a", null, qn); if (qid && BYID[qid]) { a.href = "#q-" + qid; } else { a.href = "#q=" + encodeURIComponent(qn); } return a; }
 
@@ -306,7 +308,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     mine.forEach(function (q) { q.need.forEach(function (x) { need[x[0]] = (need[x[0]] || 0) + x[1]; }); });
     var keys = Object.keys(need).sort(), tot = 0;
     if (!keys.length) P.appendChild(el("p", "note", "Start a quest and its items add up here with Free Market costs."));
-    keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = "/item/" + slug(n) + "/"; r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
+    keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = itemHref(n); r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
     if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
   }
   // deep links: #q-1012 opens one quest (from item pages and the board); #q=name or ?q=name searches
@@ -352,7 +354,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     Q.forEach(function (q) { BYID[q.id] = q; });
     Q.sort(function (a, b) { return a.lv - b.lv || a.n.localeCompare(b.n); });
     Q.forEach(function (q) { BYID[q.id] = q; });
-    ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) PRICE[r.item] = r.typ; });
+    ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) { PRICE[r.item] = r.typ; if ((r.n || 0) >= 5) PAGE[r.item] = 1; } });
     var a = res[2];
     if (a && a.signedIn) {
       SIGNED = true;
