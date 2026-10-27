@@ -1342,14 +1342,51 @@ async function redditPush(req, env) {
   await redditLog(env, log);
   st.seen = [...seen].slice(-600); st.at = Date.now(); st.lastOk = Date.now(); st.status = 200; st.fails = 0; st.via = "pc";
   await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
+  for (const h of hits) h.reply = await redditReply(env, h.p).catch(() => "");
   if (hits.length) await wdDM(env, await wdAdmins(env), redditEmbeds(hits));
   return json({ ok: true, new: hits.length });
 }
+// A reply ready to paste: for each item the post names, what it sells for, what's listed, where it drops, and the link.
+// Written plain and lowercase like a player would. Never says who runs the site.
+async function redditReply(env, p) {
+  const LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/";
+  const [sum, guide] = await Promise.all([
+    fetch(LIVE + "summary-public.json", { cf: { cacheTtl: 600, cacheEverything: true } }).then((r) => r.json()).catch(() => null),
+    fetch(LIVE + "itemguide.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).then((r) => r.json()).catch(() => null)]);
+  const rows = {}; for (const r of (sum && sum.rows) || []) if (r && r.item) rows[r.item.toLowerCase()] = r;
+  const gi = (guide && guide.items) || {};
+  // "michael's wings" finds Michael Wings: apostrophes and possessive s don't count on either side
+  const flat = (x) => " " + String(x).toLowerCase().replace(/[\u2019']s\b/g, "").replace(/[\u2019']/g, "").replace(/[^a-z0-9%+ ]+/g, " ").replace(/\s+/g, " ").trim() + " ";
+  const text = flat((p.title || "") + " " + (p.selftext || ""));
+  const names = new Set(Object.keys(rows).concat(Object.keys(gi).map((n) => n.toLowerCase())));
+  const found = [];
+  for (const n of [...names].sort((a, b) => b.length - a.length)) {
+    if (n.length < 5 || /cut off|\u2026/.test(n) || !text.includes(flat(n))) continue;
+    if (found.some((f) => f.includes(n))) continue;
+    found.push(n); if (found.length >= 2) break;
+  }
+  const k = (v) => (v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "m" : v >= 1000 ? Math.round(v / 1000) + "k" : String(Math.round(v)));
+  const lines = [];
+  for (const n of found) {
+    const r = rows[n], g = gi[Object.keys(gi).find((x) => x.toLowerCase() === n)] || null, name = (r && r.item) || Object.keys(gi).find((x) => x.toLowerCase() === n) || n;
+    const bits = [];
+    if (r && r.typ && (r.salesN || 0) >= 3) bits.push(name.toLowerCase() + " has been selling around " + k(r.typ) + (r.lo && r.hi && k(r.lo) !== k(r.hi) ? " (" + k(r.lo) + " to " + k(r.hi) + ")" : ""));
+    else if (r && r.typ) bits.push("haven't seen many " + name.toLowerCase() + " sell, the ones listed go for around " + k(r.typ));
+    const drops = g && g.d ? g.d.slice().sort((a, b) => (b[6] || 0) - (a[6] || 0)).slice(0, 2).map((d) => d[0] + (d[1] ? " (lv " + d[1] + ")" : "")) : [];
+    if (drops.length) bits.push("it drops from " + drops.join(" and "));
+    if (bits.length) lines.push(bits.join(". "));
+    lines.push("maplefm.gg/#item=" + encodeURIComponent(name));
+  }
+  if (/(^|\s)[+-]\d{1,2}\b|\bclean\b|\d\/\d/.test(text) && found.length) lines.splice(lines.length - 1, 0, "rolls change the price a lot, the item page splits sales by roll");
+  if (!found.length) lines.push("you can look up what things actually sold for and what's listed right now at maplefm.gg");
+  return lines.join("\n").slice(0, 900);
+}
 function redditEmbeds(hits) {
-  return hits.slice(0, 10).map(({ sub, p, why }) => ({
+  return hits.slice(0, 10).map(({ sub, p, why, reply }) => ({
     title: String(p.title || "New post").slice(0, 250), url: "https://www.reddit.com" + String(p.permalink || "").replace(/^https:\/\/www\.reddit\.com/, ""), color: 0x6d3fd1,
     description: String(p.selftext || "").replace(/\s+/g, " ").slice(0, 300),
-    fields: [{ name: "Where", value: "r/" + sub + (p.link_flair_text ? " · " + p.link_flair_text : ""), inline: true }, { name: "By", value: "u/" + (p.author || "?"), inline: true }, { name: "Matched", value: why, inline: true }],
+    fields: [{ name: "Where", value: "r/" + sub + (p.link_flair_text ? " · " + p.link_flair_text : ""), inline: true }, { name: "By", value: "u/" + (p.author || "?"), inline: true }, { name: "Matched", value: why, inline: true }]
+      .concat(reply ? [{ name: "Reply to paste", value: "```" + reply.replace(/`/g, "'") + "```", inline: false }] : []),
     footer: { text: "Reddit watch · reply while it's fresh" }, timestamp: new Date((Number(p.created_utc) || Date.now() / 1000) * 1000).toISOString()
   }));
 }
