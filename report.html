@@ -104,45 +104,42 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .kofitab .kx:hover { background: rgba(255,255,255,.5); }
 .kofitab[hidden] { display: none !important; }
 
-/* PDF export (admins only): a clean light printout with the logo and site address in the bottom right of every page */
-.pdfhead, .pdfmark { display: none; }
-@media print {
-  @page { size: letter; margin: 12mm 12mm 10mm; }
-  :root, :root[data-theme="dark"] {
-    --bg: #fff; --panel: #fff; --panel2: #f5f1fc; --line: #e2dbef; --line2: #d7cbec;
-    --ink: #1d1430; --muted: #5d5577; --accent: #6d3fd1; --gold: #a8730c; --gold-line: #e7c46b;
-    --up: #12895f; --up-fill: rgba(18,137,95,.16); --down: #d0402f; --down-fill: rgba(208,64,47,.14); --shadow: none; color-scheme: light;
-  }
-  html, body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body { font-size: 12.5px; min-height: 0; }
-  .sitenav, header, .tabs, .kofitab, .clubfoot, #pdfbar { display: none !important; }
-  .wrap { max-width: none; padding: 0 0 6mm; gap: 12px; }
-  .panel, .idx, .row, .stats div { break-inside: avoid; page-break-inside: avoid; }
-  .lists { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
-  .list .row { padding: 6px 9px; gap: 0 7px; grid-template-columns: 24px minmax(0, 1fr) auto; }
-  .list .row .ic { width: 24px; height: 24px; } .list .row .ic img { max-width: 20px; max-height: 20px; }
-  .list .row b { white-space: normal; overflow: visible; font-size: .8rem; line-height: 1.2; } .list .row small { font-size: .68rem; } .list .row .r { font-size: .8rem; }
-  .list h3 { padding: 10px 12px !important; }
-  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 10px !important; }
-  .grid .idx:last-child { grid-column: auto !important; }
-  .wrap, #body > div { display: block !important; } .wrap > *, #body > div > * { margin: 0 0 12px; }
-  .pdfunknown { display: none !important; }
-  .idx { padding: 10px 12px; gap: 2px; } .idx small { font-size: .72rem; }
-  .pdftable { width: 100%; border-collapse: collapse; } .pdftable td { padding: 0; vertical-align: top; } .pdfspace { height: 12mm; }
-  .stats { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
-  .stats div { border-bottom: 0 !important; }
-  .title h1 { font-size: 1.7rem; }
-  .idx.big .val b { font-size: 2.1rem; } .val b { font-size: 1.35rem; } .chg { font-size: 1rem; } .idx h2 { font-size: .95rem; } .idx.big h2 { font-size: 1.1rem; }
-  a { text-decoration: none; }
-  .sp svg { max-width: 100%; }
-  .pdfhead { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); }
-  .pdfhead img { width: 44px; height: 44px; border-radius: 10px; image-rendering: pixelated; }
-  .pdfhead b { font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -.02em; display: block; }
-  .pdfhead b span { color: var(--accent); }
-  .pdfhead small { color: var(--muted); font-size: .8rem; }
-  .pdfmark { display: flex; align-items: center; gap: 7px; position: fixed; right: 0; bottom: 0; font-family: var(--display); font-weight: 700; font-size: 12px; color: var(--ink); }
-  .pdfmark img { width: 22px; height: 22px; border-radius: 5px; image-rendering: pixelated; }
+/* PDF export (admins only). The report is drawn into a PDF file in the browser: a light, letter-width copy of what is on
+   screen, cut into pages between blocks, with the logo and maplefm.gg in the bottom right corner of every page. */
+.pdfhead { display: none; }
+html.pdfdoc, html.pdfdoc body { background: #fff !important; min-height: 0; }
+html.pdfdoc {
+  --bg: #fff; --panel: #fff; --panel2: #f5f1fc; --line: #e2dbef; --line2: #d7cbec;
+  --ink: #1d1430; --muted: #5d5577; --accent: #6d3fd1; --gold: #a8730c; --gold-line: #e7c46b;
+  --up: #12895f; --up-fill: rgba(18,137,95,.16); --down: #d0402f; --down-fill: rgba(208,64,47,.14); --shadow: none; color-scheme: light;
 }
+html.pdfdoc body { font-size: 12.5px; }
+html.pdfdoc .val b, html.pdfdoc .chg, html.pdfdoc .row .r { font-variant-numeric: normal; }
+html.pdfdoc .sitenav, html.pdfdoc header, html.pdfdoc .tabs, html.pdfdoc .kofitab, html.pdfdoc .clubfoot, html.pdfdoc .pdfunknown { display: none !important; }
+html.pdfdoc .wrap { width: 760px; max-width: none; margin: 0; padding: 0; display: block; }
+html.pdfdoc .wrap > *, html.pdfdoc #body > div > * { margin: 0 0 12px; }
+html.pdfdoc #body > div { display: block !important; }
+html.pdfdoc .lists { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
+html.pdfdoc .list .row { padding: 6px 9px; gap: 0 7px; grid-template-columns: 24px minmax(0, 1fr) auto; }
+html.pdfdoc .list .row .ic { width: 24px; height: 24px; } html.pdfdoc .list .row .ic img { max-width: 20px; max-height: 20px; }
+html.pdfdoc .list .row b { white-space: normal; overflow: visible; font-size: .8rem; line-height: 1.2; }
+html.pdfdoc .list .row small { font-size: .68rem; } html.pdfdoc .list .row .r { font-size: .8rem; }
+html.pdfdoc .list h3 { padding: 10px 12px !important; }
+html.pdfdoc .grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 10px !important; }
+html.pdfdoc .grid .idx:last-child { grid-column: auto !important; }
+html.pdfdoc .idx { padding: 10px 12px; gap: 2px; } html.pdfdoc .idx small { font-size: .72rem; }
+html.pdfdoc .sp, html.pdfdoc .idx.big .sp { height: auto; }
+html.pdfdoc .stats { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+html.pdfdoc .stats div { border-bottom: 0 !important; }
+html.pdfdoc .title h1 { font-size: 1.7rem; }
+html.pdfdoc .idx.big .val b { font-size: 2.1rem; } html.pdfdoc .val b { font-size: 1.35rem; } html.pdfdoc .chg { font-size: 1rem; }
+html.pdfdoc .idx h2 { font-size: .95rem; } html.pdfdoc .idx.big h2 { font-size: 1.1rem; }
+html.pdfdoc .pdfhead { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); }
+html.pdfdoc .pdfhead img { width: 44px; height: 44px; border-radius: 10px; }
+html.pdfdoc .pdfhead b { font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -.02em; display: block; }
+html.pdfdoc .pdfhead b span { color: var(--accent); }
+html.pdfdoc .pdfhead small { color: var(--muted); font-size: .8rem; }
+@media print { .sitenav, .kofitab, .clubfoot, #pdf { display: none !important; } }
 </style>
 <link rel="stylesheet" href="/assets/nav.css?v=2"></head>
 <body>
@@ -280,37 +277,59 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   fetch("data/itemdb.json?v=mcw4").then(function (r) { return r.json(); }).then(function (j) { j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (!DB[k]) DB[k] = r[1]; }); if (R) show(); }).catch(function () {});
 
   // Export PDF: only shown to Club FM admins (the server answers its admin routes for them alone).
-  // It prints the report on screen, whatever day or range is picked, through the browser's Save as PDF.
+  // It saves the report on screen, whatever day or range is picked, as a PDF file.
   fetch("https://api.maplefm.gg/admin/reddit", { credentials: "include", cache: "no-store" }).then(function (r) { if (r.ok) $("pdf").hidden = false; }).catch(function () {});
-  var title0 = document.title, printing = false;
-  function forPrint(on) {
-    if (on === printing) return; printing = on;
-    if (on) {
-      var range = TAB !== "daily" && R && R.ranges && R.ranges[TAB], when = range ? range.start + " to " + range.end : DAYS[at];
-      $("pdfwhen").textContent = $("sub").textContent + " · exported " + new Date().toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) + " ET";
-      document.title = "Club FM Market " + (range ? range.label + " " : "Close ") + when;
-      document.querySelectorAll(".sp").forEach(function (h) { h.textContent = ""; h.appendChild(sparkSvg(h._s, h._b, h.closest(".big") ? 680 : 150, h.closest(".big") ? 90 : 52)); });
-      tableWrap(true);
-    } else { tableWrap(false); document.title = title0; drawSparks(); }
+  function script(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+  function dataUrl(src) { return new Promise(function (ok, no) { var im = new Image(); im.onload = function () { var c = document.createElement("canvas"); c.width = c.height = 128; c.getContext("2d").drawImage(im, 0, 0, 128, 128); ok(c.toDataURL("image/png")); }; im.onerror = no; im.src = src; }); }
+  function exportPdf() {
+    var btn = $("pdf"), range = TAB !== "daily" && R.ranges && R.ranges[TAB], when = range ? range.start + " to " + range.end : DAYS[at];
+    var name = "Club FM Market " + (range ? range.label : "Close") + " " + when;
+    $("pdfwhen").textContent = $("sub").textContent + " · exported " + new Date().toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) + " ET";
+    btn.disabled = true; btn.textContent = "Making PDF…";
+    var W = 760, cuts = [], sparks = [].slice.call(document.querySelectorAll(".sp")), logo;
+    Promise.all([window.jspdf ? 0 : script("/assets/vendor/jspdf-2.5.2.min.js"), window.html2canvas ? 0 : script("/assets/vendor/html2canvas-1.4.1.min.js"), dataUrl("/clubfm-icon-512.png").then(function (u) { logo = u; })])
+    .then(function () {
+      return html2canvas(document.querySelector(".wrap"), { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 820, logging: false, onclone: function (doc) {
+        doc.documentElement.classList.add("pdfdoc"); doc.documentElement.removeAttribute("data-theme");
+        doc.querySelectorAll(".sp").forEach(function (h, i) { var o = sparks[i]; if (!o) return; var big = !!h.closest(".big"); h.textContent = ""; h.appendChild(sparkSvg(o._s, o._b, big ? 734 : 160, big ? 90 : 52)); });
+        // the picture library can't read CSS variables inside SVG, so the sparkline colours are written out
+        var cs = doc.defaultView.getComputedStyle(doc.documentElement);
+        doc.querySelectorAll(".sp [fill], .sp [stroke]").forEach(function (e) { ["fill", "stroke"].forEach(function (k) { var v = e.getAttribute(k), m = v && /^var\((--[\w-]+)\)$/.exec(v); if (m) e.setAttribute(k, cs.getPropertyValue(m[1]).trim()); }); });
+        // where a page may end: below each block, and below each row of category cards
+        var w = doc.querySelector(".wrap"), top = w.getBoundingClientRect().top;
+        doc.querySelectorAll(".wrap > *, #body > div > *, .grid > .idx").forEach(function (e) { var r = e.getBoundingClientRect(); if (r.height) cuts.push(Math.round(r.bottom - top + 6)); });
+      } });
+    }).then(function (cv) {
+      var pdf = new jspdf.jsPDF({ unit: "pt", format: "letter" }), PW = 612, PH = 792, M = 36, k = (PW - 2 * M) / W, room = (PH - M - 46) / k, s = cv.width / W;
+      var total = cv.height / s, pages = [], at0 = 0;
+      cuts = cuts.filter(function (c) { return c > 0 && c <= total + 6; }).sort(function (a, b) { return a - b; });
+      while (at0 < total - 2) {
+        var fit = cuts.filter(function (c) { return c > at0 + 40 && c - at0 <= room; }), end = fit.length ? fit[fit.length - 1] : Math.min(total, at0 + room);
+        pages.push([at0, Math.min(end, total)]); at0 = end;
+      }
+      pages.forEach(function (pg, i) {
+        if (i) pdf.addPage();
+        var h = pg[1] - pg[0], c = document.createElement("canvas"); c.width = cv.width; c.height = Math.ceil(h * s);
+        var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(cv, 0, -Math.round(pg[0] * s));
+        pdf.addImage(c.toDataURL("image/png"), "PNG", M, M, W * k, h * k, undefined, "FAST");
+        // bottom right of every page: the logo, then maplefm.gg
+        pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.setTextColor(29, 20, 48);
+        var tw = pdf.getTextWidth("maplefm.gg"), y = PH - 24;
+        pdf.text("maplefm.gg", PW - M, y, { align: "right" });
+        pdf.addImage(logo, "PNG", PW - M - tw - 22, y - 13, 17, 17);
+        pdf.link(PW - M - tw - 22, y - 13, tw + 22, 17, { url: "https://maplefm.gg/" });
+        pdf.setFont("helvetica", "normal"); pdf.setFontSize(8); pdf.setTextColor(93, 85, 119);
+        pdf.text("Page " + (i + 1) + " of " + pages.length, M, y);
+      });
+      pdf.setProperties({ title: name, author: "Club FM", creator: "maplefm.gg" });
+      pdf.save(name + ".pdf");
+    }).catch(function (e) { alert("Couldn't make the PDF: " + (e && e.message || e)); })
+    .then(function () { btn.disabled = false; btn.textContent = "Export PDF"; });
   }
-  // the report sits in a one-cell table while printing: its empty footer row repeats on every page and keeps
-  // the text clear of the logo and address pinned to the bottom right corner
-  var tbl = null;
-  function tableWrap(on) {
-    var w = document.querySelector(".wrap");
-    if (on && !tbl) {
-      tbl = el("table", "pdftable"); var tb = el("tbody"), tr = el("tr"), td = el("td"), tf = el("tfoot"), fr = el("tr"), fd = el("td");
-      fd.appendChild(el("div", "pdfspace")); fr.appendChild(fd); tf.appendChild(fr);
-      w.parentNode.insertBefore(tbl, w); td.appendChild(w); tr.appendChild(td); tb.appendChild(tr); tbl.appendChild(tb); tbl.appendChild(tf);
-    } else if (!on && tbl) { tbl.parentNode.insertBefore(w, tbl); tbl.remove(); tbl = null; }
-  }
-  addEventListener("beforeprint", function () { forPrint(true); });
-  addEventListener("afterprint", function () { forPrint(false); });
-  $("pdf").addEventListener("click", function () { if (!R) return; forPrint(true); setTimeout(function () { window.print(); }, 60); });
+  $("pdf").addEventListener("click", function () { if (R && !$("pdf").disabled) exportPdf(); });
   load(0);
 })();
 </script>
-<div class="pdfmark" aria-hidden="true"><img src="/clubfm-icon-512.png" alt="">maplefm.gg</div>
 <div class="kofitab" id="kofitab"><button type="button" class="kx" aria-label="Hide for now" onclick="this.parentNode.hidden=true">×</button><a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener" title="Support Club FM on Ko-fi"><i>☕</i><b>Support Club FM</b><span>Donations pay the FM Watchers who scan the market.</span></a></div>
 <script src="/assets/hit.js" defer></script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Play</b><a href="/quests.html">Quest log</a><a href="/training/">Training guide</a><a href="/map.html">Maps and routes</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body>
