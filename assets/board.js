@@ -317,7 +317,7 @@
     n = n.replace(/\s+(?:to|t0|TO|T0)\s+S\w{0,3}\s*$/, "");                               // "Garnet TO SELL" from chat
     n = n.replace(/\bBott\w*?ear\b/g, "Bottomwear").replace(/\b([A-Z])\1(?=[a-z]{2})/g, "$1");
     // letters the screen reader swaps in known names: Retum, Eartings, Paletie, Alfac, Cal's Eye
-    n = n.replace(/\bRetum\b/g, "Return").replace(/\bEartings?\b/g, "Earrings").replace(/\bPaletie\b/g, "Palette").replace(/\bAlfac/g, "Attac").replace(/\bCal's Eye\b/g, "Cat's Eye").replace(/\bAtlack\b/g, "Attack").replace(/\bAltack\b/g, "Attack");
+    n = n.replace(/\bRetum\b/g, "Return").replace(/\bEartings?\b/g, "Earrings").replace(/\bPaletie\b/g, "Palette").replace(/\bAlfac/g, "Attac").replace(/\bA(?:lt|tl|l1|1t|tt|lf)ac(?=k|\b)/g, "Attac").replace(/\bCal's Eye\b/g, "Cat's Eye").replace(/\bAtlack\b/g, "Attack").replace(/\bAltack\b/g, "Attack");
     n = n.replace(/\s+/g, " ").trim();
     if (/\sScr\w*(\s+\S{1,3})?$/.test(n) && !/Scroll:/.test(n)) { n = n.replace(/\sScr\w*(\s+\S{1,3})?$/, " Scroll"); tl = true; }
     if (/ Scroll$/.test(n) && !/^Return Scroll/i.test(n) && tieredBase(n)) tl = true;   // SP Reset Scroll has no tiers; its tier is never "cut off"
@@ -711,10 +711,19 @@
       if (!/Scroll$/.test(b)) {     // the row name was cut off, but the hover text has the full name
         var full = (l.xt || []).map(function (x) { var m = /([A-Za-z][A-Za-z.\- ]+Scroll)\b/.exec(x); return m ? m[1].trim() : ""; }).filter(Boolean)[0];
         if (full) b = snapScroll(full);
+        // no full name in the hover either ("Two-handed Sword Attac", 10%): the one scroll whose name starts like this
+        if (!full) {
+          var pre = b.toLowerCase().replace(/\u2026$/, "").trim(), bases = {};
+          if (pre.length >= 8) (DBB[pre.slice(0, 2)] || []).forEach(function (t) { if (t.indexOf(pre) === 0 && / scroll: /.test(t)) bases[t.split(": ")[0]] = 1; });
+          var bk = Object.keys(bases);
+          if (bk.length === 1) { var row = DB[bk[0] + ": " + t.toLowerCase()] || DB[Object.keys(DB).filter(function (k) { return k.indexOf(bk[0] + ": ") === 0; })[0]]; if (row) b = String(row[0]).split(": ")[0]; }
+        }
       }
       if (/Scroll$/.test(b) && tieredBase(b)) { l.i = b + ": " + t; l.tl = false; rateTier[String(l.s).toLowerCase() + "|" + b + "|" + l.p] = t; }
     });
     L.forEach(function (l) { var t = l.tl && rateTier[String(l.s).toLowerCase() + "|" + l.i + "|" + l.p]; if (t) { l.i = l.i + ": " + t; l.tl = false; } });
+    // a listing whose hover shows a success rate is a scroll: never price it as the weapon its cut name starts with
+    L.forEach(function (l) { if (l.x && l.x.SUCCESS != null && !/scroll/i.test(l.i) && !/\u2026$/.test(l.i)) l.i = l.i + " Scroll\u2026"; });
     L.forEach(function (l) {
       if (!l.tl) return;
       var best = "", bd = Math.log(2.5);
