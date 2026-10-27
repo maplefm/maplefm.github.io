@@ -89,7 +89,7 @@
     if (newest.stream) { note.appendChild(document.createTextNode(" · seen on ")); note.appendChild(streamLink(newest)); }
     if (!li) note.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
-  function jumpToGrade(i, g, newest, ks, base) {
+  function jumpToGrade(i, g, newest, ks, base, lab) {
     if (!newest) return;
     var inBuy = !newest.so && !newest.chat && Date.now() - newest.t < DAY;
     state.list = inBuy ? "buy" : "sales"; renderItem();
@@ -98,7 +98,7 @@
     if (li) { li.scrollIntoView({ block: "center", behavior: "smooth" }); li.classList.add("hit"); setTimeout(function () { li.classList.remove("hit"); }, 1800); }
     var sec = $("ip").querySelector(".rollbox"); if (!sec) return;
     var note = sec.querySelector(".jumpnote") || sec.appendChild(el("p", "jumpnote"));
-    var label = base != null ? ks + " " + (base + g) : (g === 0 ? "Average roll" : (g > 0 ? "+" : "") + g);
+    var label = lab || (base != null ? ks + " " + (base + g) : (g === 0 ? "Average roll" : (g > 0 ? "+" : "") + g));
     note.textContent = ""; note.appendChild(el("b", null, label + ": "));
     note.appendChild(document.createTextNode((newest.chat ? "posted by " : newest.so ? "sold by " : "asked by ") + newest.s + (where(newest) ? " · " + where(newest) : "") + " · " + ago(newest.t) + " · "));
     note.appendChild(money(newest.u));
@@ -911,6 +911,7 @@
           if (kh.length >= 2) it.bands.hi = median(kh);
           if (km.length >= 3) { it.bands.mid = median(km); it.bands.from = "rolls"; }   // the roll box shows it; the headline stays what the item sold for
           if (it.bands.lo > it.bands.mid) it.bands.lo = it.bands.mid;
+          if (it.bands.hi < it.bands.mid) it.bands.hi = it.bands.mid;
         }
         // what each roll goes for: average, +1, +2... from every listing with a known roll
         it.gradeMed = {}; var gg = {};
@@ -2276,40 +2277,90 @@
     renderItem(); ev("#open:" + name);
     if (window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); if (document.activeElement === $("q") && window.innerWidth <= 700) $("q").blur(); }
   }
+  // Price by roll: one section per stat that moves, each a short row of rolls from worst to best with the clean roll
+  // as the marker in the middle. Class main stats carry the class name, the viewer's own class goes first, rolls
+  // where several stats moved sit in their own "Total stats" section at the end, and rolls seen once wait behind a toggle.
+  var MAINCLS = { STR: "Warrior", DEX: "Bowman", INT: "Magician", LUK: "Thief" }, CLSSTAT = { 1: "STR", 2: "INT", 4: "DEX", 8: "LUK" }, CLSNAME = { WARRIOR: "STR", MAGICIAN: "INT", BOWMAN: "DEX", THIEF: "LUK" };
+  var ROLLRARE = false;
+  function myStat() {
+    var c = $("cls") && +$("cls").value; if (CLSSTAT[c]) return CLSSTAT[c];
+    try { var m = JSON.parse(localStorage.getItem("fm-map-me") || "{}"); if (m && m.cls && CLSNAME[String(m.cls).toUpperCase()]) return CLSNAME[String(m.cls).toUpperCase()]; } catch (e) {}
+    return "";
+  }
   function rollBox(i) {
-    var box = el("div", "rollbox"); box.appendChild(el("h4", null, "Price by roll"));
+    var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by roll")); box.appendChild(hd);
     if (i.bands) {
       var g = el("div", "rollbands");
-      [["Low roll", i.bands.lo, "down"], ["Average", i.bands.mid, ""], ["High roll", i.bands.hi, "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(money(b[1])); d.appendChild(el("small", null, b[0])); g.appendChild(d); });
+      [["Low", Math.min(i.bands.lo, i.bands.mid), "down"], ["Average", i.bands.mid, "mid"], ["High", Math.max(i.bands.hi, i.bands.mid), "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(el("small", null, b[0])); d.appendChild(money(b[1])); g.appendChild(d); });
       box.appendChild(g);
     }
-    var gk = Object.keys(i.gradeMed || {}).map(Number).sort(function (a, b) { return a - b; });
-    if (gk.length) {
-      var gt = el("div", "gradetab");
-      var gks = keyStat(i.item, null, ""), gkb = gks === "ATT" || gks === "MATT" ? itemBase(i.item).s[gks] : null;
-      gk.forEach(function (g) {
-        var m = i.gradeMed[g], d = el("div", "gr " + (g > 0 ? "up" : g < 0 ? "down" : ""));
-        var sign = g === 0 ? "base" : (g > 0 ? "+" : "") + g;
-        if (gkb != null) { var lb2 = el("b", null, gks + " " + (gkb + g) + " "); lb2.appendChild(el("em", null, g === 0 ? "base" : "(" + sign + ")")); d.appendChild(lb2); }
-        else { var gl = g === 0 ? "" : gradeLabel(i, g, gks); d.appendChild(el("b", null, g === 0 ? "Average" : (gl ? gl + " " : "") + sign)); if (gl) d.title = (g > 0 ? g + " more " : -g + " less ") + gl + " than the item's base"; } d.appendChild(money(m.p)); d.appendChild(el("small", null, m.n + (m.n === 1 ? " seen" : " seen")));
-        // click: jump to the newest listing with this roll, and say where it was seen
-        var newest = i.rolls.filter(function (r) { return r.g === g; }).sort(function (a, b) { return b.l.t - a.l.t; })[0];
-        if (newest) { d.classList.add("jump"); d.title = "Click: jump to the newest one seen with this roll" + (where(newest.l) ? " (" + where(newest.l) + ")" : ""); d.addEventListener("click", function () { jumpToGrade(i, g, newest.l, gks, gkb); }); }
-        gt.appendChild(d); });
-      box.appendChild(gt);
+    var now = Date.now(), gks = keyStat(i.item, null, ""), gkb = gks === "ATT" || gks === "MATT" ? itemBase(i.item).s[gks] : null;
+    var m = classMask(i.item), jobs = [1, 2, 4, 8].filter(function (b) { return m > 0 && (m & b); }).length;
+    // a chat grade like "(-3)" names no stat: on a one-class item or a weapon it's the key stat, on gear every class wears it can't be placed
+    var gradeKey = (gks === "ATT" || gks === "MATT" || jobs === 1) && gks ? gks : "GRADE";
+    var secs = {}, clean = null;
+    i.rolls.forEach(function (r) {
+      if (now - r.l.t > 14 * DAY) return;
+      var bs = rollBasis(i.item, r.l) || gradeKey;
+      if (r.g === 0 && bs !== "TOTAL") { (clean || (clean = { ps: [], rs: [] })).ps.push(r.l.u); clean.rs.push(r); return; }
+      var s = secs[bs] || (secs[bs] = { k: bs, g: {}, n: 0 }); s.n++;
+      var c = s.g[r.g] || (s.g[r.g] = { g: r.g, ps: [], rs: [] }); c.ps.push(r.l.u); c.rs.push(r);
+    });
+    var mine = myStat(), keys = Object.keys(secs);
+    var rank = function (k) { return k === "TOTAL" ? 3 : k === "GRADE" ? 2 : k === mine ? -2 : (k === "ATT" || k === "MATT") && category(i.item) !== "Weapons" ? -1 : 0; };
+    keys.sort(function (a, b) { return rank(a) - rank(b) || secs[b].n - secs[a].n || (a < b ? -1 : 1); });
+    if (!keys.length && clean) keys = [gradeKey];
+    var rare = 0, shown = 0;
+    var cell = function (k, g, ps, rs, base) {
+      var n = ps.length, d = el("div", "rc " + (g === 0 ? "ref" : g > 0 ? "up" : "down") + (n === 1 && g !== 0 ? " rare" : ""));
+      var top = el("b", null, g === 0 ? (base != null ? "Base" : "Clean") : (g > 0 ? "+" : "−") + Math.abs(g));
+      if (base != null) top.appendChild(el("em", null, " " + (base + g)));
+      d.appendChild(top); d.appendChild(money(median(ps))); d.appendChild(el("small", null, n + " seen"));
+      var newest = rs.slice().sort(function (a, b) { return b.l.t - a.l.t; })[0], lab = (k === "TOTAL" ? "Total stats" : k === "GRADE" ? "Roll" : STATABBR[k] || k) + " " + (g === 0 ? "clean" : (g > 0 ? "+" : "") + g);
+      if (newest) { d.classList.add("jump"); d.tabIndex = 0; d.title = lab + " · newest one" + (where(newest.l) ? " · " + where(newest.l) : ""); var go = function () { jumpToGrade(i, g, newest.l, gks, null, lab); }; d.addEventListener("click", go); d.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); }); }
+      return d;
+    };
+    keys.forEach(function (k) {
+      var s = secs[k] || { g: {}, n: 0 }, gs = Object.keys(s.g).map(Number);
+      var vis = gs.filter(function (g) { return s.g[g].ps.length > 1; }); rare += gs.length - vis.length;
+      if (!ROLLRARE && !vis.length && gs.length) return;
+      var base = k === gks && gkb != null ? gkb : null;
+      var sec = el("div", "rsec" + (k === mine ? " mine" : "") + (k === "TOTAL" || k === "GRADE" ? " misc" : ""));
+      var h = el("div", "rsh"), nm = el("b", null, k === "TOTAL" ? "Total stats" : k === "GRADE" ? "Chat grade" : STATABBR[k] || k); h.appendChild(nm);
+      var sub = k === "TOTAL" ? "several stats moved" : k === "GRADE" ? "stat not named" : MAINCLS[k] && (jobs !== 1 || k === mine) ? MAINCLS[k] : base != null ? "base " + base : "";
+      if (sub) h.appendChild(el("span", null, sub));
+      if (k === mine) h.appendChild(el("i", "you", "your class"));
+      if (s.n) h.appendChild(el("small", null, s.n + " rolled"));
+      sec.appendChild(h);
+      var row = el("div", "rrow");
+      if (clean && k !== "TOTAL") gs.push(0);
+      gs.sort(function (a, b) { return a - b; }).forEach(function (g) {
+        if (g === 0 && !s.g[0]) { row.appendChild(cell(k, 0, clean.ps, clean.rs, base)); return; }
+        if (!ROLLRARE && s.g[g].ps.length === 1) return;
+        row.appendChild(cell(k, g, s.g[g].ps, s.g[g].rs, base));
+      });
+      sec.appendChild(row); box.appendChild(sec); shown++;
+    });
+    if (!shown && clean) { var cs = el("div", "rsec"); var ch = el("div", "rsh"); ch.appendChild(el("b", null, "Clean")); ch.appendChild(el("small", null, clean.ps.length + " seen")); cs.appendChild(ch); var cr = el("div", "rrow"); cr.appendChild(cell(gradeKey, 0, clean.ps, clean.rs, null)); cs.appendChild(cr); box.appendChild(cs); }
+    var ft = el("div", "rfoot"), known = i.rolls.length;
+    ft.appendChild(el("span", null, (i.bands ? i.bands.n + " prices this week · " : "") + (known ? known + " with a known roll" : "No rolls known yet")));
+    if (rare) {
+      var tb = el("button", "rtog", ROLLRARE ? "Hide rare rolls" : "Show " + rare + " rare " + (rare === 1 ? "roll" : "rolls")); tb.type = "button";
+      tb.title = "Rolls seen only once"; tb.addEventListener("click", function () { ROLLRARE = !ROLLRARE; box.replaceWith(rollBox(i)); });
+      ft.appendChild(tb);
     }
-    var known = i.rolls.length;
-    box.appendChild(el("p", "note", (i.bands ? "From " + i.bands.n + " prices this week. " : "") + (known ? known + (known === 1 ? " listing has" : " listings have") + " a known roll." : "No rolls known yet.") + " Hover a listing in game, or catch one in trade chat with its stats, and it lands here."));
+    box.appendChild(ft);
     // rolls with an attack number are in the "Price by ATT" table further down; here only the ones known by grade alone, like "(-3)" in chat
     var gonly = i.rolls.filter(function (r) { return r.l.x.ATT == null && r.l.x.MATT == null; });
     if (gonly.length) {
+      var dt = el("details", "rrecent"); dt.appendChild(el("summary", null, "Newest rolls seen"));
       var ul = el("div", "rolllist");
       gonly.slice().sort(function (a, b) { return b.l.t - a.l.t; }).slice(0, 10).forEach(function (r) {
         var d = el("div"), c = statChip(i.item, r.l.x, r.l.xj); if (c) d.appendChild(c);
         d.appendChild(money(r.l.u)); d.appendChild(el("small", null, r.l.s + " · " + (r.l.chat ? "trade chat" : r.l.so ? "sold" : "listed") + " · " + ago(r.l.t)));
         ul.appendChild(d);
       });
-      box.appendChild(ul);
+      dt.appendChild(ul); box.appendChild(dt);
     }
     return box;
   }
