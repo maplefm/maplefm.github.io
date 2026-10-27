@@ -33,5 +33,5 @@ Stop it by closing the window.
 Reviewing your own data
 Double-click export.bat. It writes my_scans.csv in this folder with every listing this watcher has seen.
 
-Your scan stats: double-click stats.bat any time to see new listings, shops, sales caught and equip stats read in the last hour and today, with your pace per active hour. The watcher window also prints the same line at the top of every hour.
+Your scan stats: double-click stats.bat any time to see new listings, shops, sales caught and equip stats read in the last hour and today, with your pace per active hour. The watcher window also prints the same line at the top of every hour. Below that it lists every day by your PC's date: items scanned, items with stats read, and total scans (an item with stats counts twice). Each day is also saved in scan_history.csv, so nothing resets at midnight.
 Open it in Excel or Google Sheets.

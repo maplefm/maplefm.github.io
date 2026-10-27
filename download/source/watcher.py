@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.8"
+VERSION = "2026.10.27.9"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -1095,6 +1095,42 @@ def scan_stats(store, now=None):
                 "pace": round(len(rows) / (active / 60)) if active >= 5 else None}
     midnight = time.mktime(datetime.date.fromtimestamp(now).timetuple())
     return {"hour": window(now - 3600), "today": window(midnight), "at": now}
+HISTORY_FILE = os.path.join(HERE, "scan_history.csv")
+def day_history(store):
+    """Every day this watcher has data for, by this PC's own date: items scanned (each listing once a day), items
+    with stats read, total scans (an item with stats counts twice), shops and sales caught. Saved to
+    scan_history.csv so a day is never lost at midnight or when old data is cleared; days already in the file and
+    no longer in the data stay as they were."""
+    import csv
+    with store.lock:
+        shop = list(store.d.get("shop", {}).items())
+    days = {}
+    for k, o in shop:
+        try: day, seller = json.loads(k)[0], json.loads(k)[1]
+        except Exception: continue
+        d = days.setdefault(day, {"items": 0, "stats": 0, "shops": set(), "sales": 0})
+        d["items"] += 1; d["shops"].add(seller); d["sales"] += o.get("ns", 0) + o.get("sb", 0)
+        if o.get("x"): d["stats"] += 1
+    rows = {}
+    try:
+        with open(HISTORY_FILE, newline="", encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f): rows[r["Date"]] = r
+    except (OSError, KeyError):
+        pass
+    for day, d in days.items():
+        old = rows.get(day) or {}
+        # data for a day only grows while it's kept; never let a partly cleared day shrink what was saved
+        if int(old.get("Items scanned") or 0) > d["items"]: continue
+        rows[day] = {"Date": day, "Items scanned": d["items"], "With stats read": d["stats"], "Total scans": d["items"] + d["stats"],
+                     "Shops": len(d["shops"]), "Sales caught": d["sales"]}
+    try:
+        with open(HISTORY_FILE, "w", newline="", encoding="utf-8-sig") as f:
+            w = csv.DictWriter(f, fieldnames=["Date", "Items scanned", "With stats read", "Total scans", "Shops", "Sales caught"])
+            w.writeheader()
+            for day in sorted(rows): w.writerow({k: rows[day].get(k, "") for k in w.fieldnames})
+    except OSError:
+        pass
+    return [rows[d] for d in sorted(rows)]
 def stats_text(st):
     def line(w):
         return (f"{w['listings']:,} new listings · {w['shops']:,} shops · {w['sales']:,} sales caught · "
@@ -1107,6 +1143,15 @@ def show_stats(cfg):
     print("FM Watcher scan stats, " + datetime.datetime.now().strftime("%b %d %I:%M %p"))
     print("  Last hour: " + stats_text(st).split("\n")[0][len("last hour: "):])
     print("  Today:     " + stats_text(st).split("\n")[1].strip()[len("today:"):].strip())
+    hist = day_history(store)
+    if hist:
+        print("")
+        print("  Day by day (this PC's date). Total scans = items scanned + items with stats read.")
+        print("  Date        Items scanned  With stats  Total scans  Shops  Sales")
+        for r in hist[-21:]:
+            print(f"  {r['Date']}  {int(r['Items scanned']):>13,}  {int(r['With stats read']):>10,}  {int(r['Total scans']):>11,}  {int(r['Shops'] or 0):>5,}  {int(r['Sales caught'] or 0):>5,}")
+        print("  Every day is also saved in scan_history.csv in this folder.")
+    print("")
     print("  Active minutes count only time spent reading shops. The site's Scanner Ranks show your all-time totals.")
     print("  Equip stats read: listings whose stats you captured by hovering. Being first to capture a listing's stats earns hover credit.")
 
@@ -1529,7 +1574,7 @@ def main():
                             last_chat_hash = h; jobs.put(("chat", chat, None))
                 if int(t // 3600) != getattr(main, "stats_hour", None):
                     if getattr(main, "stats_hour", None) is not None:
-                        try: log("scan stats, " + stats_text(scan_stats(store)))
+                        try: log("scan stats, " + stats_text(scan_stats(store))); day_history(store)
                         except Exception as e: log("stats error:", e)
                     main.stats_hour = int(t // 3600)
                 if store.dirty and t - last_save > 30:
