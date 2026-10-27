@@ -1252,20 +1252,29 @@ const RD_STRONG = [
 const RD_WEAK = /\b(sell(ing|s)?|buy(ing|s)?|trad(e|ing|ed)|worth|value|cheap|expensive|deal|market|mesos?|scroll(s|ed)?|\d+% ?scroll|gfa|gfdex|ggl?|clean|slots?|att(ack)?|nx)\b/gi;
 const RD_AMOUNT = /\b\d+(\.\d+)?\s?(k|m|mil|mill|million|b|bil|mesos?)\b/i;
 // "worth it", "worth leveling", cash-shop-only and game-client posts read like market talk but aren't
-const RD_NOT = /\b(worth (it|playing|leveling|levell?ing|the grind|maining|trying|getting into|returning)|is (it|this|classic) worth|cash shop (sale|update|items? (are|is) (back|out))|pc (specs?|build|crash(es)?|lag|requirements?|version|client|players?|gaming)|on (my|a|the) pc|gaming pc|new pc|mac|steam deck|controller)\b/i;
+const RD_NOT = /\b(worth (it|playing|leveling|levell?ing|the grind|maining|trying|getting into|returning)|is (it|this|classic) worth(?! anything| much| selling)|cash shop (sale|update|items? (are|is) (back|out))|pc (specs?|build|crash(es)?|lag|requirements?|version|client|players?|gaming)|on (my|a|the) pc|gaming pc|new pc|mac|steam deck|controller)\b/i;
+// A post is worth a ping when someone is asking what gear is worth, or selling or buying it, or talking about the
+// site. Market words alone ("economy", "merchants", "in the FM", a meso amount) are not enough: they caught tier
+// lists and server-lock rants. Rules, in order:
+// 1. a market flair; 2. the site or the watcher named; 3. a price question (how much, price check, what's it worth,
+// WTS/WTB) anywhere; 4. a price word in the title with gear in the post; 5. a sell or buy word in the title with gear
+// and an amount.
+const RD_ASK = /\b(how much|price ?check|pc (pls|please|plz)|what(?:'s| is| are|s)? (?:it|this|that|they|these|my \w+|a \w+)? ?(?:worth|going for|selling for)|worth anything|any idea (?:what|how much)|wts|wtb|wtt|lf (?:seller|buyer)|taking offers|accepting offers|best offer|lowball(?:ed|ing)?|fair price|good price|going rate|market value|sells? for how much)\b/i;
+const RD_PRICEW = /\b(price[sd]?|pricing|worth|value[ds]?|cost[s]?|overpriced|underpriced|sell(?:ing|s)?|sold|buy(?:ing)?|offer)\b/i;
+const RD_SELLW = /\b(sell(?:ing|s)?|sold|buy(?:ing)?|bought|trade|trading|offer)\b/i;
+const RD_GEAR = /(^|[\s(])[+-]\d{1,2}\b|\b\d\/\d{1,2}\b|\bclean\b|\b\d{1,3}\s?(?:att|attack|matk|m\.?att|wa|ma|str|dex|int|luk|acc|avoid|slots?)\b|\b(?:gfa|gfdex|gfluk|gfint|gfstr|wg|bwg|ggl?|nlc|zhelm|pac|sauna|gach|tgh)\b|\b(?:weapons?|claw|glove|gloves|scroll|scrolls|wand|staff|bow|crossbow|xbow|helm|hat|cape|earrings?|shoes?|overall|top|bottom|shield|spear|polearm|pole ?arm|axe|sword|dagger|mace|knuckle|fan|throwing stars?|stars|wings|ring|pendant|coupon|chair)\b/i;
+const RD_SITE = /\b(maplefm|club ?fm|fm ?watcher)\b/i;
 function redditScore(title, flair, body) {
   const head = (title || "") + " " + (flair || ""), text = head + " " + String(body || "").slice(0, 3000);
   if (/\b(price ?check|market|trading|economy|buying|selling|wts|wtb)\b/i.test(flair || "")) return { hit: true, why: "flair: " + flair };
-  for (const [re, why] of RD_STRONG) {
-    const m = re.exec(text); if (!m) continue;
-    // a strong word only in the body of a post whose title says it's about something else still counts, unless the
-    // only hit is a "worth it"-type phrase
-    if (RD_NOT.test(head) && !re.test(head)) continue;
-    return { hit: true, why: why + ": " + m[0].trim().slice(0, 40) };
-  }
-  const weak = new Set((text.match(RD_WEAK) || []).map((w) => w.toLowerCase()));
-  if (weak.size >= 2 && RD_AMOUNT.test(text) && !RD_NOT.test(head)) return { hit: true, why: [...weak].slice(0, 3).join(", ") + " + amount" };
-  return { hit: false, why: weak.size ? [...weak].slice(0, 3).join(", ") : "" };
+  let m = RD_SITE.exec(text); if (m) return { hit: true, why: "mentions " + m[0] };
+  if (RD_NOT.test(head)) return { hit: false, why: "off topic: " + (RD_NOT.exec(head) || [""])[0] };
+  m = RD_ASK.exec(text); if (m) return { hit: true, why: "asks: " + m[0].trim().slice(0, 40) };
+  const g = RD_GEAR.exec(text), p = RD_PRICEW.exec(head);
+  if (p && g) return { hit: true, why: "price " + p[0] + " + " + g[0].trim() };
+  const sw = RD_SELLW.exec(head);
+  if (sw && g && RD_AMOUNT.test(text)) return { hit: true, why: sw[0] + " + " + g[0].trim() + " + amount" };
+  return { hit: false, why: [p && p[0], g && g[0].trim()].filter(Boolean).join(", ") };
 }
 // every post the watch looked at, with the call it made, for /admin/reddit (the last 200)
 async function redditLog(env, rows) {
