@@ -100,7 +100,20 @@ def crumbs_html(cr):
     return '<nav class="crumbs" aria-label="You are here">' + ' <i>›</i> '.join(parts) + '</nav>'
 
 
+# items with no icon anywhere (i/missing.json, kept by tools/iconmirror.py) get an empty icon box, not a broken image
+_NOICON = None
+def noicon(text):
+    global _NOICON
+    if _NOICON is None:
+        try: _NOICON = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "i", "missing.json"))))
+        except Exception: _NOICON = set()
+    if not _NOICON: return text
+    return re.sub(r'<img ([^>]*?)src="https://maplefm\.gg/i/(\d+)\.png"[^>]*>', lambda m: '<span class="gi"></span>' if m.group(2) in _NOICON else m.group(0), text)
+
 def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None):
+    return noicon(page0(title, desc, canon, body, ld, og, active, crumbs))
+
+def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None):
     t, d = html.escape(title), html.escape(desc)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
@@ -187,7 +200,7 @@ def guide_html(name, g, page_of):
         t = html.escape(shown(n)) + (f" ×{c:,}" if c is not None else "")
         return f'<a href="/item/{page_of[n]}/">{t}</a>' if n in page_of else f'<a href="/#item={urllib.parse.quote(n)}">{t}</a>'
     def ico(n):
-        return f'<img class="gi" src="https://maplestory.io/api/MCW/1/item/{IDS[n]}/icon" alt="" loading="lazy">' if n in IDS else '<span class="gi"></span>'
+        return f'<img class="gi" src="https://maplefm.gg/i/{IDS[n]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{IDS[n]}/icon&#39;" alt="" loading="lazy">' if n in IDS else '<span class="gi"></span>'
     out = ""
     if g.get("q"):
         tot = sum(q[2] for q in g["q"])
@@ -267,7 +280,7 @@ def main():
         chg = f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}% in 24h</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else ""
         conf = CONF.get(r.get("conf") or "", None)
         basis = "from sales players watched happen" if r.get("kind") == "sale" else "from asking prices; few sales seen yet"
-        icon = f"https://maplestory.io/api/MCW/1/item/{ids[name]}/icon"
+        icon = f"https://maplefm.gg/i/{ids[name]}.png"
         daily = [d for d in (r.get("daily") or []) if d and d[1]][-7:]
         dtab = ""
         if daily:
@@ -287,7 +300,7 @@ def main():
         vp = vp if vp > 1 else 0
         nx = NX.get(name)
         rel = [x for x in bycat.get(r.get("cat") or "Other", []) if x["item"] != name][:8]
-        rels = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="" width="22" height="22" loading="lazy">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in rel)
+        rels = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="" width="22" height="22" loading="lazy">{html.escape(shown(x["item"]))} · {meso(x["typ"])}</a>' for x in rel)
         # equipment and scrolls are searched for their price; materials, potions and cosmetics for what they are and where they drop
         price_first = bool(r.get("equip")) or "Scroll" in name
         fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
@@ -299,7 +312,7 @@ def main():
         else:
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
             title = f"{nm} · price, drops & quests · MapleStory Classic · Club FM" if not nx else f"{nm} · Cash Shop and FM price · MapleStory Classic · Club FM"
-        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
+        body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng">{rng}</span>{chg}<small>mesos</small></p>
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
 <div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
@@ -326,10 +339,10 @@ def main():
         made.append((s, nm, r))
     for name in extra:
         s = slug(name); nm = shown(name); g = GUIDE[name]
-        icon = f"https://maplestory.io/api/MCW/1/item/{ids[name]}/icon"
+        icon = f"https://maplefm.gg/i/{ids[name]}.png"
         qn = len(g.get("q") or [])
         desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
-        body = f"""<div class="card"><div class="hd"><img src="{icon}" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
+        body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
 <p class="note">No Free Market sales seen yet. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
 {equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, g, page_of)}</div>"""
@@ -346,7 +359,7 @@ def main():
             mv = (x.get("mv") or [None])[0]
             ch = f'<span class="mv {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"}{abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else '<span class="mv"></span>'
             li += (f'<a class="it" href="/item/{slug(x["item"])}/" data-n="{html.escape(shown(x["item"]).lower())}" data-p="{int(x["typ"])}" data-v="{int(x.get("vol") or 0)}" data-m="{round(mv or 0, 3) if isinstance(mv, (int, float)) else 0}" data-k="{html.escape(x["item"])}">'
-                   f'<img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="{html.escape(shown(x["item"]))}" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr">{meso(x["typ"])}</b>{ch}</a>')
+                   f'<img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="{html.escape(shown(x["item"]))}" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr">{meso(x["typ"])}</b>{ch}</a>')
         secs += f'<section class="cat" data-c="{html.escape(cat)}"><h2>{html.escape(CATS.get(cat, cat))} <small>{len(bycat[cat])}</small></h2><div class="its">{li}</div><button type="button" class="more" hidden>Show all {len(bycat[cat])}</button></section>'
     idx = (f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub"><span id="cnt">{len(rows)}</span> items priced from Free Market sales players watched · <span id="upd">updated {when}</span></p>'
            f'<input id="q" type="search" placeholder="Find an item: work gloves, GFA 60, white label ring" autocomplete="off" aria-label="Find an item">'
@@ -369,7 +382,7 @@ def main():
         for x in lst:
             mv = (x.get("mv") or [None])[0]
             ch = (f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else "")
-            trs += (f'<tr><td><a href="/item/{slug(x["item"])}/"><img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="{html.escape(shown(x["item"]))}" width="24" height="24" loading="lazy"> {html.escape(shown(x["item"]))}</a></td>'
+            trs += (f'<tr><td><a href="/item/{slug(x["item"])}/"><img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="{html.escape(shown(x["item"]))}" width="24" height="24" loading="lazy"> {html.escape(shown(x["item"]))}</a></td>'
                     f'<td class="n">{meso(x["typ"])} {ch}</td><td class="n">{full(x.get("salesN") or 0)}</td></tr>')
         others = " · ".join(f'<a href="/items/{v[0]}/">{html.escape(v[1][0].upper() + v[1][1:])}</a>' for k, v in HUB.items() if k != cat and len(bycat.get(k) or []) >= 5)
         body = (f'<div class="card"><h1>MapleStory Classic {html.escape(what)}</h1><p class="sub">{len(lst)} items · updated {when}</p><p>{html.escape(intro)} '
@@ -407,12 +420,13 @@ def main():
                                                     "".join(f"<url><loc>{u}</loc><lastmod>{wbuilt if u in world else today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     # the home page is a script-built board; give search engines plain links to the most traded items
     top = sorted(rows, key=lambda r: -(r.get("vol") or 0))[:40]
-    links = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon" alt="" width="18" height="18" loading="lazy">{html.escape(shown(x["item"]))}</a>' for x in top)
+    links = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="" width="18" height="18" loading="lazy">{html.escape(shown(x["item"]))}</a>' for x in top)
     ip = os.path.join(out, "index.html")
     if os.path.exists(ip):
         h = open(ip, encoding="utf-8").read()
         block = f'<!--toplinks--><nav class="toplinks" aria-label="Most traded items"><h2>Most traded today</h2>{links}<a href="/items/">All item prices →</a></nav><!--/toplinks-->'
         h2 = re.sub(r"<!--toplinks-->.*?<!--/toplinks-->", lambda m: block, h, flags=re.S)
+        h2 = noicon(h2)
         if h2 != h: open(ip, "w", encoding="utf-8").write(h2)
     print(len(made), "item pages")
 

@@ -17,7 +17,7 @@
 // Storage (KV): acct:<discord id> -> account JSON; code:<link code> -> discord id; watcher:<hid> -> discord id
 // Nothing here holds a watcher's real id or key: the watcher sends hid (its hashed id), and keys are masked.
 
-import { statReport } from "./statcheck.js";
+import { statReport, densify } from "./statcheck.js";
 import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
@@ -244,6 +244,7 @@ async function me(req, env) {
   const a = await whoami(req, env);
   if (!a) return json({ signedIn: false });
   const v = publicView(a); v.club = await isClub(a, env); v.inGuild = a.inGuild === undefined ? null : !!a.inGuild;
+  await logSignin(env, a.id).catch(() => {});
   return json({ signedIn: true, account: v });
 }
 
@@ -513,7 +514,7 @@ async function snapPut(req, env) {
   const body = await req.text();
   if (body.length < 1000 || body.length > 24e6) { await note({ error: "size", bytes: body.length }); return json({ error: "size" }, 400); }
   let sj = null;
-  try { sj = JSON.parse(body); if (sj.v !== 2 || !sj.cols) throw 0; } catch (e) { await note({ error: "bad", bytes: body.length }); return json({ error: "bad" }, 400); }
+  try { sj = JSON.parse(body); if ((sj.v !== 2 && sj.v !== 3) || !sj.cols) throw 0; densify(sj); } catch (e) { await note({ error: "bad", bytes: body.length }); return json({ error: "bad" }, 400); }
   await env.ACCOUNTS.put("snap:board", body);
   // shops by owner for the shop pages, and "Seen in game" on market listings
   const shopsN = await snapShops(env, sj).catch((e) => "error " + (e && e.message || e));
@@ -1292,13 +1293,24 @@ async function hitsTable(env) {
   if (HITS_READY || !env.INBOX_DB) return;
   await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS hits (t INTEGER, p TEXT, r TEXT, q TEXT, v TEXT)").run();
   await env.INBOX_DB.prepare("CREATE INDEX IF NOT EXISTS hits_t ON hits (t)").run();
+  // ret: 1 when this browser first came on an earlier day (a date kept in its own storage, never sent), 0 on a first day
+  await env.INBOX_DB.prepare("ALTER TABLE hits ADD COLUMN ret INTEGER").run().catch(() => {});
+  // who opened the site signed in with Discord, one row per account per day (Eastern), the time of the latest visit
+  await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS signin (id TEXT, day TEXT, t INTEGER, PRIMARY KEY (id, day))").run();
+  await env.INBOX_DB.prepare("CREATE INDEX IF NOT EXISTS signin_t ON signin (t)").run();
   HITS_READY = true;
 }
-async function logHit(env, page, ref, tag, who) {
+async function logHit(env, page, ref, tag, who, ret) {
   if (!env.INBOX_DB) return;
   await hitsTable(env);
   const day = new Date().toISOString().slice(0, 10), v = (await hmac(env.SESSION_SECRET || "x", "v|" + day + "|" + who)).slice(0, 12);
-  await env.INBOX_DB.prepare("INSERT INTO hits (t, p, r, q, v) VALUES (?, ?, ?, ?, ?)").bind(Date.now(), page, ref, tag, v).run();
+  await env.INBOX_DB.prepare("INSERT INTO hits (t, p, r, q, v, ret) VALUES (?, ?, ?, ?, ?, ?)").bind(Date.now(), page, ref, tag, v, ret == null ? null : ret ? 1 : 0).run();
+}
+async function logSignin(env, id) {
+  if (!env.INBOX_DB || !id) return;
+  await hitsTable(env);
+  const t = Date.now();
+  await env.INBOX_DB.prepare("INSERT INTO signin (id, day, t) VALUES (?, ?, ?) ON CONFLICT (id, day) DO UPDATE SET t = excluded.t").bind(String(id), etParts(t).day, t).run();
 }
 async function hit(req, env) {
   const ok = new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*" } });
@@ -1308,7 +1320,7 @@ async function hit(req, env) {
   let b = {}; try { b = JSON.parse(await req.text()); } catch (e) { return ok; }
   let page = String(b.p || "/").slice(0, 120), ref = String(b.r || "").toLowerCase().replace(/^www\./, "").slice(0, 80), tag = String(b.q || "").replace(/[^\w-]/g, "").slice(0, 24);
   if (/(^|\.)maplefm\.gg$/.test(ref)) ref = "";
-  await logHit(env, page, ref, tag, ip);
+  await logHit(env, page, ref, tag, ip, b.ret === 1 ? 1 : b.ret === 0 ? 0 : null);
   return ok;
 }
 // Sold buttons: players mark a listing in Where to buy as sold. One vote per person per listing (a scrambled
@@ -1376,11 +1388,13 @@ async function trafficStats(env, from, to) {
   const price = await q(`SELECT p, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '!%' GROUP BY p`, from, to);
   const opens = await q(`SELECT substr(p, 7) i, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '#open:%' GROUP BY i ORDER BY n DESC LIMIT 3`, from, to);
   const [ev] = await q(`SELECT SUM(p LIKE '#find:%') f, SUM(p LIKE '#pick:%') k FROM hits WHERE t >= ? AND t < ?`, from, to);
+  const [rt] = await q(`SELECT COUNT(DISTINCT CASE WHEN ret = 1 THEN v END) back, COUNT(DISTINCT CASE WHEN ret IS NOT NULL THEN v END) known FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
+  const [si] = await q(`SELECT COUNT(DISTINCT id) n FROM signin WHERE t >= ? AND t < ?`, from, to);
   const by = {}; pages.forEach((r) => { const k = pageLabel(r.p).startsWith("Item: ") ? "Item pages" : pageLabel(r.p); by[k] = (by[k] || 0) + r.n; });
   const items = pages.filter((r) => /^\/item\//.test(r.p)).slice(0, 3).map((r) => pageLabel(r.p).slice(6) + " " + r.n);
-  return { views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
+  return { returning: (rt && rt.back) || 0, retKnown: (rt && rt.known) || 0, signedIn: (si && si.n) || 0, views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
 }
-function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.views + "** views · **" + pc + "** !price"; }
+function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.returning + "** returning · **" + t.signedIn + "** signed in · **" + t.views + "** views · **" + pc + "** !price"; }
 function trafficEmbed(st, prev, title, from, to, extra) {
   // change against the same hours yesterday, as a count and a percent: "(+12, ▲ 25% vs yesterday)"
   const d = (a, b) => {
@@ -1395,6 +1409,9 @@ function trafficEmbed(st, prev, title, from, to, extra) {
   const pc = st.price.reduce((s, r) => s + r.n, 0);
   const ppc = prev && prev.price ? prev.price.reduce((s, r) => s + r.n, 0) : null;
   f.push({ name: "!price answers", value: "**" + pc + "**" + d(pc, ppc), inline: true });
+  // returning: came back from an earlier day; new: first day on the site. Counted from browsers that report it.
+  f.push({ name: "Returning visitors", value: "**" + st.returning + "**" + d(st.returning, prev && prev.returning) + (st.retKnown ? "\n" + Math.max(0, st.retKnown - st.returning) + " new" : ""), inline: true });
+  f.push({ name: "Signed in with Discord", value: "**" + st.signedIn + "**" + d(st.signedIn, prev && prev.signedIn) + (st.accounts != null ? "\n" + st.accounts + " accounts all time" : ""), inline: true });
   if (st.pages.length) f.push({ name: "Top pages", value: st.pages.map((x) => x[0] + " · " + x[1]).join("\n") + (st.items.length ? "\nMost viewed items: " + st.items.join(", ") : "") });
   if (st.opens && st.opens.length) f.push({ name: "Most opened on the board", value: st.opens.map((x) => x.i + " · " + x.n).join("\n") + "\nSearches " + st.finds + " · quick picks clicked " + st.picks });
   if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });
@@ -1403,8 +1420,18 @@ function trafficEmbed(st, prev, title, from, to, extra) {
   return { title, color: 0x6d3fd1, fields: f, description: "<t:" + Math.floor(from / 1000) + ":t> to <t:" + Math.floor(to / 1000) + ":t>", footer: { text: "Visitors are counted once a day each. No cookies, no IPs kept." } };
 }
 // Visitors in a total are counted once per day each (the id changes daily), so "all time" visitors are visitor-days.
+// accounts made with Discord sign-in, all time (a KV listing, kept for an hour)
+async function accountCount(env) {
+  const c = await env.ACCOUNTS.get("acctcount", "json");
+  if (c && Date.now() - c.at < 3600e3) return c.n;
+  let n = 0, cursor;
+  do { const r = await env.ACCOUNTS.list({ prefix: "acct:", cursor }); n += r.keys.length; cursor = r.list_complete ? null : r.cursor; } while (cursor);
+  await env.ACCOUNTS.put("acctcount", JSON.stringify({ n, at: Date.now() }));
+  return n;
+}
 async function trafficSend(env, from, to, title, dayStart) {
   const st = await trafficStats(env, from, to), prev = await trafficStats(env, from - 864e5, to - 864e5);
+  st.accounts = await accountCount(env).catch(() => null);
   const extra = [];
   if (dayStart != null && dayStart < from) extra.push(["Today so far", await trafficStats(env, dayStart, to)]);
   extra.push(["All time (since Oct 24)", await trafficStats(env, 0, to)]);

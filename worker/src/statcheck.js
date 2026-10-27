@@ -14,7 +14,20 @@ async function itemdb(env) {
   return DB;
 }
 
+// the board may send a mostly-empty column as gaps and values ({g, v}); spread it back out to one value per row
+export function densify(snap) {
+  if (!snap || !snap.cols) return snap;
+  Object.keys(snap.cols).forEach((k) => {
+    const c = snap.cols[k];
+    if (!c || Array.isArray(c)) return;
+    const a = new Array(snap.n).fill(0); let at = -1;
+    for (let q = 0; q < c.g.length; q++) { at += c.g[q]; a[at] = c.v[q]; }
+    snap.cols[k] = a;
+  });
+  return snap;
+}
 export function auditSnapshot(snap, db) {
+  densify(snap);
   const c = snap.cols || {}, w = snap.words || {}, n = snap.n || 0;
   const word = (k, i) => (c[k] && c[k][i] && w[k] ? w[k][c[k][i] - 1] : "");
   const missing = {}, foreign = {}, dropped = {}, byWho = {};
