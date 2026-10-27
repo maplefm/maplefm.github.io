@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.5",
- "date": "2026-10-27T09:56:21+00:00",
- "notes": "Fixes the reader error that stopped shops from being saved while you hover an item with screenshot saving on.",
- "sha256": "ebdeb3bcd55113dca1abbd5bbf5ef9a39b91b9f3c0085fa46e462f4755ed6fc9",
- "size": 104058,
+ "version": "2026.10.27.6",
+ "date": "2026-10-27T10:37:17+00:00",
+ "notes": "Much more accurate and much lighter on your PC. Prices, item names and seller names are now read straight off the game's own pixel font, and scroll tiers from their icons (Chaos included, and on sold rows). Most shops no longer need the text readers at all, which uses about 20 times less CPU.",
+ "sha256": "f85c5bff9c4349bf5c045f8581cb20af5698648746d267459259f959d4373add",
+ "size": 140766,
  "history": [
+  {
+   "version": "2026.10.27.6",
+   "date": "2026-10-27",
+   "notes": "Much more accurate and much lighter on your PC. Prices, item names and seller names are now read straight off the game's own pixel font, and scroll tiers from their icons (Chaos included, and on sold rows). Most shops no longer need the text readers at all, which uses about 20 times less CPU."
+  },
   {
    "version": "2026.10.27.5",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.21.8",
    "date": "2026-10-21",
    "notes": "Link your watcher to your Club FM account: put the code from maplefm.gg/earn in config.json as link_code."
-  },
-  {
-   "version": "2026.10.21.7",
-   "date": "2026-10-21",
-   "notes": "Signed releases: the watcher now refuses any update not signed by Club FM. Inbox posts are signed too, so nobody can post prices as you."
   }
  ],
  "pip": [],
- "sig": "ace2ad5a48a8d1b502e5e4da57cd58caec58c6875023a0255873105788dc8270a2ab948cf43a91967c5a71b7a191528e1ca03334f4492576fd3f347b40ec6f5a0a33f41a87348025bc5c9c7d9a05da4cec85bf5d8cf5e6c58d07908709d058f2cc30b716ca8339e9b8c42f78158e3303eba4a1e91950f7bc73f07006108568c4f050e5b4a86c512ab9c9f983e065c21b4301dda868cef4e748c38ee64223de625b0e12de8155f15b4210778b2dfdb9d4b548f7c9fdbd852dd0a8765d67b2129463b1ebd11870a692da17b5284e56f5537b59d88ef1c85dc798427244773af98cacc7d65c3472aefe3b126a2b3306d55f595ce7c1e9581c3992b007e049d23c16"
+ "sig": "948ae2b17ad516a92f5ccbe323129ba62fe8750223e38cd185598ee5e977749fb0c8f765d9b176236e8251e56530e8ed029a28617548ff2a8d96362cd29521c067005a11794ce11f79dd11a994fa57287a4c10496ed14c452f45ab60b09c948b41a66ed21abbb6c32a096367cbc1640caa37b8b34c6e10ddaa27000c7980b3c215d47cdb032310dd1dac9803e947e44dc90559044013d68d8b344ba9e86a65d99f541646aebc3ba389fc8a7c0adfbd48a62a378996af508eb8957324b05391587ca5f2d6da76624c0cdc85ac4985fb114c847b307244a1fb0471ca1826277b813bda357c1c35f6aa9d7fe3f45f6ef3e19802ac5ed8b445c7c38fba1ba93fe3eb"
 }
