@@ -2951,7 +2951,10 @@
   }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
-    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.rd && i.rd.length) o.rd = i.rd.slice(0, 5).map(function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== "l") c[k] = d[k]; }); return c; }); return o; });
+    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { if (rn++ < 40) rt[g] = [Math.round(i.rollTyp[g].typ), i.rollTyp[g].n]; }); if (rn) o.rt = rt; }
+      // the cheapest open listing for each roll, from the last 2 days: what the chat bot quotes for "7 att wg"
+      if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; if (ra[r.g] == null || l.u < ra[r.g]) ra[r.g] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }
+      if (i.rd && i.rd.length) o.rd = i.rd.slice(0, 5).map(function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== "l") c[k] = d[k]; }); return c; }); return o; });
     var who = (D.whoAll || []).map(function (w) { return { name: w.name, rank: w.rank, sales: w.sales, week: w.week, rows: w.rows, shopsN: w.shopsN, daysN: w.daysN, stream: w.stream, club: w.club }; });
     var big = D.sales.slice().sort(function (a, b) { return b.p - a.p; })[0];
     saveLS("fm-summary", { at: Date.now(), rows: rows, who: who, kpi: { big: big ? { i: big.i, p: big.p } : null, sales: D.sales.length, active: D.active.length }, hw: hoverWanted() });

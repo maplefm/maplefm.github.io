@@ -877,7 +877,8 @@ async function summaryRows(env) {
 
 // scrolls are shown by success rate, as on the board: Lesser 100%, Intermediate 60%, Greater 10%
 const shown = (name) => String(name || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, (m, t) => " Scroll " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%" })[t]);
-const meso = (n) => n >= 999.5e6 ? (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B" : n >= 999.5e3 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "M" : n >= 999.5 ? Math.round(n / 1e3) + "K" : String(Math.round(n));
+// exact under 10K (1,888 not 2K), then 12.5K, 790K, 1.15M, 1.2B
+const meso = (n) => n >= 999.5e6 ? (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B" : n >= 999.5e3 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "M" : n >= 99.95e3 ? Math.round(n / 1e3) + "K" : n >= 9999.5 ? (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K" : Math.round(n).toLocaleString("en-US");
 
 function findRows(rows, q, abbr) {
   q = expandQuery(q, abbr || {});
@@ -967,9 +968,21 @@ async function priceLine(env, raw) {
   const rows = await summaryRows(env), ab = await abbrMap();
   const hits = findRows(rows, q, ab);
   if (hits.length && sr.roll) {
-    const r0 = hits[0], b0 = [shown(r0.item) + ":"];
-    if (r0.typ) b0.push("clean typical " + meso(r0.typ) + ".");
-    b0.push(sr.roll + " ones are priced by roll at maplefm.gg/#item=" + encodeURIComponent(r0.item));
+    const r0 = hits[0], g = String(parseInt(sr.roll, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    // roll sales are kept per roll and slots used ("7|5"); quote the slots group with the most sales
+    let best = null;
+    for (const [k, v] of Object.entries(r0.rt || {})) if (k.split("|")[0] === g && Array.isArray(v) && (!best || v[1] > best.v[1])) best = { su: Number(k.split("|")[1]), v };
+    const ask = r0.ra && r0.ra[g];
+    if (best || ask) {
+      const b1 = [shown(r0.item) + " " + sr.roll + ":"];
+      if (best) b1.push("typical " + meso(best.v[0]) + " from " + best.v[1] + " sales" + (best.su > 0 ? " (" + best.su + " slots used)" : ""));
+      if (ask) b1.push((best ? "· " : "") + "cheapest up now " + meso(ask));
+      b1.push("· maplefm.gg/item/" + slug0);
+      return b1.join(" ").slice(0, 390);
+    }
+    const b0 = [shown(r0.item) + " " + sr.roll + ": no sales caught at that roll lately."];
+    if (r0.typ) b0.push("All rolls typical " + meso(r0.typ) + ".");
+    b0.push("Every roll's price: maplefm.gg/item/" + slug0);
     return b0.join(" ").slice(0, 390);
   }
   // a real item nobody has sold lately ("ilbi", "zakum helm"): say so, instead of answering with a different item
