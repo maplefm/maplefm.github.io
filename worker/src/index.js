@@ -28,12 +28,13 @@ const MEGA_AT = 50000;   // sales caught that earn the Mega Deals role, the same
 
 export default {
   async scheduled(ev, env, ctx) {
+    // Reddit watch runs on its own trigger so it gets its own budget of outside requests
+    if (ev.cron === REDDIT_CRON) { ctx.waitUntil(redditWatch(env).catch((e) => env.ACCOUNTS.put("reddit:err", String(e && e.stack || e).slice(0, 500)))); return; }
     // every 5 minutes: watchlist DMs; on the hourly run: the role sync too
     ctx.waitUntil(notifyWatchers(env));
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
     ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
     ctx.waitUntil(trafficPost(env).catch(() => {}));
-    ctx.waitUntil(redditWatch(env).catch(() => {}));
     ctx.waitUntil(marketSync(env, mkCtx(env)).catch(() => {}));
     ctx.waitUntil(statReport(env, { dm: (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") }).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
@@ -1124,6 +1125,7 @@ async function refStats(env, url) {
 // ---------------------------------------------------------------- Reddit watch
 // Every 5 minutes: new posts on the Classic subreddits that talk prices or the Free Market get DMed to the admins,
 // so Maya can answer while the post is fresh. Reads Reddit's public feeds only; nothing is posted or voted.
+const REDDIT_CRON = "2-59/5 * * * *";
 const REDDIT_SUBS = ["MSClassicWorld", "MapleStoryClassic"];
 const REDDIT_HIT = /\b(price[sd]?|pricing|pc|price ?check|worth|value[sd]?|how much|free ?market|fm|meso(s|\s?market)?|sell(ing|s)?|buy(ing|s)?|wts|wtb|wtt|trad(e|ing|ed)|flip(ping|ped|s)?|merch(ing)?|shop(s|ping)?|market|economy|inflation|scroll(s|ing|ed)?|nx|marketplace|auction|cheap|expensive|overpriced|underpriced|deal(s)?)\b/i;
 async function redditFeed(sub) {
