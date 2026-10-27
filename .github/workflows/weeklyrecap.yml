@@ -1,0 +1,26 @@
+name: Weekly recap files
+# Sunday about 9 PM Eastern: the Week tab of the market report saved as a PDF and a PNG (tools/weeklypdf.cjs) into
+# data/weekly/ on the live branch. At 10 PM the Worker DMs both to the admins with a Reddit title, ready to post.
+on:
+  schedule:
+    - cron: "3 1 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin main && git worktree add -q /tmp/main origin/main
+          cd /tmp/main && npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium && cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/main/node_modules node /tmp/main/tools/weeklypdf.cjs data/weekly
+          git add -f data/weekly
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Weekly recap files"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

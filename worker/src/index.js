@@ -1537,7 +1537,7 @@ async function trafficPost(env) {
   if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
   const dow = new Date(top - 4 * 3600e3).getUTCDay();   // 0 Sunday, Eastern near enough at these hours
   if (dow === 1 && et.hour === 9) await weeklyTraffic(env, top).catch((e) => env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)));
-  if (dow === 0 && et.hour === 19) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
+  if (dow === 0 && et.hour === 22) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
 }
 
 // ---------------------------------------------------------------- Monday report: the week, and search health
@@ -1581,35 +1581,36 @@ async function weeklyTraffic(env, top) {
   await wdDM(env, await wdAdmins(env), [{ title: "Club FM, the week to Monday 9 AM", color: 0x6d3fd1, fields: f, footer: { text: "Compared with the week before. Visitors counted once a day each." } }]);
 }
 
-// ---------------------------------------------------------------- Sunday: a Reddit post, drafted for approval
-// Sunday 7 PM Eastern, a DM to the admins with a ready-to-paste r/MSClassicWorld post: the week's biggest movers and
-// most traded items from the public price summary. Nothing is posted anywhere; Adam reads it and posts it himself.
+// ---------------------------------------------------------------- Sunday: the weekly recap for Reddit
+// Sunday 10 PM Eastern, a DM to the admins: the week's market report as a picture and a PDF (made at 9 PM by the
+// weeklyrecap workflow into data/weekly/ on the live branch) with a title, ready for an r/MSClassicWorld image post.
+// Nothing is posted anywhere; Adam posts it himself.
 async function redditDraft(env) {
   const day = etParts(Date.now()).day, key = "rdraft:sent:" + day;
   if (await env.ACCOUNTS.get(key)) return;
-  const s = await fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json?b=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  if (!s || !Array.isArray(s.rows)) return;
+  const RAW = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/", b = "?b=" + Date.now();
+  const rep = await fetch(RAW + "report.json" + b).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const [png, pdf] = await Promise.all(["weekly/club-fm-weekly.png", "weekly/club-fm-weekly.pdf"].map((f) => fetch(RAW + f + b).then((r) => (r.ok ? r.arrayBuffer() : null)).catch(() => null)));
+  const wk = rep && rep.ranges && rep.ranges.week;
+  if (!wk || !png) return;
   await env.ACCOUNTS.put(key, "1", { expirationTtl: 8 * DAY });
-  const rows = s.rows.filter((r) => r && r.item && r.typ && r.kind === "sale" && (r.salesN || 0) >= 8);
-  const wk = (r) => { const d = (r.daily || []).filter((x) => x && x[1] > 0); return d.length >= 5 ? d[d.length - 1][1] / d[Math.max(0, d.length - 8)][1] - 1 : null; };
-  // movers: items worth 10K or more with enough sales that the change is real, not one odd sale
-  const m = rows.filter((r) => r.typ >= 10000 && (r.salesN || 0) >= 15).map((r) => ({ r, w: wk(r) })).filter((x) => x.w != null && Math.abs(x.w) >= 0.08 && Math.abs(x.w) <= 3);
-  const up = m.filter((x) => x.w > 0).sort((a, b) => b.w - a.w).slice(0, 5), dn = m.filter((x) => x.w < 0).sort((a, b) => a.w - b.w).slice(0, 5);
-  const top = rows.slice().sort((a, b) => (b.salesN || 0) - (a.salesN || 0)).slice(0, 5);
-  const sales = rows.reduce((t, r) => t + (r.salesN || 0), 0);
-  const pct = (w) => (w > 0 ? "+" : "") + Math.round(w * 100) + "%";
-  const line = (x, i) => (i + 1) + ". **" + shown(x.r.item) + "**: " + meso(x.r.typ) + " (" + pct(x.w) + " this week)";
-  const body = [
-    "Free Market prices from sales players watched happen this week, " + sales.toLocaleString("en-US") + " sales across " + rows.length + " items.",
-    "", "**Biggest risers**", ...up.map(line),
-    "", "**Biggest drops**", ...dn.map(line),
-    "", "**Most traded**", ...top.map((r, i) => (i + 1) + ". **" + shown(r.item) + "**: " + meso(r.typ) + " typical, " + (r.salesN || 0) + " sales"),
-    "", "Every item's price history, live listings and drops: https://maplefm.gg/?ref=reddit",
-  ].join("\n");
-  const title = "This week on the MapleStory Classic FM: " + (up[0] ? shown(up[0].r.item) + " " + pct(up[0].w) : "prices") + (dn[0] ? ", " + shown(dn[0].r.item) + " " + pct(dn[0].w) : "");
-  await env.ACCOUNTS.put("rdraft:last", JSON.stringify({ day, title, body }), { expirationTtl: 30 * DAY });
-  await wdDM(env, await wdAdmins(env), [
-    { title: "Reddit post draft for r/MSClassicWorld", color: 0xff4500, description: ("Copy the title and body into a new post if it looks right. Nothing has been posted.\n\n**Title**\n```" + title + "```\n**Body**\n```" + body + "```").slice(0, 4000) }]);
+  const pct = (x) => (x > 0 ? "+" : "") + Math.round(x) + "%";
+  // the title names movers people care about: seen often and worth something, not a 200 meso shirt
+  const real = (x) => x && (x.seen || 0) >= 20 && Math.max(x.price || 0, x.was || 0) >= 10000;
+  const g = (wk.gainers || []).find(real), l = (wk.losers || []).find(real), st = wk.stats || {};
+  const chg = (x) => (x && x.chg != null ? pct(Math.abs(x.chg) <= 5 ? x.chg * 100 : x.chg) : "");
+  const title = "FM market recap for the week: " + [g && shown(g.item) + " " + chg(g), l && shown(l.item) + " " + chg(l)].filter(Boolean).join(", ");
+  const comment = "weekly recap from " + (st.sales ? st.sales.toLocaleString("en-US") + " " : "") + "real FM sales. every item and category is on maplefm.gg/report.html?ref=reddit#week";
+  const fd = new FormData();
+  fd.append("payload_json", JSON.stringify({ embeds: [{ title: "Weekly recap for r/MSClassicWorld", color: 0xff4500, description: ("Post the picture as an image post with this title, then the comment under it. Nothing has been posted.\n\n**Title**\n```" + title + "```\n**First comment**\n```" + comment + "```").slice(0, 4000) }] }));
+  fd.append("files[0]", new Blob([png], { type: "image/png" }), "club-fm-weekly-" + day + ".png");
+  if (pdf) fd.append("files[1]", new Blob([pdf], { type: "application/pdf" }), "Club FM Market Week " + day + ".pdf");
+  await env.ACCOUNTS.put("rdraft:last", JSON.stringify({ day, title, comment }), { expirationTtl: 30 * DAY });
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
+  for (const id of await wdAdmins(env)) {
+    const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, H), body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
+    if (c && c.id) await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: fd });
+  }
 }
 
 // ---------------------------------------------------------------- #deal-feed: Mega Deals, 30 minutes later
