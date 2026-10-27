@@ -206,7 +206,7 @@ def tally(kept, obs, start, end, life=None):
         if cold and consistent:                          # the cold-room bounty: a watched sale from a spot nobody else reads
             c["cold"] += 1; c["credits"] += COLD_BONUS; c["days"][day] += COLD_BONUS
         for w in wit:                                   # the people whose watcher confirmed this sale
-            wc = by[w]; wc["witnessed"] += 1; wc["credits"] += WITNESS_RATE; wc["days"][day] += WITNESS_RATE
+            wc = by[w]; wc["names"].add(w); wc["witnessed"] += 1; wc["credits"] += WITNESS_RATE; wc["days"][day] += WITNESS_RATE
         if others:
             c["verified"] += 1; c["credits"] += 1; c["days"][day] += 1; c["volume"] += price; c["sellers"][seller] += 1
             for o in others: c["witnesses"][o] += 1
@@ -230,7 +230,7 @@ def tally(kept, obs, start, end, life=None):
         if c["credits"] >= 10 and c["sellers"] and c["sellers"].most_common(1)[0][1] > 0.4 * c["credits"]: flags.append("over 40% of credits from one seller")
         if c["verified"] >= 10 and len(c["witnesses"]) == 1: flags.append("one witness for every verified sale")
         if c["credits"] >= 20 and c["ghost"] > 0.6: flags.append("%d%% of their sellers were never seen by anyone else" % round(c["ghost"] * 100))
-        names = sorted(c["names"], key=lambda n: (n.startswith("stream:"), n))
+        names = sorted(c["names"], key=lambda n: (n.startswith("stream:"), n)) or [who]
         shown = next((LINKS[TAGS[n]] for n in names if TAGS.get(n) and LINKS.get(TAGS[n])), names[0])
         if shown.startswith("stream:"): shown = shown[7:]
         tag = TAGS.get(names[0]) or names[0].lower()
@@ -289,7 +289,8 @@ def balances(all_rows, ledger, window_start, pool, life, payouts):
         hist = paid_map.get(p.lower()) or paid_map.get(str(r.get("name", "")).lower()) or paid_map.get(str(r.get("tag", "")).lower()) or []
         paid = round(sum(float(x.get("amount") or 0) for x in hist), 2)
         owed = round(max(0.0, earned - paid), 2)
-        bar = round(float(life.get(p, 0)), 1); unlocked = bar >= unlock
+        # the bar is every credit earned, all time: it keeps counting past the unlock as a lifetime record, and payouts never lower it
+        bar = round(sum(days[p].values()), 1); unlocked = bar >= unlock
         out.append({"name": r.get("name", p), "person": p, "tag": r.get("tag"), "owner": bool(r.get("owner")), "earned": earned, "paid": paid, "owed": owed,
                     "bar": bar, "unlocked": unlocked, "payable": (not r.get("owner")) and unlocked and owed >= minp,
                     "last_paid": max((x.get("date") for x in hist), default=None)})
@@ -365,6 +366,7 @@ if __name__ == "__main__":
     # what has been paid out, per person: data/payouts.json next to pay.json, {"Name": [{"date": "2026-11-02", "amount": 12.5}]}
     payouts = load(sys.argv[8] if len(sys.argv) > 8 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "payouts.json"), {})
     bal = balances(tally(kept_all, obs, 0, end_all, life), ledger, window_start, pool, life, payouts)
+    life = collections.Counter({b["person"]: b["bar"] for b in bal})   # weekly rows show the same all-time credit bar
     if ledger_path:
         ledger["updated"] = now.isoformat()
         json.dump(ledger, open(ledger_path, "w", encoding="utf-8"), separators=(",", ":"), sort_keys=True)

@@ -234,7 +234,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
         <h3>What you contribute</h3>
         <ul class="gives">
           <li><i>🛒</i><div><b>Shop scans</b><span>Open shops and scroll to the bottom. Every sold slot is a sale caught. This climbs the ranks and pays.</span></div></li>
-          <li><i>✅</i><div><b>Verified sales</b><span>Also seen by another watcher or a Twitch stream. Counts toward the pay bar at the full rate.</span></div></li>
+          <li><i>✅</i><div><b>Verified sales</b><span>Also seen by another watcher or a Twitch stream. A full credit each.</span></div></li>
           <li><i>📺</i><div><b>Streaming</b><span>Stream on Twitch with Classic in the title. Connect Twitch below and your catches earn as yours.</span></div></li>
           <li><i>🔎</i><div><b>Equip tooltips</b><span>Hover an equip's icon for a second so it's priced by stats. <a href="#stats">How</a>.</span></div></li>
           <li><i>💬</i><div><b>Trade chat</b><span>Chat posts sharpen prices. They don't earn.</span></div></li>
@@ -244,7 +244,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       <div>
         <h3>The ladder</h3>
         <ol class="ladder" id="ladder"></ol>
-        <p class="note" style="margin:8px 0 0">Ranks count every sale caught, all time. The pay bar counts verified sales only. Number one wears the Crown.</p>
+        <p class="note" style="margin:8px 0 0">Ranks count every sale caught, all time. The pay bar counts credits. Number one wears the Crown.</p>
       </div>
     </div>
   </section>
@@ -263,7 +263,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     <div class="earnleft">
     <div class="how">
       <div><b>1. Scan</b><p>Run FM Watcher while you shop.</p></div>
-      <div><b>2. Clear the bar</b><p><span id="barn">2,000</span> verified sales, all time.</p></div>
+      <div><b>2. Clear the bar</b><p><span id="barn">2,000</span> credits, all time. Only once.</p></div>
       <div><b>3. Link</b><p>Sign in with Discord, link your watcher, add PayPal.</p></div>
       <div><b>4. Get paid</b><p>Your whole balance, then it starts again from 0.</p></div>
     </div>
@@ -290,7 +290,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     </div>
     <aside class="earnrank" aria-labelledby="er-t">
       <h3 id="er-t" style="margin:0 0 4px">Earnings ranking</h3>
-      <p class="note" style="margin:0 0 10px">Owed since last payout, with progress to the pay bar.</p>
+      <p class="note" style="margin:0 0 10px">Owed since last payout. The bar counts every credit, all time.</p>
       <div class="topl" id="top"></div>
       <p class="note" id="topnote"></p>
     </aside>
@@ -298,7 +298,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
 
     <h3>To get paid you need</h3>
     <ul class="checks">
-      <li><b>A bar of <span id="barn2">2,000</span></b>, all time: a verified sale counts one, unverified a quarter. Verified means another person's watcher or a stream saw it too.</li>
+      <li><b>A bar of <span id="barn2">2,000</span> credits</b>, all time, once. Your count keeps going after that as your record.</li>
       <li><b>A linked account</b> with a PayPal email, 18 or older, linked at least 7 days.</li>
       <li><b>At least $5 owed.</b> Less stays in your balance until the next payout.</li>
       <li><b>Under the weekly cap:</b> <span id="capw">$50</span> a week per person<span id="capnote"> until Ko-fi support reaches $250 a month</span>. Past the weekly budget the rate scales down for everyone.</li>
@@ -415,7 +415,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     var placed = false;
     TIERS.forEach(function (t, i) {
       if (!placed && t[1] >= UNLOCK) {
-        var b = el("li", "bar"); b.appendChild(document.createTextNode("💵 Pay unlocks here")); b.appendChild(el("small", null, num(UNLOCK) + " verified sales caught, all time")); o.appendChild(b); placed = true;
+        var b = el("li", "bar"); b.appendChild(document.createTextNode("💵 Pay unlocks here")); b.appendChild(el("small", null, num(UNLOCK) + " credits earned, all time")); o.appendChild(b); placed = true;
       }
       if (t[0] === "Titan") {
         var m = el("li", "bar"); m.appendChild(document.createTextNode("🔔 Mega Deals unlock here")); m.appendChild(el("small", null, "the site's deal notifier and private #mega-deals channel, from " + num(t[1]) + " sales caught, or the Tiger tier and up on Ko-fi")); o.appendChild(m);
@@ -491,7 +491,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       var d = el("div", "er" + (me && nameOf(r).toLowerCase() === me ? " me" : "")); d.appendChild(el("b", "pos", "#" + (i + 1)));
       var n = el("span", "nm"); n.appendChild(el("b", null, nameOf(r)));
       var lv = r.bar != null ? r.bar : r.lifetime_verified != null ? r.lifetime_verified : r.verified, pct = Math.min(100, Math.round(100 * lv / UNLOCK));
-      var sub = r.owner ? "site owner, not paid" : r.unlocked === false ? num(Math.floor(lv)) + " of " + num(UNLOCK) + " on the bar" : "pay unlocked" + (r.paid ? " · " + usd(r.paid) + " paid out" : "");
+      var sub = r.owner ? "site owner, not paid" : r.unlocked === false ? num(Math.floor(lv)) + " of " + num(UNLOCK) + " on the bar" : num(Math.floor(lv)) + " all time · pay unlocked" + (r.paid ? " · " + usd(r.paid) + " paid out" : "");
       n.appendChild(el("small", null, sub));
       var bar = el("span", "bar"); var fill = el("i", r.unlocked === false ? "lock" : ""); fill.style.width = pct + "%"; bar.appendChild(fill); n.appendChild(bar);
       d.appendChild(n);
@@ -499,14 +499,14 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       var a = el("span", "amt"); a.appendChild(el("b", null, usd(owed))); a.appendChild(el("small", null, r.owner ? "not taken" : r.unlocked === false ? "owed, locked" : r.payable ? "owed, ready" : "owed")); d.appendChild(a);
       box.appendChild(d);
     });
-    $("topnote").textContent = rows.length ? usd(w.math.rate_per_100) + " per 100 credits, all time. Once the bar reaches " + num(UNLOCK) + ", the whole balance pays out and starts again from 0." : "No scans yet.";
+    $("topnote").textContent = rows.length ? usd(w.math.rate_per_100) + " per 100 credits. Pay unlocks once, at " + num(UNLOCK) + " credits. Each payout sends what you're owed and owed goes back to $0; your credit count keeps climbing." : "No scans yet.";
   }
   function kpi(label, val, sub) { var k = el("div", "kpi"); k.appendChild(el("small", null, label)); k.appendChild(el("b", null, val)); if (sub) k.appendChild(el("span", null, sub)); return k; }
   function show() {
     var w = C.weeks[W], m = w.math, k = $("kpis"); k.textContent = "";
     if (m.unlock_verified) { UNLOCK = m.unlock_verified; ladder(null); }
     k.appendChild(kpi("Rate", usd(m.rate_per_100) + " per 100", m.scaled ? "scaled to " + usd(m.effective_rate) + " this week to hold the budget" : "verified sales, half for unverified"));
-    k.appendChild(kpi("The bar", num(UNLOCK) + " verified", "once, all time; after that every payout sends your whole balance"));
+    k.appendChild(kpi("The bar", num(UNLOCK) + " credits", "once, all time; the count keeps going after"));
     k.appendChild(kpi("Weekly cap", m.cap_on === false ? "None" : usd(m.weekly_cap), m.cap_on === false ? "lifted: Ko-fi support covers it" : "per person, until Ko-fi support reaches " + usd(m.uncap_kofi_month || 250) + " a month"));
     k.appendChild(kpi("Weekly budget", usd(m.weekly_budget), m.scaled ? "reached: rate scaled this week" : (m.kofi_28d > 250 ? "follows Ko-fi support, " : "") + usd(m.paying) + " used so far this week"));
     k.appendChild(kpi("Week", w.start + " to " + w.end, w.current ? "in progress, Eastern time" : "closed"));
@@ -530,7 +530,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       var wi = el("td", "n", String(r.witnessed || 0)); wi.title = "Other people's sales this scanner's watcher confirmed; each earns a quarter credit"; tr.appendChild(wi);
       var cd = el("td", "n", String(r.cold || 0)); cd.title = "Watched sales caught in a room and channel nobody else had read in the past day; each earns extra credit"; tr.appendChild(cd);
       tr.appendChild(el("td", "n", String(r.hours)));
-      tr.appendChild(el("td", "n", r.lifetime_verified != null ? num(r.lifetime_verified) : "–"));
+      tr.appendChild(el("td", "n", r.bar != null ? num(Math.floor(r.bar)) : r.lifetime_verified != null ? num(r.lifetime_verified) : "–"));
       tr.appendChild(el("td", "n " + (r.unlocked === false ? "lock" : ""), status(r)));
       var f = el("td"); if (r.flags.length) r.flags.forEach(function (x) { f.appendChild(el("span", "flag", x)); }); else f.appendChild(el("span", "ok", "clean")); tr.appendChild(f);
       t.appendChild(tr);
@@ -543,7 +543,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     var r = C.rules, o = $("rules");
     ["A credit is a sale your watcher watched happen: the listing was open, then sold on a later visit, or someone else also saw it sell. A slot already grey when you walked in counts for rank, not pay" + (r.strict ? "." : " once strict mode is on."),
      "Verified: another person's watcher or a Twitch stream saw that listing within a day of the sale. Two watchers on one account never verify each other.",
-     "Your balance builds from every credit, all time, even before the bar. Nothing pays until your bar reaches " + num(UNLOCK) + " once; a verified sale adds one, an unverified sale " + (r.self_to_bar || 0) + ".",
+     "Your balance builds from every credit, all time, even before the bar. Nothing pays until your credits reach " + num(UNLOCK) + " once. After that, each payout sends what you're owed, and your credit count keeps climbing.",
      "A payout sends your whole balance, which resets to 0.",
      "Verified sales earn the full rate. Unverified sales earn " + (r.self_rate * 100) + "% while few people scan; that share rises as more people scan.",
      "Confirming someone else's sale earns you " + (r.witness_credit || 0) + " of a credit, up to two witnesses per sale.",
