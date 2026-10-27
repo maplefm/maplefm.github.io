@@ -1,0 +1,25 @@
+name: Search check
+# Monday 8 AM Eastern: every sitemap page fetched and checked (tools/seocheck.py). The result goes to data/seo.json on
+# the live branch, and the Worker's Monday 9 AM traffic DM includes it.
+on:
+  schedule:
+    - cron: "7 12 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin main && git worktree add -q /tmp/main origin/main
+          python3 /tmp/main/tools/seocheck.py data/seo.json
+          git add data/seo.json
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Search check"
+          for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

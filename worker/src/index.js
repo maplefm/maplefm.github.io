@@ -92,6 +92,8 @@ async function route(req, env, url) {
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
   if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; if (url.searchParams.get("log")) return json((await env.ACCOUNTS.get("reddit:log", "json")) || []); return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/weekly/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const n = Date.now(); await env.ACCOUNTS.delete("weekly:sent:" + etParts(n).day); await weeklyTraffic(env, n); return json({ ok: true }); }
+  if (p === "/admin/rdraft/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); await env.ACCOUNTS.delete("rdraft:sent:" + etParts(Date.now()).day); await redditDraft(env); return json(JSON.parse((await env.ACCOUNTS.get("rdraft:last")) || "{}")); }
   if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); { const n = Date.now(), e = etParts(n); return json(await trafficSend(env, n - 3600e3, n, "Traffic, last hour (test)", n - (e.hour * 60 + e.minute) * 60e3)); } }
   if (p === "/r" && req.method === "POST") return refHit(req, env, url);
   if (p === "/twitchbot/connect") return tbConnect(req, env, url);
@@ -969,7 +971,7 @@ async function interactions(req, env) {
     const hits = findRows(rows, sr.q, ab);
     if (!hits.length) return json({ type: 4, data: { content: "No listings for **" + q.slice(0, 60) + "** in the last few days. Try a shorter name, or check https://maplefm.gg", flags: 64 } });
     const r = hits[0];
-    const link = "https://maplefm.gg/#item=" + encodeURIComponent(r.item);
+    const link = "https://maplefm.gg/?ref=discord#item=" + encodeURIComponent(r.item);
     const lines = [];
     if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
     if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
@@ -1533,6 +1535,81 @@ async function trafficPost(env) {
     await trafficSend(env, top - 3600e3, top, "Traffic, " + lab(h) + " to " + lab(et.hour), midnight);
   }
   if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
+  const dow = new Date(top - 4 * 3600e3).getUTCDay();   // 0 Sunday, Eastern near enough at these hours
+  if (dow === 1 && et.hour === 9) await weeklyTraffic(env, top).catch((e) => env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)));
+  if (dow === 0 && et.hour === 19) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
+}
+
+// ---------------------------------------------------------------- Monday report: the week, and search health
+// Monday 9 AM Eastern, a DM to the admins: this week against last week by source and page type, the top pages, and the
+// weekly search check the seo workflow writes to the live branch (data/seo.json).
+async function weeklyTraffic(env, top) {
+  const key = "weekly:sent:" + etParts(top).day;
+  if (await env.ACCOUNTS.get(key)) return;
+  await env.ACCOUNTS.put(key, "1", { expirationTtl: 8 * DAY });
+  await hitsTable(env);
+  const q = (sql, ...a) => env.INBOX_DB.prepare(sql).bind(...a).all().then((r) => r.results || []);
+  const web = "p NOT LIKE '!%' AND p NOT LIKE '#%'";
+  const src = "CASE WHEN r LIKE '%google%' THEN 'Google' WHEN r LIKE '%bing%' OR r LIKE '%duckduckgo%' OR r LIKE '%brave%' OR r LIKE '%yahoo%' THEN 'Other search' WHEN r LIKE '%reddit%' THEN 'Reddit' WHEN r LIKE '%discord%' OR q = 'discord' THEN 'Discord' WHEN r LIKE '%twitch%' THEN 'Twitch' WHEN r LIKE '%youtube%' THEN 'YouTube' WHEN q != '' THEN 'Tagged links' WHEN r = '' THEN 'Direct or app' ELSE 'Other sites' END";
+  const kind = "CASE WHEN p = '/' OR p = '/index.html' THEN 'Home (board)' WHEN p LIKE '/item/%' OR p LIKE '/items/%' THEN 'Item pages' WHEN p LIKE '/map%' THEN 'Maps' WHEN p LIKE '/monster%' THEN 'Monsters' WHEN p LIKE '/quest%' THEN 'Quests' WHEN p LIKE '/training%' THEN 'Training' ELSE 'Other pages' END";
+  // visitors are counted once a day each, so a week is the sum of its days
+  const week = async (from, to) => {
+    const [t] = await q(`SELECT COUNT(*) views, COUNT(DISTINCT v || (t / 86400000)) vis FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
+    const bySrc = await q(`SELECT ${src} k, COUNT(DISTINCT v || (t / 86400000)) n FROM hits WHERE t >= ? AND t < ? AND ${web} GROUP BY k`, from, to);
+    const byKind = await q(`SELECT ${kind} k, COUNT(DISTINCT v || (t / 86400000)) n FROM hits WHERE t >= ? AND t < ? AND ${web} GROUP BY k`, from, to);
+    return { views: (t && t.views) || 0, vis: (t && t.vis) || 0, src: Object.fromEntries(bySrc.map((r) => [r.k, r.n])), kind: Object.fromEntries(byKind.map((r) => [r.k, r.n])) };
+  };
+  const now = week(top - 7 * 864e5, top), before = week(top - 14 * 864e5, top - 7 * 864e5);
+  const [a, b] = await Promise.all([now, before]);
+  const ch = (x, y) => (y ? " (" + (x >= y ? "▲ " : "▼ ") + Math.abs(Math.round((x - y) / y * 100)) + "%)" : y === 0 && x ? " (new)" : "");
+  const lines = (o, p) => Object.entries(o).sort((m, n) => n[1] - m[1]).map(([k, n]) => k + ": **" + n + "**" + ch(n, (p || {})[k] || 0)).join("\n") || "none";
+  const pages = await q(`SELECT p, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND ${web} AND p != '/' GROUP BY p ORDER BY n DESC LIMIT 8`, top - 7 * 864e5, top);
+  const [pc] = await q("SELECT COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '!%'", top - 7 * 864e5, top);
+  const f = [
+    { name: "Visitors", value: "**" + a.vis + "**" + ch(a.vis, b.vis), inline: true },
+    { name: "Page views", value: "**" + a.views + "**" + ch(a.views, b.views), inline: true },
+    { name: "!price answers", value: "**" + ((pc && pc.n) || 0) + "**", inline: true },
+    { name: "Where they came from", value: lines(a.src, b.src).slice(0, 1000), inline: true },
+    { name: "What they opened", value: lines(a.kind, b.kind).slice(0, 1000), inline: true },
+    { name: "Top pages", value: pages.map((r) => r.p + " · " + r.n).join("\n").slice(0, 1000) || "none" },
+  ];
+  const seo = await fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/seo.json?b=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (seo && seo.pages) {
+    const iss = Object.entries(seo.issues || {}).filter(([, n]) => n).map(([k, n]) => k + " " + n);
+    f.push({ name: "Search check (" + (seo.day || "") + ")", value: (seo.pages + " pages in the sitemap · median load " + seo.ms + " ms\n" + (iss.length ? "Needs a look: " + iss.join(", ") : "All pages pass: titles, descriptions, canonicals, no errors")).slice(0, 1000) });
+  }
+  await wdDM(env, await wdAdmins(env), [{ title: "Club FM, the week to Monday 9 AM", color: 0x6d3fd1, fields: f, footer: { text: "Compared with the week before. Visitors counted once a day each." } }]);
+}
+
+// ---------------------------------------------------------------- Sunday: a Reddit post, drafted for approval
+// Sunday 7 PM Eastern, a DM to the admins with a ready-to-paste r/MSClassicWorld post: the week's biggest movers and
+// most traded items from the public price summary. Nothing is posted anywhere; Adam reads it and posts it himself.
+async function redditDraft(env) {
+  const day = etParts(Date.now()).day, key = "rdraft:sent:" + day;
+  if (await env.ACCOUNTS.get(key)) return;
+  const s = await fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json?b=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!s || !Array.isArray(s.rows)) return;
+  await env.ACCOUNTS.put(key, "1", { expirationTtl: 8 * DAY });
+  const rows = s.rows.filter((r) => r && r.item && r.typ && r.kind === "sale" && (r.salesN || 0) >= 8);
+  const wk = (r) => { const d = (r.daily || []).filter((x) => x && x[1] > 0); return d.length >= 5 ? d[d.length - 1][1] / d[Math.max(0, d.length - 8)][1] - 1 : null; };
+  // movers: items worth 10K or more with enough sales that the change is real, not one odd sale
+  const m = rows.filter((r) => r.typ >= 10000 && (r.salesN || 0) >= 15).map((r) => ({ r, w: wk(r) })).filter((x) => x.w != null && Math.abs(x.w) >= 0.08 && Math.abs(x.w) <= 3);
+  const up = m.filter((x) => x.w > 0).sort((a, b) => b.w - a.w).slice(0, 5), dn = m.filter((x) => x.w < 0).sort((a, b) => a.w - b.w).slice(0, 5);
+  const top = rows.slice().sort((a, b) => (b.salesN || 0) - (a.salesN || 0)).slice(0, 5);
+  const sales = rows.reduce((t, r) => t + (r.salesN || 0), 0);
+  const pct = (w) => (w > 0 ? "+" : "") + Math.round(w * 100) + "%";
+  const line = (x, i) => (i + 1) + ". **" + shown(x.r.item) + "**: " + meso(x.r.typ) + " (" + pct(x.w) + " this week)";
+  const body = [
+    "Free Market prices from sales players watched happen this week, " + sales.toLocaleString("en-US") + " sales across " + rows.length + " items.",
+    "", "**Biggest risers**", ...up.map(line),
+    "", "**Biggest drops**", ...dn.map(line),
+    "", "**Most traded**", ...top.map((r, i) => (i + 1) + ". **" + shown(r.item) + "**: " + meso(r.typ) + " typical, " + (r.salesN || 0) + " sales"),
+    "", "Every item's price history, live listings and drops: https://maplefm.gg/?ref=reddit",
+  ].join("\n");
+  const title = "This week on the MapleStory Classic FM: " + (up[0] ? shown(up[0].r.item) + " " + pct(up[0].w) : "prices") + (dn[0] ? ", " + shown(dn[0].r.item) + " " + pct(dn[0].w) : "");
+  await env.ACCOUNTS.put("rdraft:last", JSON.stringify({ day, title, body }), { expirationTtl: 30 * DAY });
+  await wdDM(env, await wdAdmins(env), [
+    { title: "Reddit post draft for r/MSClassicWorld", color: 0xff4500, description: ("Copy the title and body into a new post if it looks right. Nothing has been posted.\n\n**Title**\n```" + title + "```\n**Body**\n```" + body + "```").slice(0, 4000) }]);
 }
 
 // ---------------------------------------------------------------- #deal-feed: Mega Deals, 30 minutes later
