@@ -93,6 +93,16 @@ h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;l
 OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
 
 
+def fit_title(*parts, cap=60):
+    """A title Google shows whole: the full form when it fits, else without the site name, else the main part with
+    'MapleStory Classic', else the main part alone. The page's own name always comes first."""
+    parts = [x for x in parts if x]
+    tries = [parts, parts[:-1], [parts[0], "MapleStory Classic"], parts[:1]]
+    for t in tries:
+        s = " · ".join(t)
+        if t and len(s) <= cap: return s
+    return parts[0]
+
 def crumbs_html(cr):
     """Prices › All items › Work Gloves: where this page sits, each step a link back"""
     if not cr: return ""
@@ -308,10 +318,10 @@ def main():
         if price_first or not fx:
             desc = (f"{nm} {price_txt} in MapleStory Classic. {r.get('salesN') or 0:,} Free Market sales seen, "
                     f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
-            title = f"{nm} price · MapleStory Classic · Club FM" if not nx else f"{nm} price · Cash Shop · MapleStory Classic · Club FM"
+            title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} price", "Cash Shop · MapleStory Classic", "Club FM")
         else:
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
-            title = f"{nm} · price, drops & quests · MapleStory Classic · Club FM" if not nx else f"{nm} · Cash Shop and FM price · MapleStory Classic · Club FM"
+            title = fit_title(f"{nm} price, drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng">{rng}</span>{chg}<small>mesos</small></p>
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
@@ -347,7 +357,7 @@ def main():
 {equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(f"{nm} · quests, drops, crafting · MapleStory Classic · Club FM", desc, f"{SITE}/item/{s}/", body, crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, f"{SITE}/item/{s}/", body, crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
         made.append((s, nm, None))
     # the index: a searchable list, every item by category, biggest markets first; plain links so search engines read it
     secs = ""
