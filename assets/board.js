@@ -3505,6 +3505,10 @@
     q.addEventListener("input", function () { clearTimeout(t); t = setTimeout(show, 90); });
     q.addEventListener("focus", function () { if (q.value.trim()) show(); });
     q.addEventListener("blur", function () { setTimeout(close, 120); });
+    // phones: the box sits under the sticky search bar, so scrolling the page with it open covered the results it had
+    // already filtered. Touching or scrolling anywhere else closes it and puts the keyboard away.
+    document.addEventListener("touchstart", function (e) { if (!box.hidden && !box.contains(e.target) && e.target !== q) { close(); q.blur(); } }, { passive: true });
+    window.addEventListener("scroll", function () { if (!box.hidden && document.activeElement !== q) close(); }, { passive: true });
     q.addEventListener("keydown", function (e) {
       if (box.hidden && e.key === "ArrowDown") { show(); return; }
       if (e.key === "ArrowDown") { e.preventDefault(); at = Math.min(hits.length - 1, at + 1); mark(); }
