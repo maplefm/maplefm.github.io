@@ -1540,6 +1540,32 @@ async function trafficPost(env) {
   if (dow === 1 && et.hour === 9) await weeklyTraffic(env, top).catch((e) => env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)));
   if (dow === 0 && et.hour === 22) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
   await kofiWeekDraft(env).catch((e) => env.ACCOUNTS.put("kofiweek:err", String(e && e.stack || e).slice(0, 500)));
+  await ghSchedule(env, et, dow).catch((e) => env.ACCOUNTS.put("ghsched:err", String(e && e.stack || e).slice(0, 500)));
+}
+
+// ---------------------------------------------------------------- on-time GitHub jobs
+// GitHub's own schedule runs hours late, so the Worker starts the jobs people see at the Eastern hour they belong
+// to (workflow_dispatch, token GH_DISPATCH: a fine-grained token with Actions write on maplefm.github.io only).
+// GitHub's crons stay as a fallback; every job skips work it already did that day.
+const GH_JOBS = [
+  { wf: "itempages.yml", hour: 6 },
+  { wf: "seo.yml", hour: 7, dow: 1 },
+  { wf: "news.yml", hour: 18, inputs: { mode: "digest" } },
+  { wf: "weekly.yml", hour: 18, dow: 0 },
+  { wf: "weeklyrecap.yml", hour: 21, dow: 0 },
+];
+async function ghSchedule(env, et, dow) {
+  if (!env.GH_DISPATCH) return;
+  for (const j of GH_JOBS) {
+    if (et.hour !== j.hour || (j.dow != null && j.dow !== dow)) continue;
+    const key = "ghsched:" + j.wf + ":" + et.day;
+    if (await env.ACCOUNTS.get(key)) continue;
+    const r = await fetch("https://api.github.com/repos/maplefm/maplefm.github.io/actions/workflows/" + j.wf + "/dispatches", {
+      method: "POST", headers: { Authorization: "Bearer " + env.GH_DISPATCH, Accept: "application/vnd.github+json", "User-Agent": "clubfm-worker", "Content-Type": "application/json" },
+      body: JSON.stringify({ ref: "main", inputs: j.inputs || {} }) });
+    await env.ACCOUNTS.put(key, String(r.status), { expirationTtl: 3 * DAY });
+    if (!r.ok) await env.ACCOUNTS.put("ghsched:err", j.wf + " " + r.status + " " + (await r.text()).slice(0, 300), { expirationTtl: 7 * DAY });
+  }
 }
 
 // ---------------------------------------------------------------- Ko-fi weekly update, for the owner to approve
