@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.9",
- "date": "2026-10-27T18:02:19+00:00",
- "notes": "stats.bat keeps every day: items scanned, items with stats read, total scans, saved in scan_history.csv",
- "sha256": "1ee0e92633325ddb4817c96eac14d4745a2400720002305365b012cf5571fe4d",
- "size": 143779,
+ "version": "2026.10.27.10",
+ "date": "2026-10-27T18:09:07+00:00",
+ "notes": "Hovering a cut-off scroll no longer swaps in a garbled popup title; names saved that way are repaired",
+ "sha256": "317638b89f166e6d9c767edb959a678f6b13759268caf78106d93ebd36739386",
+ "size": 144196,
  "history": [
+  {
+   "version": "2026.10.27.10",
+   "date": "2026-10-27",
+   "notes": "Hovering a cut-off scroll no longer swaps in a garbled popup title; names saved that way are repaired"
+  },
   {
    "version": "2026.10.27.9",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.22.4",
    "date": "2026-10-22",
    "notes": "Channel changes are caught the moment you click a channel in the Change Channel window, not only when the loading screen is spotted. Bigger read queue and more readers on bigger CPUs so fast scrolling drops fewer shops."
-  },
-  {
-   "version": "2026.10.22.3",
-   "date": "2026-10-22",
-   "notes": "Reminds you every 10 minutes to open the Change Channel window when no channel is known yet."
   }
  ],
  "pip": [],
- "sig": "5684c8a0a7f7a7feecd6256db9f5965e3f19cf9231a05801a7aaf56478d928d4aba7a822dc1ec18347c29a71d8c2b86fce5f75a2280cece4e00e7589e3dd8e4effd4e10642be27131b80a5de066c7278e7fa0f545447e801655c53343336c1a9b9d9fde888e1aa76a1eb8d99b5c4a18c001239ecddd61b18cf90b2dcbc617e8cf79952bfb88c3c732489a8a75687c4cfd343f7f5e1d95202eb5be5d87d6b79d116b4a752b9de1b3fa4d84b3cab917951679643586aee1a6059a32fd06370eaf09aeb1f37a5edc81753eefd95b0e992e9ef5ac926b521fe4654ea09109f9395cf9e9e9b4c420865778fd44f849700c18e63c3209438147a80f23734aba0732df9"
+ "sig": "765b41e1f349f3c478f9e5dd6d58fa0bfe16ce0113e060e963b96c37541572a01dd6d67710d2d94a0045bf5db6cb2e3772b74a1ee32f207ab8ab70a24dface23909543e9d6a815b5b8718e984e9fae2db2139f41b9ede847719d3c8a7be448f715f24dd652b0302ba1d5741e8ed696839d62ed5ee549ef49a94dfdec3772d9b4b59a3c4a497a886591e2f880299ebf90ed69231f20ab537b345ff6cf157b3e0a7bf806c1c263c0044043034cf3adbc69f5bd67bffcf17a217daf294a4bdb0fd4b8bca41d8049461f34b8f17a8d4cc8fc2c90afdba0a681dc04253c08bebb0e10f77376375833ad4338ba67a7ef7056228a2f1361e64c63715c76a3712ba90013"
 }

@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.9"
+VERSION = "2026.10.27.10"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -493,6 +493,27 @@ class Store:
     def _fix_names(self):
         """One-time repairs for names the reader got wrong in earlier versions."""
         done = self.d.setdefault("fixes", [])
+        if "popup-names-v1" not in done:
+            # garbled popup titles used to replace cut-off names ("One-Handed Sword Altac"): run every saved name
+            # that isn't an item through the item list, and forget the bad full names
+            shop = self.d["shop"]
+            for key in list(shop):
+                day, seller, item, price, qty = json.loads(key)
+                if fmparse.norm(item) in fmparse._ITEM_NORM or "cut off" in item: continue
+                new, ok = fmparse.clean_item(item)
+                if not ok or new == item: continue
+                nk = json.dumps([day, seller, new, price, qty]); o = shop.pop(key)
+                if nk in shop:
+                    shop[nk]["reads"] = shop[nk].get("reads", 0) + o.get("reads", 0); shop[nk]["n"] = max(shop[nk].get("n", 1), o.get("n", 1))
+                    for f in ("x", "xt", "xat", "xj", "xi"):
+                        if o.get(f) and not shop[nk].get(f): shop[nk][f] = o[f]
+                else:
+                    shop[nk] = o
+            full = self.d.setdefault("fullnames", {})
+            for k in list(full):
+                n2, ok = fmparse.clean_item(full[k])
+                if not ok or n2 != full[k]: full.pop(k)
+            done.append("popup-names-v1"); self.dirty = True
         if "lemona-v1" in done:
             return
         shop = self.d["shop"]
@@ -654,7 +675,11 @@ class Store:
             except Exception as e: log("popup picture error:", e)
             # a cut-off name: the tooltip shows the whole thing, so use it from now on
             tname = re.sub(r"\s*\(\+\d+\)\s*$", "", tip["name"]).strip()
-            if "cut off" in r["i"] and len(tname) > len(r["i"].split(" (")[0]):
+            # the popup's title is read by the text readers, so it goes through the item list like any shop name:
+            # a garbled title ("One-Handed Sword Altac") never replaces the cut-off name, only a real item does
+            tn2, tk = fmparse.clean_item(tname) if tname else (None, False)
+            tname = tn2 if tk and "cut off" not in tn2 else ""
+            if tname and "cut off" in r["i"] and len(tname) > len(r["i"].split(" (")[0]):
                 stem = fmparse.norm(r["i"].split(" (")[0])
                 if fmparse.norm(tname).startswith(stem[:max(6, len(stem) - 2)]):
                     self.d.setdefault("fullnames", {})[r["i"]] = tname
