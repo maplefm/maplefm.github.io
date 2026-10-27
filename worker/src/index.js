@@ -87,6 +87,7 @@ async function route(req, env, url) {
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
+  if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
   if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); { const n = Date.now(), e = etParts(n); return json(await trafficSend(env, n - 3600e3, n, "Traffic, last hour (test)", n - (e.hour * 60 + e.minute) * 60e3)); } }
@@ -1161,8 +1162,39 @@ async function redditFeed(sub) {
   }
   return { ok: true, posts };
 }
+// Reddit refuses requests from Cloudflare (429), so the stream reader on Maya's PC reads the feeds and pushes new
+// posts here; the matching and the DMs stay in one place.
+async function redditPush(req, env) {
+  const k = req.headers.get("X-Push-Key") || "";
+  if (!env.REDDIT_PUSH_KEY || k !== env.REDDIT_PUSH_KEY) return json({ error: "no" }, 403);
+  const body = await req.json().catch(() => null);
+  const posts = body && Array.isArray(body.posts) ? body.posts.slice(0, 60) : [];
+  const st = (await env.ACCOUNTS.get("reddit:state", "json")) || { seen: [] };
+  const seen = new Set(st.seen || []), first = !(st.seen || []).length, hits = [];
+  for (const p of posts) {
+    if (!p || !p.id || seen.has(p.id)) continue;
+    seen.add(p.id);
+    if (first || Date.now() / 1000 - (Number(p.created_utc) || 0) > 6 * 3600) continue;
+    const text = (p.title || "") + " " + (p.link_flair_text || "") + " " + String(p.selftext || "").slice(0, 3000);
+    const m = REDDIT_HIT.exec(text);
+    if (m) hits.push({ sub: String(p.sub || "MSClassicWorld"), p, why: m[0] });
+  }
+  st.seen = [...seen].slice(-600); st.at = Date.now(); st.lastOk = Date.now(); st.status = 200; st.fails = 0; st.via = "pc";
+  await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
+  if (hits.length) await wdDM(env, await wdAdmins(env), redditEmbeds(hits));
+  return json({ ok: true, new: hits.length });
+}
+function redditEmbeds(hits) {
+  return hits.slice(0, 10).map(({ sub, p, why }) => ({
+    title: String(p.title || "New post").slice(0, 250), url: "https://www.reddit.com" + String(p.permalink || "").replace(/^https:\/\/www\.reddit\.com/, ""), color: 0x6d3fd1,
+    description: String(p.selftext || "").replace(/\s+/g, " ").slice(0, 300),
+    fields: [{ name: "Where", value: "r/" + sub + (p.link_flair_text ? " · " + p.link_flair_text : ""), inline: true }, { name: "By", value: "u/" + (p.author || "?"), inline: true }, { name: "Matched", value: why, inline: true }],
+    footer: { text: "Reddit watch · reply while it's fresh" }, timestamp: new Date((Number(p.created_utc) || Date.now() / 1000) * 1000).toISOString()
+  }));
+}
 async function redditWatch(env) {
   const st = (await env.ACCOUNTS.get("reddit:state", "json")) || { seen: [], fails: 0 };
+  if (st.via === "pc" && Date.now() - (st.lastOk || 0) < 30 * 60e3) return { ok: 0, hits: 0, pc: true };   // the PC is feeding it
   const seen = new Set(st.seen || []), first = !(st.seen || []).length, hits = [];
   let ok = 0, status = 0;
   for (const sub of REDDIT_SUBS) {
@@ -1184,12 +1216,7 @@ async function redditWatch(env) {
   if (st.fails === 12) await wdDM(env, await wdAdmins(env), [{ title: "Reddit watch can't reach Reddit", description: "Reddit has refused the last hour of checks (status " + status + "). New posts won't be flagged until it answers again.", color: 0xe74c3c }]);
   await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
   if (!hits.length) return { ok, hits: 0 };
-  const embeds = hits.slice(0, 10).map(({ sub, p, why }) => ({
-    title: String(p.title || "New post").slice(0, 250), url: "https://www.reddit.com" + (p.permalink || ""), color: 0x6d3fd1,
-    description: (String(p.selftext || "").replace(/\s+/g, " ").slice(0, 300) || "") + "",
-    fields: [{ name: "Where", value: "r/" + sub + (p.link_flair_text ? " · " + p.link_flair_text : ""), inline: true }, { name: "By", value: "u/" + (p.author || "?"), inline: true }, { name: "Matched", value: why, inline: true }],
-    footer: { text: "Reddit watch · reply while it's fresh" }, timestamp: new Date((p.created_utc || Date.now() / 1000) * 1000).toISOString()
-  }));
+  const embeds = redditEmbeds(hits);
   await wdDM(env, await wdAdmins(env), embeds);
   return { ok, hits: hits.length };
 }
