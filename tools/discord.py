@@ -66,6 +66,13 @@ def post(kind, content=None, embeds=None):
     return False
 
 import re as _re
+def spot(r):
+    """Where a listing was: "FM7 ch5". A room the watcher couldn't read cleanly is left out rather than shown as junk."""
+    room = str(r.get("r") or "").strip()
+    room = room if re.fullmatch(r"FM\d{1,2}", room) else ""
+    ch = f"ch{int(r['c'])}" if str(r.get("c") or "").isdigit() else ""
+    return (room + " " + ch).strip() or "Free Market"
+
 def shown(name):
     """Scroll names as players say them: the tier word becomes the success rate (Lesser 100%, Intermediate 60%, Greater 10%)."""
     m = _re.match(r"^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$", str(name or ""))
@@ -181,7 +188,7 @@ def job_sales(data_dir, state_path):
     new.sort(key=lambda x: -x[0])
     for p, r, who in new[:MAX_SALES]:
         q = int(r.get("q") or 1)
-        where = plain(r.get("r"), 30) + (f" ch{int(r['c'])}" if str(r.get("c") or "").isdigit() else "")
+        where = spot(r)
         line = f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" sold for **{meso(p)}** meso"
         emb = {"title": "Big sale", "description": line, "color": GOLD,
                "fields": [{"name": "Seller", "value": plain(r.get("s"), 24), "inline": True},
@@ -468,7 +475,7 @@ def job_deals(data_dir, summary_path, state_path):
         seen[key] = now
         pk = f"{day}|{str(who).lower()}"; pinged[pk] = pinged.get(pk, 0) + 1
         q = int(r.get("q") or 1)
-        where = plain(r.get("r"), 30) + (f" ch{int(r['c'])}" if str(r.get("c") or "").isdigit() else "")
+        where = spot(r)
         roll = f" · **{plain(r['roll'], 40)}**, typical for this roll from {r['rolln']} sales" if r.get("roll") else ""
         line = (f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" listed at **{meso(int(r['p']))}**" + (" each" if q > 1 else "")
                 + f"\n**+{meso(int(flip))}** to flip · {int(round(off * 100))}% under typical {meso(int(it['typ']))}{roll}")
