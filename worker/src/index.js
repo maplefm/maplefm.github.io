@@ -33,6 +33,7 @@ export default {
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
     ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
     ctx.waitUntil(trafficPost(env).catch(() => {}));
+    ctx.waitUntil(redditWatch(env).catch(() => {}));
     ctx.waitUntil(marketSync(env, mkCtx(env)).catch(() => {}));
     ctx.waitUntil(statReport(env, { dm: (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") }).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
@@ -85,6 +86,7 @@ async function route(req, env, url) {
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
+  if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); { const n = Date.now(), e = etParts(n); return json(await trafficSend(env, n - 3600e3, n, "Traffic, last hour (test)", n - (e.hour * 60 + e.minute) * 60e3)); } }
   if (p === "/r" && req.method === "POST") return refHit(req, env, url);
@@ -1119,6 +1121,63 @@ async function refStats(env, url) {
   return out;
 }
 
+// ---------------------------------------------------------------- Reddit watch
+// Every 5 minutes: new posts on the Classic subreddits that talk prices or the Free Market get DMed to the admins,
+// so Maya can answer while the post is fresh. Reads Reddit's public feeds only; nothing is posted or voted.
+const REDDIT_SUBS = ["MSClassicWorld", "MapleStoryClassic"];
+const REDDIT_HIT = /\b(price[sd]?|pricing|pc|price ?check|worth|value[sd]?|how much|free ?market|fm|meso(s|\s?market)?|sell(ing|s)?|buy(ing|s)?|wts|wtb|wtt|trad(e|ing|ed)|flip(ping|ped|s)?|merch(ing)?|shop(s|ping)?|market|economy|inflation|scroll(s|ing|ed)?|nx|marketplace|auction|cheap|expensive|overpriced|underpriced|deal(s)?)\b/i;
+async function redditFeed(sub) {
+  const H = { "User-Agent": "web:gg.maplefm.redditwatch:v1 (by Club FM)", Accept: "application/json" };
+  for (const u of ["https://www.reddit.com/r/" + sub + "/new.json?limit=25&raw_json=1", "https://old.reddit.com/r/" + sub + "/new.json?limit=25&raw_json=1"]) {
+    const r = await fetch(u, { headers: H, cf: { cacheTtl: 0 } }).catch(() => null);
+    if (r && r.ok) { const j = await r.json().catch(() => null); if (j && j.data) return { ok: true, posts: j.data.children.map((c) => c.data) }; }
+    if (r && r.status === 404) return { ok: true, posts: [] };
+    var last = r ? r.status : 0;
+  }
+  // the RSS feed answers when the JSON one is refused
+  const r = await fetch("https://www.reddit.com/r/" + sub + "/new/.rss?limit=25", { headers: { "User-Agent": H["User-Agent"] } }).catch(() => null);
+  if (!r || !r.ok) return { ok: false, status: r ? r.status : last };
+  const x = await r.text(), posts = [];
+  for (const m of x.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
+    const e = m[1], g = (t) => { const k = new RegExp("<" + t + "[^>]*>([\\s\\S]*?)</" + t + ">").exec(e); return k ? k[1] : ""; };
+    const link = (/<link href="([^"]+)"/.exec(e) || [])[1] || "", id = (g("id").split("_")[1] || g("id"));
+    const un = (s) => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+    posts.push({ id, title: un(g("title")), selftext: un(g("content")).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), permalink: link.replace("https://www.reddit.com", ""), author: (g("name").replace("/u/", "")), created_utc: Date.parse(g("published") || g("updated")) / 1000, link_flair_text: "" });
+  }
+  return { ok: true, posts };
+}
+async function redditWatch(env) {
+  const st = (await env.ACCOUNTS.get("reddit:state", "json")) || { seen: [], fails: 0 };
+  const seen = new Set(st.seen || []), first = !(st.seen || []).length, hits = [];
+  let ok = 0, status = 0;
+  for (const sub of REDDIT_SUBS) {
+    const f = await redditFeed(sub);
+    if (!f.ok) { status = f.status; continue; }
+    ok++;
+    for (const p of f.posts) {
+      if (!p.id || seen.has(p.id)) continue;
+      seen.add(p.id);
+      if (first || Date.now() / 1000 - (p.created_utc || 0) > 6 * 3600) continue;   // the first run only learns what is already there
+      const text = (p.title || "") + " " + (p.link_flair_text || "") + " " + (p.selftext || "").slice(0, 3000);
+      const m = REDDIT_HIT.exec(text);
+      if (m) hits.push({ sub, p, why: m[0] });
+    }
+  }
+  st.seen = [...seen].slice(-400); st.at = Date.now(); st.lastOk = ok ? Date.now() : st.lastOk; st.status = ok ? 200 : status;
+  st.fails = ok ? 0 : (st.fails || 0) + 1;
+  // tell the admins once if Reddit keeps refusing, then stay quiet
+  if (st.fails === 12) await wdDM(env, await wdAdmins(env), [{ title: "Reddit watch can't reach Reddit", description: "Reddit has refused the last hour of checks (status " + status + "). New posts won't be flagged until it answers again.", color: 0xe74c3c }]);
+  await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
+  if (!hits.length) return { ok, hits: 0 };
+  const embeds = hits.slice(0, 10).map(({ sub, p, why }) => ({
+    title: String(p.title || "New post").slice(0, 250), url: "https://www.reddit.com" + (p.permalink || ""), color: 0x6d3fd1,
+    description: (String(p.selftext || "").replace(/\s+/g, " ").slice(0, 300) || "") + "",
+    fields: [{ name: "Where", value: "r/" + sub + (p.link_flair_text ? " · " + p.link_flair_text : ""), inline: true }, { name: "By", value: "u/" + (p.author || "?"), inline: true }, { name: "Matched", value: why, inline: true }],
+    footer: { text: "Reddit watch · reply while it's fresh" }, timestamp: new Date((p.created_utc || Date.now() / 1000) * 1000).toISOString()
+  }));
+  await wdDM(env, await wdAdmins(env), embeds);
+  return { ok, hits: hits.length };
+}
 // ---------------------------------------------------------------- traffic
 // Every page loads /assets/hit.js, which posts the page, the referring site and a ?ref= tag here. Stored in D1 with a
 // daily scrambled visitor id (hmac of the day and address); the address itself is never kept. Bots are skipped.
