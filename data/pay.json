@@ -16,5 +16,9 @@
  },
  "cold_bonus": 0.5,
  "uncap_kofi_month": 250,
- "hover_min_price": 10000
+ "hover_min_price": 10000,
+ "direct_pay": [
+  "Zik",
+  "laclac"
+ ]
 }
