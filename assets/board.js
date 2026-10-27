@@ -1324,10 +1324,10 @@
   // Share: the link to this item on the board, or a price card image for Discord and chat
   function shareBox(i) {
     var box = el("div", "share");
-    var link = el("button", "sh", "🔗"); link.type = "button"; link.title = "Copy a link to this item";
+    var link = el("button", "sh", "🔗"); link.type = "button"; link.title = "Copy a link to this item (shows its picture and price when pasted in Discord)";
     var img = el("button", "sh", "🖼️"); img.type = "button"; img.title = "Copy a price card image (or download it)";
     function flash(b, t) { var o = b.textContent; b.textContent = t; b.classList.add("done"); setTimeout(function () { b.textContent = o; b.classList.remove("done"); }, 1400); }
-    link.addEventListener("click", function (e) { e.stopPropagation(); var url = "https://maplefm.gg/#item=" + encodeURIComponent(i.item); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { flash(link, "✓"); }, function () { prompt("Copy this link", url); }); });
+    link.addEventListener("click", function (e) { e.stopPropagation(); var url = ITEMPAGES[i.item] ? "https://maplefm.gg/item/" + itemSlug(i.item) + "/" : "https://maplefm.gg/#item=" + encodeURIComponent(i.item); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { flash(link, "✓"); }, function () { prompt("Copy this link", url); }); });
     img.addEventListener("click", function (e) { e.stopPropagation(); priceCard(i).then(function (blob) {
       var ok = window.ClipboardItem && navigator.clipboard && navigator.clipboard.write;
       var p = ok ? navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]) : Promise.reject();
@@ -3295,7 +3295,7 @@
   var DIRTY = true, lastBuild = 0, PAGE = 80, keepRows = 0;
   // The table from the last visit is kept in this browser, so it shows the moment the page opens; the live
   // prices take over as soon as they arrive, and rows move to their new places.
-  var SUMK = ["item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "best", "deal", "daily", "salesN", "vol", "equip", "move", "basis", "typWho", "conf"];
+  var SUMK = ["item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "best", "deal", "daily", "salesN", "vol", "equip", "move", "basis", "typWho", "conf", "last3"];
   // Equips worth 50K+ whose open listings mostly have no hover yet: the watcher tells scanners to rest the mouse on
   // these first. Item names only, never sellers or spots.
   function hoverWanted() {

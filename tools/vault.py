@@ -26,12 +26,22 @@ MEMBER = ["watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", 
 
 
 # the public price summary: prices only. Listings, sellers, the cheapest ask and deals stay for signed-in members.
-KEEP = ("item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "daily", "salesN",
+KEEP = ("last3", "item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "daily", "salesN",
         "vol", "equip", "move", "basis", "typWho", "conf", "capped")
 
 
+def top_roll(r):
+    """The roll sold most often above clean, for item pages: [gain, typical price, sales]. Nothing else of the roll
+    prices leaves the members' summary."""
+    best = None
+    for k, v in (r.get("rt") or {}).items():
+        try: g = int(str(k).split("|")[0]); p, n = float(v[0]), int(v[1])
+        except Exception: continue
+        if g > 0 and n >= 2 and (best is None or n > best[2] or (n == best[2] and g > best[0])): best = [g, round(p), n]
+    return best
+
 def public_summary(j):
-    pub = dict(j); pub["rows"] = [{k: r[k] for k in KEEP if k in r} for r in (j.get("rows") or []) if isinstance(r, dict)]
+    pub = dict(j); pub["rows"] = [dict({k: r[k] for k in KEEP if k in r}, **({"r1": top_roll(r)} if top_roll(r) else {})) for r in (j.get("rows") or []) if isinstance(r, dict)]
     pub["public"] = True
     return pub
 

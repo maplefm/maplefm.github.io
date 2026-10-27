@@ -315,8 +315,10 @@ def main():
         price_first = bool(r.get("equip")) or "Scroll" in name
         fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
         price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
+        l3 = r.get("last3"); r1 = r.get("r1")
+        extra = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" Scrolled +{r1[0]} has sold around {meso(r1[1])}." if r1 else "")
         if price_first or not fx:
-            desc = (f"{nm} {price_txt} in MapleStory Classic. {r.get('salesN') or 0:,} Free Market sales seen, "
+            desc = (f"{nm} {price_txt} in MapleStory Classic.{extra} {r.get('salesN') or 0:,} Free Market sales seen, "
                     f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
             title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} price", "Cash Shop · MapleStory Classic", "Club FM")
         else:
