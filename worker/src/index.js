@@ -957,7 +957,11 @@ async function chatPrice(req, env, url) {
 // "5 att wg", "work gloves +3 att": the roll comes off before the name is matched, and the answer points at the
 // board's price-by-attack table for that item
 function splitRoll(q) {
-  const m = /(^|\s)\+?(\d{1,2})\s*(att|watk|atk|matt|matk)\b/i.exec(q) || /(^|\s)(att|watk|atk|matt|matk)\s*\+(\d{1,2})\b/i.exec(q);
+  // "10 att", "10 attack", "+3 watk", "7 matt", "10 magic attack", "att 10"
+  const ST = "(magic\\s*attack|m\\.?\\s?att(?:ack)?|matk|w\\.?\\s?att(?:ack)?|watk|attack|attk|atk|att)";
+  if (/scroll|%/i.test(q)) return { q, roll: "" };   // "gloves attack scroll 60" is a scroll, not a roll
+  // "att +7" needs the plus: "gloves attack 60" means the 60% scroll
+  const m = new RegExp("(^|\\s)\\+?(\\d{1,2})\\s*" + ST + "\\b", "i").exec(q) || new RegExp("(^|\\s)" + ST + "\\s*\\+(\\d{1,2})\\b", "i").exec(q);
   if (!m) return { q, roll: "" };
   const stat = isNaN(m[2]) ? m[2] : m[3], v = isNaN(m[2]) ? m[3] : m[2], rest = q.replace(m[0], " ").replace(/\s+/g, " ").trim();
   return rest ? { q: rest, roll: v + " " + (/^m/i.test(stat) ? "MATT" : "ATT") } : { q, roll: "" };
