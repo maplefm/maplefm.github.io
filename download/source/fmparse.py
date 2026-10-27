@@ -802,6 +802,7 @@ def read_tooltip(img, need_stats=True):
     left out, then reads it at two contrast levels and merges: a line one level misses or misreads, the other
     usually gets. On saved tooltips this took exact reads from 42 of 65 to 61 of 65, and it runs faster."""
     box = _tip_panel(img) if TIP_CFG["crop"] else None
+    full = img
     if box: img = img.crop(box)
     # both contrast passes at once: the text reader is a separate program, so two run side by side in about the time of one
     if len(TIP_PASSES) > 1:
@@ -824,6 +825,17 @@ def read_tooltip(img, need_stats=True):
         stats[k] = max(c.items(), key=lambda x: (x[1], -abs(x[0] - b) if b is not None else 0))[0]
         if b is not None and abs(stats[k] - b) <= 10: stats[k + "_b"] = b
     if need_stats and not any(not k.endswith("_b") for k in stats): return None
+    # the upgrades line is the bottom one, and the popup is see-through: over a pink or yellow megaphone it fades.
+    # When an equip read has no upgrades line, read the bottom of the panel once more by whiteness (white text stays,
+    # coloured ground drops out).
+    if "SLOTS" not in stats and any(k in stats for k in ("ATT", "MATT", "WDEF", "MDEF", "STR", "DEX", "INT", "LUK", "HP", "ACC")):
+        try:
+            # the panel's lower edge is found by its border, which a bright megaphone underneath can hide: look a
+            # little further down in the uncropped picture too
+            sl = _tip_slots_white(img)
+            if sl is None and box: sl = _tip_slots_white(full.crop((box[0], box[1] + (box[3] - box[1]) // 2, box[2], min(full.height, box[3] + 70))), top=0)
+            if sl is not None: stats["SLOTS"] = sl
+        except Exception: pass
     out = dict(base); out["stats"] = stats
     if not out.get("name"):
         out["name"] = next((r["name"] for r in reads if r.get("name")), "")
@@ -834,6 +846,30 @@ def read_tooltip(img, need_stats=True):
         nm = _tip_name_bright(img)
         if nm: out["name"] = nm
     return out
+
+def _tip_slots_white(img, top=0.45):
+    import numpy as np
+    a = np.asarray(img.convert("RGB")).astype(int)
+    h = a.shape[0]; a = a[int(h * top):]
+    mn, mx = a.min(axis=2), a.max(axis=2)
+    w = mn - 2 * (mx - mn)                                   # white stays high; any colour sinks
+    g = np.where(w >= 205, 0, np.where(w <= 150, 255, (205 - w) * 255 // 55)).astype("uint8")
+    im = Image.fromarray(g).resize((g.shape[1] * 4, g.shape[0] * 4), Image.BICUBIC)
+    lines = ocr_lines(im, 4, 6)
+    for l in lines:
+        t = l["text"]
+        mm = re.search(r"(?:remaining|enh\w*|[a-z]?nhan\w*|hanc\w*|r?ema[il]n\w*|upgrad\w*)\s*[.:;,]*\s*[+#*]?\s*(\d{1,2})\s*\W{0,2}$", t, re.I)
+        if mm and int(mm.group(1)) <= 20 and not re.search(r"damage|rate|crit", t, re.I):
+            return int(mm.group(1))
+    # the labels are pale blue and can drop out with the background; the values stay white. Every stat value carries
+    # a plus sign ("+19"); the upgrades count is the one bare number, on the last line under them.
+    plus = [l for l in lines if re.search(r"\+\s*\d", l["text"])]
+    bare = [l for l in lines if re.fullmatch(r"\W{0,2}(\d{1,2})\W{0,2}", l["text"].strip()) and "+" not in l["text"] and "%" not in l["text"]]
+    if len(plus) >= 2 and bare:
+        last = max(bare, key=lambda l: l["y"])
+        if last["y"] > max(l["y"] for l in plus) and int(re.sub(r"\D", "", last["text"])) <= 20:
+            return int(re.sub(r"\D", "", last["text"]))
+    return None
 
 def _tip_name_bright(img):
     """The item name from the top rows of the tooltip, read by brightness so white and orange names both show."""
@@ -892,6 +928,15 @@ def _read_tip_once(img, need_stats=True, lo=140, hi=215):
                 break
         if re.search(r"\btype\s*[:;.]", t, re.I):
             statx.append(l["x"] + (re.search(r"type", t, re.I).start() / max(1, len(t))) * l["w"]); staty.append(l["y"])
+    if stats and "SLOTS" not in stats:
+        # the upgrades line reads worst of all ("Seman Enhancements: 5", "Poermaininn Enhanremente 10"): any line with
+        # a bent "enhancements" or "remaining" word that ends in a small number is it. Upgrades left decide an equip's
+        # price, so it's worth the second look.
+        for l in found_stats:
+            t = l["text"].replace("：", ":")
+            mm = re.search(r"(?:enh\w*|[a-z]?nhan\w*|hanc\w*|r?ema[il]n\w*|upgrad\w*)\s*[.:;,]*\s*[+#*]?\s*(\d{1,2})\s*\W{0,2}$", t, re.I)
+            if mm and int(mm.group(1)) <= 20 and not re.search(r"damage|rate|crit", t, re.I):
+                stats["SLOTS"] = int(mm.group(1)); break
     if not stats:
         if need_stats:
             return None

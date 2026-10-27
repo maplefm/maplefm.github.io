@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.3",
- "date": "2026-10-27T04:58:46+00:00",
- "notes": "Shop rooms always read as a Free Market room: a minimap title read in another font keeps its room number.",
- "sha256": "cc7de232cc39b5cef51f73db957a83b06a52ea38b021de3930d7240ddfdb914a",
- "size": 102423,
+ "version": "2026.10.27.4",
+ "date": "2026-10-27T09:27:29+00:00",
+ "notes": "Reads the upgrades-left line far more often, even over a bright chat background. Expensive equips (500K and up) send a picture of their popup so the site can show it.",
+ "sha256": "d217e1fe6db9c1e9f92250958780843bab668c2706545b32fdc2feb109d14de4",
+ "size": 104001,
  "history": [
+  {
+   "version": "2026.10.27.4",
+   "date": "2026-10-27",
+   "notes": "Reads the upgrades-left line far more often, even over a bright chat background. Expensive equips (500K and up) send a picture of their popup so the site can show it."
+  },
   {
    "version": "2026.10.27.3",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.21.6",
    "date": "2026-10-21",
    "notes": "The site moved to maplefm.gg."
-  },
-  {
-   "version": "2026.10.21.5",
-   "date": "2026-10-21",
-   "notes": "Updates itself while running. No more reopening start.bat."
   }
  ],
  "pip": [],
- "sig": "63213af52a32658f9b0e31488da1f7ce8608567b8f1f7c7f711fa5989e11ecf297fa6ff31aa5200799ee778c42c99847d7c9f90a9548c8a47285a557ad39919aaf6b93e354cb3503f9e151aa58ed0df20862d47c989549d0a6e20695e72d979ee8aa95f7bf99ab571377b5f170a631133aaa2b2aec32c82f7853d0c9d99119bc2ad1e8f7b9beb3255c6909bc5e10a65d6a439de6a5b3a5cd2141b12a1aa7ccac998f06bf051af53b0cbbadd7a39a41bc7d0835227ebe2b9fee89db1fd664aa97b543028917773ebb207dfbbe8360c0f9c2bfefbf28b0a96fb60b9e87eb02b014264e08407965ac4964aa2e05680a26499948471d41582bb9ab0687b966d32c21"
+ "sig": "bb17dbf99d0a408fdb4da62c30e01129d42c46e6815fb0b0fd6bc178ffc11721e473cae3c801f93e8400294fe5d5749c26be39ee08e79c29367672e35658e023af659c2a95d36fbce5be593c976502838675de077c31775f47702cafddb8cdc60d4382a92f7765a138decf1f58d2ac6ff1dece4271441fb218d9341d43cfc45ae28ea616ee7802233568d01c193a392927a46ec9217fe51155d6566ccd047d73d36551dc00b44e0c9ec4046330aee61dfad92c8496503b7cd28b214f6d45f95129862f2782d98d1c28c9ef0f71f2b8af4f3771542fa6c8e8cd061062bf869db705c59068882f9bbc36046d7ec776e47ab6afff9ff83daaa075883fdc9aac5e8b"
 }
