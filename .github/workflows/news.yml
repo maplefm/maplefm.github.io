@@ -16,6 +16,9 @@ on:
       image:
         description: "Post a note to #site-updates: picture path in the repository (optional)"
         required: false
+      mode:
+        description: "digest = the daily post with pictures (the Worker starts it at 6 PM Eastern)"
+        required: false
 permissions:
   contents: write
 concurrency: news
@@ -31,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Browser for the page pictures (daily digest only)
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' || github.event.inputs.mode == 'digest'
         run: pip install -q playwright pillow && python3 -m playwright install --with-deps chromium >/dev/null
       - env:
           NOTE_TITLE: ${{ github.event.inputs.title }}
@@ -45,7 +48,7 @@ jobs:
           mkdir -p /tmp/arch/data
           [ -f /tmp/arch/data/discord_news.json ] && cp /tmp/arch/data/discord_news.json /tmp/news.json || echo '{}' > /tmp/news.json
           if [ -n "$NOTE_TEXT" ]; then python3 tools/discord.py note "$NOTE_TITLE" "$NOTE_TEXT"
-          elif [ "${{ github.event_name }}" = "schedule" ]; then python3 tools/discord.py news /tmp/news.json; mkdir -p /tmp/arch/data/shots; SHOTS_DIR=/tmp/arch/data/shots python3 tools/discord.py digest /tmp/news.json
+          elif [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.mode }}" = "digest" ]; then python3 tools/discord.py news /tmp/news.json; mkdir -p /tmp/arch/data/shots; SHOTS_DIR=/tmp/arch/data/shots python3 tools/discord.py digest /tmp/news.json
           else python3 tools/discord.py news /tmp/news.json; fi
           cp /tmp/news.json /tmp/arch/data/discord_news.json
           cd /tmp/arch && git add data/discord_news.json && git add -A data/shots 2>/dev/null || true
