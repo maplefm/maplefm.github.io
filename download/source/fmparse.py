@@ -14,6 +14,34 @@ def norm(s):
 
 _ITEM_NORM = {norm(n): n for n in ITEMS}
 
+# Items the game added since this release: the watcher fetches the site's full item list once a day
+# (data/itemdb.json on the live branch) and keeps the names in items_extra.json, so a new item is known
+# the day the site knows it, without waiting for a watcher update.
+EXTRA_FILE = os.path.join(HERE, "items_extra.json")
+def _add_names(names):
+    added = 0
+    for n in names:
+        n = str(n).strip()
+        if not n or len(n) > 60: continue
+        k = norm(n)
+        if k and k not in _ITEM_NORM:
+            _ITEM_NORM[k] = n; ITEMS.append(n); added += 1
+    return added
+try:
+    _add_names(json.load(open(EXTRA_FILE, encoding="utf-8")).get("items") or [])
+except (OSError, ValueError, AttributeError):
+    pass
+
+def refresh_items(names):
+    """Save the site's item names and start matching them now. Returns how many were new to this watcher."""
+    names = sorted({str(n).strip() for n in names if str(n).strip()})
+    if len(names) < 1000: return 0          # a broken download, not the item list (about 3,000 shop-tradeable names)
+    try: json.dump({"at": int(time.time()), "items": names}, open(EXTRA_FILE, "w", encoding="utf-8"), ensure_ascii=False)
+    except OSError: pass
+    n = _add_names(names)
+    _BASE_NORM.update({norm(x): x for x in names})
+    return n
+
 # ---------------------------------------------------------------- names
 
 # Every tiered scroll in MapleStory Classic World (from the maplestory.io MCW item list).

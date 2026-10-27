@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.7"
+VERSION = "2026.10.27.8"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -176,6 +176,7 @@ NUDGED = {}
 def hover_wanted():
     if time.time() - HW["at"] > 1200:
         HW["at"] = time.time()
+        refresh_itemdb()
         try:
             req = urllib.request.Request(HW_URL + "?t=" + str(int(time.time())), headers={"User-Agent": "fm-watcher/" + VERSION})
             with urllib.request.urlopen(req, timeout=20) as r:
@@ -189,6 +190,27 @@ def hover_wanted():
         except Exception:
             pass
     return HW["items"]
+ITEMDB_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json"
+def refresh_itemdb():
+    """Once a day: the site's full item list, so items the game added since this release are known right away."""
+    try:
+        if time.time() - os.path.getmtime(fmparse.EXTRA_FILE) < 86400: return
+    except OSError:
+        pass
+    def go():
+        try:
+            req = urllib.request.Request(ITEMDB_URL + "?t=" + str(int(time.time()) // 3600), headers={"User-Agent": "fm-watcher/" + VERSION})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                j = json.loads(r.read().decode("utf-8"))
+            kinds = j.get("kinds") or []
+            skip = {"Equip:Hair", "Equip:Face", "Equip:Head", "Cash:Facial Expression"}   # styles, never sold in shops
+            n = fmparse.refresh_items([row[0] for row in (j.get("items") or []) if isinstance(row, list) and len(row) > 5
+                                       and (kinds[row[5]] if isinstance(row[5], int) and row[5] < len(kinds) else "") not in skip
+                                       and "\ufffd" not in str(row[0])])
+            if n: log(f"{n} new items from the site's item list")
+        except Exception:
+            pass
+    threading.Thread(target=go, daemon=True).start()
 def short_meso(v):
     return f"{v / 1e6:.1f}M" if v >= 1e6 else f"{v // 1000}K" if v >= 1000 else str(v)
 def nudge():
