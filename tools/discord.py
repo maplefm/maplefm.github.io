@@ -639,8 +639,15 @@ def job_weekly(report_path, ranks_path, state_path):
     if post("digest" if hooks().get("digest") else "site", embeds=[emb]):
         st["weekly"] = wk; save(state_path, st)
 
-def job_note(title, text):
-    post("site", embeds=[{"title": title or "Club FM", "description": text.replace("\\n", "\n")[:3900], "color": PURPLE, "url": SITE}])
+def job_note(title, text, image=""):
+    """A hand-written note to #site-updates, with an optional picture from the repository (NOTE_IMAGE)."""
+    emb = {"title": title or "Club FM", "description": text.replace("\\n", "\n")[:3900], "color": PURPLE, "url": SITE}
+    image = image or os.environ.get("NOTE_IMAGE", "")
+    if image and os.path.isfile(image):
+        fn = os.path.basename(image)
+        emb["image"] = {"url": "attachment://" + fn}
+        return post_files("site", [(fn, open(image, "rb").read())], [emb])
+    post("site", embeds=[emb])
 
 # ---------------------------------------------------------------- members' weekly market recap
 def job_members(summary_path, feed_path, state_path):

@@ -13,6 +13,9 @@ on:
       text:
         description: "Post a note to #site-updates: body (use \\n for new lines)"
         required: false
+      image:
+        description: "Post a note to #site-updates: picture path in the repository (optional)"
+        required: false
 permissions:
   contents: write
 concurrency: news
@@ -33,6 +36,7 @@ jobs:
       - env:
           NOTE_TITLE: ${{ github.event.inputs.title }}
           NOTE_TEXT: ${{ github.event.inputs.text }}
+          NOTE_IMAGE: ${{ github.event.inputs.image }}
         run: |
           git config --global user.name maplefm
           git config --global user.email maplefm@users.noreply.github.com
