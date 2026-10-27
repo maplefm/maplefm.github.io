@@ -406,7 +406,7 @@ def build(world, guide, summary, notes, out):
     if notes and notes.get("economy"): b += "<h2>Potions and money</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["economy"]) + "</ul>"
     if notes and notes.get("party"): b += "<h2>Party play</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["party"]) + "</ul>"
     b += '<p style="margin-top:16px"><a href="/map.html#train">Your level, your class: get a personal list</a></p>'
-    write(out, "training", page("MapleStory Classic training guide · where to train at every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps, monsters, EXP per HP and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
+    write(out, "training", page("MapleStory Classic training guide · every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps, monsters, EXP per HP and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
 
     regions = {}
     for p, m in M.items(): regions.setdefault(m.get("region") or "Other", []).append(p)
@@ -416,7 +416,7 @@ def build(world, guide, summary, notes, out):
     for r in sorted(regions, key=lambda r: -len(regions[r])):
         b += f"<h2>{E(r)} <small>{len(regions[r])}</small></h2><ul class=\"toc\">" + "".join(
             f'<li>{mlink(p)}{" <small>· Lv " + str(M[p]["lv"][0]) + "+</small>" if M[p].get("lv") and M[p]["lv"][0] else ""}</li>' for p in sorted(regions[r])) + "</ul>"
-    write(out, "maps", page("All MapleStory Classic maps · minimaps, hidden portals and monsters · Club FM", f"Every MapleStory Classic map: in-game minimaps, {hidc} hidden portals, monsters, NPCs and exits.", "/maps/", [("Maps", "/maps/")], b)); paths.append("/maps/")
+    write(out, "maps", page("MapleStory Classic maps, hidden portals page("All MapleStory Classic maps · minimaps, hidden portals and monsters · Club FM" monsters", f"Every MapleStory Classic map: in-game minimaps, {hidc} hidden portals, monsters, NPCs and exits.", "/maps/", [("Maps", "/maps/")], b)); paths.append("/maps/")
 
     mons = sorted([n for n in MOB if f"/monster/{BSLUG[n]}/" in paths], key=lambda n: (MOB[n]["lv"], n))
     b = f"<h1>MapleStory Classic monsters</h1><p class=\"sub\">{len(mons)} monsters with stats, drops and where to find them · updated {built}</p><div class=\"mobs\">" + "".join(mobcard(n) for n in mons) + "</div>"
