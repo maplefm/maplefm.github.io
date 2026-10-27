@@ -2,6 +2,7 @@
 import re, json, os, time, difflib
 from PIL import Image, ImageChops, ImageOps
 from ocrlib import min_channel, ocr_lines
+import glyphs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 _d = json.load(open(os.path.join(HERE, "items.json"), encoding="utf-8"))
@@ -43,6 +44,8 @@ def scroll_name(raw):
             return None  # too cut off to tell even the item type
         return None
     base = re.sub(r"\s+", " ", m.group(1)).strip()
+    if norm(base) == "scroll":
+        return None   # "Scroll Crafting Catalyst" and the like: the word Scroll alone is not a scroll's name
     base = re.sub(r"scroll$", "Scroll", base, flags=re.I)
     if base.lower() != "return scroll":
         base = snap_scroll_base(base)
@@ -60,6 +63,19 @@ def scroll_name(raw):
     tier = re.sub(r"[^A-Za-z]", "", m.group(2))[:2].lower()
     t = {"le": "Lesser", "in": "Intermediate", "ln": "Intermediate", "gr": "Greater", "su": "Superior"}.get(tier)
     return f"{base}: {t}" if t else f"{base} (tier cut off)"
+
+def scroll_prefix(core):
+    """A scroll name cut off before the word Scroll, with a letter or two misread ("Qne-Handed Axe Attack S",
+    "Gloves Magic Attack Scrc"): the one scroll kind whose name starts that way. The row's icon then gives the tier."""
+    words = re.sub(r"[\s._…]+$", "", core).split()
+    for k in (len(words), len(words) - 1):
+        if k < 2: break
+        v = norm(" ".join(words[:k]))
+        if len(v) < 12: break
+        sc = sorted(((difflib.SequenceMatcher(None, v, nb[:len(v)]).ratio(), b) for nb, b in _SB_NORM.items()), reverse=True)
+        if sc[0][0] >= 0.88 and sc[0][0] - sc[1][0] >= 0.06:
+            return sc[0][1]
+    return None
 
 def _words_agree(a, b):
     """A misread changes a letter or two. A different word (Blue vs Black) is a different item,
@@ -123,6 +139,7 @@ def clean_item(raw):
     raw = re.sub(r"\s+", " ", raw)
     raw = raw.replace("VV", "W").replace("vv", "w")
     raw = raw.replace("Â", "")
+    raw = re.sub(r"^[dl]r\.\s*", "Jr. ", raw)   # "Jr." read as "dr."
     raw = re.sub(r"(^|[\s-])(?:[VY¥][VvWwYy¥]+|v[VvWw]+|W[WwVv]+|¥)(?=[a-z])", r"\1W", raw)   # W read as VW, Vv, YV or a yen sign
     raw = re.sub(r"^\d{1,4}\s+(?=[A-Za-z])", "", raw)   # a stock number from the icon read as part of the name
     cut = bool(re.search(r"(\.\s*\.+|…|_)\s*$", raw))
@@ -148,6 +165,9 @@ def clean_item(raw):
         sb = [v for k, v in _SB_NORM.items() if k.startswith(n)]
         if len(sb) == 1:
             return sb[0] + " (tier cut off)", True
+    sp = scroll_prefix(core)
+    if sp:
+        return sp + " (tier cut off)", True
     lm = learned_match(core)
     if lm:
         return lm, True
@@ -174,8 +194,29 @@ def _num(s):
 def _stretch(tile):
     """Normalise one row so its text is black on white. Returns (image, has_text, greyed)."""
     m = min_channel(tile)
+    # A popup or the pointer laid over the right of the row: its columns are mostly dark, while a column of text is
+    # mostly background. Blank those columns, or their dark pixels set the ink level and pale (sold) text washes out.
+    import numpy as np
+    a = np.asarray(m, dtype=np.uint8)
+    bg0 = int(np.percentile(a, 80))
+    colmed = np.median(a, axis=0)
+    cover = colmed < bg0 - 60
+    if cover.any() and not cover.all():
+        idx = np.where(cover)[0]
+        # from the first covered column on the right half, everything to its right is the overlay
+        start = idx[idx > a.shape[1] * 0.45]
+        if len(start):
+            a = a.copy(); a[:, max(0, int(start[0]) - 2):] = bg0
+            m = Image.fromarray(a)
+    # the row borders: a line across the tile, never text
+    rowmed = np.median(a, axis=1)
+    if (rowmed < bg0 - 60).any():
+        a = a.copy(); a[rowmed < bg0 - 60, :] = bg0; m = Image.fromarray(a)
     px = sorted(m.getdata())
-    fg, bg = px[int(len(px) * 0.01)], px[int(len(px) * 0.80)]
+    # the ink level from the left of the row, where the name and price always start: the pointer resting on the
+    # row's right side is darker than pale (sold) text and would wash it out
+    lp = np.sort(a[:, : max(1, int(a.shape[1] * 0.55))], axis=None)
+    fg, bg = int(lp[int(len(lp) * 0.01)]), px[int(len(px) * 0.80)]
     if bg - fg < 35:
         return None, False, False
     greyed = fg > 118
@@ -245,17 +286,84 @@ def _bucket(lines, spans):
 
 _RPRICE = re.compile(r"(\d[\d,.]*)\s*m[ea]?[s5][o0][s5]?", re.I)
 
+def _fold(s):
+    return norm(s.replace("I", "l"))
+_ITEM_FOLD = None
+
+def glyph_item(text):
+    """An item name read off the pixels (capital I comes back as l) to the item list: (name, True) or (None, False)."""
+    global _ITEM_FOLD
+    if not text:
+        return None, False
+    if _ITEM_FOLD is None or len(_ITEM_FOLD) < len(_ITEM_NORM):
+        _ITEM_FOLD = {}
+        for v in _ITEM_NORM.values():
+            _ITEM_FOLD.setdefault(_fold(v), set()).add(v)
+    cut = text.rstrip().endswith("..")
+    core = re.sub(r"[\s.]+$", "", text)
+    if not cut:
+        hit = _ITEM_FOLD.get(_fold(core))
+        if hit and len(hit) == 1:
+            return next(iter(hit)), True
+    if "Scroll" in core or cut:
+        nm, known = clean_item(text)
+        if known:
+            return nm, True
+    if cut:
+        f = _fold(core)
+        if len(f) >= 8:
+            starts = {v for k, vs in _ITEM_FOLD.items() if k.startswith(f) for v in vs}
+            if len(starts) == 1:
+                return next(iter(starts)), True
+    return None, False
+
+def _shop_rows(region):
+    S = SHOP; ys = []
+    for i in range(S["rows"]):
+        y = int(round(S["row0"] + S["pitch"] * i))
+        _, has, grey = _stretch(region.crop((S["x0"], y, S["x1"], y + 38)))
+        if has: ys.append((y, grey))
+    return ys
+
+def read_shop_fast(region):
+    """The whole shop read straight off the pixels: every price, name and the seller in the game's own font, scroll
+    tiers from their icons. Returns None when anything on it isn't certain, and the text readers take over."""
+    S = SHOP
+    seller = glyphs.read_seller(region.crop(S["seller"]))
+    if not seller or len(seller) < 2:
+        return None
+    rows = []
+    for y, grey in _shop_rows(region):
+        tile = region.crop((S["x0"], y, S["x1"], y + 38))
+        gp = glyphs.read_price(tile)
+        if not gp: return None
+        name, known = glyph_item(glyphs.read_name(tile))
+        if not known: return None
+        rows.append({"i": name, "p": gp[1], "q": gp[0], "so": bool(grey), "known": True, "y": y})
+    if not rows:
+        return None
+    return resolve_tiers(region, {"title": "", "seller": seller, "rows": rows, "dropped": 0, "fast": True})
+
 def read_shop_checked(region):
-    """Read the shop with two independent engines. Keep a row only when both agree on the price."""
+    """Read the shop. Straight off the pixels when every row is certain; otherwise with two independent text readers,
+    keeping a row only when its price is certain (exact pixel read, or both readers agree)."""
+    fast = read_shop_fast(region)
+    if fast:
+        return fast
     sh = _sheet(region)
     if not sh:
         return None
     sheet, spans, meta = sh
+    S = SHOP
     W, H = sheet.size
     tl = _bucket(ocr_lines(sheet.resize((W * 4, H * 4), Image.BICUBIC), scale=4), spans)
     rl = _bucket(rapid_lines(sheet.resize((W * 3, H * 3), Image.BICUBIC), 3), spans)
     title = " ".join(l["text"] for l in tl[0]).strip() or " ".join(l["text"] for l in rl[0]).strip()
     seller = re.sub(r"[^A-Za-z0-9]", "", "".join(l["text"] for l in rl[1])) or re.sub(r"[^A-Za-z0-9]", "", "".join(l["text"] for l in tl[1]))
+    gs = glyphs.read_seller(region.crop(S["seller"]))
+    if gs and len(gs) >= 2:
+        # exact, except capital I and small l look the same: take the text reader's I/l where it agrees otherwise
+        seller = seller if _fold(seller) == _fold(gs) else gs
     out = {"title": title, "seller": seller, "rows": [], "dropped": 0}
     for i in range(2, len(spans)):
         tt = [l["text"] for l in tl[i]]; rt = [l["text"] for l in rl[i]]
@@ -268,21 +376,30 @@ def read_shop_checked(region):
         rm = None
         for m in _RPRICE.finditer(rjoin):
             rm = m
-        if not tm or not rm:
-            out["dropped"] += 1; continue
-        qty, price, rprice = _num(tm.group(1)), _num(tm.group(2)), _num(rm.group(1))
-        if not qty or price is None or price != rprice:
-            out["dropped"] += 1; continue
-        # The bundle size must agree too: one engine reading "1 for" as "4 for" turns 133,333 into 33,333 each.
-        rq = None
-        for m in _PRICE.finditer(rjoin):
-            if _num(m.group(2)) == price: rq = _num(m.group(1))
-        if rq is None:
-            if qty != 1:
+        # The price line drawn in the game's pixel font, read letter by letter against the learned letter shapes:
+        # exact or nothing. When it reads, it decides the price and bundle size; the text readers only give the name.
+        gp = glyphs.read_price(region.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38)))
+        if gp:
+            qty, price = gp
+            if not tm:
+                tname = " ".join(tt[:-1]) if len(tt) > 1 else ""
+        else:
+            if not tm or not rm:
                 out["dropped"] += 1; continue
-        elif rq != qty:
-            out["dropped"] += 1; continue
-        name, known = clean_item(tname)
+            qty, price, rprice = _num(tm.group(1)), _num(tm.group(2)), _num(rm.group(1))
+            if not qty or price is None or price != rprice:
+                out["dropped"] += 1; continue
+            # The bundle size must agree too: one engine reading "1 for" as "4 for" turns 133,333 into 33,333 each.
+            rq = None
+            for m in _PRICE.finditer(rjoin):
+                if _num(m.group(2)) == price: rq = _num(m.group(1))
+            if rq is None:
+                if qty != 1:
+                    out["dropped"] += 1; continue
+            elif rq != qty:
+                out["dropped"] += 1; continue
+        gname, gk = glyph_item(glyphs.read_name(region.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38))))
+        name, known = (gname, True) if gk else clean_item(tname)
         if not known:
             rname = re.split(r"\d+\s*[ft1l]?[o0]?r?\s*\d", rjoin)[0]
             n2, k2 = clean_item(rname)
@@ -650,10 +767,20 @@ def tier_from_colour(base, c):
 def resolve_tiers(region, res):
     """Fill in cut-off scroll tiers from the row icon; remember colours of rows whose tier was read."""
     for row in res.get("rows") or []:
-        if "y" not in row or "Scroll" not in row["i"] or row.get("so"):
+        if "y" not in row or "Scroll" not in row["i"]:
             continue
-        m = re.match(r"^(.*Scroll)(?:: (Lesser|Intermediate|Greater|Superior)| \(tier cut off\))$", row["i"])
+        m = re.match(r"^(.*Scroll)(?:: (Lesser|Intermediate|Greater|Superior|Chaos)| \(tier cut off\))$", row["i"])
         if not m:
+            continue
+        # the icon is exact for every tiered scroll, sold rows included, and wins over a misread tier word
+        if norm(m.group(1)) in _SB_NORM:
+            try: t = tier_from_icon(region, row["y"])
+            except Exception: t = None
+            if t:
+                if t != m.group(2): row["tier_from"] = "icon"
+                row["i"] = _SB_NORM[norm(m.group(1))] + ": " + t
+                continue
+        if row.get("so"):
             continue
         try:
             c = icon_colour(crop_icon(region, row["y"]))
@@ -1056,4 +1183,47 @@ def read_channel_dialog(img):
             cell = blue[y0:y1, x0:x1]
             if cell.mean() > 0.35:
                 return bi * len(runs) + ci + 1
+    return None
+
+
+# ---------------------------------------------------------------- scroll tier from the icon
+# Every tiered scroll uses one of four icons: blue (Lesser), red (Intermediate), gold (Greater), grey (Chaos), the
+# same for all 52 kinds. The icon at the left of the row settles the tier exactly, even when the name is cut off
+# ("Scroll: C...") or the row is faded because it sold (a faded icon is the same picture mixed with the background).
+TIER_NAMES = ["Lesser", "Intermediate", "Greater", "Chaos"]
+_TIER_ICONS = None
+
+def _tier_icons():
+    global _TIER_ICONS
+    if _TIER_ICONS is None:
+        import numpy as np
+        s = np.asarray(Image.open(os.path.join(HERE, "tiers.png")).convert("RGBA"), dtype=float)
+        _TIER_ICONS = [(s[:, k * 30:(k + 1) * 30, :3], s[:, k * 30:(k + 1) * 30, 3] > 200) for k in range(4)]
+    return _TIER_ICONS
+
+def tier_from_icon(region, y):
+    """'Lesser' / 'Intermediate' / 'Greater' / 'Chaos' from a shop row's icon, or None when it isn't a clear match."""
+    import numpy as np
+    crop = np.asarray(region.crop((2, y - 2, 48, y + 42)).convert("RGB"), dtype=float)
+    best = []
+    for k, (ic, op) in enumerate(_tier_icons()):
+        h, w = op.shape; top = None
+        bgc = np.percentile(crop.reshape(-1, 3), 90, axis=0); t = ic[op]; d = t - bgc
+        # the icon sits about 9 px in from the crop's corner; a pixel or two of play either way
+        for dy in range(5, 12):
+            for dx in range(6, 13):
+                c = crop[dy:dy + h, dx:dx + w][op]
+                # faded rows: the icon mixed with a light background. Fit how faded it is, then measure what's left over.
+                e = c - bgc
+                f = float((d * e).sum() / max(1e-6, (d * d).sum()))
+                if f < 0.15: continue
+                # the worst tenth of pixels is left out: the stock number drawn over the icon's corner
+                r = np.sort(((e - f * d) ** 2).sum(axis=1))
+                err = float(r[: int(len(r) * 0.9)].mean())
+                if top is None or err < top: top = err
+        best.append((top if top is not None else 1e9, k))
+    best.sort()
+    (e0, k0), (e1, _) = best[0], best[1]
+    if e1 > 2.5 * e0 + 20:
+        return TIER_NAMES[k0]
     return None
