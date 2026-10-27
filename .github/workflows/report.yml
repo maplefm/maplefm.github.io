@@ -32,7 +32,8 @@ jobs:
           if ! git diff --cached --quiet; then git commit -q -m "Market close report"; for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done; fi
           cd "$GITHUB_WORKSPACE"
           cp /tmp/arch/data/report.json data/report.json
-          git add data/report.json
+          MAIN_DIR=/tmp/main python3 /tmp/main/tools/discord.py potd data/summary-public.json data/discord_potd.json || true
+          git add data/report.json data/discord_potd.json 2>/dev/null || git add data/report.json
           git diff --cached --quiet && exit 0
           git commit -q -m "Market close report"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

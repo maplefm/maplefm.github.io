@@ -13,6 +13,7 @@ With the secret missing every job exits quietly, so the data workflows never fai
   python3 tools/discord.py news    STATE.json [RANGE]       collect site changes, post watcher releases at once (to "site")
   python3 tools/discord.py digest  STATE.json               post the collected changes as one plain daily note
   python3 tools/discord.py note    TITLE TEXT               a hand-written note (to "site")
+  python3 tools/discord.py potd    SUMMARY.json STATE.json  price of the day (to "market_close"), once a day
 
 STATE.json is kept on the live branch so nothing is posted twice.
 """
@@ -676,9 +677,45 @@ def job_covmap(data_dir, state_path):
         st["covmap_at"] = int(now); save(state_path, st)
 
 
+# ---------------------------------------------------------------- price of the day
+def job_potd(summary_path, state_path):
+    """One item a day in the market close channel: a well-traded equip or scroll with a real price story, linked to
+    its page. No item twice in three weeks."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from itempages import slug, shown as pshown
+    st = load(state_path, {})
+    day = datetime.datetime.now(ET).strftime("%Y-%m-%d")
+    if st.get("day") == day:
+        return
+    rows = [r for r in (load(summary_path, {}).get("rows") or []) if isinstance(r, dict) and r.get("kind") == "sale"
+            and (r.get("salesN") or 0) >= 15 and (r.get("typ") or 0) >= 20000 and r.get("item")]
+    recent = {x for x in st.get("seen", [])[-21:]}
+    def week(r):
+        d = [x for x in (r.get("daily") or []) if x and x[1]]
+        return d[-1][1] / d[max(0, len(d) - 8)][1] - 1 if len(d) >= 5 else 0
+    pool = [r for r in rows if r["item"] not in recent]
+    if not pool:
+        return
+    # the most traded item that moved the most this week leads; ties go to more sales
+    pool.sort(key=lambda r: -((r.get("salesN") or 0) ** 0.5 * (1 + min(abs(week(r)), 1.5))))
+    r = pool[0]; w = week(r); nm = pshown(r["item"])
+    rng = f'{meso(r["lo"])} to {meso(r["hi"])}' if r.get("hi") and r.get("lo") and meso(r["lo"]) != meso(r["hi"]) else meso(r["typ"])
+    fields = [{"name": "Typical", "value": f'{meso(r["typ"])} meso', "inline": True},
+              {"name": "Most sales", "value": rng, "inline": True},
+              {"name": "This week", "value": pct(w) if abs(w) >= 0.01 else "steady", "inline": True},
+              {"name": "Sales seen", "value": f'{r.get("salesN") or 0:,}', "inline": True}]
+    url = f'{SITE}/item/{slug(r["item"])}/?ref=potd'
+    emb = {"title": f"Price of the day · {nm}", "url": url, "color": GOLD, "fields": fields,
+           "description": f"[Price history, live listings and drops]({url})",
+           **({"thumbnail": {"url": icon_url(r["item"])}} if icon_url(r["item"]) else {}), "footer": {"text": "From sales players watched happen · maplefm.gg"}}
+    if post("market_close", embeds=[emb]):
+        st["day"] = day; st["seen"] = (st.get("seen", []) + [r["item"]])[-60:]
+        save(state_path, st)
+
+
 if __name__ == "__main__":
     job, a = sys.argv[1], sys.argv[2:]
     if not hooks():
         print("DISCORD_HOOKS not set, skipping"); sys.exit(0)
     if job == "digest": job_news(a[0], None, True)
-    else: {"sales": job_sales, "deals": job_deals, "ranks": job_ranks, "report": job_report, "coverage": job_coverage, "news": job_news, "note": job_note, "weekly": job_weekly, "members": job_members, "covmap": job_covmap}[job](*a)
+    else: {"sales": job_sales, "deals": job_deals, "ranks": job_ranks, "report": job_report, "coverage": job_coverage, "news": job_news, "note": job_note, "weekly": job_weekly, "members": job_members, "covmap": job_covmap, "potd": job_potd}[job](*a)
