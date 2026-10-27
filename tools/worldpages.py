@@ -10,6 +10,7 @@ training/. Returns (from build()) the list of page paths for the sitemap. Plain 
 import html, json, math, os, re, sys, datetime, shutil, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from nav import nav_html as NAV, foot_html as FOOT
+import itempages
 
 SITE = "https://maplefm.gg"
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/"
@@ -264,7 +265,7 @@ def build(world, guide, summary, notes, out):
         b += f'<p style="margin-top:16px"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p><p class="note">Updated {built}.</p>'
         b += BOARD_CTA
         crumbs = [("Maps", "/maps/"), (p, f"/map/{MSLUG[p]}/")]
-        write(out, f"map/{MSLUG[p]}", page(f"{p} · MapleStory Classic map, portals and monsters · Club FM", desc, f"/map/{MSLUG[p]}/", crumbs, b, f"{OG}map/{MSLUG[p]}.png")); paths.append(f"/map/{MSLUG[p]}/")
+        write(out, f"map/{MSLUG[p]}", page(itempages.fit_title(f"{p} map, portals & monsters", "MapleStory Classic", "Club FM"), desc, f"/map/{MSLUG[p]}/", crumbs, b, f"{OG}map/{MSLUG[p]}.png")); paths.append(f"/map/{MSLUG[p]}/")
 
     # ---------------------------------------------------------- monster pages
     for n, mb in MOB.items():
@@ -296,13 +297,23 @@ def build(world, guide, summary, notes, out):
         b += f'<p class="note">Updated {built}.</p>'
         b += BOARD_CTA
         crumbs = [("Monsters", "/monsters/"), (n, f"/monster/{BSLUG[n]}/")]
-        write(out, f"monster/{BSLUG[n]}", page(f"{n} · MapleStory Classic drops, stats and location · Club FM", desc, f"/monster/{BSLUG[n]}/", crumbs, b, f"{OG}monster/{BSLUG[n]}.png" if mb.get("id") else None)); paths.append(f"/monster/{BSLUG[n]}/")
+        write(out, f"monster/{BSLUG[n]}", page(itempages.fit_title(f"{n} drops, stats & location", "MapleStory Classic", "Club FM"), desc, f"/monster/{BSLUG[n]}/", crumbs, b, f"{OG}monster/{BSLUG[n]}.png" if mb.get("id") else None)); paths.append(f"/monster/{BSLUG[n]}/")
 
     # ---------------------------------------------------------- quest pages
     def jobs_text(js):
         fam = sorted({JOBNAME.get(j // 100, "") for j in js if j // 100 in JOBNAME} - {""})
         if not js or len(fam) >= 5 or len(js) > 40: return "Every class"
         return ", ".join(fam)
+    # quests that share a name (one per town, one per job) get who gives it, then the level, so every title is its own
+    qn = {}
+    for q in QS: qn.setdefault(q["n"], []).append(q)
+    def qtitle(q):
+        same = qn.get(q["n"], [])
+        if len(same) < 2: return q["n"]
+        t = f'{q["n"]} ({q["g"]})'
+        if sum(1 for x in same if x["g"] == q["g"]) > 1: t = f'{q["n"]} ({q["g"]}, Lv {q["lv"]})'
+        if sum(1 for x in same if x["g"] == q["g"] and x["lv"] == q["lv"]) > 1: t = f'{q["n"]} ({q["g"]}, #{q["id"]})'
+        return t
     for q in QS:
         s = QSLUG[q["id"]]
         where_g = npc_at.get(q["g"], [])
@@ -339,7 +350,7 @@ def build(world, guide, summary, notes, out):
         b += f'<p style="margin-top:16px"><a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a></p><p class="note">Updated {built}.</p>'
         b += BOARD_CTA
         crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
-        write(out, f"quest/{s}", page(f"{q['n']} · MapleStory Classic quest guide · Club FM", desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
+        write(out, f"quest/{s}", page(itempages.fit_title(qtitle(q), "MapleStory Classic quest guide", "Club FM"), desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
 
     # ---------------------------------------------------------- training guides
     brackets = (notes or {}).get("brackets") or []
@@ -370,7 +381,7 @@ def build(world, guide, summary, notes, out):
         b += '<p style="margin-top:16px"><a href="/map.html#train">Enter your level and class</a> for a personal list and route.</p>'
         crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
         desc = f"Best MapleStory Classic training spots from level {lo} to {hi}: " + ", ".join(list(picks)[:3]) + ", with monsters, EXP per HP and potion cost for each class."
-        write(out, f"training/{s}", page(f"Where to train level {lo} to {hi} · MapleStory Classic training guide · Club FM", desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
+        write(out, f"training/{s}", page(itempages.fit_title(f"Where to train level {lo} to {hi}", "MapleStory Classic", "Club FM"), desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
         tr_links.append((lo, hi, s, list(picks)[:3]))
     for cls in CLASSES:
         b = f"<h1>{cls} training guide for MapleStory Classic</h1><p class=\"sub\">Where a {cls.lower()} should train at every level · updated {built}</p>"
@@ -383,7 +394,7 @@ def build(world, guide, summary, notes, out):
                 b += pick_html(sc, p, st, dmg, hit, cost, cls, L, picks[p]["why"] if p in picks else "")
             b += f'<p class="note"><a href="/training/level-{lo}-{hi}/">All of level {lo} to {hi}</a></p>'
         crumbs = [("Training guide", "/training/"), (cls, f"/training/{cls.lower()}/")]
-        write(out, f"training/{cls.lower()}", page(f"{cls} training guide · where to train at every level · MapleStory Classic · Club FM",
+        write(out, f"training/{cls.lower()}", page(itempages.fit_title(f"{cls} training guide, every level", "MapleStory Classic", "Club FM"),
                                                     f"Where a {cls} should train in MapleStory Classic from level 1 to 100: the best maps at each level with monsters, EXP per HP and potion cost.", f"/training/{cls.lower()}/", crumbs, b))
         paths.append(f"/training/{cls.lower()}/")
 
