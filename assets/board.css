@@ -232,7 +232,7 @@ button, input, select { font: inherit; color: inherit; }
 .gt-req { display: grid; gap: 0; font-size: .68rem; letter-spacing: .02em; color: #e8ebf7; }
 .gt-req span { display: inline-block; min-width: 54px; color: #b9c0d8; }
 .gt-jobs { font-size: .68rem; color: #ffe27a; margin-bottom: 4px; }
-.gt-l { white-space: nowrap; }
+.gt-l { white-space: nowrap; } .gt-l.gt-dim { white-space: normal; }
 .gt-up { color: #7ee2a8; font-weight: 800; } .gt-dn { color: #ff9a8a; font-weight: 800; }
 .gt-dim { color: #9aa3c0; font-weight: 600; }
 .gt-foot { margin-top: 7px; padding-top: 6px; border-top: 1px dashed rgba(255, 255, 255, .28); display: grid; gap: 1px; font-size: .7rem; color: #dfe4f5; }
