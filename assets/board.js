@@ -55,7 +55,8 @@
   function fixRoom(r) { if (!r) return r; var c = frCache[r]; if (c === undefined) c = frCache[r] = fixRoom0(r); return c; }
   function fixRoom0(r) {
     if (!r || /^FM(\d{1,2}| Entrance)?$/.test(r) || r === "chat") return r;
-    if (!/(fr)?e\s*e?\s*mark|m[ae]rk[ae]t|mar?k[ae]t/i.test(r)) return r;
+    // shops only open in Free Market rooms: a title read as something else ("Khe 2 tated") keeps its room number
+    if (!/(fr)?e\s*e?\s*mark|m[ae]rk[ae]t|mar?k[ae]t/i.test(r)) { var lone = String(r).match(/(^|\D)(\d{1,2})(?!\d)/g) || []; return lone.length === 1 && +lone[0].replace(/\D/g, "") >= 1 && +lone[0].replace(/\D/g, "") <= 40 ? "FM" + (+lone[0].replace(/\D/g, "")) : "FM"; }
     if (/entr/i.test(r)) return "FM Entrance";
     var m = /<\s*(\d{1,2})/.exec(r) || /(\d{1,2})\D{0,3}$/.exec(r);
     return m && +m[1] >= 1 && +m[1] <= 30 ? "FM" + (+m[1]) : "FM";
