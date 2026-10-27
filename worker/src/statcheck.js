@@ -30,7 +30,7 @@ export function auditSnapshot(snap, db) {
   densify(snap);
   const c = snap.cols || {}, w = snap.words || {}, n = snap.n || 0;
   const word = (k, i) => (c[k] && c[k][i] && w[k] ? w[k][c[k][i] - 1] : "");
-  const missing = {}, foreign = {}, dropped = {}, byWho = {};
+  const missing = {}, foreign = {}, dropped = {}, byWho = {}, slotsOff = {};
   let withStats = 0;
   for (let i = 0; i < n; i++) {
     const item = word("i", i); if (!item) continue;
@@ -47,6 +47,7 @@ export function auditSnapshot(snap, db) {
         const key = item + "|" + k + "|" + b; missing[key] = (missing[key] || 0) + 1;
       });
     }
+    if (bad && typeof bad === "object" && bad._why === "slots") { slotsOff[item] = (slotsOff[item] || 0) + 1; continue; }
     if (bad && typeof bad === "object") {
       if (x == null || x === 0) { foreign[item] = (foreign[item] || 0) + 1; if (who) byWho[who] = (byWho[who] || 0) + 1; }
       else STATS.forEach((k) => { if (bad[k] && !(x && x[k])) { const key = item + "|" + k + " " + bad[k]; dropped[key] = (dropped[key] || 0) + 1; } });
@@ -59,6 +60,7 @@ export function auditSnapshot(snap, db) {
     foreign: top(foreign, 15).map(([item, v]) => ({ item, reads: v })),
     dropped: top(dropped, 15).map(([k, v]) => ({ what: k.replace("|", ": "), reads: v })),
     scanners: top(byWho, 5).map(([who, v]) => ({ who, foreign: v })),
+    slotsOff: top(slotsOff, 15).map(([item, v]) => ({ item, reads: v })),
   };
 }
 
@@ -82,6 +84,8 @@ export async function statReport(env, opts) {
   const lines = [];
   if (fresh.length) lines.push("**Base stats our item list is missing** (kept on the board because several reads agree):\n" + fresh.slice(0, 12).map((m) => "1. " + m.item + ": " + m.stat + " " + m.base + " (" + m.reads + " reads)").join("\n"));
   if (foreignN >= 5) lines.push("**Hovers thrown out as another item's popup:** " + foreignN + " (" + rep.foreign.slice(0, 5).map((f) => f.item + " " + f.reads).join(", ") + ")" + (rep.scanners.length ? "\nMost from: " + rep.scanners.map((s) => s.who + " " + s.foreign).join(", ") : ""));
+  const slotsN = rep.slotsOff.reduce((a, f) => a + f.reads, 0);
+  if (slotsN >= 3) lines.push("**Upgrades-left reads that can't be right, set aside:** " + slotsN + " (" + rep.slotsOff.slice(0, 6).map((f) => f.item + " " + f.reads).join(", ") + ")");
   if (!lines.length) return Object.assign({ dm: false }, rep);
   fresh.forEach((m) => seen.add(m.item + "|" + m.stat));
   await env.ACCOUNTS.put("stataudit:seen", JSON.stringify([...seen].slice(-2000)));
