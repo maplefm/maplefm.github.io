@@ -34,6 +34,7 @@ export default {
     ctx.waitUntil(notifyWatchers(env));
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
     ctx.waitUntil(dealFeedPublic(env).catch(() => {}));
+    ctx.waitUntil(kofiRoleWatch(env).catch(() => {}));
     ctx.waitUntil(trafficPost(env).catch(() => {}));
     ctx.waitUntil(marketSync(env, mkCtx(env)).catch(() => {}));
     ctx.waitUntil(statReport(env, { dm: (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") }).catch(() => {}));
@@ -1998,6 +1999,40 @@ function kofiTier(d) {
   const n = String(d.tier_name || "").replace(/\s*tier$/i, "").trim().toLowerCase();
   return KOFI_PERKS.findIndex(t => t[0].toLowerCase() === n);
 }
+// Ko-fi's own bot hands out the tier role when a supporter connects Discord, which can be well after they paid (the
+// webhook then had no Discord id to thank). Every 5 minutes: anyone holding a Ko-fi tier role who hasn't been thanked
+// for that tier gets the thank-you DM and Mega Deals for Tiger and up. The first run only records who already holds one.
+async function kofiRoleWatch(env) {
+  if (!env.DISCORD_BOT_TOKEN) return;
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
+  const roles = await (await fetch(DISCORD + "/guilds/" + GUILD + "/roles", { headers: H })).json().catch(() => null);
+  if (!Array.isArray(roles)) return;
+  const tierOf = {}; for (const r of roles) { const i = KOFI_PERKS.findIndex(t => t[0].toLowerCase() === r.name.toLowerCase()); if (i >= 0) tierOf[r.id] = i; }
+  const megaId = (roles.find(r => r.name.toLowerCase() === "mega deals") || {}).id;
+  const seeded = await env.ACCOUNTS.get("kofi-rolewatch:seeded");
+  let after = "0", sent = 0;
+  for (let page = 0; page < 10; page++) {
+    const ms = await (await fetch(DISCORD + "/guilds/" + GUILD + "/members?limit=1000&after=" + after, { headers: H })).json().catch(() => null);
+    if (!Array.isArray(ms) || !ms.length) break;
+    for (const m of ms) {
+      if (!m.user || m.user.bot) continue;
+      const ti = Math.max(-1, ...(m.roles || []).map(r => (r in tierOf ? tierOf[r] : -1)));
+      if (ti < 0) continue;
+      const key = "kofi-welcomed:" + m.user.id + ":" + KOFI_PERKS[ti][0];
+      if (await env.ACCOUNTS.get(key)) continue;
+      await env.ACCOUNTS.put(key, "1", { expirationTtl: 400 * DAY });
+      if (!seeded || sent >= 5) continue;
+      const mega = ti >= 2;
+      if (mega && megaId && !(m.roles || []).includes(megaId)) await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + m.user.id + "/roles/" + megaId, { method: "PUT", headers: H });
+      await kofiThanks(env, m.user.id, ti, mega);
+      await wdDM(env, await wdAdmins(env), [{ title: "💛 Ko-fi supporter connected Discord", color: 0xf6c94a, description: "<@" + m.user.id + "> now holds the " + KOFI_PERKS[ti][0] + " role. The Club FM bot sent them the thank-you and perks" + (mega ? " and Mega Deals." : ".") }]);
+      sent++;
+    }
+    after = ms[ms.length - 1].user.id;
+    if (ms.length < 1000) break;
+  }
+  if (!seeded) await env.ACCOUNTS.put("kofi-rolewatch:seeded", String(now()));
+}
 // The owner hears about every payment right away: who, how much, which tier, and whether the supporter can be reached.
 async function kofiAlert(env, d, amount, id) {
   if (!env.DISCORD_BOT_TOKEN) return;
@@ -2026,6 +2061,11 @@ async function kofiWelcome(env, d, id, total) {
   const mega = sub ? ti >= 2 : total >= KOFI_MEGA;
   const give = sub ? [KOFI_PERKS[ti][0]] : []; if (mega) give.push("Mega Deals");
   for (const n of give) { const r = rid(n); if (r) await fetch(DISCORD + "/guilds/" + GUILD + "/members/" + id + "/roles/" + r, { method: "PUT", headers: H }); }
+  await kofiThanks(env, id, sub ? ti : -1, mega);
+}
+// The thank-you DM: the tier's whole perk list, with the Mega Deals congrats when it comes with it. ti -1 is a tip.
+async function kofiThanks(env, id, ti, mega) {
+  const sub = ti >= 0;
   let desc;
   if (sub) {
     const t = KOFI_PERKS[ti], perks = [];
