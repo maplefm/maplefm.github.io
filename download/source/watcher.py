@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.4"
+VERSION = "2026.10.27.5"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -1266,7 +1266,9 @@ def review_save(cfg, kind, img, reading):
         except OSError: pass
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")[:-3]
     img.save(os.path.join(d, f"{stamp}-{kind}.png"))
-    json.dump(reading, open(os.path.join(d, f"{stamp}-{kind}.json"), "w", encoding="utf-8"), indent=1)
+    # pictures riding along with a reading (the hovered popup) are saved as the .png, not in the .json
+    with open(os.path.join(d, f"{stamp}-{kind}.json"), "w", encoding="utf-8") as fh:
+        json.dump(reading, fh, indent=1, default=lambda o: None)
 
 def worker(cfg, jobs, store):
     worker.room_hash = getattr(worker, "room_hash", None); worker.room_text = getattr(worker, "room_text", "")
