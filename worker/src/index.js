@@ -1176,8 +1176,10 @@ async function redditPush(req, env) {
     seen.add(p.id);
     if (first || Date.now() / 1000 - (Number(p.created_utc) || 0) > 6 * 3600) continue;
     const text = (p.title || "") + " " + (p.link_flair_text || "") + " " + String(p.selftext || "").slice(0, 3000);
+    const sub = String(p.sub || "MSClassicWorld");
+    if (/^maplestory$/i.test(sub) && !/\b(classic|mscw|classic ?world)\b/i.test(text)) continue;   // the main sub is mostly the modern game
     const m = REDDIT_HIT.exec(text);
-    if (m) hits.push({ sub: String(p.sub || "MSClassicWorld"), p, why: m[0] });
+    if (m) hits.push({ sub, p, why: m[0] });
   }
   st.seen = [...seen].slice(-600); st.at = Date.now(); st.lastOk = Date.now(); st.status = 200; st.fails = 0; st.via = "pc";
   await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
