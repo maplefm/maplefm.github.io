@@ -379,10 +379,17 @@
     n = n.replace(/\s+(?:to|t0|TO|T0)\s+S\w{0,3}\s*$/, "");                               // "Garnet TO SELL" from chat
     n = n.replace(/\bBott\w*?ear\b/g, "Bottomwear").replace(/\b([A-Z])\1(?=[a-z]{2})/g, "$1");
     // letters the screen reader swaps in known names: Retum, Eartings, Paletie, Alfac, Cal's Eye
-    n = n.replace(/\bRetum\b/g, "Return").replace(/\bEartings?\b/g, "Earrings").replace(/\bPaletie\b/g, "Palette").replace(/\bAlfac/g, "Attac").replace(/\bA(?:lt|tl|l1|1t|tt|lf)ac(?=k|\b)/g, "Attac").replace(/\bCal's Eye\b/g, "Cat's Eye").replace(/\bAtlack\b/g, "Attack").replace(/\bAltack\b/g, "Attack");
+    n = n.replace(/\bRetum\b/g, "Return").replace(/\bEartings?\b/g, "Earrings").replace(/\bPalet[il1t]e\b/g, "Palette").replace(/\bAlfac/g, "Attac").replace(/\bA(?:lt|tl|l1|1t|tt|lf)ac(?=k|\b)/g, "Attac").replace(/\bCal's Eye\b/g, "Cat's Eye").replace(/\bAtlack\b/g, "Attack").replace(/\bAltack\b/g, "Attack");
     n = n.replace(/\s+/g, " ").trim();
+    // a scroll cut off before "Scroll", with the cut word misread: "One-Handed Sword Altac", "Overall Armor LUK Ser",
+    // "Two-handed Blunt" (Weapon Attack Scroll). The tier was cut too.
+    if (/\s(?:Attac\w*|Atal|Atta?|Altac)$/.test(n) && tieredBase(n.replace(/\s\S+$/, "") + " Attack Scroll")) { n = n.replace(/\s\S+$/, " Attack Scroll"); tl = true; }
+    else if (/\b(?:STR|DEX|INT|LUK|DEF|HP|MP|Accuracy|Speed|Jump|Evasion|Avoidability)\s(?:S|Se|Ser|Sc|Scr)$/.test(n) && tieredBase(n.replace(/\s\S+$/, "") + " Scroll")) { n = n.replace(/\s\S+$/, " Scroll"); tl = true; }
+    else if (/^(?:One|Two)-handed Blunt$/i.test(n)) { n = n.replace(/Blunt$/i, "Blunt Weapon Attack Scroll"); tl = true; }
+    // a tier word on a scroll that has none ("SP Reset Scroll: Greater")
+    if (/ Scroll: (?:Lesser|Intermediate|Greater|Chaos|Superior)$/.test(n) && !tieredBase(n.replace(/: \w+$/, ""))) { n = n.replace(/: \w+$/, ""); tl = false; var notier = true; }
     if (/\sScr\w*(\s+\S{1,3})?$/.test(n) && !/Scroll:/.test(n)) { n = n.replace(/\sScr\w*(\s+\S{1,3})?$/, " Scroll"); tl = true; }
-    if (/ Scroll$/.test(n) && !/^Return Scroll/i.test(n) && tieredBase(n)) tl = true;   // SP Reset Scroll has no tiers; its tier is never "cut off"
+    if (/ Scroll$/.test(n) && !/^Return Scroll/i.test(n) && tieredBase(n) && !notier) tl = true;   // SP Reset Scroll has no tiers; its tier is never "cut off"
     n = n.replace(/\s+[^\w\s'&.:()-]+$/, "").trim();
     n = n.replace(/[.,;]+$/, "").trim();                 // "Mystery Palette Exchange." is the same name
     return { s: n, cut: cut, tl: tl };
@@ -448,7 +455,7 @@
   // hour, so a name's place can still change as more spellings of it come in.
   var CNC = { cl: {}, out: {}, db: -1, at: 0 }, NAMES_IN = null;
   // bump when cleanName or the name resolver changes, so a published names.json from older rules is not reused
-  var CLEANV = 3;
+  var CLEANV = 4;
   window.fmClean = function () { return { cl: CNC.cl, out: CNC.out, v: CLEANV }; };
   window.fmQA = { statsFit: function (n, x) { return statsFit(n, x); }, statsFix: function (n, x) { return statsFix(n, x); }, canonAll: function (r) { return canonAll(r); }, pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
   // the server runs this same page and publishes the tidied spelling of every raw name it saw; seeded here, the
