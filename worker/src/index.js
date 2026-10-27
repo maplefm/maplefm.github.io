@@ -368,8 +368,9 @@ async function publicLinks(env) {
 // Who supports Club FM on Ko-fi, by in-game name: the highest tier role each account holds in the Discord, plus
 // lifetime supporters. For the heart on the ranks board and the supporters wall. Nothing else leaves here.
 const KOFI_TIERS = ["beta tester", "fangblade", "tiger", "curryishott", "suuushi"];
+function tierLabel(t) { return t.replace(/\b\w/g, c => c.toUpperCase()).replace("Fangblade", "FangBlade").replace("Curryishott", "curryishott"); }
 async function publicSupporters(env) {
-  const out = [];
+  const out = [], seen = new Set();
   if (env.DISCORD_BOT_TOKEN) {
     const roles = await (await fetch(DISCORD + "/guilds/" + GUILD + "/roles", { headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN }, cf: { cacheTtl: 600 } })).json().catch(() => []);
     const byId = {}; if (Array.isArray(roles)) for (const r of roles) byId[r.id] = r.name.toLowerCase();
@@ -383,10 +384,26 @@ async function publicSupporters(env) {
         const tier = KOFI_TIERS.find(t => names.includes(t));
         const lifetime = Number(a.kofiTotal || 0) >= KOFI_MEGA;
         if (!tier && !lifetime) continue;
-        out.push({ ign: a.ign || "", name: a.name || "", tier: tier ? tier.replace(/\b\w/g, c => c.toUpperCase()).replace("Fangblade", "FangBlade").replace("Curryishott", "curryishott") : "", lifetime });
+        seen.add(a.id);
+        out.push({ ign: a.ign || "", name: a.name || "", tier: tier ? tierLabel(tier) : "", lifetime });
       }
       cursor = page.list_complete ? null : page.cursor;
     } while (cursor);
+    // supporters who haven't signed in on the site yet go up under their Discord name; signing in swaps in their IGN
+    let after = "0";
+    for (let pg = 0; pg < 5; pg++) {
+      const ms = await (await fetch(DISCORD + "/guilds/" + GUILD + "/members?limit=1000&after=" + after, { headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN } })).json().catch(() => null);
+      if (!Array.isArray(ms) || !ms.length) break;
+      for (const m of ms) {
+        if (!m.user || m.user.bot || seen.has(m.user.id)) continue;
+        const names = (m.roles || []).map(id => byId[id]).filter(Boolean);
+        const tier = KOFI_TIERS.find(t => names.includes(t));
+        if (!tier) continue;
+        out.push({ ign: "", name: m.nick || m.user.global_name || m.user.username || "", tier: tierLabel(tier), lifetime: false });
+      }
+      after = ms[ms.length - 1].user.id;
+      if (ms.length < 1000) break;
+    }
   }
   return json(out, 200, { "Cache-Control": "public, max-age=600" });
 }
