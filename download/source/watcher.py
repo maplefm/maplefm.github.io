@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.2"
+VERSION = "2026.10.27.3"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -331,6 +331,15 @@ def hovered_row(game, shop_box):
     idx = int((ry - S["row0"]) // S["pitch"])
     box = [max(0, cx - 10), max(0, cy - 340), min(game[2], cx + 380), min(game[3], cy + 520)]
     return idx, box
+
+def shop_room(r):
+    """Shops only open in Free Market rooms, so a shop's room is always one. When the minimap title reads as
+    something else ("Khe 2 tated": another font, size or window layout), the room number in it is kept and the
+    rest is dropped: FM2. No number at all: just FM, never a made-up map name."""
+    if not r or r.startswith("FM"): return r
+    n = re.findall(r"(?<!\d)(\d{1,2})(?!\d)", r)
+    n = [int(x) for x in n if 1 <= int(x) <= 40]
+    return "FM" + str(n[0]) if len(n) == 1 else "FM"
 
 def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots": 0, "fired": 0, "check": 0}):
     """While the pointer rests on a shop row, say when to read the item's tooltip. The loop runs ten times a second
@@ -1256,6 +1265,7 @@ def worker(cfg, jobs, store):
                             if rh == worker.room_hash: res["room"] = worker.room_text
                             else: res["room"] = fmparse.read_room(extra["room"]); worker.room_hash, worker.room_text = rh, res["room"]
                     except Exception: res["room"] = ""
+                    res["room"] = shop_room(res["room"])
                     res["tip"] = None; res["hovering"] = extra.get("tip") is not None
                     if extra.get("tip") is not None:
                         try:

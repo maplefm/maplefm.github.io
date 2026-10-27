@@ -618,6 +618,14 @@ export function statText(x) {
   if (typeof x.SLOTS === "number" && typeof x.SLOTS_b === "number" && x.SLOTS !== x.SLOTS_b) out.push(x.SLOTS + " slots");
   return out.join(", ");
 }
+// shops only open in Free Market rooms: a minimap title read as something else ("Khe 2 tated") keeps its number
+function fmRoom(r) {
+  if (!r || /^FM(\d{1,2}| Entrance)?$/.test(r) || r === "chat") return r;
+  if (/entr/i.test(r) && /mark/i.test(r)) return "FM Entrance";
+  const m = /<\s*(\d{1,2})/.exec(r) || null, lone = String(r).match(/(^|\D)(\d{1,2})(?!\d)/g) || [];
+  const n = m ? +m[1] : lone.length === 1 ? +lone[0].replace(/\D/g, "") : 0;
+  return n >= 1 && n <= 40 ? "FM" + n : "FM";
+}
 export function shopIndex(snap) {
   const c = snap.cols, w = snap.words, T = snap.T || snap.at, by = {};
   if (!c || !c.i || !c.s) return by;
@@ -631,7 +639,7 @@ export function shopIndex(snap) {
     const k = sel.toLowerCase(), s0 = by[k] || (by[k] = { name: sel, t: 0, room: "", ch: 0, rows: [] });
     const x = c.x ? c.x[i] : 0;
     s0.rows.push([item, (c.u && c.u[i]) || (c.p && c.p[i]) || 0, (c.q && c.q[i]) || 1, statText(x), t]);
-    if (t > s0.t) { s0.t = t; s0.room = word("r", i) || s0.room; s0.ch = (c.c && c.c[i]) || s0.ch; }
+    if (t > s0.t) { s0.t = t; s0.room = fmRoom(word("r", i)) || s0.room; s0.ch = (c.c && c.c[i]) || s0.ch; }
   }
   // what the shop held on its latest visit: rows within two hours of the newest, one per item, stats and price
   Object.keys(by).forEach((k) => {

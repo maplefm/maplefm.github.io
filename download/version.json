@@ -1,14 +1,14 @@
 {
- "version": "2026.10.27.2",
- "date": "2026-10-27T03:54:35+00:00",
- "notes": "Hovers read the moment the item popup appears, even quick half-second hovers. Faster shop checks while a shop is open.",
- "sha256": "78e3be3d06e7dce40220ecddb4022b415d610a769ab2755c1aee1d9399f95064",
- "size": 102164,
+ "version": "2026.10.27.3",
+ "date": "2026-10-27T04:58:46+00:00",
+ "notes": "Shop rooms always read as a Free Market room: a minimap title read in another font keeps its room number.",
+ "sha256": "cc7de232cc39b5cef51f73db957a83b06a52ea38b021de3930d7240ddfdb914a",
+ "size": 102423,
  "history": [
   {
-   "version": "2026.10.27.2",
-   "date": "2026-10-26",
-   "notes": "Hovers read the moment the item popup appears, even quick half-second hovers. Faster shop checks while a shop is open."
+   "version": "2026.10.27.3",
+   "date": "2026-10-27",
+   "notes": "Shop rooms always read as a Free Market room: a minimap title read in another font keeps its room number."
   },
   {
    "version": "2026.10.27.1",
@@ -157,5 +157,5 @@
   }
  ],
  "pip": [],
- "sig": "7f97b68406e8fe8921d4bdf9e993edb1db9c99f7fa82f1bf1b51b3d1b562e033034c47701e875c1341383cbf58b55cc99df173d9828c656b89cf3ab3b587f5691fd1dc40c7f5d2d8a71ed63bcae4562ced6c5cdb025f420cf1f328f256bf5fb27af601baf6264a50123be5e350b8085ac9beecaa926fee9cacfe09b5ba884048c3ae7ab3cd385830abdee5f202306d7d56b112395b930601e47202389e73cfd363d1cae97c2b396a20695a4237efa3440c4c3456327ccee3b1b5d0a7e6d294108907bc775b69e518a12cefc9d05cd46018d3506d7bec0c1d53729ebcb6fc706b8a8fd46d4211aa55a51eaee8193435156ceaa117cbb2b4ad5985533aa6a24deb"
+ "sig": "63213af52a32658f9b0e31488da1f7ce8608567b8f1f7c7f711fa5989e11ecf297fa6ff31aa5200799ee778c42c99847d7c9f90a9548c8a47285a557ad39919aaf6b93e354cb3503f9e151aa58ed0df20862d47c989549d0a6e20695e72d979ee8aa95f7bf99ab571377b5f170a631133aaa2b2aec32c82f7853d0c9d99119bc2ad1e8f7b9beb3255c6909bc5e10a65d6a439de6a5b3a5cd2141b12a1aa7ccac998f06bf051af53b0cbbadd7a39a41bc7d0835227ebe2b9fee89db1fd664aa97b543028917773ebb207dfbbe8360c0f9c2bfefbf28b0a96fb60b9e87eb02b014264e08407965ac4964aa2e05680a26499948471d41582bb9ab0687b966d32c21"
 }
