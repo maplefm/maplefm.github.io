@@ -34,24 +34,30 @@ summary{font-weight:700;cursor:pointer}details p{margin:8px 0 2px;color:var(--mu
 h2.s{font:800 1.3rem Outfit,sans-serif;margin:26px 0 4px}
 .foot{margin-top:24px;font-size:.9rem;color:var(--muted);text-align:center}
 a{color:var(--accent)}
+.addbot{display:inline-block;background:#9146ff;color:#fff;font-weight:800;text-decoration:none;padding:12px 20px;border-radius:999px;font-size:1.05rem}.addbot:hover{filter:brightness(1.1)}details.alt{margin-top:12px}details.alt summary{cursor:pointer;font-weight:700}
 </style><link rel="stylesheet" href="/assets/nav.css?v=2"></head><body><main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 <section class="hero"><h1>!price for your chat</h1><p>Free. One minute to set up. Real Free Market sale prices for MapleStory Classic.</p></section>
 
 <div class="step"><div class="n">1</div><div>
-<h2>Pick your chat bot</h2>
+<h2>Add the Club FM bot</h2>
+<p><a class="addbot" href="https://api.maplefm.gg/twitchbot/connect?as=channel">Add the Club FM bot to my chat</a></p>
+<p class="hint">Sign in with Twitch on your streaming account and click Authorize. <b>clubfmbot</b> joins your chat and answers <b>!price</b>, <b>!pc</b> and <b>!fm</b>. Follower-only or slow mode? Type <b>/mod clubfmbot</b>. Remove it anytime under Twitch Settings, Connections.</p>
+<details class="alt"><summary>Already use Nightbot, StreamElements or Fossabot? Add it there instead</summary>
+<h2 style="font-size:1rem;margin-top:10px">Pick your chat bot</h2>
 <div class="tabs" role="group" aria-label="Chat bot">
 <button type="button" data-b="nb" aria-pressed="true">Nightbot</button><button type="button" data-b="se" aria-pressed="false">StreamElements</button><button type="button" data-b="fb" aria-pressed="false">Fossabot</button>
 </div>
 <div class="code"><code id="cmd"></code><button type="button" id="copy">Copy</button></div>
 <p class="hint" id="how"></p>
+</details>
 </div></div>
 
 <div class="step"><div class="n">2</div><div>
 <h2>Try it in your chat</h2>
 <p>Type <b>!price work gloves</b>. Your bot answers like this:</p>
-<div class="chat"><div><b>viewer</b>: !price claw 60</div><div class="bot"><b>Nightbot</b>: <span id="demo">Claw Attack Scroll 60%: typical 244K (240K to 250K) from 24 sales · cheapest now 190K · maplefm.gg/item/claw-attack-scroll-60</span></div></div>
-<p class="hint">Short names work too: wg, gfa 60, 10 int earring.</p>
+<div class="chat"><div><b>viewer</b>: !price claw 60</div><div class="bot"><b>clubfmbot</b>: <span id="demo">Claw Attack Scroll 60%: typical 244K (240K to 250K) from 24 sales · cheapest now 190K · maplefm.gg/item/claw-attack-scroll-60</span></div></div>
+<p class="hint">Short names work too: wg, gfa 60, 10 int earring, 7 att wg.</p>
 </div></div>
 
 <div class="step"><div class="n">3</div><div>
@@ -61,7 +67,7 @@ a{color:var(--accent)}
 
 <h2 class="s">Questions</h2>
 <details><summary>Does it cost anything?</summary><p>No. Free, no ads, no sign up to look up prices.</p></details>
-<details><summary>Is it safe for my stream and my viewers?</summary><p>Yes. It only fetches one line of text, like !weather or !uptime. It can't post on its own and doesn't see who asked. Links go to a public web page.</p></details>
+<details><summary>Is it safe for my stream and my viewers?</summary><p>Yes. clubfmbot only answers !price, !pc and !fm with one line, a few seconds apart at most. It never posts on its own, keeps no chat logs, and links only go to maplefm.gg.</p></details>
 <details><summary>Where do the prices come from?</summary><p>Real sales seen in Free Market shops and trade chat by players who scan. Equips are priced by stats. <a href="/how-it-works.html">Full details</a>.</p></details>
 <details><summary>Who runs Club FM?</summary><p>One player, not for profit, paid out of pocket. Donations go to the players who scan. <a href="/how-it-works.html#who">More</a>.</p></details>
 
