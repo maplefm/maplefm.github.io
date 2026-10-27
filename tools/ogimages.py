@@ -76,8 +76,13 @@ def item_card(name, r, ic):
         sub = "   " + sub; d.text((380 + d.textlength(("▲ " if mv > 0 else "▼ ") + f"{abs(round(mv * 100))}% in 24h", font=F("b", 34)), y + 162), sub, font=F("s", 32), fill=(205, 190, 245))
     else:
         d.text((380, y + 162), sub, font=F("s", 32), fill=(205, 190, 245))
+    more = []
+    if r.get("last3"): more.append(f"Last 3 sales avg {itempages.meso(r['last3'])}")
     if r.get("hi", 0) > r.get("lo", 0) and itempages.meso(r["lo"]) != itempages.meso(r["hi"]):
-        d.text((380, y + 214), f"Most sales between {itempages.meso(r['lo'])} and {itempages.meso(r['hi'])}", font=F("s", 32), fill=(205, 190, 245))
+        more.append(f"most {itempages.meso(r['lo'])} to {itempages.meso(r['hi'])}" if more else f"Most sales between {itempages.meso(r['lo'])} and {itempages.meso(r['hi'])}")
+    if more: d.text((380, y + 214), " · ".join(more), font=F("s", 32), fill=(205, 190, 245))
+    r1 = r.get("r1")
+    if r1 and y + 266 < 520: d.text((380, y + 262), f"Scrolled +{r1[0]} sold around {itempages.meso(r1[1])}", font=F("b", 32), fill=(255, 211, 77))
     footer(im, d)
     return im
 
