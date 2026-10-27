@@ -980,6 +980,24 @@
         var byRoll = {}, rollWho = {};
         it.rolls.forEach(function (r) { if (!r.l.so || now - r.l.t > 14 * DAY || !trusted(r.l.who) || !rollKeyOk(it.item, r.l)) return; var su = slotsUsed(it.item, r.l); if (su == null) return; var rk = r.g + "|" + su; (byRoll[rk] || (byRoll[rk] = [])).push(r.l.u); (rollWho[rk] || (rollWho[rk] = {}))[String(r.l.who).toLowerCase()] = 1; });
         it.rollTyp = {}; Object.keys(byRoll).forEach(function (g) { if (byRoll[g].length >= 2) it.rollTyp[g] = { typ: median(byRoll[g]), n: byRoll[g].length, who: Object.keys(rollWho[g] || {}).slice(0, 8) }; });
+        // Identical copies only: the headline price of an equip is what a plain copy sells for (an average roll with no
+        // scroll slots used). Copies known to be scrolled, failed or rolled high or low are priced in Price by roll and
+        // never move the headline. With fewer than 3 plain copies sold, the usual sales are used minus the known odd ones.
+        var hasSlH = !!(dbBase(it.item) || {}).SLOTS, offL = [], plainL = [];
+        it.rolls.forEach(function (r) { var su = slotsUsed(it.item, r.l); if (r.g === 0 && (!hasSlH || su === 0)) plainL.push(r.l); else if (r.g !== 0 || (su || 0) > 0) offL.push(r.l); });
+        var plainS = plainL.filter(function (x) { return x.so && !x.pricey && now - x.t <= 14 * DAY; }).sort(function (a, b) { return b.t - a.t; }).slice(0, 10);
+        it.typOff = 0;
+        if (plainS.length >= 3) {
+          var pu = plainS.map(function (x) { return x.u; });
+          it.typ = median(pu); it.lo = quant(pu, .25); it.hi = quant(pu, .75); it.typN = pu.length; it.typSet = plainS; it.basis = "clean"; it.moved = false;
+        } else if (it.kind === "sale" && offL.length && it.typSet) {
+          var keep = it.typSet.filter(function (x) { return offL.indexOf(x) < 0; });
+          if (keep.length >= 3 && keep.length < it.typSet.length) {
+            var ku = keep.map(function (x) { return x.u; });
+            it.typOff = it.typSet.length - keep.length;
+            it.typ = median(ku); it.lo = quant(ku, .25); it.hi = quant(ku, .75); it.typN = ku.length; it.typSet = keep;
+          }
+        }
         var pts = it.all.filter(function (x) { return !x.b && !x.spot && !x.pricey && now - x.t <= 7 * DAY; }).map(function (x) { return x.u; }).sort(function (a, b) { return a - b; });
         if (pts.length >= 6) {
           var q1 = quant(pts, .25), q3 = quant(pts, .75);
@@ -2417,6 +2435,21 @@
     if (g.up.length) { box.appendChild(el("div", "rlsub", "For sale now, cheapest first")); g.up.slice(0, 12).forEach(function (l) { box.appendChild(row(l, "up")); }); }
     if (g.sold.length) { box.appendChild(el("div", "rlsub", "Sold, newest first")); g.sold.slice(0, 8).forEach(function (l) { box.appendChild(row(l, "sold")); }); }
     if (!g.up.length && g.old.length) { box.appendChild(el("div", "rlsub", "Seen earlier, likely gone")); g.old.slice(0, 6).forEach(function (l) { box.appendChild(row(l, "old")); }); }
+    // a roll nobody has bought yet (often a one-of-a-kind copy): what the nearest rolls sold for, below and above
+    if (!g.sold.length && ls.length && i.rolls) {
+      var me = rollOf(i.item, ls[0]), mySu = slotsUsed(i.item, ls[0]);
+      if (me != null) {
+        var by = {}, cut = Date.now() - 30 * DAY;
+        i.rolls.forEach(function (r) { if (!r.l.so || r.l.t < cut || r.l.pricey || r.g === me) return; var su = slotsUsed(i.item, r.l); if (mySu != null && su != null && su !== mySu) return; (by[r.g] || (by[r.g] = [])).push(r.l.u); });
+        var ks = Object.keys(by).map(Number), lo = ks.filter(function (k) { return k < me; }).sort(function (a, b) { return b - a; })[0], hi = ks.filter(function (k) { return k > me; }).sort(function (a, b) { return a - b; })[0];
+        var near = [lo, hi].filter(function (k) { return k != null; });
+        if (near.length) {
+          var nn = el("div", "rlsub", "No sales of this roll yet. Nearest rolls sold:");
+          box.appendChild(nn);
+          near.forEach(function (k) { var v = by[k], d = el("div", "rl near"); d.appendChild(el("b", null, (k > 0 ? "+" : "") + k + (k === 0 ? " (average)" : ""))); var pp = el("div", "rlp"); pp.appendChild(money(median(v))); pp.appendChild(el("small", null, v.length + (v.length === 1 ? " sale" : " sales") + ", 30 days")); d.appendChild(pp); box.appendChild(d); });
+        }
+      }
+    }
     box.appendChild(el("p", "rlnote", (window.matchMedia && matchMedia("(hover: none)").matches ? "Tap" : "Hover") + " a listing to see the item as the game shows it."));
     return box;
   }
@@ -2824,8 +2857,8 @@
     else big.appendChild(money(i.typ));
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
     ip.appendChild(big);
-    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales" }[i.basis] || "recent sales";
-    var tnote = el("p", "note", "typical " + fmt(i.typ) + " from " + why);
+    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
+    var tnote = el("p", "note", "typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : ""));
     var cb1 = confBadge(i, true); if (cb1) { tnote.appendChild(document.createTextNode(" ")); tnote.appendChild(cb1); }
     ip.appendChild(tnote);
     if (i.equip) { var rn2 = el("p", "note", "Equips are priced by roll, each against its own sales."); rn2.style.opacity = ".8"; ip.appendChild(rn2); }
