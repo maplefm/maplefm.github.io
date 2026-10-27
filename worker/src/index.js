@@ -1539,6 +1539,33 @@ async function trafficPost(env) {
   const dow = new Date(top - 4 * 3600e3).getUTCDay();   // 0 Sunday, Eastern near enough at these hours
   if (dow === 1 && et.hour === 9) await weeklyTraffic(env, top).catch((e) => env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)));
   if (dow === 0 && et.hour === 22) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
+  await kofiWeekDraft(env).catch((e) => env.ACCOUNTS.put("kofiweek:err", String(e && e.stack || e).slice(0, 500)));
+}
+
+// ---------------------------------------------------------------- Ko-fi weekly update, for the owner to approve
+// Sunday's site digest leaves the week's update in the archive (data/shots/kofi-week.json and .png: the pages that
+// changed, before and now, and a numbered list). The first hourly run after it lands DMs it to the admins with the
+// picture, ready to post on Ko-fi. Nothing is posted on Ko-fi by itself.
+async function kofiWeekDraft(env) {
+  if (!env.DISCORD_BOT_TOKEN) return;
+  const j = await vaultJSON(env, "data/shots/kofi-week.json", 300);
+  if (!j || !j.day) return;
+  const key = "kofiweek:sent:" + j.day;
+  if (await env.ACCOUNTS.get(key)) return;
+  await env.ACCOUNTS.put(key, "1", { expirationTtl: 30 * DAY });
+  const r = j.png ? await archFetch(env, "data/shots/kofi-week.png", 300) : null;
+  const png = r ? await r.arrayBuffer() : null;
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN };
+  for (const id of await wdAdmins(env)) {
+    const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, H), body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
+    if (!c || !c.id) continue;
+    const fd = new FormData();
+    fd.append("payload_json", JSON.stringify({ embeds: [{ title: "Ko-fi update for the week", color: 0xf6c94a, url: "https://ko-fi.com/manage/posts",
+      description: ("Ready for a Ko-fi post (ko-fi.com, Your page, Post an update). Nothing has been posted. Tell Claude \"post it\" or paste it yourself.\n\n**Title**\n```" + j.title + "```\n**Text**\n```" + j.text + "```").slice(0, 4000),
+      ...(png ? { image: { url: "attachment://club-fm-week.png" } } : {}) }] }));
+    if (png) fd.append("files[0]", new Blob([png], { type: "image/png" }), "club-fm-week.png");
+    await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: fd });
+  }
 }
 
 // ---------------------------------------------------------------- Monday report: the week, and search health
