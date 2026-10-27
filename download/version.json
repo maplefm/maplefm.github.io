@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.7",
- "date": "2026-10-27T15:47:57+00:00",
- "notes": "Names cut off by the shop's width are matched to the right item, and misread names are never saved as new items (any already saved are cleared). Reports how many shops it reads straight off the pixels.",
- "sha256": "2641e8c653b5bc5a80af5a53929f841f8ad8ada503f47b86b473ee5f7f09300a",
- "size": 141486,
+ "version": "2026.10.27.8",
+ "date": "2026-10-27T17:38:48+00:00",
+ "notes": "49 new items the game added (Lakelis Statue, King Slime Balloon, Hero's set and more); the item list now refreshes from the site daily",
+ "sha256": "12ee8b41e7fbab27985d520c7ecbb6f097f163a77947c54edc91efffe093d98c",
+ "size": 142907,
  "history": [
+  {
+   "version": "2026.10.27.8",
+   "date": "2026-10-27",
+   "notes": "49 new items the game added (Lakelis Statue, King Slime Balloon, Hero's set and more); the item list now refreshes from the site daily"
+  },
   {
    "version": "2026.10.27.7",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.22.2",
    "date": "2026-10-22",
    "notes": "Startup text and README: your in-game name is read off the screen, nothing to type."
-  },
-  {
-   "version": "2026.10.22.1",
-   "date": "2026-10-21",
-   "notes": "Reads your character's name off the status bar and uses it as your scanner name, so nothing to type. Still only looks at the screen."
   }
  ],
  "pip": [],
- "sig": "a89811eb0fd10268245bf1c5e3bd56109539fa3fe798646bdf9e6fc2050d6546b639cf701850323ca6120f451f25ca0916d8043b4e3d1f2efeae27d87e320cfd84f6df954e926514912c0ee4dae03b6078b6967b938b82a8eef8f27dec64b38a237d874efba9ff9f3ae8dfb8edcc3dfdbbfef74c936d374234b2d2bb87c82c8e7b567ce9c520981ae723387c28d68a097f5a7a00a975d9652e7bcdbec24d7e5a69efbc2ca994e0c74eb7cf10c7845434fd04ea3e83b12afe39d222072a5d1a41e703b6d4517564d4fc8e502bababcfde9f09aae0b6ea394ed69875370a3624d16c3f661e1149c2639b440571f577a961faa5cd2bc2e47488d1d10ad2aa4892d4"
+ "sig": "522da9644221676d9b4cd8da437af9b3828a8075423997ad5eb3eb81b8c95e97bc7ea2fa9837b6278793359964deebdaae154f8c9b69dcc3842caf76bbcd5f01ea970f12632da4c26c0a4d13af5a0205617441cbd85c46fd4c256aea2aec68292e38ab74250ed39b11a34029da3050aada525dfceae2c2134477c74b13887c57daf891cef085b38915f18ae64a55c14e3cee4108ec6aed9397b7c53ec23e16f55304333731774a82add566eb892c21cc3f757c3614f413825bbe1ba021587427e9e5f51a4d3da453419a1708d775d36706d3bcdec9b6f7700ebef0307c16c9387f726c6d6b912a61dfaebfdfa3f55db2d932c1a992734b11e6453e993547d67b"
 }
