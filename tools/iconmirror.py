@@ -4,13 +4,18 @@ Icons come from maplestory.io. Serving them from maplefm.gg means one connection
 caching, and no blank or stand-in icons when maplestory.io is slow or busy. Only icons not yet copied are fetched;
 items maplestory.io has no icon for are listed in i/missing.json and asked for again once a week.
 
-  python3 tools/iconmirror.py ITEMDB.json OUT_DIR
+  python3 tools/iconmirror.py ITEMDB.json OUT_DIR [ITEMGUIDE.json]
+The item guide adds quest items and monster drops the price list doesn't carry.
 """
 import json, os, sys, time, urllib.request, urllib.error, concurrent.futures as cf
 
 DB, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
-ids = sorted({r[1] for r in json.load(open(DB, encoding="utf-8"))["items"] if isinstance(r[1], int)})
+ids = {r[1] for r in json.load(open(DB, encoding="utf-8"))["items"] if isinstance(r[1], int)}
+if len(sys.argv) > 3:
+    try: ids |= {int(v) for v in (json.load(open(sys.argv[3], encoding="utf-8")).get("ids") or {}).values() if str(v).isdigit()}
+    except Exception as e: print("item guide not read:", e)
+ids = sorted(ids)
 mp = os.path.join(OUT, "missing.json")
 miss = {}
 try: miss = json.load(open(mp))
