@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.6"
+VERSION = "2026.10.27.7"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -1036,6 +1036,7 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
         sid, key = anon_id(), anon_key()
         for k, part in enumerate(parts):
             msg = json.dumps({"v": 3, "id": sid, "nm": str(cfg.get("name") or "")[:16], "ign": str(cfg.get("ign") or "")[:13], "ver": VERSION,
+                              "fp": [fmparse.STATS["fast"], fmparse.STATS["shops"]],
                               "seq": seq, "k": k, "n": len(parts), "z": part,
                               "sig": inbox_sig(key, sid, seq, k, len(parts), part), "reg": key}, separators=(",", ":"))
             body = urllib.parse.urlencode({INBOX_FIELD: msg}).encode()
