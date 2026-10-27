@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.3"
+VERSION = "2026.10.27.4"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -210,7 +210,7 @@ def hover_nudge(res):
         if res.get("tip") and res["tip"].get("row") == n: continue
         NUDGED[k] = time.time()
         typ = wanted.get(r["i"]) or 0
-        log(f"hover wanted: rest your mouse on {r['i']} (row {n + 1})" + (f", sells for about {short_meso(typ)}" if typ else "") + ". The board has no stats for most of these yet.")
+        log(f"hover wanted: rest your mouse on {r['i']} (row {n + 1})" + (f", sells for about {short_meso(typ)}" if typ else "") + ". Most of these haven't had a full read yet, upgrades left included.")
         nudge()
         return
 
@@ -331,6 +331,26 @@ def hovered_row(game, shop_box):
     idx = int((ry - S["row0"]) // S["pitch"])
     box = [max(0, cx - 10), max(0, cy - 340), min(game[2], cx + 380), min(game[3], cy + 520)]
     return idx, box
+
+TIPIMG_MIN = 500000
+def send_tip_image(img):
+    """The item popup as a small picture (cropped to the popup, 64 colours), uploaded to Club FM so the site can show
+    exactly what was hovered. Returns its hash, which goes in the listing; None when it couldn't be sent."""
+    import io
+    box = fmparse._tip_panel(img)
+    if box: img = img.crop(box)
+    pic = img.convert("RGB").quantize(64)
+    buf = io.BytesIO(); pic.save(buf, "PNG", optimize=True); data = buf.getvalue()
+    if len(data) > 160000: return None
+    h = hashlib.sha256(data).hexdigest()[:16]
+    hid = hashlib.sha256(("fm-inbox:" + anon_id()).encode()).hexdigest()[:16]
+    def up():
+        try:
+            req = urllib.request.Request(ACCOUNTS + "/tipimg", data=data, headers={"Content-Type": "image/png", "X-Watcher": hid, "User-Agent": "fm-watcher/" + VERSION})
+            urllib.request.urlopen(req, timeout=30).read()
+        except Exception as e: log("popup picture not sent:", e)
+    threading.Thread(target=up, daemon=True).start()
+    return h
 
 def shop_room(r):
     """Shops only open in Free Market rooms, so a shop's room is always one. When the minimap title reads as
@@ -602,6 +622,14 @@ class Store:
             if o["x"] and not o.get("xat"): o["xat"] = time.time()   # first time this listing's stats were read
             if not o.get("xt") or len(tip["lines"]) >= len(o.get("xt", [])): o["xt"] = tip["lines"]
             if tip.get("job"): o["xj"] = tip["job"]
+            # 500K and up: the site shows the real popup on hover. Sent again when this read has the upgrades line
+            # and the last picture didn't.
+            try:
+                pic = res.get("tipimg")
+                if pic is not None and r["p"] / max(1, r["q"] or 1) >= TIPIMG_MIN and (not o.get("xi") or ("SLOTS" in tip["stats"] and not o.get("xis"))):
+                    h = send_tip_image(pic)
+                    if h: o["xi"] = h; o["xis"] = "SLOTS" in tip["stats"]
+            except Exception as e: log("popup picture error:", e)
             # a cut-off name: the tooltip shows the whole thing, so use it from now on
             tname = re.sub(r"\s*\(\+\d+\)\s*$", "", tip["name"]).strip()
             if "cut off" in r["i"] and len(tname) > len(r["i"].split(" (")[0]):
@@ -801,7 +829,7 @@ class Store:
                 if o.get("r"): row["r"] = o["r"]
                 if o.get("c"): row["c"] = o["c"]
                 if o.get("v"): row["v"] = o["v"]; row["vt"] = o.get("vt", 0)
-                if o.get("x"): row["x"] = o["x"]; row["xt"] = o.get("xt", [])
+                if o.get("x"): row["x"] = dict(o["x"], _img=o["xi"]) if o.get("xi") else o["x"]; row["xt"] = o.get("xt", [])
                 if o.get("xj"): row["xj"] = o["xj"]
                 if o.get("xn"): row["xn"] = o["xn"]
                 row["t"] = int(o["last"])
@@ -830,7 +858,7 @@ class Store:
                 doc["last"] = max(doc["last"], o["last"])
                 row = {"s": player, "i": item, "p": price, "q": 1, "t": int(o.get("last_read") or o["first"])}
                 if side == "B": row["k"] = "b"
-                if o.get("x"): row["x"] = o["x"]
+                if o.get("x"): row["x"] = dict(o["x"], _img=o["xi"]) if o.get("xi") else o["x"]
                 if o.get("xt"): row["xt"] = o["xt"]
                 if o.get("xj"): row["xj"] = o["xj"]
                 doc["rows"].append(row)
@@ -1271,7 +1299,7 @@ def worker(cfg, jobs, store):
                         try:
                             tip = fmparse.read_tooltip(extra["tip"])
                             if tip:
-                                tip["row"] = extra["row"]; res["tip"] = tip
+                                tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
                                 review_save(cfg, "tip", extra["tip"], tip)
                             elif extra.get("hover"):
                                 review_save(cfg, "tipmiss", extra["tip"], {"row": extra["row"]}); chime(False)
@@ -1294,7 +1322,9 @@ def worker(cfg, jobs, store):
                             elif hit:
                                 log(f"read  {hit[0]} {hit[1]}: " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items() if not k.endswith("_b")))
                                 chime(True)
-                                NUDGED[(res.get("seller") or "", res["tip"].get("name") or "")] = time.time() + 86400
+                                # a read without the upgrades line isn't done: the hover list may ask for this one again
+                                if "SLOTS" in res["tip"].get("stats", {}) or not any(k in res["tip"].get("stats", {}) for k in ("ATT", "MATT", "WDEF", "MDEF", "STR", "DEX", "INT", "LUK")):
+                                    NUDGED[(res.get("seller") or "", res["tip"].get("name") or "")] = time.time() + 86400
                             else: log(f"hover: read {res['tip']['name']} but couldn't match it to a row in this shop")
                         for hit in store.flush_pending(res):
                             log(f"stats {hit[0]} {hit[1]} (from an earlier hover)")
