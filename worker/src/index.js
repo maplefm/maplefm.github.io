@@ -1372,7 +1372,7 @@ async function redditReply(env, p) {
     if (found.some((f) => f.includes(n))) continue;
     found.push(n); if (found.length >= 2) break;
   }
-  const k = (v) => (v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "m" : v >= 1000 ? Math.round(v / 1000) + "k" : String(Math.round(v)));
+  const k = (v) => (v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M" : v >= 1000 ? Math.round(v / 1000) + "K" : String(Math.round(v)));
   // roll prices live in the members' summary: rt = sold typical per "roll|slots", ra = cheapest listed per roll
   const vault = found.length ? await vaultJSON(env, "data/summary.json", 600).catch(() => null) : null;
   const vrows = {}; for (const r of (vault && vault.rows) || []) if (r && r.item) vrows[r.item.toLowerCase()] = r;
@@ -1389,31 +1389,31 @@ async function redditReply(env, p) {
   for (const n of found) {
     const r = rows[n], v = vrows[n] || {}, gk = Object.keys(gi).find((x) => x.toLowerCase() === n), g = gk ? gi[gk] : null, name = (r && r.item) || gk || n, low = name.toLowerCase();
     const url = itemUrl(name, !!(r && r.typ));
-    if (r && r.typ && (r.salesN || 0) >= 3) lines.push((roll != null ? "clean " : "") + low + " has been selling around " + k(r.typ) + (r.lo && r.hi && k(r.lo) !== k(r.hi) ? " (" + k(r.lo) + " to " + k(r.hi) + ")" : "") + " from " + r.salesN + " sales");
-    else if (r && r.typ) lines.push("not many " + low + " have sold, the ones listed go for around " + k(r.typ));
+    if (r && r.typ && (r.salesN || 0) >= 3) lines.push((roll != null ? "Clean " + name : name) + " has been selling for around " + k(r.typ) + (r.lo && r.hi && k(r.lo) !== k(r.hi) ? " (" + k(r.lo) + " to " + k(r.hi) + ")" : "") + ", from " + r.salesN + " sales.");
+    else if (r && r.typ) lines.push("Not many " + name + " have sold yet. The ones listed go for around " + k(r.typ) + ".");
     if (roll != null) {
       const sold = Object.entries(v.rt || {}).filter(([kk]) => Number(kk.split("|")[0]) === roll).sort((x, y) => y[1][1] - x[1][1])[0];
-      if (sold) lines.push("+" + roll + " has sold around " + k(sold[1][0]) + " (" + sold[1][1] + " sales)");
-      else lines.push("nobody's sold a +" + roll + " " + low + " yet so there's no exact comp");
+      if (sold) lines.push("A +" + roll + " has sold for around " + k(sold[1][0]) + " (" + sold[1][1] + " sales).");
+      else lines.push("No +" + roll + " " + name + " has sold yet, so there's no exact comp.");
       const ra = Object.entries(v.ra || {}).map(([g2, pr]) => [Number(g2), pr]).filter(([g2]) => g2 > 0 && Math.abs(g2 - roll) <= 3).sort((x, y) => x[0] - y[0]);
-      if (ra.length) lines.push("listed right now: " + ra.map(([g2, pr]) => "+" + g2 + " at " + k(pr)).join(", "));
+      if (ra.length) lines.push("Listed right now: " + ra.map(([g2, pr]) => "+" + g2 + " at " + k(pr)).join(", ") + ".");
       // no sale at this roll: the same kind of gear at about the same roll, listed now (earrings for earrings)
       if (!sold && v.cat) {
         const idb = await fetch(LIVE + "itemdb.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).then((r2) => r2.json()).catch(() => null);
         const meta = {}; for (const row of (idb && idb.items) || []) meta[String(row[0]).toLowerCase()] = { lv: row[2] || 0, kind: row[5] };
         const me = meta[low];
         const sim = me ? Object.values(vrows).filter((x) => { const m2 = meta[x.item.toLowerCase()]; return x.item !== name && m2 && m2.kind === me.kind && Math.abs(m2.lv - me.lv) <= 10; })
-          .flatMap((x) => Object.entries(x.ra || {}).map(([g2, pr]) => ({ n: x.item.toLowerCase(), g: Number(g2), pr, typ: x.typ || 0 })))
+          .flatMap((x) => Object.entries(x.ra || {}).map(([g2, pr]) => ({ n: x.item.toLowerCase(), nm: x.item, g: Number(g2), pr, typ: x.typ || 0 })))
           .filter((x) => Math.abs(x.g - roll) <= 2 && x.g > 0 && x.pr >= Math.max(3 * x.typ, 50000) && (!x.typ || x.pr <= 30 * x.typ))
           .sort((x, y) => Math.abs(x.g - roll) - Math.abs(y.g - roll) || y.pr - x.pr).slice(0, 3) : [];
-        if (sim.length) lines.push("similar ones listed: " + sim.map((x) => x.n + " +" + x.g + " at " + k(x.pr)).join(", "));
+        if (sim.length) lines.push("Similar ones listed: " + sim.map((x) => x.nm + " +" + x.g + " at " + k(x.pr)).join(", ") + ".");
       }
-      plug = "you can see what's listed and sold by roll here " + url;
-    } else if (!plug) plug = "every sale and what's listed right now is here " + url;
-    const drops = g && g.d ? g.d.slice().sort((x, y) => (y[6] || 0) - (x[6] || 0)).slice(0, 2).map((d) => d[0].toLowerCase() + (d[1] ? " (lv " + d[1] + ")" : "")) : [];
-    if (drops.length && (asksDrop || !(r && r.typ))) lines.push(low + " drops from " + drops.join(" and "));
+      plug = "You can see what's listed and sold by roll here: " + url;
+    } else if (!plug) plug = "Every sale and what's listed right now is here: " + url;
+    const drops = g && g.d ? g.d.slice().sort((x, y) => (y[6] || 0) - (x[6] || 0)).slice(0, 2).map((d) => d[0] + (d[1] ? " (Lv. " + d[1] + ")" : "")) : [];
+    if (drops.length && (asksDrop || !(r && r.typ))) lines.push(name + " drops from " + drops.join(" and ") + ".");
   }
-  if (!found.length) plug = "you can look up what things actually sold for and what's listed right now at https://maplefm.gg";
+  if (!found.length) plug = "You can look up what things actually sold for and what's listed right now at https://maplefm.gg";
   if (plug) lines.push("", plug);
   return lines.join("\n").slice(0, 900);
 }
