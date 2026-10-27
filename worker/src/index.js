@@ -1348,6 +1348,13 @@ async function redditPush(req, env) {
 }
 // A reply ready to paste: for each item the post names, what it sells for, what's listed, where it drops, and the link.
 // Written plain and lowercase like a player would. Never says who runs the site.
+// An item's link: its own page when it has one (Discord and Reddit show that page's picture and price), else the board
+function itemUrl(name, priced) {
+  const m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(String(name));
+  const shown = m ? m[1] + " " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%", Chaos: "Chaos", Superior: "Superior" })[m[2]] : String(name);
+  const slug = shown.toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return priced && slug ? "https://maplefm.gg/item/" + slug + "/" : "https://maplefm.gg/#item=" + encodeURIComponent(name);
+}
 async function redditReply(env, p) {
   const LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/";
   const [sum, guide] = await Promise.all([
@@ -1381,7 +1388,7 @@ async function redditReply(env, p) {
   let plug = "";
   for (const n of found) {
     const r = rows[n], v = vrows[n] || {}, gk = Object.keys(gi).find((x) => x.toLowerCase() === n), g = gk ? gi[gk] : null, name = (r && r.item) || gk || n, low = name.toLowerCase();
-    const url = "https://maplefm.gg/#item=" + encodeURIComponent(name);
+    const url = itemUrl(name, !!(r && r.typ));
     if (r && r.typ && (r.salesN || 0) >= 3) lines.push((roll != null ? "clean " : "") + low + " has been selling around " + k(r.typ) + (r.lo && r.hi && k(r.lo) !== k(r.hi) ? " (" + k(r.lo) + " to " + k(r.hi) + ")" : "") + " from " + r.salesN + " sales");
     else if (r && r.typ) lines.push("not many " + low + " have sold, the ones listed go for around " + k(r.typ));
     if (roll != null) {
