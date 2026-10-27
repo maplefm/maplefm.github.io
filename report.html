@@ -140,7 +140,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   function dayName(d) { var x = new Date(d + "T12:00:00"); return x.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); }
   function icon(name) {
     var box = el("span", "ic"), r = DB[String(name).toLowerCase()];
-    if (r) { var im = new Image(); im.alt = ""; im.src = "https://maplestory.io/api/MCW/1/item/" + r + "/icon"; im.onerror = function () { this.remove(); }; box.appendChild(im); }
+    if (r) { var im = new Image(); im.alt = ""; im.src = "/i/" + r + ".png"; im.onerror = function () { if (this.dataset.f) this.remove(); else { this.dataset.f = 1; this.src = "https://maplestory.io/api/MCW/1/item/" + r + "/icon"; } }; box.appendChild(im); }
     return box;
   }
   // sparklines are drawn at the card's real width so the end dot stays round

@@ -1,5 +1,8 @@
 (function () {
   "use strict";
+  // ENGINE: this file is running inside fmengine.js, the background worker that builds the board for club members
+  var ENGINE = !!(typeof self !== "undefined" && self.FM_ENGINE && typeof importScripts === "function");
+  var MYSRC = !ENGINE && document.currentScript ? document.currentScript.src : "";
   // Club members' own shops are left out of prices. Stored as fingerprints, not names.
   var OWNH = { "a4959daa": 1, "bd22ad91": 1, "6d3b4a44": 1, "5b5738ce": 1, "7528a716": 1 }, OWNC = {};
   function ownShop(sl) {
@@ -142,15 +145,17 @@
   var T0 = { rows: 0, live: 0 };   // startup timing, readable as FM_T0 in the console
   // ---------- the finished board, built on the server: a first visit shows live listings without building anything
   // The pump runs this same page on the server, calls fmSnap(), and the Worker serves the result at /data/snap.
-  var SNAP_DROP = { raw: 1, sk: 1, xt: 1, tl: 1, tx: 1 };
+  var SNAP_DROP = { raw: 1, sk: 1, xt: 1, tl: 1, tx: 1 }, ENG_DROP = { raw: 1, sk: 1, xt: 1, xbad: 1 };   // only the build itself reads these
   // Listings are stored by column: text values point into a per-column word list, true/false become 1/0, and
   // times are seconds after the newest. Per-item listing lists keep the last 3 days plus anything with stats
   // (the counts and prices on each item were worked out from everything); the board-wide lists stay whole.
-  function snapEncode() {
+  // full: the club engine's copy (see fmengine.js) keeps every field, every listing and fresh deals; it is handed
+  // over as an object, never as text, so nothing is parsed twice
+  function snapEncode(full, asObj) {
     if (!D || D.preview || D.snap) return null;
     var isL = new Set(D.L), idx = new Map(), n = 0, cols = {}, words = {}, wix = {}, now = Date.now(), T = D.latest || now;
     function put(k, v) {
-      if (SNAP_DROP[k] || v === undefined || v === null || v === false || v === "") return;
+      if ((full ? ENG_DROP : SNAP_DROP)[k] || v === undefined || v === null || v === false || v === "") return;
       var c = cols[k] || (cols[k] = []);
       if (typeof v === "string") { var w = words[k] || (words[k] = []), m = wix[k] || (wix[k] = {}); if (m[v] == null) { m[v] = w.length; w.push(v); } c[n] = m[v] + 1; }
       else if (v === true) c[n] = 1;
@@ -162,9 +167,9 @@
       Object.keys(l).forEach(function (k) { put(k, l[k]); });
       idx.set(l, n); return n++;
     }
-    var keep = function (l) { return l.x || T - l.t <= 3 * DAY; };
+    var keep = function (l) { return full || l.x || T - l.t <= 3 * DAY; };
     // a fresh deal stays out of the public copy for its first 10 minutes, the same hold the page applies
-    var held = function (l) { var it = D.byName[l.i]; return !l.so && it && it.typ && l.u < it.typ * 0.8 && now - l.t < HOLD; };
+    var held = function (l) { if (full) return false; var it = D.byName[l.i]; return !l.so && it && it.typ && l.u < it.typ * 0.8 && now - l.t < HOLD; };
     function enc(v, top) {
       if (v && typeof v === "object") {
         if (isL.has(v)) return held(v) ? null : { "@": lref(v) };
@@ -181,37 +186,79 @@
     }
     var out = {}; Object.keys(D).forEach(function (k) { if (k !== "L" && k !== "byName") out[k] = enc(D[k], true); });
     Object.keys(cols).forEach(function (k) { var c = cols[k]; for (var i = 0; i < n; i++) if (c[i] === undefined) c[i] = 0; });
-    var kinds = {}; Object.keys(cols).forEach(function (k) { kinds[k] = words[k] ? "w" : k === "t" ? "t" : "v"; });
-    return JSON.stringify({ v: 2, at: now, T: T, n: n, cols: cols, words: words, kinds: kinds, D: out });
-  }
-  window.fmSnap = snapEncode; window.fmSnapDec = function (j) { return snapDecode(j); };
-  function snapDecode(j) {
-    if (!j || j.v !== 2 || !j.cols || !j.D) return null;
-    var L = new Array(j.n);
-    for (var i = 0; i < j.n; i++) L[i] = {};
-    Object.keys(j.cols).forEach(function (k) {
-      var c = j.cols[k], kind = j.kinds[k], w = j.words[k];
-      for (var i = 0; i < j.n; i++) {
-        var v = c[i];
-        if (kind === "w") { if (v) L[i][k] = w[v - 1]; }
-        else if (kind === "t") L[i][k] = j.T - v * 1000;
-        else if (v !== 0) L[i][k] = v === 1 && /^(so|b|chat|stream|tl|scaled|pricey|spot|ci)$/.test(k) ? true : v;
-      }
+    // a column that is mostly empty is sent as the rows that have a value: gaps between them, then the values
+    Object.keys(cols).forEach(function (k) {
+      var c = cols[k], nz = 0, i; for (i = 0; i < n; i++) if (c[i] !== 0) nz++;
+      if (nz > n * 0.3) return;
+      var gi = [], gv = [], last = -1; for (i = 0; i < n; i++) if (c[i] !== 0) { gi.push(i - last); gv.push(c[i]); last = i; }
+      cols[k] = { g: gi, v: gv };
     });
-    L.forEach(function (l) { if (l.x === undefined) l.x = null; ["so", "b", "chat", "stream"].forEach(function (k) { if (l[k] === undefined) l[k] = false; }); if (l.n === undefined) l.n = 0; if (l.c === undefined) l.c = 0; if (l.q === undefined) l.q = 1; });
+    var kinds = {}; Object.keys(cols).forEach(function (k) { kinds[k] = words[k] ? "w" : k === "t" ? "t" : "v"; });
+    var o = { v: 3, at: now, T: T, n: n, cols: cols, words: words, kinds: kinds, D: out };
+    return asObj ? o : JSON.stringify(o);
+  }
+  window.fmSnap = function () { return snapEncode(false); }; window.fmD = function () { return D; }; window.fmSnapDec = function (j) { return snapDecode(j); };
+  // Decoding a board makes a hundred thousand listing objects. It runs in slices with a breath between them
+  // (snapDecodeAsync), so the page keeps scrolling and clicking while a new board comes in; snapDecode runs it in one go.
+  var BOOLK = /^(so|b|chat|stream|tl|scaled|pricey|spot|ci)$/;
+  function* snapDecodeGen(j) {
+    if (!j || (j.v !== 2 && j.v !== 3) || !j.cols || !j.D) return null;
+    var n = j.n, T = j.T, L = new Array(n), i, STEP = 25000;
+    for (i = 0; i < n; i++) { L[i] = {}; if (i % STEP === STEP - 1) yield; }
+    var keys = Object.keys(j.cols);
+    for (var ki = 0; ki < keys.length; ki++) {
+      var k = keys[ki], c = j.cols[k], kind = j.kinds[k], w = j.words[k], v, bool = BOOLK.test(k);
+      if (c && c.g) {   // sparse: only the rows with a value
+        var gi = c.g, gv = c.v, at = -1;
+        for (var q = 0; q < gi.length; q++) { at += gi[q]; v = gv[q]; L[at][k] = kind === "w" ? w[v - 1] : kind === "t" ? T - v * 1000 : bool && v === 1 ? true : v; }
+        if (gi.length > 4000) yield;
+        continue;
+      }
+      for (var a = 0; a < n; a += STEP) {
+        var e = Math.min(n, a + STEP);
+        if (kind === "w") { for (i = a; i < e; i++) { v = c[i]; if (v) L[i][k] = w[v - 1]; } }
+        else if (kind === "t") { for (i = a; i < e; i++) L[i][k] = T - c[i] * 1000; }
+        else if (bool) { for (i = a; i < e; i++) { v = c[i]; if (v !== 0) L[i][k] = v === 1 ? true : v; } }
+        else { for (i = a; i < e; i++) { v = c[i]; if (v !== 0) L[i][k] = v; } }
+        yield;
+      }
+    }
+    for (i = 0; i < n; i++) {
+      var l = L[i]; if (l.x === undefined) l.x = null; if (l.so === undefined) l.so = false; if (l.b === undefined) l.b = false; if (l.chat === undefined) l.chat = false; if (l.stream === undefined) l.stream = false;
+      if (l.n === undefined) l.n = 0; if (l.c === undefined) l.c = 0; if (l.q === undefined) l.q = 1;
+      if (i % STEP === STEP - 1) yield;
+    }
     function dec(v) {
       if (v && typeof v === "object") {
         if (!Array.isArray(v) && v["@"] != null && Object.keys(v).length === 1) return L[v["@"]];
         if (Array.isArray(v)) { for (var i = 0; i < v.length; i++) v[i] = dec(v[i]); return v; }
-        Object.keys(v).forEach(function (k) { v[k] = dec(v[k]); }); return v;
+        for (var kk in v) v[kk] = dec(v[kk]); return v;
       }
       return v;
     }
-    var d = dec(j.D); d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; if (Array.isArray(i.rolls)) i.rolls = i.rolls.filter(function (r) { return r && r.l; }); }); d.snap = true; d.snapAt = j.at;
+    var D0 = j.D, top = Object.keys(D0);
+    for (var t = 0; t < top.length; t++) {
+      var tk = top[t];
+      if (tk === "list" && Array.isArray(D0.list)) { for (var li = 0; li < D0.list.length; li++) { D0.list[li] = dec(D0.list[li]); if (li % 150 === 149) yield; } }
+      else { D0[tk] = dec(D0[tk]); yield; }
+    }
+    var d = D0; d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; if (Array.isArray(i.rolls)) i.rolls = i.rolls.filter(function (r) { return r && r.l; }); }); d.snap = true; d.snapAt = j.at;
     return d;
   }
+  function snapDecode(j) { var g = snapDecodeGen(j), r; do { r = g.next(); } while (!r.done); return r.value; }
+  function snapDecodeAsync(j) {
+    return new Promise(function (ok) {
+      var g; try { g = snapDecodeGen(j); } catch (e) { ok(null); return; }
+      (function step() {
+        var end = performance.now() + 12, r;
+        try { do { r = g.next(); } while (!r.done && performance.now() < end); } catch (e) { ok(null); return; }
+        if (r.done) ok(r.value); else setTimeout(step, 0);
+      })();
+    });
+  }
   var SNAP_P = null;
-  try {
+  if (ENGINE) SNAP_P = Promise.resolve(null);
+  else try {
     SNAP_P = fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   } catch (e) { SNAP_P = Promise.resolve(null); }
   function mark(k) { if (!T0[k]) T0[k] = Math.round(performance.now()); }
@@ -254,16 +301,20 @@
     var pp = null; for (i = 1; i <= a.length; i++) { cur = [i]; var lo = i; for (j = 1; j <= b.length; j++) { cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], pp[j - 2] + 1); if (cur[j] < lo) lo = cur[j]; } if (lo > cap) return cap + 1; pp = prev; prev = cur; }
     return prev[b.length];
   }
-  var QROLL = null, PENDROLL = null;
+  var QROLL = null, PENDROLL = null, ROLLMISS = null;
   // returns [{n, score, why}] best first. strong matches score 450 and up; typo matches stay under 300.
   function searchItems(q, limit) {
     var ql = String(q || "").toLowerCase().trim(); if (!ql) return [];
+    if (!searchItems.inner) QROLL = null;   // only the query typed last can ask for a roll
     // a roll typed with the item ("5 att wg", "work gloves +3 att") finds the item, then opens that roll's listings
-    var rm = /(^|\s)\+?(\d{1,2})\s*(att|watk|atk|matt|matk)\b/.exec(ql) || /(^|\s)(att|watk|atk|matt|matk)\s*\+(\d{1,2})\b/.exec(ql);
+    // the stat can be any word people use: att, attack, watk, matt, magic attack, str, dex, int, luk, wdef, acc...
+    var RW = "(magic attack|magic att|weapon attack|attack|att|watk|atk|w\\.?att|matt|matk|m\\.?att|str|dex|int|luk|w\\.?def|wdef|m\\.?def|mdef|acc|accuracy|avoid|speed|jump|hp|mp)";
+    var rm = new RegExp("(^|\\s)\\+?(\\d{1,3})\\s*" + RW + "(?![a-z])").exec(ql) || new RegExp("(^|\\s)" + RW + "\\s*\\+?(\\d{1,3})(?![0-9%])").exec(ql);
     if (rm) {
-      var rk = /^m/.test(rm[3] && isNaN(rm[3]) ? rm[3] : rm[2]) ? "MATT" : "ATT", rv = +(isNaN(rm[2]) ? rm[3] : rm[2]);
+      var rword = isNaN(rm[2]) ? rm[2] : rm[3], rv = +(isNaN(rm[2]) ? rm[3] : rm[2]);
+      var rk = /^(magic|matt|matk|m\.?att)/.test(rword) ? "MATT" : /^(att|attack|weapon|watk|atk|w\.?att)/.test(rword) ? "ATT" : /def/.test(rword) ? (/^m/.test(rword) ? "MDEF" : "WDEF") : rword === "accuracy" ? "ACC" : rword.toUpperCase();
       var rest = ql.replace(rm[0], " ").replace(/\s+/g, " ").trim();
-      if (rest && rv > 0 && rv <= 30) { QROLL = { k: rk, v: rv, at: Date.now() }; ql = rest; }
+      if (rest && rv > 0 && rv <= (/^(HP|MP)$/.test(rk) ? 300 : 40)) { QROLL = { k: rk, v: rv, at: Date.now() }; ql = rest; }
     }
     var tier = "";
     ql = ql.replace(/(^|[^0-9])(100|60|10)\s*%/, function (m, a, n) { tier = TIERPCT[n]; return a + " "; });
@@ -302,6 +353,16 @@
     out.sort(function (a, b) { return b.score - a.score || a.n.length - b.n.length; });
     if (out.length && out[0].score >= 450) { var cut = Math.max(420, out[0].score - 420); out = out.filter(function (r) { return r.score >= cut; }); }
     else if (out.length) { var top = out[0].score; out = out.filter(function (r) { return r.score >= top - 110; }).slice(0, 8); }
+    // nothing at all: a word that isn't in any item name ("brown work gloves" for Work Gloves) is dropped, one at a time
+    if (!out.length && toks.length > 1 && !searchItems.inner) {
+      searchItems.inner = true;
+      try {
+        for (var dk = 0; dk < toks.length && !out.length; dk++) {
+          var q2 = toks.filter(function (_, x) { return x !== dk; }).join(" ");
+          out = searchItems((tier ? q2 + " " + ({ lesser: "100%", intermediate: "60%", greater: "10%" }[tier] || "") : q2), limit).map(function (r) { return { n: r.n, score: Math.min(r.score, 440) - 60, why: r.why }; });
+        }
+      } finally { searchItems.inner = false; }
+    }
     return limit ? out.slice(0, limit) : out;
   }
   function idOf(name) { var r = dbRow(name); return r ? r[1] : 0; }
@@ -569,17 +630,23 @@
   function capturedAsync(name) { var k = ocrKey(name); if (k.length < 3) return Promise.resolve(""); return shard(k).then(function (m) { return (m && m[k]) || ""; }); }
   // Classic World's own icons from maplestory.io first; then icons cut from real shop windows.
   var IO = "https://maplestory.io/api/MCW/1/item/";
+  // the site's own copy of the icon first (/i/<id>.png, same connection, long cached), then maplestory.io
   function iconSrcs(name) {
     var out = [], r = dbRow(name);
-    if (r) { out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
+    if (r) { out.push("/i/" + r[1] + ".png"); out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
     var v = ICONS[name]; if (typeof v === "string") out.push(v);
     return out;
   }
   function iconSrc(name) { return iconSrcs(name)[0] || ""; }
   // try each source in turn, then a shop window crop, until one loads
   function loadIcon(im, name) {
-    var list = iconSrcs(name), k = 0, triedCap = false;
-    function cap() { if (triedCap) { im.remove(); return; } triedCap = true; capturedAsync(name).then(function (src) { if (src) im.src = src; else im.remove(); }); }
+    var list = iconSrcs(name), k = 0, triedCap = false, again = false;
+    // a crop from a shop window is only for items with no icon anywhere; a known item that failed to load (a busy
+    // moment on the network) tries its icon once more instead of showing a crop from someone's screen
+    function cap() {
+      if (list.length) { if (!again) { again = true; k = 0; setTimeout(function () { im.src = list[0] + (list[0].indexOf("?") < 0 ? "?r=1" : ""); }, 2500); } else im.remove(); return; }
+      if (triedCap) { im.remove(); return; } triedCap = true; capturedAsync(name).then(function (src) { if (src) im.src = src; else im.remove(); });
+    }
     im.onerror = function () { k++; if (k < list.length) this.src = list[k]; else cap(); };
     if (list.length) im.src = list[0]; else cap();
     return true;
@@ -1189,27 +1256,32 @@
     if (!j || !j.members || j.members < 25) return; var c = $("disccnt");   // a tiny number reads as an empty room; show it once the server has some people in it c.textContent = " " + fmt(j.members) + (j.online ? " · " + fmt(j.online) + " on" : ""); c.hidden = false;
     $("discpill").title = fmt(j.members) + " in the Club FM Discord, " + fmt(j.online) + " online now. Price checks, scanner help, and the live feed.";
   }).catch(function () {});
-  // players whose watcher sent shop rows in the last 15 minutes (streams and chat don't count)
-  function liveScanners() {
-    if (!D || !D.L) return 0;
-    var now = Date.now(), who = {};
-    D.L.forEach(function (l) { if (!l.chat && !l.stream && l.who && now - l.t < 15 * 6e4) who[String(l.who).toLowerCase()] = 1; });
-    return Object.keys(who).length;
-  }
-  function coverage24() {
+  // One walk over every listing per board (redone after a minute, since "live" and "today" move with the clock),
+  // shared by the cards, the streamer strip and the live pill, instead of one walk each on every redraw.
+  function Lstat() {
     if (!D || !D.L) return null;
-    var now = Date.now(), shops = {}, spots = {}, sc = {}, st = {};
-    D.L.forEach(function (l) { if (l.chat || now - l.t > DAY) return; if (l.s) shops[String(l.s).toLowerCase() + "|" + (l.c || 0)] = 1; if (l.r && l.c && /^FM\d+$/.test(l.r)) spots[l.r + "|" + l.c] = 1; if (l.who) (l.stream ? st : sc)[String(l.who).toLowerCase()] = 1; });
-    var n = Object.keys(shops).length; if (!n) return null;
-    return { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length };
+    var now = Date.now(), c = D._lst; if (c && now - c.at < 60e3) return c;
+    var live = {}, shops = {}, spots = {}, sc = {}, st = {}, by = {}, lastT = 0, L = D.L;
+    for (var k = 0; k < L.length; k++) {
+      var l = L[k], age = now - l.t; if (l.t > lastT) lastT = l.t;
+      if (!l.chat && !l.stream && l.who && age < 15 * 6e4) live[String(l.who).toLowerCase()] = 1;
+      if (!l.chat && age <= DAY) { if (l.s) shops[String(l.s).toLowerCase() + "|" + (l.c || 0)] = 1; if (l.r && l.c && /^FM\d+$/.test(l.r)) spots[l.r + "|" + l.c] = 1; if (l.who) (l.stream ? st : sc)[String(l.who).toLowerCase()] = 1; }
+      if (l.stream && age <= 7 * DAY) { var w = by[l.who] || (by[l.who] = { name: l.who, rows: 0, sales: 0, last: 0, shops: {} }); w.rows++; if (l.so && !l.b) w.sales++; if (l.t > w.last) w.last = l.t; if (l.s) w.shops[l.s] = 1; }
+    }
+    var n = Object.keys(shops).length;
+    return (D._lst = { at: now, lastT: lastT, live: Object.keys(live).length, streams: by, cov: n ? { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length } : null });
   }
+  // players whose watcher sent shop rows in the last 15 minutes (streams and chat don't count)
+  function liveScanners() { var s = Lstat(); return s ? s.live : 0; }
+  function coverage24() { var s = Lstat(); return s ? s.cov : null; }
   // Streamers whose broadcasts fed the board this week, credited by name with a link to their channel
   function renderStreams() {
     var box = $("bstreams"), list = $("bstr"); if (!box || !D || !D.L) return;
-    var now = Date.now(), by = {};
-    D.L.forEach(function (l) { if (!l.stream || now - l.t > 7 * DAY) return; var w = by[l.who] || (by[l.who] = { name: l.who, rows: 0, sales: 0, last: 0, shops: {} }); w.rows++; if (l.so && !l.b) w.sales++; if (l.t > w.last) w.last = l.t; if (l.s) w.shops[l.s] = 1; });
+    var now = Date.now(), by = (Lstat() || {}).streams || {};
     var ws = Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return (now - b.last < 20 * 6e4) - (now - a.last < 20 * 6e4) || Object.keys(b.shops).length - Object.keys(a.shops).length; });
     box.hidden = !ws.length; if (!ws.length) return;
+    var sig = ws.slice(0, 12).map(function (w) { return w.name + Object.keys(w.shops).length + "/" + w.sales + (now - w.last < 20 * 6e4) + ago(w.last); }).join("|");
+    if (list.dataset.sig === sig) return; list.dataset.sig = sig;   // nothing changed: leave the strip as it is
     $("bstr-sub").textContent = ws.length + (ws.length === 1 ? " streamer" : " streamers") + " this week";
     list.textContent = "";
     ws.slice(0, 12).forEach(function (w) {
@@ -1579,7 +1651,7 @@
     if (D.byName[n]) return D.byName[n];
     var hit = D.list.filter(function (i) { return i.item.toLowerCase() === lo || String(showName(i.item)).toLowerCase() === lo; })[0];
     if (hit) return hit;
-    try { var s = searchItems(n, 1)[0]; if (s && s.score >= 600 && D.byName[s.n]) return D.byName[s.n]; } catch (e) {}
+    var keepQ = QROLL; try { var s = searchItems(n, 1)[0]; QROLL = keepQ; if (s && s.score >= 600 && D.byName[s.n]) return D.byName[s.n]; } catch (e) { QROLL = keepQ; }
     return null;
   }
   function syncPOS() { POS = ledger().hold.map(function (h) { return { i: h.i, q: h.q, paid: Math.round(h.paid), t: h.t }; }); saveLS("fm-pos", POS); }
@@ -1771,7 +1843,7 @@
     var src = ""; try { src = localStorage.getItem("fm-sell-src") || ""; } catch (e) {}
     $("sell-src").value = src;
     if (!src) { GAME = []; return Promise.resolve(); }
-    var x = BUNDLE && BUNDLE[src]; GAME = Array.isArray(x) ? x : []; return Promise.resolve();
+    var x = (BUNDLE && BUNDLE[src]) || ENG_SELL[src]; GAME = Array.isArray(x) ? x : []; return Promise.resolve();
   }
   // the item suggestions shared by Sell my items and My positions
   function fillNames() {
@@ -1868,6 +1940,7 @@
       var wc = el("td"); wc.style.textAlign = "left"; wc.appendChild(el("b", null, d.s)); var bl = d.l || (d.roll && d.roll.r ? d.roll : i.bestL), wh = bl ? where(bl) : ""; if (wh) { wc.appendChild(el("br")); wc.appendChild(el("small", null, wh)); }
       if (bl && bl.stream) { wc.appendChild(el("br")); var ss = el("small"); ss.appendChild(streamLink(bl)); wc.appendChild(ss); } tr.appendChild(wc);
       tr.appendChild(el("td", null, ago(d.t)));
+      if (lst && lst.s) tipAttach(tr, lst, i.item);   // a deal is one listing: hover it for the item as the game shows it
       tb.appendChild(tr);
     });
     $("deal-empty").hidden = list.length > 0;
@@ -1898,14 +1971,15 @@
     if (!id || BASE[name] !== undefined) return;
     BASE[name] = null;
     fetch(IO + id).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-      if (!j || !j.metaInfo) return; var b = {};
+      if (!j || !j.metaInfo) { BASE[name] = {}; return; } var b = {};
       Object.keys(BASEMAP).forEach(function (k) { if (j.metaInfo[k] != null) b[BASEMAP[k]] = j.metaInfo[k]; });
       b.cash = !!j.metaInfo.cash; b.job = j.metaInfo.reqJob || 0; b.sub = j.typeInfo ? j.typeInfo.subCategory : "";
       BASE[name] = b;
       if ((b.ATT || b.MATT) && D && D.byName[name] && D.byName[name].equip) { DIRTY = true; render(); }      // rolls can be worked out now
       else if (state.sel === name) renderItem();
       if (hovName === name) showHov(name);
-    }).catch(function () {});
+      var gi = GTIP_ON && TIPL && TIPL.get(GTIP_ON); if (gi && gi.n === name) { var t = $("gtip"); t.textContent = ""; t.appendChild(gameTip(gi.l, gi.n)); }
+    }).catch(function () { if (!BASE[name]) BASE[name] = {}; });
   }
   // The stat that matters most for an item. Weapons: attack, or magic attack for wands and staffs.
   // Other equips: the main stat of the class that wears it, so STR warrior, INT mage, DEX bowman, LUK thief.
@@ -2266,7 +2340,7 @@
   }
   function hideHov() { clearTimeout(hovTimer); hovName = null; hovRow = null; $("hov").hidden = true; }
   document.addEventListener("mouseover", function (e) {
-    var tr = e.target.closest && e.target.closest("#rows tr[data-item], #deal-rows tr[data-item]");
+    var tr = e.target.closest && e.target.closest("#rows tr[data-item], #deal-rows tr[data-item]:not(.gtipable)");
     if (!tr) { if (hovName) hideHov(); return; }
     if (tr === hovRow) return;
     hideHov(); hovRow = tr; hovName = tr.dataset.item;
@@ -2286,11 +2360,43 @@
     renderItem(); ev("#open:" + name);
     if (window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); if (document.activeElement === $("q") && window.innerWidth <= 700) $("q").blur(); }
   }
-  // Price by roll: one section per stat that moves, each a short row of rolls from worst to best with the clean roll
-  // as the marker in the middle. Class main stats carry the class name, the viewer's own class goes first, rolls
-  // where several stats moved sit in their own "Total stats" section at the end, and rolls seen once wait behind a toggle.
+  // A roll's listings, for the list that opens under Price by roll: what's for sale now (cheapest first, with where to
+  // find it), then what sold (newest first). The same copy read twice in one visit counts once.
+  function forSale(l) { return !l.so && !l.b && l.st !== "gone" && l.st !== "sold" && Date.now() - l.t < 3 * DAY; }
+  function rollRows(ls) {
+    var seen = {}, up = [], sold = [], old = [];
+    ls.slice().sort(function (a, b) { return b.t - a.t; }).forEach(function (l) {
+      var k = String(l.s).toLowerCase() + "|" + l.u + "|" + JSON.stringify(l.x || {}) + "|" + (l.so ? 1 : 0); if (seen[k]) return; seen[k] = 1;
+      (l.so ? sold : forSale(l) ? up : old).push(l);
+    });
+    up.sort(function (a, b) { return a.u - b.u || b.t - a.t; });
+    return { up: up, sold: sold, old: old };
+  }
+  function rollList(i, ls, title) {
+    var g = rollRows(ls), box = el("div", "rlist");
+    var hd = el("div", "rlh"); hd.appendChild(el("b", null, title)); hd.appendChild(el("span", null, (g.up.length ? g.up.length + " for sale now" : "none for sale now") + " · " + g.sold.length + " sold")); box.appendChild(hd);
+    function row(l, kind) {
+      var r = el("div", "rl " + kind); r.tabIndex = 0;
+      r.appendChild(avatar(l.s));
+      var t = el("div", "rlt"); t.appendChild(el("b", null, l.s)); var c = statChip(i.item, l.x, l.xj); if (c) { var cw = el("span", "rlc"); cw.appendChild(c); t.appendChild(cw); }
+      t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? "trade chat" : "")) + " · " + ago(l.t)));
+      r.appendChild(t);
+      var p = el("div", "rlp"); p.appendChild(money(l.u)); p.appendChild(el("small", null, kind === "up" ? (l.st === "up" ? "likely still up" : "may be gone") : kind === "sold" ? "sold" : "seen, gone now")); r.appendChild(p);
+      tipAttach(r, l, i.item);
+      return r;
+    }
+    if (g.up.length) { box.appendChild(el("div", "rlsub", "For sale now, cheapest first")); g.up.slice(0, 12).forEach(function (l) { box.appendChild(row(l, "up")); }); }
+    if (g.sold.length) { box.appendChild(el("div", "rlsub", "Sold, newest first")); g.sold.slice(0, 8).forEach(function (l) { box.appendChild(row(l, "sold")); }); }
+    if (!g.up.length && g.old.length) { box.appendChild(el("div", "rlsub", "Seen earlier, likely gone")); g.old.slice(0, 6).forEach(function (l) { box.appendChild(row(l, "old")); }); }
+    box.appendChild(el("p", "rlnote", (window.matchMedia && matchMedia("(hover: none)").matches ? "Tap" : "Hover") + " a listing to see the item as the game shows it."));
+    return box;
+  }
+  // Price by roll: one section per stat that moves, each a row of rolls from worst to best. Every roll seen shows,
+  // one-offs included (an 8 attack glove is seen once and is the one people ask about). A cell's price is what that roll
+  // sold for, or what it's asking when none sold yet, and it says which. Click a roll for every copy: for sale now and sold.
+  // Expensive copies nobody hovered get their own cell, so they're never invisible: hover them in game to price their roll.
   var MAINCLS = { STR: "Warrior", DEX: "Bowman", INT: "Magician", LUK: "Thief" }, CLSSTAT = { 1: "STR", 2: "INT", 4: "DEX", 8: "LUK" }, CLSNAME = { WARRIOR: "STR", MAGICIAN: "INT", BOWMAN: "DEX", THIEF: "LUK" };
-  var ROLLRARE = false;
+  var ROLLOPEN = {};
   function myStat() {
     var c = $("cls") && +$("cls").value; if (CLSSTAT[c]) return CLSSTAT[c];
     try { var m = JSON.parse(localStorage.getItem("fm-map-me") || "{}"); if (m && m.cls && CLSNAME[String(m.cls).toUpperCase()]) return CLSNAME[String(m.cls).toUpperCase()]; } catch (e) {}
@@ -2299,80 +2405,154 @@
   function rollBox(i) {
     var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by roll")); box.appendChild(hd);
     if (i.bands) {
-      var g = el("div", "rollbands");
-      [["Low", Math.min(i.bands.lo, i.bands.mid), "down"], ["Average", i.bands.mid, "mid"], ["High", Math.max(i.bands.hi, i.bands.mid), "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(el("small", null, b[0])); d.appendChild(money(b[1])); g.appendChild(d); });
-      box.appendChild(g);
+      var bg = el("div", "rollbands");
+      [["Low", Math.min(i.bands.lo, i.bands.mid), "down"], ["Average", i.bands.mid, "mid"], ["High", Math.max(i.bands.hi, i.bands.mid), "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(el("small", null, b[0])); d.appendChild(money(b[1])); bg.appendChild(d); });
+      box.appendChild(bg);
     }
     var now = Date.now(), gks = keyStat(i.item, null, ""), gkb = gks === "ATT" || gks === "MATT" ? itemBase(i.item).s[gks] : null;
     var m = classMask(i.item), jobs = [1, 2, 4, 8].filter(function (b) { return m > 0 && (m & b); }).length;
-    // a chat grade like "(-3)" names no stat: on a one-class item or a weapon it's the key stat, on gear every class wears it can't be placed
     var gradeKey = (gks === "ATT" || gks === "MATT" || jobs === 1) && gks ? gks : "GRADE";
     var secs = {}, clean = null;
     i.rolls.forEach(function (r) {
       if (now - r.l.t > 14 * DAY) return;
       var bs = rollBasis(i.item, r.l) || gradeKey;
-      if (r.g === 0 && bs !== "TOTAL") { (clean || (clean = { ps: [], rs: [] })).ps.push(r.l.u); clean.rs.push(r); return; }
-      var s = secs[bs] || (secs[bs] = { k: bs, g: {}, n: 0 }); s.n++;
-      var c = s.g[r.g] || (s.g[r.g] = { g: r.g, ps: [], rs: [] }); c.ps.push(r.l.u); c.rs.push(r);
+      if (r.g === 0 && bs !== "TOTAL") { (clean || (clean = { ls: [] })).ls.push(r.l); return; }
+      var sc = secs[bs] || (secs[bs] = { k: bs, g: {}, n: 0 }); sc.n++;
+      (sc.g[r.g] || (sc.g[r.g] = { g: r.g, ls: [] })).ls.push(r.l);
     });
     var mine = myStat(), keys = Object.keys(secs);
     var rank = function (k) { return k === "TOTAL" ? 3 : k === "GRADE" ? 2 : k === mine ? -2 : (k === "ATT" || k === "MATT") && category(i.item) !== "Weapons" ? -1 : 0; };
     keys.sort(function (a, b) { return rank(a) - rank(b) || secs[b].n - secs[a].n || (a < b ? -1 : 1); });
     if (!keys.length && clean) keys = [gradeKey];
-    var rare = 0, shown = 0;
-    var cell = function (k, g, ps, rs, base) {
-      var n = ps.length, d = el("div", "rc " + (g === 0 ? "ref" : g > 0 ? "up" : "down") + (n === 1 && g !== 0 ? " rare" : ""));
-      var top = el("b", null, g === 0 ? (base != null ? "Base" : "Clean") : (g > 0 ? "+" : "−") + Math.abs(g));
-      if (base != null) top.appendChild(el("em", null, " " + (base + g)));
-      d.appendChild(top); d.appendChild(money(median(ps))); d.appendChild(el("small", null, n + " seen"));
-      var newest = rs.slice().sort(function (a, b) { return b.l.t - a.l.t; })[0], lab = (k === "TOTAL" ? "Total stats" : k === "GRADE" ? "Roll" : STATABBR[k] || k) + " " + (g === 0 ? "clean" : (g > 0 ? "+" : "") + g);
-      if (newest) { d.classList.add("jump"); d.tabIndex = 0; d.title = lab + " · newest one" + (where(newest.l) ? " · " + where(newest.l) : ""); var go = function () { jumpToGrade(i, g, newest.l, gks, null, lab); }; d.addEventListener("click", go); d.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); }); }
-      return d;
-    };
-    keys.forEach(function (k) {
-      var s = secs[k] || { g: {}, n: 0 }, gs = Object.keys(s.g).map(Number);
-      var vis = gs.filter(function (g) { return s.g[g].ps.length > 1; }); rare += gs.length - vis.length;
-      if (!ROLLRARE && !vis.length && gs.length) return;
+    var cleanPrice = clean ? priceOf(clean.ls) : null;
+    function priceOf(ls) {
+      var g = rollRows(ls), sold = g.sold.map(function (l) { return l.u; }), ask = g.up.concat(g.old).map(function (l) { return l.u; });
+      return sold.length ? { p: median(sold), how: "sold", up: g.up.length, sold: sold.length } : { p: median(ask.length ? ask : ls.map(function (l) { return l.u; })), how: "asking", up: g.up.length, sold: 0 };
+    }
+    function cell(key, g, ls, base, label) {
+      var pr = priceOf(ls), id = i.item + "|" + key + "|" + g, open = ROLLOPEN[id];
+      var d = el("button", "rc " + (g === 0 ? "ref" : g === "?" ? "unk" : g > 0 ? "up" : "down") + (open ? " on" : "")); d.type = "button";
+      var top = el("b", null, label || (g === 0 ? (base != null ? "Base" : "Clean") : (g > 0 ? "+" : "−") + Math.abs(g)));
+      if (base != null && g !== "?") top.appendChild(el("em", null, " " + (base + g)));
+      d.appendChild(top); d.appendChild(money(pr.p));
+      d.appendChild(el("small", null, pr.how === "sold" ? pr.sold + " sold" + (pr.up ? " · " + pr.up + " up" : "") : (pr.up ? pr.up + " for sale" : ls.length + " seen") + " · asking"));
+      var lab = (key === "TOTAL" ? "Total stats" : key === "GRADE" ? "Roll" : key === "?" ? "Not hovered yet" : STATABBR[key] || key) + (g === "?" ? "" : " " + (g === 0 ? "clean" : (g > 0 ? "+" : "") + g));
+      d.title = lab + ": click for every copy, for sale now and sold";
+      d.setAttribute("aria-expanded", open ? "true" : "false"); d.dataset.k = key; d.dataset.g = String(g);
+      var ab = base != null && g !== "?" ? base + g : (ls[0] && ls[0].x && ls[0].x[key] != null ? ls[0].x[key] : null); if (ab != null) d.dataset.abs = String(ab);
+      d.addEventListener("click", function () { var was = ROLLOPEN[id]; ROLLOPEN = {}; if (!was) ROLLOPEN[id] = 1; box.replaceWith(rollBox(i)); });
+      return { el: d, open: open ? rollList(i, ls, lab) : null };
+    }
+    var shown = 0;
+    keys.forEach(function (k, ki) {
+      var sc = secs[k] || { g: {}, n: 0 }, gs = Object.keys(sc.g).map(Number);
       var base = k === gks && gkb != null ? gkb : null;
       var sec = el("div", "rsec" + (k === mine ? " mine" : "") + (k === "TOTAL" || k === "GRADE" ? " misc" : ""));
       var h = el("div", "rsh"), nm = el("b", null, k === "TOTAL" ? "Total stats" : k === "GRADE" ? "Chat grade" : STATABBR[k] || k); h.appendChild(nm);
       var sub = k === "TOTAL" ? "several stats moved" : k === "GRADE" ? "stat not named" : MAINCLS[k] && (jobs !== 1 || k === mine) ? MAINCLS[k] : base != null ? "base " + base : "";
       if (sub) h.appendChild(el("span", null, sub));
       if (k === mine) h.appendChild(el("i", "you", "your class"));
-      if (s.n) h.appendChild(el("small", null, s.n + " rolled"));
+      if (sc.n) h.appendChild(el("small", null, sc.n + " rolled" + (ki > 0 && cleanPrice ? " · clean " + short(cleanPrice.p) : "")));
       sec.appendChild(h);
-      var row = el("div", "rrow");
-      if (clean && k !== "TOTAL") gs.push(0);
+      var row = el("div", "rrow"), opened = null;
+      // the clean roll is the yardstick: a cell in the first section, a note in the header of the others
+      if (clean && k !== "TOTAL" && ki === 0) gs.push(0);
       gs.sort(function (a, b) { return a - b; }).forEach(function (g) {
-        if (g === 0 && !s.g[0]) { row.appendChild(cell(k, 0, clean.ps, clean.rs, base)); return; }
-        if (!ROLLRARE && s.g[g].ps.length === 1) return;
-        row.appendChild(cell(k, g, s.g[g].ps, s.g[g].rs, base));
+        var c = g === 0 && !sc.g[0] ? cell(k, 0, clean.ls, base) : cell(k, g, sc.g[g].ls, base);
+        row.appendChild(c.el); if (c.open) opened = c.open;
       });
-      sec.appendChild(row); box.appendChild(sec); shown++;
+      sec.appendChild(row); if (opened) sec.appendChild(opened);
+      box.appendChild(sec); shown++;
     });
-    if (!shown && clean) { var cs = el("div", "rsec"); var ch = el("div", "rsh"); ch.appendChild(el("b", null, "Clean")); ch.appendChild(el("small", null, clean.ps.length + " seen")); cs.appendChild(ch); var cr = el("div", "rrow"); cr.appendChild(cell(gradeKey, 0, clean.ps, clean.rs, null)); cs.appendChild(cr); box.appendChild(cs); }
-    var ft = el("div", "rfoot"), known = i.rolls.length;
-    ft.appendChild(el("span", null, (i.bands ? i.bands.n + " prices this week · " : "") + (known ? known + " with a known roll" : "No rolls known yet")));
-    if (rare) {
-      var tb = el("button", "rtog", ROLLRARE ? "Hide rare rolls" : "Show " + rare + " rare " + (rare === 1 ? "roll" : "rolls")); tb.type = "button";
-      tb.title = "Rolls seen only once"; tb.addEventListener("click", function () { ROLLRARE = !ROLLRARE; box.replaceWith(rollBox(i)); });
-      ft.appendChild(tb);
+    if (!shown && clean) { var cs = el("div", "rsec"); var ch = el("div", "rsh"); ch.appendChild(el("b", null, "Clean")); ch.appendChild(el("small", null, clean.ls.length + " seen")); cs.appendChild(ch); var cr = el("div", "rrow"), cc = cell(gradeKey, 0, clean.ls, null); cr.appendChild(cc.el); cs.appendChild(cr); if (cc.open) cs.appendChild(cc.open); box.appendChild(cs); }
+    // copies far above the clean price that nobody hovered: almost always scrolled or a top roll
+    var floor = Math.max(cleanPrice ? cleanPrice.p * 4 : 0, i.typ * 4, ((i.bands && i.bands.hi) || 0) * 2);
+    var unread = (i.all || []).filter(function (l) { return !l.x && !l.b && !l.chat && l.u >= floor && floor > 0 && now - l.t < 7 * DAY && l.u < 2e9; });
+    var ug = rollRows(unread);
+    if (unread.length) {
+      var us = el("div", "rsec unread"), uh = el("div", "rsh"); uh.appendChild(el("b", null, "Not hovered yet")); uh.appendChild(el("span", null, "likely scrolled or a top roll"));
+      uh.appendChild(el("small", null, (ug.up.length + ug.sold.length + ug.old.length) + " seen")); us.appendChild(uh);
+      var ps = unread.map(function (l) { return l.u; }), ur = el("div", "rrow"), uc = cell("?", "?", unread, null, "Stats unread");
+      uc.el.querySelector(".num").replaceWith(el("span", "num rng2", short(Math.min.apply(null, ps)) + "–" + short(Math.max.apply(null, ps))));
+      ur.appendChild(uc.el); us.appendChild(ur); if (uc.open) us.appendChild(uc.open);
+      us.appendChild(el("p", "rlnote", "Rest the mouse on these in game and FM Watcher reads their stats, so they get priced by roll here."));
+      box.appendChild(us);
     }
+    var ft = el("div", "rfoot"), known = i.rolls.length;
+    ft.appendChild(el("span", null, (i.bands ? i.bands.n + " prices this week · " : "") + (known ? known + " with a known roll" : "No rolls known yet") + " · click a roll to see each one"));
     box.appendChild(ft);
-    // rolls with an attack number are in the "Price by ATT" table further down; here only the ones known by grade alone, like "(-3)" in chat
-    var gonly = i.rolls.filter(function (r) { return r.l.x.ATT == null && r.l.x.MATT == null; });
-    if (gonly.length) {
-      var dt = el("details", "rrecent"); dt.appendChild(el("summary", null, "Newest rolls seen"));
-      var ul = el("div", "rolllist");
-      gonly.slice().sort(function (a, b) { return b.l.t - a.l.t; }).slice(0, 10).forEach(function (r) {
-        var d = el("div"), c = statChip(i.item, r.l.x, r.l.xj); if (c) d.appendChild(c);
-        d.appendChild(money(r.l.u)); d.appendChild(el("small", null, r.l.s + " · " + (r.l.chat ? "trade chat" : r.l.so ? "sold" : "listed") + " · " + ago(r.l.t)));
-        ul.appendChild(d);
-      });
-      dt.appendChild(ul); box.appendChild(dt);
+    return box;
+  }
+  // ---------- the in-game look
+  // Hover any listing to see the item the way the game shows it: name, icon, requirements, category, every stat
+  // (what it rolled against the item's base in green or red), and upgrades left. Rebuilt from what FM Watcher read off
+  // that copy's own popup. A copy nobody hovered shows the item's base stats, and says so.
+  var TIPL = typeof WeakMap === "function" ? new WeakMap() : null, GTIP_ON = null;
+  function tipAttach(node, l, name) { if (!TIPL) return; TIPL.set(node, { l: l, n: name || (l && l.i) }); node.classList.add("gtipable"); }
+  var GTLINES = [["ATT", "Weapon Attack"], ["MATT", "Magic Attack"], ["STR", "STR"], ["DEX", "DEX"], ["INT", "INT"], ["LUK", "LUK"], ["HP", "MaxHP"], ["MP", "MaxMP"],
+    ["WDEF", "Weapon Def."], ["MDEF", "Magic Def."], ["ACC", "Accuracy"], ["AVOID", "Avoidability"], ["SPEED", "Speed"], ["JUMP", "Jump"], ["CRIT", "Critical Rate"]];
+  function gameTip(l, name) {
+    var x = l && l.x && typeof l.x === "object" ? l.x : null, read = !!(x && Object.keys(x).some(function (k) { return /^[A-Z]+$/.test(k); }));
+    loadBase(name);   // requirements come from the item's full record; the popup fills them in when it lands
+    var fb = fullBase(name), b = fb.s || {}, r = dbRow(name), api = BASE[name] || {}, box = el("div", "gt");
+    var used = x && x.SLOTS != null && b.SLOTS ? b.SLOTS - x.SLOTS : 0;
+    box.appendChild(el("div", "gt-name", showName(name) + (used > 0 ? " (+" + used + ")" : "")));
+    var top = el("div", "gt-top"), ic = el("div", "gt-ic"), im = iconImg(name); if (im) ic.appendChild(im); top.appendChild(ic);
+    var req = el("div", "gt-req"), lv = x && x.REQLV != null ? x.REQLV : api.REQLV != null ? api.REQLV : r && r[2] ? r[2] : 0;
+    var known = BASE[name] != null || !idOf(name);
+    [["REQ LEV", lv], ["REQ STR", api.RSTR], ["REQ DEX", api.RDEX], ["REQ INT", api.RINT], ["REQ LUK", api.RLUK]].forEach(function (q, qi) { var d = el("div"); d.appendChild(el("span", null, q[0])); d.appendChild(el("b", null, ": " + (qi && !known ? "…" : q[1] || 0))); req.appendChild(d); });
+    top.appendChild(req); box.appendChild(top);
+    var cn = className(classMask(name)); if (cn) box.appendChild(el("div", "gt-jobs", cn));
+    var kind = r && DBK[r[5]] ? DBK[r[5]].split(":").pop() : ""; if (kind && kind !== "Unknown") box.appendChild(el("div", "gt-l", "Category: " + kind));
+    var any = false;
+    GTLINES.forEach(function (t) {
+      var k = t[0], v = read && x[k] != null ? x[k] : b[k]; if (v == null || (!(read && x[k] != null) && !v)) return;
+      var line = el("div", "gt-l"); line.appendChild(document.createTextNode(t[1] + ": +" + v)); any = true;
+      var bv = read && x[k] != null ? (x[k + "_b"] != null ? x[k + "_b"] : b[k] != null ? b[k] : null) : null;
+      if (bv != null && bv !== v) { var d = v - bv; line.appendChild(el("span", d > 0 ? "gt-up" : "gt-dn", " (" + bv + (d > 0 ? " +" : " −") + Math.abs(d) + ")")); }
+      box.appendChild(line);
+    });
+    if (x && x.SUCCESS != null) { box.appendChild(el("div", "gt-l", "Success Rate: " + x.SUCCESS + "%")); any = true; }
+    var slots = read && x.SLOTS != null ? x.SLOTS : b.SLOTS; if (slots != null) box.appendChild(el("div", "gt-l", "Number of upgrades available: " + slots));
+    if (!any && slots == null) box.appendChild(el("div", "gt-l gt-dim", "No stats"));
+    if (l && l.s) {
+      var f = el("div", "gt-foot");
+      var pl = el("div"); pl.appendChild(el("b", null, l.s)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
+      var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
+      f.appendChild(el("div", "gt-dim", read ? "Stats read from this copy's popup in game" : "Not hovered in game yet: these are the item's base stats"));
+      box.appendChild(f);
     }
     return box;
   }
+  function gtipEl() { var t = $("gtip"); if (!t) { t = el("div", "gtip"); t.id = "gtip"; t.setAttribute("role", "tooltip"); t.hidden = true; document.body.appendChild(t); } return t; }
+  function gtipShow(node, cx, cy) {
+    var info = TIPL && TIPL.get(node); if (!info) return;
+    var t = gtipEl(); if (GTIP_ON !== node) { t.textContent = ""; t.appendChild(gameTip(info.l, info.n)); GTIP_ON = node; }
+    t.hidden = false; gtipMove(cx, cy);
+  }
+  function gtipMove(cx, cy) {
+    var t = $("gtip"); if (!t || t.hidden) return;
+    var w = t.offsetWidth, h = t.offsetHeight, x = cx + 18, y = cy + 14;
+    if (x + w > window.innerWidth - 6) x = Math.max(6, cx - w - 14);
+    if (y + h > window.innerHeight - 6) y = Math.max(6, window.innerHeight - h - 6);
+    t.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
+  }
+  function gtipHide() { var t = $("gtip"); if (t) t.hidden = true; GTIP_ON = null; }
+  function tipNode(n) { for (var k = 0; n && k < 6; k++, n = n.parentNode) if (n.classList && n.classList.contains("gtipable")) return n; return null; }
+  (function () {
+    if (!TIPL) return;
+    var raf = 0, lx = 0, ly = 0, touch = false;
+    document.addEventListener("pointerover", function (e) { if (e.pointerType !== "mouse") return; var n = tipNode(e.target); if (n) gtipShow(n, e.clientX, e.clientY); else if (GTIP_ON) gtipHide(); });
+    document.addEventListener("pointermove", function (e) { if (e.pointerType !== "mouse" || !GTIP_ON) return; lx = e.clientX; ly = e.clientY; if (!raf) raf = requestAnimationFrame(function () { raf = 0; gtipMove(lx, ly); }); }, { passive: true });
+    document.addEventListener("pointerdown", function (e) { touch = e.pointerType !== "mouse"; });
+    // phones: a tap on a listing shows its popup under the finger; a tap anywhere else puts it away
+    document.addEventListener("click", function (e) {
+      if (!touch) return; var n = tipNode(e.target);
+      if (n && n !== GTIP_ON && !e.target.closest("button, a")) { var rc = n.getBoundingClientRect(); gtipShow(n, Math.min(rc.left + 20, window.innerWidth - 270), rc.bottom - 8); }
+      else if (GTIP_ON) gtipHide();
+    });
+    window.addEventListener("scroll", function () { if (GTIP_ON && touch) gtipHide(); }, { passive: true, capture: true });
+  })();
   function svgEl(t, a) { var e = document.createElementNS("http://www.w3.org/2000/svg", t); for (var k in a) e.setAttribute(k, a[k]); return e; }
   function txt(x, y, s, a) { var t = svgEl("text", Object.assign({ x: x, y: y, "font-size": "9.5", "font-weight": "800", fill: "var(--muted)", "font-family": "Inter, sans-serif" }, a || {})); t.textContent = s; return t; }
   function chartSpread(i) {
@@ -2493,7 +2673,7 @@
         var parts = c[2].map(function (x) { return [x[0], x[1], ""]; }); if (c[5]) parts.push([c[5][0], c[5][1], "catalyst"]);
         parts.forEach(function (x) {
           var row = el("div", "gci"), id = GUIDE.ids && GUIDE.ids[x[0]];
-          if (id) { var im = new Image(); im.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; im.alt = ""; im.loading = "lazy"; im.onerror = function () { im.remove(); }; row.appendChild(im); }
+          if (id) { var im = new Image(); im.src = "/i/" + id + ".png"; im.alt = ""; im.loading = "lazy"; im.onerror = function () { if (/^\/i\//.test(new URL(im.src).pathname)) im.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; else im.remove(); }; row.appendChild(im); }
           row.appendChild(guideLink(x[0])); if (x[2]) row.appendChild(el("small", null, " " + x[2])); row.appendChild(el("em", null, "×" + fmt(x[1]))); rc.appendChild(row);
         });
         get.appendChild(rc);
@@ -2610,7 +2790,8 @@
         li.appendChild(el("span", "stt " + (x.st === "sold" ? "gone" : x.st), x.st === "sold" ? (mine && x.sold < GONE.need ? "You marked this sold" : "Marked sold by " + x.sold + (x.sold === 1 ? " player" : " players")) : x.st === "gone" ? "Not seen on the shop's later visit" : (x.st === "up" ? "Likely still up" : "May be gone by now") + (x.sold ? " · " + x.sold + " said sold" : "")));
         if (x.st !== "gone" && !x.chat) li.appendChild(soldBtn(x, mine));
       }
-      if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); li.tabIndex = 0; li.appendChild(tipBox(x)); var ksx = keyStat(i.item, x.x, x.xj); if (ksx && x.x[ksx] != null) li.dataset.sv = String(x.x[ksx]); }
+      tipAttach(li, x, i.item);   // hover (or tap) for the item as the game shows it
+      if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); var ksx = keyStat(i.item, x.x, x.xj); if (ksx && x.x[ksx] != null) li.dataset.sv = String(x.x[ksx]); }
       var rr = i.rolls && i.rolls.filter(function (r) { return r.l === x; })[0]; if (rr) li.dataset.g = String(rr.g);
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
       ls.appendChild(li);
@@ -2631,7 +2812,7 @@
     if (i.bid) { var bd = el("div", "bids"); bd.appendChild(document.createTextNode("Buyers in chat: top offer ")); bd.appendChild(money(i.bid)); bd.appendChild(document.createTextNode(" from " + i.bids.length + (i.bids.length === 1 ? " offer" : " offers"))); ip.appendChild(bd); }
     // listings with stats actually read (a trade chat "clean" tag alone has none)
     var withX = i.all.filter(function (x) { return x.x && !x.b && Object.keys(x.x).some(function (k) { return /^[A-Z]+$/.test(k) && k !== "SLOTS"; }); });
-    if (withX.length) {
+    if (withX.length && !(i.equip && (i.bands || i.rolls.length))) {   // equips have Price by roll above, which covers this
       var ksN = {}; withX.forEach(function (x) { var k = keyStat(i.item, x.x, x.xj); if (k) ksN[k] = (ksN[k] || 0) + 1; });
       var ks = Object.keys(ksN).sort(function (a, b) { return ksN[b] - ksN[a]; })[0] || keyStat(i.item, withX[0].x, withX[0].xj);
       // the first hover can be a clean pair: gloves and other armour that gain attack from scrolls are grouped by
@@ -2748,11 +2929,14 @@
     dropsBox(n, ip);
     // a roll asked for in the search: jump to its row in "Price by ATT", or say none has been seen
     if (PENDROLL && PENDROLL.n === n) {
-      var want = PENDROLL.k + " " + PENDROLL.v, row = [].filter.call(ip.querySelectorAll(".pbs tr.jump"), function (tr) { return tr.firstChild && new RegExp("^" + want + "(\\D|$)").test(tr.firstChild.textContent); })[0];
+      var want = PENDROLL.k + " " + PENDROLL.v, row = ip.querySelector('.rollbox .rc[data-k="' + PENDROLL.k + '"][data-abs="' + PENDROLL.v + '"]') || [].filter.call(ip.querySelectorAll(".pbs tr.jump"), function (tr) { return tr.firstChild && new RegExp("^" + want + "(\\D|$)").test(tr.firstChild.textContent); })[0];
       PENDROLL = null;
-      if (row) setTimeout(function () { row.scrollIntoView({ block: "center" }); row.click(); }, 50);
-      else { var nn = el("p", "rollmiss", "No " + showName(n) + " with " + want + " seen yet. The rolls that have been seen are below."); ip.insertBefore(nn, ip.children[1] || null); }
+      if (row && row.classList.contains("rc")) { ROLLOPEN = {}; ROLLOPEN[n + "|" + row.dataset.k + "|" + row.dataset.g] = 1; var rb0 = ip.querySelector(".rollbox"); var nb0 = rollBox(D.byName[n]); rb0.replaceWith(nb0); setTimeout(function () { var o = nb0.querySelector(".rc.on"); if (o) o.scrollIntoView({ block: "center" }); }, 50); }
+      else if (row) setTimeout(function () { row.scrollIntoView({ block: "center" }); row.click(); }, 50);
+      else ROLLMISS = { n: n, want: want };
     }
+    if (ROLLMISS && ROLLMISS.n === n) { var nn = el("p", "rollmiss", "No " + showName(n) + " with " + ROLLMISS.want + " seen yet. The rolls that have been seen are below."); ip.insertBefore(nn, ip.children[1] || null); }
+    else ROLLMISS = null;
   };
   function renderActivity() {
     var box = $("act"); if ($("activity").hidden) return; box.textContent = "";
@@ -2821,6 +3005,8 @@
       sp.classList.add("in"); sp.href = "contribute.html#earn"; sp.title = "Signed in as " + ME_ACCT.name + ". Your settings are saved to this account. Opens your account page.";
       sp.textContent = ""; if (ME_ACCT.avatar) { var im = new Image(); im.src = ME_ACCT.avatar; im.alt = ""; sp.appendChild(im); }
       var tx = el("span", null, ME_ACCT.name); tx.id = "signtxt"; sp.appendChild(tx);
+      // the Club role from the Discord shows next to the name, the same tag the ranks use
+      if (ME_ACCT.club) { var ct = el("span", "clubtag", "Club"); ct.title = "Club role in the Club FM Discord"; sp.appendChild(ct); sp.title = "Signed in as " + ME_ACCT.name + " · Club member. Opens your account page."; }
     } else { sp.classList.remove("in"); }
   }
   function acctLoad() {
@@ -2854,6 +3040,7 @@
   function clubHash(k) { return crypto.subtle.digest("SHA-256", new TextEncoder().encode("maplefm-club:" + k)).then(function (b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); }); }
   function setClub(on) {
     DEALS_ON = on; document.body.classList.toggle("club", on);
+    if (!ENGINE) { if (on) engineStart(); else engineStop(); }
     if (on && $("ubar").hidden) updateBar();
     if (on && state.wantDeals) { state.tab = "deals"; state.wantDeals = false; }
     if (!on && state.list === "buy") state.list = "sales";
@@ -3042,24 +3229,34 @@
   }
   function hasRaw() { return scans.length > base.length; }
   function render(rebuild) {
+    if (ENGINE) return;   // the engine only builds; the page draws
     if (rebuild === true || DIRTY || !D || Date.now() - lastBuild > 5 * 6e4) {
       if (!scans.length && !D) { var pv = loadPreview(); if (pv) { D = pv; lastBuild = Date.now(); DIRTY = false; } }
       if (D && D.snap && !hasRaw()) { DIRTY = false; lastBuild = Date.now(); }
       else if (!D || scans.length || !D.preview) { mark("buildA"); D = build(); mark("buildB"); SIDX = null; DIRTY = false; lastBuild = Date.now(); if (D.list.length) setTimeout(saveSummary, 1500); }
     }
-    nxRate(); renderCards(); renderBoard(); renderTicker(); renderAlert(); renderWatchAlert(); if (RANKS && armed) seenTiers(); if ($("ranks").open) renderRanks();
+    nxRate(); renderCards(); renderAlert(); renderWatchAlert();
     var nck = D.list.filter(function (i) { return i.check; }).length; $("m-check-n").textContent = nck ? nck : "";
     ["prices", "deals", "sell", "pos"].forEach(function (t) { $(t + "-view").hidden = state.tab !== t; $("tab-" + t).setAttribute("aria-selected", state.tab === t); });
     $("chips").parentNode.hidden = state.tab === "sell" || state.tab === "pos";
     if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else if (state.tab === "sell") renderSell(); else renderPos();
     if (!state.sel && D.list.length && !document.body.classList.contains("noside")) { var top = D.list.slice().sort(function (a, b) { return b.vol - a.vol; })[0]; state.sel = top.item; }
     if (state.sel && !D.byName[state.sel]) { var c = canon(state.sel).n; if (D.byName[c]) state.sel = c; }
-    renderItem(); renderActivity(); renderDrawer(); livePill();
+    renderItem(); livePill();
+    // the parts below the fold or off to the side draw a moment later, when the page is idle, so the table and
+    // the item card come up first and a click never waits on the rankings
+    afterPaint();
+  }
+  var AFTER_P = 0;
+  function afterPaint() {
+    if (AFTER_P) return;
+    var run = function () { AFTER_P = 0; if (!D) return; renderBoard(); renderTicker(); if (RANKS && armed) seenTiers(); if ($("ranks").open) renderRanks(); renderActivity(); renderDrawer(); };
+    AFTER_P = window.requestIdleCallback ? requestIdleCallback(run, { timeout: 700 }) : setTimeout(run, 60);
   }
   function livePill() {
     if (!D) return;
     if (D.preview) { $("livepill").classList.add("stale"); $("livetxt").textContent = MEMBER === false ? "Prices updated " + ago(D.at) : "Loading"; return; }
-    var lastT = D.L.reduce(function (a, l) { return Math.max(a, l.t); }, 0);
+    var lastT = (Lstat() || {}).lastT || 0;
     var stale = !lastT || Date.now() - lastT > 20 * 6e4;
     $("livepill").classList.toggle("stale", stale);
     $("livetxt").textContent = lastT ? "Updated " + ago(lastT).replace("just now", "just now") : "No scans yet";
@@ -3092,7 +3289,7 @@
   });
   var qTimer = null;
   ["q", "win", "f-low", "f-sold", "f-bids", "f-cash", "f-spot", "cls", "lv-min", "lv-max"].forEach(function (id) {
-    var go = function () { if (id === "win" || id === "f-spot") { DIRTY = true; render(); } else renderView(); };
+    var go = function () { if (id === "win" || id === "f-spot") { if (engineLive()) enginePoke(true); DIRTY = true; render(); } else renderView(); };
     $(id).addEventListener("input", id === "q" ? function () { clearTimeout(qTimer); qTimer = setTimeout(go, 110); } : go);
     if (id !== "q") $(id).addEventListener("change", go);
   });
@@ -3410,10 +3607,12 @@
     d.hidden = !s.length; if (!s.length) return;
     var f = s[0], dl = $("dlast"); dl.textContent = "";
     dl.appendChild(el("b", null, f.s)); dl.appendChild(document.createTextNode(" sold " + showName(f.i) + " for ")); dl.appendChild(money(f.p)); dl.appendChild(document.createTextNode(" · " + ago(f.t)));
-    var box = $("dlist"); box.textContent = "";
+    var box = $("dlist"), sig = s.map(function (l) { return l.s + l.i + l.p + ago(l.t); }).join("|");
+    if (box.dataset.sig === sig) return; box.dataset.sig = sig; box.textContent = "";
     s.forEach(function (l) {
       var b = el("button"); b.type = "button"; b.appendChild(iconBox(l.i)); b.appendChild(el("b", null, l.i));
       b.appendChild(el("small", null, l.s + (where(l) ? " · " + where(l) : "") + " · " + ago(l.t))); b.appendChild(money(l.p));
+      tipAttach(b, l, l.i);
       b.addEventListener("click", function () { $("drawer").classList.remove("open"); pick(l.i); }); box.appendChild(b);
     });
   }
@@ -3526,9 +3725,9 @@
   function getJSON(path) {
     var now = Date.now();
     if (missing[path] && now - missing[path] < 9e5) return Promise.resolve(null);
-    // visitors read the compressed, cached copy (about 8 times smaller, no hourly limit); club members get the
-    // newest copy straight from GitHub so deals show up the moment they land
-    if (now < rawUntil || !DEALS_ON) return getRaw(path);
+    // everyone reads the compressed, cached copy (about 8 times smaller, no hourly limit). Only maintenance notices and
+    // ranks come this way, never deals, so the GitHub API (60 calls an hour, then errors) isn't worth it.
+    if (now < rawUntil || !DEALS_ON || true) return getRaw(path);
     return fetch(API + path + "?ref=live", { cache: "no-cache", headers: { Accept: "application/vnd.github.raw+json" } })
       .then(function (r) {
         var left = +r.headers.get("x-ratelimit-remaining"), reset = +r.headers.get("x-ratelimit-reset");
@@ -3587,6 +3786,7 @@
     // wait briefly for the server's finished board; when it landed, the raw listings wait until the page is idle
     return Promise.race([SNAP_P, new Promise(function (ok) { setTimeout(ok, 2500); })]).then(function () {
       if (SNAP_OK && !DEALS_ON) return BUNDLE;   // the server's board keeps refreshing on its own (snapRefresh)
+      if (!ENGINE && DEALS_ON && (engineLive() || engineStart())) return BUNDLE;   // the club engine reads the listings
       return getBundle1();
     });
   }
@@ -3663,7 +3863,7 @@
     return m || Date.now() - 36e5;
   }
   // Club and Mega Deals: new listings every 15 seconds, so a deal shows up while it's still there to buy
-  setInterval(function () { if (DEALS_ON && D && !document.hidden) livePoll(); }, 15000);
+  setInterval(function () { if (DEALS_ON && D && !document.hidden && !engineLive()) livePoll(); }, 15000);
   function livePoll() {
     getBundle().then(function (b) {
       FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
@@ -3690,6 +3890,86 @@
       });
     });
   }
+  // ---------- the club engine
+  // Club members get every new listing within 15 seconds, and working thousands of raw listings out into the board
+  // is a second or more of solid number crunching. A background worker (fmengine.js) runs this same file, builds the
+  // board there and hands over the finished board, so the page itself never freezes. If the worker can't start or
+  // goes quiet, the page falls back to building the board itself, the old way.
+  var ENG = { T: null, sellSig: "", seq: 0 }, ENGW = null, ENG_ON = false, ENG_BROKEN = false, ENG_SELL = {}, ENG_WAIT = null;
+  function engineMain() {
+    self.onmessage = function (e) {
+      var m = e.data || {};
+      if (m.type === "ui") { Object.keys(m.ids || {}).forEach(function (k) { self.FM_ENGINE.ids[k] = m.ids[k]; }); engineTick(true); }
+      else if (m.type === "poll") engineTick(false);
+    };
+    setClub(true);
+    dbReady.then(function () { engineTick(true); });
+  }
+  function engineTick(force) {
+    clearTimeout(ENG.T);
+    // the scanner ranks feed the ladder that the build works out (names, streams), as the page's poll does
+    var rk = Date.now() - (ENG.rk || 0) > 6e4 ? getJSON("data/ranks.json").then(function (r) { ENG.rk = Date.now(); if (r && r.who) { if (!RANKS || RANKS.updated !== r.updated) force = true; RANKS = r; } }) : Promise.resolve();
+    rk.then(function () { return getBundle(); }).then(function (b) {
+      if (MEMBER === false) { self.postMessage({ type: "denied" }); return; }
+      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
+      var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
+      var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
+      var changed = force || sig !== lastSig; lastSig = sig; scans = all;
+      var sell = {}, ss = ""; Object.keys(b || {}).forEach(function (k) { if (/-sell\.json$/.test(k) && Array.isArray(b[k])) { sell[k] = b[k]; ss += k + ":" + b[k].length + ":" + ((b[k][b[k].length - 1] || {}).at || "") + "|"; } });
+      if (ss !== ENG.sellSig) { ENG.sellSig = ss; self.postMessage({ type: "sell", sell: sell }); }
+      if (!changed || !hasRaw()) return;
+      var t0 = Date.now(); D = build(); var t1 = Date.now();
+      // handed over as number arrays moved across without copying (prices, times, sellers...), plus the rest as one
+      // text: far quicker for the page to take in than a copy of the whole object
+      var o = snapEncode(true, true); if (!o) return;
+      var typed = {}, move = [], rest = {};
+      Object.keys(o.cols).forEach(function (k) {
+        var c = o.cols[k], num = function (a) { for (var q = 0; q < a.length; q++) if (typeof a[q] !== "number") return false; return true; };
+        if (Array.isArray(c) && num(c)) { var f = new Float64Array(c); typed[k] = f; move.push(f.buffer); }
+        else if (c && c.g && num(c.v)) { var g = new Int32Array(c.g), v = new Float64Array(c.v); typed[k] = { g: g, v: v }; move.push(g.buffer, v.buffer); }
+        else rest[k] = c;
+      });
+      o.cols = rest;
+      self.postMessage({ type: "board", text: JSON.stringify(o), typed: typed, ms: [t1 - t0, Date.now() - t1] }, move);
+    }).catch(function (e) { self.postMessage({ type: "error", msg: String(e && e.stack || e).slice(0, 400) }); })
+      .then(function () { ENG.T = setTimeout(function () { engineTick(false); }, 15000); });
+  }
+  function engineUI() { return { win: { value: $("win").value }, "f-spot": { checked: $("f-spot").checked } }; }
+  function engineStart() {
+    if (ENGINE || ENGW || ENG_BROKEN || !window.Worker || !MYSRC) return false;
+    try { ENGW = new Worker("/fmengine.js?v=1"); } catch (e) { ENG_BROKEN = true; return false; }
+    var ls = {}; try { for (var k = 0; k < localStorage.length; k++) { var key = localStorage.key(k); if (/^fm-/.test(key) && key !== "fm-summary") ls[key] = localStorage.getItem(key); } } catch (e) {}
+    var ids = engineUI(); ["scan-data", "icon-ids"].forEach(function (id) { var n = $(id); if (n) ids[id] = { textContent: n.textContent }; });
+    ENGW.onmessage = function (e) {
+      var m = e.data || {};
+      if (m.type === "board") {
+        mark("engIn"); var seq = ++ENG.seq, j0 = null; try { j0 = JSON.parse(m.text); Object.keys(m.typed || {}).forEach(function (k) { j0.cols[k] = m.typed[k]; }); } catch (err) { j0 = null; }
+        T0.engMs = m.ms; T0.engLen = m.text.length; if (window.FM_KEEPTEXT) window.FM_ENGTEXT = m.text;
+        snapDecodeAsync(j0).then(function (d) {
+          mark("engDec");
+          if (!d || !DEALS_ON || seq !== ENG.seq) return;   // a newer board came in while this one was unpacked
+          d.engine = true; clearTimeout(ENG_WAIT); ENG_ON = true; mark("engine");
+          D = d; MEMBER = true; $("gate").hidden = true; lastBuild = Date.now(); DIRTY = false; SIDX = null;
+          keepRows = $("rows").childElementCount; render(); keepRows = 0;
+        });
+      } else if (m.type === "sell") { ENG_SELL = m.sell || {}; if (state.tab === "sell") loadGame().then(function () { render(); }); }
+      else if (m.type === "denied") { engineStop(true); MEMBER = false; gateText(!!ME_ACCT); $("gate").hidden = false; }
+      else if (m.type === "error") { if (!ENG_ON) engineFail(m.msg); else if (window.console) console.warn("board engine:", m.msg); }
+    };
+    ENGW.onerror = function (e) { engineFail(e && e.message); };
+    ENGW.postMessage({ type: "init", src: MYSRC, ids: ids, ls: ls });
+    // nothing back in 40 seconds: build here instead
+    ENG_WAIT = setTimeout(function () { if (!ENG_ON) engineFail("timeout"); }, 40000);
+    return true;
+  }
+  function engineStop(keepBroken) { clearTimeout(ENG_WAIT); if (ENGW) { try { ENGW.terminate(); } catch (e) {} } ENGW = null; ENG_ON = false; if (keepBroken) ENG_BROKEN = true; }
+  function engineFail(msg) {
+    if (window.console) console.warn("board engine off, building here:", msg);
+    engineStop(true);
+    if (DEALS_ON) livePoll();
+  }
+  function enginePoke(ui) { if (ENGW) ENGW.postMessage(ui ? { type: "ui", ids: engineUI() } : { type: "poll" }); }
+  function engineLive() { return !!ENGW && !ENG_BROKEN; }
   function updateBar() {
     fetch("download/version.json?t=" + Math.floor(Date.now() / 6e5), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
       if (!v || !v.version || !v.date) return;
@@ -3707,6 +3987,7 @@
   // The item list makes every name tidy, so the first real build waits for it (it is small and quick); the page
   // shell shows at once and the data lands in one pass instead of three.
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
+  if (ENGINE) { engineMain(); return; }
   mark("start"); render(); mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;
   // the server's finished board first; the raw listings follow when the page is idle (straight away for deal holders)
   var SNAP_OK = false, RAW_AFTER = 0;
@@ -3715,12 +3996,14 @@
     if (!SNAP_OK || hasRaw() || DEALS_ON || document.hidden) return;
     fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !D || !D.snap || j.at <= D.snapAt || hasRaw()) return;
-      var d = snapDecode(j); if (!d) return;
+      return snapDecodeAsync(j).then(function (d) {
+      if (!d || !D || !D.snap || D.engine || DEALS_ON || hasRaw()) return;
       D = d; lastBuild = Date.now(); DIRTY = false; SIDX = null; keepRows = $("rows").childElementCount; render(); keepRows = 0;
+      });
     }).catch(function () {});
   }
-  SNAP_P.then(function (j) {
-    var d = null; try { d = snapDecode(j); } catch (e) { d = null; }
+  SNAP_P.then(function (j) { return snapDecodeAsync(j); }).then(function (d) {
+    if (D && D.engine) return;   // the club engine's board already landed
     if (!d || hasRaw() || (D && !D.preview && !D.snap && D.list.length)) { getBundle(); return; }
     if (Date.now() - d.snapAt > 90 * 6e4) { getBundle(); return; }   // stale copy: build it here instead
     D = d; SNAP_OK = true; RAW_AFTER = Date.now() + 20000; lastBuild = Date.now(); DIRTY = false; SIDX = null; mark("snap"); render(); mark("live");

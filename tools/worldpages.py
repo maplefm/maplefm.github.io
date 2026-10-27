@@ -95,7 +95,8 @@ def page(title, desc, path, crumbs, body, og=None):
 def write(out, path, text):
     d = os.path.join(out, path.strip("/"))
     os.makedirs(d, exist_ok=True)
-    open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(text)
+    import itempages
+    open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(itempages.noicon(text))
 
 
 def build(world, guide, summary, notes, out):
@@ -110,7 +111,7 @@ def build(world, guide, summary, notes, out):
     import itempages
     def ilink(n, c=None):
         t = E(itempages.shown(n)) + (f" ×{c:,}" if c else "")
-        ic = f'<img class="gi" src="{IO}/item/{IDS[n]}/icon" alt="" loading="lazy">' if n in IDS else ""
+        ic = f'<img class="gi" src="https://maplefm.gg/i/{IDS[n]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{IDS[n]}/icon&#39;" alt="" loading="lazy">' if n in IDS else ""
         return f'{ic}<a href="/item/{itempages.slug(n)}/">{t}</a>' if n in ITEMPAGE else f'{ic}{t}'
     def live(n):   # straight to the item on the live board: who is selling it right now, and where
         return f' <a class="lv" href="/#item={urllib.parse.quote(n)}" title="Live listings for {E(itempages.shown(n))} on the price board">live</a>' if n in PRICE else ""

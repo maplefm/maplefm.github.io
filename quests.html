@@ -141,7 +141,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   function img(src, cls, alt) { var i = new Image(); i.loading = "lazy"; i.alt = ""; i.src = src; if (cls) i.className = cls;
     i.onerror = function () { if (alt && i.src.indexOf(alt) < 0) { i.src = alt; return; } if (i.parentNode) i.parentNode.replaceChild(ph(i.dataset.ph), i); }; return i; }
   function mobImg(id, name) { var k = MOBIMG[String(id)]; var i = img(IO + "mob/" + id + "/" + (k || "icon"), null, IO + "mob/" + id + "/render/move"); i.dataset.ph = (name || "?").charAt(0); return i; }
-  function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) { var i = img(IO + "item/" + id + "/icon"); i.dataset.ph = name.charAt(0); b.appendChild(i); } else b.appendChild(ph(name.charAt(0))); return b; }
+  function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) { var i = img("/i/" + id + ".png", null, IO + "item/" + id + "/icon"); i.dataset.ph = name.charAt(0); b.appendChild(i); } else b.appendChild(ph(name.charAt(0))); return b; }
   // only items with an item page link to one (5+ prices seen); the rest open a board search
   var PAGE = {};
   function itemHref(name) { return PAGE[name] ? "/item/" + slug(name) + "/" : "/?q=" + encodeURIComponent(name); }
@@ -217,7 +217,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     box.appendChild(t);
     var ul = el("ul"), parts = c[2].slice(); if (c[5]) parts.push([c[5][0], c[5][1], 1]);
     parts.forEach(function (x) {
-      var li = el("li"); if (IDS[x[0]]) li.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); li.appendChild(itemLink(x[0]));
+      var li = el("li"); if (IDS[x[0]]) li.appendChild(img("/i/" + IDS[x[0]] + ".png", null, IO + "item/" + IDS[x[0]] + "/icon")); li.appendChild(itemLink(x[0]));
       if (x[2]) li.appendChild(el("small", null, " catalyst"));
       var em = el("em", null, "×" + (x[1] * crafts).toLocaleString()); if (crafts > 1) em.appendChild(el("small", null, " (" + x[1] + " each)")); li.appendChild(em);
       ul.appendChild(li);
@@ -266,7 +266,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     if (q.need.length) { var s1 = el("div", "sec"); s1.appendChild(el("h4", null, "Bring")); q.need.forEach(function (x) { s1.appendChild(needRow(x[0], x[1])); }); d.appendChild(s1); var c = costOf(q); if (c) d.appendChild(el("p", "cost", "Buying it all on the Free Market: about " + meso(c) + " mesos.")); }
     if (q.kill.length) { var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt")); q.kill.forEach(function (k) { var r = el("div", "row"), ic = el("div", "ic"); if (k[2] != null) ic.appendChild(mobImg(k[2], k[0])); else ic.appendChild(ph(String(k[0]).charAt(0))); r.appendChild(ic); r.appendChild(el("b", null, k[0])); r.appendChild(el("div", "qty", "×" + k[1])); s2.appendChild(r); }); d.appendChild(s2); }
     var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, "💰 " + q.meso.toLocaleString())); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
-    q.get.forEach(function (x) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); if (IDS[x[0]]) s.appendChild(img(IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); a.appendChild(s); rw.appendChild(a); });
+    q.get.forEach(function (x) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); if (IDS[x[0]]) s.appendChild(img("/i/" + IDS[x[0]] + ".png", null, IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); a.appendChild(s); rw.appendChild(a); });
     if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); d.appendChild(s3); }
     if (q.pre.length) { var pids = q.pre.filter(function (id) { return BYID[id]; }); if (pids.length) { var pp = el("p", "pre", "After: "); pids.forEach(function (id, k) { if (k) pp.appendChild(document.createTextNode(", ")); pp.appendChild(questLink(BYID[id].n, id)); }); if (preDone(q)) pp.appendChild(document.createTextNode(" ✓")); d.appendChild(pp); } }
     if (q.custom) d.appendChild(el("p", "talk", "Not in our quest list yet, so no details. Kept so your log matches the game."));

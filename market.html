@@ -103,7 +103,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
       .catch(function () { return { _s: 0, error: "Couldn't reach Club FM. Check your connection and try again." }; });
   }
   function signIn() { var a = el("a", "btn gold", "Sign in with Discord"); a.href = API + "/login?back=market"; return a; }
-  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; i.onerror = function () { i.remove(); }; return i; }
+  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "/i/" + id + ".png"; i.onerror = function () { if (i.dataset.io) { i.src = i.dataset.io; i.dataset.io = ""; } else i.remove(); }; i.dataset.io = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; return i; }
   function vsTyp(l) {
     var r = ROWS[l.item]; if (!r || !r.typ || l.stats) return null;
     var d = l.price / r.typ - 1;

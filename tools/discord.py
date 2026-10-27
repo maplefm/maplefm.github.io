@@ -106,7 +106,9 @@ def icon_url(item):
             except Exception: continue
     base = re.sub(r"\s*\(name cut off\)$", "", name)
     iid = _ITEM_IDS.get(base.lower())
-    if iid: return f"https://maplestory.io/api/MCW/1/item/{iid}/icon"
+    if iid:
+        # the site's own copy when it has one (fast, always up), else maplestory.io
+        return f"{SITE}/i/{iid}.png" if os.path.exists(os.path.join(MAIN_DIR, "i", f"{iid}.png")) else f"https://maplestory.io/api/MCW/1/item/{iid}/icon"
     slug = re.sub(r"[^a-z0-9]+", "-", base.lower()).strip("-")
     if os.path.exists(os.path.join(MAIN_DIR, "icons", slug + ".png")): return f"{SITE}/icons/{slug}.png"
     return None
