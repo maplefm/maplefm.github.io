@@ -2509,12 +2509,24 @@
     GTLINES.forEach(function (t) {
       var k = t[0], v = read && x[k] != null ? x[k] : b[k]; if (v == null || (!(read && x[k] != null) && !v)) return;
       var line = el("div", "gt-l"); line.appendChild(document.createTextNode(t[1] + ": +" + v)); any = true;
+      if (read && x[k] == null) { line.className += " gt-dim"; line.appendChild(el("span", "gt-dim", " (base, not read)")); }
       var bv = read && x[k] != null ? (x[k + "_b"] != null ? x[k + "_b"] : b[k] != null ? b[k] : null) : null;
       if (bv != null && bv !== v) { var d = v - bv; line.appendChild(el("span", d > 0 ? "gt-up" : "gt-dn", " (" + bv + (d > 0 ? " +" : " −") + Math.abs(d) + ")")); }
       box.appendChild(line);
     });
     if (x && x.SUCCESS != null) { box.appendChild(el("div", "gt-l", "Success Rate: " + x.SUCCESS + "%")); any = true; }
-    var slots = read && x.SLOTS != null ? x.SLOTS : b.SLOTS; if (slots != null) box.appendChild(el("div", "gt-l", "Number of upgrades available: " + slots));
+    // upgrades left only when this copy's popup showed them: a scrolled copy has fewer than the base, and the base
+    // number in its place would make a used item look clean
+    // armour gains attack only from scrolls, 3 at most per success: +6 ATT gloves have used at least 2 slots
+    var armGain = read && category(name) !== "Weapons" && !b.ATT && !b.MATT ? (x.ATT || 0) + (x.MATT || 0) : 0, minUsed = Math.ceil(armGain / 3);
+    if (read && x.SLOTS != null) {
+      var sl = el("div", "gt-l", "Number of upgrades available: " + x.SLOTS);
+      if (b.SLOTS && (x.SLOTS > b.SLOTS || b.SLOTS - x.SLOTS < minUsed)) { sl.appendChild(el("span", "gt-dn", " (doesn't add up, check it in game)")); }
+      box.appendChild(sl);
+    }
+    else if (read && b.SLOTS) box.appendChild(el("div", "gt-l gt-dim", "Number of upgrades available: not read. " + (minUsed ? "At most " + Math.max(0, b.SLOTS - minUsed) + " of " + b.SLOTS + ": +" + armGain + " attack takes " + minUsed + "+ scrolls." : b.SLOTS + " when clean.")));
+    else if (b.SLOTS != null) box.appendChild(el("div", "gt-l", "Number of upgrades available: " + b.SLOTS));
+    var slots = read ? x.SLOTS : b.SLOTS;
     if (!any && slots == null) box.appendChild(el("div", "gt-l gt-dim", "No stats"));
     if (l && l.s) {
       var f = el("div", "gt-foot");
