@@ -820,6 +820,8 @@ const SYN = { att: "attack", atk: "attack", attk: "attack", matt: "magic attack"
   ths: "two-handed sword", glove: "gloves", shoe: "shoes", earrings: "earring", topwear: "topwear", ovr: "overall", ova: "overall" };
 function expandQuery(q, abbr) {
   q = String(q || "").toLowerCase().replace(/[%]/g, " ").replace(/\s+/g, " ").trim();
+  // "10 int earring" and "60 gfa": the rate can lead too
+  const lead = /^(100|60|10)\s+(.+)$/.exec(q); if (lead && !/\d$/.test(lead[2])) q = lead[2] + " " + lead[1];
   const m = /^(.*?)\s*(100|60|10)$/.exec(q);
   let base = m ? m[1].trim() : q, tier = m ? { "100": "lesser", "60": "intermediate", "10": "greater" }[m[2]] : "";
   if (abbr[base]) base = String(abbr[base]).toLowerCase();
@@ -849,12 +851,13 @@ async function mkRows(env) {
   return MKROWS || [];
 }
 // every item name in the game, for telling "nobody sold one lately" apart from "no such item"
-let DBN = null;
+let DBN = null, DBS = {};   // item names, and each item's base stats ({ATT: 57, SLOTS: 7})
 async function knownItem(env, q) {
   if (!DBN) {
     const r = await fetch((env && env.ITEMDB_URL) || "https://maplefm.gg/data/itemdb.json", { cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
     const d = r && r.ok ? await r.json().catch(() => null) : null;
     DBN = d && d.items ? d.items.map((x) => String(x[0])) : [];
+    if (d && d.items) for (const x of d.items) if (x[7] && typeof x[7] === "object") DBS[String(x[0]).toLowerCase()] = x[7];
   }
   q = String(q || "").toLowerCase().replace(/-/g, " ").trim();
   if (q.length < 3) return "";
@@ -904,7 +907,21 @@ function findRows(rows, q, abbr) {
   const exact = (r) => { const words = shown(r.item).toLowerCase().split(/[^a-z0-9%]+/); return qw.filter((w) => words.includes(w)).length; };
   // misread one-off names (a single listing) sort under real items
   const junk = (r) => ((r.n || 0) < 2 ? 1 : 0);
-  return rows.map((r) => [score(r), r]).filter((x) => x[0] < 9).sort((a, b) => a[0] - b[0] || junk(a[1]) - junk(b[1]) || exact(b[1]) - exact(a[1]) || a[1].item.length - b[1].item.length || (b[1].n || 0) - (a[1].n || 0)).map((x) => x[1]);
+  const out = rows.map((r) => [score(r), r]).filter((x) => x[0] < 9);
+  // nothing landed: allow a typo or two in each word ("wrok gloves", "nakamaky", "white lable")
+  if (!out.length && qw.length) {
+    const near = (a, b) => { if (Math.abs(a.length - b.length) > 2) return false; const d = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } }
+      // a swap of two letters ("wrok", "lable") counts as one typo
+      let swap = false; if (a.length === b.length) { const diff = []; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff.push(i); swap = diff.length === 2 && diff[1] === diff[0] + 1 && a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]]; }
+      return swap || d[b.length] <= (a.length >= 7 ? 2 : 1); };
+    for (const r of rows) {
+      const words = (shown(r.item) + " " + r.item).toLowerCase().split(/[^a-z0-9%]+/).filter(Boolean);
+      const k = qw.filter((w) => words.some((x) => x === w || x.startsWith(w) || (w.length >= 4 && near(w, x)))).length;
+      if (k === qw.length) out.push([6, r]);
+    }
+  }
+  return out.sort((a, b) => a[0] - b[0] || junk(a[1]) - junk(b[1]) || exact(b[1]) - exact(a[1]) || a[1].item.length - b[1].item.length || (b[1].n || 0) - (a[1].n || 0)).map((x) => x[1]);
 }
 
 async function interactions(req, env) {
@@ -956,25 +973,64 @@ async function chatPrice(req, env, url) {
 }
 // "5 att wg", "work gloves +3 att": the roll comes off before the name is matched, and the answer points at the
 // board's price-by-attack table for that item
+// Stat words a player might use for a roll, and the label the answer shows
+const ROLL_STATS = [
+  [/^(magic ?attack|m\.? ?att(ack)?|matt|matk|ma)$/i, "MATT"], [/^(w\.? ?att(ack)?|watk|watt|attack|attk|atk|att|a)$/i, "ATT"],
+  [/^(str|strength)$/i, "STR"], [/^(dex|dexterity)$/i, "DEX"], [/^(int|intelligence|intel)$/i, "INT"], [/^(luk|luck|lk)$/i, "LUK"],
+  [/^(acc|accuracy)$/i, "ACC"], [/^(avoid|avoidability|avo|eva)$/i, "AVOID"], [/^(speed|spd)$/i, "SPEED"], [/^(jump|jmp)$/i, "JUMP"],
+  [/^(hp|maxhp)$/i, "HP"], [/^(mp|maxmp)$/i, "MP"], [/^(wdef|w\.?def|def)$/i, "W.DEF"], [/^(mdef|m\.?def)$/i, "M.DEF"]];
+const ROLL_WORD = "(magic ?attack|m\\.? ?att(?:ack)?|matt|matk|w\\.? ?att(?:ack)?|watk|watt|attack|attk|atk|att|str|strength|dex|dexterity|int|intelligence|intel|luk|luck|acc|accuracy|avoid|avoidability|speed|spd|jump|jmp|hp|mp|w\\.?def|m\\.?def|wdef|mdef|def)";
+// "7 att wg", "wg 7 attack", "bandana +3 str", "luk 5 earring" (with +), "clean wg", "7a wg": the roll comes off the
+// front so the rest can name the item. Anything with scroll or % stays a scroll search.
 function splitRoll(q) {
-  // "10 att", "10 attack", "+3 watk", "7 matt", "10 magic attack", "att 10"
-  const ST = "(magic\\s*attack|m\\.?\\s?att(?:ack)?|matk|w\\.?\\s?att(?:ack)?|watk|attack|attk|atk|att)";
-  if (/scroll|%/i.test(q)) return { q, roll: "" };   // "gloves attack scroll 60" is a scroll, not a roll
-  // "att +7" needs the plus: "gloves attack 60" means the 60% scroll
-  const m = new RegExp("(^|\\s)\\+?(\\d{1,2})\\s*" + ST + "\\b", "i").exec(q) || new RegExp("(^|\\s)" + ST + "\\s*\\+(\\d{1,2})\\b", "i").exec(q);
-  if (!m) return { q, roll: "" };
-  const stat = isNaN(m[2]) ? m[2] : m[3], v = isNaN(m[2]) ? m[3] : m[2], rest = q.replace(m[0], " ").replace(/\s+/g, " ").trim();
-  return rest ? { q: rest, roll: v + " " + (/^m/i.test(stat) ? "MATT" : "ATT") } : { q, roll: "" };
+  if (/scroll|%/i.test(q)) return { q, roll: "" };
+  const lab = (w) => { for (const [re, l] of ROLL_STATS) if (re.test(String(w).trim())) return l; return ""; };
+  const tidy = (m) => q.replace(m, " ").replace(/\s+/g, " ").trim();
+  let m = new RegExp("(^|\\s)\\+?(\\d{1,2})\\s*" + ROLL_WORD + "(?=\\s|$)", "i").exec(q);
+  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[2] + " " + lab(m[3]), g: m[2], stat: lab(m[3]), plus: /\+/.test(m[0]) } : { q, roll: "" }; }
+  m = new RegExp("(^|\\s)" + ROLL_WORD + "\\s*\\+(\\d{1,2})(?=\\s|$)", "i").exec(q);
+  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[3] + " " + lab(m[2]), g: m[3], stat: lab(m[2]), plus: true } : { q, roll: "" }; }
+  m = /(^|\s)(\d{1,2})a(?=\s|$)/i.exec(q);                       // "7a wg"
+  if (m) { const rest = tidy(m[0]); if (rest) return { q: rest, roll: m[2] + " ATT", g: m[2], stat: "ATT" }; }
+  m = /(^|\s)\+(\d{1,2})(?=\s|$)/.exec(q);                       // "nakamaki +3": the item's main stat
+  if (m) { const rest = tidy(m[0]); if (rest) return { q: rest, roll: "+" + m[2], g: m[2], stat: "", plus: true }; }
+  m = /(^|\s)(clean|stock|unscrolled|base)(?=\s|$)/i.exec(q);     // "clean wg": no scroll taken
+  if (m) { const rest = tidy(m[0]); if (rest) return { q: rest, roll: "clean", g: "0", stat: "", plus: true }; }
+  return { q, roll: "" };
 }
+// Words that only name an equip slot: "10 int earring" is the scroll, "emerald earrings 5 int" is a roll
+const SLOT_ONLY = /^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glove|cape|capes|shoes?|boots?|top|tops|topwear|bottom|bottoms|pants|overall|ova|ovr|shield|weapon|wep|claw|bow|crossbow|xbow|cbow|dagger|spear|polearm|pole|wand|staff|sword|axe|blunt|bw|ohs|ths|1h|2h|1hs|2hs|1ha|2ha|1hbw|2hbw|knuckle|gun|face|eye|accessory|ring|pendant|belt)$/i;
 async function priceLine(env, raw) {
   let q = raw; try { q = decodeURIComponent(raw); } catch (e) {}
   q = q.replace(/^!?(price|pc|fm)\s*/i, "").trim().slice(0, 80);
   if (!q) return "Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg";
-  const sr = splitRoll(q); q = sr.q;
-  const rows = await summaryRows(env), ab = await abbrMap();
-  const hits = findRows(rows, q, ab);
+  const full = q, rows = await summaryRows(env), ab = await abbrMap();
+  let sr = splitRoll(q), hits;
+  if (sr.roll) {
+    hits = findRows(rows, sr.q, ab);
+    const isEquip = (r) => r && (r.equip || /^(weapons|equips)$/i.test(r.cat || "")) && !/scroll/i.test(r.item);
+    // a bare slot word ("10 int earring", "gloves 10 att") is a scroll search; "+5 int earring" needs an item name
+    if (SLOT_ONLY.test(sr.q.trim()) && !sr.plus) { sr = { q: full, roll: "" }; }
+    else if (SLOT_ONLY.test(sr.q.trim())) return "Which " + sr.q.trim().toLowerCase() + "? Try !price emerald earrings " + (sr.g || 5) + " " + (sr.stat || "int").toLowerCase() + ", or check maplefm.gg";
+    else if (!hits.length) {
+      // a real equip nobody has sold lately: say so for the item, not "no listings for red markers 2 att"
+      const kn = await knownItem(env, expandQuery(sr.q, ab));
+      if (kn) return shown(kn) + " " + sr.roll + ": no sales caught lately, so no price yet. Star it on maplefm.gg to get told when one shows up.";
+      sr = { q: full, roll: "" };
+    }
+    else if (!isEquip(hits[0])) sr = { q: full, roll: "" };
+    // weapons are listed by total attack: "nakamaki 60 att" is base 57 plus 3
+    if (sr.roll && hits.length && (sr.stat === "ATT" || sr.stat === "MATT")) {
+      await knownItem(env, "");
+      const base = (DBS[String(hits[0].item).toLowerCase()] || {})[sr.stat];
+      const v = parseInt(sr.g, 10);
+      if (base && v >= 15 && v >= base - 15) { sr.g = String(v - base); sr.roll = v + " " + sr.stat + " (" + (v - base >= 0 ? "+" : "") + (v - base) + ")"; }
+    }
+  }
+  q = sr.q;
+  if (!sr.roll) hits = findRows(rows, q, ab);
   if (hits.length && sr.roll) {
-    const r0 = hits[0], g = String(parseInt(sr.roll, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const r0 = hits[0], g = String(parseInt(sr.g, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     // roll sales are kept per roll and slots used ("7|5"); quote the slots group with the most sales
     let best = null;
     for (const [k, v] of Object.entries(r0.rt || {})) if (k.split("|")[0] === g && Array.isArray(v) && (!best || v[1] > best.v[1])) best = { su: Number(k.split("|")[1]), v };
