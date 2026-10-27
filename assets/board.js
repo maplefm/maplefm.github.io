@@ -971,6 +971,7 @@
       // (hovered in game or written in chat) decide the bands when there are enough of them.
       if (it.cat === "Weapons" || it.cat === "Equips") {
         it.equip = true;
+        mergeReads(it.all);
         it.rolls = it.all.filter(function (x) { return !x.b && x.x && !x.pricey; }).map(function (x) { return { l: x, g: rollOf(it.item, x) }; }).filter(function (r) { return r.g != null; }).sort(function (a, b) { return a.g - b.g || a.l.u - b.l.u; });
         // Roll prices: what each roll sold for in the last two weeks, two or more sales. A 10 ATT Work Gloves and a
         // clean one share a name and nothing else, so deals on equips are judged against the roll, never the name.
@@ -983,7 +984,8 @@
         if (pts.length >= 6) {
           var q1 = quant(pts, .25), q3 = quant(pts, .75);
           it.bands = { lo: median(pts.filter(function (v) { return v <= q1; })), mid: it.typ, hi: median(pts.filter(function (v) { return v >= q3; })), n: pts.length, from: "prices" };
-          var kl = it.rolls.filter(function (r) { return r.g < 0; }).map(function (r) { return r.l.u; }), km = it.rolls.filter(function (r) { return r.g === 0; }).map(function (r) { return r.l.u; }), kh = it.rolls.filter(function (r) { return r.g > 0; }).map(function (r) { return r.l.u; });
+          var hasSl0 = !!(dbBase(it.item) || {}).SLOTS, rk0 = it.rolls.filter(function (r) { return !hasSl0 || r.l.x.SLOTS != null; });   // complete reads only
+          var kl = rk0.filter(function (r) { return r.g < 0; }).map(function (r) { return r.l.u; }), km = rk0.filter(function (r) { return r.g === 0; }).map(function (r) { return r.l.u; }), kh = rk0.filter(function (r) { return r.g > 0; }).map(function (r) { return r.l.u; });
           if (kl.length >= 2) it.bands.lo = median(kl);
           if (kh.length >= 2) it.bands.hi = median(kh);
           if (km.length >= 3) { it.bands.mid = median(km); it.bands.from = "rolls"; }   // the roll box shows it; the headline stays what the item sold for
@@ -991,8 +993,8 @@
           if (it.bands.hi < it.bands.mid) it.bands.hi = it.bands.mid;
         }
         // what each roll goes for: average, +1, +2... from every listing with a known roll
-        it.gradeMed = {}; var gg = {};
-        it.rolls.forEach(function (r) { if (now - r.l.t <= 14 * DAY) (gg[r.g] || (gg[r.g] = [])).push(r.l.u); });
+        it.gradeMed = {}; var gg = {}, hasSl = !!(dbBase(it.item) || {}).SLOTS;
+        it.rolls.forEach(function (r) { if (now - r.l.t <= 14 * DAY && (!hasSl || r.l.x.SLOTS != null)) (gg[r.g] || (gg[r.g] = [])).push(r.l.u); });
         Object.keys(gg).forEach(function (g) { it.gradeMed[g] = { p: median(gg[g]), n: gg[g].length }; });
       }
       // Last 3 avg follows the typical: on equips the scrolled sales (pricey, or a roll above base) stay out, so a
@@ -2058,6 +2060,32 @@
     CONS = {};
     L.forEach(function (l) { var x = l.x; if (!x) return; BSTATS.forEach(function (k) { if (x[k]) { var bv = x[k + "_b"] != null ? x[k + "_b"] : x[k], key = l.i + "|" + k + "|" + bv; CONS[key] = (CONS[key] || 0) + 1; } }); });
     L.forEach(function (l) { if (!l.x) return; var f = statsFix(l.i, l.x); if (f !== l.x) { l.xbad = l.x; l.x = f; } });
+    // Upgrades left that can't be right: more than the item comes with, or armour with more scrolled attack than its
+    // used slots could give (3 per success at most). One wrong slot count moves an equip's price a lot, so the read is
+    // set aside (the daily stat report counts these) and the listing is priced as if it wasn't hovered.
+    L.forEach(function (l) {
+      var x = l.x; if (!x || x.SLOTS == null) return;
+      var b = dbBase(l.i) || {}; if (!b.SLOTS) return;
+      var gain = category(l.i) !== "Weapons" && !b.ATT && !b.MATT ? (x.ATT || 0) + (x.MATT || 0) : 0;
+      if (x.SLOTS > b.SLOTS || (b.SLOTS - x.SLOTS) * 3 < gain) { l.xbad = Object.assign({ _why: "slots" }, x); l.x = null; }
+    });
+  }
+  // The same copy is often hovered by two scanners, or twice by one, and only one read reaches the upgrades line.
+  // When the reads agree on every stat they share, the complete one fills in what the other missed.
+  function mergeReads(all) {
+    var by = {};
+    all.forEach(function (l) { if (!l.x || l.b || l.chat) return; var k = String(l.s).toLowerCase() + "|" + l.u + "|" + (l.q || 1); (by[k] || (by[k] = [])).push(l); });
+    Object.keys(by).forEach(function (k) {
+      var g = by[k]; if (g.length < 2) return;
+      var full = g.filter(function (l) { return l.x.SLOTS != null; }).sort(function (a, b) { return b.t - a.t; });
+      if (!full.length) return;
+      g.forEach(function (l) {
+        if (l.x.SLOTS != null || l.x._merged) return;
+        var m = full.filter(function (f) { return Math.abs(f.t - l.t) < 3 * DAY && BSTATS.every(function (s) { return l.x[s] == null || f.x[s] == null || l.x[s] === f.x[s]; }); })[0];
+        if (!m) return;
+        var x = Object.assign({}, m.x, l.x); x.SLOTS = m.x.SLOTS; x._merged = 1; l.x = x;
+      });
+    });
   }
   window.fmQA && (window.fmQA.cons = function (L) { sanitizeStats(L); return CONS; });
   function learnBase(L) {
@@ -2413,10 +2441,12 @@
     var now = Date.now(), gks = keyStat(i.item, null, ""), gkb = gks === "ATT" || gks === "MATT" ? itemBase(i.item).s[gks] : null;
     var m = classMask(i.item), jobs = [1, 2, 4, 8].filter(function (b) { return m > 0 && (m & b); }).length;
     var gradeKey = (gks === "ATT" || gks === "MATT" || jobs === 1) && gks ? gks : "GRADE";
-    var secs = {}, clean = null;
+    var secs = {}, clean = null, hasSl = !!(dbBase(i.item) || {}).SLOTS, noSl = {};
     i.rolls.forEach(function (r) {
       if (now - r.l.t > 14 * DAY) return;
       var bs = rollBasis(i.item, r.l) || gradeKey;
+      // copies whose upgrades left weren't read sit apart: a used one is worth far less than a clean one
+      if (hasSl && r.l.x.SLOTS == null) { var nk = (r.g === 0 && bs !== "TOTAL" ? "CLEAN" : bs) + "|" + r.g; (noSl[nk] || (noSl[nk] = { k: bs, g: r.g, ls: [] })).ls.push(r.l); return; }
       if (r.g === 0 && bs !== "TOTAL") { (clean || (clean = { ls: [] })).ls.push(r.l); return; }
       var sc = secs[bs] || (secs[bs] = { k: bs, g: {}, n: 0 }); sc.n++;
       (sc.g[r.g] || (sc.g[r.g] = { g: r.g, ls: [] })).ls.push(r.l);
@@ -2437,7 +2467,7 @@
       if (base != null && g !== "?") top.appendChild(el("em", null, " " + (base + g)));
       d.appendChild(top); d.appendChild(money(pr.p));
       d.appendChild(el("small", null, pr.how === "sold" ? pr.sold + " sold" + (pr.up ? " · " + pr.up + " up" : "") : (pr.up ? pr.up + " for sale" : ls.length + " seen") + " · asking"));
-      var lab = (key === "TOTAL" ? "Total stats" : key === "GRADE" ? "Roll" : key === "?" ? "Not hovered yet" : STATABBR[key] || key) + (g === "?" ? "" : " " + (g === 0 ? "clean" : (g > 0 ? "+" : "") + g));
+      var lab = label && key !== "?" ? label + (/^NOSL:/.test(key) ? ", upgrades not read" : "") : (key === "TOTAL" ? "Total stats" : key === "GRADE" ? "Roll" : key === "?" ? "Not hovered yet" : STATABBR[key] || key) + (g === "?" ? "" : " " + (g === 0 ? "clean" : (g > 0 ? "+" : "") + g));
       d.title = lab + ": click for every copy, for sale now and sold";
       d.setAttribute("aria-expanded", open ? "true" : "false"); d.dataset.k = key; d.dataset.g = String(g);
       var ab = base != null && g !== "?" ? base + g : (ls[0] && ls[0].x && ls[0].x[key] != null ? ls[0].x[key] : null); if (ab != null) d.dataset.abs = String(ab);
@@ -2466,6 +2496,19 @@
       box.appendChild(sec); shown++;
     });
     if (!shown && clean) { var cs = el("div", "rsec"); var ch = el("div", "rsh"); ch.appendChild(el("b", null, "Clean")); ch.appendChild(el("small", null, clean.ls.length + " seen")); cs.appendChild(ch); var cr = el("div", "rrow"), cc = cell(gradeKey, 0, clean.ls, null); cr.appendChild(cc.el); cs.appendChild(cr); if (cc.open) cs.appendChild(cc.open); box.appendChild(cs); }
+    var nks = Object.keys(noSl);
+    if (nks.length) {
+      var ns = el("div", "rsec unread"), nh = el("div", "rsh"); nh.appendChild(el("b", null, "Upgrades not read")); nh.appendChild(el("span", null, "kept out of the prices above"));
+      nh.appendChild(el("small", null, nks.reduce(function (a, k) { return a + noSl[k].ls.length; }, 0) + " seen")); ns.appendChild(nh);
+      var nr = el("div", "rrow"), nopen = null;
+      nks.sort(function (a, b) { return noSl[a].g - noSl[b].g; }).forEach(function (k) {
+        var o = noSl[k], lab = o.g === 0 && o.k !== "TOTAL" ? "Clean?" : (o.k === "TOTAL" ? "Total" : o.k === "GRADE" ? "Roll" : STATABBR[o.k] || o.k) + " " + (o.g > 0 ? "+" : o.g < 0 ? "−" : "") + Math.abs(o.g);
+        var c = cell("NOSL:" + o.k, o.g, o.ls, null, lab); nr.appendChild(c.el); if (c.open) nopen = c.open;
+      });
+      ns.appendChild(nr); if (nopen) ns.appendChild(nopen);
+      ns.appendChild(el("p", "rlnote", "The hover didn't reach the upgrades line, so these could be scrolled. Hover them again in game to price them with the rolls above."));
+      box.appendChild(ns);
+    }
     // copies far above the clean price that nobody hovered: almost always scrolled or a top roll
     var floor = Math.max(cleanPrice ? cleanPrice.p * 4 : 0, i.typ * 4, ((i.bands && i.bands.hi) || 0) * 2);
     var unread = (i.all || []).filter(function (l) { return !l.x && !l.b && !l.chat && l.u >= floor && floor > 0 && now - l.t < 7 * DAY && l.u < 2e9; });
@@ -2492,7 +2535,24 @@
   function tipAttach(node, l, name) { if (!TIPL) return; TIPL.set(node, { l: l, n: name || (l && l.i) }); node.classList.add("gtipable"); }
   var GTLINES = [["ATT", "Weapon Attack"], ["MATT", "Magic Attack"], ["STR", "STR"], ["DEX", "DEX"], ["INT", "INT"], ["LUK", "LUK"], ["HP", "MaxHP"], ["MP", "MaxMP"],
     ["WDEF", "Weapon Def."], ["MDEF", "Magic Def."], ["ACC", "Accuracy"], ["AVOID", "Avoidability"], ["SPEED", "Speed"], ["JUMP", "Jump"], ["CRIT", "Critical Rate"]];
+  // the real popup when FM Watcher sent one (equips at 500K and up), with the listing under it; the rebuilt one if
+  // the picture is missing or still on its way
   function gameTip(l, name) {
+    var xi = l && l.x && typeof l.x === "object" && /^[0-9a-f]{16}$/.test(l.x._img || "") ? l.x._img : "";
+    if (!xi || gameTip.noimg[xi]) return gameTip0(l, name);
+    var wrap = el("div", "gt gt-pic"), im = new Image(); im.alt = showName(name) + " as seen in game"; im.className = "gt-real";
+    im.onerror = function () { gameTip.noimg[xi] = 1; var t = $("gtip"); if (t && t.contains(wrap)) { t.textContent = ""; t.appendChild(gameTip0(l, name)); } };
+    im.onload = function () { var gi = GTIP_ON && TIPL.get(GTIP_ON); if (gi) gtipMove(gtipMove.x || 0, gtipMove.y || 0); };
+    im.src = "https://api.maplefm.gg/tipimg/" + xi + ".png"; wrap.appendChild(im);
+    var f = el("div", "gt-foot");
+    var pl = el("div"); pl.appendChild(el("b", null, l.s)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
+    var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t)));
+    f.appendChild(el("div", "gt-dim", "The popup exactly as FM Watcher saw it in game"));
+    wrap.appendChild(f);
+    return wrap;
+  }
+  gameTip.noimg = {};
+  function gameTip0(l, name) {
     var x = l && l.x && typeof l.x === "object" ? l.x : null, read = !!(x && Object.keys(x).some(function (k) { return /^[A-Z]+$/.test(k); }));
     loadBase(name);   // requirements come from the item's full record; the popup fills them in when it lands
     var fb = fullBase(name), b = fb.s || {}, r = dbRow(name), api = BASE[name] || {}, box = el("div", "gt");
@@ -2544,6 +2604,7 @@
     t.hidden = false; gtipMove(cx, cy);
   }
   function gtipMove(cx, cy) {
+    gtipMove.x = cx; gtipMove.y = cy;
     var t = $("gtip"); if (!t || t.hidden) return;
     var w = t.offsetWidth, h = t.offsetHeight, x = cx + 18, y = cy + 14;
     if (x + w > window.innerWidth - 6) x = Math.max(6, cx - w - 14);
@@ -3203,7 +3264,8 @@
       if (!l || !l.i || (l.t && l.t < t)) return;
       var it = D.byName && D.byName[l.i]; if (!it || !it.equip || !(it.typ >= 50000)) return;
       var b = by[l.i] || (by[l.i] = { i: l.i, typ: it.typ, n: 0, x: 0 }); b.n++;
-      if (l.x && (l.x._tip || l.x.SLOTS != null)) b.x++;
+      // a read counts once it has the upgrades line, for any equip that comes with slots
+      if (l.x && (l.x.SLOTS != null || (l.x._tip && !(dbBase(l.i) || {}).SLOTS))) b.x++;
     });
     return Object.keys(by).map(function (k) { return by[k]; }).filter(function (b) { return b.n >= 1 && b.x / b.n < 0.5; })
       .sort(function (a, b) { return b.typ * (b.n - b.x) - a.typ * (a.n - a.x); }).slice(0, 40)

@@ -84,6 +84,8 @@ async function route(req, env, url) {
   if (p === "/snap" && req.method === "POST") return snapPut(req, env);
   if (p === "/data/sig" && req.method === "GET") return dataSig(env);
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
+  if (p === "/tipimg" && req.method === "POST") return tipImgPut(req, env);
+  if (p.startsWith("/tipimg/") && req.method === "GET") return tipImgGet(p, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
@@ -490,6 +492,28 @@ async function inboxPost(req, env) {
   if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") return json({ error: "bad post" }, 400);
   await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
   return json({ ok: true });
+}
+// In-game popups for expensive equips: FM Watcher uploads a small picture of the item's popup the moment it reads it
+// (items listed at 500K and up), keyed by the picture's own hash, and puts that hash in the listing's stats. The site
+// shows the real popup on hover. Only PNGs the size of a popup are taken; they expire after 30 days.
+async function tipImgPut(req, env) {
+  const ip = req.headers.get("CF-Connecting-IP") || "";
+  if (overLimit("ti:" + ip, 120, 600)) return json({ error: "slow down" }, 429);
+  if (!/^[0-9a-f]{16}$/.test(req.headers.get("X-Watcher") || "")) return json({ error: "no" }, 403);
+  const buf = new Uint8Array(await req.arrayBuffer());
+  if (buf.length < 200 || buf.length > 160000) return json({ error: "size" }, 413);
+  const png = [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => buf[i] === v);
+  const dv = new DataView(buf.buffer), w = png ? dv.getUint32(16) : 0, h = png ? dv.getUint32(20) : 0;
+  if (!png || w < 120 || w > 420 || h < 80 || h > 800) return json({ error: "not a popup" }, 400);
+  const hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", buf))].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+  await env.ACCOUNTS.put("tipimg:" + hash, buf, { expirationTtl: 30 * 86400, metadata: { w, h, t: Date.now() } });
+  return json({ ok: true, h: hash });
+}
+async function tipImgGet(p, env) {
+  const m = /^\/tipimg\/([0-9a-f]{16})\.png$/.exec(p);
+  const v = m ? await env.ACCOUNTS.get("tipimg:" + m[1], "arrayBuffer") : null;
+  if (!v) return new Response("not found", { status: 404, headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "public, max-age=300" } });
+  return new Response(v, { headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=31536000, immutable", "Access-Control-Allow-Origin": "*" } });
 }
 async function inboxPull(req, env, url) {
   const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
