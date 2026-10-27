@@ -85,20 +85,44 @@ def _words_agree(a, b):
         return False
     if len(wa) != len(wb):
         return difflib.SequenceMatcher(None, a.replace(" ", ""), b.replace(" ", "")).ratio() >= 0.93
-    return all(x == y or (len(x) >= 4 and difflib.SequenceMatcher(None, x, y).ratio() >= 0.75) for x, y in zip(wa, wb))
+    def one_off(x, y):   # a three-letter word with one letter misread after the first ("Are" for "Arc")
+        return len(x) == len(y) == 3 and x[0] == y[0] and sum(p != q for p, q in zip(x, y)) == 1
+    return all(x == y or one_off(x, y) or (len(x) >= 4 and difflib.SequenceMatcher(None, x, y).ratio() >= 0.75) for x, y in zip(wa, wb))
 
 # Items the game added after our item list: learned from their tooltips while scanning ("Painting of Zombie
 # Mushmom"), kept in learned_items.json, and matched like any other item from then on.
 LEARNED_FILE = os.path.join(HERE, "learned_items.json")
+_BASE_NORM = dict(_ITEM_NORM)   # the item list as shipped, before anything learned
+
+def misread_of_known(name):
+    """A 'new' name that is really a known item misread or cut off: 'One-Handed Sword Altac' (a scroll cut before its
+    tier), 'Mystery Paletle Exchange' (Mystery Palette Exchange Coupon), 'Steel Fingerless' (Steel Fingerless Gloves).
+    Those are never learned, or the misread would win over the right name from then on."""
+    n = norm(name)
+    if not n or n in _BASE_NORM: return True
+    if re.search(r"scroll", name, re.I) or scroll_prefix(name): return True
+    if difflib.get_close_matches(n, list(_BASE_NORM), n=1, cutoff=0.85): return True
+    # the start of a longer known name, cut by the shop's width
+    if len(n) >= 8 and any(k.startswith(n) for k in _BASE_NORM): return True
+    # a known name with a letter or two misread at the end of a cut ("Orihalcon Burgonet He" for Orihalcon Burgonet Helm)
+    if len(n) >= 10 and any(difflib.SequenceMatcher(None, n, k[:len(n)]).ratio() >= 0.88 for k in _BASE_NORM if len(k) > len(n)): return True
+    return False
+
 LEARNED = {}
 try:
     LEARNED = json.load(open(LEARNED_FILE, encoding="utf-8"))
 except (OSError, ValueError):
     LEARNED = {}
+# learned before this check existed: anything that is a misread of a known item is dropped, real new items stay
+_junk = [n for n in LEARNED if misread_of_known(n)]
+if _junk:
+    for n in _junk: LEARNED.pop(n, None)
+    try: json.dump(LEARNED, open(LEARNED_FILE, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    except OSError: pass
 for _n in LEARNED: _ITEM_NORM[norm(_n)] = _n
 
 def learn_item(name):
-    if norm(name) in _ITEM_NORM: return False
+    if norm(name) in _ITEM_NORM or misread_of_known(name): return False
     LEARNED[name] = int(time.time())
     _ITEM_NORM[norm(name)] = name
     try: json.dump(LEARNED, open(LEARNED_FILE, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
@@ -168,6 +192,16 @@ def clean_item(raw):
     sp = scroll_prefix(core)
     if sp:
         return sp + " (tier cut off)", True
+    # cut by the shop's width with the "..." lost ("Steel Fingerless", "Orihalcon Burgonet He", "lron Hog's Metal"):
+    # the one known item whose name starts that way, allowing a misread letter or two
+    if len(n) >= 10:
+        f = n.replace("l", "i")
+        starts = {v for k, v in _BASE_NORM.items() if k.replace("l", "i").startswith(f)}
+        if len(starts) == 1:
+            return next(iter(starts)), True
+        sc = sorted(((difflib.SequenceMatcher(None, n, k[:len(n)]).ratio(), v) for k, v in _BASE_NORM.items() if len(k) > len(n)), reverse=True)[:2]
+        if sc and sc[0][0] >= 0.9 and (len(sc) < 2 or sc[0][0] - sc[1][0] >= 0.06):
+            return sc[0][1], True
     lm = learned_match(core)
     if lm:
         return lm, True
@@ -286,6 +320,8 @@ def _bucket(lines, spans):
 
 _RPRICE = re.compile(r"(\d[\d,.]*)\s*m[ea]?[s5][o0][s5]?", re.I)
 
+STATS = {"shops": 0, "fast": 0}   # shops read since start, and how many straight off the pixels
+
 def _fold(s):
     return norm(s.replace("I", "l"))
 _ITEM_FOLD = None
@@ -348,7 +384,9 @@ def read_shop_checked(region):
     """Read the shop. Straight off the pixels when every row is certain; otherwise with two independent text readers,
     keeping a row only when its price is certain (exact pixel read, or both readers agree)."""
     fast = read_shop_fast(region)
+    STATS["shops"] += 1
     if fast:
+        STATS["fast"] += 1
         return fast
     sh = _sheet(region)
     if not sh:

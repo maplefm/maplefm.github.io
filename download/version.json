@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.6",
- "date": "2026-10-27T10:37:17+00:00",
- "notes": "Much more accurate and much lighter on your PC. Prices, item names and seller names are now read straight off the game's own pixel font, and scroll tiers from their icons (Chaos included, and on sold rows). Most shops no longer need the text readers at all, which uses about 20 times less CPU.",
- "sha256": "f85c5bff9c4349bf5c045f8581cb20af5698648746d267459259f959d4373add",
- "size": 140766,
+ "version": "2026.10.27.7",
+ "date": "2026-10-27T15:47:57+00:00",
+ "notes": "Names cut off by the shop's width are matched to the right item, and misread names are never saved as new items (any already saved are cleared). Reports how many shops it reads straight off the pixels.",
+ "sha256": "2641e8c653b5bc5a80af5a53929f841f8ad8ada503f47b86b473ee5f7f09300a",
+ "size": 141486,
  "history": [
+  {
+   "version": "2026.10.27.7",
+   "date": "2026-10-27",
+   "notes": "Names cut off by the shop's width are matched to the right item, and misread names are never saved as new items (any already saved are cleared). Reports how many shops it reads straight off the pixels."
+  },
   {
    "version": "2026.10.27.6",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.22.1",
    "date": "2026-10-21",
    "notes": "Reads your character's name off the status bar and uses it as your scanner name, so nothing to type. Still only looks at the screen."
-  },
-  {
-   "version": "2026.10.21.8",
-   "date": "2026-10-21",
-   "notes": "Link your watcher to your Club FM account: put the code from maplefm.gg/earn in config.json as link_code."
   }
  ],
  "pip": [],
- "sig": "948ae2b17ad516a92f5ccbe323129ba62fe8750223e38cd185598ee5e977749fb0c8f765d9b176236e8251e56530e8ed029a28617548ff2a8d96362cd29521c067005a11794ce11f79dd11a994fa57287a4c10496ed14c452f45ab60b09c948b41a66ed21abbb6c32a096367cbc1640caa37b8b34c6e10ddaa27000c7980b3c215d47cdb032310dd1dac9803e947e44dc90559044013d68d8b344ba9e86a65d99f541646aebc3ba389fc8a7c0adfbd48a62a378996af508eb8957324b05391587ca5f2d6da76624c0cdc85ac4985fb114c847b307244a1fb0471ca1826277b813bda357c1c35f6aa9d7fe3f45f6ef3e19802ac5ed8b445c7c38fba1ba93fe3eb"
+ "sig": "a89811eb0fd10268245bf1c5e3bd56109539fa3fe798646bdf9e6fc2050d6546b639cf701850323ca6120f451f25ca0916d8043b4e3d1f2efeae27d87e320cfd84f6df954e926514912c0ee4dae03b6078b6967b938b82a8eef8f27dec64b38a237d874efba9ff9f3ae8dfb8edcc3dfdbbfef74c936d374234b2d2bb87c82c8e7b567ce9c520981ae723387c28d68a097f5a7a00a975d9652e7bcdbec24d7e5a69efbc2ca994e0c74eb7cf10c7845434fd04ea3e83b12afe39d222072a5d1a41e703b6d4517564d4fc8e502bababcfde9f09aae0b6ea394ed69875370a3624d16c3f661e1149c2639b440571f577a961faa5cd2bc2e47488d1d10ad2aa4892d4"
 }
