@@ -1343,7 +1343,14 @@ async function redditPush(req, env) {
   st.seen = [...seen].slice(-600); st.at = Date.now(); st.lastOk = Date.now(); st.status = 200; st.fails = 0; st.via = "pc";
   await env.ACCOUNTS.put("reddit:state", JSON.stringify(st));
   for (const h of hits) h.reply = await redditReply(env, h.p).catch(() => "");
-  if (hits.length) await wdDM(env, await wdAdmins(env), redditEmbeds(hits));
+  if (hits.length) {
+    // the post as a card, then the reply as a plain message under it: Discord on a phone can copy a message, not a card
+    const ids = await wdAdmins(env), embs = redditEmbeds(hits);
+    for (let i = 0; i < Math.min(hits.length, 10); i++) {
+      await wdDM(env, ids, [embs[i]]);
+      if (hits[i].reply) await wdText(env, ids, hits[i].reply);
+    }
+  }
   return json({ ok: true, new: hits.length });
 }
 // A reply ready to paste: for each item the post names, what it sells for, what's listed, where it drops, and the link.
@@ -1422,7 +1429,7 @@ function redditEmbeds(hits) {
     title: String(p.title || "New post").slice(0, 250), url: "https://www.reddit.com" + String(p.permalink || "").replace(/^https:\/\/www\.reddit\.com/, ""), color: 0x6d3fd1,
     description: String(p.selftext || "").replace(/\s+/g, " ").slice(0, 300),
     fields: [{ name: "Where", value: "r/" + sub + (p.link_flair_text ? " · " + p.link_flair_text : ""), inline: true }, { name: "By", value: "u/" + (p.author || "?"), inline: true }, { name: "Matched", value: why, inline: true }]
-      .concat(reply ? [{ name: "Reply to paste", value: "```" + reply.replace(/`/g, "'") + "```", inline: false }] : []),
+      .concat(reply ? [{ name: "Reply to paste", value: "In the next message. Press and hold it, then Copy Text.", inline: false }] : []),
     footer: { text: "Reddit watch · reply while it's fresh" }, timestamp: new Date((Number(p.created_utc) || Date.now() / 1000) * 1000).toISOString()
   }));
 }
@@ -1887,6 +1894,13 @@ async function wdAdmins(env) {
   const ids = String(env.ADMIN_IDS || "").split(",").map((x) => x.trim()).filter((x) => /^\d{15,}$/.test(x));
   const saved = (await env.ACCOUNTS.get("wd:admins", "json")) || [];
   return [...new Set(ids.concat(saved))];
+}
+async function wdText(env, ids, content) {
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  for (const id of ids) {
+    const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
+    if (c && c.id) await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ content: String(content).slice(0, 1900), allowed_mentions: { parse: [] }, flags: 4 }) });
+  }
 }
 async function wdDM(env, ids, embeds) {
   const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
