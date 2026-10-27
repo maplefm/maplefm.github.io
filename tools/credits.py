@@ -185,6 +185,7 @@ def lifetime_verified(kept, ledger, window_start):
     ledger["days"] = {p: {d: round(v, 2) for d, v in dd.items()} for p, dd in days.items()}
     return collections.Counter({p: sum(d.values()) for p, d in days.items()})
 
+DIRECT = set()               # people paid by hand, not through PayPal (pay.json direct_pay)
 KOFI = {}                    # /public/kofi-income from the Worker: {"total": dollars over 28 days}
 STRICT = False   # pay only for sales the scanner watched happen (saw it open first, or someone else saw it sold too)
 
@@ -292,8 +293,10 @@ def balances(all_rows, ledger, window_start, pool, life, payouts):
         owed = round(max(0.0, earned - paid), 2)
         # the bar is every credit earned, all time: it keeps counting past the unlock as a lifetime record, and payouts never lower it
         bar = round(sum(days[p].values()), 1); unlocked = bar >= unlock
+        # paid by hand outside PayPal (pay.json direct_pay): still counted and owed, never in the PayPal batch
+        direct = p.lower() in DIRECT or str(r.get("name", "")).lower() in DIRECT
         out.append({"name": r.get("name", p), "person": p, "tag": r.get("tag"), "owner": bool(r.get("owner")), "earned": earned, "paid": paid, "owed": owed,
-                    "bar": bar, "unlocked": unlocked, "payable": (not r.get("owner")) and unlocked and owed >= minp,
+                    "bar": bar, "unlocked": unlocked, "payable": (not r.get("owner")) and unlocked and owed >= minp and not direct, "direct": direct,
                     "last_paid": max((x.get("date") for x in hist), default=None)})
     out.sort(key=lambda x: (-x["owed"], x["name"].lower()))
     return out
@@ -352,6 +355,7 @@ if __name__ == "__main__":
     STRICT = bool(pool.get("strict"))
     if "hover_credit" in pool: HOVER_RATE = float(pool.get("hover_credit") or 0)
     if "hover_min_price" in pool: HOVER_MIN = int(pool.get("hover_min_price") or 0)
+    DIRECT.update(str(x).lower() for x in (pool.get("direct_pay") or []))
     if "witness_credit" in pool: WITNESS_RATE = float(pool.get("witness_credit") or 0)
     if "self_to_bar" in pool: SELF_TO_BAR = float(pool.get("self_to_bar") or 0)
     if "cold_bonus" in pool: COLD_BONUS = float(pool.get("cold_bonus") or 0)
