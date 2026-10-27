@@ -1633,6 +1633,56 @@ async function trafficPost(env) {
   if (dow === 0 && et.hour === 22) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
   await kofiWeekDraft(env).catch((e) => env.ACCOUNTS.put("kofiweek:err", String(e && e.stack || e).slice(0, 500)));
   await ghSchedule(env, et, dow).catch((e) => env.ACCOUNTS.put("ghsched:err", String(e && e.stack || e).slice(0, 500)));
+  await partnerMarket(env).catch((e) => env.ACCOUNTS.put("partnermkt:err", String(e && e.stack || e).slice(0, 500)));
+}
+
+// ---------------------------------------------------------------- the day's market in partner servers
+// Once Club FM's own #nightly-report has the day's market close (the archive marks report_day), the bot posts the
+// same day to each partner channel here. Gainers and losers only count items seen often enough to mean something.
+const PARTNER_MARKET = [{ guild: "125395305725165569", channel: "1564670451727474808", ref: "theclub" }];
+async function partnerMarket(env) {
+  if (!env.DISCORD_BOT_TOKEN) return;
+  const st = await vaultJSON(env, "data/discord_report.json", 300);
+  const day = st && st.report_day; if (!day) return;
+  const todo = [];
+  for (const p of PARTNER_MARKET) if (!(await env.ACCOUNTS.get("partnermkt:" + p.channel + ":" + day))) todo.push(p);
+  if (!todo.length) return;
+  const LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/";
+  const rep = await fetch(LIVE + "report.json?b=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!rep || rep.day !== day || !rep.market) return;
+  const idb = await fetch(LIVE + "itemdb.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).then((r) => r.json()).catch(() => null);
+  const ids = {}; for (const r of (idb && idb.items) || []) ids[String(r[0]).toLowerCase()] = r[1];
+  const k = (v) => (v >= 1e9 ? (v / 1e9).toFixed(1) + "B" : v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M" : v >= 1000 ? Math.round(v / 1000) + "K" : String(Math.round(v || 0)));
+  const pct = (x) => (x >= 0 ? "+" : "") + (Math.abs(x) <= 5 ? x * 100 : x).toFixed(1).replace(/\.0$/, "") + "%";
+  const real = (x) => x && x.item && (x.seen || 0) >= 5 && Math.max(x.price || 0, x.was || 0) >= 5000;
+  const g = (rep.gainers || []).filter(real).slice(0, 4), l = (rep.losers || []).filter(real).slice(0, 4);
+  const m = rep.market, s2 = rep.stats || {}, b = rep.biggest_sale || {};
+  const fields = [
+    { name: "FM index", value: Number(m.value || 0).toFixed(2) + " (" + pct(m.chg || 0) + ")", inline: true },
+    { name: "Sales caught", value: (s2.sales || 0).toLocaleString("en-US") + " for " + k(s2.volume) + " meso", inline: true },
+    { name: "For sale", value: (s2.listings || 0).toLocaleString("en-US") + " listings", inline: true }];
+  if (g.length) fields.push({ name: "📈 Up", value: g.map((x) => x.item + " " + pct(x.chg) + " (" + k(x.price) + ")").join("\n"), inline: true });
+  if (l.length) fields.push({ name: "📉 Down", value: l.map((x) => x.item + " " + pct(x.chg) + " (" + k(x.price) + ")").join("\n"), inline: true });
+  if (b.item) fields.push({ name: "Biggest sale", value: b.item + " for " + k(b.price) + " meso", inline: false });
+  const cats = (rep.categories || []).filter((c) => c && c.name);
+  if (cats.length) fields.push({ name: "By category", value: cats.map((c) => c.name + " " + pct(c.chg || 0)).join(" · ").slice(0, 1000), inline: false });
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  for (const p of todo) {
+    const url = "https://maplefm.gg/report.html?ref=" + p.ref;
+    const emb = { title: "Classic market close · " + day, url, color: (m.chg || 0) >= 0 ? 0x2ecc71 : 0xe74c3c, fields,
+      ...(b.item && ids[String(b.item).toLowerCase()] ? { thumbnail: { url: "https://maplefm.gg/i/" + ids[String(b.item).toLowerCase()] + ".png" } } : {}),
+      footer: { text: "From real FM sales caught by Club FM scanners · full report and every item at maplefm.gg" } };
+    const r = await fetch(DISCORD + "/channels/" + p.channel + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [emb], allowed_mentions: { parse: [] } }) });
+    if (r.ok) await env.ACCOUNTS.put("partnermkt:" + p.channel + ":" + day, "1", { expirationTtl: 30 * DAY });
+    else {
+      const why = r.status + " " + (await r.text()).slice(0, 200);
+      await env.ACCOUNTS.put("partnermkt:err", p.channel + " " + why, { expirationTtl: 7 * DAY });
+      if (!(await env.ACCOUNTS.get("partnermkt:told:" + p.channel))) {
+        await env.ACCOUNTS.put("partnermkt:told:" + p.channel, "1", { expirationTtl: DAY });
+        await wdDM(env, await wdAdmins(env), [{ title: "Couldn't post the market close in The Club", color: 0xe74c3c, description: "Discord said " + why + ". The Club FM bot needs View Channel, Send Messages and Embed Links in #classic-market." }]);
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------- on-time GitHub jobs
