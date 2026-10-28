@@ -328,6 +328,9 @@ def job_coverage(data_dir, state_path):
 
 # ---------------------------------------------------------------- news
 QUIET = re.compile(r"\b(earn|pay|payout|payouts|paid|credit|credits|budget|rate|paypal|money|fund|price floor|cap)\b", re.I)
+# behind-the-scenes work stays out of the public updates: the Reddit watch, Ko-fi and supporter thank-yous, outreach,
+# owner alerts and DMs, scheduled jobs and the Worker
+PRIVATE = re.compile(r"\b(reddit|ko-?fi|supporters?|tiers?|outreach|whispers?|dms?|owner|admins?|alerts?|scheduled|schedule|cron|dispatch|worker|watchdog|stat check|stats? report|partner|the club|kingdavid|api access)\b", re.I)
 
 def plain_change(subj):
     """A commit title as a visitor would read it: no file names, code words or brackets, one short line."""
@@ -357,6 +360,7 @@ def job_news(state_path, rng=None, digest=False):
         sha, subj = parts[0].strip(), parts[1].strip()
         if subj.lower().startswith(("merge", "live pump", "price inbox", "scanner ranks", "icon shards", "startup timing", "maple news state", "site updates state", "item pages")): continue
         if QUIET.search(subj): continue        # contributor pay never goes out automatically
+        if PRIVATE.search(subj): continue      # the Reddit watch and other private tooling never go out
         files = subprocess.run(["git", "show", "--name-only", "--format=", sha], capture_output=True, text=True).stdout.split()
         commits.append((sha, subj, files))
     rel = [c for c in commits if "download/version.json" in c[2]]
@@ -367,7 +371,8 @@ def job_news(state_path, rng=None, digest=False):
                               "description": "Running watchers update themselves within 15 minutes, nothing to do.\n" +
                                              "\n".join("• " + plain_change(c[1]) for c in rel if plain_change(c[1]))[:1500],
                               "url": f"{SITE}/contribute.html"}])
-    sitec = [c for c in commits if c not in rel and any(f.endswith((".html", ".css", ".js")) or f.startswith("tools/") for f in c[2])]
+    # only what visitors can see: pages, styles and the board's own script, never the Worker, bots or tools
+    sitec = [c for c in commits if c not in rel and any((f.endswith((".html", ".css", ".js")) and not f.startswith(("worker/", "bot/", "tools/", ".github/"))) for f in c[2])]
     site = [plain_change(c[1]) for c in sitec]
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import siteshots
@@ -451,7 +456,7 @@ def kofi_week(st):
                 seenp.add(pg); shots.append((siteshots.PAGES[pg][1], open(f, "rb").read()))
     changes = []
     for w in week:
-        for c in w.get("changes") or []:
+        for c in [x for x in (w.get("changes") or []) if not PRIVATE.search(x) and not QUIET.search(x)]:
             if c.lower() not in {x.lower() for x in changes}: changes.append(c)
     start = (now.date() - datetime.timedelta(days=6)).strftime("%b %d").replace(" 0", " ")
     title = "Club FM this week: " + start + " to " + now.strftime("%b %d").replace(" 0", " ")
