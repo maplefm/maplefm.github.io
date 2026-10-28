@@ -979,7 +979,17 @@
       if (it.cat === "Weapons" || it.cat === "Equips") {
         it.equip = true;
         mergeReads(it.all);
+        // lines no scroll mix or drop roll can explain, on stats buyers don't pay for, are misreads: dropped from the read
+        it.all.forEach(function (l) {
+          if (!l.x || l.b || l.x._dropped) return;
+          var sp = scrollSplit(it.item, l); if (!sp || !sp.drop || !sp.drop.length) return;
+          var nx = Object.assign({}, l.x); sp.drop.forEach(function (k) { delete nx[k]; delete nx[k + "_b"]; if (nx._tip) { nx._tip = Object.assign({}, nx._tip); delete nx._tip[k]; } if (nx._tipx) { nx._tipx = Object.assign({}, nx._tipx); delete nx._tipx[k]; } });
+          delete nx._ss; nx._dropped = sp.drop.slice(); l.x = nx;
+        });
         it.rolls = it.all.filter(function (x) { return !x.b && x.x && !x.pricey; }).map(function (x) { var p = rollPick(it.item, x); return { l: x, g: p ? sane(p.g, p.k) : null, k: p ? p.k : "", mv: p ? p.mv : {}, combo: p ? p.combo : "", su: slotsUsed(it.item, x) }; }).filter(function (r) { return r.g != null; }).sort(function (a, b) { return a.g - b.g || a.l.u - b.l.u; });
+        // a copy whose stats no mix of real scrolls and a real drop roll can make was misread: it stays out of roll prices
+        it.rollBad = 0;
+        it.rolls = it.rolls.filter(function (r) { var sp = scrollSplit(it.item, r.l); if (sp && !sp.ok) { it.rollBad++; r.l.xodd = 1; return false; } return true; });
         // Roll prices: what each roll sold for in the last two weeks, two or more sales. A 10 ATT Work Gloves and a
         // clean one share a name and nothing else, so deals on equips are judged against the roll, never the name.
         // and by slots used: a pair with 4 of 5 slots left took a scroll (often a failed one), so it is priced only
@@ -2093,8 +2103,12 @@
   }
   // A tooltip read off the screen can belong to the item next to it. Before any stat counts toward a roll, it has to
   // be one this item can carry: one of its base stats, or one a scroll for its slot adds (no attack on earrings).
-  var SCROLLABLE = { Earrings: "STR DEX INT LUK AVOID CRITDMG", Glove: "ATT MATT ACC CRIT", Hat: "ACC HP MP", Cape: "ACC DEX INT LUK MDEF STR WDEF", Top: "WDEF HP MP",
-    Bottom: "WDEF HP MP", Overall: "WDEF DEX INT LUK STR", Shield: "ACC WDEF", Shoes: "AVOID JUMP SPEED", "Pet Equipment": "JUMP SPEED", Wand: "MATT", Staff: "MATT" };
+  // Every scroll in the game, from its own description (MeowDB): per slot, each scroll line's four grades as
+  // [success rate, what one pass adds]. Lesser 100%, Intermediate 60%, Greater 10%, Chaos 10% (half the fails destroy
+  // the item). A failed scroll uses the slot and adds nothing. DEF scrolls above Lesser add magic defense too.
+  var SCROLLS = {"Bottom":[["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]],["HP",[[100,{"HP":10}],[60,{"HP":15}],[10,{"HP":20}],[10,{"HP":25}]]],["MP",[[100,{"MP":10}],[60,{"MP":15}],[10,{"MP":20}],[10,{"MP":25}]]]],"Bow":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Cape":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["DEX",[[100,{"DEX":1}],[60,{"DEX":2}],[10,{"DEX":3}],[10,{"DEX":4}]]],["INT",[[100,{"INT":1}],[60,{"INT":2}],[10,{"INT":3}],[10,{"INT":4}]]],["LUK",[[100,{"LUK":1}],[60,{"LUK":2}],[10,{"LUK":3}],[10,{"LUK":4}]]],["Magic Def",[[100,{"MDEF":2}],[60,{"WDEF":2,"MDEF":4}],[10,{"WDEF":4,"MDEF":6}],[10,{"WDEF":6,"MDEF":8}]]],["STR",[[100,{"STR":1}],[60,{"STR":2}],[10,{"STR":3}],[10,{"STR":4}]]],["Weapon Def",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]]],"Claw":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Crossbow":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Dagger":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Earrings":[["Avoidability",[[100,{"AVOID":1}],[60,{"AVOID":2}],[10,{"AVOID":3}],[10,{"AVOID":4}]]],["Crit",[[100,{"CRITDMG":1}],[60,{"CRITDMG":2}],[10,{"CRITDMG":3}],[10,{"CRITDMG":4}]]],["DEX",[[100,{"DEX":1}],[60,{"DEX":2}],[10,{"DEX":3}],[10,{"DEX":4}]]],["INT",[[100,{"INT":1}],[60,{"INT":2}],[10,{"INT":3}],[10,{"INT":4}]]],["LUK",[[100,{"LUK":1}],[60,{"LUK":2}],[10,{"LUK":3}],[10,{"LUK":4}]]],["STR",[[100,{"STR":1}],[60,{"STR":2}],[10,{"STR":3}],[10,{"STR":4}]]]],"Glove":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":3}],[10,{"ATT":4}]]],["Crit",[[100,{"CRIT":1}],[60,{"CRIT":2}],[10,{"CRIT":3}],[10,{"CRIT":4}]]],["Magic Attack",[[100,{"MATT":2}],[60,{"MATT":4}],[10,{"MATT":6}],[10,{"MATT":8}]]]],"Hat":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["HP",[[100,{"HP":10}],[60,{"HP":15}],[10,{"HP":20}],[10,{"HP":25}]]],["MP",[[100,{"MP":10}],[60,{"MP":15}],[10,{"MP":20}],[10,{"MP":25}]]]],"One-Handed Axe":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"One-Handed Blunt Weapon":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"One-Handed Sword":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Overall":[["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]],["DEX",[[100,{"DEX":1}],[60,{"DEX":2}],[10,{"DEX":3}],[10,{"DEX":4}]]],["INT",[[100,{"INT":1}],[60,{"INT":2}],[10,{"INT":3}],[10,{"INT":4}]]],["LUK",[[100,{"LUK":1}],[60,{"LUK":2}],[10,{"LUK":3}],[10,{"LUK":4}]]],["STR",[[100,{"STR":1}],[60,{"STR":2}],[10,{"STR":3}],[10,{"STR":4}]]]],"Pet Equipment":[["Jump",[[100,{"JUMP":1}],[60,{"JUMP":2}],[10,{"JUMP":3}],[10,{"JUMP":4}]]],["Speed",[[100,{"SPEED":1}],[60,{"SPEED":2}],[10,{"SPEED":3}],[10,{"SPEED":4}]]]],"Pole Arm":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Shield":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]]],"Shoes":[["Avoidability",[[100,{"AVOID":1}],[60,{"AVOID":2}],[10,{"AVOID":3}],[10,{"AVOID":4}]]],["Jump",[[100,{"JUMP":1}],[60,{"JUMP":2}],[10,{"JUMP":3}],[10,{"JUMP":4}]]],["Speed",[[100,{"SPEED":1}],[60,{"SPEED":2}],[10,{"SPEED":3}],[10,{"SPEED":4}]]]],"Spear":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Staff":[["Magic Attack",[[100,{"MATT":2}],[60,{"MATT":4}],[10,{"MATT":8}],[10,{"MATT":10}]]]],"Top":[["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]],["HP",[[100,{"HP":10}],[60,{"HP":15}],[10,{"HP":20}],[10,{"HP":25}]]],["MP",[[100,{"MP":10}],[60,{"MP":15}],[10,{"MP":20}],[10,{"MP":25}]]]],"Two-Handed Axe":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Two-Handed Blunt":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Two-Handed Sword":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Wand":[["Magic Attack",[[100,{"MATT":2}],[60,{"MATT":4}],[10,{"MATT":8}],[10,{"MATT":10}]]]]};
+  // the stats a scroll can add on each slot, straight from that table
+  var SCROLLABLE = {}; Object.keys(SCROLLS).forEach(function (sub) { var o = {}; SCROLLS[sub].forEach(function (ln) { ln[1].forEach(function (g) { Object.keys(g[1]).forEach(function (k) { o[k] = 1; }); }); }); SCROLLABLE[sub] = Object.keys(o).join(" "); });
   var WEAPONS = /Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun/;
   // returns the stats this item can really have: attack where the slot can't have attack means the whole tooltip was
   // another item's (null); a stray stat line (a requirement read as a bonus, "LUK 70" on a claw) is dropped on its own
@@ -2210,6 +2224,10 @@
   // A stat that rolled down to nothing has no line in the hover, so a complete hover (one that reached the
   // Remaining Enhancements line at the bottom) with no line for a stat the item has means that stat rolled -base.
   function missingLines(L) {
+    // A line the reader missed looks exactly like a stat that rolled to nothing, and a drop moves a small stat by 1 at
+    // most (a 3 LUK cape can't roll to 0), so a missing line no longer counts as a roll. Old marks are undone.
+    L.forEach(function (l) { var x = l.x; if (!x || !x._mk) return; x._mk.forEach(function (k) { if (x._tip) delete x._tip[k]; delete x[k]; delete x[k + "_b"]; }); x._mk = []; if (x._tip && !Object.keys(x._tip).length) delete x._tip; });
+    return;
     var ROLLK = TIPSTAT.map(function (t) { return t[1]; }), fbc = {};
     L.forEach(function (l) {
       var x = l.x; if (!x) return;
@@ -2335,6 +2353,76 @@
     var x = l && l.x; if (!x || x.UP == null) return null;
     var su = slotsUsed(name, l); if (su == null || x.UP > su || x.UP < 0) return null;
     return x.UP;
+  }
+  // A drop rolls each stat it comes with up to min(base / 10 + 1, 5) either way (a 1 crit pair rolls 0 to 2, a 31 MATT
+  // staff 27 to 35); a stat the item doesn't come with can't roll at all, it only comes from scrolls.
+  function natRange(b) { return b > 0 ? Math.min(Math.floor(b / 10) + 1, 5) : 0; }
+  // How a copy's stats split into its own drop roll and what its scrolls added, worked out from the scroll table.
+  // For every stat read: change from base = natural roll + the gains of the passed scrolls. With the passed count read
+  // off the title it's exactly that many passes; without it, anything from 0 to the slots used. Every mix of scrolls
+  // that fits is tried, so a stat is "certain" only when every fit agrees. No fit at all means a misread.
+  // Returns { ok, nat: {stat: [lo, hi]}, gain: {stat: [lo, hi]}, passed: [lo, hi], su } or null without a slots read.
+  function scrollSplit(name, l) {
+    var x = l && l.x; if (!x || x.g != null) return null;
+    var su = slotsUsed(name, l); if (su == null) return null;
+    var up = scrollsPassed(name, l), memo = su + "|" + (up == null ? "" : up);
+    if (x._ss && x._ss.k === memo) return x._ss.v;
+    var lines = SCROLLS[subKind(name)] || [], b = fullBase(name).s, tot = {}, stats = [];
+    BSTATS.forEach(function (k) { if (x[k] == null) return; tot[k] = x[k] - (b[k] || 0); stats.push(k); });
+    var res = null, drop = [], badStats = [], vsI = valSet(name);
+    // one stat at a time first: a stat no number of passes can explain is a misread line (or our item data is missing
+    // it). Lines buyers don't pay for are dropped from the read; a paid-for one keeps the whole read out of roll prices.
+    var pHi0 = up != null ? up : su;
+    stats = stats.filter(function (k) {
+      var gs = {}; lines.forEach(function (ln) { ln[1].forEach(function (g) { gs[g[1][k] || 0] = 1; }); });
+      var steps = Object.keys(gs).map(Number); if (!steps.length) steps = [0];
+      var reach = { 0: 1 }, fits = false, r = natRange(b[k] || 0);
+      for (var p = 0; p <= pHi0 && !fits; p++) {
+        if (p >= (up != null ? up : 0)) Object.keys(reach).forEach(function (gv) { if (Math.abs(tot[k] - gv) <= r) fits = true; });
+        var nx = {}; Object.keys(reach).forEach(function (gv) { steps.forEach(function (st) { var w = +gv + st; if (w <= tot[k] + r) nx[w] = 1; }); }); reach = nx;
+      }
+      if (!fits) (vsI[k] ? badStats : drop).push(k);
+      return fits;
+    });
+    if (stats.length) {
+      var pLo = up != null ? up : 0, pHi = up != null ? up : su, opts = {}, nGrades = 0;
+      lines.forEach(function (ln) { ln[1].forEach(function (g) { nGrades++; var v = stats.map(function (k) { return g[1][k] || 0; }); if (v.some(Boolean)) opts[v.join(",")] = v; }); });
+      var ov = Object.keys(opts).map(function (k) { return opts[k]; }), zero = ov.length < nGrades || !lines.length;
+      var cap = stats.map(function (k) { return tot[k] + natRange(b[k] || 0); });
+      var nat = {}, gain = {}, any = false, pass = [99, -1], cur = {};
+      cur[stats.map(function () { return 0; }).join(",")] = 1;
+      for (var p = 0; p <= pHi; p++) {
+        if (p >= pLo) Object.keys(cur).forEach(function (key) {
+          var v = key.split(",").map(Number);
+          for (var i = 0; i < stats.length; i++) if (Math.abs(tot[stats[i]] - v[i]) > natRange(b[stats[i]] || 0)) return;
+          any = true; pass[0] = Math.min(pass[0], p); pass[1] = Math.max(pass[1], p);
+          stats.forEach(function (k, i) { var n = tot[k] - v[i]; nat[k] = nat[k] ? [Math.min(nat[k][0], n), Math.max(nat[k][1], n)] : [n, n]; gain[k] = gain[k] ? [Math.min(gain[k][0], v[i]), Math.max(gain[k][1], v[i])] : [v[i], v[i]]; });
+        });
+        if (p === pHi) break;
+        var nx = {};
+        Object.keys(cur).forEach(function (key) {
+          var v = key.split(",").map(Number);
+          if (zero) nx[key] = 1;           // a pass on a stat this copy's popup didn't show leaves the stats read as they were
+          ov.forEach(function (o) { var w = v.map(function (a, i) { return a + o[i]; }); for (var i = 0; i < w.length; i++) if (w[i] > cap[i]) return; nx[w.join(",")] = 1; });
+        });
+        cur = nx; if (!Object.keys(cur).length) break;
+      }
+      res = { ok: any && !badStats.length, nat: nat, gain: gain, passed: any ? pass : null, su: su, drop: drop, badStats: badStats };
+    } else if (drop.length || badStats.length) res = { ok: !badStats.length, nat: {}, gain: {}, passed: null, su: su, drop: drop, badStats: badStats };
+    x._ss = { k: memo, v: res };
+    return res;
+  }
+  // "natural +1 crit rate" when every fit agrees on a stat that moved; "natural 0 to +1 crit rate" when it could be either
+  function naturalWords(name, sp, only) {
+    if (!sp || !sp.ok) return "";
+    var vs = valSet(name), out = [];
+    Object.keys(sp.nat).forEach(function (k) {
+      if (only && !vs[k]) return;
+      var r = sp.nat[k]; if (!r[0] && !r[1]) return;
+      var f = function (n) { return (n > 0 ? "+" : "") + n; };
+      out.push((r[0] === r[1] ? f(r[0]) : f(r[0]) + " to " + f(r[1])) + " " + (STATWORD[k] || k));
+    });
+    return out.length ? "natural " + out.join(", ") : "";
   }
   // slots taken from the item's base count: 0 is clean. Null when the hover didn't reach Remaining Enhancements.
   function slotsUsed(name, l) {
@@ -2678,7 +2766,9 @@
           su0 = o.su + (bSlots ? " of " + bSlots : "") + " used" + (o.up == null ? "" : o.up === 0 ? ", none passed" : ", " + o.up + " passed");
           // no scroll passed: every stat that moved is the drop's own roll
           if (o.up === 0 && o.combo) top = "Natural " + top;
-          full = (o.combo ? (o.up === 0 ? "Natural roll " : "") + comboLabel(o.combo) : "No gain (failed scrolls)") + ", " + o.su + (bSlots ? " of " + bSlots : "") + " slots used" + (o.up == null ? ", passed count not read" : o.up === 0 ? ", none passed" : ", " + o.up + " passed, " + (o.su - o.up) + " failed");
+          var nw = o.up === 0 ? "" : naturalWords(i.item, scrollSplit(i.item, o.ls[0]), true);   // by the scroll table: what of it the drop rolled
+          if (nw) su0 += ", " + nw;
+          full = (o.combo ? (o.up === 0 ? "Natural roll " : "") + comboLabel(o.combo) : "No gain (failed scrolls)") + ", " + o.su + (bSlots ? " of " + bSlots : "") + " slots used" + (o.up == null ? ", passed count not read" : o.up === 0 ? ", none passed" : ", " + o.up + " passed, " + (o.su - o.up) + " failed") + (nw ? ", " + nw : "");
         }
         var c = cell(e[0] + "|" + k, o.g, o.ls, top, su0, full);
         row.appendChild(c.el); if (c.open) opened = c.open;
@@ -2789,6 +2879,13 @@
       var f = el("div", "gt-foot");
       var pl = el("div"); pl.appendChild(el("b", null, l.s)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
       var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
+      var spl = read ? scrollSplit(name, l) : null;
+      if (spl && spl.ok && spl.su > 0) {
+        var pw = spl.passed[0] === spl.passed[1] ? spl.passed[0] + " passed, " + (spl.su - spl.passed[0]) + " failed" : spl.passed[0] + " to " + spl.passed[1] + " passed";
+        var gw = []; Object.keys(spl.gain).forEach(function (k) { var g0 = spl.gain[k]; if (g0[1]) gw.push((g0[0] === g0[1] ? "+" + g0[0] : "+" + g0[0] + " to +" + g0[1]) + " " + (STATWORD[k] || k)); });
+        f.appendChild(el("div", "gt-dim", "Scrolls: " + pw + (gw.length ? ", adding " + gw.join(", ") : "") + ". " + (naturalWords(name, spl, true) ? naturalWords(name, spl, true).replace(/^n/, "N") + " (the drop's own roll)." : "The stats buyers pay for are at the item's base apart from that.")));
+      }
+      else if (spl && !spl.ok) f.appendChild(el("div", "gt-dn", "These stats don't add up for any mix of scrolls, so the read is kept out of roll prices."));
       f.appendChild(el("div", "gt-dim", read ? "Stats read from this copy's popup in game" : "Not hovered in game yet: these are the item's base stats"));
       box.appendChild(f);
     }
