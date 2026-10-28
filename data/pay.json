@@ -4,7 +4,7 @@
  "weekly_cap": 50,
  "weekly_budget": 250,
  "min_payout": 5,
- "unlock_verified": 2000,
+ "unlock_verified": 500,
  "hover_credit": 2,
  "strict": true,
  "witness_credit": 0.25,
@@ -20,5 +20,9 @@
  "direct_pay": [
   "Zik",
   "laclac"
- ]
+ ],
+ "trial": false,
+ "gap_mult": 1.5,
+ "gap_from": "2026-10-28",
+ "gap_min_days": 5
 }
