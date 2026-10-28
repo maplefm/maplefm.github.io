@@ -74,6 +74,7 @@ jobs:
             sig=$(cat /tmp/arch/data/watcher*.json /tmp/arch/data/streams.json /tmp/arch/data/streams-vods.json /tmp/arch/data/inbox.json 2>/dev/null | sha1sum | cut -c1-12)
             if [ "$sig" != "$lastsig" ]; then echo "{\"at\":$(date +%s%3N),\"v\":\"$sig\"}" > data/live.sig; lastsig="$sig"; fi
             git add -A data
+            git add -f data/covhours.json 2>/dev/null || true   # ignored by the live branch's .gitignore otherwise
             if ! git diff --cached --quiet; then
               git commit -q -m "Live pump: prices and ranks"
               for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
