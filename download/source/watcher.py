@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.13"
+VERSION = "2026.10.28.1"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -478,16 +478,39 @@ def shop_room(r):
     n = [int(x) for x in n if 1 <= int(x) <= 40]
     return "FM" + str(n[0]) if len(n) == 1 else "FM"
 
+# Hover telemetry: counts only, no pictures, sent with the day's shop post as "hv" so Club FM can tell an equip that
+# was never hovered from one hovered too briefly, one whose popup never showed (pointer off the icon), and one whose
+# popup was read but couldn't be matched. Nothing here changes what gets read.
+HV_KEYS = ("rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got")
+HV = {"day": "", "c": {}}
+HV_GOT = set()
+HV_LOCK = threading.Lock()
+HV_FILE = os.path.join(HERE, "hover_counts.json")   # today's counts survive a restart
+try:
+    _h = json.load(open(HV_FILE, encoding="utf-8"))
+    if _h.get("day") == datetime.date.today().isoformat(): HV.update(day=_h["day"], c={k: int(v) for k, v in _h.get("c", {}).items() if k in HV_KEYS})
+except Exception:
+    pass
+def hv(k, n=1):
+    with HV_LOCK:
+        day = datetime.date.today().isoformat()
+        if HV["day"] != day: HV["day"] = day; HV["c"] = {}; HV_GOT.clear()
+        HV["c"][k] = HV["c"].get(k, 0) + n
+def hv_hid(st={"n": 0}):
+    st["n"] += 1; return st["n"]
+
 def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots": 0, "fired": 0, "check": 0}):
     """While the pointer rests on a shop row, say when to read the item's tooltip. The loop runs ten times a second
     while a shop is open, and the moment the game's popup panel is on screen it is read: no fixed wait, so a quick
     half-second hover is enough. Then again about 0.6 and 1.5 seconds later so the stats get voted on.
     Small wiggles of the pointer on the same row keep the hover; moving to another row starts over."""
     idx, tbox = hovered_row(game, shop_box)
+    if st["row"] is not None and st["row"] != idx and st["shots"] == 0 and 0.25 <= t - st["since"] < 1.0:
+        hv("brief")                         # rested on a row, then moved on before any popup showed
     if idx is None:
         st["row"] = None; return None
     if st["row"] != idx:
-        st.update(row=idx, since=t, shots=0, fired=0, check=0); return None
+        st.update(row=idx, since=t, shots=0, fired=0, check=0, hid=0); return None
     if st["shots"] == 0:
         if t - st["since"] < 0.12 or t - st["check"] < 0.08: return None
         st["check"] = t
@@ -496,13 +519,16 @@ def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots":
             try: seen = fmparse._tip_panel(grab(sct, game, tbox)) is not None
             except Exception: seen = False
         if seen or t - st["since"] >= 1.0:      # the panel is up (or a second has passed: read anyway)
-            st["shots"] = 1; st["fired"] = t; tip_ready.early = seen; return idx, tbox
+            st["shots"] = 1; st["fired"] = t; tip_ready.early = seen
+            st["hid"] = hv_hid(); tip_ready.hid = st["hid"]; hv("rest"); hv("panel" if seen else "nopanel")
+            return idx, tbox
         return None
     due = (0.6, 1.5)
     if st["shots"] <= len(due) and t - st["fired"] >= due[st["shots"] - 1]:
-        st["shots"] += 1; tip_ready.early = False; return idx, tbox
+        st["shots"] += 1; tip_ready.early = False; tip_ready.hid = st.get("hid", 0); return idx, tbox
     return None
 tip_ready.early = False
+tip_ready.hid = 0
 
 def masked_hash(img, game, box, size=(40, 66)):
     """The shop's fingerprint with the pointer blanked out, so moving the mouse over the list isn't a change."""
@@ -1005,9 +1031,14 @@ class Store:
                 if o.get("xj"): row["xj"] = o["xj"]
                 doc["rows"].append(row)
         out = []
+        with HV_LOCK: hvc = (HV["day"], dict(HV["c"]))
+        try: json.dump({"day": hvc[0], "c": hvc[1]}, open(HV_FILE, "w", encoding="utf-8"))
+        except Exception: pass
         for (day, kind), doc in sorted(docs.items()):
             at = datetime.datetime.fromtimestamp(doc["last"], tz.tzinfo).isoformat(timespec="seconds")
-            out.append({"at": at, "src": "watcher-" + kind, "rows": doc["rows"]})
+            d0 = {"at": at, "src": "watcher-" + kind, "rows": doc["rows"]}
+            if kind == "shop" and hvc[1] and at[:10] == hvc[0]: d0["hv"] = hvc[1]
+            out.append(d0)
         return out
 
 # ------------------------------------------------------------------ publish
@@ -1488,6 +1519,7 @@ def worker(cfg, jobs, store):
                     if extra.get("tip") is not None:
                         try:
                             tip = fmparse.read_tooltip(extra["tip"])
+                            if extra.get("hid"): hv("read" if tip else "unread")
                             if tip:
                                 tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
                                 review_save(cfg, "tip", extra["tip"], tip)
@@ -1508,6 +1540,9 @@ def worker(cfg, jobs, store):
                         store.add_shop(res)
                         if res["tip"]:
                             hit = store.add_tooltip(res)
+                            if extra.get("hid"):
+                                hv("matched" if hit else "nomatch")
+                                if hit and extra["hid"] not in HV_GOT: HV_GOT.add(extra["hid"]); hv("got")
                             if hit == "pending": log(f"hover: read {res['tip']['name']}, stats saved until its row reads clearly")
                             elif hit:
                                 log(f"read  {hit[0]} {hit[1]}: " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items() if not k.endswith("_b")))
@@ -1660,6 +1695,7 @@ def main():
                         shop_seen = t
                         h = masked_hash(shop, game, shop_box)
                         tr = tip_ready(game, shop_box, t, sct)
+                        if tr and jobs.full(): hv("busy")   # the reader was behind, so this popup wasn't looked at
                         # a changed shop is read at most once a second; a hover is read right away
                         if ((h != last_shop_hash and t - last_shop_read >= 0.9) or tr) and not jobs.full():
                             last_shop_read = t
@@ -1669,6 +1705,7 @@ def main():
                             idx, tbox = tr if tr else hovered_row(game, shop_box)
                             if idx is not None:
                                 extra["row"] = idx; extra["tip"] = grab(sct, game, tbox); extra["hover"] = bool(tr) and not tip_ready.early   # a first quick look that misses stays quiet
+                                if tr: extra["hid"] = tip_ready.hid; hv("shots")
                             extra["h"] = h
                             last_shop_hash = h; jobs.put(("shop", shop, extra))
                     elif cfg.get("sell_hover", True) and inv_ready(game, t) is not None and not jobs.full():
