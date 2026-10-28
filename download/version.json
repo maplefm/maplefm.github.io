@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.11",
- "date": "2026-10-28T00:56:59+00:00",
- "notes": "Reads Critical Rate and Critical Damage lines, so crit rolls on gloves and earrings price right",
- "sha256": "79cb05a7f0172ab04fd448b9eba060e12f304644e5f86e4985508063a521ef26",
- "size": 144498,
+ "version": "2026.10.27.12",
+ "date": "2026-10-28T02:30:09+00:00",
+ "notes": "Reads how many scrolls passed from the item's title, and fixes a 1 read as 4 on lines no scroll could have changed",
+ "sha256": "f28718ab20971bf59079c820b0e61c8038d923c37df5b20dcb52d30fc206cb92",
+ "size": 151260,
  "history": [
+  {
+   "version": "2026.10.27.12",
+   "date": "2026-10-27",
+   "notes": "Reads how many scrolls passed from the item's title, and fixes a 1 read as 4 on lines no scroll could have changed"
+  },
   {
    "version": "2026.10.27.11",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.23.1",
    "date": "2026-10-23",
    "notes": "Your name: a name in config.json is never second-guessed, and a name read off the screen needs five matching reads that outvote every other guess (3-letter misreads like Toe no longer stick). Linked watchers show under the Discord account's in-game name."
-  },
-  {
-   "version": "2026.10.22.5",
-   "date": "2026-10-22",
-   "notes": "Faster reading: the minimap is read once per look instead of once per shop frame, and each text reader keeps to one CPU thread so the readers stop fighting each other."
   }
  ],
  "pip": [],
- "sig": "044bde48db18a9cdcb687d214d59616264fa7fefb8f4686a7180fbf43a3e9ac772493eecbb3fc13b157ef4f75ad1db4a59a4f1570bda88955072732fc2502365c8978b5095051cf3bbcf62e11f809e351212c0fa71918e1d324bc8e66db95b5db9c08f34219fadc903ef756cc1e5636837186d28b4e1c4a85d225012fa81b32bb5aa8d78b8db899b35d71359123af6b0b803ad4e25cb45ff5cc51d6f1ac8ebb27305a45067b200323319a7f5c6a007f595158abc5a2ef64b7ecb306b8b78f5fff216f115a28845936ef8b44562036d11ee086bab8878f18692a83926721c6a83d301db39b97e79fbdd8e83b0bbd7ae46abb632a83c5832f45c11224174702683"
+ "sig": "3000b4dd7b053924cf18c6e54fe19e0dd50cddc9b27f56408ad414c6de13a3de87df44785872e2108a9498260cbab7d271c0249a48c6e0b6bd3368945799a01c79c84210126dda1f0e9f8451b1670987b239429a910aa25af51a5f6f78ca87cd61ef46217f6d9ce9b18ab3d2cd43a8b5cca405cf04ec2a0cda270b4bf2b776f4cff15cb7569a16b0de5b76563a3a53c42f4866660f014a7371bc47caa84bddd841ade6452818edf27c9eeb9a0630cb22f2c120cef5dbddaf2391dc77fb11817b87f9cfc9b74ab99fd7a444e92a4529e6411fba2284573c666f3e8e97de7e102de487ce115815ce093b055067cea13f714cf8b4fb4605e2ce70e4754164cbee9f"
 }

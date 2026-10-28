@@ -1040,6 +1040,12 @@ def read_tooltip(img, need_stats=True):
     if not _known_name(re.sub(r"\s*\(\+\d+\)\s*$", "", out.get("name") or "")):
         nm = _tip_name_bright(img)
         if nm: out["name"] = nm
+    # scrolls passed, from the title's colour and "(+N)": with slots used it tells failed scrolls apart from passed ones
+    if "SLOTS" in stats:
+        try:
+            up = _tip_passed(img)
+            if up is not None: stats["UP"] = up
+        except Exception: pass
     return out
 
 def _tip_slots_white(img, top=0.45):
@@ -1082,6 +1088,41 @@ def _tip_name_bright(img):
         if k: return k
         if not best and len(re.sub(r"[^A-Za-z]", "", t)) >= 4: best = t
     return best
+
+def _tip_passed(img):
+    """How many scrolls passed, from the title. The game writes an item that took passed scrolls in orange with
+    "(+N)" after the name; an item with none keeps a white name and no count. Returns 0, N, or None when unsure."""
+    import numpy as np
+    top = img.convert("RGB").crop((0, 0, img.width, min(img.height, 80)))
+    a = np.asarray(top).astype(int)
+    R, G, B = a[..., 0], a[..., 1], a[..., 2]
+    from PIL import ImageChops
+    r, g, b = top.split()
+    mx = ImageChops.lighter(ImageChops.lighter(r, g), b)
+    gg = mx.point(lambda v: 0 if v >= 200 else 255 if v <= 150 else int((200 - v) * 5.1))
+    gg = gg.resize((gg.width * 3, gg.height * 3), Image.BICUBIC)
+    for l in ocr_lines(gg, 3, 6):
+        t = re.sub(r"^[^A-Za-z]+", "", l["text"]).strip()
+        # brackets read as (, {, [, i or l and ), }, ] or |: "Old Wooden Staff i+1}", "Fairy Wand {+7}"
+        nm = re.sub(r"\s*[\(\[{il]\s*(?:[+t4]\s*\d{1,2}|\d{1,2}|I?[FM])\s*[\)\]}|1l]?", " ", t).strip()
+        nm = re.sub(r"\s*[\(\[{][^)\]}]*$|\s*[|]\s*$", "", nm).strip()
+        if not nm or re.search(r"'s\b|\b[hn]as (entered|left)|\breq\b|:", t, re.I) or not _known_name(nm): continue
+        y0, y1 = max(0, int(l["y"]) - 1), min(a.shape[0], int(l["y"] + l["h"]) + 2)
+        x0, x1 = max(0, int(l["x"]) - 1), min(a.shape[1], int(l["x"] + l["w"]) + 2)
+        sub = (slice(y0, y1), slice(x0, x1))
+        orange = int(((R[sub] > 190) & (G[sub] > 110) & (G[sub] < 205) & (B[sub] < 120)).sum())
+        white = int(((R[sub] > 205) & (G[sub] > 205) & (B[sub] > 205)).sum())
+        # the line's box also takes in the panel's light border, so the call is on orange alone: a white name has none
+        if orange < 12 and white >= 25: return 0                 # a white name: no scroll passed
+        if orange < 30: return None
+        m = re.search(r"[\(\[{il]\s*([+t4]?)\s*(\d{1,2})\s*[\)\]}|]?\s*[|]?\s*$", t)
+        if not m: return None
+        d = m.group(2)
+        # the plus sign is often read as a 4 ("(+4)" as "(44)"): two digits starting with 4 are the plus and one digit
+        if not m.group(1) and len(d) == 2 and d[0] == "4": d = d[1]
+        n = int(d)
+        return n if 1 <= n <= 20 else None
+    return None
 
 def _read_tip_once(img, need_stats=True, lo=140, hi=215):
     C = TIP_CFG

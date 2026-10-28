@@ -227,6 +227,7 @@ button, input, select { font: inherit; color: inherit; }
 .gtip { position: fixed; left: 0; top: 0; z-index: 300; pointer-events: none; width: 262px; will-change: transform; }
 .gt { background: rgba(14, 18, 36, .94); color: #fff; border: 1px solid rgba(214, 222, 255, .55); border-radius: 5px; box-shadow: 0 6px 22px rgba(0, 0, 0, .45); padding: 8px 10px 9px; font: 600 .74rem/1.45 var(--body, system-ui); }
 .gt-name { text-align: center; font-weight: 800; font-size: .86rem; padding-bottom: 6px; margin-bottom: 7px; border-bottom: 1px dashed rgba(255, 255, 255, .28); }
+.gt-name.gt-up { color: #f4ab2a; }   /* a scrolled item's name is orange in game */
 .gt-top { display: flex; gap: 9px; align-items: center; margin-bottom: 6px; }
 .gt-ic { flex: 0 0 58px; width: 58px; height: 58px; border-radius: 6px; background: linear-gradient(#fdfdfd, #d9dde8); display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
 .gt-ic img { width: 44px; height: 44px; object-fit: contain; image-rendering: pixelated; }
