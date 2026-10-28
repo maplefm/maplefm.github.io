@@ -1640,7 +1640,10 @@
       if (b < shown.length) {
         var more = el("tr", "more-row"), td = el("td", null, "Loading more…"); td.colSpan = 7; more.appendChild(td); tb.appendChild(more);
         if ("IntersectionObserver" in window) {
-          priceIO = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { priceIO.disconnect(); addRows(b, b + PAGE); } }, { root: tb.closest(".tbox"), rootMargin: "600px" });
+          // the table box only scrolls on its own on wide screens; on phones the page scrolls, so the screen is the
+          // root (with the box as root every row loaded at once, 1,000+ rows with charts, and phones stuttered)
+          var tbx = tb.closest(".tbox"), ownScroll = tbx && getComputedStyle(tbx).maxHeight !== "none";
+          priceIO = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { priceIO.disconnect(); addRows(b, b + PAGE); } }, { root: ownScroll ? tbx : null, rootMargin: "600px" });
           priceIO.observe(more);
         } else addRows(b, shown.length);
       }
@@ -4157,7 +4160,8 @@
       .catch(function () { return getRaw(path); });
   }
   // ---------- maintenance: Nexon's Classic World notices, checked every half hour by a GitHub job
-  var MAINT = null;
+  // the last notice this browser saw draws straight away, so the page doesn't jump when the fresh copy lands
+  var MAINT = null; try { MAINT = JSON.parse(localStorage.getItem("fm-maint") || "null"); } catch (e) {}
   function whenTxt(d) { return d.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
   function timeTxt(d) { return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }); }
   function renderMaint() {
@@ -4294,11 +4298,16 @@
   function poll() {
     loadGone();
     if (Date.now() >= HELD && D) { HELD = Infinity; DIRTY = true; render(); }
-    getJSON("data/maintenance.json").then(function (m) { if (m && m.notices) { MAINT = m; renderMaint(); } });
+    getJSON("data/maintenance.json").then(function (m) { if (m && m.notices) { MAINT = m; renderMaint(); try { localStorage.setItem("fm-maint", JSON.stringify(m)); } catch (e) {} } });
     getJSON("data/ranks.json").then(function (r) { if (r && r.who) { var ch = !RANKS || RANKS.updated !== r.updated; RANKS = r; if (ch && D) { DIRTY = true; render(); } } });
-    getBundle().then(function (b) {
+    // Visitors on the server's finished board (the snap) never download the raw listings: they are 6 MB and
+    // building the board from them froze phones for 10 seconds. The snap refreshes itself; club members, a
+    // missing or stale snap, and anyone already on raw listings keep the old path.
+    rawWanted().then(function (want) { return want ? getBundle() : "skip"; }).then(function (b) {
+      if (b === "skip") return "skip";
       FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
-    }).then(function () {
+    }).then(function (sk) {
+      if (sk === "skip") { livePill(); armed = true; wArmed = true; return; }
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
       var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
       var changed = sig !== lastSig; lastSig = sig; scans = all;
@@ -4406,13 +4415,19 @@
   // shell shows at once and the data lands in one pass instead of three.
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
   if (ENGINE) { engineMain(); return; }
-  mark("start"); render(); mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;
+  mark("start"); render(); try { if (MAINT) renderMaint(); } catch (e) {} mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;
   // the server's finished board first; the raw listings follow when the page is idle (straight away for deal holders)
-  var SNAP_OK = false, RAW_AFTER = 0;
+  var SNAP_OK = false, SNAP_SEEN = 0, SNAP_DONE = null;
+  function rawWanted() { return (SNAP_DONE || Promise.resolve()).then(function () { return DEALS_ON || !SNAP_OK || hasRaw() || !D || !D.snap; }, function () { return true; }); }
   // a newer copy of the server's board replaces this one, unless this browser has moved on to the raw listings
   function snapRefresh() {
     if (!SNAP_OK || hasRaw() || DEALS_ON || document.hidden) return;
-    fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    // a 1 KB check first: the board itself (3 MB) only downloads when the server has a newer one
+    fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) {
+      if (st && st.at && st.at === SNAP_SEEN) return null;
+      if (st && st.at) SNAP_SEEN = st.at;
+      return fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" });
+    }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !D || !D.snap || j.at <= D.snapAt || hasRaw()) return;
       return snapDecodeAsync(j).then(function (d) {
       if (!d || !D || !D.snap || D.engine || DEALS_ON || hasRaw()) return;
@@ -4420,11 +4435,12 @@
       });
     }).catch(function () {});
   }
-  SNAP_P.then(function (j) { return snapDecodeAsync(j); }).then(function (d) {
+  fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) { if (st && st.at && !SNAP_SEEN) SNAP_SEEN = st.at; }).catch(function () {});
+  SNAP_DONE = SNAP_P.then(function (j) { return snapDecodeAsync(j); }).then(function (d) {
     if (D && D.engine) return;   // the club engine's board already landed
     if (!d || hasRaw() || (D && !D.preview && !D.snap && D.list.length)) { getBundle(); return; }
     if (Date.now() - d.snapAt > 90 * 6e4) { getBundle(); return; }   // stale copy: build it here instead
-    D = d; SNAP_OK = true; RAW_AFTER = Date.now() + 20000; lastBuild = Date.now(); DIRTY = false; SIDX = null; mark("snap"); render(); mark("live");
+    D = d; SNAP_OK = true; lastBuild = Date.now(); DIRTY = false; SIDX = null; mark("snap"); render(); mark("live");
     setInterval(snapRefresh, 90000);
   });
   dbReady.then(function () { poll(); setInterval(poll, 60000); }); setInterval(renderMaint, 60000);
