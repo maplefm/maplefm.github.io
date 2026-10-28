@@ -979,19 +979,21 @@
       if (it.cat === "Weapons" || it.cat === "Equips") {
         it.equip = true;
         mergeReads(it.all);
-        it.rolls = it.all.filter(function (x) { return !x.b && x.x && !x.pricey; }).map(function (x) { var p = rollPick(it.item, x); return { l: x, g: p ? sane(p.g, p.k) : null, k: p ? p.k : "" }; }).filter(function (r) { return r.g != null; }).sort(function (a, b) { return a.g - b.g || a.l.u - b.l.u; });
+        it.rolls = it.all.filter(function (x) { return !x.b && x.x && !x.pricey; }).map(function (x) { var p = rollPick(it.item, x); return { l: x, g: p ? sane(p.g, p.k) : null, k: p ? p.k : "", mv: p ? p.mv : {}, combo: p ? p.combo : "", su: slotsUsed(it.item, x) }; }).filter(function (r) { return r.g != null; }).sort(function (a, b) { return a.g - b.g || a.l.u - b.l.u; });
         // Roll prices: what each roll sold for in the last two weeks, two or more sales. A 10 ATT Work Gloves and a
         // clean one share a name and nothing else, so deals on equips are judged against the roll, never the name.
         // and by slots used: a pair with 4 of 5 slots left took a scroll (often a failed one), so it is priced only
         // against sales with the same slots left, never against clean ones. Listings without a slots read don't count.
-        var byRoll = {}, rollWho = {};
-        it.rolls.forEach(function (r) { if (!r.l.so || now - r.l.t > 14 * DAY || !trusted(r.l.who) || !rollKeyOk(it.item, r.l)) return; var su = slotsUsed(it.item, r.l); if (su == null) return; var rk = r.g + "|" + su + "|" + (r.k || ""); (byRoll[rk] || (byRoll[rk] = [])).push(r.l.u); (rollWho[rk] || (rollWho[rk] = {}))[String(r.l.who).toLowerCase()] = 1; });
-        it.rollTyp = {}; Object.keys(byRoll).forEach(function (g) { if (byRoll[g].length >= 2) it.rollTyp[g] = { typ: median(byRoll[g]), n: byRoll[g].length, who: Object.keys(rollWho[g] || {}).slice(0, 8) }; });
+        // Kept per slots used and per natural roll: "0|CRIT+1" is a clean pair with 1 more crit rate than base,
+        // "2|ATT+6" took 2 scrolls for 6 attack. A clean +1 crit pair and a clean base pair never share a price.
+        var byRoll = {}, rollWho = {}, rollMeta = {};
+        it.rolls.forEach(function (r) { if (!r.l.so || now - r.l.t > 14 * DAY || !trusted(r.l.who) || !rollKeyOk(it.item, r.l)) return; var su = slotsUsed(it.item, r.l); if (su == null) return; var rk = su + "|" + r.combo; (byRoll[rk] || (byRoll[rk] = [])).push(r.l.u); rollMeta[rk] = { g: r.g, k: r.k }; (rollWho[rk] || (rollWho[rk] = {}))[String(r.l.who).toLowerCase()] = 1; });
+        it.rollTyp = {}; Object.keys(byRoll).forEach(function (g) { if (byRoll[g].length >= 2) it.rollTyp[g] = { typ: median(byRoll[g]), n: byRoll[g].length, g: rollMeta[g].g, k: rollMeta[g].k, who: Object.keys(rollWho[g] || {}).slice(0, 8) }; });
         // Identical copies only: the headline price of an equip is what a plain copy sells for (an average roll with no
         // scroll slots used). Copies known to be scrolled, failed or rolled high or low are priced in Price by roll and
         // never move the headline. With fewer than 3 plain copies sold, the usual sales are used minus the known odd ones.
         var hasSlH = !!(dbBase(it.item) || {}).SLOTS, offL = [], plainL = [];
-        it.rolls.forEach(function (r) { var su = slotsUsed(it.item, r.l); if (r.g === 0 && r.k !== "TOTAL" && (!hasSlH || su === 0)) plainL.push(r.l); else if (r.g !== 0 || (su || 0) > 0) offL.push(r.l); });
+        it.rolls.forEach(function (r) { var su = slotsUsed(it.item, r.l); if (!r.combo && r.k !== "TOTAL" && (!hasSlH || su === 0)) plainL.push(r.l); else if (r.combo || (su || 0) > 0) offL.push(r.l); });
         var plainS = plainL.filter(function (x) { return x.so && !x.pricey && now - x.t <= 14 * DAY; }).sort(function (a, b) { return b.t - a.t; }).slice(0, 10);
         it.typOff = 0;
         if (plainS.length >= 3) {
@@ -2023,7 +2025,12 @@
   function subKind(name) { var r = dbRow(name), k = r && DBK[r[5]] || ""; return k.split(":")[1] || ""; }
   // the item list's own type decides (a shield files under Weapons on the board but prices like armour)
   function isWeapon(name) { var sb = subKind(name); return sb ? sb === "Wand" || sb === "Staff" || WEAPONS.test(sb) : category(name) === "Weapons"; }
-  function valueOrder(name) { return isWeapon(name) ? (/^(Wand|Staff)$/.test(subKind(name)) ? ["MATT"] : ["ATT", "MATT"]) : VALUE[subKind(name)] || VALUE_ANY; }
+  // weapons: attack first, then any crit line (a claw with +1 crit rate on a clean roll is worth knowing about)
+  function valueOrder(name) {
+    var o = isWeapon(name) ? (/^(Wand|Staff)$/.test(subKind(name)) ? ["MATT", "CRIT", "CRITDMG"] : ["ATT", "MATT", "CRIT", "CRITDMG"]) : (VALUE[subKind(name)] || VALUE_ANY).slice();
+    var b = fullBase(name).s; ["CRIT", "CRITDMG"].forEach(function (k) { if (b[k] && o.indexOf(k) < 0) o.push(k); });
+    return o;
+  }
   // every stat that counts toward a roll on this item, MAIN spelled out
   function valSet(name) { var o = {}; valueOrder(name).forEach(function (k) { if (k === "MAIN") MAINS.forEach(function (m) { o[m] = 1; }); else o[k] = 1; }); return o; }
   function mainStat(b, x, xj) {
@@ -2303,9 +2310,8 @@
   // a roll runs from about 5 under base (a bad drop) to 15 over (a full scroll job); anything else is a misread
   function sane(g, k) { return g == null ? null : k === "HP" || k === "MP" ? (g >= -40 && g <= 300 ? g : null) : g >= -6 && g <= 15 ? g : null; }
   function rollOf(name, l) { var p = rollPick(name, l); return p ? sane(p.g, p.k) : null; }
-  // the key roll prices are kept under: roll, slots used and the stat ("1|0|CRITDMG": crit damage +1, no slots used), so a
-  // +4 LUK pair and a +4 crit pair of the same earrings never share a price
-  function rollKey(name, l, su) { var p = rollPick(name, l); return p ? p.g + "|" + su + "|" + (p.k || "") : ""; }
+  // the key roll prices are kept under: slots used and every paid-for stat that moved ("0|CRIT+1": clean, crit rate +1)
+  function rollKey(name, l, su) { var p = rollPick(name, l); return p ? su + "|" + p.combo : ""; }
   // slots taken from the item's base count: 0 is clean. Null when the hover didn't reach Remaining Enhancements.
   function slotsUsed(name, l) {
     var x = l && l.x; if (!x || x.SLOTS == null) return null;
@@ -2330,39 +2336,63 @@
   // total), then the slot's other paid-for stats in order. Nothing paid-for moved: 0 on the item's key stat.
   function rollPick(name, l) {
     var x = l && l.x; if (!x) return null;
-    if (x.g != null) return { g: x.g, k: "" };
+    if (x.g != null) return { g: x.g, k: "", mv: {}, combo: "" };
     var t = x._tip, wep = isWeapon(name), kk = keyStat(name, x, l.xj);
-    if (wep && t && kk && t[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return { g: x[kk] - x[kk + "_b"], k: kk };
-    if (wep) { if (t && t[kk] != null) return { g: t[kk], k: kk }; }
-    else {
-      // each paid-for stat's move off its base: from the popup's brackets, else the value read against the item's base
-      var vs = valSet(name), mv = {}, nread = 0;
-      Object.keys(vs).forEach(function (k) {
-        // the brackets lost but the watcher kept the base: the value against it
-        if (t && t[k] != null) { mv[k] = t[k] === 0 && x[k] != null && x[k + "_b"] != null ? x[k] - x[k + "_b"] : t[k]; nread++; }
-        else if (x[k] != null) { var b0 = baseOf(name, x, k); if (b0 != null) { mv[k] = x[k] - b0; nread++; } }
-        // a drop's own small wobble on HP, MP, accuracy or a shield's defense (22 HP rolling 24) isn't what anyone pays for; a scroll's +10 is
-        // a stat can't read below nothing: that's a misread line, left out
-        if (mv[k] != null) { var fbk = fullBase(name).s[k], cb = fbk != null ? fbk : baseOf(name, x, k) || 0; if (cb + mv[k] < 0) { delete mv[k]; nread--; } }
-        if (mv[k] && /^(HP|MP|ACC|AVOID|WDEF|MDEF)$/.test(k)) { var bb = baseOf(name, x, k) || 0; if (bb > 0 && Math.abs(mv[k]) <= Math.max(1, Math.ceil(bb * 0.12))) mv[k] = 0; }
-      });
-      if (mv.ATT || mv.MATT) return { g: mv.ATT || mv.MATT, k: mv.ATT ? "ATT" : "MATT" };   // scrolled attack on armour is what buyers shop by
+    // each paid-for stat's move off its base: from the popup's brackets, else the value read against the item's base
+    var vs = valSet(name), mv = {}, nread = 0;
+    Object.keys(vs).forEach(function (k) {
+      // the brackets lost but the watcher kept the base: the value against it
+      if (t && t[k] != null) { mv[k] = t[k] === 0 && x[k] != null && x[k + "_b"] != null ? x[k] - x[k + "_b"] : t[k]; nread++; }
+      else if (x[k] != null) { var b0 = baseOf(name, x, k); if (b0 != null) { mv[k] = x[k] - b0; nread++; } }
+      // a stat can't read below nothing: that's a misread line, left out
+      if (mv[k] != null) { var fbk = fullBase(name).s[k], cb = fbk != null ? fbk : baseOf(name, x, k) || 0; if (cb + mv[k] < 0) { delete mv[k]; nread--; } }
+      // a drop's own small wobble on HP, MP, accuracy or a shield's defense (22 HP rolling 24) isn't what anyone pays for; a scroll's +10 is
+      if (mv[k] && /^(HP|MP|ACC|AVOID|WDEF|MDEF)$/.test(k)) { var bb = baseOf(name, x, k) || 0; if (bb > 0 && Math.abs(mv[k]) <= Math.max(1, Math.ceil(bb * 0.12))) mv[k] = 0; }
+    });
+    var p = null, att = wep ? [kk, kk === "MATT" ? "ATT" : "MATT"] : ["ATT", "MATT"];
+    // attack first (scrolled attack on armour, or a weapon's own attack roll), then the main stats (several moved: their
+    // total), then the slot's other paid-for stats in order
+    for (var a = 0; a < att.length && !p; a++) if (vs[att[a]] && mv[att[a]]) p = { g: mv[att[a]], k: att[a] };
+    if (!p && !wep) {
       var ms = MAINS.filter(function (k) { return mv[k]; });
-      if (ms.length === 1) return { g: mv[ms[0]], k: ms[0] };
-      if (ms.length > 1) return { g: ms.reduce(function (a, k) { return a + mv[k]; }, 0), k: "TOTAL" };
-      var order = valueOrder(name);
-      for (var i = 0; i < order.length; i++) if (order[i] !== "MAIN" && mv[order[i]]) return { g: mv[order[i]], k: order[i] };
-      if (nread || t) return { g: 0, k: keyStat(name, null, l.xj) || kk };   // nothing paid-for moved: one clean group per item
+      if (ms.length === 1) p = { g: mv[ms[0]], k: ms[0] };
+      else if (ms.length > 1) p = { g: ms.reduce(function (s0, k) { return s0 + mv[k]; }, 0), k: "TOTAL" };
     }
-    var k = kk;
-    if (!k || k === "SUCCESS" || x[k] == null) {
-      // a complete hover (it reached Remaining Enhancements) with no line for a stat the item doesn't come with: none scrolled on
-      if (k && k !== "SUCCESS" && x.SLOTS != null && baseOf(name, x, k) === 0 && x.ATT == null && x.MATT == null) return { g: 0, k: k };
-      k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : null; if (!k) return null;
+    var order = valueOrder(name);
+    for (var i = 0; i < order.length && !p; i++) if (order[i] !== "MAIN" && mv[order[i]]) p = { g: mv[order[i]], k: order[i] };
+    if (!p && (nread || t) && (!wep || mv[kk] != null)) p = { g: 0, k: keyStat(name, null, l.xj) || kk };   // nothing paid-for moved: one clean group per item
+    if (!p) {
+      var k = kk;
+      if (!k || k === "SUCCESS" || x[k] == null) {
+        // a complete hover (it reached Remaining Enhancements) with no line for a stat the item doesn't come with: none scrolled on
+        if (k && k !== "SUCCESS" && x.SLOTS != null && baseOf(name, x, k) === 0 && x.ATT == null && x.MATT == null) p = { g: 0, k: k };
+        else { k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : null; if (!k) return null; }
+      }
+      if (!p) {
+        var bq = baseOf(name, x, k);
+        if (bq != null) p = { g: x[k] - bq, k: k };
+        else { var m = MEDSTAT[name + "|" + k]; if (m == null) return null; p = { g: Math.round(x[k] - m), k: k }; }
+        if (p.g) mv[k] = p.g;
+      }
     }
-    var b = baseOf(name, x, k); if (b != null) return { g: x[k] - b, k: k };
-    var m = MEDSTAT[name + "|" + k]; return m != null ? { g: Math.round(x[k] - m), k: k } : null;
+    p.mv = {}; Object.keys(mv).forEach(function (k) { if (mv[k]) p.mv[k] = mv[k]; });
+    p.combo = comboOf(name, p.mv);
+    return p;
   }
+  // every paid-for stat that moved, in the slot's own order: "ATT+1.CRIT+1"; "" is a copy at base on all of them
+  function comboOf(name, mv) {
+    var out = [];
+    valueOrder(name).forEach(function (k) { (k === "MAIN" ? MAINS : [k]).forEach(function (s0) { if (mv[s0]) out.push(s0 + (mv[s0] > 0 ? "+" : "") + mv[s0]); }); });
+    Object.keys(mv).forEach(function (s0) { if (mv[s0] && !out.some(function (o) { return o.indexOf(s0 + "+") === 0 || o.indexOf(s0 + "-") === 0; })) out.push(s0 + (mv[s0] > 0 ? "+" : "") + mv[s0]); });
+    return out.join(".");
+  }
+  var STATWORD = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", ACC: "accuracy", AVOID: "avoid", SPEED: "speed", JUMP: "jump", CRIT: "crit rate", CRITDMG: "crit damage", WDEF: "W.DEF", MDEF: "M.DEF" };
+  // "ATT+1.CRIT+1" read out: "+1 ATT, +1 crit rate"
+  function comboLabel(combo) {
+    if (!combo) return "base";
+    return combo.split(".").map(function (c) { var m = /^([A-Z]+)([+-]\d+)$/.exec(c); return m ? m[2] + " " + (STATWORD[m[1]] || m[1]) : c; }).join(", ");
+  }
+  function comboMap(combo) { var o = {}; (combo || "").split(".").forEach(function (c) { var m = /^([A-Z]+)([+-]\d+)$/.exec(c); if (m) o[m[1]] = +m[2]; }); return o; }
   function rollOf0(name, l) { var p = rollPick(name, l); return p ? p.g : null; }
   // The item's tooltip, rebuilt the way the game shows it from the stats that were read and checked,
   // never the raw screen text (that carries stray marks and symbols from around the popup).
@@ -2509,18 +2539,24 @@
     if (g.up.length) { box.appendChild(el("div", "rlsub", "For sale now, cheapest first")); g.up.slice(0, 12).forEach(function (l) { box.appendChild(row(l, "up")); }); }
     if (g.sold.length) { box.appendChild(el("div", "rlsub", "Sold, newest first")); g.sold.slice(0, 8).forEach(function (l) { box.appendChild(row(l, "sold")); }); }
     if (!g.up.length && g.old.length) { box.appendChild(el("div", "rlsub", "Seen earlier, likely gone")); g.old.slice(0, 6).forEach(function (l) { box.appendChild(row(l, "old")); }); }
-    // a roll nobody has bought yet (often a one-of-a-kind copy): what the nearest rolls sold for, below and above
+    // a roll nobody has bought yet (often a one-of-a-kind copy): the closest rolls that did sell, same scroll state.
+    // Closest means the fewest stat points apart across every paid-for stat, so +1 ATT +1 crit is compared with
+    // +1 ATT and with +1 crit before anything further away.
     if (!g.sold.length && ls.length && i.rolls) {
-      var me = rollOf(i.item, ls[0]), mySu = slotsUsed(i.item, ls[0]);
-      if (me != null) {
-        var by = {}, cut = Date.now() - 30 * DAY;
-        i.rolls.forEach(function (r) { if (!r.l.so || r.l.t < cut || r.l.pricey || r.g === me) return; var su = slotsUsed(i.item, r.l); if (mySu != null && su != null && su !== mySu) return; (by[r.g] || (by[r.g] = [])).push(r.l.u); });
-        var ks = Object.keys(by).map(Number), lo = ks.filter(function (k) { return k < me; }).sort(function (a, b) { return b - a; })[0], hi = ks.filter(function (k) { return k > me; }).sort(function (a, b) { return a - b; })[0];
-        var near = [lo, hi].filter(function (k) { return k != null; });
+      var mineR = i.rolls.filter(function (r) { return r.l === ls[0]; })[0];
+      if (mineR) mineR = Object.assign({}, mineR, { su: slotsUsed(i.item, mineR.l) });
+      if (mineR) {
+        var mm = comboMap(mineR.combo), cut = Date.now() - 30 * DAY, by = {};
+        i.rolls.forEach(function (r) {
+          if (!r.l.so || r.l.t < cut || r.l.pricey || r.combo === mineR.combo) return;
+          var rsu = slotsUsed(i.item, r.l); if ((mineR.su === 0) !== (rsu === 0) || (mineR.su > 0 && rsu !== mineR.su)) return;
+          var key = r.combo; (by[key] || (by[key] = { combo: key, su: rsu, v: [] })).v.push(r.l.u);
+        });
+        var dist = function (c) { var o = comboMap(c), d = 0, ks = {}; Object.keys(o).concat(Object.keys(mm)).forEach(function (k) { if (ks[k]) return; ks[k] = 1; d += Math.abs((o[k] || 0) - (mm[k] || 0)); }); return d; };
+        var near = Object.keys(by).sort(function (a, b) { return dist(a) - dist(b) || by[b].v.length - by[a].v.length; }).slice(0, 3);
         if (near.length) {
-          var nn = el("div", "rlsub", "No sales of this roll yet. Nearest rolls sold:");
-          box.appendChild(nn);
-          near.forEach(function (k) { var v = by[k], d = el("div", "rl near"); d.appendChild(el("b", null, (k > 0 ? "+" : "") + k + (k === 0 ? " (average)" : ""))); var pp = el("div", "rlp"); pp.appendChild(money(median(v))); pp.appendChild(el("small", null, v.length + (v.length === 1 ? " sale" : " sales") + ", 30 days")); d.appendChild(pp); box.appendChild(d); });
+          box.appendChild(el("div", "rlsub", "No sales of this exact roll yet. Closest rolls that sold" + (mineR.su === 0 ? ", clean copies only:" : ", same slots used:")));
+          near.forEach(function (k) { var o = by[k], d = el("div", "rl near"); d.appendChild(el("b", null, (mineR.su === 0 ? "Clean, " : "") + comboLabel(k))); var pp = el("div", "rlp"); pp.appendChild(money(median(o.v))); pp.appendChild(el("small", null, o.v.length + (o.v.length === 1 ? " sale" : " sales") + ", 30 days")); d.appendChild(pp); box.appendChild(d); });
         }
       }
     }
@@ -2540,7 +2576,7 @@
   }
   function rollBox(i) {
     var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by roll")); box.appendChild(hd);
-    var kw = keyWhy(i.item); if (kw) box.appendChild(el("p", "rlnote rkey", kw));
+    var kw = keyWhy(i.item); if (kw) box.appendChild(el("p", "rlnote rkey", kw + " Clean means no scrolls used; a clean copy can still have rolled above or below the item's base, and that roll is priced on its own."));
     if (i.bands) {
       var bg = el("div", "rollbands");
       [["Low", Math.min(i.bands.lo, i.bands.mid), "down"], ["Average", i.bands.mid, "mid"], ["High", Math.max(i.bands.hi, i.bands.mid), "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(el("small", null, b[0])); d.appendChild(money(b[1])); bg.appendChild(d); });
@@ -2549,74 +2585,88 @@
     var now = Date.now(), gks = keyStat(i.item, null, ""), gkb = gks && gks !== "SUCCESS" ? (itemBase(i.item).s[gks] != null ? itemBase(i.item).s[gks] : baseOf(i.item, null, gks)) : null;
     var m = classMask(i.item), jobs = [1, 2, 4, 8].filter(function (b) { return m > 0 && (m & b); }).length;
     var gradeKey = gks && (MAINS.indexOf(gks) < 0 || jobs === 1) ? gks : "GRADE";
-    var secs = {}, clean = null, hasSl = !!(dbBase(i.item) || {}).SLOTS, noSl = {};
+    // Clean copies (no scrolls used) go by their natural roll: base, or whatever the drop rolled above or below it.
+    // Scrolled copies go by what they gained and how many slots that took. Each cell is one exact combination.
+    var cleanG = {}, secs = {}, clean = null, hasSl = !!(dbBase(i.item) || {}).SLOTS, noSl = {}, bSlots = (dbBase(i.item) || {}).SLOTS || fullBase(i.item).s.SLOTS || 0;
     i.rolls.forEach(function (r) {
       if (now - r.l.t > 14 * DAY) return;
-      var bs = rollBasis(i.item, r.l) || gradeKey;
+      var bs = r.k || gradeKey, su = slotsUsed(i.item, r.l);   // read now: the item list may have landed after the rolls were built
       // copies whose upgrades left weren't read sit apart: a used one is worth far less than a clean one
-      if (hasSl && r.l.x.SLOTS == null) { var nk = (r.g === 0 && bs !== "TOTAL" ? "CLEAN" : bs) + "|" + r.g; (noSl[nk] || (noSl[nk] = { k: bs, g: r.g, ls: [] })).ls.push(r.l); return; }
-      // clean: every stat buyers pay for on this slot at its base, and no scroll taken
-      if (r.g === 0 && bs !== "TOTAL" && (!hasSl || slotsUsed(i.item, r.l) === 0)) { (clean || (clean = { ls: [] })).ls.push(r.l); return; }
-      var sc = secs[bs] || (secs[bs] = { k: bs, g: {}, n: 0 }); sc.n++;
-      (sc.g[r.g] || (sc.g[r.g] = { g: r.g, ls: [] })).ls.push(r.l);
+      if (hasSl && su == null) { var nk = (r.combo || "BASE") + "|" + bs; (noSl[nk] || (noSl[nk] = { k: bs, g: r.g, combo: r.combo, ls: [] })).ls.push(r.l); return; }
+      if (r.l.x.g != null) { var gk = "GRADE|" + r.g; (secs.GRADE || (secs.GRADE = { k: "GRADE", c: {}, n: 0 })).n++; (secs.GRADE.c[gk] || (secs.GRADE.c[gk] = { g: r.g, combo: "", su: null, ls: [] })).ls.push(r.l); return; }
+      if (!hasSl || su === 0) {
+        var ck = r.combo; (cleanG[ck] || (cleanG[ck] = { g: r.g, k: bs, combo: ck, su: 0, ls: [] })).ls.push(r.l);
+        if (!ck) (clean || (clean = { ls: [] })).ls.push(r.l);
+        return;
+      }
+      var sc = secs[bs] || (secs[bs] = { k: bs, c: {}, n: 0 }); sc.n++;
+      var key = su + "|" + r.combo; (sc.c[key] || (sc.c[key] = { g: r.g, combo: r.combo, su: su, ls: [] })).ls.push(r.l);
     });
     var mine = myStat(), keys = Object.keys(secs);
-    var rank = function (k) { return k === "TOTAL" ? 3 : k === "GRADE" ? 2 : k === mine ? -2 : (k === "ATT" || k === "MATT") && category(i.item) !== "Weapons" ? -1 : 0; };
+    var rank = function (k) { return k === "TOTAL" ? 3 : k === "GRADE" ? 2 : k === mine ? -2 : (k === "ATT" || k === "MATT") ? -1 : 0; };
     keys.sort(function (a, b) { return rank(a) - rank(b) || secs[b].n - secs[a].n || (a < b ? -1 : 1); });
-    if (!keys.length && clean) keys = [gradeKey];
     var cleanPrice = clean ? priceOf(clean.ls) : null;
     function priceOf(ls) {
       var g = rollRows(ls), sold = g.sold.map(function (l) { return l.u; }), ask = g.up.concat(g.old).map(function (l) { return l.u; });
       return sold.length ? { p: median(sold), how: "sold", up: g.up.length, sold: sold.length } : { p: median(ask.length ? ask : ls.map(function (l) { return l.u; })), how: "asking", up: g.up.length, sold: 0 };
     }
-    function cell(key, g, ls, base, label) {
-      var pr = priceOf(ls), id = i.item + "|" + key + "|" + g, open = ROLLOPEN[id];
-      var d = el("button", "rc " + (g === 0 ? "ref" : g === "?" ? "unk" : g > 0 ? "up" : "down") + (open ? " on" : "")); d.type = "button";
-      var isClean = clean && ls === clean.ls;
-      var top = el("b", null, label || (g === 0 ? (isClean ? (base != null ? "Base" : "Clean") : "Base, used") : (g > 0 ? "+" : "−") + Math.abs(g)));
-      if (base != null && g !== "?") top.appendChild(el("em", null, " " + (base + g)));
-      d.appendChild(top); d.appendChild(money(pr.p));
+    function total(combo) { var m = comboMap(combo), t = 0; Object.keys(m).forEach(function (k) { t += m[k]; }); return t; }
+    // one cell: its top line says the roll, the small line what it sold for or asks
+    function cell(key, g, ls, top, sub, full, cls) {
+      var pr = priceOf(ls), id = i.item + "|" + key, open = ROLLOPEN[id];
+      var d = el("button", "rc " + (cls || (g === 0 ? "ref" : g === "?" ? "unk" : g > 0 ? "up" : "down")) + (open ? " on" : "")); d.type = "button";
+      d.appendChild(el("b", null, top)); if (sub) d.appendChild(el("i", "rsu", sub)); d.appendChild(money(pr.p));
       d.appendChild(el("small", null, pr.how === "sold" ? pr.sold + " sold" + (pr.up ? " · " + pr.up + " up" : "") : (pr.up ? pr.up + " for sale" : ls.length + " seen") + " · asking"));
-      var lab = label && key !== "?" ? label + (/^NOSL:/.test(key) ? ", upgrades not read" : "") : (key === "TOTAL" ? "Total stats" : key === "GRADE" ? "Roll" : key === "?" ? "Not hovered yet" : STATABBR[key] || key) + (g === "?" ? "" : " " + (g === 0 ? (isClean ? "clean" : "at base, slots used") : (g > 0 ? "+" : "") + g));
-      d.title = lab + ": click for every copy, for sale now and sold";
+      d.title = full + ": click for every copy, for sale now and sold";
       d.setAttribute("aria-expanded", open ? "true" : "false"); d.dataset.k = key; d.dataset.g = String(g);
-      var ab = base != null && g !== "?" ? base + g : (ls[0] && ls[0].x && ls[0].x[key] != null ? ls[0].x[key] : null); if (ab != null) d.dataset.abs = String(ab);
       d.addEventListener("click", function () { var was = ROLLOPEN[id]; ROLLOPEN = {}; if (!was) ROLLOPEN[id] = 1; box.replaceWith(rollBox(i)); });
-      return { el: d, open: open ? rollList(i, ls, lab) : null };
+      return { el: d, open: open ? rollList(i, ls, full) : null };
     }
     var shown = 0;
-    keys.forEach(function (k, ki) {
-      var sc = secs[k] || { g: {}, n: 0 }, gs = Object.keys(sc.g).map(Number);
-      var base = k === gks && gkb != null ? gkb : null;
+    var cks = Object.keys(cleanG);
+    if (cks.length) {
+      var cs = el("div", "rsec clean"), ch = el("div", "rsh"); ch.appendChild(el("b", null, "Clean"));
+      ch.appendChild(el("span", null, hasSl ? "no scrolls used, by natural roll" : "by natural roll"));
+      ch.appendChild(el("small", null, cks.reduce(function (a, k) { return a + cleanG[k].ls.length; }, 0) + " seen")); cs.appendChild(ch);
+      var cr = el("div", "rrow"), copen = null;
+      cks.sort(function (a, b) { return (a ? 1 : 0) - (b ? 1 : 0) || total(a) - total(b) || (a < b ? -1 : 1); }).forEach(function (k) {
+        var o = cleanG[k], lab = k ? comboLabel(k) : "Base", c = cell("C|" + k, k ? total(k) : 0, o.ls, lab, "", "Clean, " + comboLabel(k), k ? null : "ref");
+        cr.appendChild(c.el); if (c.open) copen = c.open;
+      });
+      cs.appendChild(cr); if (copen) cs.appendChild(copen); box.appendChild(cs); shown++;
+    }
+    keys.forEach(function (k) {
+      var sc = secs[k], cells = Object.keys(sc.c).map(function (key) { return [key, sc.c[key]]; });
       var sec = el("div", "rsec" + (k === mine ? " mine" : "") + (k === "TOTAL" || k === "GRADE" ? " misc" : ""));
-      var h = el("div", "rsh"), nm = el("b", null, k === "TOTAL" ? "Total stats" : k === "GRADE" ? "Chat grade" : STATABBR[k] || k); h.appendChild(nm);
-      var sub = k === "TOTAL" ? "several stats moved" : k === "GRADE" ? "stat not named" : MAINCLS[k] && (jobs !== 1 || k === mine) ? MAINCLS[k] : base != null ? "base " + base : "";
-      if (sub) h.appendChild(el("span", null, sub));
+      var h = el("div", "rsh"); h.appendChild(el("b", null, k === "TOTAL" ? "Total stats" : k === "GRADE" ? "Chat grade" : STATABBR[k] || k));
+      var sub = k === "GRADE" ? "stat not named" : "scrolled" + (MAINCLS[k] && jobs !== 1 ? " · " + MAINCLS[k] : "");
+      h.appendChild(el("span", null, sub));
       if (k === mine) h.appendChild(el("i", "you", "your class"));
-      if (sc.n) h.appendChild(el("small", null, sc.n + " rolled" + (ki > 0 && cleanPrice ? " · clean " + short(cleanPrice.p) : "")));
+      h.appendChild(el("small", null, sc.n + " seen" + (cleanPrice ? " · clean " + short(cleanPrice.p) : "")));
       sec.appendChild(h);
       var row = el("div", "rrow"), opened = null;
-      // the clean roll is the yardstick: a cell in the first section, a note in the header of the others
-      // clean sits just before the at-base copies that took scrolls
-      var withClean = clean && k !== "TOTAL" && ki === 0;
-      if (withClean && gs.indexOf(0) < 0) gs.push(0);
-      gs.sort(function (a, b) { return a - b; }).forEach(function (g) {
-        if (g === 0 && withClean) { var cc0 = cell(k, 0, clean.ls, base); row.appendChild(cc0.el); if (cc0.open) opened = cc0.open; if (!sc.g[0]) return; }
-        var c = cell(k, g, sc.g[g].ls, base);
+      cells.sort(function (a, b) { return a[1].g - b[1].g || (a[1].su || 0) - (b[1].su || 0); }).forEach(function (e) {
+        var o = e[1], top, su0, full;
+        if (k === "GRADE") { top = (o.g > 0 ? "+" : o.g < 0 ? "−" : "") + Math.abs(o.g); su0 = ""; full = "Chat grade " + top; }
+        else {
+          top = o.combo ? comboLabel(o.combo) : "No gain";
+          su0 = o.su + (bSlots ? " of " + bSlots : "") + " slots used";
+          full = (o.combo ? comboLabel(o.combo) : "No gain (failed scrolls)") + ", " + su0;
+        }
+        var c = cell(e[0] + "|" + k, o.g, o.ls, top, su0, full);
         row.appendChild(c.el); if (c.open) opened = c.open;
       });
       sec.appendChild(row); if (opened) sec.appendChild(opened);
       box.appendChild(sec); shown++;
     });
-    if (!shown && clean) { var cs = el("div", "rsec"); var ch = el("div", "rsh"); ch.appendChild(el("b", null, "Clean")); ch.appendChild(el("small", null, clean.ls.length + " seen")); cs.appendChild(ch); var cr = el("div", "rrow"), cc = cell(gradeKey, 0, clean.ls, null); cr.appendChild(cc.el); cs.appendChild(cr); if (cc.open) cs.appendChild(cc.open); box.appendChild(cs); }
     var nks = Object.keys(noSl);
     if (nks.length) {
       var ns = el("div", "rsec unread"), nh = el("div", "rsh"); nh.appendChild(el("b", null, "Upgrades not read")); nh.appendChild(el("span", null, "kept out of the prices above"));
       nh.appendChild(el("small", null, nks.reduce(function (a, k) { return a + noSl[k].ls.length; }, 0) + " seen")); ns.appendChild(nh);
       var nr = el("div", "rrow"), nopen = null;
       nks.sort(function (a, b) { return noSl[a].g - noSl[b].g; }).forEach(function (k) {
-        var o = noSl[k], lab = o.g === 0 && o.k !== "TOTAL" ? "Clean?" : (o.k === "TOTAL" ? "Total" : o.k === "GRADE" ? "Roll" : STATABBR[o.k] || o.k) + " " + (o.g > 0 ? "+" : o.g < 0 ? "−" : "") + Math.abs(o.g);
-        var c = cell("NOSL:" + o.k, o.g, o.ls, null, lab); nr.appendChild(c.el); if (c.open) nopen = c.open;
+        var o = noSl[k], lab = o.combo ? comboLabel(o.combo) : "Base?";
+        var c = cell("NOSL:" + k, o.g, o.ls, lab, "", (o.combo ? comboLabel(o.combo) : "At base") + ", upgrades not read", o.combo ? null : "ref"); nr.appendChild(c.el); if (c.open) nopen = c.open;
       });
       ns.appendChild(nr); if (nopen) ns.appendChild(nopen);
       ns.appendChild(el("p", "rlnote", "The hover didn't reach the upgrades line, so these could be scrolled. Hover them again in game to price them with the rolls above."));
@@ -2629,7 +2679,7 @@
     if (unread.length) {
       var us = el("div", "rsec unread"), uh = el("div", "rsh"); uh.appendChild(el("b", null, "Not hovered yet")); uh.appendChild(el("span", null, "likely scrolled or a top roll"));
       uh.appendChild(el("small", null, (ug.up.length + ug.sold.length + ug.old.length) + " seen")); us.appendChild(uh);
-      var ps = unread.map(function (l) { return l.u; }), ur = el("div", "rrow"), uc = cell("?", "?", unread, null, "Stats unread");
+      var ps = unread.map(function (l) { return l.u; }), ur = el("div", "rrow"), uc = cell("?", "?", unread, "Stats unread", "", "Not hovered yet", "unk");
       uc.el.querySelector(".num").replaceWith(el("span", "num rng2", short(Math.min.apply(null, ps)) + "–" + short(Math.max.apply(null, ps))));
       ur.appendChild(uc.el); us.appendChild(ur); if (uc.open) us.appendChild(uc.open);
       us.appendChild(el("p", "rlnote", "Rest the mouse on these in game and FM Watcher reads their stats, so they get priced by roll here."));
@@ -3399,9 +3449,10 @@
   }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
-    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { if (rn++ < 40) rt[g] = [Math.round(i.rollTyp[g].typ), i.rollTyp[g].n]; }); if (rn) o.rt = rt; }
-      // the cheapest open listing for each roll, from the last 2 days: what the chat bot quotes for "7 att wg"
-      if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; var ak = r.g + "|" + (r.k || ""); if (ra[ak] == null || l.u < ra[ak]) ra[ak] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }
+    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
+      // rt: sold typical per "roll|slots used|stat|every stat that moved" ("1|0|CRIT|CRIT+1": a clean pair with +1 crit rate);
+      // the cheapest open listing for each roll, from the last 2 days, per "roll|stat|moves|slots used": what the chat bot quotes for "7 att wg"
+      if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; var ak = r.g + "|" + (r.k || "") + "|" + (r.combo || "") + "|" + (function (su) { return su == null ? "" : su; })(slotsUsed(i.item, l)); if (ra[ak] == null || l.u < ra[ak]) ra[ak] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }
       if (i.rd && i.rd.length) o.rd = i.rd.slice(0, 5).map(function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== "l") c[k] = d[k]; }); return c; }); return o; });
     var who = (D.whoAll || []).map(function (w) { return { name: w.name, rank: w.rank, sales: w.sales, week: w.week, rows: w.rows, shopsN: w.shopsN, daysN: w.daysN, stream: w.stream, club: w.club }; });
     var big = D.sales.slice().sort(function (a, b) { return b.p - a.p; })[0];

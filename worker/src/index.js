@@ -1004,14 +1004,21 @@ async function discordPrice(env, q) {
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
   else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
   if (sr.roll && sr.g != null) {
-    // the roll's own sales: "cat's eye +10" is +10 of what the item's rolls are about, unless a stat was named
-    const rs = rollSales(r, String(parseInt(sr.g, 10)), sr.stat)[0];
-    const aa = rollAsks(r, sr.stat).filter((x) => x.g === parseInt(sr.g, 10) && (!rs || !rs.k || !x.k || x.k === rs.k)).sort((x, y) => x.pr - y.pr)[0];
-    const st = statLabel((rs && rs.k) || (aa && aa.k) || sr.stat);
-    const rl = sr.roll === "clean" ? "Clean" : "+" + parseInt(sr.g, 10) + (st ? " " + st : "");
-    if (rs) lines.push("**" + rl + ": " + meso(rs.p) + "** from " + rs.n + " sales" + (rs.su > 0 ? " (" + rs.su + " slots used)" : "") + (aa ? " · cheapest up now " + meso(aa.pr) : ""));
-    else if (aa) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + meso(aa.pr));
-    else lines.push(rl + ": no sales caught at that roll lately. Clean typical is above; every roll's price is on the [item's card](" + link + ")");
+    // the exact roll and scroll state: "work gloves clean 2 crit" is a clean pair with crit rate 1 above base
+    await knownItem(env, "");
+    const b0 = DBS[String(r.item).toLowerCase()] || {};
+    if (/^CRIT/.test(sr.stat || "")) {
+      if (!b0[sr.stat] && b0[sr.stat === "CRIT" ? "CRITDMG" : "CRIT"]) sr.stat = sr.stat === "CRIT" ? "CRITDMG" : "CRIT";
+      const v = parseInt(sr.g, 10), bs = b0[sr.stat] || 0; if (!sr.plus && bs && v >= bs) sr.g = String(v - bs);
+    }
+    if ((sr.stat === "ATT" || sr.stat === "MATT") && b0[sr.stat]) { const v = parseInt(sr.g, 10); if (v >= 15 && v >= b0[sr.stat] - 15) sr.g = String(v - b0[sr.stat]); }
+    const rq = rollQuote(r, sr), rl = rq.label.charAt(0).toUpperCase() + rq.label.slice(1);
+    if (/^CRIT/.test(sr.stat || "") && !b0.CRIT && !b0.CRITDMG) lines.push(shown(r.item) + " has no crit line of its own, so crit on one only comes from scrolls.");
+    if (rq.sale) lines.push("**" + rl + ": " + meso(rq.sale.p) + "** from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : "") + (rq.ask ? " · cheapest up now " + meso(rq.ask.pr) : ""));
+    else if (rq.ask) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + meso(rq.ask.pr));
+    else lines.push(rl + ": no sales caught at that roll lately.");
+    if (!rq.sale && rq.near.length) lines.push("Closest rolls that sold: " + rq.near.map((x) => x.label + " **" + meso(x.p) + "** (" + x.n + " sales)").join(" · "));
+    if (!rq.sale) lines.push("Every roll's price is on the [item's card](" + link + ")");
   } else if (r.rk && r.equip) lines.push("Typical is for clean copies. Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
   lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
   const more = hits.slice(1, 4).map((h) => shown(h.item)).join(", ");
@@ -1036,34 +1043,75 @@ const ROLL_STATS = [
   [/^(str|strength)$/i, "STR"], [/^(dex|dexterity)$/i, "DEX"], [/^(int|intelligence|intel)$/i, "INT"], [/^(luk|luck|lk)$/i, "LUK"],
   [/^(acc|accuracy)$/i, "ACC"], [/^(avoid|avoidability|avo|eva)$/i, "AVOID"], [/^(speed|spd)$/i, "SPEED"], [/^(jump|jmp)$/i, "JUMP"],
   [/^(hp|maxhp)$/i, "HP"], [/^(mp|maxmp)$/i, "MP"], [/^(wdef|w\.?def|def)$/i, "WDEF"], [/^(mdef|m\.?def)$/i, "MDEF"],
-  [/^(crit ?rate|cr)$/i, "CRIT"], [/^(crit|crit ?dmg|crit ?damage|cd|cdmg)$/i, "CRITDMG"]];
+  [/^(crit ?rate|cr|crit)$/i, "CRIT"], [/^(crit ?dmg|crit ?damage|cd|cdmg)$/i, "CRITDMG"]];
 // how a roll's stat reads in a reply: "+1 crit damage", "+6 LUK"
 const STAT_LABEL = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", ACC: "ACC", AVOID: "avoid", SPEED: "speed", JUMP: "jump",
   WDEF: "W.DEF", MDEF: "M.DEF", CRIT: "crit rate", CRITDMG: "crit damage", TOTAL: "total stats" };
 const statLabel = (k) => STAT_LABEL[k] || k || "";
-// Roll prices in the members' summary. rt: sold typical per "roll|slots used|stat" ([price, sales]); ra: cheapest listed
-// per "roll|stat". Older summaries have no stat part. rk is the stat most of the item's rolls are about.
-function rollSales(r, g, stat) {
+// Roll prices in the members' summary. rt: sold typical per "roll|slots used|stat|moves" ([price, sales]), where moves
+// is every paid-for stat that moved, "CRIT+1" or "ATT+1.CRIT+1" ("" is base). ra: cheapest listed per
+// "roll|stat|moves|slots used". Older summaries stop after the stat or the slots. rk is the stat most rolls are about.
+function parseMoves(t) { const o = {}; for (const c of String(t || "").split(".")) { const m = /^([A-Z]+)([+-]\d+)$/.exec(c); if (m) o[m[1]] = Number(m[2]); } return o; }
+function movesLabel(o, su) { const ks = Object.keys(o || {}).filter((k) => o[k]); return ks.length ? ks.map((k) => (o[k] > 0 ? "+" : "") + o[k] + " " + statLabel(k)).join(", ") : su > 0 ? "no gain" : "base"; }
+const slotsTxt = (n) => n + (n === 1 ? " slot" : " slots") + " used";
+function rollEntries(r) {
   const out = [];
   for (const [key, v] of Object.entries((r && r.rt) || {})) {
-    const [a, b, c] = key.split("|");
-    if (Number(a) !== Number(g) || !Array.isArray(v)) continue;
-    out.push({ g: Number(a), su: Number(b) || 0, k: c || "", p: v[0], n: v[1] });
+    if (!Array.isArray(v)) continue;
+    const [a, b, c, d] = key.split("|"), g = Number(a);
+    out.push({ g, su: Number(b) || 0, k: c || "", mv: d !== undefined ? parseMoves(d) : (g && c ? { [c]: g } : {}), p: v[0], n: v[1] });
   }
-  const want = stat || (r && r.rk) || "";
-  // the asked stat first (or the item's usual one), clean slots first, then the most sales
-  return out.filter((x) => !stat || !x.k || x.k === stat).sort((x, y) => (y.k === want) - (x.k === want) || (x.su > 0) - (y.su > 0) || y.n - x.n);
-}
-function rollAsks(r, stat) {
-  const out = [];
-  for (const [key, pr] of Object.entries((r && r.ra) || {})) { const [a, c] = String(key).split("|"); if (!stat || !c || c === stat) out.push({ g: Number(a), k: c || "", pr }); }
   return out;
+}
+function askEntries(r) {
+  const out = [];
+  for (const [key, pr] of Object.entries((r && r.ra) || {})) {
+    const [a, c, d, e] = String(key).split("|"), g = Number(a);
+    out.push({ g, k: c || "", mv: d !== undefined ? parseMoves(d) : (g && c ? { [c]: g } : {}), su: e === undefined || e === "" ? null : Number(e), pr });
+  }
+  return out;
+}
+function rollSales(r, g, stat) { return rollEntries(r).filter((x) => x.g === Number(g) && (!stat || !x.k || x.k === stat)).sort((x, y) => (x.su > 0) - (y.su > 0) || y.n - x.n); }
+function rollAsks(r, stat) { return askEntries(r).filter((x) => !stat || !x.k || x.k === stat); }
+// What a roll goes for. sr: { g, stat, clean }. With a stat, the match is that stat moved by g and nothing else
+// ("+1 crit": crit rate +1, attack at base); clean means no scrolls used. Without a stat, the item's usual roll stat.
+// No sale of that exact roll: the closest rolls that did sell, same scroll state, are returned as near.
+function rollQuote(r, sr) {
+  const g = parseInt(sr.g, 10), clean = !!sr.clean, stat = sr.stat || (g ? "" : "");
+  const same = (mv) => {
+    const ks = Object.keys(mv).filter((k) => mv[k]);
+    if (!g) return ks.length === 0;
+    if (stat) return ks.length === 1 && mv[stat] === g;
+    return ks.length >= 1 && ks.some((k) => mv[k] === g) && (!r.rk || mv[r.rk] === g || ks.length === 1);
+  };
+  const okSu = (su) => !clean || su === 0;
+  const sales = rollEntries(r).filter((x) => okSu(x.su) && same(x.mv)).sort((x, y) => (x.su > 0) - (y.su > 0) || y.n - x.n);
+  const asks = askEntries(r).filter((x) => (!clean || x.su === 0 || x.su == null) && same(x.mv)).sort((x, y) => x.pr - y.pr);
+  const sale = sales[0] || null, ask = asks[0] || null;
+  const mv0 = sale ? sale.mv : ask ? ask.mv : stat ? { [stat]: g } : {};
+  const label = (clean || (sale && sale.su === 0) ? "clean, " : "") + (g && !stat && !sale && !ask ? "+" + g : g || stat ? movesLabel(mv0) : "base");
+  let near = [];
+  if (!sale) {
+    const want = stat ? { [stat]: g } : mv0, dist = (mv) => { const ks = new Set([...Object.keys(mv), ...Object.keys(want)]); let d = 0; for (const k of ks) d += Math.abs((mv[k] || 0) - (want[k] || 0)); return d; };
+    near = rollEntries(r).filter((x) => (clean ? x.su === 0 : true) && (!stat || Object.keys(x.mv).length === 0 || x.mv[stat] != null))
+      .sort((x, y) => dist(x.mv) - dist(y.mv) || (x.su > 0) - (y.su > 0) || y.n - x.n).slice(0, 2)
+      .map((x) => ({ label: (x.su === 0 ? "clean, " : "") + movesLabel(x.mv, x.su) + (x.su > 0 ? " (" + slotsTxt(x.su) + ")" : ""), p: x.p, n: x.n }));
+  }
+  return { label, sale, ask, near };
 }
 const ROLL_WORD = "(crit ?damage|crit ?dmg|crit ?rate|cdmg|crit|magic ?attack|m\\.? ?att(?:ack)?|matt|matk|w\\.? ?att(?:ack)?|watk|watt|attack|attk|atk|att|str|strength|dex|dexterity|int|intelligence|intel|luk|luck|acc|accuracy|avoid|avoidability|speed|spd|jump|jmp|hp|mp|w\\.?def|m\\.?def|wdef|mdef|def)";
 // "7 att wg", "wg 7 attack", "bandana +3 str", "luk 5 earring" (with +), "clean wg", "7a wg": the roll comes off the
 // front so the rest can name the item. Anything with scroll or % stays a scroll search.
-function splitRoll(q) {
-  if (/scroll|%/i.test(q)) return { q, roll: "" };
+function splitRoll(q0) {
+  if (/scroll|%/i.test(q0)) return { q: q0, roll: "" };
+  // "clean 2 crit work gloves": clean means no scrolls used, and the rest is the roll
+  const cm = /(^|\s)(clean|stock|unscrolled)(?=\s|$)/i.exec(q0);
+  const q = cm ? q0.replace(cm[0], " ").replace(/\s+/g, " ").trim() : q0;
+  const sr = splitRoll0(q);
+  if (cm) { if (sr.roll) { sr.clean = true; sr.roll = "clean " + sr.roll; return sr; } return q ? { q, roll: "clean", g: "0", stat: "", plus: true, clean: true } : { q: q0, roll: "" }; }
+  return sr;
+}
+function splitRoll0(q) {
   const lab = (w) => { for (const [re, l] of ROLL_STATS) if (re.test(String(w).trim())) return l; return ""; };
   const tidy = (m) => q.replace(m, " ").replace(/\s+/g, " ").trim();
   let m = new RegExp("(^|\\s)\\+?(\\d{1,2})\\s*" + ROLL_WORD + "(?=\\s|$)", "i").exec(q);
@@ -1099,6 +1147,15 @@ async function priceLine(env, raw) {
       sr = { q: full, roll: "" };
     }
     else if (!isEquip(hits[0])) sr = { q: full, roll: "" };
+    // "crit" is whichever crit line the item has; "2 crit" on 1 crit gloves is the total, so +1
+    if (sr.roll && hits.length && /^CRIT/.test(sr.stat || "")) {
+      await knownItem(env, "");
+      const b0 = DBS[String(hits[0].item).toLowerCase()] || {};
+      if (!b0[sr.stat] && b0[sr.stat === "CRIT" ? "CRITDMG" : "CRIT"]) sr.stat = sr.stat === "CRIT" ? "CRITDMG" : "CRIT";
+      const v = parseInt(sr.g, 10), bs = b0[sr.stat] || 0;
+      if (!sr.plus && bs && v >= bs) sr.g = String(v - bs);
+      sr.roll = (sr.clean ? "clean " : "") + (sr.plus || !bs ? "+" + sr.g : v) + " " + statLabel(sr.stat);
+    }
     // weapons are listed by total attack: "nakamaki 60 att" is base 57 plus 3
     if (sr.roll && hits.length && (sr.stat === "ATT" || sr.stat === "MATT")) {
       await knownItem(env, "");
@@ -1111,19 +1168,18 @@ async function priceLine(env, raw) {
   if (!sr.roll) hits = findRows(rows, q, ab);
   if (hits.length && sr.roll) {
     const r0 = hits[0], g = String(parseInt(sr.g, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    // roll sales are kept per roll, slots used and stat ("1|0|CRITDMG"); quote the asked stat, else the item's usual one
-    const rs = rollSales(r0, g, sr.stat), b0s = rs[0];
-    const best = b0s ? { su: b0s.su, v: [b0s.p, b0s.n], k: b0s.k } : null;
-    const aa = rollAsks(r0, sr.stat).filter((x) => x.g === Number(g) && (!best || !best.k || !x.k || x.k === best.k)).sort((x, y) => x.pr - y.pr)[0];
-    const ask = aa ? aa.pr : 0;
-    if (!sr.stat && sr.roll !== "clean" && (best || aa)) sr.roll = sr.roll + " " + statLabel((best && best.k) || (aa && aa.k) || r0.rk);
-    if (best || ask) {
-      const b1 = [shown(r0.item) + " " + sr.roll + ":"];
-      if (best) b1.push("typical " + meso(best.v[0]) + " from " + best.v[1] + " sales" + (best.su > 0 ? " (" + best.su + " slots used)" : ""));
-      if (ask) b1.push((best ? "· " : "") + "cheapest up now " + meso(ask));
+    // the exact roll (every paid-for stat that moved) and scroll state; without a sale, the closest rolls that sold
+    const rq = rollQuote(r0, sr), b00 = DBS[String(r0.item).toLowerCase()] || {};
+    const head = shown(r0.item) + " " + rq.label + ":" + (/^CRIT/.test(sr.stat || "") && !b00.CRIT && !b00.CRITDMG ? " (it has no crit line of its own, so crit only comes from scrolls)" : "");
+    if (rq.sale || rq.ask) {
+      const b1 = [head];
+      if (rq.sale) b1.push("typical " + meso(rq.sale.p) + " from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : ""));
+      if (rq.ask) b1.push((rq.sale ? "· " : "") + "cheapest up now " + meso(rq.ask.pr));
+      if (!rq.sale && rq.near.length) b1.push("· no sales of this exact roll yet, closest: " + rq.near.map((x) => x.label + " " + meso(x.p)).join(", "));
       b1.push("· maplefm.gg/item/" + slug0);
       return b1.join(" ").slice(0, 390);
     }
+    if (rq.near.length) return (head + " no sales of this exact roll yet. Closest that sold: " + rq.near.map((x) => x.label + " " + meso(x.p) + " (" + x.n + " sales)").join(", ") + ". Every roll: maplefm.gg/item/" + slug0).slice(0, 390);
     const b0 = [shown(r0.item) + " " + sr.roll + ": no sales caught at that roll lately."];
     if (r0.rk && sr.stat && sr.stat !== r0.rk && /DEF$/.test(sr.stat)) b0.push("Defense isn't what this sells by: rolls go by " + statLabel(r0.rk) + ".");
     if (r0.typ) b0.push("Clean ones typical " + meso(r0.typ) + ".");

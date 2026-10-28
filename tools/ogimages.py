@@ -82,7 +82,7 @@ def item_card(name, r, ic):
         more.append(f"most {itempages.meso(r['lo'])} to {itempages.meso(r['hi'])}" if more else f"Most sales between {itempages.meso(r['lo'])} and {itempages.meso(r['hi'])}")
     if more: d.text((380, y + 214), " · ".join(more), font=F("s", 32), fill=(205, 190, 245))
     r1 = r.get("r1")
-    if r1 and y + 266 < 520: d.text((380, y + 262), f"Scrolled +{r1[0]}{(' ' + itempages.STAT_WORD.get(r1[3], r1[3])) if len(r1) > 3 and r1[3] else ''} sold around {itempages.meso(r1[1])}", font=F("b", 32), fill=(255, 211, 77))
+    if r1 and y + 266 < 520: d.text((380, y + 262), f"{itempages.roll_words(r1)} sold around {itempages.meso(r1[1])}", font=F("b", 32), fill=(255, 211, 77))
     footer(im, d)
     return im
 
