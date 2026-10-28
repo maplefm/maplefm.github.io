@@ -205,6 +205,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       <li>Download and unzip <b>FMWatcher.zip</b>.</li>
       <li>Double-click <code>install.bat</code>. It installs Python and Tesseract through Windows' own installer. Close it at Done.</li>
       <li>Open MapleStory, then double-click <code>start.bat</code> and leave it open. It reads your IGN off screen for the ranks.</li>
+      <li>Leave the black window where you can glance at it. It says <b>DEAL</b> when a shop you open has something well under the usual price, and names the rooms and channels nobody has read at this hour.</li>
       <li>Optional: run <code>snapshot.bat</code> with a shop open to save a picture of what it reads in <code>review</code>.</li>
     </ol>
     <h2 style="margin-top:18px">While you shop</h2>
@@ -324,7 +325,8 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
         <ul>
           <li>Looks at the shop windows and chat box, the same pixels you see.</li>
           <li>Reads item names and prices off them.</li>
-          <li>Sends only prices: item, price, quantity, the shop owner's name as the FM shows it, and the time.</li>
+          <li>Sends only what's in the shop: item, price, quantity, equip stats, the shop owner's name as the FM shows it, the room, channel and time.</li>
+          <li>For items listed at 500K and up, a small picture of the item's popup, so buyers see the real stats. Never your screen.</li>
           <li>Puts you on the site's leaderboard under the name you choose, or as Guest.</li>
         </ul>
       </div>
@@ -335,7 +337,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
           <li>Runs no macros, prompts or scripts in the game.</li>
           <li>Never takes control of your client or your computer.</li>
           <li>Never reads or changes game files or game memory, and never reads network traffic.</li>
-          <li>Never uploads screenshots. Images stay on your PC.</li>
+          <li>Never uploads screenshots of your screen. Review pictures stay on your PC.</li>
         </ul>
       </div>
     </div>
@@ -352,7 +354,13 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
       <li><b>Updates are locked down.</b> Only from this site, each checked against its fingerprint before it installs. Only the Club FM admin can publish one.</li>
       <li><b>Easy to remove.</b> Close the black window and delete the folder.</li>
     </ol>
-    <p class="note">Windows may ask before running install.bat or start.bat since they came from the internet. Choose Run.</p>
+    <p class="note"><b>"Windows protected your PC"?</b> Windows shows this for any script downloaded from the internet that isn't from a big publisher. Click <b>More info</b>, then <b>Run anyway</b>. It shows once per file. Unsure? Open the .bat in Notepad first: it's a few lines.</p>
+    <h2 style="margin-top:18px">Can I get banned?</h2>
+    <ol class="steps">
+      <li><b>It reads pixels, like OBS or a screenshot tool.</b> Nothing is sent to the game, and nothing in the game is read but what's on your screen.</li>
+      <li><b>No clicking, no keys, no automation.</b> You play by hand. The watcher only watches.</li>
+      <li><b>We can't speak for Nexon.</b> It's built to stay on the safe side: screen reading only. Running it is your call.</li>
+    </ol>
   </section>
 
 
@@ -549,6 +557,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
      "Confirming someone else's sale earns you " + (r.witness_credit || 0) + " of a credit, up to two witnesses per sale.",
      "First to hover an equip and capture its stats earns " + (r.hover_credit || 0) + " credits, " + ((r.hover_credit || 0) >= 2 ? (r.hover_credit) + "x a verified sale" : "") + (r.hover_min_price ? " on gear listed at " + num(r.hover_min_price) + "+ mesos" : "") + ". That's what prices gear by roll, so it pays the most.",
      "Cold-room bounty: a watched sale in a room and channel nobody read in the past day earns an extra " + (r.cold_bonus || 0) + " of a credit. The board's coverage map shows cold spots.",
+     ...(r.gap_mult && r.gap_mult !== 1 ? ["Gap hours: hovers and sales in a room, channel and hour that went unread on " + (r.gap_min_days || 5) + " of the last 7 days earn " + r.gap_mult + "x. The coverage map's Most needed this hour list shows them, and so does the watcher window."] : []),
      "Only real item names earn. Misreads show on the board as scraps, never credits.",
      "Each person earns at most the weekly cap above until Ko-fi support reaches $250 a month.",
      "Watcher shop scans earn. Stream captures earn only for streamers who connected Twitch here; other streams witness. Trade chat earns nothing.",
@@ -569,6 +578,8 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
 })();
 </script>
 <div class="kofitab" id="kofitab"><button type="button" class="kx" aria-label="Hide for now" onclick="this.parentNode.hidden=true">×</button><a href="https://ko-fi.com/maplefm" target="_blank" rel="noopener" title="Support Club FM on Ko-fi"><i>☕</i><b>Support Club FM</b><span>Donations pay the FM Watchers who scan the market.</span></a></div>
-<script src="/assets/hit.js" defer></script>
+<script src="/assets/hit.js" defer>  // download clicks counted for the owner's scoreboard (the page and a tag only, like every visit)
+  (function () { var b = document.getElementById("dlbtn"); if (!b) return; b.addEventListener("click", function () { try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: "#dl", r: "", q: "" })], { type: "text/plain" })); } catch (e) {} }); })();
+</script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Play</b><a href="/quests.html">Quest log</a><a href="/training/">Training guide</a><a href="/map.html">Maps and routes</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body>
 </html>

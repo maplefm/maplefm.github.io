@@ -25,7 +25,8 @@ Everyone earns rate_per_100 for each 100 verified sales, at most daily_cap a day
 if the week's total would still pass the budget, the rate scales down for that week so the budget
 holds, and the page says so.
 """
-import sys, os, json, glob, datetime, collections
+import sys, os, re, json, glob, datetime, collections
+from zoneinfo import ZoneInfo
 try:
     from zoneinfo import ZoneInfo
     ET = ZoneInfo("America/New_York")
@@ -38,8 +39,8 @@ EARN_STREAMS = set()       # "stream:<twitch login>" of streamers who verified t
 SHOP_CAP = 20            # credits one seller's shop can yield per day, all contributors together
 REOPEN_GAP = 30 * 60     # a drop in sold slots after this long means the shop was reopened
 SELF_RATE = 0.5          # what an unwitnessed sale earns, the trial setting while few people scan
-OWNER = {"maya", "adam"}
-ALIAS = {"adam": "Maya", "yinisera": "Yint"}   # one scanner under an older name: history folds into the current one         # the owner's scans are tracked but excluded from the pool
+OWNER = {"maya"}
+ALIAS = {"yinisera": "Yint"}   # one scanner under an older name: history folds into the current one         # the owner's scans are tracked but excluded from the pool
 NAMES = {"watcher.json": "Maya", "watcher-2.json": "Jack", "watcher-3.json": "Matt", "watcher-4.json": "Jimmy"}
 OWNH = {"a4959daa", "bd22ad91", "6d3b4a44", "5b5738ce", "7528a716"}   # club members' own shops, never credited
 KNOWN = set()              # item names (lower) from itemdb.json; when given, only real items earn (no OCR scraps)
@@ -125,6 +126,20 @@ KEYSPOT = {}                            # listing key -> the spot it was last se
 COLD_GAP = 24 * 3600                    # a spot nobody else has read in a day is cold
 COLD_BONUS = 0.5                        # extra credit on a verified sale caught in a cold spot
 
+GAP_MULT = 1.0                          # pay.json gap_mult: credits for a hover or a sale in a spot and hour that usually
+GAP_MIN = 5                             # goes unread (unread that hour on GAP_MIN of the last 7 days, covhours.json) are multiplied
+GAPS = {}                               # "room|channel" -> 24 counts of days unread at that Eastern hour
+GAP_FROM = 0                            # pay.json gap_from (a date): never applied to anything earned before it
+ROOMNUM = re.compile(r"^FM(\d{1,2})$")
+
+def is_gap(key, t):
+    """The sale's spot usually goes unread at this hour: overnight and weekday-morning holes in the map."""
+    if t < GAP_FROM: return False
+    spot = KEYSPOT.get(key)
+    m = ROOMNUM.match(spot[0]) if spot else None
+    g = GAPS.get(m.group(1) + "|" + str(spot[1])) if m else None
+    return bool(g) and g[datetime.datetime.fromtimestamp(t, ZoneInfo("America/Detroit")).hour] >= GAP_MIN
+
 def is_cold(key, t, who):
     """Nobody but this scanner read the listing's spot in the day before: a room the regulars skip."""
     spot = KEYSPOT.get(key)
@@ -156,7 +171,7 @@ def credits(obs, start, end):
                     saw_open = who in first_open and first_open[who] < t
                     saw_sold = any(person(w) != me and s2 >= sld and abs(t2 - t) <= WITNESS_WINDOW for (t2, w, s2, u2) in looks)
                     wit = sorted({person(w) for (t2, w, s2, u2) in looks if not w.startswith("stream:") and person(w) != me and abs(t2 - t) <= WITNESS_WINDOW})[:WITNESS_MAX]
-                    cold = is_cold(key, t, who)
+                    cold = (1 if is_cold(key, t, who) else 0) + (2 if GAP_MULT != 1 and is_gap(key, t) else 0)   # bit 1 cold room, bit 2 gap hour
                     for _ in range(n): out.append((t, who, seller, price, others, saw_open or saw_sold, wit, cold))
             if sld >= cur: hi_t = t
     out.sort()
@@ -199,21 +214,25 @@ def tally(kept, obs, start, end, life=None):
         day = datetime.datetime.fromtimestamp(t, ET).date().isoformat()
         if hov_day[(key[0], day)] >= SHOP_CAP: continue
         hov_day[(key[0], day)] += 1
-        c = by[person(who)]; c["names"].add(who); c["hovers"] += 1; c["credits"] += HOVER_RATE; c["days"][day] += HOVER_RATE
+        hv = HOVER_RATE * (GAP_MULT if GAP_MULT != 1 and is_gap(key, t) else 1)
+        c = by[person(who)]; c["names"].add(who); c["hovers"] += 1; c["credits"] += hv; c["days"][day] += hv
+        if hv != HOVER_RATE: c["gap"] = c.get("gap", 0) + 1
     for t, who, seller, price, others, consistent, wit, cold in kept:
         c = by[person(who)]; c["names"].add(who); day = datetime.datetime.fromtimestamp(t, ET).date().isoformat()
         if STRICT and not consistent:
             c["dropped"] += 1
             continue
-        if cold and consistent:                          # the cold-room bounty: a watched sale from a spot nobody else reads
+        if cold & 1 and consistent:                      # the cold-room bounty: a watched sale from a spot nobody else reads
             c["cold"] += 1; c["credits"] += COLD_BONUS; c["days"][day] += COLD_BONUS
+        gm = GAP_MULT if cold & 2 else 1                 # the gap-hour multiplier: a spot and hour the map usually misses
+        if gm != 1: c["gap"] = c.get("gap", 0) + 1
         for w in wit:                                   # the people whose watcher confirmed this sale
             wc = by[w]; wc["names"].add(w); wc["witnessed"] += 1; wc["credits"] += WITNESS_RATE; wc["days"][day] += WITNESS_RATE
         if others:
-            c["verified"] += 1; c["credits"] += 1; c["days"][day] += 1; c["volume"] += price; c["sellers"][seller] += 1
+            c["verified"] += 1; c["credits"] += gm; c["days"][day] += gm; c["volume"] += price; c["sellers"][seller] += 1
             for o in others: c["witnesses"][o] += 1
         else:
-            c["self"] += 1; c["credits"] += SELF_RATE; c["days"][day] += SELF_RATE; c["volume"] += price; c["sellers"][seller] += 1
+            c["self"] += 1; c["credits"] += SELF_RATE * gm; c["days"][day] += SELF_RATE * gm; c["volume"] += price; c["sellers"][seller] += 1
     seen_by = collections.defaultdict(set)
     for key, looks in obs.items():
         for t, who, sld, u in looks:
@@ -236,7 +255,7 @@ def tally(kept, obs, start, end, life=None):
         shown = next((LINKS[TAGS[n]] for n in names if TAGS.get(n) and LINKS.get(TAGS[n])), names[0])
         if shown.startswith("stream:"): shown = shown[7:]
         tag = TAGS.get(names[0]) or names[0].lower()
-        rows.append({"name": shown, "person": who, "tag": tag, "watchers": names, "credits": round(c["credits"], 1), "hovers": c["hovers"], "witnessed": c["witnessed"], "cold": c["cold"], "days": {d: round(v, 1) for d, v in c["days"].items()}, "verified": c["verified"], "self": c["self"], "dropped": c["dropped"], "hours": hrs,
+        rows.append({"name": shown, "person": who, "tag": tag, "watchers": names, "credits": round(c["credits"], 1), "hovers": c["hovers"], "witnessed": c["witnessed"], "cold": c["cold"], "gap": c.get("gap", 0), "days": {d: round(v, 1) for d, v in c["days"].items()}, "verified": c["verified"], "self": c["self"], "dropped": c["dropped"], "hours": hrs,
                      "volume": c["volume"], "top_seller": c["sellers"].most_common(1)[0][0] if c["sellers"] else None,
                      "witnesses": len(c["witnesses"]), "ghost": round(c["ghost"], 2), "flags": flags, "owner": shown.lower() in OWNER or any(n.lower() in OWNER for n in names),
                      "lifetime_verified": int(life.get(who, 0)), "bar": round(float(life.get(who, 0)), 1)})
@@ -359,6 +378,11 @@ if __name__ == "__main__":
     if "witness_credit" in pool: WITNESS_RATE = float(pool.get("witness_credit") or 0)
     if "self_to_bar" in pool: SELF_TO_BAR = float(pool.get("self_to_bar") or 0)
     if "cold_bonus" in pool: COLD_BONUS = float(pool.get("cold_bonus") or 0)
+    GAP_MULT = float(pool.get("gap_mult") or 1)
+    if GAP_MULT != 1:
+        GAP_FROM = int(datetime.datetime.fromisoformat(str(pool.get("gap_from") or "2999-01-01")).replace(tzinfo=ZoneInfo("America/Detroit")).timestamp())
+        GAP_MIN = int(pool.get("gap_min_days") or GAP_MIN)
+        GAPS.update({k: v.get("m") or [] for k, v in (load(os.path.join(data_dir, "covhours.json"), {}).get("spots") or {}).items()})
     ledger_path = sys.argv[6] if len(sys.argv) > 6 else None
     if len(sys.argv) > 7: KOFI = load(sys.argv[7], {}) or {}
     ledger = load(ledger_path, {}) if ledger_path else {}
@@ -383,7 +407,7 @@ if __name__ == "__main__":
         weeks.append({"start": a.date().isoformat(), "end": (b - datetime.timedelta(days=1)).date().isoformat(),
                       "current": a == this_wk, "math": payout(rows, pool), "rows": rows})
     json.dump({"generated": now.isoformat(), "trial": True,
-               "rules": {"min_price": MIN_PRICE, "vendor_floor": bool(VEND), "shop_cap_per_day": SHOP_CAP, "self_rate": SELF_RATE, "witnesses": "another person's watcher or a stream capture, within a day of the sale", "earns": "watcher shop scans only", "strict": STRICT, "known_items_only": bool(KNOWN), "hover_credit": HOVER_RATE, "hover_min_price": HOVER_MIN, "witness_credit": WITNESS_RATE, "self_to_bar": SELF_TO_BAR, "cold_bonus": COLD_BONUS},
+               "rules": {"min_price": MIN_PRICE, "vendor_floor": bool(VEND), "shop_cap_per_day": SHOP_CAP, "self_rate": SELF_RATE, "witnesses": "another person's watcher or a stream capture, within a day of the sale", "earns": "watcher shop scans only", "strict": STRICT, "known_items_only": bool(KNOWN), "hover_credit": HOVER_RATE, "hover_min_price": HOVER_MIN, "witness_credit": WITNESS_RATE, "self_to_bar": SELF_TO_BAR, "cold_bonus": COLD_BONUS, "gap_mult": GAP_MULT, "gap_min_days": GAP_MIN},
                "weeks": weeks, "balances": bal}, open(out, "w", encoding="utf-8"), separators=(",", ":"))
     w = weeks[0]
     print("week of %s: %d contributors, %d credits" % (w["start"], len(w["rows"]), w["math"]["total_credits"]))

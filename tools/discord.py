@@ -620,7 +620,7 @@ def job_weekly(report_path, ranks_path, state_path):
         if b.get("price") and (not big or b["price"] > big["price"]): big, big_day = b, d
     if big: fields.append({"name": "Biggest sale of the week", "value": f'{plain(shown(big["item"]), 64)} for {meso(big["price"])} meso' + (f' by {plain(big["seller"], 24)}' if big.get("seller") else ""), "inline": False})
     # scanners: sales caught this week, from the ranks file's per-day tallies
-    week_by, alias = {}, {"adam": "Maya", "yinisera": "Yint"}   # one scanner under an older name, as the board folds them
+    week_by, alias = {}, {"yinisera": "Yint"}   # one scanner under an older name, as the board folds them
     for who, dd in (ranks.get("who") or {}).items():
         n = sum(a[0] for d, a in dd.items() if d >= week_days[0]) if week_days else 0
         who = alias.get(str(who).lower(), who)

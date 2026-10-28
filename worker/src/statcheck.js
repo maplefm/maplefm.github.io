@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------- daily stat accuracy report
 // Once a day, from the board the pump uploads: which items show a base stat our item list doesn't have (so the list
 // can be fixed), how many hovers were thrown out as another item's popup, and how many requirement lines were read
-// as bonuses. Adam gets a DM only when the report has something new in it.
+// as bonuses. The owner gets a DM only when the report has something new in it.
 const STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP"];
 
 let DB = null;

@@ -20,3 +20,19 @@
     set("upd", "Live as of " + new Date(s.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + ".");
   }).catch(function () {});
 })();
+// Watch this price: the same watchlist the board keeps (fm-watch in this browser, synced when signed in). The board
+// shows it under ★ Watchlist. One tap here, no sign-in needed.
+(function () {
+  var name = window.FM_ITEM, wrap = document.querySelector(".ctaw"); if (!name || !wrap) return;
+  var load = function () { try { return JSON.parse(localStorage.getItem("fm-watch") || "{}") || {}; } catch (e) { return {}; } };
+  var b = document.createElement("button"); b.type = "button"; b.className = "watchbtn";
+  var note = document.createElement("span"); note.className = "watchnote";
+  var draw = function () { var on = !!load()[name]; b.textContent = on ? "★ Watching" : "☆ Watch this price"; b.setAttribute("aria-pressed", on); note.innerHTML = on ? 'Saved in this browser. Find it under ★ Watchlist on <a href="/">the price board</a>.' : ""; };
+  b.addEventListener("click", function () {
+    var w = load(); if (w[name]) delete w[name]; else w[name] = { t: Date.now() };
+    try { localStorage.setItem("fm-watch", JSON.stringify(w)); } catch (e) {}
+    if (w[name]) try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: "#watch:" + name.slice(0, 100), r: "", q: "" })], { type: "text/plain" })); } catch (e) {}
+    draw();
+  });
+  wrap.appendChild(b); wrap.appendChild(note); draw();
+})();

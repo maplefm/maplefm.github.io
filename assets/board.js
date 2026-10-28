@@ -1178,11 +1178,11 @@
     });
     // the same person under two spellings (khrayer from a stream, Khrayer from a watcher) is one scanner, shown
     // under the spelling with a capital, else the one seen first
-    var ALIAS = { adam: "maya" };   // the owner's history was logged under his old scanner name
+    var ALIAS = {};
     // one watcher install (same inbox id) that posted under two names, say a typed name and then the name read
     // off the screen, is one scanner shown under its newest name
     ALIAS.yinisera = "yint";   // same scanner, a fresh install that now reads its name off the screen
-    var ALIASTO = { adam: "Maya", yinisera: "Yint" }, latest = {};
+    var ALIASTO = { yinisera: "Yint" }, latest = {};
     scans.forEach(function (s) { if (s.inbox && s.who) { var cur = latest[s.inbox]; if (!cur || Date.parse(s.at) > cur.t) latest[s.inbox] = { n: String(s.who).slice(0, 24), t: Date.parse(s.at) }; } });
     scans.forEach(function (s) { if (s.inbox && s.who && latest[s.inbox] && latest[s.inbox].n.toLowerCase() !== String(s.who).toLowerCase()) { ALIAS[String(s.who).toLowerCase()] = latest[s.inbox].n.toLowerCase(); ALIASTO[String(s.who).toLowerCase()] = latest[s.inbox].n; } });
     var fold = {}, canonN = function (n) { var k = ALIAS[n.toLowerCase()] || n.toLowerCase(); if (k !== n.toLowerCase()) n = ALIASTO[n.toLowerCase()] || n; if (!fold[k] || (/^[A-Z]/.test(n) && !/^[A-Z]/.test(fold[k]))) fold[k] = n; return k; };
@@ -3823,7 +3823,31 @@
     chips.sort(function (a, b) { return a.k - b.k; }).slice(0, 40).forEach(function (c) { cl.appendChild(el("span", c.hot ? "hot" : "", c.t)); });
     if (!cold.length) cl.appendChild(el("span", "", "Everything has been read in the last day. Nice."));
   }
-  function openCoverage() { coverageMap(); if (!$("covdlg").open) $("covdlg").showModal(); }
+  // The last 7 days by hour (data/covhours.json, written by the pump's pulse step): the busiest spots nobody usually
+  // reads at this hour, and how much of the market goes unread at each hour of the day. Spots and counts only.
+  var COVH = null, COVHAT = 0;
+  function etHourNow() { try { return +new Intl.DateTimeFormat("en-US", { timeZone: "America/Detroit", hour: "numeric", hour12: false }).format(new Date()) % 24; } catch (e) { return new Date().getHours(); } }
+  function coverageHours() {
+    var draw = function (j) {
+      var box = $("covhr"), bars = $("covhrs"); if (!box || !bars) return;
+      box.textContent = ""; bars.textContent = "";
+      if (!j || !j.spots) { box.appendChild(el("span", "", "Builds after a day of scans.")); return; }
+      var h = etHourNow(), n = (j.days || []).length || 7, ks = Object.keys(j.spots);
+      var gaps = ks.map(function (k) { var sp = j.spots[k]; return { k: k, m: sp.m[h], e: sp.e[h] }; }).filter(function (g) { return g.m >= Math.max(3, n - 2) && g.e >= 1; })
+        .sort(function (a, b) { return b.m * b.e - a.m * a.e; }).slice(0, 12);
+      gaps.forEach(function (g) { var p = g.k.split("|"); box.appendChild(el("span", g.m === n ? "hot" : "", "FM" + p[0] + " ch " + p[1] + " · ~" + Math.round(g.e) + " shops")); });
+      if (!gaps.length) box.appendChild(el("span", "", "Every busy spot is usually read at this hour. Nice."));
+      for (var x = 0; x < 24; x++) {
+        var tot = 0, miss = 0; ks.forEach(function (k) { var sp = j.spots[k]; tot += sp.e[x] * n; miss += sp.e[x] * sp.m[x]; });
+        var pct = tot ? miss / tot : 0, b = el("i", x === h ? "now" : ""); b.style.height = Math.max(3, Math.round(pct * 100)) + "%";
+        b.title = (x % 12 || 12) + (x < 12 ? " AM" : " PM") + ": " + Math.round(pct * 100) + "% of busy spots unread"; bars.appendChild(b);
+      }
+      var lab = $("covhrl"); if (!lab) { lab = el("div", "covhrl"); lab.id = "covhrl"; ["12a", "6a", "12p", "6p", "11p"].forEach(function (t) { lab.appendChild(el("span", "", t)); }); bars.parentNode.insertBefore(lab, bars.nextSibling); }
+    };
+    if (COVH && Date.now() - COVHAT < 30 * 60e3) { draw(COVH); return; }
+    getJSON("data/covhours.json").then(function (j) { COVH = j; COVHAT = Date.now(); draw(j); }, function () { draw(null); });
+  }
+  function openCoverage() { coverageMap(); coverageHours(); if (!$("covdlg").open) $("covdlg").showModal(); }
   function openRanks() { renderRanks(); if (!$("ranks").open) $("ranks").showModal(); }
   // ---------- the live leaderboard on the left: every scanner, first to last. Rows are kept between renders and
   // slide to their new place when the order changes, so a climb is seen rather than just read.

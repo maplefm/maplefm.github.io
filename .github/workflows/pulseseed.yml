@@ -1,0 +1,31 @@
+name: Pulse seed
+# Once: rebuild the last days of the hour-by-hour pulse from the archive's history, so the scoreboard and the
+# 7-day coverage file start with a week behind them. The pump folds pulse-seed.json in on its next pass.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Days to rebuild"
+        default: "8"
+permissions:
+  contents: read
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git config --global user.name maplefm
+          git config --global user.email maplefm@users.noreply.github.com
+          git clone -q --shallow-since="$(date -d "-$(( ${{ inputs.days }} + 2 )) days" +%Y-%m-%d)" -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
+          python3 tools/pulse.py --seed /tmp/arch ${{ inputs.days }} /tmp/pulse-seed.json
+          cd /tmp/arch
+          for i in 1 2 3 4 5; do
+            git fetch -q origin live && git reset -q --hard origin/live
+            cp /tmp/pulse-seed.json data/pulse-seed.json && git add data/pulse-seed.json
+            git commit -q -m "Pulse seed" && git push -q origin HEAD:live && break
+            sleep 7
+          done

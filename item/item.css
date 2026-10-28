@@ -42,3 +42,7 @@ h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;l
 .it img{width:28px;height:28px;object-fit:contain}.it .nm{font-weight:600;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}.it .pr{font-size:.95rem}.mv{font-size:.74rem;font-weight:800;text-align:right}.mv.up{color:var(--up)}.mv.down{color:var(--down)}
 .more{margin:8px 0 0;font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--accent);padding:6px 12px;border-radius:10px;cursor:pointer}
 .top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}
+.watchbtn{margin-left:10px;display:inline-flex;align-items:center;gap:6px;background:transparent;border:2px solid var(--accent);color:var(--accent);font:inherit;font-weight:800;padding:8px 16px;border-radius:999px;cursor:pointer}
+.watchbtn[aria-pressed="true"]{background:var(--accent);color:#fff}
+.watchnote{display:block;margin-top:8px;font-size:.88rem;color:var(--muted,#666)}
+@media (max-width:520px){.watchbtn{margin:10px 0 0}}

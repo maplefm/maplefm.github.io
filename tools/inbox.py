@@ -11,7 +11,7 @@ import sys, os, io, csv, json, re, zlib, base64, datetime, urllib.request, hmac,
 SHEET = "1zRYcSOQPakMtCUQ8dtZX_BcKxVm7YIBbmuEmsi0SG3Q"
 GID = "19216923"
 CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET}/export?format=csv&gid={GID}"
-CREW = {"adam", "jack", "matt", "jimmy", "streams", "guest"}
+CREW = {"maya", "jack", "matt", "jimmy", "streams", "guest"}
 KEEP_DAYS = 14
 MAX_ROWS_DOC = 25000          # one scanner can read a few thousand shop rows in a day; 19 channels of FM is more
 MAX_ROWS_ID = 80000

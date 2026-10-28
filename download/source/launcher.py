@@ -59,7 +59,7 @@ def merge_config(new_bytes):
 
 
 # Releases are signed. version.json carries a signature over the version, the zip's sha256 and the pip list,
-# made with a key that never leaves Adam's PC; this is the matching public key. Anything unsigned, or signed
+# made with a key only the Club FM admin holds; this is the matching public key. Anything unsigned, or signed
 # with another key, is not installed, so neither a hijacked site nor a tampered download can push code here.
 RELEASE_KEY_N = int("c8a0ad587cd024247e8a7e58f5f8104e5a7b885649f0cd1494ad2021755dc09566cf336f31d48801f10a5bd44e64aa3c77d559509fd30594ccabe3aed99d1f6a86e370a619e4375fc16775929dd9311b33fdfa7f0253b5f11b94ed4c43c11d181fe2254646ed4e7726f6019d2a724eccbc1d8899f872be99370c00a6ca00cf3da37560d1b7651f160455df5238796ee1ce364575d21bd000ae1c8a53cbfa3834f58a7479334490301534eeebf286e1d260fae6c2b71c3474d3889ef9f5f3a00ce11b573337047ad3f67107a196b8a175b730ced511db63ad6f67bc8618c4eb303d45a9d28dc4f1ca07b1a0f269f471557da7f01b3422071641761c5bca39b8c5", 16)
 RELEASE_KEY_E = 65537

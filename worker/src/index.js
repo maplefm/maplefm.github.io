@@ -11,8 +11,8 @@
 //   GET  /twitch/callback  Twitch sends the person back here
 //   POST /twitch/unlink
 //   GET  /public/links     scanner tag -> in-game name, for the earn page's ranking (no other data)
-//   GET  /admin            Adam only: every account, for review and the weekly statement
-//   POST /admin/note       Adam only: set a note or lock on an account
+//   GET  /admin            owner only: every account, for review and the weekly statement
+//   POST /admin/note       owner only: set a note or lock on an account
 //
 // Storage (KV): acct:<discord id> -> account JSON; code:<link code> -> discord id; watcher:<hid> -> discord id
 // Nothing here holds a watcher's real id or key: the watcher sends hid (its hashed id), and keys are masked.
@@ -93,6 +93,7 @@ async function route(req, env, url) {
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
   if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; if (url.searchParams.get("log")) return json((await env.ACCOUNTS.get("reddit:log", "json")) || []); return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/score/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await morningScore(env, true)); }
   if (p === "/admin/weekly/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const n = Date.now(); await env.ACCOUNTS.delete("weekly:sent:" + etParts(n).day); await weeklyTraffic(env, n); return json({ ok: true }); }
   if (p === "/admin/rdraft/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); await env.ACCOUNTS.delete("rdraft:sent:" + etParts(Date.now()).day); await redditDraft(env); return json(JSON.parse((await env.ACCOUNTS.get("rdraft:last")) || "{}")); }
   if (p === "/admin/traffic/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); { const n = Date.now(), e = etParts(n); return json(await trafficSend(env, n - 3600e3, n, "Traffic, last hour (test)", n - (e.hour * 60 + e.minute) * 60e3)); } }
@@ -984,7 +985,10 @@ async function interactions(req, env) {
   }
   if (it.type === 2 && it.data && (it.data.name === "market" || it.data.name === "sell"))
     return json(await marketCommand(env, it, Object.assign(mkCtx(env), { rows: await mkRows(env), abbr: await abbrMap() })));
-  if (it.type === 2 && it.data && it.data.name === "price") return json(await discordPrice(env, q));
+  if (it.type === 2 && it.data && it.data.name === "price") {
+    logHit(env, "#dprice", String(it.guild_id || "dm"), "", "dc:" + String((it.member && it.member.user && it.member.user.id) || (it.user && it.user.id) || "")).catch(() => {});
+    return json(await discordPrice(env, q));
+  }
   return json({ type: 4, data: { content: "Unknown command", flags: 64 } });
 }
 
@@ -1032,7 +1036,9 @@ async function chatPrice(req, env, url) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
   const txt = (t) => new Response(t.slice(0, 390), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
   if (overLimit("cp:" + ip, 120, 60)) return txt("Club FM: slow down a little, try again in a minute.");
-  logHit(env, "!price", "", "", ip).catch(() => {});
+  // Nightbot says which channel asked (Nightbot-Channel: name=...&provider=twitch...), StreamElements doesn't
+  let chan = ""; try { chan = (new URLSearchParams(req.headers.get("Nightbot-Channel") || "").get("name") || "").toLowerCase().slice(0, 40); } catch (e) {}
+  logHit(env, "!price", chan, "", ip).catch(() => {});
   return txt(await priceLine(env, String(url.searchParams.get("q") || "")));
 }
 // "5 att wg", "work gloves +3 att": the roll comes off before the name is matched, and the answer points at the
@@ -1205,7 +1211,7 @@ async function priceLine(env, raw) {
 
 // ---------------------------------------------------------------- Club FM Twitch chat bot
 // Our own bot in a streamer's chat, no Nightbot needed. Built on Twitch's chat bot model:
-// 1. Adam connects the bot account once (/twitchbot/connect?as=bot): scopes user:read:chat user:write:chat user:bot.
+// 1. The owner connects the bot account once (/twitchbot/connect?as=bot): scopes user:read:chat user:write:chat user:bot.
 // 2. A streamer clicks "Add the Club FM bot" (/twitchbot/connect?as=channel): scope channel:bot. That subscribes an
 //    EventSub webhook (channel.chat.message) for their chat, delivered to /twitchbot/eventsub.
 // 3. !price, !pc and !fm get answered with the same line as /chat/price, sent through Helix Send Chat Message
@@ -1559,7 +1565,7 @@ async function redditWatch(env) {
 // ---------------------------------------------------------------- traffic
 // Every page loads /assets/hit.js, which posts the page, the referring site and a ?ref= tag here. Stored in D1 with a
 // daily scrambled visitor id (hmac of the day and address); the address itself is never kept. Bots are skipped.
-// Reports go to a private Discord channel only Adam sees: hourly 9 AM to 11 PM Eastern, overnight at 8 AM.
+// Reports go to a private Discord channel only the owner sees: hourly 9 AM to 11 PM Eastern, overnight at 8 AM.
 const TRAFFIC_CH = "1563607619468394537";
 let HITS_READY = false;
 async function hitsTable(env) {
@@ -1737,6 +1743,7 @@ async function trafficPost(env) {
     const h = et.hour - 1, lab = (x) => (x % 12 || 12) + (x < 12 ? " AM" : " PM");
     await trafficSend(env, top - 3600e3, top, "Traffic, " + lab(h) + " to " + lab(et.hour), midnight);
   }
+  if (et.hour === 8) await morningScore(env).catch((e) => env.ACCOUNTS.put("score:err", String(e && e.stack || e).slice(0, 500)));
   if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
   const dow = new Date(top - 4 * 3600e3).getUTCDay();   // 0 Sunday, Eastern near enough at these hours
   if (dow === 1 && et.hour === 9) await weeklyTraffic(env, top).catch((e) => env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)));
@@ -1879,6 +1886,26 @@ async function weeklyTraffic(env, top) {
     { name: "What they opened", value: lines(a.kind, b.kind).slice(0, 1000), inline: true },
     { name: "Top pages", value: pages.map((r) => r.p + " · " + r.n).join("\n").slice(0, 1000) || "none" },
   ];
+  // the scoreboard's numbers summed over the last 7 full days against the 7 before, as what grew and what didn't
+  try {
+    const today = etParts(top).day, pulse = await vaultJSON(env, "data/pulse.json", 300);
+    const sum = async (off) => {
+      const o = {};
+      for (let i = 1; i <= 7; i++) {
+        const d = dayShift(today, -i - off), sd = await siteDay(env, d), sc = scanDay(pulse, d) || {};
+        for (const k of ["visitors", "returning", "fresh", "signedIn", "bang", "dprice", "dl"]) o[k] = (o[k] || 0) + (sd[k] || 0);
+        for (const k of ["watchers", "shops", "sellers", "full"]) o[k] = (o[k] || 0) + (sc[k] || 0);
+        (sc.who || []).forEach((w) => { (o.who || (o.who = new Set())).add(w.toLowerCase()); });
+      }
+      o.people = o.who ? o.who.size : 0; return o;
+    };
+    const [cw, pw] = [await sum(0), await sum(7)];
+    const lab = { visitors: "Visitor-days", returning: "Returning visitor-days", fresh: "New visitors", signedIn: "Signed-in member-days", bang: "!price answers", dprice: "Discord /price", dl: "Watcher downloads", people: "Different people scanning", shops: "Shops seen (daily, summed)", sellers: "Sellers seen (daily, summed)", full: "Fully covered hours" };
+    const up = [], down = [];
+    Object.keys(lab).forEach((k) => { const a1 = cw[k] || 0, b1 = pw[k] || 0, line = lab[k] + " " + a1 + (b1 ? " (" + (a1 >= b1 ? "+" : "") + Math.round((a1 - b1) / b1 * 100) + "%)" : " (no week before)"); (a1 > b1 ? up : down).push(line); });
+    f.push({ name: "Grew", value: (up.map((x, i) => (i + 1) + ". " + x).join("\n") || "Nothing").slice(0, 1000) });
+    f.push({ name: "Flat or down", value: (down.map((x, i) => (i + 1) + ". " + x).join("\n") || "Nothing").slice(0, 1000) });
+  } catch (e) { await env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)); }
   const seo = await fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/seo.json?b=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (seo && seo.pages) {
     const iss = Object.entries(seo.issues || {}).filter(([, n]) => n).map(([k, n]) => k + " " + n);
@@ -1887,10 +1914,110 @@ async function weeklyTraffic(env, top) {
   await wdDM(env, await wdAdmins(env), [{ title: "Club FM, the week to Monday 9 AM", color: 0x6d3fd1, fields: f, footer: { text: "Compared with the week before. Visitors counted once a day each." } }]);
 }
 
+// ---------------------------------------------------------------- morning scoreboard
+// 8 AM Eastern, a DM to the admins: yesterday as a full day against the day before and the same day last week.
+// Site numbers come from D1 (hits, signin); scanning numbers from the pulse file the pump keeps in the archive
+// (tools/pulse.py). Anything down 10% or more is flagged with the reason the data shows. Test: POST /admin/score/post.
+function etMidnight(day) {
+  for (const off of [4, 5]) { const t = Date.parse(day + "T00:00:00Z") + off * 3600e3; const e = etParts(t); if (e.day === day && e.hour === 0) return t; }
+  return Date.parse(day + "T04:00:00Z");
+}
+function dayShift(day, n) { return new Date(Date.parse(day + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10); }
+const SRC_SQL = "CASE WHEN r LIKE '%google%' THEN 'Google' WHEN r LIKE '%bing%' OR r LIKE '%duckduckgo%' OR r LIKE '%brave%' OR r LIKE '%yahoo%' THEN 'Other search' WHEN r LIKE '%reddit%' THEN 'Reddit' WHEN r LIKE '%discord%' OR q = 'discord' THEN 'Discord' WHEN r LIKE '%twitch%' THEN 'Twitch' WHEN r LIKE '%youtube%' THEN 'YouTube' WHEN q != '' THEN 'Tagged links' WHEN r = '' THEN 'Direct or app' ELSE 'Other sites' END";
+async function siteDay(env, day) {
+  await hitsTable(env);
+  const from = etMidnight(day), to = etMidnight(dayShift(day, 1));
+  const q = (sql, ...a) => env.INBOX_DB.prepare(sql).bind(...a).all().then((r) => r.results || []);
+  const web = "p NOT LIKE '!%' AND p NOT LIKE '#%'";
+  const [t] = await q(`SELECT COUNT(DISTINCT v) vis, COUNT(DISTINCT CASE WHEN ret = 1 THEN v END) back, COUNT(DISTINCT CASE WHEN ret = 0 THEN v END) fresh FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
+  const [pc] = await q("SELECT SUM(p LIKE '!%') bang, SUM(p = '#dprice') dc, COUNT(DISTINCT CASE WHEN p = '#dl' THEN v END) dl, COUNT(DISTINCT CASE WHEN p = '/contribute.html' THEN v END) earn FROM hits WHERE t >= ? AND t < ?", from, to);
+  const [si] = await q("SELECT COUNT(*) n FROM signin WHERE day = ?", day);
+  const src = await q(`SELECT ${SRC_SQL} k, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND ${web} GROUP BY k`, from, to);
+  const chans = await q("SELECT r k, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND p LIKE '!%' GROUP BY r", from, to);
+  return { visitors: (t && t.vis) || 0, returning: (t && t.back) || 0, fresh: (t && t.fresh) || 0, signedIn: (si && si.n) || 0,
+    bang: (pc && pc.bang) || 0, dprice: (pc && pc.dc) || 0, dl: (pc && pc.dl) || 0, earn: (pc && pc.earn) || 0,
+    src: Object.fromEntries(src.map((r) => [r.k, r.n])), chans: Object.fromEntries(chans.map((r) => [r.k || "Nightbot and others", r.n])) };
+}
+// the spots that matter: read with shops in them on 3 or more of the 7 days before. An hour is fully covered when
+// every one of them was read in that hour.
+function coreSpots(pulse, day) {
+  const cnt = {};
+  for (let i = 1; i <= 7; i++) { const d = pulse.days[dayShift(day, -i)]; if (!d) continue; const s = new Set(); Object.values(d.hours || {}).forEach((h) => Object.keys(h.n || {}).forEach((k) => s.add(k))); s.forEach((k) => { cnt[k] = (cnt[k] || 0) + 1; }); }
+  return Object.keys(cnt).filter((k) => cnt[k] >= 3);
+}
+function scanDay(pulse, day) {
+  const d = pulse && pulse.days && pulse.days[day];
+  if (!d) return null;
+  const core = coreSpots(pulse, day), hrs = {};
+  let full = 0, read = 0;
+  for (let h = 0; h < 24; h++) {
+    const n = (d.hours[String(h)] || {}).n || {}, got = core.filter((k) => n[k] != null).length;
+    hrs[h] = { got, w: (d.hours[String(h)] || {}).w || [] };
+    read += got; if (core.length && got === core.length) full++;
+  }
+  const before = new Set(); for (let i = 1; i <= 14; i++) ((pulse.days[dayShift(day, -i)] || {}).who || []).forEach((x) => before.add(x.toLowerCase()));
+  const fresh = (d.who || []).filter((x) => !before.has(x.toLowerCase()));
+  return { watchers: (d.who || []).length, who: d.who || [], newWatchers: fresh.length, newNames: fresh, placedPct: d.shops ? Math.round((d.placed || 0) / d.shops * 100) : 0, streams: d.streams || 0, shops: d.shops || 0, sellers: d.sellers || 0, full, core: core.length, pct: core.length ? Math.round(read / (core.length * 24) * 100) : 0, hrs,
+    active: Object.values(d.hours || {}).filter((h) => (h.w || []).length || h.s).length };
+}
+function scoreWhy(key, y, p, sy, sp) {
+  // the biggest losers behind a drop, from the day's own breakdowns
+  const diff = (a, b) => Object.keys(Object.assign({}, a, b)).map((k) => [k, (a[k] || 0) - (b[k] || 0)]).filter((x) => x[1] < 0).sort((m, n) => m[1] - n[1]).slice(0, 2).map((x) => x[0] + " " + x[1]).join(", ");
+  if (["visitors", "fresh", "returning"].includes(key)) { const w = diff(y.src, p.src); return w ? "by source: " + w : ""; }
+  if (key === "bang") { const w = diff(y.chans, p.chans); return w ? "by channel: " + w : ""; }
+  if (!sy || !sp) return "";
+  const gone = sp.who.filter((w) => !sy.who.includes(w));
+  if (key === "watchers") return gone.length ? "not seen: " + gone.slice(0, 5).join(", ") : "";
+  if (key === "shops" || key === "sellers") return (gone.length ? "not seen: " + gone.slice(0, 4).join(", ") + ". " : "") + "hours with a scanner " + sy.active + " vs " + sp.active;
+  if (key === "full" || key === "pct") {
+    const lost = []; for (let h = 0; h < 24; h++) if (sy.hrs[h].got < sp.hrs[h].got) lost.push(h);
+    const lab = (x) => (x % 12 || 12) + (x < 12 ? "a" : "p");
+    return lost.length ? "thinner at " + lost.slice(0, 8).map(lab).join(" ") + (gone.length ? "; not seen: " + gone.slice(0, 4).join(", ") : "") : "";
+  }
+  return "";
+}
+async function morningScore(env, force) {
+  if (!env.DISCORD_BOT_TOKEN || !env.INBOX_DB) return { error: "offline" };
+  const today = etParts(Date.now()).day, Y = dayShift(today, -1), P = dayShift(Y, -1), W = dayShift(Y, -7);
+  const key = "score:sent:" + today;
+  if (!force && (await env.ACCOUNTS.get(key))) return { skipped: true };
+  await env.ACCOUNTS.put(key, "1", { expirationTtl: 3 * DAY });
+  const [y, p, w] = await Promise.all([siteDay(env, Y), siteDay(env, P), siteDay(env, W)]);
+  const pulse = await vaultJSON(env, "data/pulse.json", 300);
+  const sy = scanDay(pulse, Y), sp = scanDay(pulse, P), sw = scanDay(pulse, W);
+  const rows = [
+    ["Visitors", "visitors", y, p, w], ["Returning", "returning", y, p, w], ["New", "fresh", y, p, w], ["Signed in", "signedIn", y, p, w],
+    ["!price answers", "bang", y, p, w], ["Discord /price", "dprice", y, p, w],
+    ["Earn page visitors", "earn", y, p, w], ["Watcher downloads", "dl", y, p, w],
+    ["Watchers active", "watchers", sy, sp, sw], ["First-day watchers", "newWatchers", sy, sp, sw], ["Shops seen", "shops", sy, sp, sw], ["Unique sellers", "sellers", sy, sp, sw], ["Shops placed in a room", "placedPct", sy, sp, sw],
+    ["Fully covered hours", "full", sy, sp, sw], ["Core spots read per hour", "pct", sy, sp, sw]];
+  const ch = (a, b) => (b == null ? "n/a" : a === b ? "=" : (a > b ? "▲" : "▼") + (b ? Math.abs(Math.round((a - b) / b * 100)) + "%" : " new"));
+  const lines = [], flags = [];
+  for (const [lab, k, a, b, c] of rows) {
+    if (!a) { lines.push(lab + ": no data yet"); continue; }
+    const v = a[k], vb = b ? b[k] : null, vc = c ? c[k] : null, unit = k === "pct" || k === "placedPct" ? "%" : k === "full" ? "/24" : "";
+    lines.push("**" + lab + "** " + v + unit + " · " + ch(v, vb) + " vs day before · " + ch(v, vc) + " vs last " + new Date(Date.parse(W + "T12:00:00Z")).toLocaleDateString("en-US", { weekday: "short" }));
+    const small = ["watchers", "signedIn", "dl", "full"].includes(k);   // counts where losing one matters
+    const drop = (x) => k !== "newWatchers" && x != null && x > 0 && (x - v) / x >= 0.1 && x - v >= (k === "pct" || k === "placedPct" ? 5 : small ? 1 : 2);
+    if (drop(vb) || drop(vc)) {
+      const why = (k === "placedPct" ? "the FM room couldn't be read off the minimap for most shops" : scoreWhy(k, a, b || c, k in (sy || {}) ? sy : null, drop(vb) ? sp : sw)) || "";
+      flags.push(lab + " down " + (drop(vb) ? "vs day before" : "vs last week") + (why ? ": " + why : ""));
+    }
+  }
+  if (sy && sy.newNames && sy.newNames.length) lines.push("New watchers: " + sy.newNames.slice(0, 8).join(", "));
+  if (sy && sy.core) lines.push("Core spots: " + sy.core + " room and channel spots with shops on 3 of the last 7 days.");
+  const num = lines.map((x, i) => (/^\*\*/.test(x) ? (i + 1) + ". " : "") + x), cut = 8;   // site lines, then scanning
+  const f = [{ name: Y + " site (full day, Eastern)", value: num.slice(0, cut).join("\n").slice(0, 1024) }, { name: "Scanning", value: num.slice(cut).join("\n").slice(0, 1024) || "no data yet" }];
+  f.push({ name: flags.length ? "Flagged" : "Nothing dropped 10% or more", value: flags.length ? flags.map((x, i) => (i + 1) + ". " + x).join("\n").slice(0, 1024) : "All steady or up." });
+  const sent = await wdDM(env, await wdAdmins(env), [{ title: "Club FM scoreboard", color: flags.length ? 0xe67e22 : 0x2ecc71, fields: f, footer: { text: "Visitors once a day each. Coverage from the pulse file; hours Eastern." } }]);
+  await env.ACCOUNTS.put("score:last", JSON.stringify({ day: Y, y, sy: sy && Object.assign({}, sy, { hrs: undefined }), flags, sent }), { expirationTtl: 40 * DAY });
+  return { day: Y, sent, flags, y, sy: sy && Object.assign({}, sy, { hrs: undefined }) };
+}
+
 // ---------------------------------------------------------------- Sunday: the weekly recap for Reddit
 // Sunday 10 PM Eastern, a DM to the admins: the week's market report as a picture and a PDF (made at 9 PM by the
 // weeklyrecap workflow into data/weekly/ on the live branch) with a title, ready for an r/MSClassicWorld image post.
-// Nothing is posted anywhere; Adam posts it himself.
+// Nothing is posted anywhere; the owner posts it.
 async function redditDraft(env) {
   const day = etParts(Date.now()).day, key = "rdraft:sent:" + day;
   if (await env.ACCOUNTS.get(key)) return;

@@ -58,6 +58,9 @@ jobs:
             git add -A data
             # the finished price board, built by the page itself (the full copy stays private, a price-only copy goes public)
             if ! git diff --cached --quiet || [ $(( n % 15 )) -eq 0 ]; then timeout 300 python3 $T/snapshot.py /tmp/main . data/summary.json || true; git add -A data; git add -f data/hoverwanted.json 2>/dev/null || true; fi
+            # after the board: the hour-by-hour pulse for the morning scoreboard and the 7-day coverage file
+            # (pulse.json stays private; covhours.json, spots and counts only, goes public). Rewritten only on change.
+            python3 $T/pulse.py data data/pulse.json || true; git add -A data
             if ! git diff --cached --quiet; then
               git commit -q -m "Pump: inbox, ranks and board"
               for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
@@ -66,7 +69,7 @@ jobs:
             cd "$PUB"
             git reset -q --hard origin/live
             git rm -q --ignore-unmatch data/*.enc data/live.json
-            for f in summary-public ranks report credits names; do [ -f /tmp/arch/data/$f.json ] && cp /tmp/arch/data/$f.json data/; done
+            for f in summary-public ranks report credits names covhours; do [ -f /tmp/arch/data/$f.json ] && cp /tmp/arch/data/$f.json data/; done
             for f in /tmp/arch/data/*-icons.json; do [ -f "$f" ] && cp "$f" data/; done
             sig=$(cat /tmp/arch/data/watcher*.json /tmp/arch/data/streams.json /tmp/arch/data/streams-vods.json /tmp/arch/data/inbox.json 2>/dev/null | sha1sum | cut -c1-12)
             if [ "$sig" != "$lastsig" ]; then echo "{\"at\":$(date +%s%3N),\"v\":\"$sig\"}" > data/live.sig; lastsig="$sig"; fi

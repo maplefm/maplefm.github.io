@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.12",
- "date": "2026-10-28T02:30:09+00:00",
- "notes": "Reads how many scrolls passed from the item's title, and fixes a 1 read as 4 on lines no scroll could have changed",
- "sha256": "f28718ab20971bf59079c820b0e61c8038d923c37df5b20dcb52d30fc206cb92",
- "size": 151260,
+ "version": "2026.10.27.13",
+ "date": "2026-10-28T03:22:28+00:00",
+ "notes": "Deal lines when a shop you open has something well under the usual price, the busiest rooms and channels nobody reads at this hour, a half-hour tally of your scans, and a heads-up when the FM room can't be read.",
+ "sha256": "283d9e4a5fffad89a782c0b9f11848add58f5059f522b719aa2d5a877aa6c657",
+ "size": 153471,
  "history": [
+  {
+   "version": "2026.10.27.13",
+   "date": "2026-10-27",
+   "notes": "Deal lines when a shop you open has something well under the usual price, the busiest rooms and channels nobody reads at this hour, a half-hour tally of your scans, and a heads-up when the FM room can't be read."
+  },
   {
    "version": "2026.10.27.12",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.23.2",
    "date": "2026-10-23",
    "notes": "Scans now go to Club FM's private data repository, so listings stay private to members. Nothing to change on your end."
-  },
-  {
-   "version": "2026.10.23.1",
-   "date": "2026-10-23",
-   "notes": "Your name: a name in config.json is never second-guessed, and a name read off the screen needs five matching reads that outvote every other guess (3-letter misreads like Toe no longer stick). Linked watchers show under the Discord account's in-game name."
   }
  ],
  "pip": [],
- "sig": "3000b4dd7b053924cf18c6e54fe19e0dd50cddc9b27f56408ad414c6de13a3de87df44785872e2108a9498260cbab7d271c0249a48c6e0b6bd3368945799a01c79c84210126dda1f0e9f8451b1670987b239429a910aa25af51a5f6f78ca87cd61ef46217f6d9ce9b18ab3d2cd43a8b5cca405cf04ec2a0cda270b4bf2b776f4cff15cb7569a16b0de5b76563a3a53c42f4866660f014a7371bc47caa84bddd841ade6452818edf27c9eeb9a0630cb22f2c120cef5dbddaf2391dc77fb11817b87f9cfc9b74ab99fd7a444e92a4529e6411fba2284573c666f3e8e97de7e102de487ce115815ce093b055067cea13f714cf8b4fb4605e2ce70e4754164cbee9f"
+ "sig": "342d6546eb15c2a041b0f0d48f2e7b390d1c5a61a65633bf68c0c7199c4946d80e79315d886081afcae2c9d5f1dfee4add43fc544c61c7f3f6958cb14e781932e922ddacde2df8d95cc3b1c0e45786eeffd612e94a20aa28b33d7302691330b954085566c58e16148ac05237b3b328be035a21e14da96190dd7d7d93b1d798cf189463c52ae61c2d7115f15383d7d325a9756f6156967886791a9896bc3a496ee33bdbdbcebf863dfebea451ae25071909a7c9e46b7339e74ecd9eae37748a6f12b85e148178e1af9a3f45ecc35c1a0dc6b79c076ee4147b19589d7e42db138fc2adc721ffc0a6e6ad5385440adfe666dbd6b40309d12ce5f873275cc9b67745"
 }

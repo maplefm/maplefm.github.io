@@ -582,6 +582,10 @@ tbody tr.thin { opacity: .72; }   /* one layer of fade per row, not one per cell
 .covmain { flex: 1 1 auto; min-width: 0; }
 .covside { flex: 0 0 250px; max-height: calc(100vh - 190px); overflow: auto; }
 .covside .covh { margin-top: 0; }
+.covhrs { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; align-items: end; height: 64px; margin: 6px 0 2px; }
+.covhrs i { display: block; background: var(--gold); border-radius: 2px 2px 0 0; min-height: 2px; }
+.covhrs i.now { background: #e8634a; }
+.covhrl { display: flex; justify-content: space-between; font-size: .62rem; color: var(--muted); font-weight: 700; }
 .covgrid { --ch: clamp(7px, calc((100vh - 250px) / 41), 16px); display: grid; column-gap: 4px; row-gap: 2px; font-size: .66rem; font-weight: 800; color: var(--muted); margin: 6px 0 8px; }
 .covgrid .h { text-align: center; line-height: 16px; } .covgrid .h.fm { text-align: right; padding-right: 6px; color: var(--ink); }
 .covgrid .h.g5, .covgrid .c.g5 { margin-right: 5px; }
