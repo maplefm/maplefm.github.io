@@ -979,19 +979,19 @@
       if (it.cat === "Weapons" || it.cat === "Equips") {
         it.equip = true;
         mergeReads(it.all);
-        it.rolls = it.all.filter(function (x) { return !x.b && x.x && !x.pricey; }).map(function (x) { return { l: x, g: rollOf(it.item, x) }; }).filter(function (r) { return r.g != null; }).sort(function (a, b) { return a.g - b.g || a.l.u - b.l.u; });
+        it.rolls = it.all.filter(function (x) { return !x.b && x.x && !x.pricey; }).map(function (x) { var p = rollPick(it.item, x); return { l: x, g: p ? sane(p.g, p.k) : null, k: p ? p.k : "" }; }).filter(function (r) { return r.g != null; }).sort(function (a, b) { return a.g - b.g || a.l.u - b.l.u; });
         // Roll prices: what each roll sold for in the last two weeks, two or more sales. A 10 ATT Work Gloves and a
         // clean one share a name and nothing else, so deals on equips are judged against the roll, never the name.
         // and by slots used: a pair with 4 of 5 slots left took a scroll (often a failed one), so it is priced only
         // against sales with the same slots left, never against clean ones. Listings without a slots read don't count.
         var byRoll = {}, rollWho = {};
-        it.rolls.forEach(function (r) { if (!r.l.so || now - r.l.t > 14 * DAY || !trusted(r.l.who) || !rollKeyOk(it.item, r.l)) return; var su = slotsUsed(it.item, r.l); if (su == null) return; var rk = r.g + "|" + su; (byRoll[rk] || (byRoll[rk] = [])).push(r.l.u); (rollWho[rk] || (rollWho[rk] = {}))[String(r.l.who).toLowerCase()] = 1; });
+        it.rolls.forEach(function (r) { if (!r.l.so || now - r.l.t > 14 * DAY || !trusted(r.l.who) || !rollKeyOk(it.item, r.l)) return; var su = slotsUsed(it.item, r.l); if (su == null) return; var rk = r.g + "|" + su + "|" + (r.k || ""); (byRoll[rk] || (byRoll[rk] = [])).push(r.l.u); (rollWho[rk] || (rollWho[rk] = {}))[String(r.l.who).toLowerCase()] = 1; });
         it.rollTyp = {}; Object.keys(byRoll).forEach(function (g) { if (byRoll[g].length >= 2) it.rollTyp[g] = { typ: median(byRoll[g]), n: byRoll[g].length, who: Object.keys(rollWho[g] || {}).slice(0, 8) }; });
         // Identical copies only: the headline price of an equip is what a plain copy sells for (an average roll with no
         // scroll slots used). Copies known to be scrolled, failed or rolled high or low are priced in Price by roll and
         // never move the headline. With fewer than 3 plain copies sold, the usual sales are used minus the known odd ones.
         var hasSlH = !!(dbBase(it.item) || {}).SLOTS, offL = [], plainL = [];
-        it.rolls.forEach(function (r) { var su = slotsUsed(it.item, r.l); if (r.g === 0 && (!hasSlH || su === 0)) plainL.push(r.l); else if (r.g !== 0 || (su || 0) > 0) offL.push(r.l); });
+        it.rolls.forEach(function (r) { var su = slotsUsed(it.item, r.l); if (r.g === 0 && r.k !== "TOTAL" && (!hasSlH || su === 0)) plainL.push(r.l); else if (r.g !== 0 || (su || 0) > 0) offL.push(r.l); });
         var plainS = plainL.filter(function (x) { return x.so && !x.pricey && now - x.t <= 14 * DAY; }).sort(function (a, b) { return b.t - a.t; }).slice(0, 10);
         it.typOff = 0;
         if (plainS.length >= 3) {
@@ -1061,7 +1061,7 @@
           if (!trusted(x.who)) return;                        // stats uploaded by a fresh watcher id prove nothing yet
           var g = rollOf(it.item, x); if (g == null) return;
           var su = slotsUsed(it.item, x); if (su == null) return;
-          var rt = it.rollTyp[g + "|" + su]; if (!rt) return;
+          var rt = it.rollTyp[rollKey(it.item, x, su)]; if (!rt) return;
           var off = 1 - x.u / rt.typ;
           if (off < 0.15 || off > 0.85 || rt.typ - x.u < 100) return;
           if (x.who && String(x.who).toLowerCase() === String(x.s).toLowerCase()) return;   // a seller's own watcher vouching for the seller's own roll
@@ -2013,31 +2013,71 @@
   // Other equips: the main stat of the class that wears it, so STR warrior, INT mage, DEX bowman, LUK thief.
   var JOBSTAT = [[1, "STR"], [2, "INT"], [4, "DEX"], [8, "LUK"]];
   var JOBNAME = { WARRIOR: "STR", MAGICIAN: "INT", BOWMAN: "DEX", THIEF: "LUK", PIRATE: "STR" };
-  function keyStat(name, x, xj) {
-    var b = Object.assign({}, BASE[name] || {}, fullBase(name).s);
-    if (b.job == null) { var dr = dbRow(name); if (dr) b.job = dr[3] || 0; }
-    if (x && x.SUCCESS != null) return "SUCCESS";
-    if (category(name) === "Weapons" || ((b.ATT || b.MATT) && !b.WDEF)) {
-      if ((b.MATT || 0) > (b.ATT || 0) || (!b.ATT && x && x.MATT != null && x.ATT == null)) return "MATT";
-      if (b.ATT || (x && x.ATT != null)) return "ATT";
-    }
+  // What buyers pay for, by slot, in the order a roll is keyed. MAIN is the main stat of the class that wears it
+  // (STR warrior, INT mage, DEX bowman, LUK thief). Defense is never a pricing stat, except on shields, and there only
+  // after attack and main stats. Weapons go by weapon attack, or magic attack for wands and staffs.
+  var MAINS = ["STR", "DEX", "INT", "LUK"];
+  var VALUE = { Glove: ["ATT", "MATT", "CRIT"], Earrings: ["MAIN", "MATT", "CRITDMG"], Hat: ["MAIN", "HP", "ACC"], Top: ["MAIN", "HP"], Bottom: ["MAIN", "HP"],
+    Overall: ["MAIN", "HP"], Cape: ["MAIN", "HP", "ACC"], Shoes: ["SPEED", "JUMP", "DEX"], Shield: ["ATT", "MATT", "MAIN", "WDEF"], "Pet Equipment": ["SPEED", "JUMP"] };
+  var VALUE_ANY = ["ATT", "MATT", "MAIN", "CRIT", "CRITDMG", "HP", "MP", "ACC", "AVOID", "SPEED", "JUMP"];
+  function subKind(name) { var r = dbRow(name), k = r && DBK[r[5]] || ""; return k.split(":")[1] || ""; }
+  // the item list's own type decides (a shield files under Weapons on the board but prices like armour)
+  function isWeapon(name) { var sb = subKind(name); return sb ? sb === "Wand" || sb === "Staff" || WEAPONS.test(sb) : category(name) === "Weapons"; }
+  function valueOrder(name) { return isWeapon(name) ? (/^(Wand|Staff)$/.test(subKind(name)) ? ["MATT"] : ["ATT", "MATT"]) : VALUE[subKind(name)] || VALUE_ANY; }
+  // every stat that counts toward a roll on this item, MAIN spelled out
+  function valSet(name) { var o = {}; valueOrder(name).forEach(function (k) { if (k === "MAIN") MAINS.forEach(function (m) { o[m] = 1; }); else o[k] = 1; }); return o; }
+  function mainStat(b, x, xj) {
     var jobs = JOBSTAT.filter(function (j) { return (b.job || 0) & j[0]; }).map(function (j) { return j[1]; });
     if (xj && JOBNAME[xj]) jobs = [JOBNAME[xj]];
-    if (jobs.length === 1) return jobs[0];
-    var mains = ["STR", "DEX", "INT", "LUK"], pk = "", best = -1;
-    mains.forEach(function (k) { var v = Math.max(b[k] || 0, x && x[k] != null ? x[k] : -1); if ((!jobs.length || jobs.indexOf(k) > -1) && v > best) { best = v; pk = k; } });
-    if (best > 0) return pk;
-    if (b.ATT || (x && x.ATT != null)) return "ATT";
-    var order = ["WDEF", "MDEF", "STR", "DEX", "INT", "LUK", "HP", "MP", "ACC", "AVOID", "SPEED", "JUMP"];
-    for (var k = 0; k < order.length; k++) if (x && x[order[k]] != null) return order[k];
-    return "";
+    if (jobs.length === 1) return { k: jobs[0], one: true, all: jobs };
+    var pk = "", best = -1;
+    MAINS.forEach(function (k) { var v = Math.max(b[k] || 0, x && x[k] != null ? x[k] : -1); if ((!jobs.length || jobs.indexOf(k) > -1) && v > best) { best = v; pk = k; } });
+    return { k: best > 0 ? pk : "", one: false, all: jobs.length ? jobs : MAINS };
+  }
+  function keyStat(name, x, xj) {
+    if (x && x.SUCCESS != null) return "SUCCESS";
+    var b = Object.assign({}, BASE[name] || {}, fullBase(name).s);
+    if (b.job == null) { var dr = dbRow(name); if (dr) b.job = dr[3] || 0; }
+    if (isWeapon(name)) {
+      if (/^(Wand|Staff)$/.test(subKind(name)) || (b.MATT || 0) > (b.ATT || 0) || (!b.ATT && x && x.MATT != null && x.ATT == null)) return "MATT";
+      return "ATT";
+    }
+    var order = valueOrder(name), ms = mainStat(b, x, xj);
+    var has = function (k) { return (b[k] || 0) > 0 || (x && x[k] != null); };
+    // a copy with a valuable stat off its base is keyed on that stat: +10 LUK earrings go by LUK, not crit damage
+    if (x) for (var i = 0; i < order.length; i++) {
+      var ks = order[i] === "MAIN" ? ms.all : [order[i]];
+      for (var j = 0; j < ks.length; j++) {
+        var k = ks[j], bv = x[k + "_b"] != null ? x[k + "_b"] : b[k] || 0;
+        if (x[k] == null || x[k] === bv || (/^(HP|MP|ACC|AVOID|WDEF|MDEF)$/.test(k) && bv > 0 && Math.abs(x[k] - bv) <= Math.max(1, Math.ceil(bv * 0.12)))) continue;
+        return k;
+      }
+    }
+    // gloves are shopped by attack: a pair with nothing moved is a 0 ATT pair, even though most carry 1 crit rate
+    if (subKind(name) === "Glove") return x && x.MATT != null && x.ATT == null ? "MATT" : "ATT";
+    for (var i2 = 0; i2 < order.length; i2++) {
+      if (order[i2] === "MAIN") { if (ms.k && (ms.one || has(ms.k))) return ms.k; continue; }
+      if (has(order[i2])) return order[i2];
+    }
+    return order[0] === "MAIN" ? ms.k : order[0];
+  }
+  // one line for the item page: which stat Price by roll is keyed on, and why
+  var KEYWHY = { Glove: "gloves sell by the attack scrolled onto them, then a crit rate roll (a 2 crit pair of Work Gloves sells for many times a 1 crit one)", Earrings: "earrings sell by main stats, then magic attack, then crit damage",
+    Hat: "hats sell by main stats, then HP and accuracy", Top: "tops sell by main stats, then HP", Bottom: "bottoms sell by main stats, then HP",
+    Overall: "overalls sell by main stats, then HP", Cape: "capes sell by main stats, then HP and accuracy", Shoes: "shoes sell by speed, jump and DEX",
+    Shield: "shields sell by attack, then main stats, then defense", "Pet Equipment": "pet equips sell by speed and jump" };
+  function keyWhy(name) {
+    var k = keyStat(name, null, ""); if (!k || k === "SUCCESS") return "";
+    var why = isWeapon(name) ? (k === "MATT" ? "wands and staffs sell by magic attack" : "weapons sell by weapon attack") : KEYWHY[subKind(name)] || "it's the stat this item is bought for";
+    var b = fullBase(name).s, one = MAINS.indexOf(k) > -1 && (classMask(name) & 15) && [1, 2, 4, 8].filter(function (m) { return classMask(name) & m; }).length === 1;
+    return "Rolls keyed on " + (STATABBR[k] || k) + (b[k] ? " (base " + b[k] + ")" : "") + ": " + why + (one ? ", and this is " + MAINCLS[k] + " gear" : "") + ". A copy that moved another of those stats is keyed on that one. Defense never counts" + (subKind(name) === "Shield" ? " except last on shields" : "") + ".";
   }
   // An equip's base stats. The item list carries them from the game data (Classic's own data leaves weapon attack
   // out, so the closed beta data fills it in). Hovers in the game check them: a stat at its base shows as a plain
   // number ("Weapon Attack: +55"), one that rolled differently shows the base in brackets ("+57 (55 +2)"), and one
   // that rolled down to nothing has no line at all. When two or more hovers agree on a base the data doesn't
   // have, or most hovers outvote the data, the hovers win.
-  var LB = {}, BSTATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP"];
+  var LB = {}, BSTATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP", "CRIT", "CRITDMG"];
   function dbBase(name) {
     var r = dbRow(name); if (!r) return null;
     if (r[7] && typeof r[7] === "object") return r[7];
@@ -2046,7 +2086,7 @@
   }
   // A tooltip read off the screen can belong to the item next to it. Before any stat counts toward a roll, it has to
   // be one this item can carry: one of its base stats, or one a scroll for its slot adds (no attack on earrings).
-  var SCROLLABLE = { Earrings: "STR DEX INT LUK AVOID", Glove: "ATT MATT ACC", Hat: "ACC HP MP", Cape: "ACC DEX INT LUK MDEF STR WDEF", Top: "WDEF HP MP",
+  var SCROLLABLE = { Earrings: "STR DEX INT LUK AVOID CRITDMG", Glove: "ATT MATT ACC CRIT", Hat: "ACC HP MP", Cape: "ACC DEX INT LUK MDEF STR WDEF", Top: "WDEF HP MP",
     Bottom: "WDEF HP MP", Overall: "WDEF DEX INT LUK STR", Shield: "ACC WDEF", Shoes: "AVOID JUMP SPEED", "Pet Equipment": "JUMP SPEED", Wand: "MATT", Staff: "MATT" };
   var WEAPONS = /Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun/;
   // returns the stats this item can really have: attack where the slot can't have attack means the whole tooltip was
@@ -2055,7 +2095,7 @@
   // the list doesn't have still counts when it's small and two or more hovers show the same base for it; a big one
   // ("LUK 70" on a claw) is a requirement read as a bonus, and attack where the slot can't have attack means the
   // tooltip was another item's.
-  var CONS = {}, SMALL = { STR: 15, DEX: 15, INT: 15, LUK: 15, ACC: 15, AVOID: 15, SPEED: 15, JUMP: 15, HP: 60, MP: 60, WDEF: 40, MDEF: 40 };
+  var CONS = {}, SMALL = { STR: 15, DEX: 15, INT: 15, LUK: 15, ACC: 15, AVOID: 15, SPEED: 15, JUMP: 15, HP: 60, MP: 60, WDEF: 40, MDEF: 40, CRIT: 15, CRITDMG: 15 };
   function statsFix(name, x) {
     if (!x || typeof x !== "object") return x;
     var r = dbRow(name); if (!r) return x;
@@ -2143,6 +2183,7 @@
       }
     });
     var sl = db.SLOTS || api.SLOTS || c._slots; if (sl) out.SLOTS = sl;
+    if (db.KB) out.KB = db.KB; if (db.ASPD) out.ASPD = db.ASPD;       // shown in the popup, never priced
     return { s: out, src: src, weak: weak, known: !!(Object.keys(db).length || api.SLOTS != null) };
   }
   // A stat that rolled down to nothing has no line in the hover, so a complete hover (one that reached the
@@ -2157,14 +2198,16 @@
       x._mk = [];
       if (!l.xt || !l.xt.length || !l.xt.some(function (t) { return /enhance|upgrade/i.test(t); })) return;
       var fb = fbc[l.i] || (fbc[l.i] = fullBase(l.i).s);
+      var critLine = l.xt.some(function (t) { return /cri?t/i.test(t); });
       ROLLK.forEach(function (k) {
+        if ((k === "CRIT" || k === "CRITDMG") && (critLine || fb[k] > 1)) return;   // crit 2 rolls 1 to 3, never to nothing: no line is a missed read
         // only small stats can roll away to nothing; a big one with no line is a line the reader missed
         if (!fb[k] || fb[k] > 5 || x[k] != null || (x._tip && x._tip[k] != null)) return;
         (x._tip || (x._tip = {}))[k] = -fb[k]; x[k] = 0; x[k + "_b"] = fb[k]; x._mk.push(k);
       });
     });
   }
-  var BLABEL = { ATT: "ATT", MATT: "MATT", WDEF: "W.DEF", MDEF: "M.DEF", ACC: "ACC", AVOID: "AVOID", SPEED: "Speed", JUMP: "Jump", HP: "HP", MP: "MP", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK" };
+  var BLABEL = { ATT: "ATT", MATT: "MATT", WDEF: "W.DEF", MDEF: "M.DEF", ACC: "ACC", AVOID: "AVOID", SPEED: "Speed", JUMP: "Jump", HP: "HP", MP: "MP", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", CRIT: "Crit rate", CRITDMG: "Crit damage" };
   function baseText(name) {
     var b = fullBase(name), s = b.s;
     var parts = BSTATS.filter(function (k) { return s[k]; }).map(function (k) { return BLABEL[k] + " " + s[k] + (b.weak[k] ? "?" : ""); });
@@ -2179,6 +2222,7 @@
     var b = fullBase(name); if (b.s[k] != null) return b.s[k];
     if (k === "STR" || k === "DEX" || k === "INT" || k === "LUK") return b.known ? 0 : null;
     if ((k === "ATT" || k === "MATT") && b.known && category(name) !== "Weapons") return 0;   // attack on gloves or a cape is scrolled on
+    if (b.known && /^(HP|MP|ACC|AVOID|SPEED|JUMP|CRIT|CRITDMG)$/.test(k)) return 0;               // our item data now has every line: none is none
     return null;
   }
   function statChip(name, x, xj) {
@@ -2208,18 +2252,20 @@
   }
   // The game's tooltip shows a stat that rolled off its base as "Critical Rate: +2 (1 +1)": base 1, one above.
   // A stat with no brackets rolled exactly its base. So every hovered equip tells us its own roll, per stat.
-  var TIPSTAT = [[/weapon\s*att(?:ack)?/i, "ATT"], [/magic\s*att(?:ack)?/i, "MATT"], [/crit(?:ical)?\s*rate/i, "CRIT"], [/\bstr\b/i, "STR"], [/\bdex\b/i, "DEX"], [/\bint\b/i, "INT"], [/\bluk\b/i, "LUK"]];
+  var TIPSTAT = [[/weapon\s*att(?:ack)?/i, "ATT"], [/magic\s*att(?:ack)?/i, "MATT"], [/crit(?:ical)?\s*rate/i, "CRIT"], [/cri\w*\.?\s*da[mrn]\w*/i, "CRITDMG"], [/\bstr\b/i, "STR"], [/\bdex\b/i, "DEX"], [/\bint\b/i, "INT"], [/\bluk\b/i, "LUK"]];
   // the rest of a tooltip: read for the item's base stats only, never counted in a roll
   var TIPEXTRA = [[/weapon\s*def(?:ense)?\.?/i, "WDEF"], [/magic\s*def(?:ense)?\.?/i, "MDEF"], [/accuracy/i, "ACC"], [/avoidability|evasion/i, "AVOID"],
     [/\bspeed\b/i, "SPEED"], [/\bjump\b/i, "JUMP"], [/max\s*hp|\bhp\b/i, "HP"], [/max\s*mp|\bmp\b/i, "MP"]];
   function tipStats(l) {
     if (!l.xt || !l.xt.length || !l.x || l.x._tipd) return;
     l.x._tipd = true;                                                 // parsed once; the same x object comes back every build
-    var bon = {}, ext = {}, any = false;
+    var bon = {}, ext = {}, any = false, vs = valSet(l.i), shield = subKind(l.i) === "Shield";
     l.xt.forEach(function (line) {
       if (/\breq|re\s*[qgo0@®©]+\s*(lev|lv|str|dex|int|luk)/i.test(line)) return;   // "REQ STR: 35" (or misread "RE@LUK") is a requirement, not a stat
       TIPSTAT.concat(TIPEXTRA).forEach(function (t) {
         var extra = TIPEXTRA.indexOf(t) >= 0;
+        if (extra && vs[t[1]] && (shield || (t[1] !== "WDEF" && t[1] !== "MDEF"))) extra = false;
+        var hpmp = t[1] === "HP" || t[1] === "MP";
         var m = new RegExp("(?:" + t[0].source + ")\\s*[:.;]?\\s*\\+?\\s*(\\d{1,3})(?:\\s*[\\(\\[{]\\s*(\\d{1,3})(?:\\s*([+-])?\\s*(\\d{1,3}))?\\s*[\\)\\]}]?)?", "i").exec(line);
         if (!m || bon[t[1]] != null || ext[t[1]] != null) return;
         var v = +m[1], d = 0;
@@ -2230,7 +2276,7 @@
           if (m[4] != null && Math.abs(+m[4]) !== Math.abs(d)) return;   // the brackets must add up, or it's a misread
         }
         if (v >= 200 && !extra && t[1] !== "HP" && t[1] !== "MP" && t[1] !== "WDEF" && t[1] !== "MDEF") return;   // no Classic roll reads 200+ on a main stat or attack
-        if (d < -6 || d > 15) return;                                 // a roll more than 6 under or 15 over base is a misread
+        if (hpmp ? d < -40 || d > 300 : d < -6 || d > 15) return;      // a roll more than 6 under or 15 over base is a misread (HP and MP move more)
         if (extra) ext[t[1]] = d; else { bon[t[1]] = d; any = true; }
         if (l.x[t[1]] == null) l.x[t[1]] = v;
         if (l.x[t[1] + "_b"] == null) l.x[t[1] + "_b"] = v - d;
@@ -2247,17 +2293,19 @@
   // How far a listing's roll is above or below an average one: from "(+3)" in chat, from the item's base stats,
   // or, when the base hasn't loaded, from the middle of every roll we've seen of that item.
   var MEDSTAT = {};
-  // Roll pricing only trusts the stats a scroll changes: attack, magic attack and the four main stats. Defense is
-  // base-plus-scroll-noise and groups nothing useful. A hover whose name reads as another item is ignored.
+  // Roll pricing only trusts the stats buyers pay for on that slot (see VALUE). Defense counts only on shields. A hover whose name reads as another item is ignored.
   function rollKeyOk(name, l) {
     var x = l && l.x; if (!x) return false;
     if (l.xn) { var hn = String(l.xn).replace(/\s*\(tier cut off\)/, "").toLowerCase(), nn = String(name).toLowerCase(); if (hn && hn !== nn && !nn.startsWith(hn.slice(0, 6)) && !hn.startsWith(nn.slice(0, 6))) return false; }
     var k = keyStat(name, x, l.xj);
-    return k === "ATT" || k === "MATT" || k === "STR" || k === "DEX" || k === "INT" || k === "LUK";
+    return !!k && k !== "SUCCESS" && (isWeapon(name) || !!valSet(name)[k]);
   }
   // a roll runs from about 5 under base (a bad drop) to 15 over (a full scroll job); anything else is a misread
-  function sane(g) { return g != null && g >= -6 && g <= 15 ? g : null; }
-  function rollOf(name, l) { return sane(rollOf0(name, l)); }
+  function sane(g, k) { return g == null ? null : k === "HP" || k === "MP" ? (g >= -40 && g <= 300 ? g : null) : g >= -6 && g <= 15 ? g : null; }
+  function rollOf(name, l) { var p = rollPick(name, l); return p ? sane(p.g, p.k) : null; }
+  // the key roll prices are kept under: roll, slots used and the stat ("1|0|CRITDMG": crit damage +1, no slots used), so a
+  // +4 LUK pair and a +4 crit pair of the same earrings never share a price
+  function rollKey(name, l, su) { var p = rollPick(name, l); return p ? p.g + "|" + su + "|" + (p.k || "") : ""; }
   // slots taken from the item's base count: 0 is clean. Null when the hover didn't reach Remaining Enhancements.
   function slotsUsed(name, l) {
     var x = l && l.x; if (!x || x.SLOTS == null) return null;
@@ -2266,19 +2314,10 @@
   }
   // which stat a roll's +/- number is about, for the label on Price by roll: one stat when only one moved off base,
   // "Total stats" when several did and the number is their sum, "" when only a chat grade like (-3) is known
-  var STATABBR = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", WDEF: "W.DEF", MDEF: "M.DEF", ACC: "ACC", AVOID: "AVOID", SPEED: "SPEED", JUMP: "JUMP" };
+  var STATABBR = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", WDEF: "W.DEF", MDEF: "M.DEF", ACC: "ACC", AVOID: "AVOID", SPEED: "SPEED", JUMP: "JUMP", CRIT: "Crit rate", CRITDMG: "Crit damage" };
   function rollBasis(name, l) {
     var x = l && l.x; if (!x || x.g != null) return "";
-    if (x._tip) {
-      // scrolled attack on gloves and other armour is what buyers shop by
-      if (category(name) !== "Weapons" && (x._tip.ATT || x._tip.MATT)) return x._tip.ATT ? "ATT" : "MATT";
-      var kk = keyStat(name, x, l.xj); if (kk && x._tip[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return kk;
-      var moved = Object.keys(x._tip).filter(function (k) { return x._tip[k]; });
-      return moved.length === 1 ? moved[0] : moved.length ? "TOTAL" : "";
-    }
-    var k = keyStat(name, x, l.xj);
-    if (!k || k === "SUCCESS" || x[k] == null) k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : "";
-    return k;
+    var p = rollPick(name, l); return p ? p.k || "" : "";
   }
   function gradeLabel(i, g, fallback) {
     var c = {}, best = "", n = 0;
@@ -2286,22 +2325,50 @@
     best = best || fallback || "";
     return best === "TOTAL" ? "Total stats" : STATABBR[best] || best;
   }
-  function rollOf0(name, l) {
+  // A copy's roll and the stat it's about. A hovered copy shows its own roll per stat ("+57 (55 +2)"). The roll goes by
+  // what buyers pay for on that slot (VALUE): scrolled attack on armour first, then the main stats (several moved: their
+  // total), then the slot's other paid-for stats in order. Nothing paid-for moved: 0 on the item's key stat.
+  function rollPick(name, l) {
     var x = l && l.x; if (!x) return null;
-    if (x.g != null) return x.g;
-    if (x._tip && category(name) !== "Weapons" && (x._tip.ATT || x._tip.MATT)) return x._tip.ATT || x._tip.MATT;
-    if (x._tip) { var kk = keyStat(name, x, l.xj); if (kk && x._tip[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return x[kk] - x[kk + "_b"]; }
-    if (x._tip) { var tot = 0; Object.keys(x._tip).forEach(function (k) { tot += x._tip[k]; }); return tot; }
-    var k = keyStat(name, x, l.xj);
-    if (!k || k === "SUCCESS" || x[k] == null) { k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : null; if (!k) return null; }
-    var b = baseOf(name, x, k); if (b != null) return x[k] - b;
-    var m = MEDSTAT[name + "|" + k]; return m != null ? Math.round(x[k] - m) : null;
+    if (x.g != null) return { g: x.g, k: "" };
+    var t = x._tip, wep = isWeapon(name), kk = keyStat(name, x, l.xj);
+    if (wep && t && kk && t[kk] === 0 && x[kk] != null && x[kk + "_b"] != null && x[kk] !== x[kk + "_b"]) return { g: x[kk] - x[kk + "_b"], k: kk };
+    if (wep) { if (t && t[kk] != null) return { g: t[kk], k: kk }; }
+    else {
+      // each paid-for stat's move off its base: from the popup's brackets, else the value read against the item's base
+      var vs = valSet(name), mv = {}, nread = 0;
+      Object.keys(vs).forEach(function (k) {
+        // the brackets lost but the watcher kept the base: the value against it
+        if (t && t[k] != null) { mv[k] = t[k] === 0 && x[k] != null && x[k + "_b"] != null ? x[k] - x[k + "_b"] : t[k]; nread++; }
+        else if (x[k] != null) { var b0 = baseOf(name, x, k); if (b0 != null) { mv[k] = x[k] - b0; nread++; } }
+        // a drop's own small wobble on HP, MP, accuracy or a shield's defense (22 HP rolling 24) isn't what anyone pays for; a scroll's +10 is
+        // a stat can't read below nothing: that's a misread line, left out
+        if (mv[k] != null) { var fbk = fullBase(name).s[k], cb = fbk != null ? fbk : baseOf(name, x, k) || 0; if (cb + mv[k] < 0) { delete mv[k]; nread--; } }
+        if (mv[k] && /^(HP|MP|ACC|AVOID|WDEF|MDEF)$/.test(k)) { var bb = baseOf(name, x, k) || 0; if (bb > 0 && Math.abs(mv[k]) <= Math.max(1, Math.ceil(bb * 0.12))) mv[k] = 0; }
+      });
+      if (mv.ATT || mv.MATT) return { g: mv.ATT || mv.MATT, k: mv.ATT ? "ATT" : "MATT" };   // scrolled attack on armour is what buyers shop by
+      var ms = MAINS.filter(function (k) { return mv[k]; });
+      if (ms.length === 1) return { g: mv[ms[0]], k: ms[0] };
+      if (ms.length > 1) return { g: ms.reduce(function (a, k) { return a + mv[k]; }, 0), k: "TOTAL" };
+      var order = valueOrder(name);
+      for (var i = 0; i < order.length; i++) if (order[i] !== "MAIN" && mv[order[i]]) return { g: mv[order[i]], k: order[i] };
+      if (nread || t) return { g: 0, k: keyStat(name, null, l.xj) || kk };   // nothing paid-for moved: one clean group per item
+    }
+    var k = kk;
+    if (!k || k === "SUCCESS" || x[k] == null) {
+      // a complete hover (it reached Remaining Enhancements) with no line for a stat the item doesn't come with: none scrolled on
+      if (k && k !== "SUCCESS" && x.SLOTS != null && baseOf(name, x, k) === 0 && x.ATT == null && x.MATT == null) return { g: 0, k: k };
+      k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : null; if (!k) return null;
+    }
+    var b = baseOf(name, x, k); if (b != null) return { g: x[k] - b, k: k };
+    var m = MEDSTAT[name + "|" + k]; return m != null ? { g: Math.round(x[k] - m), k: k } : null;
   }
+  function rollOf0(name, l) { var p = rollPick(name, l); return p ? p.g : null; }
   // The item's tooltip, rebuilt the way the game shows it from the stats that were read and checked,
   // never the raw screen text (that carries stray marks and symbols from around the popup).
-  var TIPROWS = [["REQLV", "REQ LEV"], ["ATT", "Weapon Attack"], ["MATT", "Magic Attack"], ["STR", "STR"], ["DEX", "DEX"], ["INT", "INT"], ["LUK", "LUK"],
-    ["HP", "Max HP"], ["MP", "Max MP"], ["WDEF", "Weapon Def."], ["MDEF", "Magic Def."], ["ACC", "Accuracy"], ["AVOID", "Avoidability"], ["SPEED", "Speed"], ["JUMP", "Jump"],
-    ["CRIT", "Critical Rate"], ["SUCCESS", "Success Rate"], ["SLOTS", "Remaining Enhancements"]];
+  var TIPROWS = [["REQLV", "REQ LEV"], ["STR", "STR"], ["DEX", "DEX"], ["INT", "INT"], ["LUK", "LUK"], ["HP", "MaxHP"], ["MP", "MaxMP"], ["ATT", "Weapon Attack"], ["MATT", "Magic Attack"],
+    ["WDEF", "Weapon Def."], ["MDEF", "Magic Def."], ["ACC", "Accuracy"], ["AVOID", "Evasion"], ["SPEED", "Speed"], ["JUMP", "Jump"],
+    ["CRIT", "Critical Rate"], ["CRITDMG", "Critical Damage"], ["SUCCESS", "Success rate"], ["SLOTS", "Remaining Enhancements"]];
   // where a stream price came from: the past broadcast at the exact moment when we have it, else the channel
   function streamLink(l) {
     var a = el("a", "slink", l.who + (l.v ? "'s broadcast" : "'s stream")); a.target = "_blank"; a.rel = "noopener";
@@ -2473,21 +2540,23 @@
   }
   function rollBox(i) {
     var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by roll")); box.appendChild(hd);
+    var kw = keyWhy(i.item); if (kw) box.appendChild(el("p", "rlnote rkey", kw));
     if (i.bands) {
       var bg = el("div", "rollbands");
       [["Low", Math.min(i.bands.lo, i.bands.mid), "down"], ["Average", i.bands.mid, "mid"], ["High", Math.max(i.bands.hi, i.bands.mid), "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(el("small", null, b[0])); d.appendChild(money(b[1])); bg.appendChild(d); });
       box.appendChild(bg);
     }
-    var now = Date.now(), gks = keyStat(i.item, null, ""), gkb = gks === "ATT" || gks === "MATT" ? itemBase(i.item).s[gks] : null;
+    var now = Date.now(), gks = keyStat(i.item, null, ""), gkb = gks && gks !== "SUCCESS" ? (itemBase(i.item).s[gks] != null ? itemBase(i.item).s[gks] : baseOf(i.item, null, gks)) : null;
     var m = classMask(i.item), jobs = [1, 2, 4, 8].filter(function (b) { return m > 0 && (m & b); }).length;
-    var gradeKey = (gks === "ATT" || gks === "MATT" || jobs === 1) && gks ? gks : "GRADE";
+    var gradeKey = gks && (MAINS.indexOf(gks) < 0 || jobs === 1) ? gks : "GRADE";
     var secs = {}, clean = null, hasSl = !!(dbBase(i.item) || {}).SLOTS, noSl = {};
     i.rolls.forEach(function (r) {
       if (now - r.l.t > 14 * DAY) return;
       var bs = rollBasis(i.item, r.l) || gradeKey;
       // copies whose upgrades left weren't read sit apart: a used one is worth far less than a clean one
       if (hasSl && r.l.x.SLOTS == null) { var nk = (r.g === 0 && bs !== "TOTAL" ? "CLEAN" : bs) + "|" + r.g; (noSl[nk] || (noSl[nk] = { k: bs, g: r.g, ls: [] })).ls.push(r.l); return; }
-      if (r.g === 0 && bs !== "TOTAL") { (clean || (clean = { ls: [] })).ls.push(r.l); return; }
+      // clean: every stat buyers pay for on this slot at its base, and no scroll taken
+      if (r.g === 0 && bs !== "TOTAL" && (!hasSl || slotsUsed(i.item, r.l) === 0)) { (clean || (clean = { ls: [] })).ls.push(r.l); return; }
       var sc = secs[bs] || (secs[bs] = { k: bs, g: {}, n: 0 }); sc.n++;
       (sc.g[r.g] || (sc.g[r.g] = { g: r.g, ls: [] })).ls.push(r.l);
     });
@@ -2503,11 +2572,12 @@
     function cell(key, g, ls, base, label) {
       var pr = priceOf(ls), id = i.item + "|" + key + "|" + g, open = ROLLOPEN[id];
       var d = el("button", "rc " + (g === 0 ? "ref" : g === "?" ? "unk" : g > 0 ? "up" : "down") + (open ? " on" : "")); d.type = "button";
-      var top = el("b", null, label || (g === 0 ? (base != null ? "Base" : "Clean") : (g > 0 ? "+" : "−") + Math.abs(g)));
+      var isClean = clean && ls === clean.ls;
+      var top = el("b", null, label || (g === 0 ? (isClean ? (base != null ? "Base" : "Clean") : "Base, used") : (g > 0 ? "+" : "−") + Math.abs(g)));
       if (base != null && g !== "?") top.appendChild(el("em", null, " " + (base + g)));
       d.appendChild(top); d.appendChild(money(pr.p));
       d.appendChild(el("small", null, pr.how === "sold" ? pr.sold + " sold" + (pr.up ? " · " + pr.up + " up" : "") : (pr.up ? pr.up + " for sale" : ls.length + " seen") + " · asking"));
-      var lab = label && key !== "?" ? label + (/^NOSL:/.test(key) ? ", upgrades not read" : "") : (key === "TOTAL" ? "Total stats" : key === "GRADE" ? "Roll" : key === "?" ? "Not hovered yet" : STATABBR[key] || key) + (g === "?" ? "" : " " + (g === 0 ? "clean" : (g > 0 ? "+" : "") + g));
+      var lab = label && key !== "?" ? label + (/^NOSL:/.test(key) ? ", upgrades not read" : "") : (key === "TOTAL" ? "Total stats" : key === "GRADE" ? "Roll" : key === "?" ? "Not hovered yet" : STATABBR[key] || key) + (g === "?" ? "" : " " + (g === 0 ? (isClean ? "clean" : "at base, slots used") : (g > 0 ? "+" : "") + g));
       d.title = lab + ": click for every copy, for sale now and sold";
       d.setAttribute("aria-expanded", open ? "true" : "false"); d.dataset.k = key; d.dataset.g = String(g);
       var ab = base != null && g !== "?" ? base + g : (ls[0] && ls[0].x && ls[0].x[key] != null ? ls[0].x[key] : null); if (ab != null) d.dataset.abs = String(ab);
@@ -2527,9 +2597,12 @@
       sec.appendChild(h);
       var row = el("div", "rrow"), opened = null;
       // the clean roll is the yardstick: a cell in the first section, a note in the header of the others
-      if (clean && k !== "TOTAL" && ki === 0) gs.push(0);
+      // clean sits just before the at-base copies that took scrolls
+      var withClean = clean && k !== "TOTAL" && ki === 0;
+      if (withClean && gs.indexOf(0) < 0) gs.push(0);
       gs.sort(function (a, b) { return a - b; }).forEach(function (g) {
-        var c = g === 0 && !sc.g[0] ? cell(k, 0, clean.ls, base) : cell(k, g, sc.g[g].ls, base);
+        if (g === 0 && withClean) { var cc0 = cell(k, 0, clean.ls, base); row.appendChild(cc0.el); if (cc0.open) opened = cc0.open; if (!sc.g[0]) return; }
+        var c = cell(k, g, sc.g[g].ls, base);
         row.appendChild(c.el); if (c.open) opened = c.open;
       });
       sec.appendChild(row); if (opened) sec.appendChild(opened);
@@ -2573,8 +2646,12 @@
   // that copy's own popup. A copy nobody hovered shows the item's base stats, and says so.
   var TIPL = typeof WeakMap === "function" ? new WeakMap() : null, GTIP_ON = null;
   function tipAttach(node, l, name) { if (!TIPL) return; TIPL.set(node, { l: l, n: name || (l && l.i) }); node.classList.add("gtipable"); }
-  var GTLINES = [["ATT", "Weapon Attack"], ["MATT", "Magic Attack"], ["STR", "STR"], ["DEX", "DEX"], ["INT", "INT"], ["LUK", "LUK"], ["HP", "MaxHP"], ["MP", "MaxMP"],
-    ["WDEF", "Weapon Def."], ["MDEF", "Magic Def."], ["ACC", "Accuracy"], ["AVOID", "Avoidability"], ["SPEED", "Speed"], ["JUMP", "Jump"], ["CRIT", "Critical Rate"]];
+  // the game's own order and wording (read off thousands of hovers): main stats, MaxHP/MaxMP, attack, defense, the rest, crit
+  var GTLINES = [["STR", "STR"], ["DEX", "DEX"], ["INT", "INT"], ["LUK", "LUK"], ["HP", "MaxHP"], ["MP", "MaxMP"], ["ATT", "Weapon Attack"], ["MATT", "Magic Attack"],
+    ["WDEF", "Weapon Def."], ["MDEF", "Magic Def."], ["ACC", "Accuracy"], ["AVOID", "Evasion"], ["SPEED", "Speed"], ["JUMP", "Jump"], ["CRIT", "Critical Rate"], ["CRITDMG", "Critical Damage"]];
+  var GTTYPE = { Glove: "Gloves", Overall: "Outfit", "Pole Arm": "Polearm", "One-Handed Sword": "One-handed Sword", "One-Handed Axe": "One-handed Axe", "One-Handed Blunt Weapon": "One-handed Blunt Weapon",
+    "Two-Handed Sword": "Two-handed Sword", "Two-Handed Axe": "Two-handed Axe", "Two-Handed Blunt": "Two-handed Blunt Weapon" };
+  function aspdName(v) { return v <= 3 ? "Very Fast" : v <= 5 ? "Fast" : v === 6 ? "Average" : "Slow"; }
   // the real popup when FM Watcher sent one (equips at 500K and up), with the listing under it; the rebuilt one if
   // the picture is missing or still on its way
   function gameTip(l, name) {
@@ -2604,7 +2681,8 @@
     [["REQ LEV", lv], ["REQ STR", api.RSTR], ["REQ DEX", api.RDEX], ["REQ INT", api.RINT], ["REQ LUK", api.RLUK]].forEach(function (q, qi) { var d = el("div"); d.appendChild(el("span", null, q[0])); d.appendChild(el("b", null, ": " + (qi && !known ? "…" : q[1] || 0))); req.appendChild(d); });
     top.appendChild(req); box.appendChild(top);
     var cn = className(classMask(name)); if (cn) box.appendChild(el("div", "gt-jobs", cn));
-    var kind = r && DBK[r[5]] ? DBK[r[5]].split(":").pop() : ""; if (kind && kind !== "Unknown") box.appendChild(el("div", "gt-l", "Category: " + kind));
+    var kind = r && DBK[r[5]] ? DBK[r[5]].split(":").pop() : ""; if (kind && kind !== "Unknown") box.appendChild(el("div", "gt-l", "Type: " + (GTTYPE[kind] || kind)));
+    if (b.ASPD) box.appendChild(el("div", "gt-l", "Attack Speed: " + aspdName(b.ASPD)));
     var any = false;
     GTLINES.forEach(function (t) {
       var k = t[0], v = read && x[k] != null ? x[k] : b[k]; if (v == null || (!(read && x[k] != null) && !v)) return;
@@ -2614,18 +2692,19 @@
       if (bv != null && bv !== v) { var d = v - bv; line.appendChild(el("span", d > 0 ? "gt-up" : "gt-dn", " (" + bv + (d > 0 ? " +" : " −") + Math.abs(d) + ")")); }
       box.appendChild(line);
     });
-    if (x && x.SUCCESS != null) { box.appendChild(el("div", "gt-l", "Success Rate: " + x.SUCCESS + "%")); any = true; }
+    if (b.KB) { box.appendChild(el("div", "gt-l", "Knockback Chance: " + b.KB + "%")); any = true; }
+    if (x && x.SUCCESS != null) { box.appendChild(el("div", "gt-l", "Success rate: " + x.SUCCESS + "%")); any = true; }
     // upgrades left only when this copy's popup showed them: a scrolled copy has fewer than the base, and the base
     // number in its place would make a used item look clean
     // armour gains attack only from scrolls, 3 at most per success: +6 ATT gloves have used at least 2 slots
     var armGain = read && category(name) !== "Weapons" && !b.ATT && !b.MATT ? (x.ATT || 0) + (x.MATT || 0) : 0, minUsed = Math.ceil(armGain / 3);
     if (read && x.SLOTS != null) {
-      var sl = el("div", "gt-l", "Number of upgrades available: " + x.SLOTS);
+      var sl = el("div", "gt-l", "Remaining Enhancements: " + x.SLOTS);
       if (b.SLOTS && (x.SLOTS > b.SLOTS || b.SLOTS - x.SLOTS < minUsed)) { sl.appendChild(el("span", "gt-dn", " (doesn't add up, check it in game)")); }
       box.appendChild(sl);
     }
-    else if (read && b.SLOTS) box.appendChild(el("div", "gt-l gt-dim", "Number of upgrades available: not read. " + (minUsed ? "At most " + Math.max(0, b.SLOTS - minUsed) + " of " + b.SLOTS + ": +" + armGain + " attack takes " + minUsed + "+ scrolls." : b.SLOTS + " when clean.")));
-    else if (b.SLOTS != null) box.appendChild(el("div", "gt-l", "Number of upgrades available: " + b.SLOTS));
+    else if (read && b.SLOTS) box.appendChild(el("div", "gt-l gt-dim", "Remaining Enhancements: not read. " + (minUsed ? "At most " + Math.max(0, b.SLOTS - minUsed) + " of " + b.SLOTS + ": +" + armGain + " attack takes " + minUsed + "+ scrolls." : b.SLOTS + " when clean.")));
+    else if (b.SLOTS != null) box.appendChild(el("div", "gt-l", "Remaining Enhancements: " + b.SLOTS));
     var slots = read ? x.SLOTS : b.SLOTS;
     if (!any && slots == null) box.appendChild(el("div", "gt-l gt-dim", "No stats"));
     if (l && l.s) {
@@ -2952,7 +3031,7 @@
           tr.addEventListener("click", function () { jumpToStat(i, v, newest, ks); });
           tb.appendChild(tr);
         });
-        sec.appendChild(tb); sec.appendChild(el("p", "note", "Read from hovered tooltips. Weapons group by attack, other equips by their class's main stat.")); ip.appendChild(sec);
+        sec.appendChild(tb); sec.appendChild(el("p", "note", "Read from hovered tooltips. Weapons group by attack, other equips by the stat buyers pay for on that slot. Defense only counts on shields.")); ip.appendChild(sec);
       }
     }
   }
@@ -3199,7 +3278,7 @@
         // a hovered equip is judged only against sales of the same roll with the same slots used, the same rule as
         // Mega Deals: a +1 crit Work Gloves with 4 of 5 slots left took a failed scroll and is worth far less than a
         // clean one. Slots not read, or no sales of that exact roll and slots yet: no deal.
-        var su = slotsUsed(l.i, l), rt = su != null && i.rollTyp ? i.rollTyp[g + "|" + su] : null;
+        var su = slotsUsed(l.i, l), rt = su != null && i.rollTyp ? i.rollTyp[rollKey(l.i, l, su)] : null;
         if (!rt) return;
         ref = rt.typ;
       }
@@ -3311,11 +3390,18 @@
       .sort(function (a, b) { return b.typ * (b.n - b.x) - a.typ * (a.n - a.x); }).slice(0, 40)
       .map(function (b) { return { i: b.i, typ: b.typ, miss: b.n - b.x }; });
   }
+  // the stat an item's roll prices are about, for the bots and item pages: "+1 Crit damage", "+6 LUK"
+  function rollKeyName(i) {
+    var c = {}, best = "", n = 0;
+    (i.rolls || []).forEach(function (r) { var k = r.k; if (!k || k === "TOTAL") return; c[k] = (c[k] || 0) + 1; if (r.g && c[k] > n) { n = c[k]; best = k; } });
+    best = best || keyStat(i.item, null, "");
+    return best && best !== "SUCCESS" ? best : "";
+  }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
-    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { if (rn++ < 40) rt[g] = [Math.round(i.rollTyp[g].typ), i.rollTyp[g].n]; }); if (rn) o.rt = rt; }
+    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { if (rn++ < 40) rt[g] = [Math.round(i.rollTyp[g].typ), i.rollTyp[g].n]; }); if (rn) o.rt = rt; }
       // the cheapest open listing for each roll, from the last 2 days: what the chat bot quotes for "7 att wg"
-      if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; if (ra[r.g] == null || l.u < ra[r.g]) ra[r.g] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }
+      if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; var ak = r.g + "|" + (r.k || ""); if (ra[ak] == null || l.u < ra[ak]) ra[ak] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }
       if (i.rd && i.rd.length) o.rd = i.rd.slice(0, 5).map(function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== "l") c[k] = d[k]; }); return c; }); return o; });
     var who = (D.whoAll || []).map(function (w) { return { name: w.name, rank: w.rank, sales: w.sales, week: w.week, rows: w.rows, shopsN: w.shopsN, daysN: w.daysN, stream: w.stream, club: w.club }; });
     var big = D.sales.slice().sort(function (a, b) { return b.p - a.p; })[0];

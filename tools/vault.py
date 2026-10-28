@@ -26,18 +26,21 @@ MEMBER = ["watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", 
 
 
 # the public price summary: prices only. Listings, sellers, the cheapest ask and deals stay for signed-in members.
-KEEP = ("last3", "item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "daily", "salesN",
+KEEP = ("last3", "rk", "item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "daily", "salesN",
         "vol", "equip", "move", "basis", "typWho", "conf", "capped")
 
 
 def top_roll(r):
-    """The roll sold most often above clean, for item pages: [gain, typical price, sales]. Nothing else of the roll
-    prices leaves the members' summary."""
+    """The roll sold most often above clean, for item pages: [gain, typical price, sales, stat]. Keys are "roll|slots|stat"
+    (older ones "roll|slots"). Nothing else of the roll prices leaves the members' summary."""
     best = None
     for k, v in (r.get("rt") or {}).items():
-        try: g = int(str(k).split("|")[0]); p, n = float(v[0]), int(v[1])
+        try:
+            parts = str(k).split("|"); g = int(parts[0]); p, n = float(v[0]), int(v[1])
         except Exception: continue
-        if g > 0 and n >= 2 and (best is None or n > best[2] or (n == best[2] and g > best[0])): best = [g, round(p), n]
+        st = parts[2] if len(parts) > 2 else ""
+        if st == "TOTAL": continue
+        if g > 0 and n >= 2 and (best is None or n > best[2] or (n == best[2] and g > best[0])): best = [g, round(p), n, st]
     return best
 
 def public_summary(j):

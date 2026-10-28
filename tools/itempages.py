@@ -15,6 +15,9 @@ TIER = {"Lesser": "100%", "Intermediate": "60%", "Greater": "10%"}
 CATS = {"Cash": "Cash Shop"}
 
 
+STAT_WORD = {"ATT": "ATT", "MATT": "MATT", "STR": "STR", "DEX": "DEX", "INT": "INT", "LUK": "LUK", "HP": "HP", "MP": "MP", "ACC": "accuracy",
+             "AVOID": "avoid", "SPEED": "speed", "JUMP": "jump", "CRIT": "crit rate", "CRITDMG": "crit damage", "WDEF": "weapon def", "MDEF": "magic def"}
+
 def shown(name):
     m = re.match(r"^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$", name)
     return f"{m.group(1)} {TIER.get(m.group(2), m.group(2))}" if m else name
@@ -316,7 +319,7 @@ def main():
         fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
         price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
         l3 = r.get("last3"); r1 = r.get("r1")
-        extra = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" Scrolled +{r1[0]} has sold around {meso(r1[1])}." if r1 else "")
+        extra = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" Scrolled +{r1[0]}{(' ' + STAT_WORD.get(r1[3], r1[3])) if len(r1) > 3 and r1[3] else ''} has sold around {meso(r1[1])}." if r1 else "")
         if price_first or not fx:
             desc = (f"{nm} {price_txt} in MapleStory Classic.{extra} {r.get('salesN') or 0:,} Free Market sales seen, "
                     f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))

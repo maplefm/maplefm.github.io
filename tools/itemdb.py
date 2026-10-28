@@ -71,7 +71,9 @@ def npc_price(row):
 # included, so it comes first; the two maplestory.io data sets fill in anything it doesn't have.
 MEOW = "https://meowdb.com/msclassic/api/items?type=Equip&ossyria=1&sort=slot&limit=200&locale=en&page="
 MEOWKEYS = {"watk": "ATT", "matk": "MATT", "wdef": "WDEF", "mdef": "MDEF", "str": "STR", "dex": "DEX", "int": "INT",
-            "luk": "LUK", "hp": "HP", "mp": "MP", "acc": "ACC", "avoid": "AVOID", "speed": "SPEED", "jump": "JUMP", "slots": "SLOTS"}
+            "luk": "LUK", "hp": "HP", "mp": "MP", "acc": "ACC", "avoid": "AVOID", "speed": "SPEED", "jump": "JUMP", "slots": "SLOTS",
+            # crit, knockback and attack speed show in the game's popup too (Emerald Earrings: Critical Damage +2)
+            "critRate": "CRIT", "critDamage": "CRITDMG", "knockback": "KB", "attackSpeed": "ASPD"}
 
 
 def meow_stats():
