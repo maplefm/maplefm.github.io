@@ -906,6 +906,8 @@ _LABELS = [
     ("HP", r"max\s*hp"), ("MP", r"max\s*mp"), ("ACC", r"accura\w*"), ("AVOID", r"evasion|avoid\w*"),
     ("SPEED", r"speed"), ("JUMP", r"jump"), ("STR", r"\bstr"), ("DEX", r"\bdex"), ("INT", r"\bint"), ("LUK", r"\bluk"),
     ("SLOTS", r"remaining\s*enhanc\w*|upgrades?\s*avail\w*"), ("SUCCESS", r"success\s*rate"),
+    # crit lines: Emerald Earrings carry Critical Damage, Work Gloves Critical Rate ("Critical Darnage" is a common misread)
+    ("CRITDMG", r"cri\w*\.?\s*da[mrn]\w*"), ("CRIT", r"cri\w*\.?\s*ra[tl]\w*"),
 ]
 _VAL = r"\s*(?:[.:;]+\s*[+#*]?|[+#*])\s*(\d{1,4})\s*%?(?:\s*[\(\[{]\s*(\d{1,4})(?:\s*([+\-~]?)\s*(\d{1,3}))?)?"
 _LINE_RE = [(k, re.compile(r"(?<![a-z])(?<!req )(?<!req)(?:" + rx + r")" + _VAL, re.I)) for k, rx in _LABELS]
@@ -1259,13 +1261,18 @@ def read_channel_dialog(img):
 TIER_NAMES = ["Lesser", "Intermediate", "Greater", "Chaos"]
 _TIER_ICONS = None
 
-def _tier_icons():
-    global _TIER_ICONS
+_TIER_SOFT = None
+def _tier_icons(soft=False):
+    global _TIER_ICONS, _TIER_SOFT
     if _TIER_ICONS is None:
         import numpy as np
-        s = np.asarray(Image.open(os.path.join(HERE, "tiers.png")).convert("RGBA"), dtype=float)
+        from PIL import ImageFilter
+        src = Image.open(os.path.join(HERE, "tiers.png")).convert("RGBA")
+        s = np.asarray(src, dtype=float)
         _TIER_ICONS = [(s[:, k * 30:(k + 1) * 30, :3], s[:, k * 30:(k + 1) * 30, 3] > 200) for k in range(4)]
-    return _TIER_ICONS
+        b = np.asarray(src.convert("RGB").filter(ImageFilter.BoxBlur(1)), dtype=float)
+        _TIER_SOFT = [(b[:, k * 30:(k + 1) * 30, :3], _TIER_ICONS[k][1]) for k in range(4)]
+    return _TIER_SOFT if soft else _TIER_ICONS
 
 def tier_from_icon(region, y):
     """'Lesser' / 'Intermediate' / 'Greater' / 'Chaos' from a shop row's icon, or None when it isn't a clear match."""

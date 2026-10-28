@@ -984,26 +984,38 @@ async function interactions(req, env) {
   }
   if (it.type === 2 && it.data && (it.data.name === "market" || it.data.name === "sell"))
     return json(await marketCommand(env, it, Object.assign(mkCtx(env), { rows: await mkRows(env), abbr: await abbrMap() })));
-  if (it.type === 2 && it.data && it.data.name === "price") {
-    const rows = await summaryRows(env), ab = await abbrMap(), sr = splitRoll(q);
-    const hits = findRows(rows, sr.q, ab);
-    if (!hits.length) return json({ type: 4, data: { content: "No listings for **" + q.slice(0, 60) + "** in the last few days. Try a shorter name, or check https://maplefm.gg", flags: 64 } });
-    const r = hits[0];
-    const link = "https://maplefm.gg/?ref=discord#item=" + encodeURIComponent(r.item);
-    const lines = [];
-    if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
-    if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
-    // mv[0] is the last 24 hours against the 24 before; daily is the typical per day, so the week comes from its ends
-    const d = Array.isArray(r.daily) ? r.daily.filter((x) => x && x[1] > 0) : [];
-    const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
-    if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
-    else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
-    if (sr.roll) lines.push(sr.roll + " ones: see **Price by " + sr.roll.split(" ")[1] + "** on the item's card, [open it here](" + link + ")");
-    lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
-    const more = hits.slice(1, 4).map((h) => shown(h.item)).join(", ");
-    return json({ type: 4, data: { embeds: [{ title: shown(r.item), description: lines.join("\n"), url: link, color: 0x5b4bdb, footer: { text: (more ? "Also matched: " + more + " · " : "") + "Club FM, priced by watched sales · add /price: maplefm.gg/bot" } }] } });
-  }
+  if (it.type === 2 && it.data && it.data.name === "price") return json(await discordPrice(env, q));
   return json({ type: 4, data: { content: "Unknown command", flags: 64 } });
+}
+
+// /price in Discord: the embed for one item, with the roll's own sales when a roll is asked for
+async function discordPrice(env, q) {
+  const rows = await summaryRows(env), ab = await abbrMap(), sr = splitRoll(q);
+  const hits = findRows(rows, sr.q, ab);
+  if (!hits.length) return ({ type: 4, data: { content: "No listings for **" + q.slice(0, 60) + "** in the last few days. Try a shorter name, or check https://maplefm.gg", flags: 64 } });
+  const r = hits[0];
+  const link = "https://maplefm.gg/?ref=discord#item=" + encodeURIComponent(r.item);
+  const lines = [];
+  if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
+  if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
+  // mv[0] is the last 24 hours against the 24 before; daily is the typical per day, so the week comes from its ends
+  const d = Array.isArray(r.daily) ? r.daily.filter((x) => x && x[1] > 0) : [];
+  const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
+  if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
+  else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
+  if (sr.roll && sr.g != null) {
+    // the roll's own sales: "cat's eye +10" is +10 of what the item's rolls are about, unless a stat was named
+    const rs = rollSales(r, String(parseInt(sr.g, 10)), sr.stat)[0];
+    const aa = rollAsks(r, sr.stat).filter((x) => x.g === parseInt(sr.g, 10) && (!rs || !rs.k || !x.k || x.k === rs.k)).sort((x, y) => x.pr - y.pr)[0];
+    const st = statLabel((rs && rs.k) || (aa && aa.k) || sr.stat);
+    const rl = sr.roll === "clean" ? "Clean" : "+" + parseInt(sr.g, 10) + (st ? " " + st : "");
+    if (rs) lines.push("**" + rl + ": " + meso(rs.p) + "** from " + rs.n + " sales" + (rs.su > 0 ? " (" + rs.su + " slots used)" : "") + (aa ? " · cheapest up now " + meso(aa.pr) : ""));
+    else if (aa) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + meso(aa.pr));
+    else lines.push(rl + ": no sales caught at that roll lately. Clean typical is above; every roll's price is on the [item's card](" + link + ")");
+  } else if (r.rk && r.equip) lines.push("Typical is for clean copies. Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
+  lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
+  const more = hits.slice(1, 4).map((h) => shown(h.item)).join(", ");
+  return ({ type: 4, data: { embeds: [{ title: shown(r.item), description: lines.join("\n"), url: link, color: 0x5b4bdb, footer: { text: (more ? "Also matched: " + more + " · " : "") + "Club FM, priced by watched sales · add /price: maplefm.gg/bot" } }] } });
 }
 
 // ---------------------------------------------------------------- !price for Twitch chat
@@ -1023,8 +1035,31 @@ const ROLL_STATS = [
   [/^(magic ?attack|m\.? ?att(ack)?|matt|matk|ma)$/i, "MATT"], [/^(w\.? ?att(ack)?|watk|watt|attack|attk|atk|att|a)$/i, "ATT"],
   [/^(str|strength)$/i, "STR"], [/^(dex|dexterity)$/i, "DEX"], [/^(int|intelligence|intel)$/i, "INT"], [/^(luk|luck|lk)$/i, "LUK"],
   [/^(acc|accuracy)$/i, "ACC"], [/^(avoid|avoidability|avo|eva)$/i, "AVOID"], [/^(speed|spd)$/i, "SPEED"], [/^(jump|jmp)$/i, "JUMP"],
-  [/^(hp|maxhp)$/i, "HP"], [/^(mp|maxmp)$/i, "MP"], [/^(wdef|w\.?def|def)$/i, "W.DEF"], [/^(mdef|m\.?def)$/i, "M.DEF"]];
-const ROLL_WORD = "(magic ?attack|m\\.? ?att(?:ack)?|matt|matk|w\\.? ?att(?:ack)?|watk|watt|attack|attk|atk|att|str|strength|dex|dexterity|int|intelligence|intel|luk|luck|acc|accuracy|avoid|avoidability|speed|spd|jump|jmp|hp|mp|w\\.?def|m\\.?def|wdef|mdef|def)";
+  [/^(hp|maxhp)$/i, "HP"], [/^(mp|maxmp)$/i, "MP"], [/^(wdef|w\.?def|def)$/i, "WDEF"], [/^(mdef|m\.?def)$/i, "MDEF"],
+  [/^(crit ?rate|cr)$/i, "CRIT"], [/^(crit|crit ?dmg|crit ?damage|cd|cdmg)$/i, "CRITDMG"]];
+// how a roll's stat reads in a reply: "+1 crit damage", "+6 LUK"
+const STAT_LABEL = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", ACC: "ACC", AVOID: "avoid", SPEED: "speed", JUMP: "jump",
+  WDEF: "W.DEF", MDEF: "M.DEF", CRIT: "crit rate", CRITDMG: "crit damage", TOTAL: "total stats" };
+const statLabel = (k) => STAT_LABEL[k] || k || "";
+// Roll prices in the members' summary. rt: sold typical per "roll|slots used|stat" ([price, sales]); ra: cheapest listed
+// per "roll|stat". Older summaries have no stat part. rk is the stat most of the item's rolls are about.
+function rollSales(r, g, stat) {
+  const out = [];
+  for (const [key, v] of Object.entries((r && r.rt) || {})) {
+    const [a, b, c] = key.split("|");
+    if (Number(a) !== Number(g) || !Array.isArray(v)) continue;
+    out.push({ g: Number(a), su: Number(b) || 0, k: c || "", p: v[0], n: v[1] });
+  }
+  const want = stat || (r && r.rk) || "";
+  // the asked stat first (or the item's usual one), clean slots first, then the most sales
+  return out.filter((x) => !stat || !x.k || x.k === stat).sort((x, y) => (y.k === want) - (x.k === want) || (x.su > 0) - (y.su > 0) || y.n - x.n);
+}
+function rollAsks(r, stat) {
+  const out = [];
+  for (const [key, pr] of Object.entries((r && r.ra) || {})) { const [a, c] = String(key).split("|"); if (!stat || !c || c === stat) out.push({ g: Number(a), k: c || "", pr }); }
+  return out;
+}
+const ROLL_WORD = "(crit ?damage|crit ?dmg|crit ?rate|cdmg|crit|magic ?attack|m\\.? ?att(?:ack)?|matt|matk|w\\.? ?att(?:ack)?|watk|watt|attack|attk|atk|att|str|strength|dex|dexterity|int|intelligence|intel|luk|luck|acc|accuracy|avoid|avoidability|speed|spd|jump|jmp|hp|mp|w\\.?def|m\\.?def|wdef|mdef|def)";
 // "7 att wg", "wg 7 attack", "bandana +3 str", "luk 5 earring" (with +), "clean wg", "7a wg": the roll comes off the
 // front so the rest can name the item. Anything with scroll or % stays a scroll search.
 function splitRoll(q) {
@@ -1032,9 +1067,9 @@ function splitRoll(q) {
   const lab = (w) => { for (const [re, l] of ROLL_STATS) if (re.test(String(w).trim())) return l; return ""; };
   const tidy = (m) => q.replace(m, " ").replace(/\s+/g, " ").trim();
   let m = new RegExp("(^|\\s)\\+?(\\d{1,2})\\s*" + ROLL_WORD + "(?=\\s|$)", "i").exec(q);
-  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[2] + " " + lab(m[3]), g: m[2], stat: lab(m[3]), plus: /\+/.test(m[0]) } : { q, roll: "" }; }
+  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[2] + " " + statLabel(lab(m[3])), g: m[2], stat: lab(m[3]), plus: /\+/.test(m[0]) } : { q, roll: "" }; }
   m = new RegExp("(^|\\s)" + ROLL_WORD + "\\s*\\+(\\d{1,2})(?=\\s|$)", "i").exec(q);
-  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[3] + " " + lab(m[2]), g: m[3], stat: lab(m[2]), plus: true } : { q, roll: "" }; }
+  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[3] + " " + statLabel(lab(m[2])), g: m[3], stat: lab(m[2]), plus: true } : { q, roll: "" }; }
   m = /(^|\s)(\d{1,2})a(?=\s|$)/i.exec(q);                       // "7a wg"
   if (m) { const rest = tidy(m[0]); if (rest) return { q: rest, roll: m[2] + " ATT", g: m[2], stat: "ATT" }; }
   m = /(^|\s)\+(\d{1,2})(?=\s|$)/.exec(q);                       // "nakamaki +3": the item's main stat
@@ -1076,10 +1111,12 @@ async function priceLine(env, raw) {
   if (!sr.roll) hits = findRows(rows, q, ab);
   if (hits.length && sr.roll) {
     const r0 = hits[0], g = String(parseInt(sr.g, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    // roll sales are kept per roll and slots used ("7|5"); quote the slots group with the most sales
-    let best = null;
-    for (const [k, v] of Object.entries(r0.rt || {})) if (k.split("|")[0] === g && Array.isArray(v) && (!best || v[1] > best.v[1])) best = { su: Number(k.split("|")[1]), v };
-    const ask = r0.ra && r0.ra[g];
+    // roll sales are kept per roll, slots used and stat ("1|0|CRITDMG"); quote the asked stat, else the item's usual one
+    const rs = rollSales(r0, g, sr.stat), b0s = rs[0];
+    const best = b0s ? { su: b0s.su, v: [b0s.p, b0s.n], k: b0s.k } : null;
+    const aa = rollAsks(r0, sr.stat).filter((x) => x.g === Number(g) && (!best || !best.k || !x.k || x.k === best.k)).sort((x, y) => x.pr - y.pr)[0];
+    const ask = aa ? aa.pr : 0;
+    if (!sr.stat && sr.roll !== "clean" && (best || aa)) sr.roll = sr.roll + " " + statLabel((best && best.k) || (aa && aa.k) || r0.rk);
     if (best || ask) {
       const b1 = [shown(r0.item) + " " + sr.roll + ":"];
       if (best) b1.push("typical " + meso(best.v[0]) + " from " + best.v[1] + " sales" + (best.su > 0 ? " (" + best.su + " slots used)" : ""));
@@ -1088,7 +1125,8 @@ async function priceLine(env, raw) {
       return b1.join(" ").slice(0, 390);
     }
     const b0 = [shown(r0.item) + " " + sr.roll + ": no sales caught at that roll lately."];
-    if (r0.typ) b0.push("All rolls typical " + meso(r0.typ) + ".");
+    if (r0.rk && sr.stat && sr.stat !== r0.rk && /DEF$/.test(sr.stat)) b0.push("Defense isn't what this sells by: rolls go by " + statLabel(r0.rk) + ".");
+    if (r0.typ) b0.push("Clean ones typical " + meso(r0.typ) + ".");
     b0.push("Every roll's price: maplefm.gg/item/" + slug0);
     return b0.join(" ").slice(0, 390);
   }
@@ -1399,21 +1437,23 @@ async function redditReply(env, p) {
     if (r && r.typ && (r.salesN || 0) >= 3) lines.push((roll != null ? "Clean " + name : name) + " has been selling for around " + k(r.typ) + (r.lo && r.hi && k(r.lo) !== k(r.hi) ? " (" + k(r.lo) + " to " + k(r.hi) + ")" : "") + ", from " + r.salesN + " sales.");
     else if (r && r.typ) lines.push("Not many " + name + " have sold yet. The ones listed go for around " + k(r.typ) + ".");
     if (roll != null) {
-      const sold = Object.entries(v.rt || {}).filter(([kk]) => Number(kk.split("|")[0]) === roll).sort((x, y) => y[1][1] - x[1][1])[0];
-      if (sold) lines.push("A +" + roll + " has sold for around " + k(sold[1][0]) + " (" + sold[1][1] + " sales).");
-      else lines.push("No +" + roll + " " + name + " has sold yet, so there's no exact comp.");
-      const ra = Object.entries(v.ra || {}).map(([g2, pr]) => [Number(g2), pr]).filter(([g2]) => g2 > 0 && Math.abs(g2 - roll) <= 3).sort((x, y) => x[0] - y[0]);
-      if (ra.length) lines.push("Listed right now: " + ra.map(([g2, pr]) => "+" + g2 + " at " + k(pr)).join(", ") + ".");
+      // the stat the post names ("+5 int"), else the stat this item's rolls are usually about
+      const sm = /\+\d{1,2}\s*(str|dex|int|luk|att|matt|crit)/i.exec(raw), stat = sm ? { str: "STR", dex: "DEX", int: "INT", luk: "LUK", att: "ATT", matt: "MATT", crit: "CRITDMG" }[sm[1].toLowerCase()] : "";
+      const s0 = rollSales(v, roll, stat)[0], sold = s0 ? [null, [s0.p, s0.n]] : null, sk = statLabel((s0 && s0.k) || stat || v.rk);
+      if (sold) lines.push("A +" + roll + (sk ? " " + sk : "") + " has sold for around " + k(sold[1][0]) + " (" + sold[1][1] + " sales).");
+      else lines.push("No +" + roll + (sk ? " " + sk : "") + " " + name + " has sold yet, so there's no exact comp.");
+      const ra = rollAsks(v, stat).filter((x) => x.g > 0 && Math.abs(x.g - roll) <= 3).sort((x, y) => x.g - y.g || x.pr - y.pr).map((x) => [x.g, x.pr, x.k]);
+      if (ra.length) lines.push("Listed right now: " + ra.slice(0, 4).map(([g2, pr, kk]) => "+" + g2 + (kk ? " " + statLabel(kk) : "") + " at " + k(pr)).join(", ") + ".");
       // no sale at this roll: the same kind of gear at about the same roll, listed now (earrings for earrings)
       if (!sold && v.cat) {
         const idb = await fetch(LIVE + "itemdb.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).then((r2) => r2.json()).catch(() => null);
         const meta = {}; for (const row of (idb && idb.items) || []) meta[String(row[0]).toLowerCase()] = { lv: row[2] || 0, kind: row[5] };
         const me = meta[low];
         const sim = me ? Object.values(vrows).filter((x) => { const m2 = meta[x.item.toLowerCase()]; return x.item !== name && m2 && m2.kind === me.kind && Math.abs(m2.lv - me.lv) <= 10; })
-          .flatMap((x) => Object.entries(x.ra || {}).map(([g2, pr]) => ({ n: x.item.toLowerCase(), nm: x.item, g: Number(g2), pr, typ: x.typ || 0 })))
+          .flatMap((x) => rollAsks(x, "").map((a2) => ({ n: x.item.toLowerCase(), nm: x.item, g: a2.g, k: a2.k, pr: a2.pr, typ: x.typ || 0 })))
           .filter((x) => Math.abs(x.g - roll) <= 2 && x.g > 0 && x.pr >= Math.max(3 * x.typ, 50000) && (!x.typ || x.pr <= 30 * x.typ))
           .sort((x, y) => Math.abs(x.g - roll) - Math.abs(y.g - roll) || y.pr - x.pr).slice(0, 3) : [];
-        if (sim.length) lines.push("Similar ones listed: " + sim.map((x) => x.nm + " +" + x.g + " at " + k(x.pr)).join(", ") + ".");
+        if (sim.length) lines.push("Similar ones listed: " + sim.map((x) => x.nm + " +" + x.g + (x.k ? " " + statLabel(x.k) : "") + " at " + k(x.pr)).join(", ") + ".");
       }
       plug = "You can see what's listed and sold by roll here: " + url;
     } else if (!plug) plug = "Every sale and what's listed right now is here: " + url;

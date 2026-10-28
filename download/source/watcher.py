@@ -17,16 +17,16 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.10"
+VERSION = "2026.10.27.11"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
 # doesn't have ("LUK 70" on a claw) is a requirement line read as a bonus and is dropped on its own.
-_SCROLLABLE = {"Earrings": "STR DEX INT LUK AVOID", "Glove": "ATT MATT ACC", "Hat": "ACC HP MP", "Cape": "ACC DEX INT LUK MDEF STR WDEF", "Top": "WDEF HP MP",
+_SCROLLABLE = {"Earrings": "STR DEX INT LUK AVOID CRITDMG", "Glove": "ATT MATT ACC CRIT", "Hat": "ACC HP MP", "Cape": "ACC DEX INT LUK MDEF STR WDEF", "Top": "WDEF HP MP",
                "Bottom": "WDEF HP MP", "Overall": "WDEF DEX INT LUK STR", "Shield": "ACC WDEF", "Shoes": "AVOID JUMP SPEED", "Pet Equipment": "JUMP SPEED", "Wand": "MATT", "Staff": "MATT"}
 _WEAPON = re.compile(r"Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun")
-_STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP"]
-_SMALL = {"STR": 15, "DEX": 15, "INT": 15, "LUK": 15, "ACC": 15, "AVOID": 15, "SPEED": 15, "JUMP": 15, "HP": 60, "MP": 60, "WDEF": 40, "MDEF": 40}
+_STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP", "CRIT", "CRITDMG"]
+_SMALL = {"STR": 15, "DEX": 15, "INT": 15, "LUK": 15, "ACC": 15, "AVOID": 15, "SPEED": 15, "JUMP": 15, "HP": 60, "MP": 60, "WDEF": 40, "MDEF": 40, "CRIT": 15, "CRITDMG": 15}
 try:
     _FIT = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "statfit.json"), encoding="utf-8"))
 except (OSError, ValueError):

@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.10",
- "date": "2026-10-27T18:09:07+00:00",
- "notes": "Hovering a cut-off scroll no longer swaps in a garbled popup title; names saved that way are repaired",
- "sha256": "317638b89f166e6d9c767edb959a678f6b13759268caf78106d93ebd36739386",
- "size": 144196,
+ "version": "2026.10.27.11",
+ "date": "2026-10-28T00:56:59+00:00",
+ "notes": "Reads Critical Rate and Critical Damage lines, so crit rolls on gloves and earrings price right",
+ "sha256": "79cb05a7f0172ab04fd448b9eba060e12f304644e5f86e4985508063a521ef26",
+ "size": 144498,
  "history": [
+  {
+   "version": "2026.10.27.11",
+   "date": "2026-10-27",
+   "notes": "Reads Critical Rate and Critical Damage lines, so crit rolls on gloves and earrings price right"
+  },
   {
    "version": "2026.10.27.10",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.22.5",
    "date": "2026-10-22",
    "notes": "Faster reading: the minimap is read once per look instead of once per shop frame, and each text reader keeps to one CPU thread so the readers stop fighting each other."
-  },
-  {
-   "version": "2026.10.22.4",
-   "date": "2026-10-22",
-   "notes": "Channel changes are caught the moment you click a channel in the Change Channel window, not only when the loading screen is spotted. Bigger read queue and more readers on bigger CPUs so fast scrolling drops fewer shops."
   }
  ],
  "pip": [],
- "sig": "765b41e1f349f3c478f9e5dd6d58fa0bfe16ce0113e060e963b96c37541572a01dd6d67710d2d94a0045bf5db6cb2e3772b74a1ee32f207ab8ab70a24dface23909543e9d6a815b5b8718e984e9fae2db2139f41b9ede847719d3c8a7be448f715f24dd652b0302ba1d5741e8ed696839d62ed5ee549ef49a94dfdec3772d9b4b59a3c4a497a886591e2f880299ebf90ed69231f20ab537b345ff6cf157b3e0a7bf806c1c263c0044043034cf3adbc69f5bd67bffcf17a217daf294a4bdb0fd4b8bca41d8049461f34b8f17a8d4cc8fc2c90afdba0a681dc04253c08bebb0e10f77376375833ad4338ba67a7ef7056228a2f1361e64c63715c76a3712ba90013"
+ "sig": "044bde48db18a9cdcb687d214d59616264fa7fefb8f4686a7180fbf43a3e9ac772493eecbb3fc13b157ef4f75ad1db4a59a4f1570bda88955072732fc2502365c8978b5095051cf3bbcf62e11f809e351212c0fa71918e1d324bc8e66db95b5db9c08f34219fadc903ef756cc1e5636837186d28b4e1c4a85d225012fa81b32bb5aa8d78b8db899b35d71359123af6b0b803ad4e25cb45ff5cc51d6f1ac8ebb27305a45067b200323319a7f5c6a007f595158abc5a2ef64b7ecb306b8b78f5fff216f115a28845936ef8b44562036d11ee086bab8878f18692a83926721c6a83d301db39b97e79fbdd8e83b0bbd7ae46abb632a83c5832f45c11224174702683"
 }
