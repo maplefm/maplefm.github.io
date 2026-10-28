@@ -1,7 +1,17 @@
 {
- "checked": "2026-10-22T22:40:52.810388Z",
+ "checked": "2026-10-28T05:26:24.470275Z",
  "source": "Nexon news, Classic World maintenance",
  "notices": [
+  {
+   "id": 47298,
+   "title": "Scheduled Maintenance - October 29, 2026",
+   "status": "scheduled",
+   "start": "2026-10-29T12:00:00Z",
+   "end": "2026-10-29T16:00:00Z",
+   "down": "All MapleStory Classic World game servers.",
+   "posted": "2026-10-27T21:41:47Z",
+   "url": "https://www.nexon.com/maplestory/news/maintenance/47298"
+  },
   {
    "id": 47098,
    "title": "Unscheduled Maintenance - October 22, 2026",
