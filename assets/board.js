@@ -2366,7 +2366,7 @@
       if (!k || k === "SUCCESS" || x[k] == null) {
         // a complete hover (it reached Remaining Enhancements) with no line for a stat the item doesn't come with: none scrolled on
         if (k && k !== "SUCCESS" && x.SLOTS != null && baseOf(name, x, k) === 0 && x.ATT == null && x.MATT == null) p = { g: 0, k: k };
-        else { k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : null; if (!k) return null; }
+        else { k = x.ATT != null ? "ATT" : x.MATT != null ? "MATT" : null; if (!k || (wep && !vs[k])) return null; }   // weapon attack on a staff is a misread
       }
       if (!p) {
         var bq = baseOf(name, x, k);
