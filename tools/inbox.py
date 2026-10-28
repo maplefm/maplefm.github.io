@@ -13,6 +13,7 @@ GID = "19216923"
 CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET}/export?format=csv&gid={GID}"
 CREW = {"maya", "jack", "matt", "jimmy", "streams", "guest"}
 KEEP_DAYS = 14
+HV_KEYS = {"rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got"}
 MAX_ROWS_DOC = 25000          # one scanner can read a few thousand shop rows in a day; 19 channels of FM is more
 MAX_ROWS_ID = 80000
 # names for watchers whose config.json has none, keyed by the hashed id (hid), never the id itself
@@ -202,6 +203,11 @@ def merge(state, rows, block=()):
             doc = me["docs"].setdefault(key, {"at": at, "rows": {}})
             if at > doc["at"]:
                 doc["at"] = at
+            # hover counts for the day (watcher 2026.10.28+): cumulative, so keep the larger of each
+            if isinstance(d.get("hv"), dict):
+                hvd = doc.setdefault("hv", {})
+                for k, n in list(d["hv"].items())[:16]:
+                    if k in HV_KEYS and isinstance(n, int) and 0 <= n <= 1000000: hvd[k] = max(hvd.get(k, 0), n)
             occ = {}
             for r in (d.get("rows") or [])[:MAX_ROWS_DOC]:
                 c = clean_row(r, now)
@@ -257,7 +263,9 @@ def publish(state):
             total += len(rows)
             if total > MAX_ROWS_ID:
                 break
-            out.append({"at": doc["at"], "src": src, "rows": rows, "who": names[sid], "inbox": sid[:4]})
+            o = {"at": doc["at"], "src": src, "rows": rows, "who": names[sid], "inbox": sid[:4]}
+            if doc.get("hv"): o["hv"] = doc["hv"]
+            out.append(o)
     out.sort(key=lambda d: (d["at"], d["who"], d["src"]))
     return out
 

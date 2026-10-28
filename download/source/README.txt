@@ -8,7 +8,7 @@ What it does and doesn't do
 2. It never clicks, never types, never sends a key to the game, and never takes control of your game or computer.
 3. It runs no macros, prompts or scripts in the game, and never touches the game's files or memory.
 4. It sends only what's in the shops: item names, prices, quantities, seller names as shown in the FM, room, channel,
-   time and item tooltip text. For items listed at 500K and up it also sends a small picture of that item's popup,
+   time, item tooltip text, and a daily count of hovers read and missed. For items listed at 500K and up it also sends a small picture of that item's popup,
    so buyers see the real stats. Never a screenshot of your screen.
 
 First time

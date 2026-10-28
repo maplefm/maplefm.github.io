@@ -1,10 +1,15 @@
 {
- "version": "2026.10.27.13",
- "date": "2026-10-28T03:22:28+00:00",
- "notes": "Deal lines when a shop you open has something well under the usual price, the busiest rooms and channels nobody reads at this hour, a half-hour tally of your scans, and a heads-up when the FM room can't be read.",
- "sha256": "283d9e4a5fffad89a782c0b9f11848add58f5059f522b719aa2d5a877aa6c657",
- "size": 153471,
+ "version": "2026.10.28.1",
+ "date": "2026-10-28T17:45:01+00:00",
+ "notes": "Counts hovers (rested, popup shown or not, read, matched) and sends the day's totals with your shop scans, so we can see where equipment stats get lost. No pictures, no change to what gets read.",
+ "sha256": "2a25eb518fd24287c398d49d6d054cfcea1806d48bad8cf32c71e98e08a6e99d",
+ "size": 154294,
  "history": [
+  {
+   "version": "2026.10.28.1",
+   "date": "2026-10-28",
+   "notes": "Counts hovers (rested, popup shown or not, read, matched) and sends the day's totals with your shop scans, so we can see where equipment stats get lost. No pictures, no change to what gets read."
+  },
   {
    "version": "2026.10.27.13",
    "date": "2026-10-27",
@@ -149,13 +154,8 @@
    "version": "2026.10.23.3",
    "date": "2026-10-23",
    "notes": "Prices from watchers without a GitHub key now go to Club FM's own private inbox instead of a shared sheet."
-  },
-  {
-   "version": "2026.10.23.2",
-   "date": "2026-10-23",
-   "notes": "Scans now go to Club FM's private data repository, so listings stay private to members. Nothing to change on your end."
   }
  ],
  "pip": [],
- "sig": "342d6546eb15c2a041b0f0d48f2e7b390d1c5a61a65633bf68c0c7199c4946d80e79315d886081afcae2c9d5f1dfee4add43fc544c61c7f3f6958cb14e781932e922ddacde2df8d95cc3b1c0e45786eeffd612e94a20aa28b33d7302691330b954085566c58e16148ac05237b3b328be035a21e14da96190dd7d7d93b1d798cf189463c52ae61c2d7115f15383d7d325a9756f6156967886791a9896bc3a496ee33bdbdbcebf863dfebea451ae25071909a7c9e46b7339e74ecd9eae37748a6f12b85e148178e1af9a3f45ecc35c1a0dc6b79c076ee4147b19589d7e42db138fc2adc721ffc0a6e6ad5385440adfe666dbd6b40309d12ce5f873275cc9b67745"
+ "sig": "895bfb200133168ff372bf8e3c2c6d75a2db19eb213a50cec9eeceecb4ddc6a84b92c791a4777cfd7e45c4de2e2c0b876820e8232c2f0782892213a4adc97d5a499b6ed397dfb7ce615e268dfe9d8e81a47db0aec8d9983fbc71921a7bf6a4d7c0e2851acab0b9f039eeed3ce076369b9ea71e0d53ebdac1c9eef99071e69dbec1ce30db4ae74203f4b9bb84102a79428cbc154a6d0d1021690eda4850d23147f4bb93b4df4b7adbe7b2e23060f277901acc9c782c9c38449973597cc95cfd4dc27694b5fdb0658bddabed000e31c00f7894c2cbf5f839eb348b761d29e8ea776001dfefa8519e4e2214d8716f42c2433c7a8aa0bd140cc824f61c1e031b6bb1"
 }
