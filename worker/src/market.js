@@ -763,7 +763,7 @@ async function importOne(env, th, ps, body) {
   return "";
 }
 
-// for Adam: is the forum set up the way the bot needs it
+// for the owner: is the forum set up the way the bot needs it
 export async function marketCheck(env) {
   await ensure(env);
   const c = await (await fetch(api(env) + "/channels/" + SELL_FORUM, { headers: H(env) })).json().catch((e) => ({ error: String(e) }));

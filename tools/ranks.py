@@ -16,6 +16,13 @@ def own(name):
     return format(x, "08x") in OWNH
 
 STREAMS = set()
+OLDOWN = "2e55a9a5"   # the owner's old scanner name, as a fingerprint; its days fold into Maya
+
+def fp(name):
+    x = 0x811c9dc5
+    for c in ("clubfm:" + name.lower()).encode():
+        x ^= c; x = (x * 0x01000193) & 0xffffffff
+    return format(x, "08x")
 
 def tally(data_dir):
     out = {}
@@ -26,6 +33,7 @@ def tally(data_dir):
         for d in docs:
             who = name or d.get("by") or d.get("who") or "Guest"
             who = str(who)[:24]
+            if fp(who) == OLDOWN: who = "Maya"
             if f.startswith("streams"): STREAMS.add(who)
             try: st = datetime.datetime.fromisoformat(d["at"]).timestamp()
             except Exception: continue
@@ -45,6 +53,10 @@ def main():
     try: led = json.load(open(outp, encoding="utf-8"))
     except Exception: led = {"who": {}}
     before = json.dumps(led.get("who"), sort_keys=True)
+    for k in [k for k in led.get("who", {}) if fp(k) == OLDOWN]:
+        m = led["who"].setdefault("Maya", {})
+        for day, v in led["who"].pop(k).items():
+            m[day] = [max(a, b) for a, b in zip(m.get(day, [0, 0, 0]), v)]   # the same scans logged under both names
     for who, days in tally(data_dir).items():
         w = led["who"].setdefault(who, {})
         for day, c in days.items():

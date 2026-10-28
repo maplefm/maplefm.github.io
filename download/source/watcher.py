@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.12"
+VERSION = "2026.10.27.13"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -96,6 +96,8 @@ DEFAULTS = {
     "room_region": [60, 20, 400, 60],
     "name": "",
     "inbox_every_minutes": 10,
+    "deal_alerts": True,            # say so in this window when a shop you open has something well under the usual price
+    "coverage_tips": True,          # name the rooms and channels nobody usually reads at this hour
 }
 
 def load_config():
@@ -207,6 +209,82 @@ def hover_wanted():
         except Exception:
             pass
     return HW["items"]
+# ---- useful while you play: deals in the shop you just opened, a running tally, and the spots that need a scan.
+# All of it is said in this window only. The watcher never moves you or clicks anything.
+COV_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/covhours.json"
+COV = {"at": 0.0, "j": None}
+SESSION = {"start": time.time(), "shops": 0, "sold": 0, "deals": 0, "said": time.time() - 1500, "tip": 0.0, "spots": set()}   # first tally 5 minutes in
+DEALS_SAID = {}
+CFG_DEALS = [True]
+CFG_COV = [True]
+def coverage_hours():
+    if time.time() - COV["at"] > 1800:
+        COV["at"] = time.time()
+        try:
+            req = urllib.request.Request(COV_URL + "?t=" + str(int(time.time()) // 1800), headers={"User-Agent": "fm-watcher/" + VERSION})
+            with urllib.request.urlopen(req, timeout=20) as r: COV["j"] = json.loads(r.read().decode("utf-8"))
+        except Exception:
+            pass
+    return COV["j"]
+def et_hour():
+    """The hour in US Eastern, which the coverage file uses (daylight time from the second Sunday of March to the
+    first Sunday of November)."""
+    u = datetime.datetime.utcnow(); y = u.year
+    def sunday(m, n):
+        d = datetime.datetime(y, m, 1)
+        return d + datetime.timedelta(days=(6 - d.weekday()) % 7 + 7 * (n - 1))
+    dst = sunday(3, 2) + datetime.timedelta(hours=7) <= u < sunday(11, 1) + datetime.timedelta(hours=6)
+    return (u - datetime.timedelta(hours=4 if dst else 5)).hour
+def deal_spot(res):
+    """Open rows priced well under what the board says the item usually sells for. Said once per listing a day."""
+    if not CFG_DEALS[0]: return
+    hover_wanted()
+    for r in res.get("rows") or []:
+        if r.get("so") or not r.get("known") or "cut off" in r["i"]: continue
+        typ = BOARD_TYP.get(r["i"]) or 0
+        unit = r["p"] / max(1, r["q"])
+        if typ < 20000 or unit > typ * 0.6: continue
+        k = (res.get("seller") or "", r["i"], r["p"], datetime.date.today().isoformat())
+        if k in DEALS_SAID: continue
+        DEALS_SAID[k] = 1; SESSION["deals"] += 1
+        eq = r["i"] in _FIT
+        log(f"DEAL  {r['i']} at {short_meso(int(unit))}" + (" each" if r["q"] > 1 else "") + f", usually {short_meso(typ)} ({round((1 - unit / typ) * 100)}% under)"
+            + (", check its stats" if eq else "") + f"  shop {res.get('seller') or '?'}")
+        chime(True); chime(True)
+def session_tally(res):
+    SESSION["shops"] += 1
+    # shops that can't be placed in a room: the minimap title isn't readable. Say so, at most every 20 minutes.
+    rm = str(res.get("room") or "")
+    SESSION["noroom"] = 0 if re.match(r"^FM\d", rm) else SESSION.get("noroom", 0) + 1
+    if SESSION["noroom"] >= 8 and time.time() - SESSION.get("roomtip", 0) >= 1200:
+        SESSION["roomtip"] = time.time()
+        log("room unreadable for the last " + str(SESSION["noroom"]) + " shops (read: " + (rm or "nothing") + "). Keep the minimap open with its title "
+            "\"Free Market <number>\" in full view, not covered or cut off. Room pictures are saved in review\\ if you want to send one. Until then these shops can't be placed on the coverage map or earn the cold-room bounty.")
+    SESSION["sold"] += sum(1 for r in res.get("rows") or [] if r.get("so"))
+    if res.get("room") and res.get("ch"): SESSION["spots"].add((res["room"], res["ch"]))
+    if time.time() - SESSION["said"] >= 1800:
+        SESSION["said"] = time.time()
+        mins = int((time.time() - SESSION["start"]) / 60)
+        log(f"so far {mins // 60}h{mins % 60:02d}m: {SESSION['shops']} shop{'' if SESSION['shops'] == 1 else 's'}, {SESSION['sold']} sold slot{'' if SESSION['sold'] == 1 else 's'} caught, {len(SESSION['spots'])} room and channel spot{'' if len(SESSION['spots']) == 1 else 's'}"
+            + (f", {SESSION['deals']} deals spotted" if SESSION["deals"] else "") + ". Your bar on maplefm.gg/contribute.html updates within 15 minutes.")
+        cov_tip()
+def cov_tip(here=None):
+    """The busiest spots that usually go unread at this hour. Thanks the scanner when they're standing in one."""
+    if not CFG_COV[0]: return
+    j = coverage_hours()
+    if not j or not j.get("spots"): return
+    h, n = et_hour(), len(j.get("days") or []) or 7
+    if here:
+        rm = re.match(r"^FM(\d+)$", str(here[0] or ""))
+        sp = j["spots"].get(rm.group(1) + "|" + str(here[1])) if rm else None
+        told = SESSION.setdefault("spots_tip", set())
+        if sp and sp["m"][h] >= max(3, n - 2) and (here, h) not in told:
+            told.add((here, h))
+            log(f"cold spot: {here[0]} ch {here[1]} goes unread at this hour on {sp['m'][h]} of the last {n} days. Scans here help most.")
+        return
+    gaps = sorted(((k, sp["m"][h], sp["e"][h]) for k, sp in j["spots"].items() if sp["m"][h] >= max(3, n - 2)), key=lambda g: -(g[1] * g[2]))[:4]
+    if gaps:
+        log("most needed this hour: " + ", ".join(f"FM{k.split('|')[0]} ch {k.split('|')[1]} (~{e:g} shops)" for k, _, e in gaps))
 ITEMDB_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json"
 def refresh_itemdb():
     """Once a day: the site's full item list, so items the game added since this release are known right away."""
@@ -1445,6 +1523,10 @@ def worker(cfg, jobs, store):
                         try: store.add_icons(img, res)
                         except Exception as e: log("icon error:", e)
                         behind = jobs.qsize()
+                        try:
+                            deal_spot(res); session_tally(res)
+                            if res.get("room") and res.get("ch"): cov_tip((res["room"], res["ch"]))
+                        except Exception as e: log("tips error:", e)
                         log(f"shop  {res['seller'] or '?':<14} {res['room'] or 'room ?':<8} {('ch ' + str(res['ch'])) if res['ch'] else 'ch ?':<6} {len(res['rows'])} rows read, {res['dropped']} unsure" + (f"  ({behind} still to read)" if behind >= 4 else ""))
             elif kind == "chattip":
                 tip = fmparse.read_tooltip(img, need_stats=False)
@@ -1514,7 +1596,7 @@ def snapshot(cfg):
     print("Saved review/snapshot.png. Game window is", game[2], "x", game[3], "pixels.")
 
 def main():
-    cfg = load_config(); CFG_CHIME[0] = cfg.get("hover_sound", True)
+    cfg = load_config(); CFG_CHIME[0] = cfg.get("hover_sound", True); CFG_DEALS[0] = cfg.get("deal_alerts", True); CFG_COV[0] = cfg.get("coverage_tips", True)
     if sys.platform == "win32":
         import ctypes
         try: ctypes.windll.shcore.SetProcessDpiAwareness(2)
