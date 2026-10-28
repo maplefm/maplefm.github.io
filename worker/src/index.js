@@ -93,6 +93,7 @@ async function route(req, env, url) {
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
   if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; if (url.searchParams.get("log")) return json((await env.ACCOUNTS.get("reddit:log", "json")) || []); return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/me/digest/test" && req.method === "POST") { const me = await whoami(req, env); if (!me) return json({ error: "sign in" }, 401); if (overLimit("dg:" + me.id, 3, 3600)) return json({ error: "slow down" }, 429); return json(await watchDigest(env, String(me.id))); }
   if (p === "/admin/score/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await morningScore(env, true)); }
   if (p === "/admin/weekly/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const n = Date.now(); await env.ACCOUNTS.delete("weekly:sent:" + etParts(n).day); await weeklyTraffic(env, n); return json({ ok: true }); }
   if (p === "/admin/rdraft/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); await env.ACCOUNTS.delete("rdraft:sent:" + etParts(Date.now()).day); await redditDraft(env); return json(JSON.parse((await env.ACCOUNTS.get("rdraft:last")) || "{}")); }
@@ -1743,6 +1744,7 @@ async function trafficPost(env) {
     const h = et.hour - 1, lab = (x) => (x % 12 || 12) + (x < 12 ? " AM" : " PM");
     await trafficSend(env, top - 3600e3, top, "Traffic, " + lab(h) + " to " + lab(et.hour), midnight);
   }
+  if (et.hour === 10) await watchDigest(env).catch((e) => env.ACCOUNTS.put("digest:err", String(e && e.stack || e).slice(0, 500)));
   if (et.hour === 8) await morningScore(env).catch((e) => env.ACCOUNTS.put("score:err", String(e && e.stack || e).slice(0, 500)));
   if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
   const dow = new Date(top - 4 * 3600e3).getUTCDay();   // 0 Sunday, Eastern near enough at these hours
@@ -1912,6 +1914,51 @@ async function weeklyTraffic(env, top) {
     f.push({ name: "Search check (" + (seo.day || "") + ")", value: (seo.pages + " pages in the sitemap · median load " + seo.ms + " ms\n" + (iss.length ? "Needs a look: " + iss.join(", ") : "All pages pass: titles, descriptions, canonicals, no errors")).slice(0, 1000) });
   }
   await wdDM(env, await wdAdmins(env), [{ title: "Club FM, the week to Monday 9 AM", color: 0x6d3fd1, fields: f, footer: { text: "Compared with the week before. Visitors counted once a day each." } }]);
+}
+
+// ---------------------------------------------------------------- daily watchlist DM
+// Free for anyone signed in with Discord who turns on "Daily DM" next to the board's Watchlist button (fm-digest in
+// their synced settings). Once a day at 10 AM Eastern: each watched item's typical price, the change since the day
+// before, and its page. Mega Deals keeps the instant alerts; this is the once-a-day look. At most 15 items per DM.
+async function watchDigest(env, onlyId) {
+  if (!env.DISCORD_BOT_TOKEN) return { error: "offline" };
+  const day = etParts(Date.now()).day;
+  const sum = await fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json?b=" + Date.now()).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!sum || !Array.isArray(sum.rows)) return { error: "no prices" };
+  const by = {}; sum.rows.forEach((x) => { if (x && x.item) by[String(x.item).toLowerCase()] = x; });
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  let cursor, sent = 0, people = 0;
+  do {
+    const page = await env.ACCOUNTS.list({ prefix: "settings:", cursor });
+    for (const k of page.keys) {
+      const id = k.name.slice(9);
+      if (onlyId && id !== onlyId) continue;
+      const st = await env.ACCOUNTS.get(k.name, "json"), s = (st && st.settings) || {};
+      if (s["fm-digest"] !== "true") continue;
+      let watch = {}; try { watch = JSON.parse(s["fm-watch"] || "{}") || {}; } catch (e) {}
+      const names = Object.keys(watch); if (!names.length) continue;
+      people++;
+      const key = "digest:" + id + ":" + day;
+      if (!onlyId && (await env.ACCOUNTS.get(key))) continue;
+      const lines = names.slice(0, 15).map((n) => {
+        const r = by[n.toLowerCase()];
+        const slug = shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        if (!r || !r.typ) return "**" + shown(n) + "**: no recent sales";
+        const d = Array.isArray(r.daily) ? r.daily.filter((x) => Array.isArray(x) && x[1] > 0) : [];
+        const a = d.length >= 2 ? d[d.length - 1][1] : 0, b = d.length >= 2 ? d[d.length - 2][1] : 0;
+        const ch = a && b ? Math.round((a - b) / b * 100) : null;
+        const under = watch[n] && watch[n].under ? " · your alert under " + meso(watch[n].under) : "";
+        return "**[" + shown(n) + "](https://maplefm.gg/item/" + slug + "/?ref=digest)** " + meso(r.typ) + (ch == null || ch === 0 ? "" : " (" + (ch > 0 ? "▲ " : "▼ ") + Math.abs(ch) + "% vs the day before)") + under;
+      });
+      const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
+      if (!c || !c.id) continue;
+      const r = await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [{ title: "Your watchlist today", url: "https://maplefm.gg/?ref=digest", color: 0x6d3fd1, description: lines.join("\n").slice(0, 4000) + (names.length > 15 ? "\n…and " + (names.length - 15) + " more on the board" : ""), footer: { text: "Typical sale price on maplefm.gg right now. Turn this off with Daily DM next to Watchlist on the board." } }], allowed_mentions: { parse: [] } }) });
+      if (r.ok) { sent++; await env.ACCOUNTS.put(key, "1", { expirationTtl: 3 * DAY }); }
+    }
+    cursor = page.list_complete ? null : page.cursor;
+  } while (cursor);
+  await env.ACCOUNTS.put("digest:last", JSON.stringify({ day, people, sent }), { expirationTtl: 40 * DAY });
+  return { day, people, sent };
 }
 
 // ---------------------------------------------------------------- morning scoreboard

@@ -3356,7 +3356,7 @@
   // Signed in, the board's own settings (watchlist, positions, filters, theme, club key...) are kept with the
   // account, so a cleared browser or another PC gets them back. Nothing is sent when you are not signed in.
   var ACCT = "https://api.maplefm.gg", ME_ACCT = null, syncTimer = null;
-  var SYNC_KEYS = ["fm-watch", "fm-watch-th", "fm-watch-seen", "fm-pos", "fm-trades", "fm-fee", "fm-pf-period", "fm-sell", "fm-sell-hide", "fm-min-profit", "fm-night", "fm-activity", "fm-fast-pct", "fm-sound", "fm-me", "fm-sell-src", "fm-buy-sort", "fm-tiers-seen", "fm-club", "fm-fb-tuck", "fm-ranks-open", "fm-gatherer", "fm-upd-hide"];
+  var SYNC_KEYS = ["fm-watch", "fm-watch-th", "fm-watch-seen", "fm-pos", "fm-trades", "fm-fee", "fm-pf-period", "fm-sell", "fm-sell-hide", "fm-min-profit", "fm-night", "fm-activity", "fm-fast-pct", "fm-sound", "fm-me", "fm-sell-src", "fm-buy-sort", "fm-tiers-seen", "fm-club", "fm-fb-tuck", "fm-ranks-open", "fm-gatherer", "fm-upd-hide", "fm-digest"];
   function syncBlob() { var o = {}; SYNC_KEYS.forEach(function (k) { try { var v = localStorage.getItem(k); if (v != null) o[k] = v; } catch (e) {} }); return o; }
   function syncPush() {
     if (!ME_ACCT) return;
@@ -3380,7 +3380,7 @@
   function acctLoad() {
     fetch(ACCT + "/me", { credentials: "include" }).then(function (r) { return r.json(); }).then(function (m) {
       if (!m.signedIn) { ME_ACCT = null; acctMenu(); return; }
-      ME_ACCT = m.account; acctMenu();
+      ME_ACCT = m.account; acctMenu(); try { digestBtn(); } catch (e) {}
       if (ME_ACCT.club && !DEALS_ON) setClub(true);   // the Club role in the Discord unlocks club features, no key needed
       if ((ME_ACCT.watchers || []).length) { try { localStorage.setItem("fm-gatherer", "1"); } catch (e) {} }   // a linked watcher makes you a gatherer on every PC
       return fetch(ACCT + "/me/settings", { credentials: "include" }).then(function (r) { return r.json(); }).then(function (s) {
@@ -3670,7 +3670,20 @@
     $(id).addEventListener("input", id === "q" ? function () { clearTimeout(qTimer); qTimer = setTimeout(go, 110); } : go);
     if (id !== "q") $(id).addEventListener("change", go);
   });
-  $("wonly").addEventListener("click", function () { state.wonly = !state.wonly; this.setAttribute("aria-pressed", state.wonly); renderView(); });
+  $("wonly").addEventListener("click", function () { state.wonly = !state.wonly; this.setAttribute("aria-pressed", state.wonly); digestBtn(); renderView(); });
+  // Daily DM: a free once-a-day Discord DM of the watchlist (the Worker's watchDigest reads fm-digest from synced
+  // settings). Shown while the watchlist is open; signing in comes first.
+  function digestBtn() {
+    var b = $("wdm"); if (!b) return;
+    b.hidden = !state.wonly; var on = !!loadLS("fm-digest", false) && !!ME_ACCT;
+    b.setAttribute("aria-pressed", on); b.textContent = on ? "📬 Daily DM on" : "📬 Daily DM";
+    b.title = !ME_ACCT ? "Sign in with Discord to get your watchlist by DM once a day" : on ? "On: your watchlist arrives by Discord DM at 10 AM Eastern. Click to turn off." : "Once a day at 10 AM Eastern, a Discord DM with your watched items' prices and how they moved";
+  }
+  $("wdm").addEventListener("click", function () {
+    if (!ME_ACCT) { location.href = ACCT + "/login?back=home"; return; }
+    var on = !loadLS("fm-digest", false); saveLS("fm-digest", on); digestBtn();
+    try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: on ? "#digest:on" : "#digest:off", r: "", q: "" })], { type: "text/plain" })); } catch (e) {}
+  });
   function renderView() { if (!D) return render(); if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else render(); }
   var PRESETS = [[0, 10], [10, 20], [20, 30], [30, 40], [40, 50], [50, 70]];
   PRESETS.forEach(function (p) { var b = el("button", null, p[0] + "–" + p[1]); b.type = "button"; b.addEventListener("click", function () { var on = $("lv-min").value === String(p[0]) && $("lv-max").value === String(p[1]); $("lv-min").value = on ? "" : p[0]; $("lv-max").value = on ? "" : p[1]; syncPresets(); render(); }); $("presets").appendChild(b); });
