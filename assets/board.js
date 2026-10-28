@@ -3941,7 +3941,7 @@
       var d = el("div", n ? "has" : ""), b = el("span", "tbadge " + t[2]); b.appendChild(el("i", null, GEM[t[2]])); b.appendChild(document.createTextNode(t[1])); d.appendChild(b);
       d.appendChild(el("small", null, (t[0] ? fmt(t[0]) + " sales" : "Start") + " · " + n + (n === 1 ? " scanner" : " scanners")));
       if (t[2] === "titan") { d.classList.add("unlock"); d.appendChild(el("span", "perk", "🔔 Mega Deals unlock")); }
-      if (t[2] === "royal") { d.appendChild(el("span", "perk", "💵 pay unlocks at 2,000 verified")); }
+      if (t[2] === "broker") { d.appendChild(el("span", "perk", "💵 pay unlocks at 500 credits")); }
       lad.appendChild(d);
     });
   }

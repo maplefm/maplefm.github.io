@@ -406,7 +406,7 @@ if __name__ == "__main__":
         rows = tally(kept, obs, int(a.timestamp()), int(b.timestamp()), life)
         weeks.append({"start": a.date().isoformat(), "end": (b - datetime.timedelta(days=1)).date().isoformat(),
                       "current": a == this_wk, "math": payout(rows, pool), "rows": rows})
-    json.dump({"generated": now.isoformat(), "trial": True,
+    json.dump({"generated": now.isoformat(), "trial": bool(pool.get("trial", False)),
                "rules": {"min_price": MIN_PRICE, "vendor_floor": bool(VEND), "shop_cap_per_day": SHOP_CAP, "self_rate": SELF_RATE, "witnesses": "another person's watcher or a stream capture, within a day of the sale", "earns": "watcher shop scans only", "strict": STRICT, "known_items_only": bool(KNOWN), "hover_credit": HOVER_RATE, "hover_min_price": HOVER_MIN, "witness_credit": WITNESS_RATE, "self_to_bar": SELF_TO_BAR, "cold_bonus": COLD_BONUS, "gap_mult": GAP_MULT, "gap_min_days": GAP_MIN},
                "weeks": weeks, "balances": bal}, open(out, "w", encoding="utf-8"), separators=(",", ":"))
     w = weeks[0]
