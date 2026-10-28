@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.27.11"
+VERSION = "2026.10.27.12"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -33,11 +33,28 @@ except (OSError, ValueError):
     _FIT = {}
 _FIT_LOW = {k.lower(): v for k, v in _FIT.items()}
 
+# the text reader's usual digit slips: a 1 read as 4 or 7, and back
+_SLIPS = {("1", "4"), ("4", "1"), ("1", "7"), ("7", "1")}
+def _slip(a, b):
+    a, b = str(a), str(b)
+    if len(a) != len(b): return False
+    diff = [(x, y) for x, y in zip(a, b) if x != y]
+    return len(diff) == 1 and diff[0] in _SLIPS
+
 def stats_fit(name, stats):
     """The stats this item can really have, or None when the popup was clearly another item's."""
     f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(name)).strip().lower())
     if not f or not stats: return stats
-    sub, base, cash = f
+    sub, base, cash = f[0], f[1], f[2]
+    vals = f[3] if len(f) > 3 else {}
+    # a line with no brackets is exactly the item's base (the game brackets any stat that rolled or was scrolled off
+    # it), so "Critical Rate: +4" on 1 crit Work Gloves is a 1 read as 4
+    stats = dict(stats)
+    # only where no scroll passed (all slots left, or a white name) and the value is out of a drop's reach (more than 2 off)
+    noscroll = stats.get("UP") == 0 or (vals.get("SLOTS") is not None and stats.get("SLOTS") == vals.get("SLOTS"))
+    for k, bv in vals.items():
+        v = stats.get(k)
+        if k != "SLOTS" and noscroll and v is not None and stats.get(k + "_b") is None and bv <= 5 and abs(v - bv) > 2 and _slip(v, bv): stats[k] = bv
     allow = set(base)
     if not cash: allow |= set((_SCROLLABLE.get(sub) or ("ATT" if _WEAPON.search(sub) else "")).split())
     out = dict(stats)

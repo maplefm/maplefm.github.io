@@ -2113,6 +2113,7 @@
     var out = x, foreign = false;
     BSTATS.forEach(function (k) {
       if (!x[k]) return;
+      if (x[k + "_b"] == null && base[k] && x[k] !== base[k] && slipFix(name, x, x[k], base[k])) { if (out === x) out = Object.assign({}, x); out[k] = base[k]; return; }
       // a stat only scrolls give this item, showing a big plain number ("LUK 30" on an overall): a requirement line
       if (allow[k] && base[k] == null && SMALL[k] && x[k] > SMALL[k] && !(x[k + "_b"] != null && x[k + "_b"] < x[k])) {
         if (out === x) out = Object.assign({}, x);
@@ -2128,6 +2129,19 @@
     return foreign ? null : out;
   }
   function statsFit(name, x) { return statsFix(name, x) === x; }
+  // the text reader's usual digit slips: a 1 read as 4 or 7, and back
+  // A value with no brackets that only a scroll could reach, on a copy that took no passed scroll (all slots left, or a
+  // white name), can't be real: when it's one digit off the base (1 read as 4), it's the base.
+  function slipFix(name, x, v, base) {
+    if (base > 5 || Math.abs(v - base) <= 2 || !digitSlip(v, base)) return false;   // small bases only: a drop moves them 1 or 2 at most
+    var bs = (dbBase(name) || {}).SLOTS;
+    return x.UP === 0 || (bs != null && x.SLOTS != null && x.SLOTS === bs);
+  }
+  function digitSlip(a, b) {
+    a = String(a); b = String(b); if (a.length !== b.length) return false;
+    var diff = []; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) diff.push(a[i] + b[i]);
+    return diff.length === 1 && /^(14|41|17|71)$/.test(diff[0]);
+  }
   function sanitizeStats(L) {
     CONS = {};
     L.forEach(function (l) { var x = l.x; if (!x) return; BSTATS.forEach(function (k) { if (x[k]) { var bv = x[k + "_b"] != null ? x[k + "_b"] : x[k], key = l.i + "|" + k + "|" + bv; CONS[key] = (CONS[key] || 0) + 1; } }); });
@@ -2253,7 +2267,8 @@
   function slotTag(s, name, x) {
     var su = slotsUsed(name, { x: x }), b = fullBase(name).s.SLOTS;
     if (su == null || !b) return s;
-    var t = el("em", "slot" + (su === 0 ? " clean" : ""), su === 0 ? "clean, " + b + " slots" : su + "/" + b + " used");
+    var up = scrollsPassed(name, { x: x });
+    var t = el("em", "slot" + (su === 0 ? " clean" : ""), su === 0 ? "clean, " + b + " slots" : su + "/" + b + " used" + (up != null ? ", " + up + " passed" : ""));
     t.title = su === 0 ? "No scrolls used: all " + b + " upgrade slots left" : su + " of " + b + " upgrade slots used (passed or failed scrolls), " + x.SLOTS + " left";
     s.appendChild(t); return s;
   }
@@ -2276,6 +2291,8 @@
         var m = new RegExp("(?:" + t[0].source + ")\\s*[:.;]?\\s*\\+?\\s*(\\d{1,3})(?:\\s*[\\(\\[{]\\s*(\\d{1,3})(?:\\s*([+-])?\\s*(\\d{1,3}))?\\s*[\\)\\]}]?)?", "i").exec(line);
         if (!m || bon[t[1]] != null || ext[t[1]] != null) return;
         var v = +m[1], d = 0;
+        // "Critical Rate: +4" on 1 crit gloves with no scroll passed is a 1 read as 4: a drop rolls a 1 to 0 or 2 at most
+        if (m[2] == null) { var dbv = (dbBase(l.i) || {})[t[1]]; if (dbv && v !== dbv && slipFix(l.i, l.x, v, dbv)) { v = dbv; l.x[t[1]] = dbv; l.x[t[1] + "_b"] = dbv; } }
         if (m[2] != null) {
           // "+52 (55 -3)" is base 55, roll -3. The screen often loses the sign or the whole second number ("+52 (55)"):
           // the base is still there, so the roll is the difference
@@ -2312,6 +2329,13 @@
   function rollOf(name, l) { var p = rollPick(name, l); return p ? sane(p.g, p.k) : null; }
   // the key roll prices are kept under: slots used and every paid-for stat that moved ("0|CRIT+1": clean, crit rate +1)
   function rollKey(name, l, su) { var p = rollPick(name, l); return p ? su + "|" + p.combo : ""; }
+  // scrolls that passed, from the popup's title: an orange name with "(+N)" (FM Watcher reads it), a white name is 0.
+  // Null when it wasn't read or doesn't add up (more passed than slots used). Slots used minus passed is failed.
+  function scrollsPassed(name, l) {
+    var x = l && l.x; if (!x || x.UP == null) return null;
+    var su = slotsUsed(name, l); if (su == null || x.UP > su || x.UP < 0) return null;
+    return x.UP;
+  }
   // slots taken from the item's base count: 0 is clean. Null when the hover didn't reach Remaining Enhancements.
   function slotsUsed(name, l) {
     var x = l && l.x; if (!x || x.SLOTS == null) return null;
@@ -2600,7 +2624,8 @@
         return;
       }
       var sc = secs[bs] || (secs[bs] = { k: bs, c: {}, n: 0 }); sc.n++;
-      var key = su + "|" + r.combo; (sc.c[key] || (sc.c[key] = { g: r.g, combo: r.combo, su: su, ls: [] })).ls.push(r.l);
+      var up = scrollsPassed(i.item, r.l);
+      var key = su + "|" + (up == null ? "?" : up) + "|" + r.combo; (sc.c[key] || (sc.c[key] = { g: r.g, combo: r.combo, su: su, up: up, ls: [] })).ls.push(r.l);
     });
     var mine = myStat(), keys = Object.keys(secs);
     var rank = function (k) { return k === "TOTAL" ? 3 : k === "GRADE" ? 2 : k === mine ? -2 : (k === "ATT" || k === "MATT") ? -1 : 0; };
@@ -2645,13 +2670,15 @@
       h.appendChild(el("small", null, sc.n + " seen" + (cleanPrice ? " · clean " + short(cleanPrice.p) : "")));
       sec.appendChild(h);
       var row = el("div", "rrow"), opened = null;
-      cells.sort(function (a, b) { return a[1].g - b[1].g || (a[1].su || 0) - (b[1].su || 0); }).forEach(function (e) {
+      cells.sort(function (a, b) { return a[1].g - b[1].g || (a[1].su || 0) - (b[1].su || 0) || (a[1].up == null ? 99 : a[1].up) - (b[1].up == null ? 99 : b[1].up); }).forEach(function (e) {
         var o = e[1], top, su0, full;
         if (k === "GRADE") { top = (o.g > 0 ? "+" : o.g < 0 ? "−" : "") + Math.abs(o.g); su0 = ""; full = "Chat grade " + top; }
         else {
           top = o.combo ? comboLabel(o.combo) : "No gain";
-          su0 = o.su + (bSlots ? " of " + bSlots : "") + " slots used";
-          full = (o.combo ? comboLabel(o.combo) : "No gain (failed scrolls)") + ", " + su0;
+          su0 = o.su + (bSlots ? " of " + bSlots : "") + " used" + (o.up == null ? "" : o.up === 0 ? ", none passed" : ", " + o.up + " passed");
+          // no scroll passed: every stat that moved is the drop's own roll
+          if (o.up === 0 && o.combo) top = "Natural " + top;
+          full = (o.combo ? (o.up === 0 ? "Natural roll " : "") + comboLabel(o.combo) : "No gain (failed scrolls)") + ", " + o.su + (bSlots ? " of " + bSlots : "") + " slots used" + (o.up == null ? ", passed count not read" : o.up === 0 ? ", none passed" : ", " + o.up + " passed, " + (o.su - o.up) + " failed");
         }
         var c = cell(e[0] + "|" + k, o.g, o.ls, top, su0, full);
         row.appendChild(c.el); if (c.open) opened = c.open;
@@ -2723,8 +2750,9 @@
     var x = l && l.x && typeof l.x === "object" ? l.x : null, read = !!(x && Object.keys(x).some(function (k) { return /^[A-Z]+$/.test(k); }));
     loadBase(name);   // requirements come from the item's full record; the popup fills them in when it lands
     var fb = fullBase(name), b = fb.s || {}, r = dbRow(name), api = BASE[name] || {}, box = el("div", "gt");
-    var used = x && x.SLOTS != null && b.SLOTS ? b.SLOTS - x.SLOTS : 0;
-    box.appendChild(el("div", "gt-name", showName(name) + (used > 0 ? " (+" + used + ")" : "")));
+    // the game's "(+N)" is scrolls that passed, not slots used: shown only when this copy's title was read
+    var passed = l ? scrollsPassed(name, l) : null;
+    box.appendChild(el("div", "gt-name" + (passed > 0 ? " gt-up" : ""), showName(name) + (passed > 0 ? " (+" + passed + ")" : "")));
     var top = el("div", "gt-top"), ic = el("div", "gt-ic"), im = iconImg(name); if (im) ic.appendChild(im); top.appendChild(ic);
     var req = el("div", "gt-req"), lv = x && x.REQLV != null ? x.REQLV : api.REQLV != null ? api.REQLV : r && r[2] ? r[2] : 0;
     var known = BASE[name] != null || !idOf(name);
