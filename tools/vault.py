@@ -31,16 +31,18 @@ KEEP = ("last3", "rk", "item", "baseName", "cat", "tier", "n", "kind", "check", 
 
 
 def top_roll(r):
-    """The roll sold most often above clean, for item pages: [gain, typical price, sales, stat]. Keys are "roll|slots|stat"
-    (older ones "roll|slots"). Nothing else of the roll prices leaves the members' summary."""
+    """The roll above base sold most often, for item pages: [gain, typical price, sales, stat, slots used, moves].
+    Keys are "roll|slots|stat|moves" (older ones stop sooner). Nothing else of the roll prices leaves the members' summary."""
     best = None
     for k, v in (r.get("rt") or {}).items():
         try:
             parts = str(k).split("|"); g = int(parts[0]); p, n = float(v[0]), int(v[1])
         except Exception: continue
         st = parts[2] if len(parts) > 2 else ""
+        su = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else None
+        mv = parts[3] if len(parts) > 3 else ""
         if st == "TOTAL": continue
-        if g > 0 and n >= 2 and (best is None or n > best[2] or (n == best[2] and g > best[0])): best = [g, round(p), n, st]
+        if g > 0 and n >= 2 and (best is None or n > best[2] or (n == best[2] and g > best[0])): best = [g, round(p), n, st, su, mv]
     return best
 
 def public_summary(j):

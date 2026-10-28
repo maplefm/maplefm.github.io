@@ -189,9 +189,10 @@ button, input, select { font: inherit; color: inherit; }
 .rsh .you { font-style: normal; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--accent-ink); border: 1px solid var(--accent); border-radius: 999px; padding: 0 6px; }
 .rsh small { margin-left: auto; color: var(--muted); font-size: .7rem; white-space: nowrap; }
 .rsec.misc .rsh b { color: var(--muted); }
-.rrow { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 5px; }
+.rrow { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 5px; }
 .rc { display: grid; gap: 0; padding: 4px 7px 5px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); font-size: .8rem; line-height: 1.25; min-width: 0; }
-.rc b { font-size: .78rem; font-weight: 800; white-space: nowrap; }
+.rc b { font-size: .78rem; font-weight: 800; overflow-wrap: anywhere; }
+.rc i.rsu { font-style: normal; font-size: .64rem; color: var(--muted); }
 .rc b em { font-style: normal; font-weight: 700; color: var(--muted); font-size: .7rem; }
 .rc.up b { color: var(--up); } .rc.down b { color: var(--down); }
 .rc.ref { background: var(--panel2); border-color: var(--line2); }
