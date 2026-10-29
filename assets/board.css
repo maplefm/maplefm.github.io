@@ -1293,7 +1293,7 @@ body.sheet .nudge { display: none; }
   /* the biggest mover always starts its own line, so it doesn't hop when the picks fill in */
   .hrow::after { content: ""; flex-basis: 100%; height: 0; margin-top: -10px; order: 1; }
   .hrow .hdeal { order: 2; }
-  .hrow:has(.picks:empty) .hdeal[hidden] { display: inline-flex !important; visibility: hidden; min-height: 35px; box-sizing: border-box; }   /* hold its row while the board loads */
+  .hrow:has(.picks:empty) .hdeal[hidden] { display: inline-flex !important; visibility: hidden; min-height: 42px; box-sizing: border-box; }   /* hold its row while the board loads */
   .plbl .mbar { width: 0; min-width: 100%; }
 }
 
@@ -1417,3 +1417,6 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
 
 /* the stats strip under the search keeps its height while the numbers load, so the board never jumps */
 .cards.strip { min-height: 34px; }
+/* the biggest mover pill keeps its height while its icon loads */
+.hdeal { min-height: 42px; box-sizing: border-box; }
+.hdeal img { width: 26px; height: 26px; object-fit: contain; }
