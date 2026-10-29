@@ -17,7 +17,7 @@ const BUILDS = [["Warrior", null, 10, 29], ["Magician", null, 10, 29], ["Bowman"
   ["Hunter", null, 30, 100], ["Crossbowman", null, 30, 100], ["Assassin", "assassin", 30, 100], ["Bandit", "bandit", 30, 100], ["Bandit", "sindit", 30, 100],
   // hybrids: their top maps must pass like any build, but a level where none passes is expected (the page says nothing
   // fits) and is listed under "nofit" instead of failing the check
-  ["Bandit", "sindit36", 30, 100, 1], ["Bandit", "sinditreset", 30, 100, 1], ["Thief", "strbandit", 10, 29, 1], ["Bandit", "strbandit", 30, 100, 1],
+  ["Bandit", "sindit36", 30, 100, 1], ["Bandit", "sinditreset", 30, 100, 1],
   ["Thief", "dexassassin", 10, 29, 1], ["Assassin", "dexassassin", 30, 100, 1], ["Thief", "dexbandit", 10, 29, 1], ["Bandit", "dexbandit", 30, 100, 1],
   ["Warrior", "dexless", 10, 29, 1], ["Fighter", "dexless", 30, 100, 1], ["Page", "dexless", 30, 100, 1], ["Spearman", "dexless", 30, 100, 1],
   ["Magician", "lukmage", 10, 29, 1], ["Fire Poison Wizard", "lukmage", 30, 100, 1], ["Ice Lightning Wizard", "lukmage", 30, 100, 1], ["Cleric", "lukmage", 30, 100, 1]];

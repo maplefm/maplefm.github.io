@@ -35,7 +35,6 @@
     sindit: { name: "Sindit (claw, then dagger)", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger", desc: "Bandit who kept Lucky Seven and throws until a dagger and Savage Blow hit harder, then swaps." },
     sindit36: { name: "Sindit (dagger at 36)", base: "sindit", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger", swap: 36, desc: "Sindit who swaps to a dagger and Savage Blow at level 36." },
     sinditreset: { name: "Sindit (reset at 40)", base: "sindit", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger", swap: 40, reset: true, desc: "Throws Lucky Seven to 40, then resets those points into Savage Blow and plays as a Bandit." },
-    strbandit: { name: "STR Bandit (dagger)", base: "bandit", jobs: ["Thief", "Bandit"], w: "Dagger", stats: "str", desc: "Bandit with STR as the damage stat: LUK stays at 4, 25 DEX, the rest STR.", stat: "STR, 25 DEX, LUK 4" },
     dexassassin: { name: "Dexless Assassin (claw)", base: "assassin", jobs: ["Thief", "Assassin"], w: "Claw", stats: "dexless", desc: "Assassin with no DEX past the base 4: all LUK. Hits harder, misses more.", stat: "all LUK, DEX 4" },
     dexbandit: { name: "Dexless Bandit (dagger)", base: "bandit", jobs: ["Thief", "Bandit"], w: "Dagger", stats: "dexless", desc: "Bandit with no DEX past the base 4: all LUK. Hits harder, misses more.", stat: "all LUK, DEX 4" },
     dexless: { name: "Dexless warrior", base: "pure", jobs: ["Warrior", "Fighter", "Page", "Spearman"], stats: "dexless", desc: "Warrior with DEX left at 4: all STR. Hits harder, misses more.", stat: "all STR, DEX 4" },

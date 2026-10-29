@@ -853,7 +853,7 @@ async function putQuests(req, env) {
 // short names, so nothing else can be stored under it.
 const BKEY = (id) => "build:" + id;
 const BJOBS = ["Beginner", "Warrior", "Fighter", "Page", "Spearman", "Magician", "Fire Poison Wizard", "Ice Lightning Wizard", "Cleric", "Bowman", "Hunter", "Crossbowman", "Thief", "Assassin", "Bandit"];
-const BTYPES = ["pure", "assassin", "bandit", "sindit", "sindit36", "sinditreset", "strbandit", "dexassassin", "dexbandit", "dexless", "lukmage"];
+const BTYPES = ["pure", "assassin", "bandit", "sindit", "sindit36", "sinditreset", "dexassassin", "dexbandit", "dexless", "lukmage"];
 const BWEAP = ["1H Sword", "2H Sword", "1H Axe", "2H Axe", "1H Blunt", "2H Blunt", "Spear", "Polearm", "Dagger", "Claw", "Bow", "Crossbow", "Wand", "Staff"];
 function cleanBuild(b) {
   const n = (v, lo, hi) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? Math.max(lo, Math.min(hi, x)) : null; };
