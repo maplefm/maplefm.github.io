@@ -66,7 +66,9 @@ except Exception: pass
 maps = cargo("maps", ["_pageName=page", "id", "name_en", "region", "map_type", "recommended_level_min", "recommended_level_max", "nearest_town", "return_map", "game_version", "image", "origin_x", "origin_y", "render_width", "render_height"])
 portals = cargo("portals", ["_pageName=src", "to_map", "portal_name", "direction", "portal_type", "requires_level", "x", "y"])
 spawns = cargo("monster_spawns", ["monster_id", "map_id", "spawn_count", "respawn_seconds", "variant"])
-mons = cargo("monsters", ["id", "name_en", "level", "hp", "mp", "exp", "weapon_attack", "magic_attack", "physical_defense", "magic_defense", "accuracy", "avoidability", "knockback", "element_weak", "element_resist", "boss", "undead", "variant"])
+mons = cargo("monsters", ["_pageName=page", "id", "name_en", "level", "hp", "mp", "exp", "weapon_attack", "magic_attack", "physical_defense", "magic_defense", "accuracy", "avoidability", "knockback", "element_weak", "element_resist", "boss", "undead", "variant", "variant_label"])
+# mesos a kill, measured by the wiki's editors (kills counted, mesos seen): the item "Meso" in monster_drops
+meso_rows = cargo("monster_drops", ["monster_id", "drop_rate", "min_quantity", "max_quantity", "sample_kills"], 'item_id="Meso"') or []
 npcs = cargo("npcs", ["_pageName=page", "id", "name_en", "role", "map"])
 shops = cargo("shops", ["_pageName=page", "npc", "map", "shop_type"])
 shop_items = cargo("shop_items", ["shop_id", "item_id", "price"])
@@ -84,27 +86,73 @@ if lua:
 io_list = get(IO + "/map") or []
 io_ids = {m["id"] for m in io_list if isinstance(m, dict)}
 os.makedirs(os.path.join(OUT, "minimap"), exist_ok=True)
-io_mobs = {}
+io_mobs = {}   # by game id: names repeat (a job test or party quest copy shares its name with the real monster)
 for m in get(IO + "/mob") or []:
     if isinstance(m, dict) and m.get("id") and m["id"] < 9000000:
         d = get(f"{IO}/mob/{m['id']}")
-        if d and d.get("meta"): io_mobs[d["name"]] = dict(d["meta"], id=d["id"])
+        if d and d.get("meta"): io_mobs[d["id"]] = dict(d["meta"], id=d["id"])
         time.sleep(0.1)
 
-mob = {}
+
+def val(v):
+    """the wiki's number, or None when the wiki left it empty: 0 is a value, not a gap"""
+    if v is None or (isinstance(v, str) and not v.strip()): return None
+    try: return int(float(v))
+    except (TypeError, ValueError): return None
+
+
+def first(*vs):
+    for v in vs:
+        if v is not None: return v
+    return 0
+
+
+def elem(w, field):
+    v = w.get(field) or ""
+    return "" if v in ("", "None") else v
+
+
+# monster stats: the game files first (looked up by id), the wiki where the game files don't have the monster yet.
+# Variants (a party quest or 2nd job test copy of a monster) keep their own stats under "Name (label)" and are only
+# placed on the maps where they spawn; they are flagged "variant" so training math leaves them out.
+mob, var_key = {}, {}
 for w in mons:
-    if not w.get("name_en") or w.get("variant"): continue
-    nm = w["name_en"]; m = io_mobs.get(nm) or {}
-    mob.setdefault(nm, {
-        "id": num(w.get("id")) or m.get("id"), "lv": num(w.get("level")) or m.get("level", 0), "hp": num(w.get("hp")) or m.get("maxHP", 0),
-        "exp": num(w.get("exp")) or m.get("exp", 0), "atk": num(w.get("weapon_attack")) or m.get("physicalDamage", 0),
-        "matk": num(w.get("magic_attack")) or m.get("magicDamage", 0), "acc": num(w.get("accuracy")) or m.get("accuracy", 0),
-        "eva": num(w.get("avoidability")) or m.get("evasion", 0), "wdef": num(w.get("physical_defense")) or m.get("physicalDefense", 0),
-        "mdef": num(w.get("magic_defense")) or m.get("magicDefense", 0), "kb": num(w.get("knockback")),
-        "weak": "" if (w.get("element_weak") or "None") == "None" else w["element_weak"],
-        "resist": "" if (w.get("element_resist") or "None") == "None" else w["element_resist"],
-        "undead": w.get("undead") == "1" or bool(m.get("isUndead")), "boss": w.get("boss") == "1",
-    })
+    nm = w.get("name_en"); wid = val(w.get("id"))
+    if not nm or not wid or (w.get("page") or "").startswith("Module:"): continue   # skip rows that aren't monsters
+    g = io_mobs.get(wid) or {}
+    key = nm
+    if w.get("variant"):
+        key = f"{nm} ({w.get('variant_label') or w['variant']})"
+        var_key[(nm, w["variant"])] = key
+    if key in mob: continue
+    mob[key] = {
+        "id": wid, "lv": first(g.get("level"), val(w.get("level"))), "hp": first(g.get("maxHP"), val(w.get("hp"))),
+        "exp": first(g.get("exp"), val(w.get("exp"))), "atk": first(g.get("physicalDamage"), val(w.get("weapon_attack"))),
+        "matk": first(g.get("magicDamage"), val(w.get("magic_attack"))), "acc": first(g.get("accuracy"), val(w.get("accuracy"))),
+        "eva": first(g.get("evasion"), val(w.get("avoidability"))), "wdef": first(g.get("physicalDefense"), val(w.get("physical_defense"))),
+        "mdef": first(g.get("magicDefense"), val(w.get("magic_defense"))), "kb": first(g.get("minimumPushDamage"), val(w.get("knockback"))),
+        "weak": elem(w, "element_weak"), "resist": elem(w, "element_resist"),
+        "undead": bool(g["isUndead"]) if "isUndead" in g else w.get("undead") == "1",
+        "boss": bool(g["isBoss"]) if "isBoss" in g else w.get("boss") == "1",
+    }
+    if w.get("variant"): mob[key].update(variant=w["variant"], base=nm)
+
+# mesos a kill: [min, max, chance %, source]. The wiki's measured range first; tools/mesos_reported.json (player reports)
+# only for monsters the wiki hasn't measured yet. Neither: no entry, and pages fall back to the level estimate.
+for r in meso_rows:
+    n = r.get("monster_id")
+    lo, hi = val(r.get("min_quantity")), val(r.get("max_quantity"))
+    if n in mob and lo is not None and hi is not None:
+        rate = r.get("drop_rate")
+        mob[n]["meso"] = [lo, hi, round(float(rate)) if rate not in (None, "") else None, "wiki", val(r.get("sample_kills"))]
+try:
+    rep = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mesos_reported.json"), encoding="utf-8"))
+    rep = rep.get("mobs", rep)
+except Exception:
+    rep = {}
+for n, v in rep.items():
+    if n in mob and "meso" not in mob[n] and isinstance(v, list) and len(v) >= 2:
+        mob[n]["meso"] = [v[0], v[1], v[2] if len(v) > 2 else None, "reported", None]
 
 npc_by_page = {n["page"]: n for n in npcs}
 npc_by_id = {num(n.get("id")): n for n in npcs if n.get("id")}
@@ -120,11 +168,32 @@ for p in portals:
     s, t = p.get("src"), p.get("to_map")
     if s in M and t:
         M[s]["portals"].append([t, p.get("portal_type") or "walking", num(p.get("x")), num(p.get("y")), p.get("portal_name") or "", num(p.get("requires_level")) or 0])
+# spawns: "groups" keeps every wiki spawn row [monster, count, respawn seconds or None]; "mobs" adds the groups up per
+# monster; "respawn" is each monster's timer where the wiki records one; variant spawns go to "vmobs" only.
 for s in spawns:
-    if s.get("variant"): continue
     mpg, mn = s.get("map_id"), s.get("monster_id")
-    if mpg in M and mn in mob:
-        M[mpg]["mobs"].append([mn, num(s.get("spawn_count"))])
+    if mpg not in M: continue
+    c = num(s.get("spawn_count")); rs = val(s.get("respawn_seconds"))
+    if s.get("variant"):
+        k = var_key.get((mn, s["variant"]))
+        if k: M[mpg].setdefault("vmobs", []).append([k, c])
+        continue
+    if mn not in mob: continue
+    M[mpg].setdefault("groups", []).append([mn, c, rs])
+for m in M.values():
+    tot, timed = {}, {}
+    for n, c, rs in m.get("groups", []):
+        tot[n] = tot.get(n, 0) + c
+        if rs: timed.setdefault(n, []).append((c, rs))
+    m["mobs"] = sorted([[n, c] for n, c in tot.items()], key=lambda x: -x[1])
+    # one timer per monster, only when every one of its spawn points has a timer: the rate they refill at together
+    # (count / sum of count/seconds), so kills an hour from it can be at most count * 3600 / respawn. When only some of
+    # a monster's points have a timer, "groups" has the detail and "respawn" leaves the monster out.
+    m["respawn"] = {n: round(sum(c for c, _ in g) / sum(c / r for c, r in g)) for n, g in timed.items() if sum(c for c, _ in g) == tot[n]}
+    if "vmobs" in m:
+        vt = {}
+        for n, c in m["vmobs"]: vt[n] = vt.get(n, 0) + c
+        m["vmobs"] = [[n, c] for n, c in vt.items()]
 for sh in shops:
     if sh.get("map") in M: M[sh["map"]]["shops"].append(sh.get("npc") or sh["page"])
 
@@ -138,6 +207,7 @@ for page, m in M.items():
     vr = d.get("vrBounds") or {}
     m["w"], m["h"] = vr.get("width") or 0, vr.get("height") or 0
     m["town"] = bool(d.get("isTown"))
+    if d.get("mobRate") is not None: m["rate"] = round(float(d["mobRate"]), 2)   # the map's monster rate setting in the game files
     mm = d.get("miniMap") or {}
     if mm.get("canvas"):
         png = base64.b64decode(mm["canvas"])
@@ -187,28 +257,28 @@ print("maps", len(M), "minimaps", n_mm)
 mob_id_name = {v["id"]: k for k, v in mob.items() if v.get("id")}
 
 # ------------------------------------------------------------------ travel: cabs and return scrolls
+# Only fares the wiki records. [from, to, fare below level 20, fare from level 20]; boats add who to talk to and,
+# where the wiki gives no fare, None plus "unconfirmed" so the page can say so instead of showing it as free.
 F = lambda k, d=0: fares.get(k, d)
 mult = F("regularCabLevel20Multiplier", 2)
-cabs = []   # [from town, to town, fare below 20, fare from 20]
+cabs = []
 for town, key in (("Henesys", "henesysCab"), ("Kerning City", "kerningCityCab"), ("Perion", "perionCab")):
     for dest, dk in (("Lith Harbor", "LithHarbor"), ("Perion", "Perion"), ("Ellinia", "Ellinia"), ("Kerning City", "KerningCity"), ("Henesys", "Henesys")):
         f = F(key + dk + "Fare")
         if f and dest != town: cabs.append([town, dest, f, f * mult])
     sw = F(key + "SleepywoodFare")
-    if sw: cabs.append([town, "Sleepywood", sw, sw])
-# Ellinia's cab isn't recorded yet: fares are the same both ways on every recorded pair, so use the reverse trips
-have = {(a, b) for a, b, _, _ in cabs}
-for a, b, f1, f2 in list(cabs):
-    if b == "Ellinia" and ("Ellinia", a) not in have: cabs.append(["Ellinia", a, f1, f2])
-if F("sleepywoodCabFare"):
+    if sw: cabs.append([town, "Sleepywood", sw, sw])   # wiki Regular Cab: fares double from 20 "except to and from Sleepywood"
+# Ellinia's Regular Cab has no recorded fares on the wiki, so it isn't listed (no guessing from the reverse trips).
+if F("sleepywoodCabFare"):   # wiki Regular Cab (Sleepywood): the same fare to Henesys, Ellinia, Perion or Kerning City
     for dest in ("Henesys", "Ellinia", "Perion", "Kerning City"): cabs.append(["Sleepywood", dest, F("sleepywoodCabFare"), F("sleepywoodCabFare")])
+# Phil in Lith Harbor: one way only (wiki Phil); fares halve from level 10 to 19
 for dest, dk in (("Perion", "philPerionFare"), ("Ellinia", "philElliniaFare"), ("Henesys", "philHenesysFare"), ("Kerning City", "philKerningCityFare")):
     if F(dk): cabs.append(["Lith Harbor", dest, F(dk) // max(1, F("philLevel10To19Divisor", 2)), F(dk)])
-if ("Ellinia", "Lith Harbor") not in {(a, b) for a, b, _, _ in cabs} and F("philElliniaFare"):
-    cabs.append(["Ellinia", "Lith Harbor", F("philElliniaFare") // 2, F("philElliniaFare")])
-# NPC rides that aren't cabs: Pason in Lith Harbor sails to Florina Beach and Pison brings you back (fare from the wiki's Pason page)
-boats = [["Lith Harbor", "Florina Beach", 1500, "Pason"], ["Florina Beach", "Lith Harbor", 0, "Pison"]]
-vip = [[t, "Ant Tunnel Park", F("vipCabFare", 10000), F("vipCabFare", 10000)] for t in ("Ellinia", "Lith Harbor") if F("vipCabFare")]
+# boats and rides that aren't cabs [from, to, fare, NPC, note]: Shanks 300 mesos one way off Maple Island (wiki Shanks),
+# Pason 1,500 to Florina Beach (wiki Pason); Pison brings you back (wiki Pason/Pison) but no fare is recorded.
+boats = [["Southperry", "Lith Harbor", 300, "Shanks", ""], ["Lith Harbor", "Florina Beach", 1500, "Pason", ""],
+         ["Florina Beach", "Lith Harbor", None, "Pison", "unconfirmed"]]
+vip = [[t, "Ant Tunnel Park", F("vipCabFare"), F("vipCabFare")] for t in ("Ellinia", "Lith Harbor") if F("vipCabFare")]   # wiki VIP Cab
 scrolls = {}
 for s in shop_items:
     it = s.get("item_id") or ""
@@ -247,7 +317,7 @@ first = {k: v for k, v in (prev.get("first") or {}).items()}
 for page in M: first.setdefault("map:" + page, TODAY)
 for name in mob: first.setdefault("mob:" + name, TODAY)
 new_maps = [p for p in M if prev.get("maps") and p not in prev["maps"]]
-new_mobs = [n for n in mob if prev.get("mobs") and n not in prev["mobs"]]
+new_mobs = [n for n in mob if prev.get("mobs") and n not in prev["mobs"] and not mob[n].get("variant")]   # job test and PQ copies aren't news
 for page, m in M.items(): m["since"] = first.get("map:" + page)
 unreleased = sorted(m["name"] for m in io_list if isinstance(m, dict) and m.get("id") not in {v["id"] for v in M.values()})
 

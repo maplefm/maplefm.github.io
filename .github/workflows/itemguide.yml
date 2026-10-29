@@ -11,6 +11,9 @@ on:
 concurrency: itemguide
 permissions:
   contents: write
+  actions: write
+env:
+  DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,5 +33,20 @@ jobs:
           grep -q '^!data/itemguide.json$' .gitignore || echo '!data/itemguide.json' >> .gitignore
           git add .gitignore data/itemguide.json
           git diff --cached --quiet && exit 0
+          # new quests since the last guide: one plain line in #site-updates, then rebuild the quest and item pages now
+          new=$(python3 - <<'PY'
+          import json, subprocess
+          try: old = json.loads(subprocess.run(["git", "show", "HEAD:data/itemguide.json"], capture_output=True, text=True).stdout or "{}")
+          except Exception: old = {}
+          have = {q["id"] for q in old.get("quests") or []}
+          new = [q for q in json.load(open("data/itemguide.json")).get("quests") or [] if q["id"] not in have]
+          if have and new: print("New quests on the Quest Log: " + ", ".join(f'{q["n"]} (Lv {q["lv"]})' for q in new[:12]) + (f" and {len(new) - 12} more" if len(new) > 12 else ""))
+          PY
+          )
           git commit -q -m "Refresh the item guide (quests, drops, crafting, shops)"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
+          cd "$GITHUB_WORKSPACE"
+          if [ -n "$new" ]; then python3 tools/discord.py note "New quests" "$new\nSee them on https://maplefm.gg/quests.html" || true; fi
+          gh api -X POST repos/${{ github.repository }}/actions/workflows/itempages.yml/dispatches -f ref=main || true
+        env:
+          GH_TOKEN: ${{ github.token }}

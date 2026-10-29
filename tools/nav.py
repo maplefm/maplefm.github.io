@@ -2,10 +2,12 @@
 hand-written pages: it replaces whatever sits between <!--nav--> and <!--/nav--> with the current links."""
 import os, re, sys
 
-LINKS = [("prices", "/", "Prices", "Prices"), ("market", "/market.html", "Player market", "Market"), ("quests", "/quests.html", "Quests", "Quests"),
-         ("maps", "/map.html", "Training and maps", "Training"), ("earn", "/contribute.html", "Earn by scanning", "Earn")]
-# pages that belong under one of the five: the item catalog and item pages live under Prices
-ALIAS = {"items": "prices", "shop": "market", "training": "maps"}
+LINKS = [("prices", "/", "Prices", "Prices"), ("market", "/market.html", "Player market", "Market"), ("play", "/quests.html", "Quests and training", "Play"),
+         ("earn", "/contribute.html", "Earn by scanning", "Earn")]
+# Play has its own row: quests, training, maps and monsters, one tap apart on every one of those pages
+PLAY = [("quests", "/quests.html", "Quests"), ("training", "/map.html", "Training"), ("maps", "/maps/", "Maps"), ("monsters", "/monsters/", "Monsters")]
+# pages that belong under one of the top links: the item catalog and item pages live under Prices
+ALIAS = {"items": "prices", "shop": "market", "quests": "play", "training": "play", "maps": "play", "monsters": "play"}
 
 SEARCH = ('<form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span>'
           '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/>'
@@ -22,7 +24,13 @@ PIN_JS = ('<script>(function(){var n=document.querySelector(".sitenav.sn-pin");i
           'if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script>')
 
 
+def play_html(sub):
+    return ('<nav class="playbar" aria-label="Quests and training">' + "".join(
+        f'<a href="{href}"' + (' aria-current="page"' if k == sub else '') + f'>{name}</a>' for k, href, name in PLAY) + '</nav>')
+
+
 def nav_html(active="", home=False):
+    sub = active if active in dict((k, 1) for k, _, _ in PLAY) else ""
     active = ALIAS.get(active, active)
     out = []
     for k, href, long, short in LINKS:
@@ -33,13 +41,13 @@ def nav_html(active="", home=False):
     return ('<!--nav--><nav class="sitenav' + (' sn-home' if home else ' sn-pin') + '" aria-label="Club FM">'
             '<a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a>'
             + ('' if home else SEARCH) +
-            '<div class="sn-links">' + "".join(out) + '</div></nav>' + ('' if home else PIN_JS) + '<!--/nav-->')
+            '<div class="sn-links">' + "".join(out) + '</div></nav>' + ('' if home else PIN_JS) + (play_html(sub) if sub else '') + '<!--/nav-->')
 
 
 FOOT_COLS = [
     ("Prices", [("Price board", "/"), ("All items", "/items/"), ("Weekly recap", "/recap/"), ("How prices work", "/how-it-works.html")]),
     ("Trade", [("Player market", "/market.html"), ("Shops", "/shop.html"), ("List an item", "/market.html#new"), ("My positions", "/#positions")]),
-    ("Play", [("Quest log", "/quests.html"), ("Training guide", "/training/"), ("Maps and routes", "/map.html"), ("All maps", "/maps/"), ("Monsters", "/monsters/")]),
+    ("Play", [("Quests", "/quests.html"), ("Training", "/map.html"), ("Training guides", "/training/"), ("All maps", "/maps/"), ("Monsters", "/monsters/"), ("Crafting recipes", "/crafting/")]),
     ("Club FM", [("Earn by scanning", "/contribute.html"), ("For streamers", "/streamers.html"), ("Add /price to Discord", "/bot/"), ("Discord", "https://discord.gg/cXnVBTUUPk"), ("Terms", "/terms.html")]),
 ]
 
@@ -52,8 +60,8 @@ def foot_html():
             'Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot-->')
 
 
-NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=2">'
-PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "shop.html": ("market", False), "map.html": ("maps", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
+NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=3">'
+PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "shop.html": ("market", False), "map.html": ("training", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
          "report.html": ("", False), "streamers.html": ("", False), "how-it-works.html": ("", False), "shortcuts.html": ("", False),
          "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("", False)}
 
@@ -68,5 +76,5 @@ if __name__ == "__main__":
         if "<!--foot-->" in s: s = re.sub(r"<!--foot-->.*?<!--/foot-->", lambda m: foot_html(), s, flags=re.S)
         else: s = s.replace("</body>", foot_html() + "</body>", 1)
         if "/assets/nav.css" not in s: s = s.replace("</head>", NAV_CSS + "</head>", 1)
-        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=2", s)
+        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=3", s)
         open(p, "w", encoding="utf-8").write(s); print("nav", f)

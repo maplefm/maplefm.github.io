@@ -34,7 +34,19 @@ CSS = """.wn{display:flex;gap:10px;flex-wrap:wrap;font-weight:700;font-size:.9re
 .sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;background:var(--panel2);border-radius:14px;padding:6px}
 .mk.you{width:14px;height:14px;background:#2ee08a;border:3px solid #fff;box-shadow:0 0 0 2px #0a5}
 a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
-.cta{margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2)}.cta a{font-weight:800}"""
+.cta{display:block;margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink)}.cta a{font-weight:800}
+.need{border-top:1px solid var(--line2);padding:8px 0}.need:first-of-type{border-top:0}
+.nl{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.nl .n{margin-left:auto;font-weight:800;white-space:nowrap}.nl .n small{font-weight:600;color:var(--muted)}
+.gi{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:4px}
+.srcs{font-size:.82rem;color:var(--muted);margin:3px 0 0 30px}.srcs img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated;vertical-align:middle}
+.crt{font-size:.8rem;color:var(--muted);margin:2px 0 0 30px}.crt b{color:var(--ink)}
+.tk{margin:4px 0 0 18px;padding-left:10px;border-left:2px dashed var(--line2)}
+.tk .nl{font-size:.92rem}
+.basebox{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;margin:10px 0}.basebox b{display:block;margin-bottom:4px}
+.basebox span{display:inline-flex;align-items:center;margin:2px 10px 2px 0;font-weight:700}
+.ms{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:6px}
+.npcpic{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;background:var(--panel2);border-radius:10px}
+.nextbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.nextbar a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:9px 14px;border-radius:999px}.nextbar a.alt{background:var(--panel2);color:var(--accent);border:1px solid var(--line2)}"""
 
 JOBNAME = {0: "Beginner", 1: "Warrior", 2: "Magician", 3: "Bowman", 4: "Thief", 5: "Pirate"}
 CLASSES = ["Warrior", "Magician", "Bowman", "Thief"]
@@ -78,15 +90,15 @@ def page(title, desc, path, crumbs, body, og=None):
     ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": i + 1, "name": n, "item": SITE + u} for i, (n, u) in enumerate([("Club FM", "/")] + crumbs)]}
     # the trail starts at the section in the menu: Training › Maps › Sleepywood, Quests › Quest guides › ...
-    root = ("Quests", "/quests.html") if path.startswith(("/quest", "/quests")) else ("Training", "/map.html")
+    root = ("Quests", "/quests.html") if path.startswith(("/quest", "/quests", "/crafting")) else ("Training", "/map.html")
     trail = ([root] if crumbs and crumbs[0][0] != root[0] else []) + crumbs
     nav = ' <i>›</i> '.join([f'<a href="{u}">{E(n)}</a>' for n, u in trail[:-1]] + ([f'<span aria-current="page">{E(trail[-1][0])}</span>'] if trail else []))
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/item/world.css?v=2"><link rel="stylesheet" href="/assets/nav.css?v=2">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/item/world.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=3">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
-{NAV("quests" if path.startswith(("/quest", "/quests")) else "maps")}
+{NAV("quests" if path.startswith(("/quest", "/quests", "/crafting")) else "training" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
 {f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
@@ -116,6 +128,33 @@ def build(world, guide, summary, notes, out):
         return f'{ic}<a href="/item/{itempages.slug(n)}/">{t}</a>' if n in ITEMPAGE else f'{ic}{t}'
     def live(n):   # straight to the item on the live board: who is selling it right now, and where
         return f' <a class="lv" href="/#item={urllib.parse.quote(n)}" title="Live listings for {E(itempages.shown(n))} on the price board">live</a>' if n in PRICE else ""
+    def recipe(n):
+        c = (ITEMS.get(n) or {}).get("c"); return c[0] if c else None
+    def plan(n, q, seen, acc):
+        r = recipe(n); node = {"n": n, "q": q, "r": None, "crafts": 0, "kids": []}
+        if r and n not in seen and len(seen) < 5:
+            node["r"] = r; node["crafts"] = -(-q // (r[4] or 1)); acc["fee"] += node["crafts"] * (r[3] or 0)
+            if r[5]: acc["cat"][r[5][0]] = acc["cat"].get(r[5][0], 0) + r[5][1] * node["crafts"]
+            node["kids"] = [plan(i, c * node["crafts"], seen | {n}, acc) for i, c in r[2]]
+        else: acc["base"][n] = acc["base"].get(n, 0) + q
+        return node
+    def srcs(n, k=3):
+        g = ITEMS.get(n) or {}; out = []
+        for d in (g.get("d") or [])[:k]:
+            im = f'<img src="{sprite_url(d[0])}" alt="" loading="lazy">' if sprite_url(d[0]) else ""
+            out.append(f"{im}{blink(d[0])}" + (f" {d[2]:g}%" if d[2] is not None else ""))
+        if g.get("s"): out.append(f"{E(g['s'][0][0])} sells it for {meso(g['s'][0][2])}")
+        return ('<div class="srcs">' + " · ".join(out) + "</div>") if out else ""
+    def craft_line(nd):
+        r = nd["r"]
+        return (f'<div class="crt"><b>{E(r[0])} Lv {r[1]}</b> · {nd["crafts"]} craft{"s" if nd["crafts"] > 1 else ""}' + (f" of {r[4]}" if (r[4] or 1) > 1 else "")
+                + (f" · {meso(r[3] * nd['crafts'])} in fees" if r[3] else " · no fee") + (f" · catalyst {E(itempages.shown(r[5][0]))} ×{r[5][1] * nd['crafts']}" if r[5] else "") + "</div>")
+    def tree_html(nd):
+        price = f" <small>· {meso(PRICE[nd['n']] * nd['q'])}</small>" if not nd["r"] and nd["n"] in PRICE else ""
+        h = f'<div class="nl">{ilink(nd["n"])}<span class="n">×{nd["q"]:,}{price}</span></div>'
+        if nd["r"]: h += craft_line(nd) + '<div class="tk">' + "".join(tree_html(k) for k in nd["kids"]) + "</div>"
+        else: h += srcs(nd["n"], 2)
+        return h
     MSLUG = {p: slug(p) for p in M}
     BSLUG = {n: slug(n) for n in MOB}
     QSLUG = quest_slugs(QS)
@@ -129,9 +168,18 @@ def build(world, guide, summary, notes, out):
     BOARD_CTA = ('<div class="cta"><b>What does it sell for right now?</b> Every Free Market listing seen today, with channel and room. '
                  '<a href="/">Open the price board</a></div>')
 
-    # mesos each monster drops, as players report it (tools/mesos_reported.json: name -> [min, max, chance %])
-    mp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mesos_reported.json")
-    MESOS = json.load(open(mp, encoding="utf-8")) if os.path.exists(mp) else {}
+    # mesos a kill from world.json: [min, max, chance %, "wiki" (measured) or "reported" (player reports), kills sampled]
+    MESOS = {n: mb["meso"] for n, mb in MOB.items() if mb.get("meso")}
+    if not MESOS:   # a world.json from before mesos moved into it: player reports only
+        try:
+            rp = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mesos_reported.json"), encoding="utf-8"))
+            MESOS = {n: list(v[:3]) + ["reported", None] for n, v in rp.get("mobs", rp).items() if isinstance(v, list)}
+        except Exception: pass
+    # spawn rows add up per monster (older world.json files list one row per spawn group)
+    for m in M.values():
+        tot = {}
+        for n, c in m.get("mobs") or []: tot[n] = tot.get(n, 0) + c
+        m["mobs"] = sorted(([n, c] for n, c in tot.items()), key=lambda x: -x[1])
     # who drops what, where each monster lives, which quests send you after it
     drops = {}
     for item, g in ITEMS.items():
@@ -173,15 +221,38 @@ def build(world, guide, summary, notes, out):
             qq = Ev / A; c = 1 if qq <= 1 - f else 0 if qq >= 1 + f else (1 + f - qq) / (2 * f)
         return dmg, c + (1 - c) * 0.08
 
+    # a spawn point with a long timer (wiki respawn_seconds) can't refill as often as a normal one: map.html counts a normal
+    # map as refilling every 7.56 s with 3 of 4 points up solo (0.6 x 3600 / 7.56 kills an hour per point), so a point on an
+    # N-second timer counts as min(1, 12.6 / N) of a normal point ("ne" below).
     def stats(m):
-        tot = e = hp = lv = 0; maxlv = 0; worst = None
+        tot = e = hp = lv = 0; maxlv = 0; worst = None; ne = 0
+        for n, c, rs in m.get("groups") or [[n, c, None] for n, c in m["mobs"]]:
+            mb = MOB.get(n)
+            if mb and not mb.get("boss") and not mb.get("variant"): ne += c * min(1.0, 12.6 / rs) if rs else c
         for n, c in m["mobs"]:
             mb = MOB.get(n)
-            if not mb or mb.get("boss"): continue
+            if not mb or mb.get("boss") or mb.get("variant"): continue
             tot += c; e += mb["exp"] * c; hp += mb["hp"] * c; lv += mb["lv"] * c; maxlv = max(maxlv, mb["lv"])
             if not worst or mb["atk"] > MOB[worst]["atk"]: worst = n
         if not tot or not hp: return None
-        return {"n": tot, "eph": e / hp * 100, "lv": lv / tot, "maxlv": maxlv, "worst": worst}
+        return {"n": tot, "ne": ne, "eph": e / hp * 100, "lv": lv / tot, "maxlv": maxlv, "worst": worst}
+
+    # Class fit. Magicians hit magic defense, everyone else weapon defense (game files), damage x 100 / (DEF + 100) as in
+    # map.html. Elements (wiki Elements, Skills): from the 2nd job at 30 magicians have Fire and Poison (Fire/Poison Wizard),
+    # Ice and Lightning (Ice/Lightning Wizard) or Holy (Cleric; Heal also hurts undead). The game files say which element a
+    # monster is weak to, not by how much, so a weakness only nudges the ranking (x1.25) and is never shown as a damage figure.
+    MAGE_EL = {"Fire", "Poison", "Ice", "Lightning", "Holy"}
+    def els(v): return {x.strip() for x in (v or "").split(",") if x.strip()}
+    def fit(m, cls, L):
+        tot = f = 0
+        for n, c in m["mobs"]:
+            mb = MOB.get(n)
+            if not mb or mb.get("boss") or mb.get("variant"): continue
+            d = mb.get("mdef" if cls == "Magician" else "wdef") or 0
+            k = 100 / (d + 100)
+            if cls == "Magician" and L >= 30 and (els(mb.get("weak")) & MAGE_EL or mb.get("undead")): k *= 1.25
+            tot += c; f += k * c
+        return f / tot if tot else 1
 
     def rank(L, cls, picks):
         out = []
@@ -191,9 +262,13 @@ def build(world, guide, summary, notes, out):
             if not st: continue
             if (st["lv"] < L - 9 or st["lv"] > L + 4 or st["maxlv"] > L + 12) and p not in picks: continue
             dmg, hit = touch(MOB[st["worst"]], L, cls); cost = dmg * hit * HP[1]
-            sc = st["eph"] * math.sqrt(st["n"]) / (1 + cost / 120) * (1.6 if p in picks else 1) * (0.8 if st["lv"] > L + 2 else 1)
+            sc = st["eph"] * fit(m, cls, L) * math.sqrt(st["ne"]) / (1 + cost / 120) * (1.6 if p in picks else 1) * (0.8 if st["lv"] > L + 2 else 1)
             out.append((sc, p, st, dmg, hit, cost))
         out.sort(key=lambda x: -x[0]); return out
+
+    def timers(m):
+        rs = m.get("respawn") or {}
+        return ", ".join(f"{E(n)} every {s} s" for n, s in sorted(rs.items(), key=lambda x: -x[1]))
 
     # ---------------------------------------------------------- a static minimap with portals, NPCs and spawns
     def minimap(m, spawns=True, hl=None):
@@ -239,7 +314,9 @@ def build(world, guide, summary, notes, out):
         intro = []
         if m.get("near") and m["near"] != p: intro.append(f"Nearest town: {mlink(m['near'])}.")
         if m.get("ret") and m["ret"] != p and m["ret"] != m.get("near"): intro.append(f"Return Scroll goes to {mlink(m['ret'])}.")
-        if st: intro.append(f"{st['n']} monsters at once, average level {st['lv']:.0f}, {st['eph']:.1f} EXP per 100 HP.")
+        if st: intro.append(f"{st['n']} monster spawn points, average level {st['lv']:.0f}, {st['eph']:.1f} EXP per 100 HP." +
+                            (f" Monster rate setting in the game files: {m['rate']:g}." if m.get("rate") is not None else ""))
+        if timers(m): intro.append(f"Slow respawns: {timers(m)}.")
         if intro: b += f'<p>{" ".join(intro)}</p>'
         b += minimap(m)
         if hid:
@@ -248,7 +325,7 @@ def build(world, guide, summary, notes, out):
             b += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th></tr>" + "".join(
                 f'<tr><td>{mlink(x[0])}</td><td>{"Hidden portal" if x[1] == "hidden" else "Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{where(m, x[2], x[3])}</small></td></tr>' for x in m["portals"]) + "</table>"
         if mobs_sorted:
-            b += "<h2>Monsters</h2><div class=\"mobs\">" + "".join(mobcard(n, f" ×{c}") for n, c in mobs_sorted if n in MOB) + "</div>"
+            b += "<h2>Monsters</h2><p class=\"note\">×N is the number of spawn points.</p><div class=\"mobs\">" + "".join(mobcard(n, f" ×{c}") for n, c in mobs_sorted if n in MOB) + "</div>"
             dr = []
             for n, _ in mobs_sorted:
                 for it, rate, qo in drops.get(n, []):
@@ -257,6 +334,10 @@ def build(world, guide, summary, notes, out):
                 dr.sort(key=lambda x: -x[0])
                 b += "<h2>Most valuable drops here</h2><table><tr><th>Item</th><th>From</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
                     f'<tr><td>{ilink(it)}{live(it)}</td><td>{blink(n)}</td><td>{rate:g}%</td><td class="n">{meso(PRICE[it])}</td></tr>' for _, it, n, rate in dr[:8]) + "</table>"
+        vm = [(n, c) for n, c in m.get("vmobs") or [] if n in MOB]
+        if vm:
+            b += ("<h2>Party quest and job test monsters</h2><p class=\"note\">Copies made for this map, with their own stats.</p><div class=\"mobs\">" +
+                  "".join(f'<div class="mob"><span></span><span><b>{E(n)} ×{c}</b><small>Lv {MOB[n]["lv"]} · {fmt(MOB[n]["hp"])} HP · {fmt(MOB[n]["exp"])} EXP</small></span></div>' for n, c in sorted(vm, key=lambda x: -x[1])) + "</div>")
         if m.get("npcs"):
             b += "<h2>NPCs</h2><ul>" + "".join(f"<li>{E(n[0])}{' · ' + E(n[3]) if n[3] else ''}</li>" for n in m["npcs"]) + "</ul>"
         if m.get("shops"): b += f'<p class="note">Shops here: {E(", ".join(m["shops"]))}.</p>'
@@ -269,6 +350,7 @@ def build(world, guide, summary, notes, out):
 
     # ---------------------------------------------------------- monster pages
     for n, mb in MOB.items():
+        if mb.get("variant"): continue
         if not homes.get(n) and not drops.get(n) and not qkill.get(n): continue
         sp = sprite_url(n)
         ev = sum(r / 100 * PRICE[i] for i, r, qo in drops.get(n, []) if not qo and i in PRICE and r)
@@ -279,7 +361,9 @@ def build(world, guide, summary, notes, out):
         b += ('<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
             ("HP", fmt(mb["hp"])), ("EXP", fmt(mb["exp"])), ("Attack", fmt(mb["atk"])), ("Accuracy", fmt(mb.get("acc"))), ("Avoid", fmt(mb.get("eva"))),
             ("Defense", f'{fmt(mb.get("wdef"))} / {fmt(mb.get("mdef"))} magic'), ("Weak to", E(mb.get("weak") or "Nothing")), ("Resists", E(mb.get("resist") or "Nothing"))]) + "</div>")
-        b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (f" Drops worth about {meso(ev)} mesos a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
+        mz = mb.get("meso")
+        b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (
+            (f" Drops {mz[0]} to {mz[1]} mesos" + (f" {mz[2]}% of the time" if mz[2] else "") + (f" (measured over {mz[4]} kills on the wiki)." if mz[3] == "wiki" and mz[4] else " (wiki measurement)." if mz[3] == "wiki" else " (player reports).")) if mz else "") + (f" Drops worth about {meso(ev)} mesos a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
         if homes.get(n):
             b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>How many</th><th>Level range</th></tr>" + "".join(
                 f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
@@ -321,11 +405,21 @@ def build(world, guide, summary, notes, out):
                 (", ".join(f"{c} {i}" for i, c in q.get("need", [])[:3]) or ", ".join(f"hunt {c} {k}" for k, c, *_ in q.get("kill", [])[:2]) or "what to do") +
                 (f", rewards {fmt(q['exp'])} EXP" if q.get("exp") else "") + ".")
         b = f'<h1>{E(q["n"])}</h1><p class="sub">MapleStory Classic quest · Level {q["lv"]}+ · {E(q.get("a") or "")}{" · Repeatable" if q.get("rep") else ""}</p>'
+        extra = []
+        if q.get("lv2"): extra.append(f"Turn it in at level {q['lv2']}.")
+        if q.get("cost"): extra.append(f"Costs {fmt(q['cost'])} mesos to accept.")
+        for pr in q.get("prof") or []: extra.append(f"Needs {E(pr[0])} level {pr[1]}.")
+        if q.get("ended"): extra.append("This event has ended" + (f" ({E(q['to'][:10])})" if q.get("to") else "") + ". The quest can't be started now.")
+        elif q.get("from") or q.get("to"): extra.append("Event quest" + (f", opens {E(q['from'][:10])}" if q.get("from") else "") + (f", ends {E(q['to'][:10])}" if q.get("to") else "") + ".")
+        if q.get("start"): extra.append("You're given " + ", ".join(ilink(i, c) for i, c in q["start"]) + " when you start.")
+        if q.get("unconfirmed"): extra.append("Sources disagree on: " + E(", ".join(q["unconfirmed"])) + ". Shown from the game data.")
+        if extra: b += '<div class="tip">' + "<br>".join(extra) + "</div>"
         b += '<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
             ("Start from", E(q["g"])), ("Level", f"{q['lv']}+"), ("Who can do it", jobs_text(q.get("jobs") or [])),
             ("EXP", fmt(q.get("exp"))), ("Mesos", fmt(q.get("meso"))), ("Fame", fmt(q.get("fame")))] if v not in ("0",)) + "</div>"
         if where_g:
-            b += f"<p>{E(q['g'])} stands in {', '.join(mlink(p) for p in where_g[:4])}.</p>"
+            npic = f'<img class="npcpic" src="{IO}/npc/{q["gid"]}/icon" alt="" loading="lazy">' if q.get("gid") is not None else ""
+            b += f"<p>{npic}{E(q['g'])} stands in {', '.join(mlink(p) for p in where_g[:4])}.</p>"
             gm = next((M[p] for p in where_g if M[p].get("mm")), None)
             if gm:
                 np_ = next((n for n in gm.get("npcs") or [] if n[0] == q["g"]), None)
@@ -335,19 +429,36 @@ def build(world, guide, summary, notes, out):
             if pre: b += "<h2>Finish first</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in pre) + "</ul>"
         if q.get("kill"):
             b += "<h2>Hunt</h2><ul>" + "".join(
-                f"<li>{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mlink(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
+                f"<li>" + (f'<img class="ms" src="{sprite_url(k[0])}" alt="" loading="lazy">' if sprite_url(k[0]) else "") + f"{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mlink(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
         if q.get("need"):
-            rows = ""
+            acc = {"fee": 0, "cat": {}, "base": {}}; rows = ""; crafted = 0
             for i, c in q["need"]:
-                g = ITEMS.get(i) or {}
-                src = ", ".join(f"{blink(d[0])} {d[2]:g}%" if d[2] is not None else blink(d[0]) for d in (g.get("d") or [])[:3])
-                rows += f'<tr><td>{ilink(i)}{live(i)}<br><small>{("Dropped by " + src) if src else ""}</small></td><td class="n">×{c:,}</td><td class="n">{meso(PRICE[i] * c) if i in PRICE else ""}</td></tr>'
-            b += f"<h2>Bring</h2><table><tr><th>Item</th><th>Need</th><th>Buy it all for</th></tr>{rows}</table>"
-        if q.get("get"):
-            b += "<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)}</li>" for i, c in q["get"]) + ("<li>" + fmt(q["exp"]) + " EXP</li>" if q.get("exp") else "") + ("<li>" + fmt(q["meso"]) + " mesos</li>" if q.get("meso") else "") + "</ul>"
+                nd = plan(i, c, frozenset(), acc)
+                price = f'<small>{meso(PRICE[i] * c)} on the FM</small>' if i in PRICE else '<small>not traded yet</small>'
+                rows += f'<div class="need"><div class="nl">{ilink(i)}{live(i)}<span class="n">×{c:,} {price}</span></div>'
+                if nd["r"]:
+                    crafted += 1
+                    rows += craft_line(nd) + '<div class="tk">' + "".join(tree_html(k) for k in nd["kids"]) + "</div>"
+                else: rows += srcs(i)
+                rows += "</div>"
+            b += f"<h2>Bring</h2>{rows}"
+            if crafted:
+                b += ('<div class="basebox"><b>Everything to gather</b>' + "".join(f"<span>{ilink(n, c)}</span>" for n, c in sorted(acc["base"].items(), key=lambda x: -x[1]))
+                      + (f"<div>{meso(acc['fee'])} mesos in crafting fees" + "".join(f" · catalyst {E(itempages.shown(n))} ×{c}" for n, c in acc["cat"].items()) + "</div>" if acc["fee"] or acc["cat"] else "") + "</div>")
+            tot = sum(PRICE[i] * c for i, c in q["need"] if i in PRICE)
+            if tot: b += f'<p>Buy it all on the Free Market: <b>{"about" if all(i in PRICE for i, _ in q["need"]) else "at least"} {meso(tot)} mesos</b>.</p>'
+        if q.get("get") or q.get("get2") or q.get("skill") or q.get("exp") or q.get("meso"):
+            b += ("<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)}</li>" for i, c in q.get("get") or [])
+                  + "".join(f"<li>{ilink(x[0], x[1])} <small>· {E(x[2])}</small></li>" for x in q.get("get2") or [])
+                  + "".join(f"<li>Skill: {E(n)}</li>" for n in q.get("skill") or [])
+                  + ("<li>" + fmt(q["exp"]) + " EXP</li>" if q.get("exp") else "") + ("<li>" + fmt(q["meso"]) + " mesos</li>" if q.get("meso") else "") + "</ul>")
         nx = nextq.get(q["id"], [])
         if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
-        b += f'<p style="margin-top:16px"><a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a></p><p class="note">Updated {built}.</p>'
+        br = next((x for x in (notes or {}).get("brackets") or [] if x["lo"] <= max(q["lv"], 1) < x["hi"]), None)
+        b += ('<div class="nextbar">' + f'<a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>'
+              + "".join(f'<a class="alt" href="/quest/{QSLUG[x["id"]]}/">Next: {E(x["n"])}</a>' for x in nx[:2])
+              + (f'<a class="alt" href="/training/level-{br["lo"]}-{br["hi"]}/">Where to train at level {br["lo"]} to {br["hi"]}</a>' if br else "") + "</div>")
+        b += f'<p class="note">Updated {built}.</p>'
         b += BOARD_CTA
         crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
         write(out, f"quest/{s}", page(itempages.fit_title(qtitle(q), "MapleStory Classic quest guide", "Club FM"), desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
@@ -357,7 +468,7 @@ def build(world, guide, summary, notes, out):
     def pick_html(sc, p, st, dmg, hit, cost, cls, L, why=""):
         m = M[p]
         mobs = "".join(mobcard(n, f" ×{c}") for n, c in sorted(m["mobs"], key=lambda x: -x[1]) if n in MOB and not MOB[n].get("boss"))
-        return (f'<div class="pick"><h3>{mlink(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} monsters · {st["eph"]:.1f} EXP per 100 HP</p>'
+        return (f'<div class="pick"><h3>{mlink(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} spawn points · {st["eph"]:.1f} EXP per 100 HP{(" · slow respawns: " + timers(m)) if timers(m) else ""}</p>'
                 + (f"<p>{E(why)}</p>" if why else "") + f'<div class="mobs">{mobs}</div>'
                 f'<p class="note">Touch from {blink(st["worst"])}: about {fmt(dmg)} damage to a level {L} {cls.lower()} in typical gear, hits {round(hit * 100)}% of the time, about {fmt(cost)} mesos of {E(HP[0])} each. Varies with your gear.</p></div>')
     tr_links = []
@@ -367,16 +478,16 @@ def build(world, guide, summary, notes, out):
         s = f"level-{lo}-{hi}"
         b = f"<h1>Where to train from level {lo} to {hi} in MapleStory Classic</h1><p class=\"sub\">Training guide · every class · updated {built}</p>"
         b += "".join(f'<div class="tip">{E(t)}</div>' for t in br.get("tips") or [])
-        b += "<h2>What players recommend</h2>"
+        b += "<h2>Our picks</h2>"
         for x in br.get("picks") or []:
             if x["map"] not in M: continue
             st = stats(M[x["map"]])
             if not st: continue
             dmg, hit = touch(MOB[st["worst"]], L, "Bowman")
             b += pick_html(0, x["map"], st, dmg, hit, dmg * hit * HP[1], "Bowman", L, x["why"] + (f" Best for: {', '.join(x['classes'])}." if x.get("classes") else ""))
-        b += f"<h2>Best maps by the numbers at level {L}</h2><p>Ranked by EXP per HP, monster count and potion cost of getting hit.</p><ol>"
+        b += f"<h2>Best maps by the numbers at level {L}</h2><p>Ranked by EXP per HP, spawn points (fewer when respawns are slow) and potion cost of getting hit.</p><ol>"
         for sc, p, st, dmg, hit, cost in rank(L, "Bowman", picks)[:10]:
-            b += f'<li>{mlink(p)} <small>· {st["eph"]:.1f} EXP per 100 HP · {st["n"]} monsters · about {fmt(cost)} mesos of potions a touch</small></li>'
+            b += f'<li>{mlink(p)} <small>· {st["eph"]:.1f} EXP per 100 HP · {st["n"]} spawn points · about {fmt(cost)} mesos of potions a touch</small></li>'
         b += "</ol><h2>By class</h2><p>" + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
         b += '<p style="margin-top:16px"><a href="/map.html#train">Enter your level and class</a> for a personal list and route.</p>'
         crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
@@ -385,7 +496,8 @@ def build(world, guide, summary, notes, out):
         tr_links.append((lo, hi, s, list(picks)[:3]))
     for cls in CLASSES:
         b = f"<h1>{cls} training guide for MapleStory Classic</h1><p class=\"sub\">Where a {cls.lower()} should train at every level · updated {built}</p>"
-        b += f"<p>Top maps at each stage, ranked by EXP per HP, monster count and potion cost for a {cls.lower()} in typical gear. Spots players recommend for {cls}s rank higher.</p>"
+        b += (f"<p>Top maps at each stage, ranked by EXP per HP, spawn points (fewer when respawns are slow), the monsters' {'magic' if cls == 'Magician' else 'weapon'} defense and potion cost for a {cls.lower()} in typical gear. Our picks for {cls}s rank higher.</p>" +
+              ("<p>From level 30, maps whose monsters are weak to fire, poison, ice, lightning or holy (or undead) rank higher. The game files say which element a monster is weak to, not how much extra damage it takes.</p>" if cls == "Magician" else ""))
         for br in brackets:
             lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
             picks = {x["map"]: x for x in br.get("picks") or [] if not x.get("classes") or cls in x["classes"]}
@@ -400,7 +512,7 @@ def build(world, guide, summary, notes, out):
 
     # ---------------------------------------------------------- hubs
     b = "<h1>MapleStory Classic training guide</h1><p class=\"sub\">Where to train at every level, for every class · updated " + built + "</p>"
-    b += "<p>From the game's monster and spawn data plus player reports, re-checked weekly. Each spot shows monsters, EXP per HP and potion cost at today's Free Market prices.</p>"
+    b += "<p>From the game files and the MapleStory Classic Wiki: monsters, spawns, respawn times and elements. Each spot shows monsters, EXP per HP and potion cost at today's Free Market prices.</p>"
     b += "<h2>By level</h2><ul>" + "".join(f'<li><a href="/training/{s}/">Level {lo} to {hi}</a> <small>· {E(", ".join(p))}</small></li>' for lo, hi, s, p in tr_links) + "</ul>"
     b += "<h2>By class</h2><ul>" + "".join(f'<li><a href="/training/{c.lower()}/">{c}</a></li>' for c in CLASSES) + "</ul>"
     if notes and notes.get("economy"): b += "<h2>Potions and money</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["economy"]) + "</ul>"
@@ -428,7 +540,48 @@ def build(world, guide, summary, notes, out):
     b += '<p><a href="/quests.html">The Quest Log</a> shows what is open at your level and tracks what you have done.</p>'
     for a in sorted(areas, key=lambda a: -len(areas[a])):
         b += f"<h2>{E(a)} <small>{len(areas[a])}</small></h2><ul class=\"toc\">" + "".join(f"<li>{qlink(q)} {('<small>· Lv ' + str(q['lv']) + '</small>') if q['lv'] else ''}</li>" for q in sorted(areas[a], key=lambda q: (q["lv"], q["n"]))) + "</ul>"
+    QBANDS = [(1, 10), (10, 20), (20, 30), (30, 40), (40, 50), (50, 70), (70, 200)]
+    b = b.replace('<p><a href="/quests.html">', '<p><b>By level:</b> ' + " · ".join(f'<a href="/quests/level-{lo}-{hi}/">{lo} to {hi if hi < 200 else str(lo) + "+"}</a>'.replace(f"{lo} to {lo}+", f"{lo}+") for lo, hi in QBANDS) + ' · <a href="/crafting/">Crafting recipes</a></p><p><a href="/quests.html">', 1)
     write(out, "quests", page("All MapleStory Classic quests · items, monsters and rewards · Club FM", "Every MapleStory Classic quest: level, who gives it, the items to bring, monsters to hunt and the rewards.", "/quests/", [("Quest guides", "/quests/")], b)); paths.append("/quests/")
+
+    # ---------------------------------------------------------- quests by level: what people search for ("maplestory classic quests level 30")
+    def qcost(q): return sum(PRICE[i] * c for i, c in q.get("need") or [] if i in PRICE)
+    for lo, hi in QBANDS:
+        band = sorted([q for q in QS if lo <= max(q["lv"], 1) < hi and not q.get("ended")], key=lambda q: (-(q.get("exp") or 0), q["n"]))
+        if not band: continue
+        lab = f"level {lo} to {hi}" if hi < 200 else f"level {lo} and up"
+        rows = "".join(f'<tr><td>{qlink(q)}<br><small>Lv {q["lv"]} · {E(q["g"])}{(" · " + E(q.get("town"))) if q.get("town") else ""}</small></td><td class="n">{fmt(q.get("exp"))}</td>'
+                       f'<td class="n">{"talk only" if not q.get("need") and not q.get("kill") else (meso(qcost(q)) if qcost(q) else "gather")}</td></tr>' for q in band)
+        b = (f"<h1>MapleStory Classic quests for {lab}</h1><p class=\"sub\">{len(band)} quests, most EXP first · updated {built}</p>"
+             f'<p>Tap a quest for what to bring, crafted items broken down to base materials, and rewards. <a href="/quests.html">Track them in your Quest Log</a>.</p>'
+             f"<table><tr><th>Quest</th><th>EXP</th><th>Buy it all</th></tr>{rows}</table>"
+             + '<p class="note">' + " · ".join(f'<a href="/quests/level-{a}-{z}/">Level {a} to {z if z < 200 else str(a) + "+"}</a>'.replace(f"{a} to {a}+", f"{a}+") for a, z in QBANDS if (a, z) != (lo, hi)) + "</p>")
+        top = ", ".join(q["n"] for q in band[:3])
+        write(out, f"quests/level-{lo}-{hi}", page(itempages.fit_title(f"MapleStory Classic quests for {lab}", "best EXP", "Club FM"),
+              f"Every MapleStory Classic quest for {lab}, most EXP first: {top}. Items to bring, crafted materials and rewards.", f"/quests/level-{lo}-{hi}/", [("Quest guides", "/quests/"), (lab.capitalize(), f"/quests/level-{lo}-{hi}/")], b))
+        paths.append(f"/quests/level-{lo}-{hi}/")
+
+    # ---------------------------------------------------------- crafting recipes by profession
+    profs = {}
+    for n, g in ITEMS.items():
+        for r in g.get("c") or []: profs.setdefault(r[0], []).append((n, r))
+    if profs:
+        for pf, recs in profs.items():
+            recs.sort(key=lambda x: (x[1][1], x[0]))
+            rows = "".join(f'<tr><td>{ilink(n)}{(" ×" + str(r[4])) if (r[4] or 1) > 1 else ""}<br><small>Lv {r[1]}{(" · catalyst " + E(itempages.shown(r[5][0]))) if r[5] else ""}</small></td>'
+                           f'<td>{"<br>".join(ilink(i, c) for i, c in r[2])}</td><td class="n">{meso(r[3]) if r[3] else "free"}</td></tr>' for n, r in recs)
+            ps = slug(pf)
+            b = (f"<h1>MapleStory Classic {E(pf)} recipes</h1><p class=\"sub\">{len(recs)} recipes by crafting level · updated {built}</p>"
+                 f"<table><tr><th>Makes</th><th>Needs</th><th>Fee</th></tr>{rows}</table>"
+                 + '<p class="note">' + " · ".join(f'<a href="/crafting/{slug(x)}/">{E(x)}</a>' for x in sorted(profs) if x != pf) + "</p>")
+            write(out, f"crafting/{ps}", page(itempages.fit_title(f"{pf} recipes", "MapleStory Classic crafting", "Club FM"),
+                  f"Every MapleStory Classic {pf} recipe: what it makes, the materials, crafting level and fee.", f"/crafting/{ps}/", [("Crafting", "/crafting/"), (pf, f"/crafting/{ps}/")], b))
+            paths.append(f"/crafting/{ps}/")
+        b = (f"<h1>MapleStory Classic crafting recipes</h1><p class=\"sub\">{sum(len(v) for v in profs.values())} recipes in {len(profs)} professions · updated {built}</p><ul>"
+             + "".join(f'<li><a href="/crafting/{slug(pf)}/">{E(pf)}</a> <small>· {len(recs)} recipes</small></li>' for pf, recs in sorted(profs.items())) + "</ul>"
+             + '<p>Quests that need a crafted item show the whole recipe down to base materials in the <a href="/quests.html">Quest Log</a>.</p>')
+        write(out, "crafting", page("MapleStory Classic crafting recipes · every profession · Club FM", "Every MapleStory Classic crafting recipe by profession: materials, crafting level and meso fee.", "/crafting/", [("Crafting", "/crafting/")], b))
+        paths.append("/crafting/")
 
     open(os.path.join(out, "item", "world.css"), "w").write(CSS + "\n")
     # pages for things that left the data go away, so nothing stale sits in search
@@ -443,14 +596,25 @@ def build(world, guide, summary, notes, out):
     for n, mb in MOB.items():
         if not mb.get("id") or n not in BSLUG: continue
         best = max(homes.get(n, []), key=lambda x: x[1], default=None)
-        # 5: mesos a kill drops [min, max, chance %] as players report it; 6: drops with a measured rate [[item, %]]
-        mz = list(MESOS.get(n) or []) or 0
+        # 5: mesos a kill [min, max, chance %, "wiki" measured or "reported" by players]; 6: drops with a measured rate [[item, %]]
+        if mb.get("variant"): continue
+        mz = list(MESOS.get(n) or [])[:4] or 0
         rated = [[i, r] for i, r, qo in drops.get(n, []) if r and not qo and i != "Meso"]
         mrate = [r for i, r, qo in drops.get(n, []) if i == "Meso" and r]
-        if mz: mz[2] = round(mrate[0]) if mrate else 70     # how often mesos drop at all: the wiki's kill counts, else about 70%
+        if mz and not mz[2]: mz[2] = round(mrate[0]) if mrate else 70     # how often mesos drop at all: the wiki's kill counts, else about 70%
         mobs_out[n] = [mb["id"], mb.get("lv") or 0, BSLUG[n], best[0] if best else "", MSLUG.get(best[0], "") if best else "", mz, rated]
     os.makedirs(os.path.join(out, "data"), exist_ok=True)
     json.dump(mobs_out, open(os.path.join(out, "data", "mobs.json"), "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+    def _sum(pairs):
+        t = {}
+        for p, c in pairs: t[p] = t.get(p, 0) + c
+        return t
+    # data/play.json: what the Quests and Training pages link to (quest guide pages, where monsters live, where NPCs stand)
+    play = {"q": {str(q["id"]): QSLUG[q["id"]] for q in QS},
+            "mob": {n: [BSLUG[n], [[p, MSLUG[p]] for p, c in sorted(_sum(homes.get(n, [])).items(), key=lambda x: -x[1])[:3]]] for n in MOB if not MOB[n].get("boss") or homes.get(n)},
+            "npc": {n: [[p, MSLUG[p]] for p in ps[:2]] for n, ps in npc_at.items()}}
+    os.makedirs(os.path.join(out, "data"), exist_ok=True)
+    with open(os.path.join(out, "data", "play.json"), "w", encoding="utf-8") as f: json.dump(play, f, separators=(",", ":"), ensure_ascii=False)
     return paths, QSLUG, BSLUG, MSLUG
 
 

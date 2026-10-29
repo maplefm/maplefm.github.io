@@ -1,0 +1,20 @@
+{
+ "about": "Known disagreements between the game files (maplestory.io MCW) and the MapleStory Classic Wiki. Our data keeps the game's value; the weekly fact check lists these under 'unconfirmed' instead of failing. Add an entry once a new disagreement has been looked at; remove it when the sources agree again. ignore_new: source entries that look new but are not released content.",
+ "disagree": [
+  {"kind": "quest", "id": "1002", "field": "need", "note": "Roger's Apple: the game lists item 2010000 with no count; the wiki says 1"},
+  {"kind": "quest", "id": "1002", "field": "exp", "note": "Roger's Apple: game 0, wiki 2"},
+  {"kind": "quest", "id": "1002", "field": "get", "note": "Roger's Apple: game no item reward, wiki 3 Apples"},
+  {"kind": "quest", "id": "20002", "field": "exp", "note": "Test of Qualification (Warrior): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20003", "field": "exp", "note": "Proof of Qualification (Warrior): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20102", "field": "exp", "note": "Test of Qualification (Magician): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20103", "field": "exp", "note": "Proof of Qualification (Magician): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20202", "field": "exp", "note": "Test of Qualification (Bowman): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20203", "field": "exp", "note": "Proof of Qualification (Bowman): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20302", "field": "exp", "note": "Test of Qualification (Thief): game 0, wiki 3150"},
+  {"kind": "quest", "id": "20303", "field": "exp", "note": "Proof of Qualification (Thief): game 0, wiki 3150"}
+ ],
+ "ignore_new": [
+  {"kind": "quest", "id": "First Time Together", "note": "wiki-only, pre-launch, no id, giver or level"},
+  {"kind": "quest", "id": "Rain's Maple Quiz", "note": "wiki-only, pre-launch, no id"}
+ ]
+}

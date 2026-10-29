@@ -6,10 +6,18 @@ Sources:
   2. The MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0) through its Cargo tables: quest givers and
      regions, crafting recipes, monster drops measured by players, NPC shops, reactor (box) drops.
 
+Wiki quest rows are joined to game quests by id (the wiki carries the game id), by name only as a fallback.
+Event quests whose window has closed are kept with "ended": true. Optional per-quest fields, omitted when empty:
+  get2 [[item, count, note]] rewards bound to a class, gender or chance ("Warrior only", "one of these at random (20%)");
+       "get" keeps only the always-given ones
+  lv2 turn-in level when above lv, cost mesos to accept, start [[item, count]] handed over at the start,
+  skill [names] rewarded, prof [[profession, level]] required, from/to event window (ISO), town of the giver,
+  unconfirmed [fields] where the game and the wiki disagree (the game's value is kept)
+
 Run daily by .github/workflows/itemguide.yml, so new quests show up the day either source has them.
   python tools/itemguide.py OUT.json [itemdb.json]
 """
-import sys, os, json, time, re, html, urllib.request, urllib.parse
+import sys, os, json, time, re, html, datetime, urllib.request, urllib.parse
 
 IO = "https://maplestory.io/api/MCW/1"
 WIKI = "https://mapleclassic.wiki/api.php"
@@ -73,21 +81,69 @@ def ingredients(s):
     return out
 
 
+def norm2(name):
+    """norm() that also ignores the game's '[Event] ' style prefixes and the wiki's '(Warrior)' style suffixes"""
+    n = re.sub(r"^\s*\[[^\]]*\]\s*", "", html.unescape(str(name or "")))
+    n = re.sub(r"\s*\((?:quest item|warrior|magician|bowman|thief|pirate|beginner)\)\s*$", "", n, flags=re.I)
+    return norm(n)
+
+
+JUNK = "�?"
+
+
+def clean_name(game, wiki=""):
+    """game strings carry U+FFFD (and the odd '?') where the original had a character maplestory.io could not decode.
+    When the wiki row (joined by id) spells the same name, take the real character from it; otherwise a space."""
+    s = str(game or "").strip()
+    wiki = str(wiki or "").strip()
+    if wiki and any(c in s for c in JUNK):
+        body = re.sub(r"^\[[^\]]*\]\s*", "", s); pre = s[:len(s) - len(body)]
+        pat = "".join("(.?)" if c in JUNK else (r"\s*" if c == " " else re.escape(c)) for c in body)
+        m = re.fullmatch(pat, wiki)
+        if m:
+            it = iter(m.groups())
+            s = pre + "".join(next(it) if c in JUNK else c for c in body)
+    s = s.replace("\ufffd", " ")
+    if not wiki:
+        s = re.sub(r"(?<=\w)\?(?=\w)", " ", s).replace("?&", " &").replace("&?", "& ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+JOBBITS = [(1, "Beginner"), (2, "Warrior"), (4, "Magician"), (8, "Bowman"), (16, "Thief"), (32, "Pirate")]
+
+
+def job_note(mask):
+    """game reward 'job' is a bitmask; Classic only has the explorer bits (higher bits are other branches)"""
+    js = [n for b, n in JOBBITS if int(mask) & b]
+    return (" or ".join(js) + " only") if js and len(js) < len(JOBBITS) else ""
+
+
+def iso(t):
+    try: return datetime.datetime.fromisoformat(str(t)[:19])
+    except (TypeError, ValueError): return None
+
+
 def main():
     out_path = sys.argv[1]
     names = {}
     if len(sys.argv) > 2 and os.path.exists(sys.argv[2]):
         for r in (json.load(open(sys.argv[2], encoding="utf-8")).get("items") or []):
-            if r and len(r) > 1 and r[1]: names[int(r[1])] = r[0]
+            if r and len(r) > 1 and r[1]: names[int(r[1])] = str(r[0]).strip()
     G = {}                                    # item name -> guide
+    now = datetime.datetime.utcnow()
 
     def g(name):
         return G.setdefault(name, {"q": [], "d": [], "c": [], "u": 0, "s": [], "r": []})
 
     # ---- wiki tables
-    wq = cargo("quests", ["id", "name_en", "required_level", "giver", "region", "repeatable", "profession", "profession_level"])
+    wq = cargo("quests", ["_pageName=page", "id", "name_en", "required_level", "complete_level", "giver", "turn_in", "region", "area", "repeatable", "profession", "profession_level",
+                          "meso_cost", "exp_reward", "meso_reward", "fame_reward", "available_until"])
     wqi = cargo("quest_required_items", ["quest_id", "item_id", "quantity"])
-    rec = cargo("recipes", ["profession", "level", "output_item", "output_count", "meso_cost", "catalyst", "catalyst_count", "ingredients"])
+    wqr = cargo("quest_rewards", ["quest_id", "item_id", "quantity", "reward_type", "choice_group", "job", "gender", "chance"])
+    wqe = cargo("quest_enemies", ["quest_id", "monster_id", "quantity"])
+    wnpc = cargo("npcs", ["name_en", "location", "map", "region"])
+    witems = cargo("items", ["id", "name_en"])
+    rec = cargo("recipes", ["profession", "profession_id", "level", "output_item", "output_count", "meso_cost", "catalyst", "catalyst_count", "ingredients"])
     mons = cargo("monsters", ["name_en", "level", "primary_location", "region"])
     drops = cargo("monster_drops", ["monster_id", "item_id", "drop_rate", "sample_kills", "quest_flag"])
     shops = cargo("shops", ["id", "name_en", "npc", "town", "map", "currency"])
@@ -103,109 +159,198 @@ def main():
     for n in (get(IO + "/npc") or []):
         if isinstance(n, dict) and n.get("name"): npc_id.setdefault(str(n["name"]).strip().lower(), n.get("id"))
     print("mob ids", len(mob_id), "npc ids", len(npc_id))
-    wq_by_name = {str(q.get("name_en") or "").strip().lower(): q for q in wq}
-    wq_by_norm = {norm(q.get("name_en")): q for q in wq if q.get("name_en")}
+    wq_by_id = {int(q["id"]): q for q in wq if str(q.get("id") or "").strip().isdigit()}
     mon_lv = {str(m.get("name_en") or ""): int(num(m.get("level"))) for m in mons}
     mon_where = {str(m.get("name_en") or ""): (m.get("primary_location") or m.get("region") or "") for m in mons}
+    npc_town = {}
+    for n in wnpc:
+        if n.get("name_en") and n.get("location"):
+            npc_town.setdefault(str(n["name_en"]).strip().lower(), n["location"])
+            npc_town.setdefault(re.sub(r"\s*\([^)]*\)\s*$", "", str(n["name_en"])).strip().lower(), n["location"])
+    prof_name = {int(num(r.get("profession_id"))): r.get("profession") for r in rec if r.get("profession_id") and r.get("profession")}
+    # wiki item pages carry the game item id: "Dark Marble (Warrior)" is item 4031017, which the game calls "Dark Marble"
+    wiki_iid = {str(r.get("name_en") or "").strip(): int(r["id"]) for r in witems if str(r.get("id") or "").strip().isdigit()}
 
-    # ---- game data: every quest's required items
-    seen = set()
+    def wname(page):
+        page = str(page or "").strip()
+        i = wiki_iid.get(page)
+        return names.get(i) or page if i else page
+
+    # ---- game data: every quest
     qlist = get(IO + "/quest") or []
     print("game quests", len(qlist))
+    game_ids = {q["id"] for q in qlist if isinstance(q, dict)}
     npc_name = {}
     mob_name = {}
     for m in (get(IO + "/mob") or []):
         if isinstance(m, dict) and m.get("id") is not None: mob_name[m["id"]] = m.get("name") or ""
-    allq = []
+    allq, hidden, page_qid = [], [], {}
+
     def item_name(iid):
         nm = names.get(iid)
         if not nm:
             n = get(f"{IO}/item/{iid}/name")
-            nm = (n.get("name") if isinstance(n, dict) else None) or str(iid)
+            nm = (str(n.get("name") or "").strip() if isinstance(n, dict) else None) or str(iid)
             names[iid] = nm
         return nm
+
+    def npcn(nid):
+        if nid and nid not in npc_name:
+            n = get(f"{IO}/npc/{nid}/name"); npc_name[nid] = str((n.get("name") if isinstance(n, dict) else n) or "").strip()
+        return npc_name.get(nid, "")
+
+    def wrow(gid, gname):
+        """the wiki row for a game quest: by id (289 of the wiki's rows carry it), else by name among rows with no game id"""
+        w = wq_by_id.get(gid)
+        if w and norm2(w.get("name_en")) == norm2(gname): return w
+        for w in wq:
+            wid = str(w.get("id") or "").strip()
+            if (not wid.isdigit() or int(wid) not in game_ids) and norm2(w.get("name_en")) == norm2(gname): return w
+        return {}
+
+    def wrows(table, w, col="quest_id"):
+        ps = {str(w.get(k) or "").strip() for k in ("page", "name_en")} - {""}   # child tables key on the page, "Hero's Gladius (quest)"
+        return [r for r in table if str(r.get(col) or "").strip() in ps] if w else []
+
     for k, q in enumerate(qlist):
         d = get(f"{IO}/quest/{q['id']}")
         if not d or "id" not in d: continue
         try:
             st0, rc = d.get("requirementToStart") or {}, d.get("requirementToComplete") or {}
-            rw = d.get("rewardOnComplete") or {}
-            nm0 = str(d.get("name") or q.get("name") or "").strip()
-            w0 = wq_by_name.get(nm0.lower()) or wq_by_norm.get(norm(nm0)) or {}
-            if "?" in nm0:
-                nm0 = str(w0.get("name_en") or "").strip() or re.sub(r"(?<=\w)\?(?=\w)", " ", nm0).replace("?&", " &").replace("&?", "& ")
+            rw, rs = d.get("rewardOnComplete") or {}, d.get("rewardOnStart") or {}
+            raw = str(d.get("name") or q.get("name") or "")
+            w0 = wrow(d["id"], raw)
+            nm0 = clean_name(raw, str(w0.get("name_en") or ""))
+            t_from, t_to = iso(st0.get("startTime")), iso(st0.get("endTime"))
+            if not t_to and w0.get("available_until"): t_to = iso(w0["available_until"])
+            ended = bool(t_to and t_to < now)       # event over: kept (its guide page still answers searches), marked ended
             gid0 = st0.get("npcId")
-            if gid0 and gid0 not in npc_name:
-                n = get(f"{IO}/npc/{gid0}/name"); npc_name[gid0] = (n.get("name") if isinstance(n, dict) else n) or ""
-            allq.append({
-                "id": d["id"], "n": nm0, "lv": int(st0.get("levelMinimum") or num(w0.get("required_level")) or 0),
-                "g": w0.get("giver") or npc_name.get(gid0, ""), "gid": gid0, "a": w0.get("region") or d.get("areaName") or "",
-                "rep": 1 if str(w0.get("repeatable") or "0") == "1" else 0,
+            giver = str(w0.get("giver") or "").strip() or npcn(gid0)
+            lv = int(st0.get("levelMinimum") or num(w0.get("required_level")) or 0)
+            need = [[item_name(int(x["id"])), int(x["count"])] for x in (rc.get("items") or []) if int(x.get("count") or 0) > 0]
+            # rewards: always-given ones in "get"; class-, gender- or chance-bound ones in "get2" with a note
+            ritems = [x for x in (rw.get("items") or []) if int(x.get("count") or 0) > 0]
+            genders = {x.get("gender") for x in ritems if "gender" in x}
+            wr_items = [r for r in wrows(wqr, w0) if r.get("reward_type") == "item"]
+            wr_by = {norm2(wname(r.get("item_id"))): r for r in wr_items}
+            n_choice = sum(1 for r in wr_items if r.get("choice_group") in ("random", "choice"))
+            get_, get2 = [], []
+            for x in ritems:
+                nm, c = item_name(int(x["id"])), int(x["count"])
+                wr_ = wr_by.get(norm2(nm)) or {}
+                notes = []
+                jn = job_note(x["job"]) if x.get("job") else (f"{wr_['job']} only" if wr_.get("job") else "")
+                if jn: notes.append(jn)
+                if wr_.get("gender"): notes.append(f"{str(wr_['gender']).lower()} only")
+                elif "gender" in x and len(genders) > 1: notes.append("female only" if x["gender"] else "male only")
+                if wr_.get("choice_group") == "random" and n_choice > 1:
+                    notes.append(f"one of these at random ({int(num(wr_['chance']))}%)" if wr_.get("chance") else "one of these at random")
+                elif wr_.get("choice_group") == "choice" and n_choice > 1:
+                    notes.append("choose one of these")
+                (get2.append([nm, c, ", ".join(notes)]) if notes else get_.append([nm, c]))
+            if not ritems and d.get("rewardSummary"):  # rewards handed out by script only show in the quest's reward summary
+                for iid, c in re.findall(r"#i(\d+)#[^#]*#t\d+#\s*x\s*(\d+)", str(d["rewardSummary"])):
+                    get_.append([item_name(int(iid)), int(c)])
+            rec0 = {
+                "id": d["id"], "n": nm0, "lv": lv,
+                "g": giver, "gid": gid0, "a": str(w0.get("area") or d.get("areaName") or w0.get("region") or "").strip(),
+                "rep": 1 if (str(w0.get("repeatable") or "0") == "1" or st0.get("dayByDay") or st0.get("repeatInterval")) else 0,
                 "jobs": st0.get("jobs") or [],
                 "pre": [x.get("id") for x in (st0.get("quests") or []) if isinstance(x, dict) and x.get("state") == 2],
-                "need": [[item_name(int(x["id"])), int(x["count"])] for x in (rc.get("items") or []) if int(x.get("count") or 0) > 0],
+                "need": need,
                 "kill": [[mob_name.get(x.get("id"), str(x.get("id"))), int(x.get("count") or 0), x.get("id")] for x in (rc.get("mobs") or [])],
                 "exp": int(rw.get("exp") or 0), "meso": int(rw.get("money") or rw.get("meso") or 0), "fame": int(rw.get("pop") or rw.get("fame") or 0),
-                "get": [[item_name(int(x["id"])), int(x["count"])] for x in (rw.get("items") or []) if int(x.get("count") or 0) > 0],
+                "get": get_,
                 "end": rc.get("npcId"),
-            })
+            }
+            extra = {
+                "get2": get2,
+                "lv2": int(rc["levelMinimum"]) if int(rc.get("levelMinimum") or 0) > lv else None,
+                "cost": -int(rs["meso"]) if int(rs.get("meso") or 0) < 0 else (int(num(w0.get("meso_cost"))) or None),
+                "start": [[item_name(int(x["id"])), int(x["count"])] for x in (rs.get("items") or []) if int(x.get("count") or 0) > 0],
+                "skill": [prof_name.get(int(s["id"])) or f"skill {s['id']}" for s in (rw.get("skills") or []) if isinstance(s, dict) and s.get("id")],
+                "prof": [[w0["profession"], int(num(w0.get("profession_level")))]] if w0.get("profession") else [],
+                "from": t_from.strftime("%Y-%m-%dT%H:%M") if t_from else None,
+                "to": t_to.strftime("%Y-%m-%dT%H:%M") if t_to else None,
+                "town": npc_town.get(giver.lower()) or npc_town.get(npcn(gid0).lower()) if (giver or gid0) else None,
+                "ended": True if ended else None,
+            }
+            # where the game and the wiki disagree, keep the game's value and say so
+            unc = []
+            if any("count" not in x for x in (rc.get("items") or [])): unc.append("need")
+            wn = {}
+            for r in wrows(wqi, w0): wn[norm2(wname(r.get("item_id")))] = wn.get(norm2(wname(r.get("item_id"))), 0) + int(num(r.get("quantity")))
+            gn = {}
+            for nm, c in need: gn[norm2(nm)] = gn.get(norm2(nm), 0) + c
+            if wn and wn != gn and "need" not in unc: unc.append("need")
+            wk = {}
+            for r in wrows(wqe, w0): wk[norm2(r.get("monster_id"))] = wk.get(norm2(r.get("monster_id")), 0) + int(num(r.get("quantity")))
+            gk = {}
+            for m in rec0["kill"]: gk[norm2(m[0])] = gk.get(norm2(m[0]), 0) + m[1]
+            if wk and wk != gk: unc.append("kill")
+            if w0.get("required_level") and st0.get("levelMinimum") and int(num(w0["required_level"])) != int(st0["levelMinimum"]): unc.append("lv")
+            for fld, col in (("exp", "exp_reward"), ("meso", "meso_reward"), ("fame", "fame_reward")):
+                vals = {int(num(w0[col]))} if w0.get(col) not in (None, "") else set()
+                rows = [int(num(r.get("quantity"))) for r in wrows(wqr, w0) if r.get("reward_type") == fld]
+                if rows: vals.add(sum(rows))
+                if vals and rec0[fld] not in vals: unc.append(fld)
+            if wr_items:
+                wg = {}
+                for r in wr_items: wg[norm2(wname(r.get("item_id")))] = wg.get(norm2(wname(r.get("item_id"))), 0) + int(num(r.get("quantity")))
+                gg = {}
+                for x in get_ + get2: gg[norm2(x[0])] = gg.get(norm2(x[0]), 0) + x[1]
+                if wg != gg: unc.append("get")
+            extra["unconfirmed"] = unc
+            rec0.update({k2: v for k2, v in extra.items() if v})
+            allq.append(rec0)
+            for k2 in ("page", "name_en"):
+                if w0.get(k2): page_qid[str(w0[k2]).strip()] = d["id"]
         except Exception as e:
             print("quest", q.get("id"), e)
-        req = (d.get("requirementToComplete") or {}).get("items") or []
-        need = [(int(x["id"]), int(x["count"])) for x in req if int(x.get("count") or 0) > 0]
-        if not need: continue
-        start = d.get("requirementToStart") or {}
-        name = allq[-1]["n"] if allq and allq[-1]["id"] == d["id"] else str(d.get("name") or q.get("name") or "").strip()
-        wiki = wq_by_name.get(name.lower()) or wq_by_norm.get(norm(name)) or {}
-        giver = wiki.get("giver") or ""
-        nid = start.get("npcId")
-        if not giver and nid:
-            if nid not in npc_name:
-                n = get(f"{IO}/npc/{nid}/name")
-                npc_name[nid] = (n.get("name") if isinstance(n, dict) else n) or ""
-            giver = npc_name[nid]
-        lvl = int(start.get("levelMinimum") or num(wiki.get("required_level")) or 0)
-        region = wiki.get("region") or d.get("areaName") or ""
-        for iid, cnt in need:
-            iname = names.get(iid)
-            if not iname:
-                n = get(f"{IO}/item/{iid}/name")
-                iname = (n.get("name") if isinstance(n, dict) else None) or str(iid)
-                names[iid] = iname
-            key = (norm(name), iname.lower())
-            if key in seen: continue
-            seen.add(key)
-            g(iname)["q"].append([name, lvl, cnt, giver, region, 1 if str(wiki.get("repeatable") or "0") == "1" else 0, nid or npc_id.get(str(giver).lower()), d["id"]])
         if k % 25 == 0: time.sleep(0.3)
+    print("event quests past their window, left out:", hidden)
+
+    # item cards: every quest that asks for the item, one entry per (quest id, item)
+    seen = set()
+    for q in allq:
+        for iname, cnt in q["need"]:
+            if (q["id"], iname) in seen: continue
+            seen.add((q["id"], iname))
+            g(iname)["q"].append([q["n"], q["lv"], cnt, q["g"], q["a"], q["rep"], q["gid"] or npc_id.get(str(q["g"]).lower()), q["id"]])
 
     qid_by_norm = {}
-    for q in allq: qid_by_norm.setdefault(norm(q["n"]), q["id"])
-    # the wiki splits job quests by class, "Finding the Instructor (Warrior)"; the game keeps one name per job id
-    JOB = {"warrior": 100, "magician": 200, "bowman": 300, "thief": 400, "pirate": 500}
-    for q in allq:
-        for jn, jid in JOB.items():
-            if jid in (q.get("jobs") or []): qid_by_norm.setdefault(norm(q["n"] + jn), q["id"])
+    for q in allq: qid_by_norm.setdefault(norm2(q["n"]), q["id"])
+
+    def qid_of(page):
+        page = str(page or "").strip()
+        return page_qid.get(page) or qid_by_norm.get(norm2(page))
 
     # ---- wiki quests the game data doesn't list yet go in the quest log too (the Lith Harbor snail line, the
     # Sleepywood rumor line...), with what the wiki knows: level, giver, region and the items it asks for
-    have = {norm(q["n"]) for q in allq}; have_id = {q["id"] for q in allq}
+    have = {norm2(q["n"]) for q in allq} | {norm2(p) for p in page_qid}; have_id = {q["id"] for q in allq} | set(hidden)
     for w in wq:
         nm, wid = str(w.get("name_en") or "").strip(), str(w.get("id") or "").strip()
-        if not nm or not wid.isdigit() or int(wid) in have_id or norm(nm) in have: continue
-        have.add(norm(nm))
-        allq.append({"id": int(wid), "n": nm, "lv": int(num(w.get("required_level"))), "g": w.get("giver") or "", "gid": npc_id.get(str(w.get("giver") or "").lower()),
-                     "a": w.get("region") or "", "rep": 1 if str(w.get("repeatable") or "0") == "1" else 0, "jobs": [], "pre": [],
-                     "need": [[str(r.get("item_id") or "").strip(), int(num(r.get("quantity")))] for r in wqi if str(r.get("quest_id") or "").strip().lower() == nm.lower() and int(num(r.get("quantity"))) > 0],
-                     "kill": [], "exp": 0, "meso": 0, "fame": 0, "get": [], "end": None, "wiki": 1})
+        if not nm or not wid.isdigit() or int(wid) in have_id or norm2(nm) in have: continue
+        if w.get("available_until") and iso(w["available_until"]) and iso(w["available_until"]) < now: continue
+        have.add(norm2(nm))
+        q = {"id": int(wid), "n": nm, "lv": int(num(w.get("required_level"))), "g": w.get("giver") or "", "gid": npc_id.get(str(w.get("giver") or "").lower()),
+             "a": w.get("area") or w.get("region") or "", "rep": 1 if str(w.get("repeatable") or "0") == "1" else 0, "jobs": [], "pre": [],
+             "need": [[wname(r.get("item_id")), int(num(r.get("quantity")))] for r in wrows(wqi, w) if int(num(r.get("quantity"))) > 0],
+             "kill": [], "exp": int(num(w.get("exp_reward"))), "meso": int(num(w.get("meso_reward"))), "fame": int(num(w.get("fame_reward"))), "get": [], "end": None, "wiki": 1}
+        if npc_town.get(str(q["g"]).lower()): q["town"] = npc_town[str(q["g"]).lower()]
+        allq.append(q); page_qid[nm] = q["id"]; page_qid[str(w.get("page") or nm).strip()] = q["id"]
+        for iname, cnt in q["need"]:
+            if (q["id"], iname) not in seen:
+                seen.add((q["id"], iname)); g(iname)["q"].append([nm, q["lv"], cnt, q["g"], q["a"], q["rep"], q["gid"], q["id"]])
     print("quests in the log", len(allq))
 
-    # ---- wiki quests the game data doesn't list yet (newly added ones)
+    # ---- wiki required items for quests that are neither in the game data nor a quest row of their own
     for r in wqi:
-        qn, iname, cnt = str(r.get("quest_id") or "").strip(), str(r.get("item_id") or "").strip(), int(num(r.get("quantity")))
-        if not qn or not iname or cnt <= 0 or (norm(qn), iname.lower()) in seen: continue
-        seen.add((norm(qn), iname.lower()))
-        wiki = wq_by_name.get(qn.lower()) or {}
-        g(iname)["q"].append([qn, int(num(wiki.get("required_level"))), cnt, wiki.get("giver") or "", wiki.get("region") or "", 1 if str(wiki.get("repeatable") or "0") == "1" else 0, npc_id.get(str(wiki.get("giver") or "").lower()), qid_by_norm.get(norm(qn))])
+        qn, iname, cnt = str(r.get("quest_id") or "").strip(), wname(r.get("item_id")), int(num(r.get("quantity")))
+        if not qn or not iname or cnt <= 0 or qn in page_qid or norm2(qn) in qid_by_norm or norm2(qn) in {norm2(p) for p in page_qid}: continue
+        if ("w:" + norm2(qn), iname) in seen: continue
+        seen.add(("w:" + norm2(qn), iname))
+        g(iname)["q"].append([qn, 0, cnt, "", "", 0, None, None])
 
     # ---- crafting: how an item is made, and how many recipes use it
     for r in rec:
@@ -243,12 +388,17 @@ def main():
         if iname: g(iname)["r"].append([str(r.get("reactor_id") or ""), num(r.get("drop_rate"), None), r.get("required_quest") or ""])
 
     # ---- quest sources: handed over by an NPC during a quest, dropped by a mob only while on the quest, or a reward
+    for q in allq:                            # the game's own list of what each quest hands over when it starts
+        for x in q.get("start") or []:
+            g(x[0]).setdefault("g", []).append([q["n"], q["id"], "given"])
     for r in qgive:
-        iname, qn = str(r.get("item_id") or "").strip(), str(r.get("quest_id") or "").strip()
-        if iname and qn: g(iname).setdefault("g", []).append([qn, qid_by_norm.get(norm(qn)), "given"])
+        iname, qn = wname(r.get("item_id")), str(r.get("quest_id") or "").strip()
+        if iname and qn and qid_of(qn) not in hidden:
+            qid = qid_of(qn)
+            g(iname).setdefault("g", []).append([next((q["n"] for q in allq if q["id"] == qid), qn), qid, "given"])
     have_drop = {(nm, d[0].lower()) for nm, v in G.items() for d in v["d"]}
     for r in qsteps:
-        iname, mob, qn = str(r.get("required_item") or "").strip(), str(r.get("target_monster") or "").strip(), str(r.get("quest_id") or "").strip()
+        iname, mob, qn = wname(r.get("required_item")), str(r.get("target_monster") or "").strip(), str(r.get("quest_id") or "").strip()
         if iname and mob and (iname, mob.lower()) not in have_drop:
             have_drop.add((iname, mob.lower()))
             g(iname)["d"].append([mob, mon_lv.get(mob, 0), None, 0, mon_where.get(mob, ""), 1, mob_id.get(mob.lower())])
@@ -268,13 +418,13 @@ def main():
                 added += 1
         print("player-reported drops added", added)
     for q in allq:
-        for x in q["get"]:
+        for x in q["get"] + (q.get("get2") or []):
             g(x[0]).setdefault("g", []).append([q["n"], q["id"], "reward"])
     for v in G.values():
         if v.get("g"):
             seen_g, keep = set(), []
             for x in v["g"]:
-                k = (norm(x[0]), x[2])
+                k = (x[1] if x[1] is not None else norm2(x[0]), x[2])
                 if k not in seen_g: seen_g.add(k); keep.append(x)
             v["g"] = keep
 
@@ -307,7 +457,7 @@ def main():
         i = byname.get(nm.lower())
         if i: ids[nm] = i
     for q in allq:
-        for x in q["need"] + q["get"]:
+        for x in q["need"] + q["get"] + (q.get("get2") or []) + (q.get("start") or []):
             i = byname.get(x[0].lower())
             if i: ids[x[0]] = i
     for nm, v in items.items():

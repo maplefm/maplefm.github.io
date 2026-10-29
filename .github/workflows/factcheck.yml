@@ -1,0 +1,39 @@
+name: Fact check
+# Weekly: our published quests, monsters and maps against the game files (maplestory.io MCW) and the MapleStory
+# Classic Wiki. Writes data/factcheck.json to the live branch. Fails (so the watchdog alerts the admins) when our data
+# differs from a source or the sources have released content we don't; a source being down is not a failure.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 13 * * 2"
+concurrency: factcheck
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin live
+          git worktree add -q /tmp/live origin/live
+          mkdir -p /tmp/live/data
+          set +e
+          python3 tools/factcheck.py /tmp/live/data/itemguide.json /tmp/live/data/world.json /tmp/factcheck.json
+          code=$?
+          set -e
+          if [ ! -s /tmp/factcheck.json ]; then echo "fact check wrote nothing (exit $code)"; exit 1; fi
+          cp /tmp/factcheck.json /tmp/live/data/factcheck.json
+          cd /tmp/live
+          git add -f data/factcheck.json
+          if ! git diff --cached --quiet; then
+            git commit -q -m "Weekly fact check"
+            for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
+          fi
+          exit $code
