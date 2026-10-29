@@ -19,7 +19,11 @@ STATE.json is kept on the live branch so nothing is posted twice.
 """
 import sys, os, json, math, glob, datetime, subprocess, urllib.request, time, re
 
-ET = datetime.timezone(datetime.timedelta(hours=-4))
+try:
+    from zoneinfo import ZoneInfo
+    ET = ZoneInfo("America/New_York")      # Eastern with daylight time, so posts keep their day after November
+except Exception:
+    ET = datetime.timezone(datetime.timedelta(hours=-5))
 SITE = "https://maplefm.gg"
 BIG = 250000          # a sale at or above this price gets a post in #big-sales
 MAX_SALES = 8         # per run, the biggest ones
@@ -253,7 +257,7 @@ def job_ranks(ranks_path, state_path):
 def pct(x):
     return f"{x * 100:+.1f}%"
 
-def job_report(report_path, state_path):
+def job_report(report_path, state_path, pdf_path=""):
     st = load(state_path, {})
     rep = load(report_path, {})
     day = rep.get("day")
@@ -279,14 +283,23 @@ def job_report(report_path, state_path):
     emb = {"title": f"Market close · {day}", "color": GREEN if up else RED, "fields": fields,
            **({"thumbnail": {"url": big_icon}} if big_icon else {}),
            "url": f"{SITE}/report.html", "footer": {"text": "Full report at maplefm.gg/report.html"}}
-    if post("market_close", embeds=[emb]):
+    # the day's report as a PDF (tools/reportpdf.py), attached when it was made and fits; the post goes out either way
+    pdf = b""
+    try:
+        if pdf_path and os.path.isfile(pdf_path) and 1000 < os.path.getsize(pdf_path) < 8 * 1024 * 1024: pdf = open(pdf_path, "rb").read()
+        elif pdf_path: print("market close: no PDF to attach", pdf_path)
+    except Exception as e: print("market close pdf", e)
+    sent = post_files("market_close", [(f"club-fm-market-close-{day}.pdf", pdf)], [emb]) if pdf else False
+    if sent or post("market_close", embeds=[emb]):
         st["report_day"] = day
         save(state_path, st)
 
 # ---------------------------------------------------------------- coverage
 def job_coverage(data_dir, state_path):
     st = load(state_path, {})
-    today = datetime.datetime.now(ET).date().isoformat()
+    # the day being closed, the same rule as the market report: a run before noon closes the day before
+    nowet = datetime.datetime.now(ET)
+    today = (nowet.date() - datetime.timedelta(days=1 if nowet.hour < 12 else 0)).isoformat()
     if st.get("coverage_day") == today:
         return
     spots, by, shops, sales = set(), {}, set(), 0
@@ -308,7 +321,7 @@ def job_coverage(data_dir, state_path):
     rooms = {}
     for r, c in spots: rooms[r] = rooms.get(r, 0) + 1
     top = sorted(by.items(), key=lambda kv: -len(kv[1]))[:8]
-    desc = (f"**{len(spots)} of {total}** FM spots scanned today ({len(spots) * 100 // total}%), "
+    desc = (f"**{len(spots)} of {total}** FM spots scanned ({len(spots) * 100 // total}%), "
             f"{len(shops):,} shops read, {sales:,} sales caught, {len(by)} scanner{'s' if len(by) != 1 else ''}.")
     fields = []
     if top:
@@ -402,7 +415,8 @@ def post_files(kind, files, embeds):
     body = (f"--{b}\r\nContent-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n"
             + json.dumps({"allowed_mentions": {"parse": []}, "embeds": embeds[:10]}) + "\r\n").encode()
     for i, (fname, png) in enumerate(files[:10]):
-        body += (f"--{b}\r\nContent-Disposition: form-data; name=\"files[{i}]\"; filename=\"{fname}\"\r\nContent-Type: image/png\r\n\r\n").encode() + png + b"\r\n"
+        ct = "application/pdf" if fname.endswith(".pdf") else "image/png"
+        body += (f"--{b}\r\nContent-Disposition: form-data; name=\"files[{i}]\"; filename=\"{fname}\"\r\nContent-Type: {ct}\r\n\r\n").encode() + png + b"\r\n"
     body += f"--{b}--\r\n".encode()
     req = urllib.request.Request(url + "?wait=true", body, {"Content-Type": "multipart/form-data; boundary=" + b, "User-Agent": "maplefm.gg"})
     for i in range(3):

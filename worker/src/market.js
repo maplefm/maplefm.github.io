@@ -799,8 +799,15 @@ export async function marketCommand(env, it, ctx) {
     const me = Object.assign({ id: u.id, name: u.global_name || u.username || "", username: u.username || "", ign: "", discordCreated: Number((BigInt(u.id) >> 22n) + 1420070400000n) / 1000 | 0,
       avatar: u.avatar ? "https://cdn.discordapp.com/avatars/" + u.id + "/" + u.avatar + ".png?size=64" : "" }, acct, { id: String(u.id) });
     let item = String(opts.item || "");
-    const ex = ctx.rows.find((r) => r.item === item);
-    if (!ex) { const h = ctx.findRows(ctx.rows, item, ctx.abbr)[0]; if (h) item = h.item; }
+    // the item must be one picked from the suggestions (or typed in full): never list a different item by a guess
+    const low = item.trim().toLowerCase(), ex = ctx.rows.find((r) => r.item.toLowerCase() === low || shown(r.item).toLowerCase() === low);
+    if (ex) item = ex.item;
+    else {
+      // a shortcut that names exactly one item ("wg", "gfa 60") is that item; anything looser asks to pick
+      const hs = ctx.findRows(ctx.rows, item, ctx.abbr), h = hs[0], want = ctx.expandQuery ? ctx.expandQuery(item, ctx.abbr || {}) : low;
+      if (h && (hs.length === 1 || h.item.toLowerCase() === want || shown(h.item).toLowerCase() === want)) item = h.item;
+      else return say("Pick the item from the list that pops up as you type" + (h ? ". Did you mean **" + shown(h.item) + "**?" : "."));
+    }
     const r = await create(env, me, { item, price: opts.price, qty: opts.qty, stats: opts.stats, note: opts.note, ign: opts.ign }, ctx);
     const d = await r.json();
     if (!d.ok) return say(d.error + (d.id ? " " + listingUrl(d.id) : ""));
