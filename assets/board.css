@@ -1295,3 +1295,6 @@ body.sheet .nudge { display: none; }
   .hrow:has(.picks:empty) .hdeal[hidden] { display: inline-flex !important; visibility: hidden; min-height: 35px; box-sizing: border-box; }   /* hold its row while the board loads */
   .plbl .mbar { width: 0; min-width: 100%; }
 }
+
+/* the price table holds a screen's worth of space until its rows arrive, so the panels under it don't jump */
+#prices-view .tbox:has(#rows:empty) { min-height: min(1060px, calc(100vh - 110px)); }
