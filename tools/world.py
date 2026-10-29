@@ -132,6 +132,8 @@ for w in mons:
         "eva": first(g.get("evasion"), val(w.get("avoidability"))), "wdef": first(g.get("physicalDefense"), val(w.get("physical_defense"))),
         "mdef": first(g.get("magicDefense"), val(w.get("magic_defense"))), "kb": first(g.get("minimumPushDamage"), val(w.get("knockback"))),
         "weak": elem(w, "element_weak"), "resist": elem(w, "element_resist"),
+        # the game files' element code: a letter (F fire, I ice, L lightning, S poison, H holy) then 1 immune, 2 resists, 3 weak
+        "elem": str(g.get("elementalAttributes") or ""),
         "undead": bool(g["isUndead"]) if "isUndead" in g else w.get("undead") == "1",
         "boss": bool(g["isBoss"]) if "isBoss" in g else w.get("boss") == "1",
     }

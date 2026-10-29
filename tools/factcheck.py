@@ -361,10 +361,11 @@ def main():
         miss = [x for x in gx if x not in ours_x]
         if miss and ("map", m["id"], "exits") not in primary:
             disagree("map", m["id"], "exits", ours_x, {"game_exits_not_on_wiki": miss}, [url, f"{IO}/map/{m['id']}"])
-        gm = sorted({mobname[x["id"]] for x in g.get("mobs") or [] if isinstance(x, dict) and x.get("id") in mobname and not x.get("hidden")})
-        om = sorted({n for n, _ in m.get("mobs") or []})
-        if gm != om and gm and ("map", m["id"], "spawns") not in primary:
-            disagree("map", m["id"], "spawns", om, {"game_monsters": gm}, [url, f"{IO}/map/{m['id']}"])
+        # monsters and how many spawn points each, against the game files' own placements (training counts on these)
+        gm = bag((mobname[x["id"]], 1) for x in g.get("mobs") or [] if isinstance(x, dict) and x.get("id") in mobname and not x.get("hidden"))
+        om = bag((n, c) for n, c in m.get("mobs") or [])
+        if gm and gm != om and ("map", m["id"], "spawns") not in primary:
+            disagree("map", m["id"], "spawns", om, {"game_spawn_points": gm}, [url, f"{IO}/map/{m['id']}"])
     checked["maps"] = int(n_p)
 
     partial = bool(FAILED) or any(t is None for t in (wq, wqi, wqr, wqe, wmons, wmaps, wspawn, wport)) or glist is None

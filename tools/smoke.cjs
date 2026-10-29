@@ -56,7 +56,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         return over + "px wider: " + bad.join(" ");
       });
       ok(!wide, `${tag} ${pg}: no sideways scroll ${wide}`);
-      ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length === 4), `${tag} ${pg}: site menu`);
+      ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length === 5), `${tag} ${pg}: site menu`);
       // all five menu links fit on screen, nothing hidden off the side
       ok(await p.evaluate(() => [...document.querySelectorAll(".sitenav .sn-links a")].every((a) => { const r = a.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; })), `${tag} ${pg}: whole menu visible`);
       ok(await p.evaluate(() => !!document.querySelector(".clubfoot .sf-cols a[href='/market.html']")), `${tag} ${pg}: site footer`);

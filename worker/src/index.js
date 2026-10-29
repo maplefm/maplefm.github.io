@@ -65,6 +65,8 @@ async function route(req, env, url) {
   if (p === "/me" && req.method === "POST") return updateMe(req, env);
   if (p === "/me/quests" && req.method === "GET") return getQuests(req, env);
   if (p === "/me/quests" && req.method === "POST") return putQuests(req, env);
+  if (p === "/me/build" && req.method === "GET") return getBuild(req, env);
+  if (p === "/me/build" && req.method === "POST") return putBuild(req, env);
   if (p === "/watcher/quests" && req.method === "POST") return watcherQuests(req, env);
   if (p === "/me/settings" && req.method === "GET") return getSettings(req, env);
   if (p === "/me/settings" && req.method === "POST") return putSettings(req, env);
@@ -801,6 +803,46 @@ async function putQuests(req, env) {
   q.updated = t;
   await env.ACCOUNTS.put(QKEY(a.id), JSON.stringify(q));
   return json(Object.assign({ ok: true }, q));
+}
+// the training build: level, job, build type, stats, weapons and skill levels. Only known fields, only numbers and
+// short names, so nothing else can be stored under it.
+const BKEY = (id) => "build:" + id;
+const BJOBS = ["Beginner", "Warrior", "Fighter", "Page", "Spearman", "Magician", "Fire Poison Wizard", "Ice Lightning Wizard", "Cleric", "Bowman", "Hunter", "Crossbowman", "Thief", "Assassin", "Bandit"];
+const BTYPES = ["pure", "assassin", "bandit", "sindit"];
+const BWEAP = ["1H Sword", "2H Sword", "1H Axe", "2H Axe", "1H Blunt", "2H Blunt", "Spear", "Polearm", "Dagger", "Claw", "Bow", "Crossbow", "Wand", "Staff"];
+function cleanBuild(b) {
+  const n = (v, lo, hi) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? Math.max(lo, Math.min(hi, x)) : null; };
+  const o = {};
+  if (BJOBS.includes(b.job)) o.job = b.job;
+  if (BTYPES.includes(b.type)) o.type = b.type;
+  for (const [k, lo, hi] of [["lv", 1, 200], ["swap", 1, 200], ["str", 4, 999], ["dex", 4, 999], ["int", 4, 999], ["luk", 4, 999], ["matk", 0, 999], ["accTotal", 0, 999], ["gearAcc", 0, 999]]) { const v = n(b[k], lo, hi); if (v != null) o[k] = v; }
+  if (Array.isArray(b.range) && b.range.length === 2) { const a = n(b.range[0], 0, 99999), c = n(b.range[1], 0, 99999); if (a != null && c != null) o.range = [a, c]; }
+  if (BWEAP.includes(b.rangeW) || b.rangeW === "magic") o.rangeW = b.rangeW;
+  for (const k of ["w", "w2"]) if (BWEAP.includes(b[k])) o[k] = b[k];
+  o.gear = {};
+  for (const [w, g] of Object.entries(b.gear || {}).slice(0, 3)) {
+    if (!BWEAP.includes(w) || !g || typeof g !== "object") continue;
+    o.gear[w] = { watk: n(g.watk, 0, 999) || 0, matk: n(g.matk, 0, 999) || 0, spd: n(g.spd, 2, 9) || 6, ammoAtk: n(g.ammoAtk, 0, 99) || 0, name: cleanName(String(g.name || "")).slice(0, 40), ammo: cleanName(String(g.ammo || "")).slice(0, 40) };
+  }
+  o.skills = {};
+  for (const [k, v] of Object.entries(b.skills || {}).slice(0, 60)) { if (/^\d{7}$/.test(k)) { const x = n(v, 0, 30); if (x) o.skills[k] = x; } }
+  return o;
+}
+async function getBuild(req, env) {
+  const a = await whoami(req, env);
+  if (!a) return json({ signedIn: false });
+  const raw = await env.ACCOUNTS.get(BKEY(a.id));
+  return json({ signedIn: true, build: raw ? JSON.parse(raw) : null }, 200, { "Cache-Control": "no-store" });
+}
+async function putBuild(req, env) {
+  const a = await whoami(req, env);
+  if (!a) return json({ error: "sign in first" }, 401);
+  if (overLimit("bd:" + a.id, 60, 3600)) return json({ error: "slow down" }, 429);
+  const raw = await req.text(); if (raw.length > 8000) return json({ error: "too big" }, 413);
+  let b; try { b = JSON.parse(raw); } catch (e) { return json({ error: "bad json" }, 400); }
+  const o = cleanBuild(b || {}); o.updated = now();
+  await env.ACCOUNTS.put(BKEY(a.id), JSON.stringify(o));
+  return json({ ok: true, build: o });
 }
 // a linked watcher: {hid, done: [...], doing: [...], level}. The watcher id is the credential, as for linking.
 async function watcherQuests(req, env) {

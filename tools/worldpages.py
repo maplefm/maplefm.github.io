@@ -96,9 +96,9 @@ def page(title, desc, path, crumbs, body, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/item/world.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=3">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/item/world.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=4">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
-{NAV("quests" if path.startswith(("/quest", "/quests", "/crafting")) else "training" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
+{NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
 {f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
@@ -236,35 +236,6 @@ def build(world, guide, summary, notes, out):
             if not worst or mb["atk"] > MOB[worst]["atk"]: worst = n
         if not tot or not hp: return None
         return {"n": tot, "ne": ne, "eph": e / hp * 100, "lv": lv / tot, "maxlv": maxlv, "worst": worst}
-
-    # Class fit. Magicians hit magic defense, everyone else weapon defense (game files), damage x 100 / (DEF + 100) as in
-    # map.html. Elements (wiki Elements, Skills): from the 2nd job at 30 magicians have Fire and Poison (Fire/Poison Wizard),
-    # Ice and Lightning (Ice/Lightning Wizard) or Holy (Cleric; Heal also hurts undead). The game files say which element a
-    # monster is weak to, not by how much, so a weakness only nudges the ranking (x1.25) and is never shown as a damage figure.
-    MAGE_EL = {"Fire", "Poison", "Ice", "Lightning", "Holy"}
-    def els(v): return {x.strip() for x in (v or "").split(",") if x.strip()}
-    def fit(m, cls, L):
-        tot = f = 0
-        for n, c in m["mobs"]:
-            mb = MOB.get(n)
-            if not mb or mb.get("boss") or mb.get("variant"): continue
-            d = mb.get("mdef" if cls == "Magician" else "wdef") or 0
-            k = 100 / (d + 100)
-            if cls == "Magician" and L >= 30 and (els(mb.get("weak")) & MAGE_EL or mb.get("undead")): k *= 1.25
-            tot += c; f += k * c
-        return f / tot if tot else 1
-
-    def rank(L, cls, picks):
-        out = []
-        for p, m in M.items():
-            if m.get("type") == "Town" or not m["mobs"]: continue
-            st = stats(m)
-            if not st: continue
-            if (st["lv"] < L - 9 or st["lv"] > L + 4 or st["maxlv"] > L + 12) and p not in picks: continue
-            dmg, hit = touch(MOB[st["worst"]], L, cls); cost = dmg * hit * HP[1]
-            sc = st["eph"] * fit(m, cls, L) * math.sqrt(st["ne"]) / (1 + cost / 120) * (1.6 if p in picks else 1) * (0.8 if st["lv"] > L + 2 else 1)
-            out.append((sc, p, st, dmg, hit, cost))
-        out.sort(key=lambda x: -x[0]); return out
 
     def timers(m):
         rs = m.get("respawn") or {}
@@ -464,61 +435,85 @@ def build(world, guide, summary, notes, out):
         write(out, f"quest/{s}", page(itempages.fit_title(qtitle(q), "MapleStory Classic quest guide", "Club FM"), desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
 
     # ---------------------------------------------------------- training guides
+    # Rankings come from the damage engine (assets/classic-dmg.js through tools/trainrank.cjs), the same one map.html
+    # uses: each job's typical build at the level, maps where it hits and kills reliably, ranked by EXP an hour.
     brackets = (notes or {}).get("brackets") or []
-    def pick_html(sc, p, st, dmg, hit, cost, cls, L, why=""):
+    RANK = {}
+    try:
+        import subprocess, tempfile
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+        with tempfile.TemporaryDirectory() as td:
+            wf, rf = os.path.join(td, "w.json"), os.path.join(td, "r.json")
+            json.dump(world, open(wf, "w", encoding="utf-8"))
+            subprocess.run(["node", os.path.join(root, "tools", "trainrank.cjs"), wf, os.path.join(root, "assets", "classic-skills.json"), rf], check=True, timeout=300)
+            RANK = json.load(open(rf, encoding="utf-8")).get("builds") or {}
+    except Exception as e:  # noqa: BLE001
+        print("training ranks unavailable:", e)
+    BY_FAM = {"Beginner": ["Beginner"], "Warrior": ["Warrior", "Fighter", "Page", "Spearman"], "Magician": ["Magician", "Fire Poison Wizard", "Ice Lightning Wizard", "Cleric"],
+              "Bowman": ["Bowman", "Hunter", "Crossbowman"], "Thief": ["Thief (claw)", "Thief (dagger)", "Assassin", "Bandit", "Sindit"]}
+    def ranked(key, L, n=3):
+        lv = ((RANK.get(key) or {}).get("levels") or {}).get(str(L)) or {}
+        return lv.get("atk") or "", (lv.get("top") or [])[:n]
+    def rank_list(key, L, n=3):
+        atk, top = ranked(key, L, n)
+        if not top: return ""
+        return (f'<h3>{E(key)} <small class="note">· {E(atk)}</small></h3><ol>' +
+                "".join(f'<li>{mlink(p)} <small>· {fmt(e)} EXP an hour (est.) · {E(w)}</small></li>' for p, e, k, w in top) + "</ol>")
+    def keys_at(L, fams=None):
+        out = []
+        for f in (["Beginner"] if L < 10 else []) + (fams or ["Warrior", "Magician", "Bowman", "Thief"]):
+            for k in BY_FAM[f]:
+                info = RANK.get(k) or {}
+                if str(L) in (info.get("levels") or {}): out.append(k)
+        return out
+    def pick_html(p, st, dmg, hit, cost, L, why=""):
         m = M[p]
         mobs = "".join(mobcard(n, f" ×{c}") for n, c in sorted(m["mobs"], key=lambda x: -x[1]) if n in MOB and not MOB[n].get("boss"))
-        return (f'<div class="pick"><h3>{mlink(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} spawn points · {st["eph"]:.1f} EXP per 100 HP{(" · slow respawns: " + timers(m)) if timers(m) else ""}</p>'
+        return (f'<div class="pick"><h3>{mlink(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} spawn points{(" · slow respawns: " + timers(m)) if timers(m) else ""}</p>'
                 + (f"<p>{E(why)}</p>" if why else "") + f'<div class="mobs">{mobs}</div>'
-                f'<p class="note">Touch from {blink(st["worst"])}: about {fmt(dmg)} damage to a level {L} {cls.lower()} in typical gear, hits {round(hit * 100)}% of the time, about {fmt(cost)} mesos of {E(HP[0])} each. Varies with your gear.</p></div>')
+                f'<p class="note">Touch from {blink(st["worst"])}: about {fmt(dmg)} damage at level {L} in typical gear, hits {round(hit * 100)}% of the time, about {fmt(cost)} mesos of {E(HP[0])} each.</p></div>')
+    BAR = '<p class="note"><b>Typical gear estimates.</b> Clean shop weapon for the level, usual stats and skill order. Every map shown lets that build land 80% of its attacks or more and kill each common monster in 8 s or less. <a href="/map.html#train">Enter your own build</a> for your numbers.</p>'
     tr_links = []
     for br in brackets:
         lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
         picks = {x["map"]: x for x in br.get("picks") or []}
         s = f"level-{lo}-{hi}"
-        b = f"<h1>Where to train from level {lo} to {hi} in MapleStory Classic</h1><p class=\"sub\">Training guide · every class · updated {built}</p>"
+        b = f"<h1>Where to train from level {lo} to {hi} in MapleStory Classic</h1><p class=\"sub\">Training guide · every job · updated {built}</p>"
         b += "".join(f'<div class="tip">{E(t)}</div>' for t in br.get("tips") or [])
-        b += "<h2>Our picks</h2>"
+        b += "<h2>Players recommend</h2>"
         for x in br.get("picks") or []:
             if x["map"] not in M: continue
             st = stats(M[x["map"]])
             if not st: continue
             dmg, hit = touch(MOB[st["worst"]], L, "Bowman")
-            b += pick_html(0, x["map"], st, dmg, hit, dmg * hit * HP[1], "Bowman", L, x["why"] + (f" Best for: {', '.join(x['classes'])}." if x.get("classes") else ""))
-        b += f"<h2>Best maps by the numbers at level {L}</h2><p>Ranked by EXP per HP, spawn points (fewer when respawns are slow) and potion cost of getting hit.</p><ol>"
-        for sc, p, st, dmg, hit, cost in rank(L, "Bowman", picks)[:10]:
-            b += f'<li>{mlink(p)} <small>· {st["eph"]:.1f} EXP per 100 HP · {st["n"]} spawn points · about {fmt(cost)} mesos of potions a touch</small></li>'
-        b += "</ol><h2>By class</h2><p>" + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
-        b += '<p style="margin-top:16px"><a href="/map.html#train">Enter your level and class</a> for a personal list and route.</p>'
+            b += pick_html(x["map"], st, dmg, hit, dmg * hit * HP[1], L, x["why"] + (f" Best for: {', '.join(x['classes'])}." if x.get("classes") else ""))
+        b += f"<h2>Best maps for each job at level {L}</h2>" + BAR + "".join(rank_list(k, L) for k in keys_at(L))
+        b += "<h2>By class</h2><p>" + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
         crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
-        desc = f"Best MapleStory Classic training spots from level {lo} to {hi}: " + ", ".join(list(picks)[:3]) + ", with monsters, EXP per HP and potion cost for each class."
+        desc = f"Best MapleStory Classic training spots from level {lo} to {hi} for every job: " + ", ".join(list(picks)[:3]) + ", with EXP an hour, monsters and potion costs."
         write(out, f"training/{s}", page(itempages.fit_title(f"Where to train level {lo} to {hi}", "MapleStory Classic", "Club FM"), desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
         tr_links.append((lo, hi, s, list(picks)[:3]))
     for cls in CLASSES:
         b = f"<h1>{cls} training guide for MapleStory Classic</h1><p class=\"sub\">Where a {cls.lower()} should train at every level · updated {built}</p>"
-        b += (f"<p>Top maps at each stage, ranked by EXP per HP, spawn points (fewer when respawns are slow), the monsters' {'magic' if cls == 'Magician' else 'weapon'} defense and potion cost for a {cls.lower()} in typical gear. Our picks for {cls}s rank higher.</p>" +
-              ("<p>From level 30, maps whose monsters are weak to fire, poison, ice, lightning or holy (or undead) rank higher. The game files say which element a monster is weak to, not how much extra damage it takes.</p>" if cls == "Magician" else ""))
+        b += BAR + ("<p class=\"note\">Mages hit magic defense and use elements: maps differ by 2nd job.</p>" if cls == "Magician" else "<p class=\"note\">Physical attacks hit weapon defense: high-defense monsters like Iron Hogs are slow for every physical job.</p>")
         for br in brackets:
             lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
-            picks = {x["map"]: x for x in br.get("picks") or [] if not x.get("classes") or cls in x["classes"]}
-            b += f'<h2>Level {lo} to {hi}</h2>'
-            for sc, p, st, dmg, hit, cost in rank(L, cls, picks)[:3]:
-                b += pick_html(sc, p, st, dmg, hit, cost, cls, L, picks[p]["why"] if p in picks else "")
+            b += f'<h2>Level {lo} to {hi} <small class="note">· shown for level {L}</small></h2>' + "".join(rank_list(k, L) for k in keys_at(L, [cls]))
             b += f'<p class="note"><a href="/training/level-{lo}-{hi}/">All of level {lo} to {hi}</a></p>'
         crumbs = [("Training guide", "/training/"), (cls, f"/training/{cls.lower()}/")]
         write(out, f"training/{cls.lower()}", page(itempages.fit_title(f"{cls} training guide, every level", "MapleStory Classic", "Club FM"),
-                                                    f"Where a {cls} should train in MapleStory Classic from level 1 to 100: the best maps at each level with monsters, EXP per HP and potion cost.", f"/training/{cls.lower()}/", crumbs, b))
+                                                    f"Where a {cls} should train in MapleStory Classic from level 1 to 100, by 2nd job: the best maps at each level with EXP an hour.", f"/training/{cls.lower()}/", crumbs, b))
         paths.append(f"/training/{cls.lower()}/")
 
     # ---------------------------------------------------------- hubs
     b = "<h1>MapleStory Classic training guide</h1><p class=\"sub\">Where to train at every level, for every class · updated " + built + "</p>"
-    b += "<p>From the game files and the MapleStory Classic Wiki: monsters, spawns, respawn times and elements. Each spot shows monsters, EXP per HP and potion cost at today's Free Market prices.</p>"
+    b += "<p>From the game files and the MapleStory Classic Wiki: monsters, spawns, respawn times and elements. Maps ranked by EXP an hour for each job's typical build, only where it hits and kills reliably.</p>"
     b += "<h2>By level</h2><ul>" + "".join(f'<li><a href="/training/{s}/">Level {lo} to {hi}</a> <small>· {E(", ".join(p))}</small></li>' for lo, hi, s, p in tr_links) + "</ul>"
     b += "<h2>By class</h2><ul>" + "".join(f'<li><a href="/training/{c.lower()}/">{c}</a></li>' for c in CLASSES) + "</ul>"
     if notes and notes.get("economy"): b += "<h2>Potions and money</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["economy"]) + "</ul>"
     if notes and notes.get("party"): b += "<h2>Party play</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["party"]) + "</ul>"
     b += '<p style="margin-top:16px"><a href="/map.html#train">Your level, your class: get a personal list</a></p>'
-    write(out, "training", page("MapleStory Classic training guide · every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps, monsters, EXP per HP and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
+    write(out, "training", page("MapleStory Classic training guide · every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps by job with EXP an hour, monsters and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
 
     regions = {}
     for p, m in M.items(): regions.setdefault(m.get("region") or "Other", []).append(p)
