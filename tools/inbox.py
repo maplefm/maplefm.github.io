@@ -14,8 +14,8 @@ CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET}/export?format=csv&gid
 CREW = {"maya", "jack", "matt", "jimmy", "streams", "guest"}
 KEEP_DAYS = 14
 HV_KEYS = {"rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got"}
-MAX_ROWS_DOC = 25000          # one scanner can read a few thousand shop rows in a day; 19 channels of FM is more
-MAX_ROWS_ID = 80000
+MAX_ROWS_DOC = 40000          # a full-time scanner reads over 20,000 shop rows a day (Zik, laclac); leave room
+MAX_ROWS_ID = 200000         # per scanner across the kept days; at 80,000 a full-time scanner lost its oldest days within 4 days
 # names for watchers whose config.json has none, keyed by the hashed id (hid), never the id itself
 NAMES = {"85eefd149a011f8f": "Yinisera"}
 # watcher tag (first 4 of the hashed id) -> the in-game name of the Discord account that linked it, from the Worker's
