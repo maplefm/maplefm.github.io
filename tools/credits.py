@@ -101,7 +101,7 @@ def observations(data_dir):
                 if r.get("so") and r.get("ss") and t < int(r["ss"]) - 1800:   # claimed sold long before the pump first saw it sold
                     t = int(r["ss"]) - 1800                               # the pump runs every 5 minutes; half an hour of slack
                 look[(key, t)][1 if r.get("so") else 0] += 1
-                if not stream and r.get("r") and r.get("c"):
+                if not stream and r.get("r") and r.get("c") and not r.get("ri"):   # an inferred room was not read: no spot
                     spot = (str(r["r"]), int(r["c"])); SPOTS[spot].append((t, who)); KEYSPOT[key] = spot
                 if not stream and isinstance(r.get("x"), dict) and r["x"] and (key not in HOVERS or t < HOVERS[key][0]):
                     HOVERS[key] = (t, who)
