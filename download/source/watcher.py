@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.29.1"
+VERSION = "2026.10.29.2"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -1185,7 +1185,9 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
                 continue
             r2 = dict(r); r2["_o"] = o; rows.append(r2); mark[key] = (sig, t)
         if rows:
-            out.append({"at": d["at"], "src": d["src"], "rows": rows})
+            o2 = {"at": d["at"], "src": d["src"], "rows": rows}
+            if d.get("hv"): o2["hv"] = d["hv"]          # the day's hover counts ride with the shop post
+            out.append(o2)
     if not out:
         state["started"] = True
         return True
@@ -1196,7 +1198,9 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
             chunk = d["rows"][i:i + 1500]
             if n + len(chunk) > 1500 and cur:
                 batches.append(cur); cur, n = [], 0
-            cur.append({"at": d["at"], "src": d["src"], "rows": chunk}); n += len(chunk)
+            part = {"at": d["at"], "src": d["src"], "rows": chunk}
+            if i == 0 and d.get("hv"): part["hv"] = d["hv"]
+            cur.append(part); n += len(chunk)
     if cur:
         batches.append(cur)
     total = 0

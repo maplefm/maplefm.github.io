@@ -1,10 +1,15 @@
 {
- "version": "2026.10.29.1",
- "date": "2026-10-29T14:16:41+00:00",
- "notes": "Reads the Free Market room when the minimap is minimized to its title bar, so those shops land in the right room. Re-sends listings still up every 15 minutes instead of every hour, so the site can tell a listing that left from one still up.",
- "sha256": "99267f389b60c2b99afb4bf2aac8fef0cda0fa1c6268e3dfb1cde16e53d7b3ac",
- "size": 154834,
+ "version": "2026.10.29.2",
+ "date": "2026-10-29T16:26:55+00:00",
+ "notes": "Hover counts now reach Club FM with your shop scans, so we can see why some equips come in without stats.",
+ "sha256": "ae07e79bf44410735522997004ee98b1752c3ec305b6952643746fba6642b9f6",
+ "size": 154888,
  "history": [
+  {
+   "version": "2026.10.29.2",
+   "date": "2026-10-29",
+   "notes": "Hover counts now reach Club FM with your shop scans, so we can see why some equips come in without stats."
+  },
   {
    "version": "2026.10.29.1",
    "date": "2026-10-29",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.1",
    "date": "2026-10-24",
    "notes": "A short chime when a hovered item's stats are read, a low tone when a hover couldn't be read. Tooltips that open above the pointer are read too."
-  },
-  {
-   "version": "2026.10.23.4",
-   "date": "2026-10-23",
-   "notes": "Reads the chalkboard posts over players' heads when you stand in the Free Market Entrance. Counted as asking prices, once a day per seller."
   }
  ],
  "pip": [],
- "sig": "72870348c33469cd969e5220befb66354989716d41c7fd56ef0846f29fe845f6357809e88ee8040a29765cce5b8a99df4304e2353c0e10b33b5dc09815cbcd2bd148edbdebcf17f9c3fd96ec214e6d7637074b699425e83bf4087e1ae05621b86840a9fb5e2852f57b51fae66e17d8a2c0bc8c76deacf82a02e474ee21be442dad1c44099327cdcabe8d573dd8f544eca187792d56de33464dc4f70274cfa4e9fe8e160f732c7d4335ce4012258f8192974caa403b1d1b5009787671407a84a1f33654aabae4f62dd90d67be275bd1b51b656307555b339c41763326163ef59b0edbab799bd03cafb424d3eb06cf6bba0554177e77f56412957e9ed80784f562"
+ "sig": "3844db86366e2f42972893b862bfb75ec4c0cd08a9f9b29b4f0c5088feec8d7a607a8a5388642ff54db346f607b2b37bbf673a3f2ceceac24ad68b8a78c6867ab16b29bc976fadaa35ef1da991c9e224853a95d2766a9647463733167d892eade9c31e71d42c67c775bc8ca014627a8da80b3ce19a885c1ce0835d37c625c4f62aa93167d1122f685240969ef0b599a3f3fca0348975bf6c2b273608448423b94febd891ce0d00c27dc5bb6110436a332893ce11771e9fbcf9b630a890531efda0c91d8470be5378938e0f948119c519cb893a8229cc34e85850620393c2fb2f3811dff1c36835e122831863c28e85df85b38bf2b497562d6123a143d58b9157"
 }
