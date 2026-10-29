@@ -88,6 +88,7 @@ async function route(req, env, url) {
   if (p === "/tipimg" && req.method === "POST") return tipImgPut(req, env);
   if (p.startsWith("/tipimg/") && req.method === "GET") return tipImgGet(p, env);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
+  if (p === "/inbox/rejects" && req.method === "GET") return inboxRejects(req, env);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
@@ -505,15 +506,23 @@ async function sessionId(req, env) {
 async function inboxPost(req, env) {
   if (!env.INBOX_DB) return json({ error: "inbox offline" }, 503);
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if (overLimit("p:" + ip, 200, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "120" });
+  if (overLimit("p:" + ip, 200, 600)) { await inboxReject(env, "slow down"); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
   const body = await req.text();
-  if (body.length > 60000) return json({ error: "too big" }, 413);
+  if (body.length > 60000) { await inboxReject(env, "too big"); return json({ error: "too big" }, 413); }
   let msg = "";
   try { msg = /json/.test(req.headers.get("Content-Type") || "") ? String(JSON.parse(body).m || "") : String(new URLSearchParams(body).get("m") || ""); } catch (e) {}
   let m = null; try { m = JSON.parse(msg); } catch (e) {}
-  if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") return json({ error: "bad post" }, 400);
+  if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") { await inboxReject(env, "bad post"); return json({ error: "bad post" }, 400); }
   await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
   return json({ ok: true });
+}
+// Rejected uploads, counted per UTC day and reason (KV inbox:rej:<day>, kept 15 days) for the daily scanner check.
+async function inboxReject(env, why) {
+  try {
+    const k = "inbox:rej:" + new Date().toISOString().slice(0, 10), o = (await env.ACCOUNTS.get(k, "json")) || {};
+    o[why] = (o[why] || 0) + 1;
+    await env.ACCOUNTS.put(k, JSON.stringify(o), { expirationTtl: 15 * 86400 });
+  } catch (e) {}
 }
 // In-game popups for expensive equips: FM Watcher uploads a small picture of the item's popup the moment it reads it
 // (items listed at 500K and up), keyed by the picture's own hash, and puts that hash in the listing's stats. The site
@@ -545,6 +554,14 @@ async function inboxPull(req, env, url) {
   const rows = (r.results || []).map((x) => [new Date(x.t).toISOString(), x.msg, x.id]);
   if (!after) await env.INBOX_DB.prepare("DELETE FROM posts WHERE t < ?").bind(Date.now() - 15 * DAY * 1000).run();
   return json({ rows, last: rows.length ? rows[rows.length - 1][2] : after }, 200, { "Cache-Control": "no-store" });
+}
+// the last 7 days of rejected uploads, for the pump's daily scanner check (same key as /inbox/pull)
+async function inboxRejects(req, env) {
+  const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
+  if (!want || got.length !== want.length || !(await same(got, want))) return json({ error: "no" }, 403);
+  const out = {};
+  for (let i = 0; i < 7; i++) { const d = new Date(Date.now() - i * DAY * 1000).toISOString().slice(0, 10); const o = await env.ACCOUNTS.get("inbox:rej:" + d, "json"); if (o) out[d] = o; }
+  return json(out, 200, { "Cache-Control": "no-store" });
 }
 async function same(a, b) {
   const h = async (x) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(x)));
@@ -630,7 +647,7 @@ async function dataLive(req, env) {
       for (let i = 0; i < MEMBER_FILES.length; i++) {
         if (!parts[i]) continue;
         let arr; try { arr = JSON.parse(await parts[i].text()); } catch (e) { continue; }
-        out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + JSON.stringify(Array.isArray(arr) ? arr.filter((d) => d && Date.parse(d.at) > ak) : []); first = false;
+        out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + JSON.stringify(Array.isArray(arr) ? arr.filter((d) => d && (Date.parse(d.at) > ak || (d.u || 0) * 1000 > ak)) : []); first = false;
       }
       body = out + "}";
       if (ref) await caches.default.put(ck, new Response(body, { headers: { "Cache-Control": "public, max-age=900" } })).catch(() => {});
