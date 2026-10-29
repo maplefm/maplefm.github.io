@@ -1276,6 +1276,7 @@ body.sheet .nudge { display: none; }
 .plbl .mbar { display: flex; width: max-content; max-width: 100%; margin-top: 4px; gap: 5px; padding: 0 8px; border-width: 1px; border-radius: 999px; box-shadow: none !important; font-size: .72rem; line-height: 16px; letter-spacing: 0; text-transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .plbl .mbar[hidden] { display: none; }
 .plbl .mbar .mdot { width: 7px; height: 7px; flex-basis: 7px; }
+.plbl .mbar { flex-wrap: nowrap; align-items: center; white-space: nowrap; }
 .plbl .mbar #mtext { overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 700px) {
   .plbl { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
