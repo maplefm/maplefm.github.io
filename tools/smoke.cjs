@@ -33,7 +33,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       await ctx.route(/fonts\.(googleapis|gstatic)\.com|googletagmanager|google-analytics/, (r) => r.abort());
       if (tag === "small phone") await ctx.addInitScript(() => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = '*{font-family:"DejaVu Sans",Verdana,sans-serif!important}'; document.head.appendChild(st); }));
       // layout jumps: summed the way browsers score them, for the pages most visitors open
-      await ctx.addInitScript(() => { window.__cls = 0; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: "layout-shift", buffered: true }); } catch (e) {} });
+      await ctx.addInitScript(() => { window.__cls = 0; window.__src = []; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) { window.__cls += e.value; if (e.value > 0.02) window.__src.push(Math.round(e.startTime) + "ms " + e.value.toFixed(3) + " " + (e.sources || []).slice(0, 3).map((x) => { const n = x.node; return (n ? (n.id ? "#" + n.id : n.className && typeof n.className === "string" ? "." + n.className.split(" ")[0] : n.nodeName) : "?") + " " + Math.round(x.previousRect.y) + ">" + Math.round(x.currentRect.y); }).join(" | ")); } })).observe({ type: "layout-shift", buffered: true }); } catch (e) {} });
       const p = await ctx.newPage(), errs = [];
       p.on("pageerror", (e) => errs.push(e.message));
       const t0 = Date.now();
@@ -44,7 +44,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       ok(found, `${tag} ${pg}: shows ${must}`);
       if (["/", "/market.html", "/quests.html", "/map.html", "/training/level-30-40/", "/quest/pios-collecting-recycled-goods/", "/item/work-gloves/"].includes(pg) && !tag.startsWith("small")) {
         const cls = await p.evaluate(() => window.__cls || 0);
-        ok(cls < 0.15, `${tag} ${pg}: layout jumps ${cls.toFixed(3)} (limit 0.15)`);
+        ok(cls < 0.15, `${tag} ${pg}: layout jumps ${cls.toFixed(3)} (limit 0.15)` + (cls >= 0.15 ? " " + (await p.evaluate(() => window.__src.join(" ; "))) : ""));
       }
       const wide = await p.evaluate(() => {
         const over = document.documentElement.scrollWidth - window.innerWidth; if (over <= 1) return "";
