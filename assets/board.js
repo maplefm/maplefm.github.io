@@ -1085,7 +1085,10 @@
       // Where to buy lists every shop listing; ones without a room read sit below full locations (listRank). Cheapest
       // now is the cheapest shop listing seen in the last 24 hours that nobody has seen gone or sold since.
       it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON; });
-      var still = it.buy.filter(function (x) { return x.st !== "gone" && x.st !== "sold" && !x.chat; });
+      // a listing priced at a small slice of the typical is almost always a misread (a quantity read as the price, a
+      // stream frame caught mid-change): it stays in Where to buy, but never becomes Cheapest now
+      var floorU = it.typ > 0 ? it.typ * (it.equip ? 0.08 : 0.15) : 0;
+      var still = it.buy.filter(function (x) { return x.st !== "gone" && x.st !== "sold" && !x.chat && !(floorU && x.u < floorU); });
       it.bestL = still[0] || null;
       it.best = it.bestL ? it.bestL.u : 0;
       // A deal needs a typical that rests on sales: 3+ in the last 3 days. Asking prices and a lone old sale don't count.
