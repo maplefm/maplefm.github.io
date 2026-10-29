@@ -112,12 +112,14 @@
   function where(l) { return [l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "", roomLabel(l.r) + (l.r && l.ri ? " (likely)" : "")].filter(Boolean).join(", "); }
   // Where to buy: where to walk to, in plain words; says so when the room hasn't been seen yet
   function placed(l) { return !l.chat && !!l.c && !l.ci && /^FM\d+$/.test(l.r || ""); }
+  // Where to buy order: full location first, then channel only, then nothing read; chat posts last
+  function listRank(l) { return l.chat ? 3 : placed(l) ? 0 : l.c && !l.ci ? 1 : 2; }
   function buyWhere(l) {
     if (l.chat) return "whisper them, posted in chat";
-    var room = l.r && l.r !== "chat" ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
+    var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
-    if (!ch && !room) return "location not seen yet";
-    return [ch || "channel not seen yet", room || "room not seen yet"].join(", ");
+    if (!ch && !room) return "location not read";
+    return [ch || "channel not read", room || "room not read"].join(", ");
   }
   function hue(s) { var h = 0; for (var k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) % 360; return h; }
   function avatar(name, cls) { var a = el("span", "av" + (cls ? " " + cls : ""), (name || "?").replace(/[^A-Za-z0-9]/g, "").charAt(0).toUpperCase() || "?"); a.style.background = "hsl(" + hue(name || "") + " 55% 48%)"; a.setAttribute("aria-hidden", "true"); return a; }
@@ -1050,16 +1052,20 @@
       // people scan, the sooner a sold or pulled listing is caught missing, so this stays fresh as scanners grow.
       fresh.forEach(function (x) {
         var sl = String(x.s).toLowerCase(), lastShop = sellerLast[sl] || 0, lastItem = itemLast[sl + "|" + x.i] || x.t;
-        x.st = !x.chat && lastShop - lastItem > 5 * 6e4 ? "gone" : now - x.t < 3 * H ? "up" : "old";
+        // gone only after a later visit with the item missing for over an hour: watchers re-send an unchanged listing
+        // once an hour, so a visit sooner than that can't tell a listing that left from one that wasn't re-sent yet
+        x.st = !x.chat && lastShop - lastItem > 65 * 6e4 ? "gone" : now - x.t < 3 * H ? "up" : "old";
         var gv = GONE.items[soldKey(x)]; x.sold = gv && gv[1] > x.t ? gv[0] : 0;
         if (x.sold >= GONE.need || (MYSOLD[soldKey(x)] || 0) > x.t) x.st = "sold";
       });
       // Where to buy, Cheapest now and deals use only shops you can walk to: an FM room on a channel a scanner actually
       // read. Trade chat, megaphones, FM Entrance boards and streams without a room still feed the prices in the
       // background. Club and Mega Deals also see chat posts there, since a seller's name is enough to whisper.
-      it.buy = fresh.filter(function (x) { return placed(x) || (DEALS_ON && x.chat); });
-      var still = it.buy.filter(function (x) { return x.st !== "gone" && x.st !== "sold"; });
-      it.bestL = still[0] || null;
+      // Where to buy lists every shop listing; ones without a room read sit below full locations (listRank). Cheapest
+      // now and deals only use listings seen in the last 3 hours on a known channel, a placed one first.
+      it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON; });
+      var still = it.buy.filter(function (x) { return x.st === "up" && !x.chat && x.c && !x.ci; });
+      it.bestL = still.filter(placed)[0] || still[0] || null;
       it.best = it.bestL ? it.bestL.u : 0;
       // A deal needs a typical that rests on sales: 3+ in the last 3 days. Asking prices and a lone old sale don't count.
       var solid = it.basis === "24h" || it.basis === "3d";
@@ -3161,6 +3167,7 @@
       [["price", "Cheapest"], ["recent", "Most recent"]].forEach(function (x) { var b = el("button", null, x[1]); b.type = "button"; b.setAttribute("aria-pressed", BUYSORT === x[0]); b.addEventListener("click", function () { BUYSORT = x[0]; saveLS("fm-buy-sort", BUYSORT); renderItem(); }); bs.appendChild(b); });
       ip.appendChild(bs);
       if (BUYSORT === "recent") buyRows = buyRows.slice().sort(function (a, b) { return b.t - a.t || a.u - b.u; });
+      buyRows = buyRows.map(function (x, k) { return [listRank(x), k, x]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (z) { return z[2]; });
     }
     var ls = el("div", "list"), rows = state.list === "buy" ? buyRows : i.sales;
     rows.slice(0, 40).forEach(function (x) {
@@ -3169,7 +3176,7 @@
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var sm = el("small"); li.appendChild(sm);
-      if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not seen yet/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
+      if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not (seen|read)/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
       else { var w = where(x); sm.appendChild(document.createTextNode((w ? w + " · " : "") + ago(x.t))); }
       // seen on a stream: a small TV that opens the broadcast at that moment; the streamer's name is on hover
       if (x.stream) { var tv = streamLink(x); tv.textContent = "📺"; tv.classList.add("tv"); tv.title = "Seen on " + x.who + "'s stream. " + tv.title; tv.setAttribute("aria-label", tv.title); sm.appendChild(document.createTextNode(" ")); sm.appendChild(tv); }
@@ -4269,8 +4276,10 @@
             Object.keys(BUNDLE).forEach(function (k) { nb[k] = BUNDLE[k]; });
             Object.keys(b).forEach(function (k) {
               var cur = (nb[k] || []).slice(), at0 = {};
-              cur.forEach(function (d, i) { at0[(d.at || "") + "|" + (d.src || "")] = i; });
-              (b[k] || []).forEach(function (d) { var key = (d.at || "") + "|" + (d.src || ""); if (at0[key] != null) cur[at0[key]] = d; else cur.push(d); });
+              // an inbox day copy keeps its scanner, kind and day while its "at" moves, so the new copy replaces the old
+              var dk = function (d) { return d.inbox && d.day ? "ib|" + d.inbox + "|" + d.src + "|" + d.day : (d.at || "") + "|" + (d.src || ""); };
+              cur.forEach(function (d, i) { at0[dk(d)] = i; });
+              (b[k] || []).forEach(function (d) { var key = dk(d); if (at0[key] != null) cur[at0[key]] = d; else cur.push(d); });
               nb[k] = cur;
             });
             BUNDLE = nb;
