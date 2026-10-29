@@ -25,12 +25,30 @@
     Bandit: { fam: "Thief", base: 400, job: 420, w: ["Dagger", "Claw"] }
   };
   // build types. A sindit is a Bandit who keeps a claw and Lucky Seven, then swaps to a dagger and Savage Blow.
+  // base: the saved type the account Worker knows (a hybrid saves as its base). stats: how typical() splits points.
+  // swap: a fixed level the claw goes away. reset: at the swap, Lucky Seven's points move into the Bandit book.
+  // desc: the plain line under the build picker. stat: the "Typical:" stat note when it differs from the job's.
   var BUILDS = {
-    pure: { name: "Standard", jobs: null },
-    assassin: { name: "Assassin (claw)", jobs: ["Thief", "Assassin"], w: "Claw" },
-    bandit: { name: "Pure Bandit (dagger)", jobs: ["Thief", "Bandit"], w: "Dagger" },
-    sindit: { name: "Sindit (claw, then dagger)", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger" }
+    pure: { name: "Standard", jobs: null, desc: "The usual build for the job." },
+    assassin: { name: "Assassin (claw)", jobs: ["Thief", "Assassin"], w: "Claw", desc: "Claw and Lucky Seven. LUK with 25 DEX." },
+    bandit: { name: "Pure Bandit (dagger)", jobs: ["Thief", "Bandit"], w: "Dagger", desc: "Dagger from the start: Double Stab, then Savage Blow. LUK with 25 DEX." },
+    sindit: { name: "Sindit (claw, then dagger)", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger", desc: "Bandit who kept Lucky Seven and throws until a dagger and Savage Blow hit harder, then swaps." },
+    sindit36: { name: "Sindit (dagger at 36)", base: "sindit", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger", swap: 36, desc: "Sindit who swaps to a dagger and Savage Blow at level 36." },
+    sinditreset: { name: "Sindit (reset at 40)", base: "sindit", jobs: ["Thief", "Bandit"], w: "Claw", w2: "Dagger", swap: 40, reset: true, desc: "Throws Lucky Seven to 40, then resets those points into Savage Blow and plays as a Bandit." },
+    strbandit: { name: "STR Bandit (dagger)", base: "bandit", jobs: ["Thief", "Bandit"], w: "Dagger", stats: "str", desc: "Bandit with STR as the damage stat: LUK stays at 4, 25 DEX, the rest STR.", stat: "STR, 25 DEX, LUK 4" },
+    dexassassin: { name: "Dexless Assassin (claw)", base: "assassin", jobs: ["Thief", "Assassin"], w: "Claw", stats: "dexless", desc: "Assassin with no DEX past the base 4: all LUK. Hits harder, misses more.", stat: "all LUK, DEX 4" },
+    dexbandit: { name: "Dexless Bandit (dagger)", base: "bandit", jobs: ["Thief", "Bandit"], w: "Dagger", stats: "dexless", desc: "Bandit with no DEX past the base 4: all LUK. Hits harder, misses more.", stat: "all LUK, DEX 4" },
+    dexless: { name: "Dexless warrior", base: "pure", jobs: ["Warrior", "Fighter", "Page", "Spearman"], stats: "dexless", desc: "Warrior with DEX left at 4: all STR. Hits harder, misses more.", stat: "all STR, DEX 4" },
+    lukmage: { name: "LUK mage", base: "pure", jobs: ["Magician", "Fire Poison Wizard", "Ice Lightning Wizard", "Cleric"], stats: "luk", desc: "Mage who raises LUK with the level (for thief gear): less INT, a little more accuracy.", stat: "LUK = level, rest INT" }
   };
+  // the build types a job can pick, in picker order (Standard first for non-thieves)
+  function buildTypes(job) {
+    var fam = (JOBS[job] || {}).fam, out = fam === "Thief" ? [] : ["pure"];
+    Object.keys(BUILDS).forEach(function (k) { if (BUILDS[k].jobs && BUILDS[k].jobs.indexOf(job) >= 0) out.push(k); });
+    return out;
+  }
+  function isSwap(type) { return !!(BUILDS[type] && BUILDS[type].w2); }
+  function baseType(type) { return (BUILDS[type] && BUILDS[type].base) || type; }
   // classicrank job names to ours
   var JOB_ALIAS = { "Fire/Poison Wizard": "Fire Poison Wizard", "Fire/Poison": "Fire Poison Wizard", "F/P Wizard": "Fire Poison Wizard", "Wizard (Fire, Poison)": "Fire Poison Wizard", "Wizard (Fire/Poison)": "Fire Poison Wizard",
     "Ice/Lightning Wizard": "Ice Lightning Wizard", "Ice/Lightning": "Ice Lightning Wizard", "I/L Wizard": "Ice Lightning Wizard", "Wizard (Ice, Lightning)": "Ice Lightning Wizard", "Wizard (Ice/Lightning)": "Ice Lightning Wizard",
@@ -130,13 +148,13 @@
       job = jobName(job) || "Beginner"; if (L < 10) job = job === "Beginner" ? "Beginner" : job;
       var J = JOBS[job], fam = J.fam, total = 25 + 5 * (L - 1);
       var b = { lv: L, job: job, type: type || (fam === "Thief" ? (job === "Bandit" ? "bandit" : "assassin") : "pure"), generic: true, gearAcc: 0, notes: [] };
-      if (b.type === "sindit") b.swap = swap || null;
-      var bt = BUILDS[b.type]; b.w = bt && bt.w || J.w[0]; if (bt && bt.w2) b.w2 = bt.w2;
-      // stats: an assumption per family, shown on the page
-      if (fam === "Warrior") { b.dex = Math.max(4, Math.min(L, total - 12)); b.int = 4; b.luk = 4; b.str = total - b.dex - 8; }
-      else if (fam === "Magician") { b.str = 4; b.dex = 4; b.luk = 4; b.int = total - 12; }
+      var bt = BUILDS[b.type] || BUILDS.pure; b.w = bt.w || J.w[0]; if (bt.w2) { b.w2 = bt.w2; b.swap = bt.swap || swap || null; }
+      // stats: an assumption per family and build, shown on the page
+      if (fam === "Warrior") { b.dex = bt.stats === "dexless" ? 4 : Math.max(4, Math.min(L, total - 12)); b.int = 4; b.luk = 4; b.str = total - b.dex - 8; }
+      else if (fam === "Magician") { b.str = 4; b.dex = 4; b.luk = bt.stats === "luk" ? Math.max(4, Math.min(L, total - 12)) : 4; b.int = total - 8 - b.luk; }
       else if (fam === "Bowman") { b.str = 4; b.int = 4; b.luk = 4; b.dex = total - 12; }
-      else if (fam === "Thief") { b.str = 4; b.int = 4; b.dex = Math.min(25, total - 8); b.luk = total - b.dex - 8; }
+      else if (fam === "Thief" && bt.stats === "str") { b.luk = 4; b.int = 4; b.dex = Math.min(25, total - 8); b.str = total - b.dex - 8; }
+      else if (fam === "Thief") { b.str = 4; b.int = 4; b.dex = bt.stats === "dexless" ? 4 : Math.min(25, total - 8); b.luk = total - b.dex - 8; }
       else { b.str = Math.max(4, total - 12); b.dex = 4; b.int = 4; b.luk = 4; }
       // gear for each weapon the build will hold
       b.gear = {};
@@ -145,7 +163,7 @@
         b.gear[c] = { name: w ? w[0] : "no weapon", watk: w ? w[2] : 0, matk: w ? w[3] : 0, spd: w ? w[4] : 6, ammo: a[0], ammoAtk: a[1] || 0 };
       });
       b.skills = typicalSkills(b, L);
-      if (b.type === "sindit" && !b.swap) b.swap = swapLevel(b);
+      if (bt.w2 && !b.swap) b.swap = swapLevel(b);
       return b;
     }
     // where skill points go: the job's usual order, at the level given
@@ -158,12 +176,15 @@
           if (!sk(id)) return; var n = Math.min(o[1], sk(id).max, pts); out[id] = n; pts -= n;
         });
       }
+      var moved = 0;
       if (L >= 10 && J.base) {
         var key = J.base === 400 ? (b.w === "Dagger" ? "400dagger" : "400claw") : J.base;
         // a sindit or Bandit keeps Lucky Seven from the claw days; a pure bandit learns Double Stab
         spend(ORDER[key], 1 + 3 * (Math.min(L, 30) - 10));
+        // a reset sindit: from the swap level, Lucky Seven's points go into the Bandit book (Savage Blow first)
+        if ((BUILDS[b.type] || {}).reset && J.job && L >= (b.swap || 999) && out[4001003]) { moved = out[4001003]; delete out[4001003]; }
       }
-      if (L >= 30 && J.job) spend(ORDER[J.job], 1 + 3 * (L - 30), b.w2 && L >= (b.swap || 999) ? b.w2 : b.w2 || b.w);
+      if (L >= 30 && J.job) spend(ORDER[J.job], 1 + 3 * (L - 30) + moved, b.w2 && L >= (b.swap || 999) ? b.w2 : b.w2 || b.w);
       return out;
     }
 
@@ -362,10 +383,10 @@
       return a + el + (r.hc < 1 ? " · " + Math.round(r.hc * 100) + "% hit" : "") + " · " + h.all + " spawns" + (h.capped ? " · respawn-limited" : "");
     }
 
-    return { JOBS: JOBS, BUILDS: BUILDS, jobName: jobName, typical: typical, mapHour: mapHour, rankMaps: rankMaps, why: why, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, typicalSkills: typicalSkills, acc: acc, attacks: attacks, onMob: onMob, best: best,
+    return { JOBS: JOBS, BUILDS: BUILDS, buildTypes: buildTypes, isSwap: isSwap, baseType: baseType, jobName: jobName, typical: typical, mapHour: mapHour, rankMaps: rankMaps, why: why, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, typicalSkills: typicalSkills, acc: acc, attacks: attacks, onMob: onMob, best: best,
       hitChance: hitChance, accNeeded: accNeeded, elemMult: elemMult, gapMult: gapMult, actionMs: actionMs, FRAMES: FRAMES, weaponAt: weaponAt, swapLevel: swapLevel, skill: sk };
   }
 
-  var API = { Engine: Engine, JOBS: JOBS, BUILDS: BUILDS, jobName: jobName, actionMs: actionMs, FRAMES: FRAMES };
+  var API = { Engine: Engine, JOBS: JOBS, BUILDS: BUILDS, buildTypes: buildTypes, isSwap: isSwap, baseType: baseType, jobName: jobName, actionMs: actionMs, FRAMES: FRAMES };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.ClassicDmg = API;
 })(typeof window !== "undefined" ? window : this);

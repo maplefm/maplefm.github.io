@@ -451,18 +451,24 @@ def build(world, guide, summary, notes, out):
         print("training ranks unavailable:", e)
     BY_FAM = {"Beginner": ["Beginner"], "Warrior": ["Warrior", "Fighter", "Page", "Spearman"], "Magician": ["Magician", "Fire Poison Wizard", "Ice Lightning Wizard", "Cleric"],
               "Bowman": ["Bowman", "Hunter", "Crossbowman"], "Thief": ["Thief (claw)", "Thief (dagger)", "Assassin", "Bandit", "Sindit"]}
+    # hybrid builds (trainrank.cjs): shown on the class pages only, so the level pages stay one list per job
+    HYBRIDS = {"Warrior": ["Warrior (dexless)", "Dexless Fighter", "Dexless Page", "Dexless Spearman"],
+               "Magician": ["Magician (LUK)", "LUK Fire Poison Wizard", "LUK Ice Lightning Wizard", "LUK Cleric"],
+               "Thief": ["Sindit (dagger at 36)", "Sindit (reset at 40)", "Thief (STR dagger)", "STR Bandit", "Thief (dexless claw)", "Dexless Assassin", "Thief (dexless dagger)", "Dexless Bandit"]}
     def ranked(key, L, n=3):
         lv = ((RANK.get(key) or {}).get("levels") or {}).get(str(L)) or {}
         return lv.get("atk") or "", (lv.get("top") or [])[:n]
     def rank_list(key, L, n=3):
         atk, top = ranked(key, L, n)
+        if not top and any(key in v for v in HYBRIDS.values()) and str(L) in ((RANK.get(key) or {}).get("levels") or {}):
+            return f'<h3>{E(key)}</h3><p class="note">Nothing near level {L} passes the bar for this build in typical gear.</p>'
         if not top: return ""
         return (f'<h3>{E(key)} <small class="note">· {E(atk)}</small></h3><ol>' +
                 "".join(f'<li>{mlink(p)} <small>· {fmt(e)} EXP an hour (est.) · {E(w)}</small></li>' for p, e, k, w in top) + "</ol>")
     def keys_at(L, fams=None):
         out = []
         for f in (["Beginner"] if L < 10 else []) + (fams or ["Warrior", "Magician", "Bowman", "Thief"]):
-            for k in BY_FAM[f]:
+            for k in BY_FAM[f] + (HYBRIDS.get(f, []) if fams else []):
                 info = RANK.get(k) or {}
                 if str(L) in (info.get("levels") or {}): out.append(k)
         return out

@@ -7,7 +7,7 @@ const CD = require(path.join(__dirname, "..", "assets", "classic-dmg.js"));
 const [WF, SF, OUT, PRINT] = process.argv.slice(2);
 const W = JSON.parse(fs.readFileSync(WF, "utf8")), D = JSON.parse(fs.readFileSync(SF, "utf8")), E = CD.Engine(D);
 
-// the builds the site ranks: 1st jobs under 30, every 2nd job from 30, the three thief builds
+// the builds the site ranks: 1st jobs under 30, every 2nd job from 30, the three thief builds, then the hybrids
 const BUILDS = [
   ["Beginner", "Beginner", null, 1, 9],
   ["Warrior", "Warrior", null, 10, 29], ["Magician", "Magician", null, 10, 29], ["Bowman", "Bowman", null, 10, 29],
@@ -16,6 +16,13 @@ const BUILDS = [
   ["Fire Poison Wizard", "Fire Poison Wizard", null, 30, 100], ["Ice Lightning Wizard", "Ice Lightning Wizard", null, 30, 100], ["Cleric", "Cleric", null, 30, 100],
   ["Hunter", "Hunter", null, 30, 100], ["Crossbowman", "Crossbowman", null, 30, 100],
   ["Assassin", "Assassin", "assassin", 30, 100], ["Bandit", "Bandit", "bandit", 30, 100], ["Sindit", "Bandit", "sindit", 30, 100],
+  // hybrids (classic-dmg.js BUILDS): a level where nothing passes the bar gets an empty list, and the page says nothing fits
+  ["Sindit (dagger at 36)", "Bandit", "sindit36", 30, 100], ["Sindit (reset at 40)", "Bandit", "sinditreset", 30, 100],
+  ["Thief (STR dagger)", "Thief", "strbandit", 10, 29], ["STR Bandit", "Bandit", "strbandit", 30, 100],
+  ["Thief (dexless claw)", "Thief", "dexassassin", 10, 29], ["Dexless Assassin", "Assassin", "dexassassin", 30, 100],
+  ["Thief (dexless dagger)", "Thief", "dexbandit", 10, 29], ["Dexless Bandit", "Bandit", "dexbandit", 30, 100],
+  ["Warrior (dexless)", "Warrior", "dexless", 10, 29], ["Dexless Fighter", "Fighter", "dexless", 30, 100], ["Dexless Page", "Page", "dexless", 30, 100], ["Dexless Spearman", "Spearman", "dexless", 30, 100],
+  ["Magician (LUK)", "Magician", "lukmage", 10, 29], ["LUK Fire Poison Wizard", "Fire Poison Wizard", "lukmage", 30, 100], ["LUK Ice Lightning Wizard", "Ice Lightning Wizard", "lukmage", 30, 100], ["LUK Cleric", "Cleric", "lukmage", 30, 100],
 ];
 const out = { built: new Date().toISOString().slice(0, 10), bar: { hit: E.HIT_BAR, kill: E.KILL_BAR }, builds: {} };
 for (const [key, job, type, lo, hi] of BUILDS) {
