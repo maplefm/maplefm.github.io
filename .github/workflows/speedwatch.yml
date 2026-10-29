@@ -16,7 +16,7 @@ permissions:
 concurrency: speedwatch
 jobs:
   speed:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Playwright's WebKit and Firefox builds support 24.04; ubuntu-latest moved to 26.04
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
