@@ -265,6 +265,8 @@
     SNAP_P = fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   } catch (e) { SNAP_P = Promise.resolve(null); }
   function mark(k) { if (!T0[k]) T0[k] = Math.round(performance.now()); }
+  // items the game data names alike but the shop window tells apart by colour: name -> {item id: colour}
+  var COLOURS = { "Buddy Overall Jeans": { 1057090: "Blue", 1057096: "Red" } };
   function loadDB() {
     fetch("data/abbr.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; SIDX = null; } }).catch(function () {});
     // the weekly refreshed list lives with the price data; the copy next to the page is the fallback
@@ -272,7 +274,12 @@
       .then(function (j) { return j && j.items ? j : fetch("data/itemdb.json?v=mcw4").then(function (r) { return r.ok ? r.json() : null; }); }).then(function (j) {
       if (!j || !j.items) return; mark("dbIn");
       DBK = j.kinds || [];
-      j.items.forEach(function (r) { var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); } });
+      j.items.forEach(function (r) {
+        var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); }
+        // one name in the game data, two items in the shop window: each colour is its own item with its own price
+        var cv = COLOURS[r[0]] && COLOURS[r[0]][r[1]];
+        if (cv) { var vn = r[0] + " (" + cv + ")", vk = vn.toLowerCase(), vr = r.slice(); vr[0] = vn; if (!DB[vk]) { DB[vk] = vr; (DBB[vk.slice(0, 2)] || (DBB[vk.slice(0, 2)] = [])).push(vk); } }
+      });
       DBN = Object.keys(DB).length;
       CN = {}; SBC = {}; SB = null; SIDX = null; DIRTY = true; tieredCache = {}; mark("db"); seedNames(); if (D && scans.length) render();   // before any prices are in, the poll's render is the first real one
     }).catch(function () {});
@@ -457,7 +464,7 @@
   // hour, so a name's place can still change as more spellings of it come in.
   var CNC = { cl: {}, out: {}, db: -1, at: 0 }, NAMES_IN = null;
   // bump when cleanName or the name resolver changes, so a published names.json from older rules is not reused
-  var CLEANV = 4;
+  var CLEANV = 5;   // 5: colour items (Buddy Overall Jeans) kept apart
   window.fmClean = function () { return { cl: CNC.cl, out: CNC.out, v: CLEANV }; };
   window.fmQA = { statsFit: function (n, x) { return statsFit(n, x); }, statsFix: function (n, x) { return statsFix(n, x); }, canonAll: function (r) { return canonAll(r); }, pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
   // the server runs this same page and publishes the tidied spelling of every raw name it saw; seeded here, the
@@ -481,7 +488,7 @@
           // also with a short scrap of junk on the end dropped ("Horny Mushroom G")
           // or several, all tiers of one scroll ("One-Handed Axe Attack S"): cut off, tier unknown
           var oneBase = function (a) { return a.length > 1 && a.every(function (t) { return / scroll: /.test(t) && t.split(": ")[0] === a[0].split(": ")[0]; }); };
-          if (starts(lk).length === 1 || (lk.split(" ").length >= 3 && oneBase(starts(lk))) || (/\s\S{1,2}$/.test(lk) && starts(lk.replace(/\s\S{1,2}$/, " ")).length === 1)) c.cut = true;
+          if (starts(lk).length === 1 || (lk.split(" ").length >= 3 && oneBase(starts(lk))) || (lk.split(" ").length >= 3 && starts(lk).length > 1 && !/ scroll: /.test(starts(lk)[0])) || (/\s\S{1,2}$/.test(lk) && starts(lk.replace(/\s\S{1,2}$/, " ")).length === 1)) c.cut = true;
         }
       }
       if (c.cut) return;
@@ -800,7 +807,21 @@
     });
     L.forEach(function (l) { var t = l.tl && rateTier[String(l.s).toLowerCase() + "|" + l.i + "|" + l.p]; if (t) { l.i = l.i + ": " + t; l.tl = false; } });
     // a listing whose hover shows a success rate is a scroll: never price it as the weapon its cut name starts with
-    L.forEach(function (l) { if (l.x && l.x.SUCCESS != null && !/scroll/i.test(l.i) && !/\u2026$/.test(l.i)) l.i = l.i + " Scroll\u2026"; });
+    // ...unless the name is a whole real item that isn't a scroll (Bronze Ore, Wolbi Throwing Stars): then the
+    // success rate was a misread, and the listing stays the item it says it is
+    L.forEach(function (l) {
+      if (!(l.x && l.x.SUCCESS != null && !/scroll/i.test(l.i) && !/\u2026$/.test(l.i))) return;
+      if (DB[String(l.i).toLowerCase()]) { delete l.x.SUCCESS; return; }
+      l.i = l.i + " Scroll\u2026";
+    });
+    // a colour item read without its colour (older watchers): the colour whose price it sits on, or left out
+    var colBase = {}; Object.keys(COLOURS).forEach(function (b) { colBase[b] = Object.keys(COLOURS[b]).map(function (id) { return b + " (" + COLOURS[b][id] + ")"; }); });
+    var colMed = {}; L.forEach(function (l) { Object.keys(colBase).forEach(function (b) { if (colBase[b].indexOf(l.i) >= 0 && !l.b) (colMed[l.i] || (colMed[l.i] = [])).push(l.u); }); });
+    L.forEach(function (l) {
+      var vs = colBase[l.i]; if (!vs) return;
+      var near = vs.filter(function (v) { var a = colMed[v]; return a && a.length >= 3 && Math.abs(Math.log(l.u / median(a))) < Math.log(1.5); });
+      l.i = near.length === 1 ? near[0] : l.i + "\u2026";
+    });
     L.forEach(function (l) {
       if (!l.tl) return;
       var best = "", bd = Math.log(2.5);
