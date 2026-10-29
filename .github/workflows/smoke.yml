@@ -17,6 +17,14 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - name: Page builders compile and run
+        # a broken builder stopped the daily item, quest and map pages for two days in October; catch it before merge
+        run: |
+          for f in tools/*.py; do python3 -m py_compile "$f"; done
+          L=https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data
+          for f in world itemguide summary-public; do curl -fsSL "$L/$f.json" -o /tmp/$f.json; done
+          mkdir -p /tmp/wp/item && python3 tools/worldpages.py /tmp/world.json /tmp/itemguide.json /tmp/summary-public.json assets/training-notes.json /tmp/wp
+          test "$(ls /tmp/wp/quest | wc -l)" -gt 200 && test "$(ls /tmp/wp/map | wc -l)" -gt 200
       - run: node tools/smoke.cjs
       - name: Every indexable page names its canonical address
         run: |
