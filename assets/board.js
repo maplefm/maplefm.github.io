@@ -3682,7 +3682,7 @@
       if (i.rd && i.rd.length) o.rd = i.rd.slice(0, 5).map(function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== "l") c[k] = d[k]; }); return c; }); return o; });
     var who = (D.whoAll || []).map(function (w) { return { name: w.name, rank: w.rank, sales: w.sales, week: w.week, rows: w.rows, shopsN: w.shopsN, daysN: w.daysN, stream: w.stream, club: w.club }; });
     var big = D.sales.slice().sort(function (a, b) { return b.p - a.p; })[0];
-    saveLS("fm-summary", { at: Date.now(), rows: rows, who: who, kpi: { big: big ? { i: big.i, p: big.p } : null, sales: D.sales.length, active: D.active.length }, hw: hoverWanted() });
+    saveLS("fm-summary", { at: Date.now(), rows: rows, who: who, kpi: { big: big ? { i: big.i, p: big.p } : null, sales: D.sales.length, active: D.active.length, last: (Lstat() || {}).lastT || 0 }, hw: hoverWanted() });
   }
   // a saved board, from this browser's last visit or from the copy the server rebuilds every few minutes,
   // becomes the page at once; the raw scans then load behind it and take over
@@ -3719,7 +3719,7 @@
     $("chips").parentNode.hidden = state.tab === "sell" || state.tab === "pos";
     if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else if (state.tab === "sell") renderSell(); else renderPos();
     if (state.sel && !D.byName[state.sel]) { var c = canon(state.sel).n; if (D.byName[c]) state.sel = c; }
-    renderItem(); livePill();
+    renderItem(); livePill(); try { renderMaint(); } catch (e) {}
     // the parts below the fold or off to the side draw a moment later, when the page is idle, so the table and
     // the item card come up first and a click never waits on the rankings
     afterPaint();
@@ -4281,13 +4281,17 @@
   function renderMaint() {
     var bar = $("mbar"); if (!MAINT || !MAINT.notices) { bar.hidden = true; return; }
     var now = Date.now(), pick = null, kind = "";
+    // the newest shop scan: scans landing after the maintenance started mean the game is back up, even when Nexon's
+    // notice still says scheduled (they rarely update it)
+    var lastScan = (D && ((!D.preview && (Lstat() || {}).lastT) || (D.kpi && D.kpi.last))) || 0;
     MAINT.notices.forEach(function (n) {
       var a = n.start ? Date.parse(n.start) : 0, b = n.end ? Date.parse(n.end) : 0;
-      var done = n.status === "completed" || (b && now - b > 6 * H);
+      var back = a && lastScan > a + 20 * 6e4 && (!b || lastScan > b - H);
+      var done = n.status === "completed" || back || (b && now - b > 6 * H);
       var k = "";
       if (!done && a && a <= now) k = "down";
       else if (!done && a > now && a - now < 7 * DAY) k = "soon";
-      else if (done && b && now - b < 12 * H && now >= a) k = "done";
+      else if (done && b && now - b < 3 * H && now >= a) k = "done";
       var rank = { down: 3, soon: 2, done: 1 }[k] || 0;
       if (rank > ({ down: 3, soon: 2, done: 1 }[kind] || 0)) { pick = n; kind = k; }
     });
