@@ -59,6 +59,7 @@ jobs:
             git -C "$PUB" show origin/live:data/itemdb.json > /tmp/itemdb.json 2>/dev/null && [ -s /tmp/itemdb.json ] && ! cmp -s /tmp/itemdb.json data/itemdb.json && cp /tmp/itemdb.json data/itemdb.json || true
             # scanner health (room read rate, late rows, watcher version, dropped uploads) for the watchdog's alert
             if [ $(( n % 15 )) -eq 0 ]; then python3 $T/health.py data data/health.json /tmp/main/download/version.json || true; fi
+            if [ $(( n % 15 )) -eq 0 ]; then timeout 120 python3 $T/misspull.py data || true; fi
             git add -A data
             # the finished price board, built by the page itself (the full copy stays private, a price-only copy goes public)
             if ! git diff --cached --quiet || [ $(( n % 15 )) -eq 0 ]; then timeout 300 python3 $T/snapshot.py /tmp/main . data/summary.json || true; git add -A data; git add -f data/hoverwanted.json 2>/dev/null || true; fi

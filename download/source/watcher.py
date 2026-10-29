@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.29.2"
+VERSION = "2026.10.29.3"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -469,6 +469,33 @@ def send_tip_image(img):
         except Exception as e: log("popup picture not sent:", e)
     threading.Thread(target=up, daemon=True).start()
     return h
+
+# A popup or room title the readers couldn't make sense of goes to Club FM as a small picture, so the readers can be
+# fixed from what scanners actually see (no review folder to send). Only while publishing is on; a few a day.
+MISS_CAP = {"tip": 20, "room": 5, "bar": 5}
+MISS = {"day": "", "n": {}, "at": {}}
+def send_miss(cfg, img, kind, info=""):
+    try:
+        if not cfg.get("publish") or img is None: return
+        day = datetime.date.today().isoformat()
+        if MISS["day"] != day: MISS.update(day=day, n={}, at={})
+        if MISS["n"].get(kind, 0) >= MISS_CAP.get(kind, 0) or time.time() - MISS["at"].get(kind, 0) < 20: return
+        MISS["n"][kind] = MISS["n"].get(kind, 0) + 1; MISS["at"][kind] = time.time()
+        import io
+        pic = img.convert("RGB")
+        if pic.width > 1000 or pic.height > 1000: pic.thumbnail((1000, 1000))
+        buf = io.BytesIO(); pic.quantize(64).save(buf, "PNG", optimize=True); data = buf.getvalue()
+        if len(data) > 300000: return
+        hid = hashlib.sha256(("fm-inbox:" + anon_id()).encode()).hexdigest()[:16]
+        info = re.sub(r"[^\x20-\x7e]", "", str(info))[:300]
+        def up():
+            try:
+                req = urllib.request.Request(ACCOUNTS + "/missimg", data=data, headers={"Content-Type": "image/png", "X-Watcher": hid, "X-Kind": kind, "X-Info": info, "User-Agent": "fm-watcher/" + VERSION})
+                urllib.request.urlopen(req, timeout=30).read()
+            except Exception: pass
+        threading.Thread(target=up, daemon=True).start()
+    except Exception:
+        pass
 
 def shop_room(r):
     """Shops only open in Free Market rooms, so a shop's room is always one. When the minimap title reads as
@@ -1536,7 +1563,10 @@ def worker(cfg, jobs, store):
                             if tip:
                                 tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
                                 review_save(cfg, "tip", extra["tip"], tip)
-                            elif extra.get("hover"):
+                            if not tip and extra.get("hid"):
+                                rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
+                                send_miss(cfg, extra["tip"], "tip", f"row {extra.get('row')} | {rn}")
+                            if not tip and extra.get("hover"):
                                 review_save(cfg, "tipmiss", extra["tip"], {"row": extra["row"]}); chime(False)
                                 log(f"hover: couldn't read a tooltip on row {extra['row'] + 1} yet")
                         except Exception as e:
@@ -1544,6 +1574,10 @@ def worker(cfg, jobs, store):
                     # the channel when the shop was on screen, not when it got read: reading can run behind
                     res["ch"] = extra["ch"] if "ch" in extra else current_channel(cfg)
                     review_save(cfg, kind, img, res)
+                    # a shop whose room couldn't be read: the minimap title (and the title bar) as pictures
+                    if extra.get("room") is not None and not re.match(r"^FM\d", res["room"] or "") and res.get("rows"):
+                        send_miss(cfg, extra["room"], "room", f"read '{res['room']}'")
+                        if extra.get("bar") is not None: send_miss(cfg, extra["bar"], "bar", f"read '{getattr(worker, 'bar_text', '')}'")
                     if extra.get("room") is not None and res["room"] != getattr(worker, "last_room", None):
                         worker.last_room = res["room"]; review_save(cfg, "room", extra["room"], {"room": res["room"]})
                         if extra.get("bar") is not None: review_save(cfg, "roombar", extra["bar"], {"room": res["room"]})
