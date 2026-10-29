@@ -35,7 +35,7 @@ jobs:
           python3 tools/indexnow.py sitemap.xml || true
           git add -A item items map monster quest training maps monsters quests crafting recap sitemap.xml data/mobs.json index.html i data/play.json
           git diff --cached --quiet && exit 0
-          b=item-pages-$(date -u +%Y%m%d)
+          b=item-pages-$(date -u +%Y%m%d-%H%M%S)
           git checkout -q -b "$b"
           git commit -q -m "item pages: daily refresh"
           git push -q -f origin "$b"
