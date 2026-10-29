@@ -1062,10 +1062,10 @@
       // read. Trade chat, megaphones, FM Entrance boards and streams without a room still feed the prices in the
       // background. Club and Mega Deals also see chat posts there, since a seller's name is enough to whisper.
       // Where to buy lists every shop listing; ones without a room read sit below full locations (listRank). Cheapest
-      // now and deals only use listings seen in the last 3 hours on a known channel, a placed one first.
+      // now is the cheapest shop listing seen in the last 24 hours that nobody has seen gone or sold since.
       it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON; });
-      var still = it.buy.filter(function (x) { return x.st === "up" && !x.chat && x.c && !x.ci; });
-      it.bestL = still.filter(placed)[0] || still[0] || null;
+      var still = it.buy.filter(function (x) { return x.st !== "gone" && x.st !== "sold" && !x.chat; });
+      it.bestL = still[0] || null;
       it.best = it.bestL ? it.bestL.u : 0;
       // A deal needs a typical that rests on sales: 3+ in the last 3 days. Asking prices and a lone old sale don't count.
       var solid = it.basis === "24h" || it.basis === "3d";
