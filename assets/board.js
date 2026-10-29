@@ -2631,6 +2631,7 @@
     earnNudge(1);
     var was = cardOpen(), h = "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "");
     PENDROLL = QROLL && Date.now() - QROLL.at < 15000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;
+    if (PENDROLL) STATOPEN = name;
     state.sel = name; state.list = "buy"; hideHov();
     // opening from the board adds a history step, so the browser's back button (or a phone's back gesture) closes
     // the card; a link straight to #item= gets a board step put under it for the same reason
@@ -2743,7 +2744,7 @@
     return "";
   }
   function rollBox(i) {
-    var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by roll")); box.appendChild(hd);
+    var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by stat")); box.appendChild(hd);
     var kw = keyWhy(i.item); if (kw) hd.appendChild(infoTip(kw + " Clean means no scrolls used; a clean copy can still have rolled above or below the item's base, and that roll is priced on its own."));
     if (i.bands) {
       var bg = el("div", "rollbands");
@@ -3150,7 +3151,27 @@
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
     orderCard($("ip"));
+    foldStats($("ip"));
     splitCard();
+  }
+  // phones and tablets: Price by stat starts folded so Where to buy is a short scroll away; one tap opens it, and it
+  // stays open for that item. A search for a roll ("wg 3 att") opens it on its own.
+  var STATOPEN = "";
+  function foldStats(ip) {
+    if (!ip || window.innerWidth > 1180) return;
+    ip.querySelectorAll(":scope > .rollbox, :scope > .pbs").forEach(function (box) {
+      var h = box.querySelector(":scope > h4"); if (!h) return;
+      var open = STATOPEN === state.sel;
+      box.classList.add("fold"); box.classList.toggle("open", open);
+      h.setAttribute("role", "button"); h.tabIndex = 0; h.setAttribute("aria-expanded", open);
+      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
+      var go = function (e) {
+        if (e.target.closest(".inf")) return; if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return; e.preventDefault();
+        var now = !box.classList.contains("open"); STATOPEN = now ? state.sel : "";
+        ip.querySelectorAll(":scope > .fold").forEach(function (b) { b.classList.toggle("open", now); var hh = b.querySelector(":scope > h4"); hh.setAttribute("aria-expanded", now); var fh = hh.querySelector(".fhint"); if (fh) fh.textContent = now ? "Hide" : "Tap to open"; });
+      };
+      h.addEventListener("click", go); h.addEventListener("keydown", go);
+    });
   }
   // the card's reading order: price first, then what to do, how to get it, prices by roll, listings, links.
   // Anything without a place stays right after the part it was added next to.
