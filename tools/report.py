@@ -103,6 +103,8 @@ def prev_day(d):
             return p
     return (datetime.date.fromisoformat(d) - datetime.timedelta(days=1)).isoformat()
 
+MOVER_MIN = 10   # prices seen on each of the two days before an item can be a top gainer or loser
+
 def move(d, cat=None):
     """Geometric mean of each item's change from the day before, and how many rose and fell."""
     p = prev_day(d); logs = []; rose = fell = 0; movers = []
@@ -114,8 +116,11 @@ def move(d, cat=None):
             logs.append(math.log(r))
             if r > 1.02: rose += 1
             elif r < 0.98: fell += 1
-            if min(v[d][1], v[p][1]) >= 3:
-                movers.append((name, r - 1, v[d][0], v[p][0], v[d][1]))
+            # a top mover needs enough prices on both days to mean something (a handful of listings swings 100%
+            # on one odd ask), and a move past 4x either way is a misread, not a market
+            raw = v[d][0] / v[p][0]
+            if min(v[d][1], v[p][1]) >= MOVER_MIN and 0.25 <= raw <= 4:
+                movers.append((name, raw - 1, v[d][0], v[p][0], v[d][1]))
     if not logs:
         return None
     return {"f": math.exp(sum(logs) / len(logs)), "n": len(logs), "rose": rose, "fell": fell, "movers": movers}
@@ -241,7 +246,7 @@ def make_range(key, label, n):
         if not a or not b: continue
         pa = statistics.median(v[d][0] for d in a); pb = statistics.median(v[d][0] for d in b)
         na = sum(v[d][1] for d in a); nb = sum(v[d][1] for d in b)
-        if min(na, nb) < 3 or not pa: continue
+        if min(na, nb) < MOVER_MIN or not pa or not (0.25 <= pb / pa <= 4): continue
         movers.append((name, pb / pa - 1, pb, pa, na + nb))
     movers.sort(key=lambda x: x[1])
     fmt = lambda x: {"item": x[0], "chg": round(x[1], 4), "price": round(x[2]), "was": round(x[3]), "seen": x[4], "cat": category(x[0])}

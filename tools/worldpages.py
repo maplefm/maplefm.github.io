@@ -454,7 +454,7 @@ def build(world, guide, summary, notes, out):
     # hybrid builds (trainrank.cjs): shown on the class pages only, so the level pages stay one list per job
     HYBRIDS = {"Warrior": ["Warrior (dexless)", "Dexless Fighter", "Dexless Page", "Dexless Spearman"],
                "Magician": ["Magician (LUK)", "LUK Fire Poison Wizard", "LUK Ice Lightning Wizard", "LUK Cleric"],
-               "Thief": ["Sindit (dagger at 36)", "Sindit (reset at 40)", "Thief (STR dagger)", "STR Bandit", "Thief (dexless claw)", "Dexless Assassin", "Thief (dexless dagger)", "Dexless Bandit"]}
+               "Thief": ["Sindit (dagger at 36)", "Sindit (reset at 40)", "Thief (dexless claw)", "Dexless Assassin", "Thief (dexless dagger)", "Dexless Bandit"]}
     def ranked(key, L, n=3):
         lv = ((RANK.get(key) or {}).get("levels") or {}).get(str(L)) or {}
         return lv.get("atk") or "", (lv.get("top") or [])[:n]

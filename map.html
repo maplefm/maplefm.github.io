@@ -164,7 +164,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 </section>
 <p class="foot" id="credit"></p>
 </main>
-<script src="/assets/classic-dmg.js?v=2"></script>
+<script src="/assets/classic-dmg.js?v=3"></script>
 <script>
 (function () {
   "use strict";
@@ -244,6 +244,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   // skill order; "My build" is what the player types (or, later, reads from a screenshot of the Stats and Skills windows).
   var CD = window.ClassicDmg, ENG = null, BUILD = null, MODE = "typical";
   try { BUILD = JSON.parse(localStorage.getItem("fm-build") || "null"); MODE = localStorage.getItem("fm-build-mode") || (BUILD ? "mine" : "typical"); } catch (e) {}
+  // a build type the site no longer offers (STR Bandit) falls back to its plain job build
+  if (BUILD && BUILD.type && window.CD && CD.BUILDS && !CD.BUILDS[BUILD.type]) BUILD.type = /bandit/i.test(BUILD.type) ? "bandit" : "pure";
   var BTYPE = "", SWAP = 0; try { var bt0 = JSON.parse(localStorage.getItem("fm-build-type") || "{}"); BTYPE = bt0.type || ""; SWAP = bt0.swap || 0; } catch (e) {}
   var ACCT = { signedIn: false, synced: false };
   function famOf(job) { var j = CD && CD.JOBS[CD.jobName(job)]; return j ? j.fam : ""; }

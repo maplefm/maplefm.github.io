@@ -18,7 +18,6 @@ const BUILDS = [
   ["Assassin", "Assassin", "assassin", 30, 100], ["Bandit", "Bandit", "bandit", 30, 100], ["Sindit", "Bandit", "sindit", 30, 100],
   // hybrids (classic-dmg.js BUILDS): a level where nothing passes the bar gets an empty list, and the page says nothing fits
   ["Sindit (dagger at 36)", "Bandit", "sindit36", 30, 100], ["Sindit (reset at 40)", "Bandit", "sinditreset", 30, 100],
-  ["Thief (STR dagger)", "Thief", "strbandit", 10, 29], ["STR Bandit", "Bandit", "strbandit", 30, 100],
   ["Thief (dexless claw)", "Thief", "dexassassin", 10, 29], ["Dexless Assassin", "Assassin", "dexassassin", 30, 100],
   ["Thief (dexless dagger)", "Thief", "dexbandit", 10, 29], ["Dexless Bandit", "Bandit", "dexbandit", 30, 100],
   ["Warrior (dexless)", "Warrior", "dexless", 10, 29], ["Dexless Fighter", "Fighter", "dexless", 30, 100], ["Dexless Page", "Page", "dexless", 30, 100], ["Dexless Spearman", "Spearman", "dexless", 30, 100],

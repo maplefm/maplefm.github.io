@@ -372,17 +372,19 @@ def job_news(state_path, rng=None, digest=False):
         if len(parts) < 2 or not parts[0].strip(): continue
         sha, subj = parts[0].strip(), parts[1].strip()
         if subj.lower().startswith(("merge", "live pump", "price inbox", "scanner ranks", "icon shards", "startup timing", "maple news state", "site updates state", "item pages")): continue
+        files = subprocess.run(["git", "show", "--name-only", "--format=", sha], capture_output=True, text=True).stdout.split()
+        # a watcher release always gets its post; its text comes from the release notes, not the commit line
+        if "download/version.json" in files: commits.append((sha, "", files)); continue
         if QUIET.search(subj): continue        # contributor pay never goes out automatically
         if PRIVATE.search(subj): continue      # the Reddit watch and other private tooling never go out
-        files = subprocess.run(["git", "show", "--name-only", "--format=", sha], capture_output=True, text=True).stdout.split()
         commits.append((sha, subj, files))
     rel = [c for c in commits if "download/version.json" in c[2]]
     if rel:
-        try: ver = json.load(open("download/version.json")).get("version")
-        except Exception: ver = None
+        try: vj = json.load(open("download/version.json")); ver, notes = vj.get("version"), str(vj.get("notes") or "")
+        except Exception: ver, notes = None, ""
+        if QUIET.search(notes) or PRIVATE.search(notes): notes = ""
         post("site", embeds=[{"title": f"FM Watcher {ver or ''} is out".strip(), "color": GOLD,
-                              "description": "Running watchers update themselves within 15 minutes, nothing to do.\n" +
-                                             "\n".join("• " + plain_change(c[1]) for c in rel if plain_change(c[1]))[:1500],
+                              "description": ("Running watchers update themselves within 15 minutes, nothing to do.\n" + notes)[:1500],
                               "url": f"{SITE}/contribute.html"}])
     # only what visitors can see: pages, styles and the board's own script, never the Worker, bots or tools
     sitec = [c for c in commits if c not in rel and any((f.endswith((".html", ".css", ".js")) and not f.startswith(("worker/", "bot/", "tools/", ".github/"))) for f in c[2])]
