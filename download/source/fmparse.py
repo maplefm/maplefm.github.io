@@ -800,6 +800,33 @@ def read_room(img):
     return name if re.search(r"[A-Za-z]{4}", name) and len(name) <= 44 else ""
 
 
+def read_room_bar(img):
+    """The minimap minimized to its title bar: one line, "Hidden Street : Free Market <9>", dark text on a light bar at
+    the very top left of the game window. Only a room number written between < and > counts (a misread digit
+    elsewhere is never a room), and "Entrance" for the Free Market Entrance. Returns 'FM9', 'FM Entrance' or ''."""
+    try:
+        img = _title_bar(img.convert("RGB"))
+        m = min_channel(img)
+        best = ""
+        for lo, hi in ((90, 170), (120, 200)):
+            k = 255.0 / (hi - lo)
+            g = m.point(lambda v: 255 if v <= lo else 0 if v >= hi else int(255 - (v - lo) * k))
+            g = g.resize((g.width * 4, g.height * 4), Image.BICUBIC)
+            for l in ocr_lines(g, 4, 6):
+                t = re.sub(r"[^A-Za-z0-9<>:' -]", "", l["text"])
+                if not re.search(r"(fr)?e\s*e?\s*mark", t, re.I):
+                    continue
+                if re.search(r"entr", t, re.I):
+                    return "FM Entrance"
+                n = re.findall(r"<\s*(\d{1,2})\s*>", t)
+                if len(n) == 1 and 1 <= int(n[0]) <= 40:
+                    best = "FM" + str(int(n[0]))
+            if best: return best
+        return ""
+    except Exception:
+        return ""
+
+
 # Scroll tiers have their own icon colours: Lesser blue, Intermediate red-brown, Greater light tan.
 # When the tier word is cut off, the row's icon decides it. Colours seen next to a readable tier
 # word are remembered per scroll, so a scroll whose colours differ is still matched to itself.
