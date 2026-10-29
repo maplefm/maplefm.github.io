@@ -921,7 +921,7 @@ async function abbrMap() {
 // "gfa 60" is Gloves Attack Scroll 60%: chat shortcuts from the board's list, and the rate words the board uses
 // trade-chat words the item names spell out: "glove for att 60" is Gloves Attack Scroll 60%
 const FILLER = new Set(["for", "of", "the", "a", "an", "to", "scroll", "scrolls", "scr"]);
-const SYN = { att: "attack", atk: "attack", attk: "attack", matt: "magic attack", matk: "magic attack", ma: "magic attack", acc: "accuracy",
+const SYN = { earing: "earring", earings: "earrings", att: "attack", atk: "attack", attk: "attack", matt: "magic attack", matk: "magic attack", ma: "magic attack", acc: "accuracy",
   luck: "luk", avoid: "avoidability", avo: "avoidability", spd: "speed", jmp: "jump", wep: "weapon", wpn: "weapon", crit: "crit", ohs: "one-handed sword",
   ths: "two-handed sword", glove: "gloves", shoe: "shoes", earrings: "earring", topwear: "topwear", ovr: "overall", ova: "overall" };
 function expandQuery(q, abbr) {
@@ -941,7 +941,7 @@ function expandQuery(q, abbr) {
   return tier ? base.replace(/\s*scroll:?.*$/, "") + " scroll: " + tier : base;
 }
 // what the market needs from here: the item list it checks names against, and the chat matcher for #selling posts
-function mkCtx(env) { return { whoami, isAdmin, overLimit, findRows, splitRoll, rows: () => mkRows(env), abbr: abbrMap,
+function mkCtx(env) { return { whoami, isAdmin, overLimit, findRows, splitRoll, expandQuery, rows: () => mkRows(env), abbr: abbrMap,
   dmAdmins: async (m, title) => wdDM(env, await wdAdmins(env), [{ description: String(m).slice(0, 3900), color: 0xe74c3c, title: title || "Club FM market" }]) }; }
 setRows((env) => mkRows(env));
 let MKROWS = null, MKAT = 0;
@@ -977,11 +977,15 @@ async function knownItem(env, q) {
   return m.length === 1 ? m[0] : "";
 }
 async function summaryRows(env) {
-  let sm = await vaultJSON(env, "data/summary.json", 300).catch(() => null);
-  // the vault copy is a few minutes fresher; the public copy keeps answers coming if the vault can't be read
-  if (!sm || !Array.isArray(sm.rows)) {
-    const r = await fetch(env.MARKET_ROWS_URL || "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json", { cf: { cacheTtl: 300, cacheEverything: true } }).catch(() => null);
-    sm = r && r.ok ? await r.json().catch(() => null) : null;
+  // two copies of the board: the vault's has roll prices and cheapest asks, the public one is sometimes a pump pass
+  // newer. Answers use whichever is newer, with the vault's extra fields kept, so /price and !price match the site.
+  const [v, pub] = await Promise.all([
+    vaultJSON(env, "data/summary.json", 300).catch(() => null),
+    fetch(env.MARKET_ROWS_URL || "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json", { cf: { cacheTtl: 120, cacheEverything: true } }).then((r) => (r.ok ? r.json() : null)).catch(() => null)]);
+  let sm = v && Array.isArray(v.rows) ? v : pub;
+  if (v && Array.isArray(v.rows) && pub && Array.isArray(pub.rows) && (pub.at || 0) > (v.at || 0)) {
+    const extra = {}; v.rows.forEach((r) => { if (r && r.item) extra[r.item] = r; });
+    sm = { at: pub.at, rows: pub.rows.map((r) => { const x = extra[r && r.item]; if (!x) return r; const o = Object.assign({}, r); for (const k of ["rt", "ra", "rk", "best", "bestS", "deal", "equip"]) if (o[k] == null && x[k] != null) o[k] = x[k]; return o; }) };
   }
   return sm && Array.isArray(sm.rows) ? sm.rows.filter((r) => r && r.item && !/\u2026$|^scroll: |\|/i.test(r.item)) : [];
 }
@@ -989,13 +993,19 @@ async function summaryRows(env) {
 // scrolls are shown by success rate, as on the board: Lesser 100%, Intermediate 60%, Greater 10%
 const shown = (name) => String(name || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, (m, t) => " Scroll " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%" })[t]);
 // exact under 10K (1,888 not 2K), then 12.5K, 790K, 1.15M, 1.2B
-const meso = (n) => n >= 999.5e6 ? (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B" : n >= 999.5e3 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "M" : n >= 99.95e3 ? Math.round(n / 1e3) + "K" : n >= 9999.5 ? (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K" : Math.round(n).toLocaleString("en-US");
+const meso = (n) => n > 0 && n < 1 ? n.toFixed(2) : n >= 999.5e6 ? (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B" : n >= 999.5e3 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "M" : n >= 99.95e3 ? Math.round(n / 1e3) + "K" : n >= 9999.5 ? (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K" : Math.round(n).toLocaleString("en-US");
 
 function findRows(rows, q, abbr) {
-  q = expandQuery(q, abbr || {});
-  if (!q) return [];
+  q = expandQuery(String(q || "").replace(/[^\p{L}\p{N}\s%:'+.&-]/gu, " "), abbr || {});   // emoji and symbols out
+  if (q.replace(/[^a-z0-9]/g, "").length < 2 || FILLER.has(q)) return [];   // "a", "the": no item
   const qw = q.split(/[\s:]+/).filter((w) => w && !FILLER.has(w));
   const tierQ = /scroll: (lesser|intermediate|greater)$/.exec(q);
+  // a typo or two in a word ("wrok", "lable", "crusadr")
+  const near = (a, b) => { if (Math.abs(a.length - b.length) > 2) return false; const d = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } }
+    // a swap of two letters ("wrok", "lable") counts as one typo
+    let swap = false; if (a.length === b.length) { const diff = []; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff.push(i); swap = diff.length === 2 && diff[1] === diff[0] + 1 && a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]]; }
+    return swap || d[b.length] <= (a.length >= 7 ? 2 : 1); };
   const score = (r) => {
     const raw = String(r.item || "").toLowerCase(), n = shown(r.item).toLowerCase(), words = (n + " " + raw).split(/[^a-z0-9%]+/);
     if (tierQ && !raw.endsWith(": " + tierQ[1])) return 9;
@@ -1008,7 +1018,8 @@ function findRows(rows, q, abbr) {
     const k = qw.filter(hit).length;
     // one word off is fine in a longer name ("dark crusadr chainmail"), but two words where only one lands
     // ("zakum helm", "maple claw") is a different item, not a typo
-    return qw.length >= 3 && k >= qw.length - 1 ? 5 : 9;
+    // ...and the word that missed must still be close to a word in the name ("helmet int 60" is not a cape scroll)
+    return qw.length >= 3 && k >= qw.length - 1 && qw.every((w) => hit(w) || (w.length >= 4 && words.some((x) => near(w, x)))) ? 5 : 9;
   };
   const exact = (r) => { const words = shown(r.item).toLowerCase().split(/[^a-z0-9%]+/); return qw.filter((w) => words.includes(w)).length; };
   // misread one-off names (a single listing) sort under real items
@@ -1016,18 +1027,15 @@ function findRows(rows, q, abbr) {
   const out = rows.map((r) => [score(r), r]).filter((x) => x[0] < 9);
   // nothing landed: allow a typo or two in each word ("wrok gloves", "nakamaky", "white lable")
   if (!out.length && qw.length) {
-    const near = (a, b) => { if (Math.abs(a.length - b.length) > 2) return false; const d = Array.from({ length: b.length + 1 }, (_, i) => i);
-      for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } }
-      // a swap of two letters ("wrok", "lable") counts as one typo
-      let swap = false; if (a.length === b.length) { const diff = []; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff.push(i); swap = diff.length === 2 && diff[1] === diff[0] + 1 && a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]]; }
-      return swap || d[b.length] <= (a.length >= 7 ? 2 : 1); };
     for (const r of rows) {
       const words = (shown(r.item) + " " + r.item).toLowerCase().split(/[^a-z0-9%]+/).filter(Boolean);
       const k = qw.filter((w) => words.some((x) => x === w || x.startsWith(w) || (w.length >= 4 && near(w, x)))).length;
       if (k === qw.length) out.push([6, r]);
     }
   }
-  return out.sort((a, b) => a[0] - b[0] || junk(a[1]) - junk(b[1]) || exact(b[1]) - exact(a[1]) || a[1].item.length - b[1].item.length || (b[1].n || 0) - (a[1].n || 0)).map((x) => x[1]);
+  return out.sort((a, b) => a[0] - b[0] || junk(a[1]) - junk(b[1]) || exact(b[1]) - exact(a[1]) ||
+    // tiers of one scroll: the most traded first, so "gfa" is the 60% people mean
+    (a[1].item.replace(/: \w+$/, "") === b[1].item.replace(/: \w+$/, "") ? (b[1].n || 0) - (a[1].n || 0) : 0) || a[1].item.length - b[1].item.length || (b[1].n || 0) - (a[1].n || 0)).map((x) => x[1]);
 }
 
 async function interactions(req, env) {
@@ -1040,7 +1048,8 @@ async function interactions(req, env) {
   if (it.type === 4) {                                   // autocomplete: the closest item names
     const rows = await mkRows(env), ab = await abbrMap();
     // nothing typed yet: the busiest items, so the list shows as soon as the box opens
-    const pick = q.trim() ? findRows(rows, q, ab) : rows.filter((r) => (r.n || 0) >= 2).sort((a, b) => (b.vol || b.n || 0) - (a.vol || a.n || 0));
+    let pick = q.trim() ? findRows(rows, q, ab) : rows.filter((r) => (r.n || 0) >= 2).sort((a, b) => (b.vol || b.n || 0) - (a.vol || a.n || 0));
+    if (!pick.length && /\s\d{1,2}$/.test(q.trim())) pick = findRows(rows, q.trim().replace(/\s+\d{1,2}$/, ""), ab);   // "gfa 6" on the way to "gfa 60"
     return json({ type: 8, data: { choices: pick.slice(0, 25).map((r) => ({ name: shown(r.item).slice(0, 100), value: r.item.slice(0, 100) })) } });
   }
   if (it.type === 2 && it.data && (it.data.name === "market" || it.data.name === "sell"))
@@ -1055,12 +1064,17 @@ async function interactions(req, env) {
 // /price in Discord: the embed for one item, with the roll's own sales when a roll is asked for
 async function discordPrice(env, q) {
   const rows = await summaryRows(env), ab = await abbrMap(), sr = splitRoll(q);
+  // the same checks as !price: a bare slot word is a scroll search, and a real item nobody sold lately says so
+  if (sr.roll && SLOT_ONLY.test(sr.q.trim()) && !sr.plus) { sr.q = q; sr.roll = ""; }
+  else if (sr.roll && SLOT_ONLY.test(sr.q.trim())) return ({ type: 4, data: { content: "Which " + sr.q.trim().toLowerCase() + "? Try `/price emerald earrings " + (sr.g || 5) + " " + (sr.stat || "int").toLowerCase() + "`", flags: 64 } });
   const hits = findRows(rows, sr.q, ab);
+  const kn = await knownItem(env, expandQuery(sr.q, ab));
+  if (kn && (!hits.length || hits[0].item.toLowerCase() !== kn.toLowerCase())) return ({ type: 4, data: { content: "**" + shown(kn) + "**: no sales caught in the last few days, so no price yet. Star it on https://maplefm.gg to get told when one shows up.", flags: 64 } });
   if (!hits.length) return ({ type: 4, data: { content: "No listings for **" + q.slice(0, 60) + "** in the last few days. Try a shorter name, or check https://maplefm.gg", flags: 64 } });
   const r = hits[0];
   const link = "https://maplefm.gg/?ref=discord#item=" + encodeURIComponent(r.item);
   const lines = [];
-  if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
+  if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
   if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
   // mv[0] is the last 24 hours against the 24 before; daily is the typical per day, so the week comes from its ends
   const d = Array.isArray(r.daily) ? r.daily.filter((x) => x && x[1] > 0) : [];
@@ -1195,8 +1209,10 @@ function splitRoll0(q) {
 // Words that only name an equip slot: "10 int earring" is the scroll, "emerald earrings 5 int" is a roll
 const SLOT_ONLY = /^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glove|cape|capes|shoes?|boots?|top|tops|topwear|bottom|bottoms|pants|overall|ova|ovr|shield|weapon|wep|claw|bow|crossbow|xbow|cbow|dagger|spear|polearm|pole|wand|staff|sword|axe|blunt|bw|ohs|ths|1h|2h|1hs|2hs|1ha|2ha|1hbw|2hbw|knuckle|gun|face|eye|accessory|ring|pendant|belt)$/i;
 async function priceLine(env, raw) {
-  let q = raw; try { q = decodeURIComponent(raw); } catch (e) {}
-  q = q.replace(/^!?(price|pc|fm)\s*/i, "").trim().slice(0, 80);
+  let q = String(raw || "");
+  // the query arrives decoded already; decode again only when it still looks encoded ("work%20gloves")
+  if (/%[0-9a-f]{2}/i.test(q) && !/%25/i.test(q) && !/\s/.test(q)) { try { q = decodeURIComponent(q); } catch (e) {} }
+  q = q.replace(/[\u0000-\u001f\u200b-\u200d\ufeff]/g, " ").replace(/^!?(price|pc|fm)\s*/i, "").replace(/\s+/g, " ").trim().slice(0, 80);
   if (!q) return "Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg";
   const full = q, rows = await summaryRows(env), ab = await abbrMap();
   let sr = splitRoll(q), hits;
@@ -1261,7 +1277,7 @@ async function priceLine(env, raw) {
   if (hits.length && /\bscr(oll)?s?\b/i.test(q) && !/scroll/i.test(hits[0].item)) return "No recent listings for " + q + ". Try the full name, like gloves attack scroll 60, or check maplefm.gg";
   if (!hits.length) return "No recent listings for " + q + ". Check maplefm.gg";
   const r = hits[0], bits = [shown(r.item) + ":"];
-  if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" ? " from " + (r.salesN || 0) + " sales" : " from asks"));
+  if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? " from " + (r.salesN || 0) + " sales" : " from asks"));
   if (r.best) bits.push("· cheapest now " + meso(r.best));
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
   const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -1280,6 +1296,7 @@ async function priceLine(env, raw) {
 // Needs Worker secrets TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET, and the redirect URL
 // https://clubfm-accounts.aaweaver93.workers.dev/twitchbot/callback added to the Twitch app.
 const TB_CMDS = /^!(price|pc|fm)\b/i;
+const TBLAST = new Map();   // last answer per channel: 3 seconds between answers
 async function tbSecret(env) { return (await hmac(env.SESSION_SECRET || "x", "eventsub-secret")).slice(0, 48); }
 async function tbAppToken(env) {
   const c = await env.ACCOUNTS.get("tb:apptoken", "json");
@@ -1356,9 +1373,10 @@ async function tbEventsub(req, env) {
   if (!TB_CMDS.test(said)) return new Response("ok");
   if (await env.ACCOUNTS.get("tbseen:" + id)) return new Response("ok");
   const b = e.broadcaster_user_id;
-  if (overLimit("tbcd:" + b, 1, 3) || overLimit("tbmin:" + b, 20, 60)) return new Response("ok");
   const bot = await env.ACCOUNTS.get("tb:bot", "json");
-  if (!bot || e.chatter_user_id === bot.id) return new Response("ok");
+  if (!bot || e.chatter_user_id === bot.id) return new Response("ok");   // its own replies never use up the cooldown
+  if (Date.now() - (TBLAST.get(b) || 0) < 3000 || overLimit("tbmin:" + b, 20, 60)) return new Response("ok");
+  TBLAST.set(b, Date.now());
   await env.ACCOUNTS.put("tbseen:" + id, "1", { expirationTtl: 900 });
   const line = await priceLine(env, said);
   await logHit(env, "!price bot", e.broadcaster_user_login || "", "", "tb:" + e.chatter_user_id).catch(() => {});
@@ -1868,6 +1886,7 @@ async function partnerMarket(env) {
 // to (workflow_dispatch, token GH_DISPATCH: a fine-grained token with Actions write on maplefm.github.io only).
 // GitHub's crons stay as a fallback; every job skips work it already did that day.
 const GH_JOBS = [
+  { wf: "report.yml", hour: 0 },        // the market close, right after midnight Eastern (GitHub's own cron runs hours late)
   { wf: "itempages.yml", hour: 6 },
   { wf: "seo.yml", hour: 7, dow: 1 },
   { wf: "news.yml", hour: 18, inputs: { mode: "digest" } },
