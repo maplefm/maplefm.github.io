@@ -330,7 +330,7 @@ def job_coverage(data_dir, state_path):
 QUIET = re.compile(r"\b(earn|pay|payout|payouts|paid|credit|credits|budget|rate|paypal|money|fund|price floor|cap)\b", re.I)
 # behind-the-scenes work stays out of the public updates: the Reddit watch, Ko-fi and supporter thank-yous, outreach,
 # owner alerts and DMs, scheduled jobs and the Worker
-PRIVATE = re.compile(r"\b(reddit|ko-?fi|supporters?|tiers?|outreach|whispers?|dms?|owner|admins?|alerts?|scheduled|schedule|cron|dispatch|worker|watchdog|stat check|stats? report|partner|the club|kingdavid|api access)\b", re.I)
+PRIVATE = re.compile(r"\b(reddit|ko-?fi|supporters?|tiers?|outreach|whispers?|dms?|owner|admins?|alerts?|scheduled|schedule|cron|dispatch|worker|watchdog|stat check|stats? report|partner|the club|kingdavid|api access|speed watch|fact check|smoke)\b", re.I)
 
 def plain_change(subj):
     """A commit title as a visitor would read it: no file names, code words or brackets, one short line."""
