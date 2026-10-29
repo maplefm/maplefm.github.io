@@ -61,6 +61,8 @@ PAGES = [
     ("Player market", "/market.html", "Player market"),
     ("Shops", "/shop.html", "Shops"),
     ("Training guide", "/training/", "training guide"),
+    ("Quest page", "/quest/pios-collecting-recycled-goods/", "Pio"),
+    ("Training level page", "/training/level-30-40/", "level 30 to 40"),
     ("Map page", "/map/sleepywood/", "Sleepywood"),
     ("Weekly recap", "/recap/", "This week on the"),
     ("Item list", "/items/", "Work Gloves"),
@@ -133,6 +135,27 @@ if TOKEN:
             s, _ = gh(f"/actions/runs/{r['id']}/rerun-failed-jobs", "POST")
             repairs.append({"what": f"re-ran failed job: {r['name']}", "ok": s in (201, 204)})
     check("Scheduled jobs", not bad, "all passing" if not bad else "failed: " + ", ".join(sorted({r["name"] for r in bad})))
+
+    # 4b. Every scheduled job, one by one: still failing (until its next success, not just for 3 hours) or stopped
+    # running. Hours = the longest a healthy job goes between successful runs.
+    EVERY = {"covmap.yml": 8, "icons.yml": 8, "itemdb.yml": 28, "itemguide.yml": 28, "itempages.yml": 28, "world.yml": 28,
+             "maintenance.yml": 8, "news.yml": 28, "report.yml": 28, "seo.yml": 8 * 24 + 4, "weekly.yml": 8 * 24 + 4,
+             "weeklyrecap.yml": 8 * 24 + 4, "speedwatch.yml": 28, "factcheck.yml": 8 * 24 + 4}
+    late, failing_now = [], []
+    for wf, hrs in EVERY.items():
+        s2, rr = gh(f"/actions/workflows/{wf}/runs?per_page=8&exclude_pull_requests=true")
+        if s2 == 404:
+            continue    # not added yet
+        rr = [r for r in (rr.get("workflow_runs") or []) if r.get("event") != "pull_request"] if isinstance(rr, dict) else []
+        done = [r for r in rr if r.get("status") == "completed"]
+        if done and done[0].get("conclusion") in ("failure", "timed_out", "startup_failure"):
+            failing_now.append(done[0]["name"])
+        ok_runs = [r for r in done if r.get("conclusion") == "success"]
+        last = calendar.timegm(time.strptime(ok_runs[0]["updated_at"], "%Y-%m-%dT%H:%M:%SZ")) if ok_runs else 0
+        if NOW - last > hrs * 3600:
+            late.append(f"{(rr[0]['name'] if rr else wf)} (last success {'never' if not last else str(int((NOW - last) / 3600)) + 'h ago'})")
+    check("Jobs still failing", not failing_now, "none" if not failing_now else ", ".join(sorted(set(failing_now))))
+    check("Jobs on schedule", not late, "all ran on time" if not late else "late: " + "; ".join(late))
 
     def running(wf_name):
         return any(r["name"] == wf_name and r["status"] in ("queued", "in_progress", "waiting", "pending") for r in runs)
