@@ -81,7 +81,7 @@
     if (!newest) return;
     var inBuy = !newest.so && Date.now() - newest.t < DAY;
     state.list = inBuy ? "buy" : "sales"; renderItem();
-    var ls = $("ip").querySelector(".list");
+    var ls = $("side").querySelector(".list");
     var li = ls && Array.prototype.filter.call(ls.querySelectorAll(".li[data-sv]"), function (x) { return x.dataset.sv === String(v); })[0];
     if (li) { li.scrollIntoView({ block: "center", behavior: "smooth" }); li.classList.add("hit"); setTimeout(function () { li.classList.remove("hit"); }, 1800); }
     // and say where the newest one with this roll was, whether or not it is in the list
@@ -97,7 +97,7 @@
     if (!newest) return;
     var inBuy = !newest.so && !newest.chat && Date.now() - newest.t < DAY;
     state.list = inBuy ? "buy" : "sales"; renderItem();
-    var ls = $("ip").querySelector(".list");
+    var ls = $("side").querySelector(".list");
     var li = ls && Array.prototype.filter.call(ls.querySelectorAll(".li[data-g]"), function (x) { return x.dataset.g === String(g); })[0];
     if (li) { li.scrollIntoView({ block: "center", behavior: "smooth" }); li.classList.add("hit"); setTimeout(function () { li.classList.remove("hit"); }, 1800); }
     var sec = $("ip").querySelector(".rollbox"); if (!sec) return;
@@ -1452,8 +1452,6 @@
   // a search or a popular pick always lands on the board, whatever tab was open (My positions, Best deals...)
   function jumpToCard() {
     if (state.tab !== "prices") $("tab-prices").click();
-    if (window.innerWidth <= 1180) return;   // phones and tablets get the card as a sheet
-    var m = document.querySelector(".main"); if (m && m.getBoundingClientRect().top > window.innerHeight * 0.5) m.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   var POP = null, POP_AT = 0;
   function loadPopular() {
@@ -1543,7 +1541,7 @@
   var QHIT = {};
   function lvRange() { var a = $("lv-min").value, b = $("lv-max").value; return [a === "" ? null : +a, b === "" ? null : +b]; }
   function visible() {
-    var q = $("q").value.trim().toLowerCase(), low = $("f-low").checked, onlySold = $("f-sold").checked, onlyBids = $("f-bids").checked, cash = $("f-cash").checked, cls = +$("cls").value || 0, lr = lvRange();
+    var q = boardQ().trim().toLowerCase(), low = $("f-low").checked, onlySold = $("f-sold").checked, onlyBids = $("f-bids").checked, cash = $("f-cash").checked, cls = +$("cls").value || 0, lr = lvRange();
     var fon = low || !cash || $("f-spot").checked || onlySold || onlyBids || lr[0] != null || lr[1] != null || $("win").value !== "7";
     $("fon").hidden = !fon;
     $("spotn").textContent = "Junk put up at silly prices to hold a shop spot" + (D.spotN ? " · " + fmt(D.spotN) + ($("f-spot").checked ? " shown" : " left out") : "");
@@ -1609,7 +1607,7 @@
     var shown = basel.filter(function (i) { return (state.cat === "All" || i.cat === state.cat) && (!state.wonly || WATCH[i.item]); });
     $("wcount").textContent = Object.keys(WATCH).length;
     var k = state.sortK, dir = state.sortDir;
-    var hasQ = $("q").value.trim() !== "";
+    var hasQ = boardQ().trim() !== "";
     shown.sort(function (a, b) {
       if (hasQ && QHIT[a.item] !== QHIT[b.item] && Math.max(QHIT[a.item], QHIT[b.item]) >= 900) return QHIT[b.item] - QHIT[a.item];
       if (k === "item") return dir * a.item.localeCompare(b.item);
@@ -1657,7 +1655,7 @@
     addRows(0, upto);
     $("empty").hidden = shown.length > 0;
     if (!shown.length && hasQ) {
-      var qh = searchItems($("q").value, 3);
+      var qh = searchItems(boardQ(), 3);
       if (qh.length && !qh[0].it) {
         $("empty").textContent = ""; $("empty").appendChild(el("strong", null, qh[0].n + " has no price yet"));
         var eb = el("button", "cta", "See item info"); eb.type = "button"; eb.addEventListener("click", function () { pick(qh[0].n); });
@@ -1996,7 +1994,7 @@
     var dn = $("deal-note"); if (dn) { dn.textContent = "Equips are matched by roll, so only hovered listings show here."; dn.hidden = false; }
     // searching on this tab: say which matching items exist but aren't under typical right now, so none seem missing
     var also = $("deal-also"); also.textContent = ""; also.hidden = true;
-    if ($("q").value.trim()) {
+    if (boardQ().trim()) {
       var inDeals = {}; list.forEach(function (d) { inDeals[d.item] = 1; });
       var rest = basel.filter(function (i) { return !inDeals[i.item] && (state.cat === "All" || i.cat === state.cat); }).slice(0, 6);
       if (rest.length) {
@@ -2621,16 +2619,56 @@
   window.addEventListener("scroll", hideHov, { passive: true });
 
   // ---------- item panel
-  function pick(name) {
+  function pick(name, nav) {
     earnNudge(1);
+    var was = cardOpen(), h = "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "");
     PENDROLL = QROLL && Date.now() - QROLL.at < 15000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;
-    document.body.classList.remove("noside");
     state.sel = name; state.list = "buy"; hideHov();
-    try { history.replaceState(null, "", "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "")); } catch (e) {}
+    // opening from the board adds a history step, so the browser's back button (or a phone's back gesture) closes
+    // the card; a link straight to #item= gets a board step put under it for the same reason
+    try {
+      if (nav === "load" && !was) { var base = location.pathname + location.search + (state.tab === "deals" ? "#deals" : ""); history.replaceState(null, "", base); history.pushState({ fmcard: 1 }, "", h); }
+      else if (!was && !nav) history.pushState({ fmcard: 1 }, "", h);
+      else history.replaceState(history.state, "", h);
+    } catch (e) {}
     document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); });
     document.querySelectorAll('tbody tr[data-item="' + (window.CSS && CSS.escape ? CSS.escape(name) : name) + '"]').forEach(function (r) { r.classList.add("sel"); });
     renderItem(); ev("#open:" + name);
-    if (window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); if (document.activeElement === $("q") && window.innerWidth <= 700) $("q").blur(); }
+    $("side").scrollTop = 0; showCard();
+  }
+  // The item card opens over the board: a big framed card on a wide screen, the full screen on a phone. The board
+  // behind it is never touched, so closing the card leaves it exactly where it was.
+  // the board keeps the search it had when the card opened: looking up other items from the card's search box
+  // doesn't filter the board behind it, and closing the card puts the old search back
+  var CARD_Y = 0, CARD_Q = "";
+  function boardQ() { return cardOpen() ? CARD_Q : $("q").value; }
+  function cardOpen() { var b = document.body.classList; return b.contains("bigcard") || b.contains("sheet"); }
+  function showCard() {
+    var b = document.body, hs = $("hsearch"), ph = $("hsph"), wide = window.innerWidth > 1180;
+    // the search moves to the top while the card is open; a spacer of the same height keeps the page behind from moving
+    if (!cardOpen()) { CARD_Y = window.scrollY; CARD_Q = $("q").value; if (hs && ph) ph.style.height = hs.offsetHeight + "px"; }
+    b.classList.toggle("bigcard", wide); b.classList.toggle("sheet", !wide);
+    if (!wide && document.activeElement === $("q") && window.innerWidth <= 700) $("q").blur();
+    placeCard();
+  }
+  function placeCard() {
+    var hs = $("hsearch"), rs = document.documentElement.style; if (!hs || !cardOpen()) return;
+    if (window.innerWidth > 1180) {
+      var tp = document.querySelector(".top"), tb = tp ? Math.max(0, tp.getBoundingClientRect().bottom) : 0;
+      rs.setProperty("--srchtop", Math.round(tb + 4) + "px");
+      rs.setProperty("--cardtop", Math.round(tb + 4 + hs.offsetHeight + 12) + "px");
+    } else rs.setProperty("--cardtop", Math.round(hs.getBoundingClientRect().bottom) + "px");
+  }
+  function closeCard(nav) {
+    if (!cardOpen()) return;
+    document.body.classList.remove("bigcard", "sheet");
+    if ($("q").value !== CARD_Q) { $("q").value = CARD_Q; render(); }
+    if (Math.abs(window.scrollY - CARD_Y) > 1) window.scrollTo(0, CARD_Y);
+    state.sel = null; hideHov();
+    document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); });
+    if (nav) return;
+    if (history.state && history.state.fmcard) { try { history.back(); return; } catch (e) {} }
+    try { history.replaceState(null, "", location.pathname + location.search + (state.tab === "deals" ? "#deals" : "")); } catch (e) {}
   }
   // A roll's listings, for the list that opens under Price by roll: what's for sale now (cheapest first, with where to
   // find it), then what sold (newest first). The same copy read twice in one visit counts once.
@@ -3077,9 +3115,44 @@
     return box;
   }
   function renderItem() {
+    var r = $("ipr"); if (r) { r.textContent = ""; r.hidden = true; }
     renderItem0();
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
+    splitCard();
+  }
+  // wide screens: the price, stats and guide on the left; a price chart and the listings on the right
+  function splitCard() {
+    var r = $("ipr"), ip = $("ip"); if (!r || !ip || window.innerWidth <= 1180 || !state.sel) return;
+    var i = D && D.byName && D.byName[state.sel];
+    var mv = ip.querySelectorAll(":scope > .ltabs, :scope > .bsort, :scope > .list"); if (!mv.length) return;
+    var ch = i && bigChart(i); if (ch) r.appendChild(ch);
+    mv.forEach(function (n) { r.appendChild(n); });
+    r.hidden = false;
+  }
+  // the card's price chart: every sale and asking price we saw, with the daily typical price as a line
+  function bigChart(i) {
+    var pts = (i.sales || []).map(function (x) { return [x.t, x.u, 1]; }).concat((i.asks || []).map(function (x) { return [x.t, x.u, 0]; }));
+    var dl = (i.daily || []).filter(function (d) { return d && d[1] > 0; });
+    if (pts.length < 3 && dl.length < 2) return null;
+    if (pts.length < 3) pts = [];
+    var W = 560, Hh = 210, pl = 46, pr = 14, pt = 12, pb = 24;
+    var ys = pts.map(function (p) { return p[1]; }).concat(dl.map(function (d) { return d[1]; }));
+    var lo = quant(ys, .03), hi = quant(ys, .97); if (hi <= lo) { lo *= .8; hi = hi * 1.2 + 1; }
+    var span = hi - lo; lo = Math.max(0, lo - span * .06); hi = hi + span * .06;
+    var ts = pts.map(function (p) { return p[0]; }).concat(dl.map(function (d) { return d[0] + DAY / 2; }));
+    var t0 = Math.min.apply(null, ts), t1 = Math.max.apply(null, ts); if (t1 - t0 < H) { t0 -= H / 2; t1 += H / 2; }
+    var X = function (t) { return pl + (t - t0) / (t1 - t0) * (W - pl - pr); }, Y = function (v) { return pt + (1 - (Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo)) * (Hh - pt - pb); };
+    var svg = svgEl("svg", { viewBox: "0 0 " + W + " " + Hh, role: "img", "aria-label": "Prices over time", "class": "bchart" });
+    [0, 1, 2, 3].forEach(function (k) { var v = lo + (hi - lo) * k / 3; svg.appendChild(svgEl("line", { x1: pl, x2: W - pr, y1: Y(v), y2: Y(v), stroke: "var(--line)" })); svg.appendChild(txt(pl - 5, Y(v) + 3, short(v), { "text-anchor": "end" })); });
+    if (i.hi > i.lo) svg.appendChild(svgEl("rect", { x: pl, y: Y(i.hi), width: W - pl - pr, height: Math.max(2, Y(i.lo) - Y(i.hi)), fill: "rgba(124,77,230,.13)" }));
+    pts.forEach(function (p) { svg.appendChild(p[2] ? svgEl("circle", { cx: X(p[0]), cy: Y(p[1]), r: 3.2, fill: "var(--orange)", "fill-opacity": ".6" }) : svgEl("circle", { cx: X(p[0]), cy: Y(p[1]), r: 3.2, fill: "none", stroke: "var(--wood)", "stroke-width": "1.3", "stroke-opacity": ".8" })); });
+    if (dl.length >= 2) svg.appendChild(svgEl("polyline", { points: dl.map(function (d) { return X(Math.min(t1, Math.max(t0, d[0] + DAY / 2))).toFixed(1) + "," + Y(d[1]).toFixed(1); }).join(" "), fill: "none", stroke: "var(--orange-lo)", "stroke-width": "2.4", "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    var multi = t1 - t0 > 1.5 * DAY;
+    [t0, (t0 + t1) / 2, t1].forEach(function (t, k) { svg.appendChild(txt(k === 0 ? pl : k === 1 ? (pl + W - pr) / 2 : W - pr, Hh - 6, new Date(t).toLocaleString("en-US", multi ? { month: "short", day: "numeric" } : { hour: "numeric", minute: "2-digit" }), { "text-anchor": k === 0 ? "start" : k === 1 ? "middle" : "end" })); });
+    var box = el("div", "subw bchartw"), hd = el("h4"); hd.appendChild(document.createTextNode("Price over time"));
+    hd.appendChild(el("small", null, pts.length ? "dots: sales and asks · line: typical by day" : "typical price by day")); box.appendChild(hd); box.appendChild(svg);
+    return box;
   }
 
   // the item's name bar: once the header scrolls away, the card's title bar names the item, its price and the site, so any screenshot says what it is
@@ -3124,7 +3197,7 @@
       if (/^Equip/.test(DBK[nr[5]] || "") && !nr[4]) { var nbt = baseText(nr[0]); if (nbt) { var nbl = el("p", "baseln"); nbl.appendChild(el("b", null, "Base ")); nbl.appendChild(document.createTextNode(nbt.t)); nt.appendChild(nbl); } }
       var nv = vendor(nr[0]); if (nv) { var nvl = el("p", "vend"); nvl.appendChild(document.createTextNode("Vendor price ")); nvl.appendChild(money(nv)); nvl.appendChild(document.createTextNode(" each")); nt.appendChild(nvl); }
       nh.appendChild(nt); ip.appendChild(nh);
-      ip.appendChild(el("p", "note", "No price in this time range. Try Last 30 days in Filters, or open a shop that sells it with FM Watcher running."));
+      ip.appendChild(el("p", "note nosale", "No sales yet. Try Last 30 days in Filters, or open a shop that sells it with FM Watcher running."));
       if (nr[1]) { var na = el("a", null, "Item data: maplestory.io"); na.href = IO + nr[1]; na.target = "_blank"; na.rel = "noopener"; $("wiki").appendChild(na); }
       return;
     }
@@ -3645,7 +3718,6 @@
     ["prices", "deals", "sell", "pos"].forEach(function (t) { $(t + "-view").hidden = state.tab !== t; $("tab-" + t).setAttribute("aria-selected", state.tab === t); });
     $("chips").parentNode.hidden = state.tab === "sell" || state.tab === "pos";
     if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else if (state.tab === "sell") renderSell(); else renderPos();
-    if (!state.sel && D.list.length && !document.body.classList.contains("noside")) { var top = D.list.slice().sort(function (a, b) { return b.vol - a.vol; })[0]; state.sel = top.item; }
     if (state.sel && !D.byName[state.sel]) { var c = canon(state.sel).n; if (D.byName[c]) state.sel = c; }
     renderItem(); livePill();
     // the parts below the fold or off to the side draw a moment later, when the page is idle, so the table and
@@ -3788,7 +3860,7 @@
     var q = $("q"), box = $("sugg"), hits = [], at = -1, t = null;
     function close() { box.hidden = true; q.setAttribute("aria-expanded", "false"); at = -1; }
     function choose(k) { var r = hits[k]; if (!r) return; close(); ev("#find:" + q.value.trim().toLowerCase().slice(0, 40)); pick(r.n); jumpToCard(); }
-    function mark() { box.querySelectorAll(".so").forEach(function (o, k) { o.setAttribute("aria-selected", k === at ? "true" : "false"); if (k === at) o.scrollIntoView({ block: "nearest" }); }); }
+    function mark() { box.querySelectorAll(".so").forEach(function (o, k) { o.setAttribute("aria-selected", k === at ? "true" : "false"); if (k === at) { var t0 = o.offsetTop, t1 = t0 + o.offsetHeight; if (t0 < box.scrollTop) box.scrollTop = t0; else if (t1 > box.scrollTop + box.clientHeight) box.scrollTop = t1 - box.clientHeight; } }); }
     function show() {
       var v = q.value.trim(); if (!v || !D) { close(); return; }
       hits = searchItems(v, 5); box.textContent = ""; at = -1;
@@ -4039,14 +4111,31 @@
   $("m-minprof").addEventListener("change", function () { var v = parseMesos(this.value); if (!(v >= 0)) v = 50000; MINPROF = v; saveLS("fm-min-profit", v); this.value = fmt(v); seenDeals = null; renderAlert(); });
   $("sound").addEventListener("change", function () { if (this.checked) beep(); try { syncTouch("fm-sound"); localStorage.setItem("fm-sound", this.checked ? "1" : ""); } catch (e) {} });
   try { $("sound").checked = localStorage.getItem("fm-sound") === "1"; } catch (e) {}
-  $("scrim").addEventListener("click", function () { document.body.classList.remove("sheet"); });
+  $("scrim").addEventListener("click", function () { closeCard(); });
   // searching again from an open item: start fresh instead of editing the last search
-  function freshQ() { if (document.body.classList.contains("sheet")) { var q = $("q"); q.select(); setTimeout(function () { q.select(); }, 0); } }
+  function freshQ() { if (cardOpen()) { var q = $("q"); q.select(); setTimeout(function () { q.select(); }, 0); } }
   $("q").addEventListener("focus", freshQ); $("q").addEventListener("click", freshQ);
   // close the item panel: on a phone it slides the sheet away; on a wide screen it hides the panel and the price
   // list takes the full width until you pick another item
-  $("sheetx").addEventListener("click", function () { document.body.classList.remove("sheet"); if (window.innerWidth > 1180) { document.body.classList.add("noside"); state.sel = null; document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); }); } });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.body.classList.remove("sheet"); });
+  $("sheetx").addEventListener("click", function () { closeCard(); });
+  $("sheetback").addEventListener("click", function () { closeCard(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || !cardOpen()) return;   // runs first (capture), while the menu or suggestions still show
+    if (!$("sugg").hidden || document.querySelector("dialog[open]") || ($("menu") && !$("menu").hidden)) return;   // Esc closes those first
+    closeCard();
+  }, true);
+  // back and forward: a step without #item= closes the card, a step with one opens that item
+  window.addEventListener("popstate", function () {
+    var m = /item=([^&]+)/.exec(location.hash); if (!m) { closeCard(true); return; }
+    var n = ""; try { n = decodeURIComponent(m[1]); } catch (e) { return; }
+    if (D && D.byName && D.byName[n] && (n !== state.sel || !cardOpen())) pick(n, true);
+  });
+  // turning a tablet or resizing across the wide-screen line: the card switches between its two shapes
+  var cardWide = window.innerWidth > 1180;
+  window.addEventListener("resize", function () {
+    var w = window.innerWidth > 1180; if (!cardOpen()) { cardWide = w; return; }
+    if (w !== cardWide) { cardWide = w; showCard(); renderItem(); } else placeCard();
+  });
   $("drawerbtn").addEventListener("click", function () { var d = $("drawer"), o = !d.classList.contains("open"); d.classList.toggle("open", o); this.setAttribute("aria-expanded", o); });
   function renderDrawer() {
     var s = D.sales.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 40), d = $("drawer");
@@ -4141,8 +4230,9 @@
   })();
   (function fromHash() { var h = location.hash; if (/deals/.test(h)) state.tab = "deals"; if (/sell/.test(h)) state.tab = "sell"; if (/positions/.test(h)) state.tab = "pos"; var m = /item=([^&]+)/.exec(h); if (m) state.sel = decodeURIComponent(m[1]); })();
   // "See X on the price board" links (#item=Name): once prices load, open that item's card and scroll to it
+  var first = true;
   function itemHash() {
-    var m = /item=([^&]+)/.exec(location.hash); if (!m) return;
+    var m = /item=([^&]+)/.exec(location.hash); if (!m) { first = false; return; }
     var name = ""; try { name = decodeURIComponent(m[1]); } catch (e) { return; }
     var tries = 0, t = setInterval(function () {
       if (++tries > 120) return clearInterval(t);
@@ -4151,10 +4241,9 @@
       var hit = null;
       for (var i = 0; i < D.list.length; i++) if (D.list[i].item === name) { hit = name; break; }
       if (!hit) { var h = searchItems(name, 1); if (h.length) hit = h[0].n; }
-      if (hit && (hit !== state.sel || !document.querySelector("#ip"))) { try { pick(hit); jumpToCard(); } catch (e) {} }
+      if (hit && (hit !== state.sel || !cardOpen())) { try { pick(hit, first ? "load" : true); jumpToCard(); } catch (e) {} }
       else if (hit) { try { jumpToCard(); } catch (e) {} }
-      // the page may already show this item from the saved state; on a phone the card only shows as a sheet
-      if (hit && window.innerWidth <= 1180) { $("side").scrollTop = 0; document.body.classList.add("sheet"); }
+      first = false;
     }, 250);
   }
   itemHash();
