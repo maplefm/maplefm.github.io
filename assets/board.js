@@ -1579,6 +1579,14 @@
   }
   // the verified-price badge: what the typical rests on, in one glance
   var CONFTXT = { verified: ["Verified", "Fresh sales caught by two trusted scanners, or by a scanner and a stream"], watched: ["Watched", "Fresh sales caught by one trusted scanner. Treat it as a lead until a second scanner sees it"], lead: ["Lead", "Rests on older sales or asking prices, not fresh watched sales"] };
+  function infoTip(text) {
+    var b = el("button", "inf", "i"); b.type = "button"; b.title = text; b.setAttribute("aria-label", "What this means: " + text);
+    b.addEventListener("click", function (e) {
+      e.stopPropagation(); var host = b.closest(".subw, .rollbox, .guide, .tline, .gbox") || b.parentNode, ex = host.querySelector(":scope > .infx");
+      if (ex) { ex.remove(); return; } var n = el("p", "infx", text); if (host.classList.contains("tline")) host.parentNode.insertBefore(n, host.nextSibling); else host.appendChild(n);
+    });
+    return b;
+  }
   function confBadge(i, long) {
     if (!i.conf || i.kind !== "sale") return null;
     var b = el("span", "conf " + i.conf + (long ? "" : " mini")); var im = el("img"); im.alt = CONFTXT[i.conf][0]; im.src = "assets/emoji/" + (i.conf === "verified" ? "verified" : i.conf === "watched" ? "scanner" : "witness") + ".png"; b.appendChild(im);
@@ -2663,7 +2671,8 @@
     if (!cardOpen()) return;
     document.body.classList.remove("bigcard", "sheet");
     if ($("q").value !== CARD_Q) { $("q").value = CARD_Q; render(); }
-    if (Math.abs(window.scrollY - CARD_Y) > 1) window.scrollTo(0, CARD_Y);
+    var keepY = function () { if (!cardOpen() && Math.abs(window.scrollY - CARD_Y) > 1) window.scrollTo(0, CARD_Y); };
+    keepY(); requestAnimationFrame(keepY); setTimeout(keepY, 250);   // the board redraws its rows a moment later
     state.sel = null; hideHov();
     document.querySelectorAll("tbody tr.sel").forEach(function (r) { r.classList.remove("sel"); });
     if (nav) return;
@@ -2735,7 +2744,7 @@
   }
   function rollBox(i) {
     var box = el("div", "rollbox"), hd = el("h4"); hd.appendChild(document.createTextNode("Price by roll")); box.appendChild(hd);
-    var kw = keyWhy(i.item); if (kw) box.appendChild(el("p", "rlnote rkey", kw + " Clean means no scrolls used; a clean copy can still have rolled above or below the item's base, and that roll is priced on its own."));
+    var kw = keyWhy(i.item); if (kw) hd.appendChild(infoTip(kw + " Clean means no scrolls used; a clean copy can still have rolled above or below the item's base, and that roll is priced on its own."));
     if (i.bands) {
       var bg = el("div", "rollbands");
       [["Low", Math.min(i.bands.lo, i.bands.mid), "down"], ["Average", i.bands.mid, "mid"], ["High", Math.max(i.bands.hi, i.bands.mid), "up"]].forEach(function (b) { var d = el("div", "rb " + b[2]); d.appendChild(el("small", null, b[0])); d.appendChild(money(b[1])); bg.appendChild(d); });
@@ -2833,7 +2842,7 @@
         var c = cell("NOSL:" + k, o.g, o.ls, lab, "", (o.combo ? comboLabel(o.combo) : "At base") + ", upgrades not read", o.combo ? null : "ref"); nr.appendChild(c.el); if (c.open) nopen = c.open;
       });
       ns.appendChild(nr); if (nopen) ns.appendChild(nopen);
-      ns.appendChild(el("p", "rlnote", "The hover didn't reach the upgrades line, so these could be scrolled. Hover them again in game to price them with the rolls above."));
+      ns.firstChild.appendChild(infoTip("The hover didn't reach the upgrades line, so these could be scrolled. Hover them again in game to price them with the rolls above."));
       box.appendChild(ns);
     }
     // copies far above the clean price that nobody hovered: almost always scrolled or a top roll
@@ -2846,7 +2855,7 @@
       var ps = unread.map(function (l) { return l.u; }), ur = el("div", "rrow"), uc = cell("?", "?", unread, "Stats unread", "", "Not hovered yet", "unk");
       uc.el.querySelector(".num").replaceWith(el("span", "num rng2", short(Math.min.apply(null, ps)) + "–" + short(Math.max.apply(null, ps))));
       ur.appendChild(uc.el); us.appendChild(ur); if (uc.open) us.appendChild(uc.open);
-      us.appendChild(el("p", "rlnote", "Rest the mouse on these in game and FM Watcher reads their stats, so they get priced by roll here."));
+      us.firstChild.appendChild(infoTip("Rest the mouse on these in game and FM Watcher reads their stats, so they get priced by roll here."));
       box.appendChild(us);
     }
     var ft = el("div", "rfoot"), known = i.rolls.length;
@@ -3019,22 +3028,20 @@
     var sp = splitTier(name); if (!sp.t || !D) return null;
     var RATE = { Lesser: 100, Intermediate: 60, Greater: 10 }, rows = [];
     ["Lesser", "Intermediate", "Greater"].forEach(function (t) { var it = D.byName[sp.b + ": " + t]; if (it && it.typ) rows.push({ t: t, p: it.typ, r: RATE[t], per: it.typ * 100 / RATE[t], it: it }); });
-    if (!rows.length) return null;
-    var best = rows.reduce(function (a, b) { return b.per < a.per ? b : a; });
-    var sec = el("div", "subw"); var h = el("h4"); h.appendChild(document.createTextNode("Cost per success")); h.appendChild(el("small", null, "price ÷ success rate")); sec.appendChild(h);
-    var tb = el("table"); var hr = el("tr"); ["Scroll", "Price", "Per success"].forEach(function (x) { hr.appendChild(el("th", null, x)); }); tb.appendChild(hr);
-    rows.forEach(function (r) {
-      var tr = el("tr"); var c0 = el("td"); c0.appendChild(el("b", null, r.r + "%")); if (r.t === sp.t) c0.appendChild(el("em", null, " this one")); tr.appendChild(c0);
-      var c1 = el("td"); c1.appendChild(money(r.p)); tr.appendChild(c1);
-      var c2 = el("td"); c2.appendChild(money(Math.round(r.per))); if (r === best && rows.length > 1) c2.appendChild(el("span", "tg ok", "cheapest")); tr.appendChild(c2);
-      if (r.t !== sp.t) { tr.className = "jump"; tr.title = "Open the " + r.r + "% scroll"; tr.addEventListener("click", function () { pick(r.it.item); }); }
-      tb.appendChild(tr);
+    if (rows.length < 2) return null;   // one tier priced: nothing to compare
+    // one line: which tier lands a success for the least mesos, the others muted and clickable
+    rows.sort(function (a, b) { return a.per - b.per; });
+    var box = el("div", "smath"), best = rows[0];
+    box.appendChild(el("span", "sml", "Cheapest per success"));
+    var bw = el("b", best.t === sp.t ? "me" : "jump", best.r + "% "); bw.appendChild(money(Math.round(best.per))); if (best.t !== sp.t) { bw.title = "Open the " + best.r + "% scroll"; bw.addEventListener("click", function () { pick(best.it.item); }); } box.appendChild(bw);
+    rows.slice(1).forEach(function (r) {
+      var o = el("span", "smo" + (r.t === sp.t ? " me" : " jump"), r.r + "% "); o.appendChild(money(Math.round(r.per)));
+      if (r.t !== sp.t) { o.title = "Open the " + r.r + "% scroll"; o.addEventListener("click", function () { pick(r.it.item); }); } box.appendChild(o);
     });
-    sec.appendChild(tb);
-    var me = rows.filter(function (r) { return r.t === sp.t; })[0];
-    if (me && me.r < 100) sec.appendChild(el("p", "note", "On average you'd use " + Math.round(100 / me.r) + " of these for one success" + ", and every failed one still uses up a slot."));
-    return sec;
+    box.appendChild(infoTip("Price divided by success rate: what one successful scroll costs on average, counting the ones that fail. A " + (rows.filter(function (r) { return r.t === sp.t; })[0] || best).r + "% takes about " + Math.round(100 / (rows.filter(function (r) { return r.t === sp.t; })[0] || best).r) + " tries per success, and every failed one still uses a slot."));
+    return box;
   }
+
 
   // ---- item guide: what quests ask for this item, where it drops, how it's crafted, who sells it (data/itemguide.json)
   var GUIDE = null, guideAsked = false;
@@ -3053,32 +3060,58 @@
     if (known) { a.tabIndex = 0; a.title = "Open " + name; a.addEventListener("click", function () { pick(D && D.byName[name] ? name : dbRow(name)[0]); }); }
     return a;
   }
+  // quests by id, with the address of each one's guide page (same rule as tools/worldpages.py)
+  var QBY = null;
+  function questById(id) {
+    if (!GUIDE || !GUIDE.quests) return null;
+    if (!QBY) {
+      QBY = {}; var seen = {}, sl = function (n) { return String(n).toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "x"; };
+      GUIDE.quests.forEach(function (q) { seen[sl(q.n)] = (seen[sl(q.n)] || 0) + 1; });
+      GUIDE.quests.forEach(function (q) { var x = sl(q.n); QBY[q.id] = { q: q, slug: seen[x] === 1 ? x : x + "-" + q.id }; });
+    }
+    return QBY[id] || null;
+  }
+  function npcPic(id, name) {
+    var pic = el("span", "qnpc"), ini = String(name || "?").charAt(0);
+    if (id != null) { var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = "https://maplestory.io/api/MCW/1/npc/" + id + "/icon"; im.onerror = function () { im.remove(); pic.textContent = ini; }; pic.appendChild(im); }
+    else pic.textContent = ini;
+    return pic;
+  }
+  // one quest as a card: the NPC who gives it, the quest name, level and town, and what it means for this item
+  function questCard(id, name, tag, cls) {
+    var r = questById(id), q = r && r.q, a = el("a", "qcard");
+    a.href = r ? "/quest/" + r.slug + "/" : "quests.html?q=" + encodeURIComponent(name);
+    a.appendChild(npcPic(q && q.gid, (q && q.g) || name));
+    var t = el("span", "qtx"); t.appendChild(el("b", null, name));
+    var sub = [q && q.g, q && q.lv ? "Lv " + q.lv + "+" : "", q && (q.town || q.a), q && q.rep ? "repeatable" : ""].filter(Boolean).join(" · ");
+    if (sub) t.appendChild(el("small", null, sub)); a.appendChild(t);
+    a.appendChild(el("span", "qtag " + cls, tag));
+    return a;
+  }
+  // a long list shows its first few cards and a button for the rest, so prices and listings stay near the top
+  function capCards(box, n, what) {
+    var k = box.children; if (k.length <= n + 1) return box;
+    for (var j = n; j < k.length; j++) k[j].hidden = true;
+    var w = el("div", "qwrap"), b = el("button", "qall", "Show all " + k.length + " " + what); b.type = "button";
+    b.addEventListener("click", function () { [].forEach.call(box.children, function (c) { c.hidden = false; }); b.remove(); });
+    w.appendChild(box); w.appendChild(b); return w;
+  }
   function guideBox(name) {
     var g = guideFor(name); if (!g) return null;
-    var box = el("div", "guide");
-    if (g.q) {
-      var tot = g.q.reduce(function (a, q) { return a + q[2]; }, 0);
-      var sec = el("div"); var h = el("h4"); h.appendChild(document.createTextNode("Used in quests")); h.appendChild(el("small", null, g.q.length + (g.q.length === 1 ? " quest" : " quests") + (g.q.length > 1 ? " · " + fmt(tot) + " in all" : ""))); sec.appendChild(h);
-      var tb = el("table");
-      g.q.forEach(function (q) {
-        var tr = el("tr"), c = el("td"), qa = el("a", null, q[0]); qa.href = q[7] ? "quests.html#q-" + q[7] : "quests.html?q=" + encodeURIComponent(q[0]); qa.title = "Open in the Quest Log"; var qb = el("b"); qb.appendChild(qa); c.appendChild(qb);
-        var sub = [q[3] ? "from " + q[3] : "", q[4] || "", q[1] ? "Lv " + q[1] + "+" : "", q[5] ? "repeatable" : ""].filter(Boolean).join(" · ");
-        if (sub) c.appendChild(el("small", null, sub));
-        tr.appendChild(c); tr.appendChild(el("td", "n", "×" + fmt(q[2]))); tb.appendChild(tr);
-      });
-      sec.appendChild(tb); box.appendChild(sec);
-    }
-    var get = el("div"), any = false; var gh = el("h4", null, "Where to get it"); get.appendChild(gh);
-    if (g.d) {
-      any = true; var dt = el("table");
-      g.d.forEach(function (d) {
-        var tr = el("tr"), c = el("td"); c.appendChild(el("b", null, d[0] + (d[1] ? " (Lv " + d[1] + ")" : "")));
-        var sub = ["Dropped by", d[4] || "", d[5] ? "only while on the quest" : ""].filter(Boolean).join(" · "); c.appendChild(el("small", null, sub));
-        tr.appendChild(c); tr.appendChild(el("td", "n", d[2] != null ? d[2] + "%" : "drops")); if (d[2] != null && d[3]) tr.lastChild.title = "Measured over " + fmt(d[3]) + " kills";
-        dt.appendChild(tr);
-      });
-      get.appendChild(dt);
-    }
+    var box = el("div", "guide gbox");
+    var where = el("div", "gwhere"), any = false, wh = el("h4", null, "Where to get it"); where.appendChild(wh);
+    var cards = el("div", "qcards"), shops = el("div", "qcards");
+    if (g.g) g.g.forEach(function (x) { any = true; cards.appendChild(questCard(x[1], x[0], x[2] === "given" ? "Given" : "Reward", "rew")); });
+    if (g.s) g.s.forEach(function (x) {
+      any = true; var c = el("div", "qcard shop"); c.appendChild(npcPic(x[4], x[0]));
+      var t = el("span", "qtx"); t.appendChild(el("b", null, x[0])); t.appendChild(el("small", null, ["NPC shop", x[1]].filter(Boolean).join(" · "))); c.appendChild(t);
+      var pr = el("span", "qtag shp"); if (x[3]) pr.textContent = fmt(x[2]) + " " + x[3]; else pr.appendChild(money(x[2])); c.appendChild(pr);
+      shops.appendChild(c);
+    });
+    if (cards.firstChild) where.appendChild(capCards(cards, 4, "quests"));
+    if (shops.firstChild) where.appendChild(capCards(shops, 2, "shops"));
+    // monsters: the pictures come in from dropsBox; this keeps their place so the card doesn't jump
+    if (g.d && g.d.length) { any = true; var gd = el("div", "gdrops"); gd.style.minHeight = (g.d.length > 4 ? 124 : 62) + "px"; where.appendChild(gd); }
     if (g.c) {
       any = true;
       g.c.forEach(function (c) {
@@ -3091,26 +3124,23 @@
           if (id) { var im = new Image(); im.src = "/i/" + id + ".png"; im.alt = ""; im.loading = "lazy"; im.onerror = function () { if (/^\/i\//.test(new URL(im.src).pathname)) im.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; else im.remove(); }; row.appendChild(im); }
           row.appendChild(guideLink(x[0])); if (x[2]) row.appendChild(el("small", null, " " + x[2])); row.appendChild(el("em", null, "×" + fmt(x[1]))); rc.appendChild(row);
         });
-        get.appendChild(rc);
+        where.appendChild(rc);
       });
     }
-    if (g.g) {
-      any = true;
-      g.g.forEach(function (x) { var rc = el("div", "rc"); rc.appendChild(document.createTextNode(x[2] === "given" ? "Given by the NPC during " : "Reward from the quest ")); var a = el("a", null, x[0]); a.href = x[1] ? "quests.html#q-" + x[1] : "quests.html?q=" + encodeURIComponent(x[0]); rc.appendChild(a); get.appendChild(rc); });
+    if (g.r) { any = true; g.r.forEach(function (x) { where.appendChild(el("div", "rc", "From " + x[0] + (x[1] != null ? " (" + x[1] + "%)" : "") + (x[2] ? " · during " + x[2] : ""))); }); }
+    if (!any && g.t) { any = true; where.appendChild(el("div", "rc", "Found during the quest. In game: \u201c" + g.t + "\u201d")); }
+    if (any) box.appendChild(where);
+    if (g.q) {
+      var tot = g.q.reduce(function (a, q) { return a + q[2]; }, 0);
+      var used = el("div", "gused"), h = el("h4"); h.appendChild(document.createTextNode("Used in quests")); if (g.q.length > 1) h.appendChild(el("small", null, fmt(tot) + " in all")); used.appendChild(h);
+      var uc = el("div", "qcards"); g.q.forEach(function (q) { uc.appendChild(questCard(q[7], q[0], "Needs ×" + fmt(q[2]), "need")); }); used.appendChild(capCards(uc, 4, "quests"));
+      box.appendChild(used);
     }
-    if (!any && g.t) { any = true; get.appendChild(el("div", "rc", "Found during the quest. In game: \u201c" + g.t + "\u201d")); }
-    if (g.s) {
-      any = true; var st = el("table");
-      g.s.forEach(function (x) { var tr = el("tr"), c = el("td"); c.appendChild(el("b", null, x[0])); c.appendChild(el("small", null, ["Sold by NPC", x[1]].filter(Boolean).join(" · "))); tr.appendChild(c); var n = el("td", "n"); if (x[3]) n.textContent = fmt(x[2]) + " " + x[3]; else n.appendChild(money(x[2])); tr.appendChild(n); st.appendChild(tr); });
-      get.appendChild(st);
-    }
-    if (g.r) { any = true; g.r.forEach(function (x) { get.appendChild(el("div", "rc", "From " + x[0] + (x[1] != null ? " (" + x[1] + "%)" : "") + (x[2] ? " · during " + x[2] : ""))); }); }
-    if (!any) get.appendChild(el("p", "note", g.q ? "No drop, shop or recipe recorded for this one yet." : ""));
-    if (any || g.q) box.appendChild(get);
-    if (g.u) box.appendChild(el("p", "note", "Used in " + g.u + " crafting recipe" + (g.u === 1 ? "" : "s") + "."));
-    var src = el("p", "src"); src.appendChild(document.createTextNode("Quests from the game data. Givers, drops, crafting and shops from the "));
+    if (g.u) box.appendChild(el("p", "gnote", "Used in " + g.u + " crafting recipe" + (g.u === 1 ? "" : "s") + "."));
+    if (!box.firstChild) return null;
+    var src = el("p", "src"); src.appendChild(document.createTextNode("Sources: game data and the "));
     var wl = el("a", null, "MapleStory Classic Wiki"); wl.href = "https://mapleclassic.wiki/wiki/" + encodeURIComponent(String(name).replace(/ /g, "_")); wl.target = "_blank"; wl.rel = "noopener"; src.appendChild(wl);
-    src.appendChild(document.createTextNode(" (CC BY-NC-SA 4.0). Drop rates are measured by players."));
+    src.appendChild(document.createTextNode(" (CC BY-NC-SA 4.0)"));
     box.appendChild(src);
     return box;
   }
@@ -3119,7 +3149,19 @@
     renderItem0();
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
+    orderCard($("ip"));
     splitCard();
+  }
+  // the card's reading order: price first, then what to do, how to get it, prices by roll, listings, links.
+  // Anything without a place stays right after the part it was added next to.
+  var CARDORDER = [["ih", 0], ["chkbox", 1], ["rollmiss", 2], ["big", 3], ["tline", 4], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["ltabs", 13], ["bsort", 14], ["list", 15], ["ifoot", 20]];
+  function orderCard(ip) {
+    if (!ip || !state.sel) return;
+    var last = -1, kids = [].slice.call(ip.children).map(function (k, ix) {
+      var r = null; for (var j = 0; j < CARDORDER.length && r == null; j++) if (k.classList.contains(CARDORDER[j][0])) r = CARDORDER[j][1];
+      if (r == null) r = last + 0.01; last = r; return [r, ix, k];
+    });
+    kids.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).forEach(function (x) { ip.appendChild(x[2]); });
   }
   // wide screens: the price, stats and guide on the left; a price chart and the listings on the right
   function splitCard() {
@@ -3219,10 +3261,12 @@
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
     ip.appendChild(big); nameBar(i);
     var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
-    var tnote = el("p", "note", "typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : ""));
-    var cb1 = confBadge(i, true); if (cb1) { tnote.appendChild(document.createTextNode(" ")); tnote.appendChild(cb1); }
+    var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
+    var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
+    var tnote = el("p", "tline"); tnote.appendChild(el("span", null, "Typical ")); tnote.appendChild(el("b", null, short(i.typ))); tnote.appendChild(el("span", "tsep", " · " + (SHORTWHY[i.basis] || "recent sales")));
+    var cb1 = confBadge(i, false); if (cb1) tnote.appendChild(cb1);
+    tnote.appendChild(infoTip(full));
     ip.appendChild(tnote);
-    if (i.equip) { var rn2 = el("p", "note", "Equips are priced by roll, each against its own sales."); rn2.style.opacity = ".8"; ip.appendChild(rn2); }
     var st = el("div", "stats");
     [[i.lastSale ? i.lastSale.u : 0, "Last sale"], [i.last3, "Last 3 avg"], [null, "Sales" + (i.saleDays ? " · " + i.saleDays + (i.saleDays === 1 ? " day" : " days") : ""), i.salesN]].forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "None")); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
     ip.appendChild(st);
@@ -3293,7 +3337,7 @@
       withX.forEach(function (x) { var v = x.x[ks]; if (v == null && noBaseAtt && x.x.SLOTS != null) v = 0; if (v == null) return; var bv = baseOf(i.item, x.x, ks); if (ks !== "SUCCESS" && (v < 0 || (bv != null ? v > bv * 2 + 40 : v > 250))) return; (groups[v] || (groups[v] = [])).push(x); });   // a roll twice the base is a misread, not a scroll job
       var vals = Object.keys(groups).map(Number).sort(function (a, b) { return b - a; });
       if (vals.length) {
-        var sec = el("div", "subw pbs"); var h5 = el("h4"); h5.appendChild(document.createTextNode("Price by " + (ks === "SUCCESS" ? "success rate" : ks))); sec.appendChild(h5);
+        var sec = el("div", "subw pbs"); var h5 = el("h4"); h5.appendChild(document.createTextNode("Price by " + (ks === "SUCCESS" ? "success rate" : ks))); h5.appendChild(infoTip("Read from hovered tooltips. Weapons group by attack, other equips by the stat buyers pay for on that slot. Defense only counts on shields. Click a row to jump to the newest one.")); sec.appendChild(h5);
         var tb = el("table"); var hr = el("tr"); ["Roll", "Seen", "Sold at", "Asking", "Cheapest"].forEach(function (h) { hr.appendChild(el("th", null, h)); }); tb.appendChild(hr);
         vals.forEach(function (v) {
           var g = groups[v], sold = g.filter(function (x) { return x.so; }).map(function (x) { return x.u; }), ask = g.filter(function (x) { return !x.so; }).map(function (x) { return x.u; });
@@ -3307,7 +3351,7 @@
           tr.addEventListener("click", function () { jumpToStat(i, v, newest, ks); });
           tb.appendChild(tr);
         });
-        sec.appendChild(tb); sec.appendChild(el("p", "note", "Read from hovered tooltips. Weapons group by attack, other equips by the stat buyers pay for on that slot. Defense only counts on shields.")); ip.appendChild(sec);
+        sec.appendChild(tb); ip.appendChild(sec);
       }
     }
   }
@@ -3364,7 +3408,9 @@
         a.appendChild(t); row.appendChild(a);
       });
       box.appendChild(row);
-      if (list.length > 8) box.appendChild(el("small", "dmore", "+" + (list.length - 8) + " more in Where to get it below"));
+      if (list.length > 8) { var more = el("a", "dmore", "+" + (list.length - 8) + " more monsters"); more.href = ITEMPAGES[n] && idOf(n) ? "/item/" + itemSlug(n) + "/" : "/monsters/"; box.appendChild(more); }
+      var gd = ip.querySelector(".gdrops");
+      if (gd) { gd.style.minHeight = ""; gd.appendChild(box); return; }
       var mk = ip.querySelector(".mkt"); ip.insertBefore(box, mk ? mk.nextSibling : (ip.children[1] || null));
     });
   }
@@ -3373,10 +3419,12 @@
     renderItemBody();
     var n = state.sel, ip = $("ip"); if (!n || !ip || !ip.firstChild) return;
     var f = el("div", "ifoot");
-    if (ITEMPAGES[n] && idOf(n)) { var a = el("a", "ifull", "Price history, quests and drops →"); a.href = "/item/" + itemSlug(n) + "/"; f.appendChild(a); }
-    var sl = el("a", "ifull isell", "Have one to sell? List it on maplefm.gg →"); sl.href = "/market.html#new=" + encodeURIComponent(n); f.appendChild(sl);
-    var e = el("p", "iearn"); e.appendChild(document.createTextNode("Prices here come from players running FM Watcher while they shop. "));
-    var ea = el("a", null, "Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea); f.appendChild(e);
+    var fb = el("div", "ifbtns");
+    var fbtn = function (href, ico, big, small, cls) { var x = el("a", "ifb" + (cls ? " " + cls : "")); x.href = href; x.appendChild(el("span", "ifi", ico)); var tx = el("span", "ift"); tx.appendChild(el("b", null, big)); tx.appendChild(el("small", null, small)); x.appendChild(tx); x.appendChild(el("span", "ifa", "→")); return x; };
+    if (ITEMPAGES[n] && idOf(n)) fb.appendChild(fbtn("/item/" + itemSlug(n) + "/", "📈", "Full price history", "Charts, quests and drops"));
+    fb.appendChild(fbtn("/market.html#new=" + encodeURIComponent(n), "🏷️", "Sell yours", "List it on maplefm.gg", "isell"));
+    f.appendChild(fb);
+    var e = el("p", "iearn"); var ea = el("a", null, "Prices come from players scanning. Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea); f.appendChild(e);
     ip.appendChild(f);
     // members' own listings for this item: shown apart from the shop listings and never counted in the price
     mktLoad().then(function (L) {
