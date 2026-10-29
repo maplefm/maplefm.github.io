@@ -1,10 +1,15 @@
 {
- "version": "2026.10.28.1",
- "date": "2026-10-28T17:45:01+00:00",
- "notes": "Counts hovers (rested, popup shown or not, read, matched) and sends the day's totals with your shop scans, so we can see where equipment stats get lost. No pictures, no change to what gets read.",
- "sha256": "2a25eb518fd24287c398d49d6d054cfcea1806d48bad8cf32c71e98e08a6e99d",
- "size": 154294,
+ "version": "2026.10.29.1",
+ "date": "2026-10-29T14:16:41+00:00",
+ "notes": "Reads the Free Market room when the minimap is minimized to its title bar, so those shops land in the right room. Re-sends listings still up every 15 minutes instead of every hour, so the site can tell a listing that left from one still up.",
+ "sha256": "99267f389b60c2b99afb4bf2aac8fef0cda0fa1c6268e3dfb1cde16e53d7b3ac",
+ "size": 154834,
  "history": [
+  {
+   "version": "2026.10.29.1",
+   "date": "2026-10-29",
+   "notes": "Reads the Free Market room when the minimap is minimized to its title bar, so those shops land in the right room. Re-sends listings still up every 15 minutes instead of every hour, so the site can tell a listing that left from one still up."
+  },
   {
    "version": "2026.10.28.1",
    "date": "2026-10-28",
@@ -149,13 +154,8 @@
    "version": "2026.10.23.4",
    "date": "2026-10-23",
    "notes": "Reads the chalkboard posts over players' heads when you stand in the Free Market Entrance. Counted as asking prices, once a day per seller."
-  },
-  {
-   "version": "2026.10.23.3",
-   "date": "2026-10-23",
-   "notes": "Prices from watchers without a GitHub key now go to Club FM's own private inbox instead of a shared sheet."
   }
  ],
  "pip": [],
- "sig": "895bfb200133168ff372bf8e3c2c6d75a2db19eb213a50cec9eeceecb4ddc6a84b92c791a4777cfd7e45c4de2e2c0b876820e8232c2f0782892213a4adc97d5a499b6ed397dfb7ce615e268dfe9d8e81a47db0aec8d9983fbc71921a7bf6a4d7c0e2851acab0b9f039eeed3ce076369b9ea71e0d53ebdac1c9eef99071e69dbec1ce30db4ae74203f4b9bb84102a79428cbc154a6d0d1021690eda4850d23147f4bb93b4df4b7adbe7b2e23060f277901acc9c782c9c38449973597cc95cfd4dc27694b5fdb0658bddabed000e31c00f7894c2cbf5f839eb348b761d29e8ea776001dfefa8519e4e2214d8716f42c2433c7a8aa0bd140cc824f61c1e031b6bb1"
+ "sig": "72870348c33469cd969e5220befb66354989716d41c7fd56ef0846f29fe845f6357809e88ee8040a29765cce5b8a99df4304e2353c0e10b33b5dc09815cbcd2bd148edbdebcf17f9c3fd96ec214e6d7637074b699425e83bf4087e1ae05621b86840a9fb5e2852f57b51fae66e17d8a2c0bc8c76deacf82a02e474ee21be442dad1c44099327cdcabe8d573dd8f544eca187792d56de33464dc4f70274cfa4e9fe8e160f732c7d4335ce4012258f8192974caa403b1d1b5009787671407a84a1f33654aabae4f62dd90d67be275bd1b51b656307555b339c41763326163ef59b0edbab799bd03cafb424d3eb06cf6bba0554177e77f56412957e9ed80784f562"
 }

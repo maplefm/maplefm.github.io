@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.28.1"
+VERSION = "2026.10.29.1"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -94,6 +94,7 @@ DEFAULTS = {
     "github_branch": "live",
     "token_file": "token.txt",
     "room_region": [60, 20, 400, 60],
+    "room_bar_region": [0, 0, 360, 30],   # the minimap minimized to its title bar sits at the very top left
     "name": "",
     "inbox_every_minutes": 10,
     "deal_alerts": True,            # say so in this window when a shop you open has something well under the usual price
@@ -258,8 +259,8 @@ def session_tally(res):
     SESSION["noroom"] = 0 if re.match(r"^FM\d", rm) else SESSION.get("noroom", 0) + 1
     if SESSION["noroom"] >= 8 and time.time() - SESSION.get("roomtip", 0) >= 1200:
         SESSION["roomtip"] = time.time()
-        log("room unreadable for the last " + str(SESSION["noroom"]) + " shops (read: " + (rm or "nothing") + "). Keep the minimap open with its title "
-            "\"Free Market <number>\" in full view, not covered or cut off. Room pictures are saved in review\\ if you want to send one. Until then these shops can't be placed on the coverage map or earn the cold-room bounty.")
+        log("room unreadable for the last " + str(SESSION["noroom"]) + " shops (read: " + (rm or "nothing") + "). Keep the minimap title "
+            "\"Free Market <number>\" in view, open or minimized, not covered or cut off. Room pictures are saved in review\\ if you want to send one. Until then these shops can't be placed on the coverage map or earn the cold-room bounty.")
     SESSION["sold"] += sum(1 for r in res.get("rows") or [] if r.get("so"))
     if res.get("room") and res.get("ch"): SESSION["spots"].add((res["room"], res["ch"]))
     if time.time() - SESSION["said"] >= 1800:
@@ -1178,8 +1179,9 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
             body = dict(r); t = body.pop("t", 0)
             sig = json.dumps(body, sort_keys=True)
             old = sent.get(key)
-            # a listing seen again only goes up again when something about it changed, or once an hour
-            if old and old[0] == sig and t - old[1] < 3600:
+            # a listing seen again only goes up again when something about it changed, or every 15 minutes, so the site
+            # can tell a listing still up from one that left
+            if old and old[0] == sig and t - old[1] < 900:
                 continue
             r2 = dict(r); r2["_o"] = o; rows.append(r2); mark[key] = (sig, t)
         if rows:
@@ -1515,6 +1517,13 @@ def worker(cfg, jobs, store):
                             else: res["room"] = fmparse.read_room(extra["room"]); worker.room_hash, worker.room_text = rh, res["room"]
                     except Exception: res["room"] = ""
                     res["room"] = shop_room(res["room"])
+                    # minimap minimized: the room is in the one-line title bar at the top left instead
+                    if not re.match(r"^FM\d", res["room"]) and extra.get("bar") is not None:
+                        try:
+                            bh = quick_hash(extra["bar"], (60, 5))
+                            if bh != getattr(worker, "bar_hash", None): worker.bar_hash, worker.bar_text = bh, fmparse.read_room_bar(extra["bar"])
+                            if re.match(r"^FM\d", worker.bar_text or ""): res["room"] = worker.bar_text
+                        except Exception: pass
                     res["tip"] = None; res["hovering"] = extra.get("tip") is not None
                     if extra.get("tip") is not None:
                         try:
@@ -1533,6 +1542,7 @@ def worker(cfg, jobs, store):
                     review_save(cfg, kind, img, res)
                     if extra.get("room") is not None and res["room"] != getattr(worker, "last_room", None):
                         worker.last_room = res["room"]; review_save(cfg, "room", extra["room"], {"room": res["room"]})
+                        if extra.get("bar") is not None: review_save(cfg, "roombar", extra["bar"], {"room": res["room"]})
                     if res["rows"] and extra.get("tip") is not None:
                         try: learn_new(res, extra["tip"])
                         except Exception as e: log("new item error:", e)
@@ -1584,6 +1594,10 @@ def worker(cfg, jobs, store):
                 rh = quick_hash(extra["room"], (40, 8))
                 if rh != getattr(worker, "board_hash", None):
                     worker.board_hash = rh; worker.board_room = fmparse.read_room(extra["room"])
+                    if worker.board_room != "FM Entrance" and extra.get("bar") is not None:
+                        try:
+                            if fmparse.read_room_bar(extra["bar"]) == "FM Entrance": worker.board_room = "FM Entrance"
+                        except Exception: pass
                 if worker.board_room != "FM Entrance":
                     continue
                 posts = boards.read_boards(img, scale=img.height / 1080)
@@ -1699,7 +1713,7 @@ def main():
                         # a changed shop is read at most once a second; a hover is read right away
                         if ((h != last_shop_hash and t - last_shop_read >= 0.9) or tr) and not jobs.full():
                             last_shop_read = t
-                            extra = {"room": grab(sct, game, cfg["room_region"]), "ch": current_channel(cfg)}
+                            extra = {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30])), "ch": current_channel(cfg)}
                             if extra["ch"] is None and t - nudge_at > 600:
                                 nudge_at = t; log("No channel known yet: open the Change Channel window once (Esc, then Change Channel) so these scans land on the right channel.")
                             idx, tbox = tr if tr else hovered_row(game, shop_box)
@@ -1726,7 +1740,7 @@ def main():
                     elif boards and cfg.get("boards", True) and t - last_board >= cfg.get("board_every_seconds", 45) and jobs.qsize() < 2:
                         # Free Market Entrance: read the chat bubbles over everyone's head (the worker checks the map first)
                         last_board = t
-                        jobs.put(("board", grab(sct, game, [0, 0, game[2], game[3]]), {"room": grab(sct, game, cfg["room_region"])}))
+                        jobs.put(("board", grab(sct, game, [0, 0, game[2], game[3]]), {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30]))}))
                     elif t - last_chat >= cfg["chat_every_seconds"]:
                         last_chat = t
                         chat = grab(sct, game, chat_box)
