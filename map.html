@@ -113,6 +113,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   .bld input, .bld select { font: 700 .95rem Inter, sans-serif; border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 8px; background: var(--card); color: var(--ink); width: 100%; min-width: 0; }
   .bld h3 { margin: 6px 0 0; font: 800 .95rem Outfit, sans-serif; }
   .bld .row2 { display: flex; gap: 6px; align-items: center; }
+  .bld .bdesc { margin: -4px 0 0; }
   .mode { display: inline-flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--soft); }
   .mode button { border: 0; background: transparent; color: var(--ink); font: 700 .85rem Inter, sans-serif; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
   .mode button[aria-pressed="true"] { background: var(--accent); color: #fff; }
@@ -163,7 +164,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 </section>
 <p class="foot" id="credit"></p>
 </main>
-<script src="/assets/classic-dmg.js?v=1"></script>
+<script src="/assets/classic-dmg.js?v=2"></script>
 <script>
 (function () {
   "use strict";
@@ -246,21 +247,24 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   var BTYPE = "", SWAP = 0; try { var bt0 = JSON.parse(localStorage.getItem("fm-build-type") || "{}"); BTYPE = bt0.type || ""; SWAP = bt0.swap || 0; } catch (e) {}
   var ACCT = { signedIn: false, synced: false };
   function famOf(job) { var j = CD && CD.JOBS[CD.jobName(job)]; return j ? j.fam : ""; }
-  function thiefTypes(job) { return job === "Assassin" ? ["assassin"] : job === "Bandit" ? ["bandit", "sindit"] : job === "Thief" ? ["assassin", "bandit", "sindit"] : []; }
-  function buildType(job) { var t = thiefTypes(job); return t.indexOf(BTYPE) >= 0 ? BTYPE : t[0] || "pure"; }
+  // the builds a job can pick (classic-dmg.js BUILDS: thief builds and the hybrids)
+  function jobTypes(job) { return CD.buildTypes(job); }
+  function buildType(job) { var t = jobTypes(job); return t.indexOf(BTYPE) >= 0 ? BTYPE : t[0] || "pure"; }
   // the build the ranking uses right now
   function current() {
     var L = ME.lv, job = CD.jobName(ME.cls) || (L < 10 ? "Beginner" : "Bowman");
     if (MODE === "mine" && BUILD && BUILD.job === job) {
       var b = JSON.parse(JSON.stringify(BUILD)); b.lv = L; b.generic = false; b.notes = [];
-      if (b.type !== "sindit") delete b.w2;
+      if (!CD.isSwap(b.type)) delete b.w2;
       return b;
     }
-    return ENG.typical(job, L, buildType(job), buildType(job) === "sindit" && SWAP ? SWAP : null);
+    return ENG.typical(job, L, buildType(job), SWAP || null);
   }
   function saveBuild(b) {
     BUILD = b; try { localStorage.setItem("fm-build", JSON.stringify(b)); localStorage.setItem("fm-build-mode", MODE); } catch (e) {}
-    if (ACCT.signedIn) fetch(window.FM_API + "/me/build", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b) })
+    // the account keeps the base type (a hybrid's stats, skills, weapons and swap level carry the rest)
+    var send = Object.assign({}, b, { type: CD.baseType(b.type) });
+    if (ACCT.signedIn) fetch(window.FM_API + "/me/build", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(send) })
       .then(function (r) { ACCT.synced = r.ok; var s = $("bsave"); if (s) s.textContent = r.ok ? "Saved on this device and to your Discord account" : "Saved on this device"; }).catch(function () {});
   }
   // the build from the Discord account, when the account has one and this device doesn't
@@ -303,29 +307,40 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     top.appendChild(md);
     top.appendChild(el("span", "est" + (b.generic ? "" : " me2"), b.generic ? "Typical gear estimate" : "Your build"));
     c.appendChild(top);
-    var tt = thiefTypes(job);
-    if (tt.length) {
+    var tt = jobTypes(job);
+    if (tt.length > 1) {
       var r = el("div", "grid"); r.style.gridTemplateColumns = "repeat(auto-fill,minmax(230px,1fr))";
-      r.appendChild(selIn("Build", tt.map(function (k) { return [k, CD.BUILDS[k].name]; }), b.type, function (v) { BTYPE = v; try { localStorage.setItem("fm-build-type", JSON.stringify({ type: BTYPE, swap: SWAP })); } catch (e) {} if (MODE === "mine" && BUILD) { BUILD.type = v; if (v === "sindit") { BUILD.w = "Claw"; BUILD.w2 = "Dagger"; } else { BUILD.w = v === "bandit" ? "Dagger" : "Claw"; delete BUILD.w2; } fillGear(BUILD); saveBuild(BUILD); } renderTrain(); }, "type"));
+      r.appendChild(selIn("Build", tt.map(function (k) { return [k, CD.BUILDS[k].name]; }), tt.indexOf(b.type) >= 0 ? b.type : buildType(job), function (v) {
+        BTYPE = v; try { localStorage.setItem("fm-build-type", JSON.stringify({ type: BTYPE, swap: SWAP })); } catch (e) {}
+        if (MODE === "mine" && BUILD) {
+          var bt = CD.BUILDS[v] || {}; BUILD.type = v;
+          if (bt.w) BUILD.w = bt.w; if (bt.w2) { BUILD.w2 = bt.w2; if (bt.swap) BUILD.swap = bt.swap; } else delete BUILD.w2;
+          fillGear(BUILD); saveBuild(BUILD);
+        }
+        renderTrain();
+      }, "type"));
       if (b.type === "sindit") r.appendChild(numIn("Swap to dagger at level", b.swap, function (v) { SWAP = v || 0; try { localStorage.setItem("fm-build-type", JSON.stringify({ type: BTYPE || "sindit", swap: SWAP })); } catch (e) {} if (MODE === "mine" && BUILD) { BUILD.swap = v; saveBuild(BUILD); } renderTrain(); }, { min: 30, max: 100, key: "swap" }));
       c.appendChild(r);
+      var bd = (CD.BUILDS[b.type] || CD.BUILDS[buildType(job)] || {}).desc;
+      if (bd) c.appendChild(el("p", "note bdesc", bd));
     }
     // what the numbers use, in one line
     var w = ENG.weaponAt(b, b.lv), g = (b.gear || {})[w] || {}, atk = bestAtk(b);
     var line = el("p", "note");
     line.appendChild(el("b", null, (atk ? atk.name + (atk.lv > 1 ? " " + atk.lv : "") : "Regular attack")));
     line.appendChild(document.createTextNode(" · " + (fam === "Magician" ? "INT " + b.int + " · " + (g.name || w) + " " + (b.matk != null ? b.matk : g.matk) + " magic attack" : (g.name || w) + " " + ((g.watk || 0) + (g.scroll || 0)) + " attack" + (g.ammoAtk ? " + " + (g.ammo || "ammo") + " " + g.ammoAtk : "") + " · " + statLine(b, w)) + " · ACC " + ENG.acc(b) + (atk ? " · " + Math.round(atk.min) + " to " + Math.round(atk.max * (atk.lines > 1 ? 1 : 1)) + " a hit" : "")));
-    if (b.type === "sindit") line.appendChild(document.createTextNode(" · dagger from level " + b.swap));
+    if (CD.isSwap(b.type)) line.appendChild(document.createTextNode(" · dagger from level " + b.swap));
     c.appendChild(line);
     if (ME.lv >= 30 && CD.JOBS[job] && !CD.JOBS[job].job && fam !== "Beginner") c.appendChild(el("p", "warn", "Level 30 and up: pick your 2nd job at the top for its skills."));
-    if (b.generic) c.appendChild(el("p", "note", "Typical: " + typicalNote(fam)));
+    if (b.generic) c.appendChild(el("p", "note", "Typical: " + typicalNote(fam, b.type)));
     if (MODE === "mine") c.appendChild(buildForm(b));
     return c;
   }
-  function statLine(b, w) { return w === "Claw" || w === "Dagger" ? "LUK " + b.luk + ", DEX " + b.dex : w === "Bow" || w === "Crossbow" ? "DEX " + b.dex + ", STR " + b.str : "STR " + b.str + ", DEX " + b.dex; }
-  function typicalNote(fam) {
-    return { Warrior: "STR, DEX = level", Magician: "all INT", Bowman: "all DEX", Thief: "LUK, 25 DEX", Beginner: "all STR" }[fam || "Beginner"] +
-      " · best clean shop weapon, no scrolls" + (fam === "Thief" ? " · stars by level" : "") + " · usual skill order";
+  function statLine(b, w) { return w === "Claw" || w === "Dagger" ? "LUK " + b.luk + ", DEX " + b.dex + (b.str > b.luk ? ", STR " + b.str : "") : w === "Bow" || w === "Crossbow" ? "DEX " + b.dex + ", STR " + b.str : "STR " + b.str + ", DEX " + b.dex; }
+  function typicalNote(fam, type) {
+    var bt = CD.BUILDS[type] || {};
+    return (bt.stat || { Warrior: "STR, DEX = level", Magician: "all INT", Bowman: "all DEX", Thief: "LUK, 25 DEX", Beginner: "all STR" }[fam || "Beginner"]) +
+      " · best clean shop weapon, no scrolls" + (fam === "Thief" ? " · stars by level" : "") + (bt.reset ? " · Lucky Seven points moved to the Bandit book at " + bt.swap : " · usual skill order");
   }
   function bestAtk(b) { var a = ENG.attacks(b).filter(function (o) { return !o.undeadOnly; }); a.sort(function (x, y) { return y.avgHit * y.lines / y.ms - x.avgHit * x.lines / x.ms; }); return a[0]; }
   function fillGear(b) { [b.w, b.w2].forEach(function (cl) { if (cl && !(b.gear || {})[cl]) { var t = ENG.typical(b.job, b.lv, b.type, b.swap); b.gear = b.gear || {}; b.gear[cl] = (t.gear || {})[cl] || { watk: 0, spd: 6 }; } }); }
@@ -340,7 +355,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     if (fam === "Magician") g1.appendChild(numIn("Magic attack (gear)", b.matk != null ? b.matk : ((b.gear || {})[b.w] || {}).matk, set("matk"), { max: 999, key: "matk" }));
     f.appendChild(g1);
     // one row per weapon the build holds (two for a sindit)
-    [b.w, b.type === "sindit" ? b.w2 : null].forEach(function (cl, k) {
+    [b.w, CD.isSwap(b.type) ? b.w2 : null].forEach(function (cl, k) {
       if (!cl) return; var g = (b.gear || {})[cl] || {};
       f.appendChild(el("h3", null, k ? "Second weapon (from level " + (b.swap || "?") + ")" : "Weapon"));
       var g2 = el("div", "grid");
@@ -387,7 +402,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var hpPot = bestPot("hp"), mpPot = bestPot("mp"), br = bracket(L);
     if (!QIDX) setTimeout(loadQuests, 400);
     var head = el("div", "card");
-    head.appendChild(el("h2", null, "Level " + L + " " + b.job + (b.type && b.type !== "pure" ? " (" + CD.BUILDS[b.type].name.split(" (")[0].toLowerCase() + ")" : "") + ": where to train"));
+    head.appendChild(el("h2", null, "Level " + L + " " + b.job + (b.type && b.type !== "pure" ? " (" + CD.BUILDS[b.type].name.split(" (")[0].toLowerCase().replace(/\b(str|luk)\b/g, function (s) { return s.toUpperCase(); }) + ")" : "") + ": where to train"));
     head.appendChild(el("p", "note", "Maps where you hit and kill reliably, ranked by EXP an hour. Potions and mesos included."));
     var pr = el("div", "row"); pr.style.marginTop = "6px";
     pr.appendChild(el("span", "chip ok wrap", "Cheapest HP now: " + hpPot.name + " · " + hpPot.per.toFixed(2) + " mesos per HP" + (hpPot.fm ? " on the Free Market" : " at the NPC")));
