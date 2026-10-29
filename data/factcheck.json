@@ -1,0 +1,10324 @@
+{
+ "at": 1793241751,
+ "checked": {
+  "quests": 343,
+  "monsters": 72,
+  "maps_game": 303,
+  "maps": 303
+ },
+ "diff": [
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Black Headband",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Blue Headband",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Brown Skullcap",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Green Headband",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Green Skullcap",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Red Headband",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1008,
+   "field": "get2",
+   "ours": [
+    [
+     "Brown Skullcap",
+     1
+    ],
+    [
+     "Green Skullcap",
+     1
+    ],
+    [
+     "Red Headband",
+     1
+    ],
+    [
+     "Black Headband",
+     1
+    ],
+    [
+     "Green Headband",
+     1
+    ],
+    [
+     "Yellow Headband",
+     1
+    ],
+    [
+     "Blue Headband",
+     1
+    ]
+   ],
+   "source": [
+    "Yellow Headband",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1008",
+    "https://mapleclassic.wiki/index.php?title=Lucas%27_Reply"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1011,
+   "field": "get2",
+   "ours": [
+    [
+     "Fruit Knife",
+     1
+    ],
+    [
+     "Razor",
+     1
+    ]
+   ],
+   "source": [
+    "Fruit Knife",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1011",
+    "https://mapleclassic.wiki/index.php?title=Biggs%27s_Collection_of_Items"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 1011,
+   "field": "get2",
+   "ours": [
+    [
+     "Fruit Knife",
+     1
+    ],
+    [
+     "Razor",
+     1
+    ]
+   ],
+   "source": [
+    "Razor",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1011",
+    "https://mapleclassic.wiki/index.php?title=Biggs%27s_Collection_of_Items"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 7707,
+   "field": "rep",
+   "ours": 0,
+   "source": 1,
+   "url": "https://maplestory.io/api/MCW/1/quest/7707"
+  },
+  {
+   "kind": "quest",
+   "id": 10001,
+   "field": "lv2",
+   "ours": null,
+   "source": 10,
+   "url": "https://maplestory.io/api/MCW/1/quest/10001"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Bow Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Claw Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Crossbow Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Dagger Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Axe Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Sword Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Polearm Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Spear Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Staff Magic Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Axe Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Sword Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10002,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Wand Magic Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10002",
+    "https://mapleclassic.wiki/index.php?title=Jane_and_the_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10005,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Attack Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10005",
+    "https://mapleclassic.wiki/index.php?title=Jane%27s_Final_Challenge"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10005,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10005",
+    "https://mapleclassic.wiki/index.php?title=Jane%27s_Final_Challenge"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10005,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Magic Attack Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10005",
+    "https://mapleclassic.wiki/index.php?title=Jane%27s_Final_Challenge"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10005,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Magic Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10005",
+    "https://mapleclassic.wiki/index.php?title=Jane%27s_Final_Challenge"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10007,
+   "field": "get2",
+   "ours": [
+    [
+     "Work Gloves",
+     1
+    ],
+    [
+     "Dark Clench",
+     1
+    ],
+    [
+     "Dark Manute",
+     1
+    ],
+    [
+     "Dark Garner",
+     1
+    ],
+    [
+     "Steel Pow",
+     1
+    ]
+   ],
+   "source": [
+    "Work Gloves",
+    1,
+    "Beginner only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10007",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10007,
+   "field": "get2",
+   "ours": [
+    [
+     "Work Gloves",
+     1
+    ],
+    [
+     "Dark Clench",
+     1
+    ],
+    [
+     "Dark Manute",
+     1
+    ],
+    [
+     "Dark Garner",
+     1
+    ],
+    [
+     "Steel Pow",
+     1
+    ]
+   ],
+   "source": [
+    "Dark Clench",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10007",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10007,
+   "field": "get2",
+   "ours": [
+    [
+     "Work Gloves",
+     1
+    ],
+    [
+     "Dark Clench",
+     1
+    ],
+    [
+     "Dark Manute",
+     1
+    ],
+    [
+     "Dark Garner",
+     1
+    ],
+    [
+     "Steel Pow",
+     1
+    ]
+   ],
+   "source": [
+    "Dark Manute",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10007",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10007,
+   "field": "get2",
+   "ours": [
+    [
+     "Work Gloves",
+     1
+    ],
+    [
+     "Dark Clench",
+     1
+    ],
+    [
+     "Dark Manute",
+     1
+    ],
+    [
+     "Dark Garner",
+     1
+    ],
+    [
+     "Steel Pow",
+     1
+    ]
+   ],
+   "source": [
+    "Dark Garner",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10007",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10007,
+   "field": "get2",
+   "ours": [
+    [
+     "Work Gloves",
+     1
+    ],
+    [
+     "Dark Clench",
+     1
+    ],
+    [
+     "Dark Manute",
+     1
+    ],
+    [
+     "Dark Garner",
+     1
+    ],
+    [
+     "Steel Pow",
+     1
+    ]
+   ],
+   "source": [
+    "Steel Pow",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10007",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10104,
+   "field": "get2",
+   "ours": [
+    [
+     "Hat Accuracy Scroll: Lesser",
+     1
+    ],
+    [
+     "Hat Accuracy Scroll: Intermediate",
+     1
+    ],
+    [
+     "Hat Accuracy Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Hat Accuracy Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10104",
+    "https://mapleclassic.wiki/index.php?title=Pia_and_the_Blue_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10104,
+   "field": "get2",
+   "ours": [
+    [
+     "Hat Accuracy Scroll: Lesser",
+     1
+    ],
+    [
+     "Hat Accuracy Scroll: Intermediate",
+     1
+    ],
+    [
+     "Hat Accuracy Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Hat Accuracy Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10104",
+    "https://mapleclassic.wiki/index.php?title=Pia_and_the_Blue_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10104,
+   "field": "get2",
+   "ours": [
+    [
+     "Hat Accuracy Scroll: Lesser",
+     1
+    ],
+    [
+     "Hat Accuracy Scroll: Intermediate",
+     1
+    ],
+    [
+     "Hat Accuracy Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Hat Accuracy Scroll: Lesser",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10104",
+    "https://mapleclassic.wiki/index.php?title=Pia_and_the_Blue_Mushroom"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10105,
+   "field": "get2",
+   "ours": [
+    [
+     "Cake",
+     30
+    ],
+    [
+     "Pig Illustrated",
+     1
+    ]
+   ],
+   "source": [
+    "Cake",
+    "30",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10105",
+    "https://mapleclassic.wiki/index.php?title=Camila%27s_Gem"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10105,
+   "field": "get2",
+   "ours": [
+    [
+     "Cake",
+     30
+    ],
+    [
+     "Pig Illustrated",
+     1
+    ]
+   ],
+   "source": [
+    "Pig Illustrated",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10105",
+    "https://mapleclassic.wiki/index.php?title=Camila%27s_Gem"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Amethyst",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Aquamarine",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Diamond",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Emerald",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Garnet",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Opal",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Sapphire",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10113,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet",
+     1
+    ],
+    [
+     "Amethyst",
+     1
+    ],
+    [
+     "Aquamarine",
+     1
+    ],
+    [
+     "Emerald",
+     1
+    ],
+    [
+     "Opal",
+     1
+    ],
+    [
+     "Sapphire",
+     1
+    ],
+    [
+     "Topaz",
+     1
+    ],
+    [
+     "Diamond",
+     1
+    ]
+   ],
+   "source": [
+    "Topaz",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10113",
+    "https://mapleclassic.wiki/index.php?title=Luke_the_Security_Guy"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10122,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Greater",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Greater",
+     1
+    ],
+    [
+     "Cape INT Scroll: Greater",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Cape DEX Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10122",
+    "https://mapleclassic.wiki/index.php?title=Pia%27s_Gift"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10122,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Greater",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Greater",
+     1
+    ],
+    [
+     "Cape INT Scroll: Greater",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Cape INT Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10122",
+    "https://mapleclassic.wiki/index.php?title=Pia%27s_Gift"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10122,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Greater",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Greater",
+     1
+    ],
+    [
+     "Cape INT Scroll: Greater",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Cape LUK Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10122",
+    "https://mapleclassic.wiki/index.php?title=Pia%27s_Gift"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10122,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Greater",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Greater",
+     1
+    ],
+    [
+     "Cape INT Scroll: Greater",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Cape STR Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10122",
+    "https://mapleclassic.wiki/index.php?title=Pia%27s_Gift"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10200,
+   "field": "get2",
+   "ours": [
+    [
+     "Piece of Ice",
+     1
+    ],
+    [
+     "Fairy Wing",
+     1
+    ]
+   ],
+   "source": [
+    "Fairy Wing",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10200",
+    "https://mapleclassic.wiki/index.php?title=Arwen_and_the_Glass_Shoe"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10200,
+   "field": "get2",
+   "ours": [
+    [
+     "Piece of Ice",
+     1
+    ],
+    [
+     "Fairy Wing",
+     1
+    ]
+   ],
+   "source": [
+    "Piece of Ice",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10200",
+    "https://mapleclassic.wiki/index.php?title=Arwen_and_the_Glass_Shoe"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10201,
+   "field": "get2",
+   "ours": [
+    [
+     "Bronze Ore",
+     7
+    ],
+    [
+     "Iron Ore",
+     7
+    ],
+    [
+     "Mithril Ore",
+     7
+    ],
+    [
+     "Adamantium Ore",
+     7
+    ],
+    [
+     "Silver Ore",
+     7
+    ],
+    [
+     "Orihalcon Ore",
+     7
+    ]
+   ],
+   "source": [
+    "Adamantium Ore",
+    "7",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10201",
+    "https://mapleclassic.wiki/index.php?title=Collecting_50_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10201,
+   "field": "get2",
+   "ours": [
+    [
+     "Bronze Ore",
+     7
+    ],
+    [
+     "Iron Ore",
+     7
+    ],
+    [
+     "Mithril Ore",
+     7
+    ],
+    [
+     "Adamantium Ore",
+     7
+    ],
+    [
+     "Silver Ore",
+     7
+    ],
+    [
+     "Orihalcon Ore",
+     7
+    ]
+   ],
+   "source": [
+    "Bronze Ore",
+    "7",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10201",
+    "https://mapleclassic.wiki/index.php?title=Collecting_50_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10201,
+   "field": "get2",
+   "ours": [
+    [
+     "Bronze Ore",
+     7
+    ],
+    [
+     "Iron Ore",
+     7
+    ],
+    [
+     "Mithril Ore",
+     7
+    ],
+    [
+     "Adamantium Ore",
+     7
+    ],
+    [
+     "Silver Ore",
+     7
+    ],
+    [
+     "Orihalcon Ore",
+     7
+    ]
+   ],
+   "source": [
+    "Iron Ore",
+    "7",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10201",
+    "https://mapleclassic.wiki/index.php?title=Collecting_50_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10201,
+   "field": "get2",
+   "ours": [
+    [
+     "Bronze Ore",
+     7
+    ],
+    [
+     "Iron Ore",
+     7
+    ],
+    [
+     "Mithril Ore",
+     7
+    ],
+    [
+     "Adamantium Ore",
+     7
+    ],
+    [
+     "Silver Ore",
+     7
+    ],
+    [
+     "Orihalcon Ore",
+     7
+    ]
+   ],
+   "source": [
+    "Mithril Ore",
+    "7",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10201",
+    "https://mapleclassic.wiki/index.php?title=Collecting_50_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10201,
+   "field": "get2",
+   "ours": [
+    [
+     "Bronze Ore",
+     7
+    ],
+    [
+     "Iron Ore",
+     7
+    ],
+    [
+     "Mithril Ore",
+     7
+    ],
+    [
+     "Adamantium Ore",
+     7
+    ],
+    [
+     "Silver Ore",
+     7
+    ],
+    [
+     "Orihalcon Ore",
+     7
+    ]
+   ],
+   "source": [
+    "Orihalcon Ore",
+    "7",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10201",
+    "https://mapleclassic.wiki/index.php?title=Collecting_50_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10201,
+   "field": "get2",
+   "ours": [
+    [
+     "Bronze Ore",
+     7
+    ],
+    [
+     "Iron Ore",
+     7
+    ],
+    [
+     "Mithril Ore",
+     7
+    ],
+    [
+     "Adamantium Ore",
+     7
+    ],
+    [
+     "Silver Ore",
+     7
+    ],
+    [
+     "Orihalcon Ore",
+     7
+    ]
+   ],
+   "source": [
+    "Silver Ore",
+    "7",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10201",
+    "https://mapleclassic.wiki/index.php?title=Collecting_50_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Amethyst Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Aquamarine Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Emerald Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Garnet Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Opal Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Sapphire Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10202,
+   "field": "get2",
+   "ours": [
+    [
+     "Garnet Ore",
+     10
+    ],
+    [
+     "Amethyst Ore",
+     10
+    ],
+    [
+     "Aquamarine Ore",
+     10
+    ],
+    [
+     "Emerald Ore",
+     10
+    ],
+    [
+     "Opal Ore",
+     10
+    ],
+    [
+     "Sapphire Ore",
+     10
+    ],
+    [
+     "Topaz Ore",
+     10
+    ]
+   ],
+   "source": [
+    "Topaz Ore",
+    "10",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10202",
+    "https://mapleclassic.wiki/index.php?title=Collecting_70_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10203,
+   "field": "get2",
+   "ours": [
+    [
+     "Gold Ore",
+     5
+    ],
+    [
+     "Diamond Ore",
+     5
+    ]
+   ],
+   "source": [
+    "Diamond Ore",
+    "5",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10203",
+    "https://mapleclassic.wiki/index.php?title=Collecting_100_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10203,
+   "field": "get2",
+   "ours": [
+    [
+     "Gold Ore",
+     5
+    ],
+    [
+     "Diamond Ore",
+     5
+    ]
+   ],
+   "source": [
+    "Gold Ore",
+    "5",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10203",
+    "https://mapleclassic.wiki/index.php?title=Collecting_100_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10204,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10204",
+    "https://mapleclassic.wiki/index.php?title=Collecting_150_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10204,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Attack Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Magic Attack Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Magic Attack Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10204",
+    "https://mapleclassic.wiki/index.php?title=Collecting_150_Cursed_Dolls"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10205,
+   "field": "get2",
+   "ours": [
+    [
+     "Old Wisconsin",
+     1
+    ],
+    [
+     "Steel Nordic Helm",
+     1
+    ],
+    [
+     "Dark Guiltian",
+     1
+    ],
+    [
+     "Dark Distinction",
+     1
+    ],
+    [
+     "Dark Pilfer",
+     1
+    ]
+   ],
+   "source": [
+    "Old Wisconsin",
+    1,
+    "Beginner only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10205",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10205,
+   "field": "get2",
+   "ours": [
+    [
+     "Old Wisconsin",
+     1
+    ],
+    [
+     "Steel Nordic Helm",
+     1
+    ],
+    [
+     "Dark Guiltian",
+     1
+    ],
+    [
+     "Dark Distinction",
+     1
+    ],
+    [
+     "Dark Pilfer",
+     1
+    ]
+   ],
+   "source": [
+    "Steel Nordic Helm",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10205",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10205,
+   "field": "get2",
+   "ours": [
+    [
+     "Old Wisconsin",
+     1
+    ],
+    [
+     "Steel Nordic Helm",
+     1
+    ],
+    [
+     "Dark Guiltian",
+     1
+    ],
+    [
+     "Dark Distinction",
+     1
+    ],
+    [
+     "Dark Pilfer",
+     1
+    ]
+   ],
+   "source": [
+    "Dark Guiltian",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10205",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10205,
+   "field": "get2",
+   "ours": [
+    [
+     "Old Wisconsin",
+     1
+    ],
+    [
+     "Steel Nordic Helm",
+     1
+    ],
+    [
+     "Dark Guiltian",
+     1
+    ],
+    [
+     "Dark Distinction",
+     1
+    ],
+    [
+     "Dark Pilfer",
+     1
+    ]
+   ],
+   "source": [
+    "Dark Distinction",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10205",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10205,
+   "field": "get2",
+   "ours": [
+    [
+     "Old Wisconsin",
+     1
+    ],
+    [
+     "Steel Nordic Helm",
+     1
+    ],
+    [
+     "Dark Guiltian",
+     1
+    ],
+    [
+     "Dark Distinction",
+     1
+    ],
+    [
+     "Dark Pilfer",
+     1
+    ]
+   ],
+   "source": [
+    "Dark Pilfer",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10205",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10209,
+   "field": "get2",
+   "ours": [
+    [
+     "Shoes Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Shoes Speed Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Shoes Speed Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10209",
+    "https://mapleclassic.wiki/index.php?title=Last_Material_Delivery_for_Building_a_New_House"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10209,
+   "field": "get2",
+   "ours": [
+    [
+     "Shoes Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Shoes Speed Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Shoes Speed Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10209",
+    "https://mapleclassic.wiki/index.php?title=Last_Material_Delivery_for_Building_a_New_House"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10302,
+   "field": "get2",
+   "ours": [
+    [
+     "Weighted Earrings",
+     1
+    ],
+    [
+     "Yellow Square",
+     1
+    ]
+   ],
+   "source": [
+    "Weighted Earrings",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10302",
+    "https://mapleclassic.wiki/index.php?title=Mother%27s_Gold_Watch"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10302,
+   "field": "get2",
+   "ours": [
+    [
+     "Weighted Earrings",
+     1
+    ],
+    [
+     "Yellow Square",
+     1
+    ]
+   ],
+   "source": [
+    "Yellow Square",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10302",
+    "https://mapleclassic.wiki/index.php?title=Mother%27s_Gold_Watch"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10303,
+   "field": "cost",
+   "ours": null,
+   "source": 1000,
+   "url": "https://maplestory.io/api/MCW/1/quest/10303"
+  },
+  {
+   "kind": "quest",
+   "id": 10308,
+   "field": "get2",
+   "ours": [
+    [
+     "Red Whitebottom Boots",
+     1
+    ],
+    [
+     "Mithril War Boots",
+     1
+    ],
+    [
+     "Silver Wind Shoes",
+     1
+    ],
+    [
+     "Brown Jack Boots",
+     1
+    ],
+    [
+     "Blue Lappy Boots",
+     1
+    ]
+   ],
+   "source": [
+    "Red Whitebottom Boots",
+    1,
+    "Beginner only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10308",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10308,
+   "field": "get2",
+   "ours": [
+    [
+     "Red Whitebottom Boots",
+     1
+    ],
+    [
+     "Mithril War Boots",
+     1
+    ],
+    [
+     "Silver Wind Shoes",
+     1
+    ],
+    [
+     "Brown Jack Boots",
+     1
+    ],
+    [
+     "Blue Lappy Boots",
+     1
+    ]
+   ],
+   "source": [
+    "Mithril War Boots",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10308",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10308,
+   "field": "get2",
+   "ours": [
+    [
+     "Red Whitebottom Boots",
+     1
+    ],
+    [
+     "Mithril War Boots",
+     1
+    ],
+    [
+     "Silver Wind Shoes",
+     1
+    ],
+    [
+     "Brown Jack Boots",
+     1
+    ],
+    [
+     "Blue Lappy Boots",
+     1
+    ]
+   ],
+   "source": [
+    "Silver Wind Shoes",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10308",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10308,
+   "field": "get2",
+   "ours": [
+    [
+     "Red Whitebottom Boots",
+     1
+    ],
+    [
+     "Mithril War Boots",
+     1
+    ],
+    [
+     "Silver Wind Shoes",
+     1
+    ],
+    [
+     "Brown Jack Boots",
+     1
+    ],
+    [
+     "Blue Lappy Boots",
+     1
+    ]
+   ],
+   "source": [
+    "Brown Jack Boots",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10308",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10308,
+   "field": "get2",
+   "ours": [
+    [
+     "Red Whitebottom Boots",
+     1
+    ],
+    [
+     "Mithril War Boots",
+     1
+    ],
+    [
+     "Silver Wind Shoes",
+     1
+    ],
+    [
+     "Brown Jack Boots",
+     1
+    ],
+    [
+     "Blue Lappy Boots",
+     1
+    ]
+   ],
+   "source": [
+    "Blue Lappy Boots",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10308",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10311,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring DEX Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10311",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Companionship"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10311,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring INT Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10311",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Companionship"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10311,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring LUK Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10311",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Companionship"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10311,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring STR Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10311",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Companionship"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10321,
+   "field": "get2",
+   "ours": [
+    [
+     "Green Icarus Cape",
+     1
+    ],
+    [
+     "Yellow Icarus Cape",
+     1
+    ],
+    [
+     "Blue Icarus Cape",
+     1
+    ]
+   ],
+   "source": [
+    "Blue Icarus Cape",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10321",
+    "https://mapleclassic.wiki/index.php?title=Delivering_the_Flying_Medicine"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10321,
+   "field": "get2",
+   "ours": [
+    [
+     "Green Icarus Cape",
+     1
+    ],
+    [
+     "Yellow Icarus Cape",
+     1
+    ],
+    [
+     "Blue Icarus Cape",
+     1
+    ]
+   ],
+   "source": [
+    "Green Icarus Cape",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10321",
+    "https://mapleclassic.wiki/index.php?title=Delivering_the_Flying_Medicine"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10321,
+   "field": "get2",
+   "ours": [
+    [
+     "Green Icarus Cape",
+     1
+    ],
+    [
+     "Yellow Icarus Cape",
+     1
+    ],
+    [
+     "Blue Icarus Cape",
+     1
+    ]
+   ],
+   "source": [
+    "Yellow Icarus Cape",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10321",
+    "https://mapleclassic.wiki/index.php?title=Delivering_the_Flying_Medicine"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10400,
+   "field": "get2",
+   "ours": [
+    [
+     "Wooden Buckler",
+     1
+    ],
+    [
+     "Steel Shield",
+     1
+    ]
+   ],
+   "source": [
+    "Steel Shield",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10400",
+    "https://mapleclassic.wiki/index.php?title=Fixing_Blackbull%27s_House"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10400,
+   "field": "get2",
+   "ours": [
+    [
+     "Wooden Buckler",
+     1
+    ],
+    [
+     "Steel Shield",
+     1
+    ]
+   ],
+   "source": [
+    "Wooden Buckler",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10400",
+    "https://mapleclassic.wiki/index.php?title=Fixing_Blackbull%27s_House"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Sword Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Axe Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Blunt Weapon Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Sword Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Axe Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Blunt Weapon Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Spear Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Polearm Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Wand Magic Attack Scroll: Greater",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Staff Magic Attack Scroll: Greater",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Bow Attack Scroll: Greater",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Crossbow Attack Scroll: Greater",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Dagger Attack Scroll: Greater",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Claw Attack Scroll: Greater",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10401",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Bow Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Claw Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Crossbow Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Dagger Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Axe Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Blunt Weapon Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Sword Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Polearm Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Spear Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Staff Magic Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Axe Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Blunt Weapon Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Sword Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10401,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Wand Magic Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10401",
+    "https://mapleclassic.wiki/index.php?title=Building_a_New_House_For_Blackbull"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10404,
+   "field": "get2",
+   "ours": [
+    [
+     "Hero's Gladius",
+     1
+    ],
+    [
+     "Skull Earrings",
+     1
+    ]
+   ],
+   "source": [
+    "Hero's Gladius",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10404",
+    "https://mapleclassic.wiki/index.php?title=Hero%27s_Gladius_%28quest%29"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10404,
+   "field": "get2",
+   "ours": [
+    [
+     "Hero's Gladius",
+     1
+    ],
+    [
+     "Skull Earrings",
+     1
+    ]
+   ],
+   "source": [
+    "Skull Earrings",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10404",
+    "https://mapleclassic.wiki/index.php?title=Hero%27s_Gladius_%28quest%29"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Sword Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Axe Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Blunt Weapon Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Sword Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Axe Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Blunt Weapon Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Spear Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Polearm Attack Scroll: Greater",
+    1,
+    "Warrior only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Wand Magic Attack Scroll: Greater",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Staff Magic Attack Scroll: Greater",
+    1,
+    "Magician only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Bow Attack Scroll: Greater",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Crossbow Attack Scroll: Greater",
+    1,
+    "Bowman only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Dagger Attack Scroll: Greater",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Claw Attack Scroll: Greater",
+    1,
+    "Thief only"
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/10412",
+   "note": "class-bound reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Bow Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Claw Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Crossbow Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Dagger Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Axe Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Blunt Weapon Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "One-Handed Sword Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Polearm Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Spear Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Staff Magic Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Axe Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Blunt Weapon Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Two-handed Sword Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10412,
+   "field": "get2",
+   "ours": [
+    [
+     "One-Handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "One-Handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Sword Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Axe Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Two-handed Blunt Weapon Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Spear Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Polearm Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Wand Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Staff Magic Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Bow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Crossbow Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Dagger Attack Scroll: Greater",
+     1
+    ],
+    [
+     "Claw Attack Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Wand Magic Attack Scroll: Greater",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10412",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_1"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10413,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Cape DEX Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10413",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_2"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10413,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Cape INT Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10413",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_2"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10413,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Cape LUK Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10413",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_2"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10413,
+   "field": "get2",
+   "ours": [
+    [
+     "Cape STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Cape LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Cape STR Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10413",
+    "https://mapleclassic.wiki/index.php?title=Taking_Out_the_Alligators_2"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10509,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEF Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor DEF Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10509",
+    "https://mapleclassic.wiki/index.php?title=Sabitrama_and_the_Diet_Medicine"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10509,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEF Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor DEF Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10509",
+    "https://mapleclassic.wiki/index.php?title=Sabitrama_and_the_Diet_Medicine"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 10617,
+   "field": "from",
+   "ours": null,
+   "source": "2026-12-09T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10617"
+  },
+  {
+   "kind": "quest",
+   "id": 10618,
+   "field": "from",
+   "ours": null,
+   "source": "2026-12-09T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10618"
+  },
+  {
+   "kind": "quest",
+   "id": 10619,
+   "field": "from",
+   "ours": null,
+   "source": "2026-12-09T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10619"
+  },
+  {
+   "kind": "quest",
+   "id": 10620,
+   "field": "from",
+   "ours": null,
+   "source": "2026-12-09T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10620"
+  },
+  {
+   "kind": "quest",
+   "id": 10621,
+   "field": "from",
+   "ours": null,
+   "source": "2026-11-18T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10621"
+  },
+  {
+   "kind": "quest",
+   "id": 10622,
+   "field": "from",
+   "ours": null,
+   "source": "2026-11-18T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10622"
+  },
+  {
+   "kind": "quest",
+   "id": 10623,
+   "field": "from",
+   "ours": null,
+   "source": "2026-11-18T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10623"
+  },
+  {
+   "kind": "quest",
+   "id": 10624,
+   "field": "from",
+   "ours": null,
+   "source": "2026-11-18T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10624"
+  },
+  {
+   "kind": "quest",
+   "id": 10625,
+   "field": "from",
+   "ours": null,
+   "source": "2026-11-18T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10625"
+  },
+  {
+   "kind": "quest",
+   "id": 10626,
+   "field": "from",
+   "ours": null,
+   "source": "2026-11-18T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/10626"
+  },
+  {
+   "kind": "quest",
+   "id": 500000,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500000",
+   "note": "event window per the game's endTime 2026-08-12T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500000,
+   "field": "from",
+   "ours": null,
+   "source": "2026-08-04T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500000"
+  },
+  {
+   "kind": "quest",
+   "id": 500000,
+   "field": "to",
+   "ours": null,
+   "source": "2026-08-12T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500000"
+  },
+  {
+   "kind": "quest",
+   "id": 500000,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Classic Beginnings Label Ring",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/500000"
+  },
+  {
+   "kind": "quest",
+   "id": 500001,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500001",
+   "note": "event window per the game's endTime 2026-08-12T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500001,
+   "field": "from",
+   "ours": null,
+   "source": "2026-08-04T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500001"
+  },
+  {
+   "kind": "quest",
+   "id": 500001,
+   "field": "to",
+   "ours": null,
+   "source": "2026-08-12T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500001"
+  },
+  {
+   "kind": "quest",
+   "id": 500001,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Classic Beginnings Chat Ring",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/500001"
+  },
+  {
+   "kind": "quest",
+   "id": 500002,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500002",
+   "note": "event window per the game's endTime 2026-04-23T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500002,
+   "field": "from",
+   "ours": null,
+   "source": "2026-04-21T15:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500002"
+  },
+  {
+   "kind": "quest",
+   "id": 500002,
+   "field": "to",
+   "ours": null,
+   "source": "2026-04-23T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500002"
+  },
+  {
+   "kind": "quest",
+   "id": 500002,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Leaf Points (1,000) Exchange Coupon",
+     3,
+     null
+    ],
+    [
+     "Lemon",
+     50,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/500002"
+  },
+  {
+   "kind": "quest",
+   "id": 500005,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500005",
+   "note": "event window per the game's endTime 2026-04-23T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500005,
+   "field": "from",
+   "ours": null,
+   "source": "2026-04-14T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500005"
+  },
+  {
+   "kind": "quest",
+   "id": 500005,
+   "field": "to",
+   "ours": null,
+   "source": "2026-04-23T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500005"
+  },
+  {
+   "kind": "quest",
+   "id": 500005,
+   "field": "rep",
+   "ours": 0,
+   "source": 1,
+   "url": "https://maplestory.io/api/MCW/1/quest/500005"
+  },
+  {
+   "kind": "quest",
+   "id": 500006,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500006",
+   "note": "event window per the game's endTime 2026-08-12T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500006,
+   "field": "from",
+   "ours": null,
+   "source": "2026-08-04T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500006"
+  },
+  {
+   "kind": "quest",
+   "id": 500006,
+   "field": "to",
+   "ours": null,
+   "source": "2026-08-12T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500006"
+  },
+  {
+   "kind": "quest",
+   "id": 500008,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500008",
+   "note": "event window per the game's endTime 2026-08-12T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500008,
+   "field": "from",
+   "ours": null,
+   "source": "2026-08-08T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500008"
+  },
+  {
+   "kind": "quest",
+   "id": 500008,
+   "field": "to",
+   "ours": null,
+   "source": "2026-08-12T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500008"
+  },
+  {
+   "kind": "quest",
+   "id": 500008,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Leaf Points (5,000) Exchange Coupon",
+     1,
+     null
+    ],
+    [
+     "Blue Potion",
+     30,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/500008"
+  },
+  {
+   "kind": "quest",
+   "id": 500009,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/500009",
+   "note": "event window per the game's endTime 2026-08-12T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 500009,
+   "field": "from",
+   "ours": null,
+   "source": "2026-08-04T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500009"
+  },
+  {
+   "kind": "quest",
+   "id": 500009,
+   "field": "to",
+   "ours": null,
+   "source": "2026-08-12T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/500009"
+  },
+  {
+   "kind": "quest",
+   "id": 500009,
+   "field": "rep",
+   "ours": 0,
+   "source": 1,
+   "url": "https://maplestory.io/api/MCW/1/quest/500009"
+  },
+  {
+   "kind": "quest",
+   "id": 500010,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-28T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500010"
+  },
+  {
+   "kind": "quest",
+   "id": 500010,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500010"
+  },
+  {
+   "kind": "quest",
+   "id": 500011,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-28T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500011"
+  },
+  {
+   "kind": "quest",
+   "id": 500011,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/500011"
+  },
+  {
+   "kind": "quest",
+   "id": 500011,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Pumpkin Basket",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/500011"
+  },
+  {
+   "kind": "quest",
+   "id": 500011,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "pumpkinbasket": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/500011",
+    "https://mapleclassic.wiki/index.php?title=Trick_or_Treat%21"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 506015,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506015"
+  },
+  {
+   "kind": "quest",
+   "id": 506016,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506016"
+  },
+  {
+   "kind": "quest",
+   "id": 506017,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506017"
+  },
+  {
+   "kind": "quest",
+   "id": 506018,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506018"
+  },
+  {
+   "kind": "quest",
+   "id": 506025,
+   "field": "lv2",
+   "ours": null,
+   "source": 17,
+   "url": "https://maplestory.io/api/MCW/1/quest/506025"
+  },
+  {
+   "kind": "quest",
+   "id": 506026,
+   "field": "lv2",
+   "ours": null,
+   "source": 22,
+   "url": "https://maplestory.io/api/MCW/1/quest/506026"
+  },
+  {
+   "kind": "quest",
+   "id": 506027,
+   "field": "lv2",
+   "ours": null,
+   "source": 22,
+   "url": "https://maplestory.io/api/MCW/1/quest/506027"
+  },
+  {
+   "kind": "quest",
+   "id": 506028,
+   "field": "lv2",
+   "ours": null,
+   "source": 22,
+   "url": "https://maplestory.io/api/MCW/1/quest/506028"
+  },
+  {
+   "kind": "quest",
+   "id": 506029,
+   "field": "lv2",
+   "ours": null,
+   "source": 27,
+   "url": "https://maplestory.io/api/MCW/1/quest/506029"
+  },
+  {
+   "kind": "quest",
+   "id": 506030,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506030"
+  },
+  {
+   "kind": "quest",
+   "id": 506031,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506031"
+  },
+  {
+   "kind": "quest",
+   "id": 506032,
+   "field": "lv2",
+   "ours": null,
+   "source": 37,
+   "url": "https://maplestory.io/api/MCW/1/quest/506032"
+  },
+  {
+   "kind": "quest",
+   "id": 506033,
+   "field": "lv2",
+   "ours": null,
+   "source": 42,
+   "url": "https://maplestory.io/api/MCW/1/quest/506033"
+  },
+  {
+   "kind": "quest",
+   "id": 506034,
+   "field": "lv2",
+   "ours": null,
+   "source": 47,
+   "url": "https://maplestory.io/api/MCW/1/quest/506034"
+  },
+  {
+   "kind": "quest",
+   "id": 506035,
+   "field": "lv2",
+   "ours": null,
+   "source": 52,
+   "url": "https://maplestory.io/api/MCW/1/quest/506035"
+  },
+  {
+   "kind": "quest",
+   "id": 506040,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Jump Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506040",
+    "https://mapleclassic.wiki/index.php?title=The_Best_Dad"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506040,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Jump Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506040",
+    "https://mapleclassic.wiki/index.php?title=The_Best_Dad"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506040,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Speed Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506040",
+    "https://mapleclassic.wiki/index.php?title=The_Best_Dad"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506040,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Speed Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506040",
+    "https://mapleclassic.wiki/index.php?title=The_Best_Dad"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506045,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring DEX Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506045",
+    "https://mapleclassic.wiki/index.php?title=Regained_Vitality"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506045,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring INT Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506045",
+    "https://mapleclassic.wiki/index.php?title=Regained_Vitality"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506045,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring LUK Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506045",
+    "https://mapleclassic.wiki/index.php?title=Regained_Vitality"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506045,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring STR Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506045",
+    "https://mapleclassic.wiki/index.php?title=Regained_Vitality"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506050,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor DEF Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506050",
+    "https://mapleclassic.wiki/index.php?title=A_Promise_Between_Three_Friends"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506050,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor DEX Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506050",
+    "https://mapleclassic.wiki/index.php?title=A_Promise_Between_Three_Friends"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506050,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor INT Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506050",
+    "https://mapleclassic.wiki/index.php?title=A_Promise_Between_Three_Friends"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506050,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor LUK Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506050",
+    "https://mapleclassic.wiki/index.php?title=A_Promise_Between_Three_Friends"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506050,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor STR Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506050",
+    "https://mapleclassic.wiki/index.php?title=A_Promise_Between_Three_Friends"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506055,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Crit. Rate Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Crit. Rate Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Crit. Rate Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506055",
+    "https://mapleclassic.wiki/index.php?title=A_Name_Never_Given"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506055,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Crit. Rate Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Crit. Rate Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Crit. Rate Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506055",
+    "https://mapleclassic.wiki/index.php?title=A_Name_Never_Given"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506115,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506115"
+  },
+  {
+   "kind": "quest",
+   "id": 506116,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506116"
+  },
+  {
+   "kind": "quest",
+   "id": 506117,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506117"
+  },
+  {
+   "kind": "quest",
+   "id": 506118,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506118"
+  },
+  {
+   "kind": "quest",
+   "id": 506125,
+   "field": "lv2",
+   "ours": null,
+   "source": 17,
+   "url": "https://maplestory.io/api/MCW/1/quest/506125"
+  },
+  {
+   "kind": "quest",
+   "id": 506126,
+   "field": "lv2",
+   "ours": null,
+   "source": 22,
+   "url": "https://maplestory.io/api/MCW/1/quest/506126"
+  },
+  {
+   "kind": "quest",
+   "id": 506127,
+   "field": "lv2",
+   "ours": null,
+   "source": 22,
+   "url": "https://maplestory.io/api/MCW/1/quest/506127"
+  },
+  {
+   "kind": "quest",
+   "id": 506128,
+   "field": "lv2",
+   "ours": null,
+   "source": 22,
+   "url": "https://maplestory.io/api/MCW/1/quest/506128"
+  },
+  {
+   "kind": "quest",
+   "id": 506129,
+   "field": "lv2",
+   "ours": null,
+   "source": 27,
+   "url": "https://maplestory.io/api/MCW/1/quest/506129"
+  },
+  {
+   "kind": "quest",
+   "id": 506130,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506130"
+  },
+  {
+   "kind": "quest",
+   "id": 506131,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506131"
+  },
+  {
+   "kind": "quest",
+   "id": 506132,
+   "field": "lv2",
+   "ours": null,
+   "source": 32,
+   "url": "https://maplestory.io/api/MCW/1/quest/506132"
+  },
+  {
+   "kind": "quest",
+   "id": 506133,
+   "field": "lv2",
+   "ours": null,
+   "source": 37,
+   "url": "https://maplestory.io/api/MCW/1/quest/506133"
+  },
+  {
+   "kind": "quest",
+   "id": 506134,
+   "field": "lv2",
+   "ours": null,
+   "source": 42,
+   "url": "https://maplestory.io/api/MCW/1/quest/506134"
+  },
+  {
+   "kind": "quest",
+   "id": 506135,
+   "field": "lv2",
+   "ours": null,
+   "source": 47,
+   "url": "https://maplestory.io/api/MCW/1/quest/506135"
+  },
+  {
+   "kind": "quest",
+   "id": 506136,
+   "field": "lv2",
+   "ours": null,
+   "source": 52,
+   "url": "https://maplestory.io/api/MCW/1/quest/506136"
+  },
+  {
+   "kind": "quest",
+   "id": 506141,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Jump Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506141",
+    "https://mapleclassic.wiki/index.php?title=It%27s_All_in_the_Mind"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506141,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Jump Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506141",
+    "https://mapleclassic.wiki/index.php?title=It%27s_All_in_the_Mind"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506141,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Speed Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506141",
+    "https://mapleclassic.wiki/index.php?title=It%27s_All_in_the_Mind"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506141,
+   "field": "get2",
+   "ours": [
+    [
+     "Pet Equip Speed Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Speed Scroll: Greater",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Intermediate",
+     1
+    ],
+    [
+     "Pet Equip Jump Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Pet Equip Speed Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506141",
+    "https://mapleclassic.wiki/index.php?title=It%27s_All_in_the_Mind"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506146,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring DEX Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506146",
+    "https://mapleclassic.wiki/index.php?title=Not_Ready_to_Go_Home_Yet"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506146,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring INT Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506146",
+    "https://mapleclassic.wiki/index.php?title=Not_Ready_to_Go_Home_Yet"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506146,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring LUK Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506146",
+    "https://mapleclassic.wiki/index.php?title=Not_Ready_to_Go_Home_Yet"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506146,
+   "field": "get2",
+   "ours": [
+    [
+     "Earring STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Earring LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Earring STR Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506146",
+    "https://mapleclassic.wiki/index.php?title=Not_Ready_to_Go_Home_Yet"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506151,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor DEF Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506151",
+    "https://mapleclassic.wiki/index.php?title=A_Truth_Finally_Known"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506151,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor DEX Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506151",
+    "https://mapleclassic.wiki/index.php?title=A_Truth_Finally_Known"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506151,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor INT Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506151",
+    "https://mapleclassic.wiki/index.php?title=A_Truth_Finally_Known"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506151,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor LUK Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506151",
+    "https://mapleclassic.wiki/index.php?title=A_Truth_Finally_Known"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506151,
+   "field": "get2",
+   "ours": [
+    [
+     "Overall Armor DEF Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor STR Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor DEX Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor INT Scroll: Intermediate",
+     1
+    ],
+    [
+     "Overall Armor LUK Scroll: Intermediate",
+     1
+    ]
+   ],
+   "source": [
+    "Overall Armor STR Scroll: Intermediate",
+    "1",
+    "choice"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506151",
+    "https://mapleclassic.wiki/index.php?title=A_Truth_Finally_Known"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506156,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Crit. Rate Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Crit. Rate Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Crit. Rate Scroll: Greater",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506156",
+    "https://mapleclassic.wiki/index.php?title=An_Unresolved_Question"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 506156,
+   "field": "get2",
+   "ours": [
+    [
+     "Gloves Crit. Rate Scroll: Intermediate",
+     1
+    ],
+    [
+     "Gloves Crit. Rate Scroll: Greater",
+     1
+    ]
+   ],
+   "source": [
+    "Gloves Crit. Rate Scroll: Intermediate",
+    "1",
+    "random"
+   ],
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/506156",
+    "https://mapleclassic.wiki/index.php?title=An_Unresolved_Question"
+   ],
+   "note": "one-of reward listed as always given"
+  },
+  {
+   "kind": "quest",
+   "id": 600000,
+   "field": "ended",
+   "ours": false,
+   "source": true,
+   "url": "https://maplestory.io/api/MCW/1/quest/600000",
+   "note": "event window per the game's endTime 2026-10-20T23:59:00"
+  },
+  {
+   "kind": "quest",
+   "id": 600000,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-06T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600000"
+  },
+  {
+   "kind": "quest",
+   "id": 600000,
+   "field": "to",
+   "ours": null,
+   "source": "2026-10-20T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/600000"
+  },
+  {
+   "kind": "quest",
+   "id": 600000,
+   "field": "rep",
+   "ours": 0,
+   "source": 1,
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600000",
+    "https://mapleclassic.wiki/index.php?title=Founder%27s_First_Step"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 600002,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T16:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600002"
+  },
+  {
+   "kind": "quest",
+   "id": 600002,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-18T23:59",
+   "url": "https://maplestory.io/api/MCW/1/quest/600002"
+  },
+  {
+   "kind": "quest",
+   "id": 600002,
+   "field": "rep",
+   "ours": 0,
+   "source": 1,
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600002",
+    "https://mapleclassic.wiki/index.php?title=The_Journey_Begins"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 600004,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600004"
+  },
+  {
+   "kind": "quest",
+   "id": 600004,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600004"
+  },
+  {
+   "kind": "quest",
+   "id": 600004,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Adventurer's Journal",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600004"
+  },
+  {
+   "kind": "quest",
+   "id": 600004,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "adventurerjournal": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600004",
+    "https://mapleclassic.wiki/index.php?title=The_Marks_We_Leave_Behind"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 600005,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600005"
+  },
+  {
+   "kind": "quest",
+   "id": 600005,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600005"
+  },
+  {
+   "kind": "quest",
+   "id": 600005,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Adventurer's Journal - Page 2",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600005"
+  },
+  {
+   "kind": "quest",
+   "id": 600005,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "adventurerjournalpage2": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600005",
+    "https://mapleclassic.wiki/index.php?title=The_First_Mark"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 600006,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600006"
+  },
+  {
+   "kind": "quest",
+   "id": 600006,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600006"
+  },
+  {
+   "kind": "quest",
+   "id": 600006,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Adventurer's Journal - Page 3",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600006"
+  },
+  {
+   "kind": "quest",
+   "id": 600006,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "adventurerjournalpage3": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600006",
+    "https://mapleclassic.wiki/index.php?title=The_Second_Mark"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 600007,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600007"
+  },
+  {
+   "kind": "quest",
+   "id": 600007,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600007"
+  },
+  {
+   "kind": "quest",
+   "id": 600007,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Adventurer's Journal - Page 4",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600007"
+  },
+  {
+   "kind": "quest",
+   "id": 600007,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "adventurerjournalpage4": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600007",
+    "https://mapleclassic.wiki/index.php?title=The_Third_Mark"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 600008,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600008"
+  },
+  {
+   "kind": "quest",
+   "id": 600008,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600008"
+  },
+  {
+   "kind": "quest",
+   "id": 600008,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Adventurer's Journal - Page 5",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600008"
+  },
+  {
+   "kind": "quest",
+   "id": 600008,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "adventurerjournalpage5": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600008",
+    "https://mapleclassic.wiki/index.php?title=The_Fourth_Mark"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 600009,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600009"
+  },
+  {
+   "kind": "quest",
+   "id": 600009,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600009"
+  },
+  {
+   "kind": "quest",
+   "id": 600009,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Adventurer's Journal - Page 6",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600009"
+  },
+  {
+   "kind": "quest",
+   "id": 600009,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "adventurerjournalpage6": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600009",
+    "https://mapleclassic.wiki/index.php?title=The_Fifth_Mark"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "quest",
+   "id": 600010,
+   "field": "from",
+   "ours": null,
+   "source": "2026-10-21T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600010"
+  },
+  {
+   "kind": "quest",
+   "id": 600010,
+   "field": "to",
+   "ours": null,
+   "source": "2026-11-19T00:00",
+   "url": "https://maplestory.io/api/MCW/1/quest/600010"
+  },
+  {
+   "kind": "quest",
+   "id": 600010,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": [
+    [
+     "Mark of the Beta",
+     1,
+     null
+    ]
+   ],
+   "url": "https://maplestory.io/api/MCW/1/quest/600010"
+  },
+  {
+   "kind": "quest",
+   "id": 600010,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "markofthebeta": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/600010",
+    "https://mapleclassic.wiki/index.php?title=The_Final_Mark"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "monster",
+   "id": 17,
+   "field": "wdef",
+   "ours": 15,
+   "source": 0,
+   "url": "https://maplestory.io/api/MCW/1/mob/17",
+   "note": "Stirge"
+  }
+ ],
+ "new": [],
+ "unconfirmed": [
+  {
+   "kind": "quest",
+   "id": 1002,
+   "field": "need",
+   "ours": [],
+   "source": {
+    "game": [
+     [
+      "Roger's Apple",
+      null
+     ]
+    ],
+    "wiki": {
+     "rogerapple": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1002",
+    "https://mapleclassic.wiki/index.php?title=Roger%27s_Apple_%28quest%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 1002,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     2
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1002",
+    "https://mapleclassic.wiki/index.php?title=Roger%27s_Apple_%28quest%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 1002,
+   "field": "get",
+   "ours": {
+    "get": [],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "apple": 3
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/1002",
+    "https://mapleclassic.wiki/index.php?title=Roger%27s_Apple_%28quest%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20002,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20002",
+    "https://mapleclassic.wiki/index.php?title=Test_of_Qualification_%28Warrior%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20003,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20003",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Qualification_%28Warrior%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20102,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20102",
+    "https://mapleclassic.wiki/index.php?title=Test_of_Qualification_%28Magician%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20103,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20103",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Qualification_%28Magician%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20202,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20202",
+    "https://mapleclassic.wiki/index.php?title=Test_of_Qualification_%28Bowman%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20203,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20203",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Qualification_%28Bowman%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20302,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20302",
+    "https://mapleclassic.wiki/index.php?title=Test_of_Qualification_%28Thief%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 20303,
+   "field": "exp",
+   "ours": 0,
+   "source": {
+    "wiki": [
+     3150
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/20303",
+    "https://mapleclassic.wiki/index.php?title=Proof_of_Qualification_%28Thief%29"
+   ]
+  }
+ ],
+ "partial": false,
+ "failed": [],
+ "seconds": 195,
+ "sources": [
+  "maplestory.io MCW game data",
+  "MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0)"
+ ]
+}
