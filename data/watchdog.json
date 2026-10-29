@@ -1,169 +1,174 @@
 {
- "at": 1793274561,
- "ok": false,
- "failing": [
-  "Jobs still failing"
- ],
+ "at": 1793298264,
+ "ok": true,
+ "failing": [],
  "checks": [
   {
    "name": "Price board",
-   "ok": true,
-   "detail": "loads",
-   "ms": 200,
-   "fix": null
-  },
-  {
-   "name": "For streamers",
-   "ok": true,
-   "detail": "loads",
-   "ms": 112,
-   "fix": null
-  },
-  {
-   "name": "How it works",
-   "ok": true,
-   "detail": "loads",
-   "ms": 188,
-   "fix": null
-  },
-  {
-   "name": "Quest log",
-   "ok": true,
-   "detail": "loads",
-   "ms": 135,
-   "fix": null
-  },
-  {
-   "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
    "ms": 156,
    "fix": null
   },
   {
+   "name": "For streamers",
+   "ok": true,
+   "detail": "loads",
+   "ms": 143,
+   "fix": null
+  },
+  {
+   "name": "How it works",
+   "ok": true,
+   "detail": "loads",
+   "ms": 133,
+   "fix": null
+  },
+  {
+   "name": "Quest log",
+   "ok": true,
+   "detail": "loads",
+   "ms": 228,
+   "fix": null
+  },
+  {
+   "name": "Earn by scanning",
+   "ok": true,
+   "detail": "loads",
+   "ms": 105,
+   "fix": null
+  },
+  {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 294,
+   "ms": 164,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 146,
+   "ms": 160,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 249,
+   "ms": 158,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 182,
+   "ms": 240,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 141,
+   "ms": 123,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 222,
+   "ms": 288,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 189,
+   "ms": 106,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 203,
+   "ms": 128,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 135,
+   "ms": 202,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 104,
+   "ms": 133,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 132,
+   "ms": 259,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 113,
+   "ms": 298,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: typical 1,899 (1,500 to 2,000) from 319 sales · cheapest now 2,468 · maplefm.",
-   "ms": 506,
+   "detail": "Work Gloves: typical 1,800 (1,199 to 2,000) from 318 sales · cheapest now 1,000 · maplefm.",
+   "ms": 452,
    "fix": null
   },
   {
    "name": "!price (old address)",
    "ok": true,
-   "detail": "Work Gloves: typical 1,899 (1,500 to 2,000) from 319 sales · cheapest now 2,468 · maplefm.",
-   "ms": 345,
+   "detail": "Work Gloves: typical 1,800 (1,199 to 2,000) from 318 sales · cheapest now 1,000 · maplefm.",
+   "ms": 198,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded 2 min ago",
-   "ms": 107,
+   "detail": "uploaded 3 min ago",
+   "ms": 97,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "13 open listings, #selling synced 4 min ago",
-   "ms": 354,
+   "detail": "19 open listings, #selling synced 4 min ago",
+   "ms": 404,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated 2 min ago",
-   "ms": 140,
+   "detail": "updated 3 min ago",
+   "ms": 124,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1599 items",
-   "ms": 277,
+   "detail": "1523 items",
+   "ms": 194,
+   "fix": null
+  },
+  {
+   "name": "Scanner health",
+   "ok": true,
+   "detail": "no health file yet",
+   "ms": 113,
    "fix": null
   },
   {
@@ -175,8 +180,8 @@
   },
   {
    "name": "Jobs still failing",
-   "ok": false,
-   "detail": "Item pages",
+   "ok": true,
+   "detail": "none",
    "ms": null,
    "fix": null
   },
@@ -233,7 +238,12 @@
     "Jobs still failing"
    ],
    "repairs": []
+  },
+  {
+   "at": 1793298264,
+   "failing": [],
+   "repairs": []
   }
  ],
- "beat": 1793274561
+ "beat": 1793298264
 }
