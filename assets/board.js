@@ -3076,7 +3076,25 @@
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
   }
 
+  // the item's name bar: once the header scrolls away, the card's title bar names the item, its price and the site, so any screenshot says what it is
+  var nbIO = null;
+  function nameBar(i) {
+    var w = $("side") && $("side").querySelector(".wtitle"); if (!w) return;
+    if (nbIO) { nbIO.disconnect(); nbIO = null; }
+    var old = w.querySelector(".nbar"); if (old) old.remove();
+    var hd = i && $("ip").querySelector(".big");
+    if (!hd || !window.IntersectionObserver) { w.classList.remove("named"); return; }
+    var nb = el("div", "nbar"); nb.setAttribute("aria-hidden", "true");
+    nb.appendChild(iconBox(i.item)); var t = el("div", "nbt"); t.appendChild(el("b", null, showName(i.item)));
+    t.appendChild(el("small", null, "typical " + short(i.typ) + (i.salesN ? " · " + fmt(i.salesN) + " sales" : ""))); nb.appendChild(t);
+    nb.appendChild(el("span", "nbrand", "maplefm.gg"));
+    w.insertBefore(nb, w.querySelector(".meta"));
+    nbIO = new IntersectionObserver(function (es) { var e = es[es.length - 1]; w.classList.toggle("named", !e.isIntersecting && e.boundingClientRect.top < e.rootBounds.top + 80); }, { root: $("side"), rootMargin: "-56px 0px 0px 0px" });
+    nbIO.observe(hd);
+  }
+
   function renderItem0() {
+    nameBar(null);
     if (state.sel) loadBase(state.sel);
     var ip = $("ip"); ip.textContent = ""; $("wiki").textContent = "";
     if (D && D.preview) {
@@ -3120,7 +3138,7 @@
     if (i.hi > i.lo) { big.appendChild(money(i.lo)); big.appendChild(el("span", "dash", "–")); var hiS = el("span", "num", short(i.hi)); big.appendChild(hiS); }
     else big.appendChild(money(i.typ));
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
-    ip.appendChild(big);
+    ip.appendChild(big); nameBar(i);
     var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
     var tnote = el("p", "note", "typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : ""));
     var cb1 = confBadge(i, true); if (cb1) { tnote.appendChild(document.createTextNode(" ")); tnote.appendChild(cb1); }
@@ -4182,8 +4200,12 @@
     if (kind === "down") t = b && now > b.getTime() ? "Classic World maintenance is running past " + timeTxt(b) + ". Nexon hasn't called it done yet." : "Classic World is down for maintenance" + (b ? " until about " + timeTxt(b) + " your time." : ".") + " Prices pause until the servers are back.";
     else if (kind === "soon") t = "Maintenance coming: " + whenTxt(a) + (b ? " to " + timeTxt(b) : "") + " your time. " + (pick.down || "Classic World servers go down.");
     else t = "Maintenance finished" + (b ? " at " + timeTxt(b) : "") + ". Classic World is back up.";
-    bar.className = "mbar " + kind; bar.href = pick.url; bar.hidden = false;
-    $("mtext").textContent = t;
+    // a short pill next to "Browse all items": it never pushes the board down when it arrives; the full text is on hover and on Nexon's page
+    var tt = function (d) { return timeTxt(d).replace(":00", ""); };
+    var sh = kind === "down" ? (b && now > b.getTime() ? "Maint. running late" : "Down" + (b ? " until " + tt(b) : " now")) : kind === "soon" ? "Maint. " + (a.toDateString() === new Date().toDateString() ? "today" : a.toLocaleDateString("en-US", { weekday: "short" })) + " " + tt(a) : "Servers back up";
+    bar.className = "mbar " + kind; bar.href = pick.url; bar.hidden = false; bar.title = t + " Tap for Nexon's notice.";
+    bar.setAttribute("aria-label", t + " Opens Nexon's notice.");
+    $("mtext").textContent = sh;
   }
   var lastSig = "";
   // Live listings come from the Club FM Worker, open to everyone (rate limited and marked per copy).

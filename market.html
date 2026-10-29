@@ -36,7 +36,8 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 .tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs button[aria-pressed="true"] em{background:rgba(255,255,255,.25);color:#fff}
 .ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .ctl input,.ctl select{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
-.ctl input[type=search]{flex:1 1 240px}
+.ctl input[type=search]{flex:1 1 170px;min-width:0}.ctl select{flex:0 0 auto}
+#view>.ctl:first-child{margin-top:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;display:grid;gap:6px;text-decoration:none;color:inherit;cursor:pointer}
 .card:hover{border-color:var(--accent)}
@@ -76,13 +77,31 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 .shot .hint{margin:0}
 .foot{margin-top:24px;font-size:.78rem;color:var(--muted)}
 #view{min-height:100vh}
+.chips{display:flex;gap:6px;margin:0 0 12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;font:700 .88rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.chips button em{font-style:normal;color:var(--muted);font-size:.78rem}
+.chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.chips button[aria-pressed="true"] em{color:rgba(255,255,255,.85)}
+.grid.tiles{grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
+.tile{padding:10px;gap:5px;align-content:start}
+.tile .tic{height:76px;border-radius:12px;background:var(--soft);display:grid;place-items:center}
+.tile .tic img{width:46px;height:46px;object-fit:contain;image-rendering:pixelated}
+.tile .tname{font:700 .95rem/1.2 Outfit,sans-serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile .price{font-size:1.45rem;line-height:1.1}.tile .price small{display:block;font-size:.74rem}
+.tile .seller{font-size:.78rem;min-width:0}.tile .seller .sn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile.hot{border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.28),var(--shadow)}
+.tag.hot{background:#ffedd5;color:#c2410c}
+:root[data-theme="dark"] .tag.hot{background:#3d2410;color:#fdba74}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.hot{background:#3d2410;color:#fdba74}}
+.fab{position:fixed;right:16px;bottom:16px;z-index:40;background:var(--accent);color:#fff;font:800 .95rem Inter,sans-serif;padding:13px 18px;border-radius:999px;text-decoration:none;box-shadow:0 8px 22px rgba(60,20,140,.35)}
+.fab:hover{filter:brightness(1.08)}
+body{padding-bottom:70px}
 @media (max-width:600px){.hero h1{font-size:1.55rem}.panel{padding:14px}.btn{padding:9px 12px}}
 </style>
 <link rel="stylesheet" href="/assets/nav.css?v=2"></head><body>
 <main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html" aria-current="page"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
 <section class="hero">
-  <div><h1>Player market</h1><p>Members selling for mesos. Buy it now or make an offer and the seller gets a Discord DM. Listings never change board prices.</p></div>
+  <div><h1>Player market</h1><p><b>Buy now</b> or <b>make an offer</b>. Sellers get a Discord DM.</p></div>
   <div class="who" id="who"></div>
 </section>
 <div id="view"></div>
@@ -108,8 +127,12 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
   function vsTyp(l) {
     var r = ROWS[l.item]; if (!r || !r.typ || l.stats) return null;
     var d = l.price / r.typ - 1;
-    if (Math.abs(d) < 0.03) return el("span", "tag", "about typical");
-    return el("span", "tag " + (d < 0 ? "under" : "over"), Math.round(Math.abs(d) * 100) + "% " + (d < 0 ? "under" : "over") + " typical");
+    var t, pc = Math.round(Math.abs(d) * 100);
+    if (Math.abs(d) < 0.03) t = el("span", "tag", "fair price");
+    else if (d <= -0.15) t = el("span", "tag hot", "🔥 " + pc + "% under");
+    else t = el("span", "tag " + (d < 0 ? "under" : "over"), pc + "% " + (d < 0 ? "under" : "over"));
+    t.title = "Typical price " + meso(r.typ);
+    return t;
   }
   function tradesTag(sel) { return sel.trades ? el("span", "tag rep", sel.trades + (sel.trades === 1 ? " trade" : " trades") + " confirmed") : null; }
   function seenTag(l) {
@@ -136,28 +159,55 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
   }).catch(function () {});
   // item pictures: ids from the board's item list, drawn as the cards come in
   var BASES = {};
-  var IDS = {}, idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; if (r[7] && typeof r[7] === "object") BASES[r[0].toLowerCase()] = r[7]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
+  var IDS = {}, idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; if (m.kinds) KIND[r[0].toLowerCase()] = m.kinds[r[5]] || ""; if (r[7] && typeof r[7] === "object") BASES[r[0].toLowerCase()] = r[7]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
 
   // ---- the list
+  var KIND = {};
+  function cat(l) {
+    var r = ROWS[l.item], c = r && r.cat;
+    if (!c) { var k = KIND[String(l.item).toLowerCase()] || ""; c = /Scroll/.test(l.item) ? "Scrolls" : /^Equip:Cash/.test(k) ? "Cash" : /^Equip/.test(k) ? "Equips" : /^Use/.test(k) ? "Use" : /^Cash/.test(k) ? "Cash" : /^Etc/.test(k) ? "Etc" : "Other"; }
+    return c === "Weapons" ? "Equips" : c === "Stars" ? "Use" : c;
+  }
+  function dealOf(l) { var r = ROWS[l.item]; return r && r.typ && !l.stats ? l.price / r.typ : 9; }
+  var CATS = [["Scrolls", "📜 Scrolls"], ["Equips", "⚔️ Equips"], ["Use", "🧪 Use"], ["Etc", "📦 Etc"], ["Cash", "💎 Cash"], ["Other", "Other"]];
+  function fab(on) {
+    var f = $("fab");
+    if (!f) { f = el("a", "fab", "+ Sell an item"); f.id = "fab"; f.href = "#new"; document.body.appendChild(f); }
+    f.hidden = !on;
+  }
   function list() {
     var v = $("view"); v.textContent = "";
+    fab(true);
     var tabs = el("div", "tabs"), mineN = MINE ? MINE.listings.filter(function (l) { return l.status === "active" || l.status === "pending"; }).length : 0;
     [["all", "All listings", L.length], ["mine", "My listings", mineN], ["offers", "My offers", MINE ? MINE.offers.filter(function (o) { return o.status === "open"; }).length : 0]].forEach(function (t) {
       var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", TAB === t[0]); b.appendChild(document.createTextNode(t[1] + " ")); b.appendChild(el("em", null, String(t[2])));
       b.addEventListener("click", function () { TAB = t[0]; list(); }); tabs.appendChild(b);
     });
-    v.appendChild(tabs);
+    if (MINE) v.appendChild(tabs);   // visitors only have the one list: no empty tabs
     if (TAB !== "all" && !MINE) { var e0 = el("div", "empty"); e0.appendChild(el("p", null, "Sign in with Discord to see your listings and offers.")); e0.appendChild(signIn()); v.appendChild(e0); return; }
     if (TAB === "offers") return offersTab(v);
-    var ctl = el("div", "ctl"), q = el("input"); q.type = "search"; q.placeholder = "Search items, like work gloves or claw 60"; q.value = list.q || "";
-    var so = el("select"); [["new", "Newest"], ["cheap", "Cheapest"], ["deal", "Furthest under typical"]].forEach(function (x) { var o = el("option", null, x[1]); o.value = x[0]; so.appendChild(o); }); so.value = list.s || "new";
+    var ctl = el("div", "ctl"), q = el("input"); q.type = "search"; q.placeholder = "Search items, like claw 60"; q.value = list.q || "";
+    var so = el("select"); [["new", "Newest"], ["cheap", "Cheapest"], ["deal", "Best deal"]].forEach(function (x) { var o = el("option", null, x[1]); o.value = x[0]; so.appendChild(o); }); so.value = list.s || "new";
     ctl.appendChild(q); ctl.appendChild(so); v.appendChild(ctl);
-    var g = el("div", "grid"); v.appendChild(g);
+    var chips = el("div", "chips"); chips.setAttribute("role", "group"); chips.setAttribute("aria-label", "Show"); v.appendChild(chips);
+    var g = el("div", "grid tiles"); v.appendChild(g);
+    function drawChips(src) {
+      chips.textContent = "";
+      var n = {}, deals = 0; src.forEach(function (l) { var c = cat(l); n[c] = (n[c] || 0) + 1; if (dealOf(l) <= 0.9) deals++; });
+      var opts = [["", "All", src.length]].concat(deals ? [["deals", "🔥 Deals", deals]] : []).concat(CATS.filter(function (c) { return n[c[0]]; }).map(function (c) { return [c[0], c[1], n[c[0]]]; }));
+      if (list.c && !opts.some(function (o) { return o[0] === list.c; })) list.c = "";
+      opts.forEach(function (o) {
+        var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", (list.c || "") === o[0]); b.appendChild(document.createTextNode(o[1] + " ")); b.appendChild(el("em", null, String(o[2])));
+        b.addEventListener("click", function () { list.c = o[0]; draw(); }); chips.appendChild(b);
+      });
+    }
     function draw() {
       list.q = q.value; list.s = so.value; g.textContent = "";
-      var src = TAB === "mine" ? MINE.listings : L, words = q.value.toLowerCase().replace(/%/g, "").split(/\s+/).filter(Boolean);
+      var src = TAB === "mine" ? MINE.listings : L; drawChips(src);
+      if (list.c) src = src.filter(function (l) { return list.c === "deals" ? dealOf(l) <= 0.9 : cat(l) === list.c; });
+      var words = q.value.toLowerCase().replace(/%/g, "").split(/\s+/).filter(Boolean);
       var rows = src.filter(function (l) { var t = (shown(l.item) + " " + l.item + " " + (l.stats || "") + " " + (l.seller.name || "") + " " + (l.ign || "")).toLowerCase().replace(/%/g, ""); return words.every(function (w) { return t.indexOf(w) >= 0; }); });
-      var deal = function (l) { var r = ROWS[l.item]; return r && r.typ && !l.stats ? l.price / r.typ : 9; };
+      var deal = dealOf;
       rows.sort(so.value === "cheap" ? function (a, b) { return a.price - b.price; } : so.value === "deal" ? function (a, b) { return deal(a) - deal(b); } : function (a, b) { return b.created - a.created; });
       if (!rows.length) {
         var e = el("div", "empty");
@@ -170,8 +220,9 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     q.addEventListener("input", draw); so.addEventListener("change", draw); draw();
   }
   function card(l) {
-    var c = el("a", "card"); c.href = "#l=" + l.id;
-    var h = el("h3"), ic = icon(l.item); if (ic) h.appendChild(ic); else h.dataset.ic = l.item; h.appendChild(document.createTextNode(shown(l.item))); c.appendChild(h);
+    var c = el("a", "card tile" + (dealOf(l) <= 0.85 && l.status === "active" ? " hot" : "")); c.href = "#l=" + l.id;
+    var pic = el("div", "tic"), ic = icon(l.item); if (ic) pic.appendChild(ic); else pic.dataset.ic = l.item; c.appendChild(pic);
+    c.appendChild(el("h3", "tname", shown(l.item)));
     var p = el("div", "price", meso(l.price)); if (l.qty > 1) p.appendChild(el("small", null, " each · " + l.qty + " for sale")); c.appendChild(p);
     var t = el("div", "tags"); if (l.stats) t.appendChild(el("span", "tag", l.stats)); var vt = vsTyp(l); if (vt) t.appendChild(vt);
     if (l.status === "pending") t.appendChild(el("span", "tag hold", "Buyer on it"));
@@ -180,7 +231,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     var sn = seenTag(l); if (sn) t.appendChild(sn); var tt = tradesTag(l.seller); if (tt) t.appendChild(tt);
     if (t.firstChild) c.appendChild(t);
     var s = el("div", "seller"); if (l.seller.avatar) { var im = el("img"); im.src = l.seller.avatar; im.alt = ""; s.appendChild(im); }
-    s.appendChild(document.createTextNode((l.ign || l.seller.name) + " · " + ago(l.created))); c.appendChild(s);
+    s.appendChild(el("span", "sn", (l.ign || l.seller.name) + " · " + ago(l.created))); c.appendChild(s);
     return c;
   }
   function offersTab(v) {
@@ -434,7 +485,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
   }
   function refresh() { return Promise.all([loadAll(), loadMine()]); }
   function route() {
-    var h = location.hash, m;
+    var h = location.hash, m; fab(false);
     if ((m = /^#l=([0-9a-f]{10})(&new)?/.exec(h))) return detail(m[1], !!m[2]);
     if ((m = /^#new(?:=(.+))?/.exec(h))) return rowsP.then(function () { newForm(m[1] ? decodeURIComponent(m[1]) : ""); });
     if (h === "#mine") TAB = "mine";
