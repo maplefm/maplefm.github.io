@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
 <script src="/assets/api.js?v=3"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quest Log · MapleStory Classic · Club FM</title>
-<meta name="description" content="Your MapleStory Classic quest log: what's open at your level, what you've started, what's next, and exactly what each quest needs, where it drops and what it costs on the Free Market.">
+<meta name="description" content="Every MapleStory Classic quest at your level: what to bring, crafted items broken down to base materials, where each item drops, and what it costs on the Free Market.">
 <link rel="canonical" href="https://maplefm.gg/quests.html">
 <meta property="og:title" content="Quest Log · MapleStory Classic · Club FM"><meta property="og:description" content="Every quest at your level, what it needs, where to get it, and what it costs on the Free Market."><meta property="og:image" content="https://maplefm.gg/og.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Club FM Quest Log","url":"https://maplefm.gg/quests.html","applicationCategory":"GameApplication","operatingSystem":"Any","description":"Your MapleStory Classic quest log: what is open at your level, what you started, what each quest needs.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
@@ -9,101 +9,134 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1;--accent2:#8b5cf6;--soft:#efe8ff;--gold:#e0a91c;--gold-soft:#fff3d1;--ok:#12895f;--ok-soft:#dcf5ea;--warn:#b0570a;--shadow:0 2px 0 rgba(60,30,120,.06),0 8px 24px rgba(60,30,120,.08)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--accent2:#c4b5fd;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f12;--ok:#4ade80;--ok-soft:#173326;--shadow:0 2px 0 rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}}
+:root{--bg:#f4effc;--card:#fff;--ink:#22183d;--muted:#6c6188;--line:#e6ddf6;--accent:#6d3fd1;--accent2:#8b5cf6;--soft:#efe8ff;--gold:#e0a91c;--gold-soft:#fff3d1;--ok:#12895f;--ok-soft:#dcf5ea;--warn:#b0570a;--bad:#c0392b;--shadow:0 1px 0 rgba(60,30,120,.05),0 6px 18px rgba(60,30,120,.07)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--accent2:#c4b5fd;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f12;--ok:#4ade80;--ok-soft:#173326;--warn:#fbbf24;--bad:#f87171;--shadow:0 1px 0 rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--accent2:#c4b5fd;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f12;--ok:#4ade80;--ok-soft:#173326;--warn:#fbbf24;--bad:#f87171;--shadow:0 1px 0 rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35)}
+[hidden]{display:none!important}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
 a{color:var(--accent)}
-main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.brand{font:800 1.25rem Outfit,sans-serif;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}
-.brand img{height:30px;image-rendering:pixelated}
-.navs{display:flex;gap:8px;flex-wrap:wrap}
-.navs a{font-weight:700;font-size:.85rem;text-decoration:none;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
-.navs a.go{background:var(--accent);border-color:var(--accent);color:#fff}
-.hero{background:linear-gradient(135deg,#3b1a7a,#6d3fd1 60%,#8b5cf6);color:#fff;border-radius:18px;padding:18px 20px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
-.hero h1{font:800 1.9rem/1.1 Outfit,sans-serif;margin:0}
-.hero p{margin:6px 0 0;opacity:.9}
-.me{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 12px;min-width:250px}
-.me .lvrow{display:flex;align-items:center;gap:8px;font-weight:700;flex-wrap:wrap}
-.me .ign input{width:9.5em;font:inherit;font-size:.9rem;font-weight:600;padding:6px 10px;border-radius:10px;border:0;background:rgba(255,255,255,.9);color:#2b2140}
-#lvsrc{opacity:.9}#lvsrc a{color:inherit}
-.me input{width:70px;font:800 1.2rem Outfit;border:0;border-radius:10px;padding:4px 8px;text-align:center}
-.me small{display:block;opacity:.85;margin-top:6px;font-size:.78rem}
+main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+img.px{image-rendering:pixelated;object-fit:contain}
+/* header: name, one line, then your level and class, saved for Quests and Training */
+.hero{background:linear-gradient(135deg,#3b1a7a,#6d3fd1 60%,#8b5cf6);color:#fff;border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center}
+.hero h1{font:800 1.6rem/1.1 Outfit,sans-serif;margin:0}
+.hero p{margin:4px 0 0;opacity:.92;font-size:.92rem}
+.me{display:grid;gap:6px;min-width:0}
+.me .lvrow{display:flex;align-items:center;gap:6px;font-weight:700;flex-wrap:wrap}
+.me input,.me select{font:700 .95rem Inter,sans-serif;border:0;border-radius:10px;padding:7px 9px;background:rgba(255,255,255,.95);color:#2b2140}
+.me #lv{width:64px;text-align:center;font:800 1.05rem Outfit,sans-serif}
+.me #ign{width:9em}
+.me small{display:block;opacity:.88;font-size:.76rem}
 .me a{color:#ffe08a;font-weight:700}
-.bar{height:8px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#ffd34d;border-radius:99px}
-.tabs{display:flex;gap:6px;margin:16px 0 10px;flex-wrap:wrap}
-.tabs button{font:700 .9rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
-.tabs button em{font-style:normal;background:var(--soft);color:var(--accent);border-radius:99px;padding:0 8px;font-size:.8rem}
-.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs button[aria-pressed="true"] em{background:rgba(255,255,255,.25);color:#fff}
-.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.ctl input,.ctl select{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
-.ctl input[type=search]{flex:1 1 260px}
-.layout{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
-@media (max-width:860px){.layout{grid-template-columns:1fr}.hero{grid-template-columns:1fr}}
-.q{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:12px}
-.q.doing{border-color:var(--accent);box-shadow:0 0 0 2px rgba(109,63,209,.18),var(--shadow)}
-.q.done{opacity:.72}
-.qh{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center}
-.qh{grid-template-columns:56px minmax(0,1fr) auto}.qh h3{overflow-wrap:anywhere}
-@media (max-width:420px){.qh{grid-template-columns:48px minmax(0,1fr)}.qh .acts{grid-column:1/-1;flex-wrap:wrap}}
-.npc{width:56px;height:56px;border-radius:14px;background:var(--soft);display:grid;place-items:center;overflow:hidden}
-.npc img{max-width:52px;max-height:52px;image-rendering:pixelated}
-.qh h3{margin:0;font:700 1.08rem Outfit,sans-serif}
-.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
-.chip{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent)}
-.chip.lv{background:var(--gold-soft);color:var(--warn)}.chip.rep{background:var(--ok-soft);color:var(--ok)}
-.acts{display:flex;gap:6px}
-.acts button{font:700 .8rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 10px;border-radius:10px;cursor:pointer}
+.bar{height:6px;background:rgba(255,255,255,.22);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:#ffd34d;border-radius:99px}
+@media (max-width:760px){.hero{grid-template-columns:1fr}}
+/* tabs and filters: one row each, nothing to scroll past */
+.tabs{display:flex;gap:6px;margin:12px 0 8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;font:700 .88rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.tabs button em{font-style:normal;color:var(--muted);font-size:.78rem}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs button[aria-pressed="true"] em{color:rgba(255,255,255,.85)}
+.ctl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ctl input,.ctl select{font:inherit;font-size:.92rem;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);min-width:0}
+.ctl input[type=search]{flex:1 1 100%}
+.ctl select{flex:1 1 140px}
+@media (min-width:761px){.ctl input[type=search]{flex:1 1 300px}.ctl select{flex:0 0 auto}}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}}
+.lbl{font:700 .7rem Inter,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:10px 2px 6px}
+/* one quest: a compact row; tap it for everything */
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden}
+.q.doing{border-color:var(--accent)}.q.done .qrow{opacity:.62}
+.q.win{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft),var(--shadow)}
+.q.focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,169,28,.35),var(--shadow)}
+.qrow{all:unset;box-sizing:border-box;display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:8px 12px;cursor:pointer}
+.qrow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:14px}
+.npc{width:46px;height:46px;border-radius:12px;background:var(--soft);display:grid;place-items:center;overflow:hidden}
+.npc img{max-width:42px;max-height:42px}
+.qt{min-width:0}
+.qt b{display:block;font:700 1rem/1.2 Outfit,sans-serif;overflow-wrap:anywhere}
+.qt small{display:block;color:var(--muted);font-size:.78rem;margin-top:1px}
+.strip{display:flex;gap:4px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.strip img{width:22px;height:22px}
+.strip .t{font-size:.7rem;font-weight:700;color:var(--muted);background:var(--bg);border-radius:6px;padding:1px 6px}
+.strip .st{font-size:.7rem;font-weight:800;border-radius:6px;padding:1px 6px;background:var(--soft);color:var(--accent)}
+.strip .st.done{background:var(--ok-soft);color:var(--ok)}
+.qr{text-align:right}
+.qr b{display:block;font:800 .95rem Outfit,sans-serif;white-space:nowrap}
+.qr small{display:block;color:var(--muted);font-size:.75rem;white-space:nowrap}
+.qr .chev{display:inline-block;margin-top:2px;color:var(--muted);transition:transform .15s}
+.q.open .qr .chev{transform:rotate(180deg)}
+.qbody{padding:2px 12px 12px;border-top:1px solid var(--line)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.acts button,.acts a{font:700 .82rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 11px;border-radius:10px;cursor:pointer;text-decoration:none}
 .acts button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .acts button.ok.on{background:var(--ok);border-color:var(--ok)}
-.sec{margin-top:10px}
-.sec h4{margin:0 0 6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.row{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.sec{margin-top:12px}
+.sec h4{margin:0 0 6px;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.row{display:grid;grid-template-columns:22px 36px minmax(0,1fr) auto;gap:8px;align-items:start;padding:7px 0;border-top:1px solid var(--line)}
 .row:first-of-type{border-top:0}
+.row input{width:18px;height:18px;margin:9px 0 0;accent-color:var(--accent)}
 .ic{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center}
-.ic img{max-width:32px;max-height:32px;image-rendering:pixelated}
-.row b{font-weight:700}.row a{text-decoration:none;font-weight:700}
-.src{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
-.src span{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:1px 6px}
-.src img{height:18px;image-rendering:pixelated}
-.qty{text-align:right;font-weight:800;white-space:nowrap}.qty small{display:block;font-weight:600;color:var(--muted);font-size:.75rem}
-.rw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.rw span{display:inline-flex;gap:4px;align-items:center;font-weight:700;font-size:.85rem;background:var(--bg);border-radius:10px;padding:3px 8px}
-.rw img{height:22px;image-rendering:pixelated}
+.ic img{max-width:32px;max-height:32px}
+.row a{text-decoration:none;font-weight:700}
+.row.got .ic,.row.got a,.row.got b{opacity:.55}
+.qty{text-align:right;font-weight:800;white-space:nowrap}.qty small{display:block;font-weight:600;color:var(--muted);font-size:.74rem}
+.tag{display:inline-block;margin-left:6px;background:var(--accent);color:#fff;font-weight:800;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:1px 6px;vertical-align:2px}
+.src{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.src span,.src a{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:2px 7px;text-decoration:none;font-weight:600}
+.src img{height:20px;max-width:28px}
+/* the craft tree: every crafted item opened down to what you gather, amounts multiplied out */
+.tree{margin-top:6px;display:grid;gap:4px}
+.tk{margin-left:10px;padding-left:8px;border-left:2px dashed var(--line);display:grid;gap:4px}
+.tl{display:flex;align-items:center;gap:6px;font-size:.84rem;min-width:0}
+.tl img{width:22px;height:22px;flex:0 0 22px}
+.tl a{font-weight:700}
+.tl em{margin-left:auto;font-style:normal;font-weight:800;white-space:nowrap;padding-left:6px}.tl em small{font-weight:600;color:var(--muted)}
+.tm{font-size:.73rem;color:var(--muted);margin:0 0 0 28px}
+.tm b{color:var(--ink)}
+.alt{font-size:.74rem;color:var(--muted);margin-top:4px}
+.base{background:var(--gold-soft);border-radius:12px;padding:9px 11px;margin-top:10px;font-size:.84rem;display:grid;gap:5px}
+.base b{font:800 .9rem Outfit,sans-serif}
+.bi{display:flex;flex-wrap:wrap;gap:4px 10px}
+.bi span{display:inline-flex;align-items:center;gap:4px;font-weight:700}
+.bi img{width:22px;height:22px}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.vs div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:.76rem;color:var(--muted)}
+.vs strong{display:block;font:800 1.02rem Outfit,sans-serif;color:var(--ink)}
+.vs .best{border-color:var(--ok);background:var(--ok-soft)}
 .cost{margin-top:8px;font-size:.84rem;color:var(--muted)}
-.pre{font-size:.8rem;color:var(--muted);margin-top:6px}
-.fill{margin:-4px 0 12px;font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;color:var(--muted)}
-.fill button{font:inherit;font-weight:700;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;cursor:pointer}
-.fill input{font:inherit;padding:6px 10px;border-radius:10px;border:1.5px solid var(--line,#ddd);min-width:14em;background:var(--panel,#fff);color:inherit}
-.fill button.yes{background:#6d3fd1;border-color:#6d3fd1;color:#fff}
-.side{position:sticky;top:10px;display:grid;gap:12px}
+.cost b{color:var(--ink)}
+.rw{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.rw span{display:inline-flex;gap:5px;align-items:center;font-weight:700;font-size:.85rem;background:var(--bg);border-radius:10px;padding:3px 9px}
+.rw img{height:22px;max-width:28px}
+.rw a{color:inherit;text-decoration:none}
+.rw small{font-weight:600;color:var(--muted)}
+.pre{font-size:.82rem;color:var(--muted);margin-top:8px}
+.warn{font-size:.82rem;background:var(--gold-soft);border-radius:10px;padding:6px 10px;margin-top:10px}
+.talk{font-size:.84rem;color:var(--muted);margin-top:10px}
+.fill{margin:0 0 10px;font-size:.86rem;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;color:var(--muted)}
+.fill button{font:inherit;font-weight:700;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:inherit;cursor:pointer}
+.fill input{font:inherit;padding:6px 10px;border-radius:10px;border:1.5px solid var(--line);min-width:0;flex:1 1 12em;background:var(--card);color:inherit}
+.fill button.yes{background:var(--accent);border-color:var(--accent);color:#fff}
+.side{position:sticky;top:64px;display:grid;gap:12px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px}
 .panel h2{margin:0 0 8px;font:700 1rem Outfit,sans-serif}
-.panel .row{grid-template-columns:30px 1fr auto}.panel .ic{width:30px;height:30px}
+.panel .row{grid-template-columns:30px minmax(0,1fr) auto}.panel .ic{width:30px;height:30px}
 .tot{font-weight:800;margin-top:8px}
 .note{color:var(--muted);font-size:.84rem}
 .empty{text-align:center;padding:30px 10px;color:var(--muted)}
 .foot{color:var(--muted);font-size:.78rem;margin-top:20px}
 .ph{width:26px;height:26px;border-radius:8px;background:var(--line);display:grid;place-items:center;color:var(--muted);font:800 .8rem Outfit,sans-serif}
-.npc .ph{width:44px;height:44px;font-size:1.2rem}
-.q.focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,169,28,.35),var(--shadow)}
-.craft{margin-top:5px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:.8rem}
-.craft .ct{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted)}
-.craft .tag{background:var(--accent);color:#fff;font-weight:800;font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:1px 6px}
-.craft ul{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:3px}
-.craft li{display:flex;align-items:center;gap:6px}.craft li img{height:20px;image-rendering:pixelated}.craft li a{font-weight:700}
-.craft li em{font-style:normal;margin-left:auto;font-weight:800;white-space:nowrap}.craft li em small{font-weight:600;color:var(--muted)}
-.qsrc{font-size:.78rem;color:var(--muted);margin-top:3px}.qsrc a{font-weight:700}
-.rw a{color:inherit;text-decoration:none}.rw a:hover span,.rw a:hover{text-decoration:underline}
-.talk{font-size:.84rem;color:var(--muted);margin-top:8px}
-.more{display:block;width:100%;font:700 .95rem Inter;padding:12px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--accent);cursor:pointer}
-</style><link rel="stylesheet" href="/assets/nav.css?v=2"></head><body><main>
-<!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html" aria-current="page"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><!--/nav-->
-
+.npc .ph{width:40px;height:40px;font-size:1.1rem}
+.more{display:block;width:100%;font:700 .95rem Inter;padding:12px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--accent);cursor:pointer;margin-top:4px}
+#qs{min-height:70vh}
+@media (prefers-reduced-motion: reduce){.qr .chev{transition:none}}
+@media (max-width:480px){.tk{margin-left:6px;padding-left:7px}.tm{margin-left:0}.tn .src{margin-left:0!important}.me #acct{display:none}}
+</style><link rel="stylesheet" href="/assets/nav.css?v=3"></head><body><main>
+<!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html" aria-current="page"><span class="sn-l">Quests and training</span><span class="sn-s">Play</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><nav class="playbar" aria-label="Quests and training"><a href="/quests.html" aria-current="page">Quests</a><a href="/map.html">Training</a><a href="/maps/">Maps</a><a href="/monsters/">Monsters</a></nav><!--/nav-->
 <section class="hero">
-  <div><h1>Quest Log</h1><p>Every MapleStory Classic quest: what's open at your level, what each needs, where it drops and what it costs to buy.</p></div>
+  <div><h1>Quests</h1><p><b>What's open</b> at your level, <b>what to bring</b> down to the last ore, and <b>what it costs</b>.</p></div>
   <div class="me">
-    <div class="lvrow">My level <input type="number" id="lv" min="1" max="250" placeholder="?"><span class="ign" id="ignbox"><input type="text" id="ign" placeholder="or your IGN" maxlength="16" autocomplete="off" aria-label="Your character name, to pull your level from classicrank.com"></span></div>
+    <div class="lvrow"><label for="lv">Lv</label><input type="number" id="lv" min="1" max="250" placeholder="?" inputmode="numeric"><select id="cls" aria-label="Class"><option value="0">Any class</option><option value="1">Warrior</option><option value="2">Magician</option><option value="3">Bowman</option><option value="4">Thief</option><option value="5">Pirate</option></select><input type="text" id="ign" placeholder="or your IGN" maxlength="16" autocomplete="off" aria-label="Your character name, fills your level from classicrank.com"></div>
     <small id="lvsrc" hidden></small>
     <div class="bar"><i id="pbar" style="width:0"></i></div>
     <small id="ptxt">Set your level to see what's open.</small>
@@ -111,19 +144,21 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   </div>
 </section>
 
-<div class="tabs" id="tabs"></div>
-<div class="fill" id="fill" hidden></div>
-<div class="fill" id="addq" hidden><span>Started a quest that isn't on this list?</span><input type="text" id="addn" maxlength="60" placeholder="Its name, as the game shows it" aria-label="Quest name"><button type="button" id="addb">Add to In progress</button></div>
+<div class="tabs" id="tabs" role="group" aria-label="Show"></div>
 <div class="ctl">
-  <input type="search" id="s" placeholder="Search a quest, item, NPC or mob: processed wood, Icarus, stirge" aria-label="Search quests">
-  <select id="rg" aria-label="Region"><option value="">All regions</option></select>
-  <select id="sort" aria-label="Sort"><option value="lv">Lowest level first</option><option value="exp">Most EXP first</option><option value="cost">Cheapest to buy first</option></select>
+  <input type="search" id="s" placeholder="Search quests, items, NPCs or monsters" aria-label="Search quests" enterkeyhint="search">
+  <select id="rg" aria-label="Town or area"><option value="">All towns and areas</option></select>
+  <select id="sort" aria-label="Sort"><option value="lv">Lowest level first</option><option value="value">Best EXP for the cost</option><option value="exp">Most EXP first</option><option value="cost">Cheapest to buy first</option></select>
 </div>
 <div class="layout">
-  <div id="qs"><p class="empty">Loading quests…</p></div>
+  <div>
+    <div class="fill" id="fill" hidden></div>
+    <div class="fill" id="addq" hidden><span>Started a quest that isn't listed?</span><input type="text" id="addn" maxlength="60" placeholder="Its name, as the game shows it" aria-label="Quest name"><button type="button" id="addb">Add it</button></div>
+    <div id="qs"><p class="empty">Loading quests…</p></div>
+  </div>
   <aside class="side">
     <div class="panel" id="shop"><h2>Shopping list</h2><p class="note">Start a quest and its items add up here with Free Market costs.</p></div>
-    <div class="panel"><h2>How it works</h2><p class="note">Mark quests Started or Done. Sign in with Discord to keep your log on any browser. Coming soon: FM Watcher fills it in from your quest window.</p></div>
+    <div class="panel"><h2>How it works</h2><p class="note"><b>Tap a quest</b> for what to bring, where it drops and how to craft it. <b>Start</b> and <b>Done</b> keep your log. Sign in with Discord to keep it on any device.</p></div>
   </aside>
 </div>
 <p class="foot">Quests and rewards: MapleStory Classic game data, pictures via maplestory.io. Givers, drops, crafting and shops: <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a>, CC BY-NC-SA 4.0. Drop rates measured by players. Prices: typical Club FM sales. Not affiliated with Nexon. <a href="/terms.html">Terms</a></p>
@@ -137,22 +172,31 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   function shown(n) { var m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(n); return m ? m[1] + " " + (TIER[m[2]] || m[2]) : n; }
   function slug(n) { return shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
   function meso(n) { n = +n || 0; if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B"; if (n >= 999.5e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1).replace(/\.?0+$/, "") + "K"; return Math.round(n).toLocaleString(); }
+  function qname(q) { return String(q.n || "").replace(/[?�]/g, " ").replace(/\s{2,}/g, " ").trim(); }
   function ph(t) { return el("span", "ph", t || "?"); }
-  function img(src, cls, alt) { var i = new Image(); i.loading = "lazy"; i.alt = ""; i.src = src; if (cls) i.className = cls;
+  function img(src, cls, alt) { var i = new Image(); i.loading = "lazy"; i.decoding = "async"; i.alt = ""; i.src = src; i.className = "px" + (cls ? " " + cls : "");
     i.onerror = function () { if (alt && i.src.indexOf(alt) < 0) { i.src = alt; return; } if (i.parentNode) i.parentNode.replaceChild(ph(i.dataset.ph), i); }; return i; }
-  function mobImg(id, name) { var k = MOBIMG[String(id)]; var i = img(IO + "mob/" + id + "/" + (k || "icon"), null, IO + "mob/" + id + "/render/move"); i.dataset.ph = (name || "?").charAt(0); return i; }
-  function itemIcon(name) { var id = IDS[name]; var b = el("div", "ic"); if (id) { var i = img("/i/" + id + ".png", null, IO + "item/" + id + "/icon"); i.dataset.ph = name.charAt(0); b.appendChild(i); } else b.appendChild(ph(name.charAt(0))); return b; }
-  // only items with an item page link to one (5+ prices seen); the rest open a board search
+  function mobImg(id, name) { var k = MOBIMG[String(id)]; var i = img(IO + "mob/" + id + "/" + (k || "icon"), null, IO + "mob/" + id + "/render/move"); i.dataset.ph = (name || "?").charAt(0); i.title = name || ""; return i; }
+  function itemImg(name) { var id = IDS[name]; if (!id) return null; var i = img("/i/" + id + ".png", null, IO + "item/" + id + "/icon"); i.dataset.ph = name.charAt(0); i.title = shown(name); return i; }
+  function itemIcon(name) { var b = el("div", "ic"), i = itemImg(name); b.appendChild(i || ph(name.charAt(0))); return b; }
+  function npcImg(q) { if (q.gid == null) return ph((q.g || "?").charAt(0)); var i = img(IO + "npc/" + q.gid + "/icon"); i.dataset.ph = (q.g || "?").charAt(0); return i; }
+  // only items with an item page link to one; the rest open a board search
   var PAGE = {};
   function itemHref(name) { return PAGE[name] ? "/item/" + slug(name) + "/" : "/?q=" + encodeURIComponent(name); }
   function itemLink(name, txt) { var a = el("a", null, txt || shown(name)); a.href = itemHref(name); return a; }
-  function questLink(qn, qid) { var a = el("a", null, qn); if (qid && BYID[qid]) { a.href = "#q-" + qid; } else { a.href = "#q=" + encodeURIComponent(qn); } return a; }
+  function questLink(qn, qid) { var a = el("a", null, qn); a.href = qid && BYID[qid] ? "#q-" + qid : "#q=" + encodeURIComponent(qn); return a; }
+  // map and monster pages (data/play.json, built with the guide pages each day)
+  var PLAY = { q: {}, mob: {}, npc: {} };
+  function mobHref(n) { var m = PLAY.mob[n]; return m ? "/monster/" + m[0] + "/" : ""; }
 
-  // ---- my log: this browser, plus the Discord account when signed in
+  // ---- my log: this browser, plus the Discord account when signed in. Level and class are shared with Training.
   var LOG = { done: {}, doing: {}, level: 0 }; try { var s0 = JSON.parse(localStorage.getItem("fm-qlog") || "null"); if (s0) LOG = s0; } catch (e) {}
   LOG.done = LOG.done || {}; LOG.doing = LOG.doing || {};
+  try { var pl = JSON.parse(localStorage.getItem("fm-play") || "null"); if (pl) { if (!LOG.level && pl.lv) LOG.level = pl.lv; if (!LOG.fam && pl.fam) LOG.fam = pl.fam; } } catch (e) {}
+  var CHECK = {}; try { CHECK = JSON.parse(localStorage.getItem("fm-qcheck") || "{}") || {}; } catch (e) {}
   var SIGNED = false;
-  function saveLocal() { try { localStorage.setItem("fm-qlog", JSON.stringify(LOG)); } catch (e) {} }
+  function saveLocal() { try { localStorage.setItem("fm-qlog", JSON.stringify(LOG)); localStorage.setItem("fm-play", JSON.stringify({ lv: LOG.level || 0, fam: LOG.fam || 0 })); } catch (e) {} }
+  function saveCheck() { try { localStorage.setItem("fm-qcheck", JSON.stringify(CHECK)); } catch (e) {} }
   function push(set, level) {
     if (!SIGNED) return;
     var body = {}; if (set) body.set = set; if (level != null) body.level = level;
@@ -176,20 +220,20 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     });
   }
   function fillBar(ask) {
-    var f = $("fill"), list = fillable(); f.textContent = ""; f.hidden = !list.length;
+    var f = $("fill"), list = TAB === "open" ? fillable() : []; f.textContent = ""; f.hidden = !list.length;
     if (!list.length) return;
     if (!ask) {
-      f.appendChild(document.createTextNode("Your in-game Available tab is empty? "));
+      f.appendChild(document.createTextNode("New here and your in-game Available tab is empty?"));
       var b = el("button", null, "Mark the rest done up to Lv " + LOG.level); b.type = "button"; b.addEventListener("click", function () { fillBar(true); }); f.appendChild(b);
       return;
     }
-    f.appendChild(document.createTextNode("Mark " + list.length + " quests done? Your In Progress quests stay as they are, so mark those Started first." + (LOG.fam ? "" : " Other classes' job quests are skipped.") + " "));
+    f.appendChild(document.createTextNode("Mark " + list.length + " quests done? Started quests stay as they are." + (LOG.fam ? "" : " Other classes' job quests are skipped.")));
     var y = el("button", "yes", "Yes, mark them"); y.type = "button";
     y.addEventListener("click", function () { var up = {}; list.forEach(function (q) { LOG.done[q.n] = Date.now(); up[q.n] = "done"; }); saveLocal(); push(up); render(); });
     var n = el("button", null, "Cancel"); n.type = "button"; n.addEventListener("click", function () { fillBar(false); });
     f.appendChild(y); f.appendChild(n);
   }
-  // quests you track that our list doesn't have yet (brand-new ones): kept as plain cards so the log matches the game
+  // quests you track that our list doesn't have yet (brand-new ones): kept so the log matches the game
   function addCustoms() {
     var have = {}; Q.forEach(function (q) { have[q.n.toLowerCase()] = 1; });
     Object.keys(LOG.doing).concat(Object.keys(LOG.done)).forEach(function (n) {
@@ -206,81 +250,178 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   $("addn").addEventListener("keydown", function (e) { if (e.key === "Enter") $("addb").click(); });
   function stateOf(n) { return LOG.done[n] ? "done" : LOG.doing[n] ? "doing" : ""; }
 
-  var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, MOBIMG = {}, TAB = "open", FOCUS = 0, SHOWN = 120;
+  var Q = [], G = {}, IDS = {}, PRICE = {}, BYID = {}, MOBIMG = {}, NEXT = {}, TAB = "open", FOCUS = 0, SHOWN = 40, OPEN = {};
   try { TAB = localStorage.getItem("fm-qtab") || "open"; } catch (e) {}
 
-  function craftBox(c, need, more) {
-    // c = [profession, level, [[ingredient, n]], fee, makes, catalyst]
-    var box = el("div", "craft"), t = el("div", "ct"), crafts = Math.ceil((need || 1) / (c[4] || 1));
-    t.appendChild(el("span", "tag", "Crafted")); t.appendChild(el("b", null, c[0] + " Lv " + c[1]));
-    t.appendChild(document.createTextNode("makes " + (c[4] || 1) + " per craft" + (c[3] ? " · " + meso(c[3]) + " fee" : "") + (need > 1 ? " · ×" + need + " takes " + crafts + " craft" + (crafts > 1 ? "s" : "") : "")));
-    box.appendChild(t);
-    var ul = el("ul"), parts = c[2].slice(); if (c[5]) parts.push([c[5][0], c[5][1], 1]);
-    parts.forEach(function (x) {
-      var li = el("li"); if (IDS[x[0]]) li.appendChild(img("/i/" + IDS[x[0]] + ".png", null, IO + "item/" + IDS[x[0]] + "/icon")); li.appendChild(itemLink(x[0]));
-      if (x[2]) li.appendChild(el("small", null, " catalyst"));
-      var em = el("em", null, "×" + (x[1] * crafts).toLocaleString()); if (crafts > 1) em.appendChild(el("small", null, " (" + x[1] + " each)")); li.appendChild(em);
-      ul.appendChild(li);
-    });
-    box.appendChild(ul);
-    if (more) { var m = el("a", null, "+" + more + " other recipe" + (more > 1 ? "s" : "")); m.href = "/item/" + slug(c.__name) + "/"; box.appendChild(m); }
-    return box;
+  // ---- the craft tree. recipe c = [profession, level, [[ingredient, n]], fee, makes, catalyst]; the first recipe is the
+  // lowest crafting level, the one most players use. Amounts are multiplied out by the number of crafts.
+  function recipe(name) { var c = (G[name] || {}).c; return c && c.length ? c[0] : null; }
+  function plan(name, qty, seen, acc) {
+    var r = recipe(name), node = { n: name, q: qty, r: null, crafts: 0, kids: [] };
+    if (r && !seen[name] && Object.keys(seen).length < 5) {
+      var s2 = Object.assign({}, seen); s2[name] = 1;
+      node.r = r; node.crafts = Math.ceil(qty / (r[4] || 1));
+      acc.fee += node.crafts * (r[3] || 0);
+      if (r[5]) { acc.cat[r[5][0]] = (acc.cat[r[5][0]] || 0) + r[5][1] * node.crafts; }
+      node.kids = r[2].map(function (x) { return plan(x[0], x[1] * node.crafts, s2, acc); });
+    } else acc.base[name] = (acc.base[name] || 0) + qty;
+    return node;
   }
-  function sources(name, qty) {
-    var g = G[name], wrap = el("div"); if (!g) return null;
-    var out = el("div", "src");
-    (g.d || []).slice(0, 3).forEach(function (d) { var s = el("span"); if (d[6] != null) s.appendChild(mobImg(d[6], d[0])); s.appendChild(document.createTextNode(d[0] + (d[2] != null ? " " + d[2] + "%" : d[5] ? " (on quest)" : ""))); out.appendChild(s); });
-    if (g.s && g.s.length) { var sp = el("span"); if (g.s[0][4] != null) sp.appendChild(img(IO + "npc/" + g.s[0][4] + "/icon")); sp.appendChild(document.createTextNode("NPC " + g.s[0][0] + " · " + meso(g.s[0][2]))); out.appendChild(sp); }
-    if (out.childNodes.length) wrap.appendChild(out);
-    if (g.c && g.c.length) { var c = g.c[0]; c.__name = name; wrap.appendChild(craftBox(c, qty, g.c.length - 1)); }
-    (g.g || []).slice(0, 2).forEach(function (x) { var p = el("div", "qsrc"); p.appendChild(document.createTextNode(x[2] === "given" ? "Given to you during " : "Reward from ")); p.appendChild(questLink(x[0], x[1])); wrap.appendChild(p); });
-    if (!wrap.childNodes.length && g.t) wrap.appendChild(el("div", "qsrc", "Found during the quest: “" + g.t + "”"));
-    return wrap.childNodes.length ? wrap : null;
+  function newAcc() { return { fee: 0, cat: {}, base: {} }; }
+  function matCost(acc) { var c = acc.fee, miss = 0; Object.keys(acc.base).forEach(function (n) { if (PRICE[n]) c += PRICE[n] * acc.base[n]; else miss++; }); Object.keys(acc.cat).forEach(function (n) { if (PRICE[n]) c += PRICE[n] * acc.cat[n]; else miss++; }); return { c: c, miss: miss }; }
+  function srcChips(name, max, leaf) {
+    var g = G[name] || {}, out = el("div", "src"), n = 0;
+    (g.d || []).slice(0, max || 3).forEach(function (d) { var h = mobHref(d[0]), s = el(h ? "a" : "span"); if (h) s.href = h; if (d[6] != null) s.appendChild(mobImg(d[6], d[0])); s.appendChild(document.createTextNode(d[0] + (d[2] != null ? " " + (+d[2]).toFixed(d[2] < 1 ? 2 : 0).replace(/\.?0+$/, "") + "%" : d[5] ? " (on quest)" : ""))); out.appendChild(s); n++; });
+    if (g.s && g.s.length) { var sp = el("span"); if (g.s[0][4] != null) sp.appendChild(img(IO + "npc/" + g.s[0][4] + "/icon")); sp.appendChild(document.createTextNode(g.s[0][0] + " sells it · " + meso(g.s[0][2]))); out.appendChild(sp); n++; }
+    if (!leaf) (g.g || []).slice(0, 1).forEach(function (x) { var s = el("span"); s.appendChild(document.createTextNode(x[2] === "given" ? "Given during " : "Reward from ")); var a = questLink(x[0], x[1]); a.style.fontWeight = "700"; s.appendChild(a); out.appendChild(s); n++; });
+    if (!n && g.t) out.appendChild(el("span", null, "Found during the quest"));
+    return out.childNodes.length ? out : null;
   }
-  function needRow(name, qty) {
-    var r = el("div", "row"); r.appendChild(itemIcon(name));
-    var mid = el("div"); mid.appendChild(itemLink(name));
-    var src = sources(name, qty); if (src) mid.appendChild(src); r.appendChild(mid);
-    var q = el("div", "qty", "×" + qty.toLocaleString()); if (PRICE[name]) q.appendChild(el("small", null, meso(PRICE[name] * qty) + " on the FM")); r.appendChild(q);
+  function treeNode(node) {
+    var d = el("div", "tn"), l = el("div", "tl"), im = itemImg(node.n); if (im) l.appendChild(im);
+    l.appendChild(itemLink(node.n)); var em = el("em", null, "×" + node.q.toLocaleString());
+    if (!node.r && PRICE[node.n]) em.appendChild(el("small", null, " · " + meso(PRICE[node.n] * node.q)));
+    l.appendChild(em); d.appendChild(l);
+    if (node.r) { d.appendChild(craftMeta(node)); var k = el("div", "tk"); node.kids.forEach(function (c) { k.appendChild(treeNode(c)); }); d.appendChild(k); }
+    else { var s = srcChips(node.n, 2, true); if (s) { s.style.marginLeft = "28px"; d.appendChild(s); } }
+    return d;
+  }
+  function craftMeta(node) {
+    var r = node.r, m = el("p", "tm");
+    m.appendChild(el("b", null, r[0] + " Lv " + r[1]));
+    m.appendChild(document.createTextNode(" · " + node.crafts + " craft" + (node.crafts > 1 ? "s" : "") + ((r[4] || 1) > 1 ? " of " + r[4] : "") + (r[3] ? " · " + meso(r[3] * node.crafts) + " in fees" : " · no fee")));
+    if (r[5]) m.appendChild(document.createTextNode(" · catalyst " + shown(r[5][0]) + " ×" + r[5][1] * node.crafts));
+    return m;
+  }
+  function needRow(q, name, qty) {
+    var key = String(q.id), got = !!(CHECK[key] && CHECK[key][name]);
+    var r = el("div", "row" + (got ? " got" : "")), cb = el("input"); cb.type = "checkbox"; cb.checked = got; cb.setAttribute("aria-label", "Got " + shown(name));
+    cb.addEventListener("change", function () { CHECK[key] = CHECK[key] || {}; if (cb.checked) CHECK[key][name] = 1; else delete CHECK[key][name]; if (!Object.keys(CHECK[key]).length) delete CHECK[key]; saveCheck(); r.classList.toggle("got", cb.checked); });
+    r.appendChild(cb); r.appendChild(itemIcon(name));
+    var mid = el("div"); mid.appendChild(itemLink(name)); var rc = recipe(name);
+    if (rc) {
+      mid.appendChild(el("span", "tag", "Crafted"));
+      var acc = newAcc(), node = plan(name, qty, {}, acc);
+      mid.appendChild(craftMeta(node)).style.marginLeft = "0";
+      var tr = el("div", "tree"); node.kids.forEach(function (k) { tr.appendChild(treeNode(k)); }); mid.appendChild(tr);
+      var alts = (G[name].c || []).slice(1);
+      if (alts.length) { var al = el("p", "alt", "Other recipes: " + alts.map(function (c) { return c[2].map(function (x) { return shown(x[0]) + " ×" + x[1]; }).join(" + ") + " (" + c[0] + " Lv " + c[1] + ")"; }).join(" · ")); mid.appendChild(al); }
+      var buy = PRICE[name] ? PRICE[name] * qty : 0, mc = matCost(acc);
+      if (buy || mc.c) {
+        var vs = el("div", "vs"), b1 = el("div", buy && (mc.miss || buy <= mc.c) ? "best" : ""), b2 = el("div", !buy || (!mc.miss && mc.c < buy) ? "best" : "");
+        b1.appendChild(document.createTextNode("Buy " + qty + " on the FM")); b1.appendChild(el("strong", null, buy ? meso(buy) : "not traded yet"));
+        b2.appendChild(document.createTextNode("Craft from scratch")); b2.appendChild(el("strong", null, meso(mc.c) + (mc.miss ? "+" : ""))); if (mc.miss) b2.appendChild(document.createTextNode(mc.miss + " item" + (mc.miss > 1 ? "s" : "") + " not traded yet"));
+        vs.appendChild(b1); vs.appendChild(b2); mid.appendChild(vs);
+      }
+    } else { var src = srcChips(name, 3); if (src) mid.appendChild(src); }
+    r.appendChild(mid);
+    var qd = el("div", "qty", "×" + qty.toLocaleString()); if (PRICE[name]) qd.appendChild(el("small", null, meso(PRICE[name] * qty) + " on the FM")); r.appendChild(qd);
     return r;
   }
+  // every base material for the whole quest, after opening each crafted item
+  function questPlan(q) { var acc = newAcc(), crafted = 0; q.need.forEach(function (x) { if (recipe(x[0])) crafted++; plan(x[0], x[1], {}, acc); }); return crafted ? acc : null; }
   function costOf(q) { var c = 0; q.need.forEach(function (x) { if (PRICE[x[0]]) c += PRICE[x[0]] * x[1]; }); return c; }
+  function priced(q) { return q.need.every(function (x) { return PRICE[x[0]]; }); }
   function preDone(q) { return !q.pre.length || q.pre.every(function (id) { var p = BYID[id]; return !p || LOG.done[p.n]; }); }
   function bucket(q) {
     var st = stateOf(q.n), lv = LOG.level || 0;
     if (st === "done") return "done"; if (st === "doing") return "doing";
+    if (q.ended) return "ended";   // past events: only under All quests
     if (LOG.fam && q.jobs.length && q.jobs.indexOf(0) < 0 && !q.jobs.some(function (j) { return Math.floor(j / 100) === LOG.fam; })) return "other";   // another class's job quest
+    if (q.from && Date.parse(q.from) > Date.now()) return "next";
     if (lv && q.lv > lv) return "next";
     return preDone(q) ? "open" : "locked";
   }
-  function card(q) {
-    var st = stateOf(q.n), d = el("div", "q" + (st ? " " + st : "") + (FOCUS === q.id ? " focus" : "")); d.id = "q-" + q.id;
-    var h = el("div", "qh"), npc = el("div", "npc"); if (q.gid != null) { var ni = img(IO + "npc/" + q.gid + "/icon"); ni.dataset.ph = (q.g || "?").charAt(0); npc.appendChild(ni); } else npc.appendChild(ph((q.g || "?").charAt(0))); h.appendChild(npc);
-    var t = el("div"); t.appendChild(el("h3", null, q.n.replace(/\?/g, " ")));
-    var m = el("div", "meta"); if (q.lv) m.appendChild(el("span", "chip lv", "Lv " + q.lv + "+")); if (q.g) m.appendChild(el("span", "chip", q.g)); if (q.a) m.appendChild(el("span", "chip", q.a)); if (q.rep) m.appendChild(el("span", "chip rep", "repeatable"));
-    t.appendChild(m); h.appendChild(t);
-    var acts = el("div", "acts");
-    var b1 = el("button", st === "doing" ? "on" : "", st === "doing" ? "Started ✓" : "Start"); b1.type = "button"; b1.addEventListener("click", function () { setState(q.n, st === "doing" ? null : "doing"); });
-    var b2 = el("button", "ok" + (st === "done" ? " on" : ""), st === "done" ? "Done ✓" : "Done"); b2.type = "button"; b2.addEventListener("click", function () { setState(q.n, st === "done" ? null : "done"); });
-    acts.appendChild(b1); acts.appendChild(b2); h.appendChild(acts); d.appendChild(h);
-    if (q.need.length) { var s1 = el("div", "sec"); s1.appendChild(el("h4", null, "Bring")); q.need.forEach(function (x) { s1.appendChild(needRow(x[0], x[1])); }); d.appendChild(s1); var c = costOf(q); if (c) d.appendChild(el("p", "cost", "Buying it all on the Free Market: about " + meso(c) + " mesos.")); }
-    if (q.kill.length) { var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt")); q.kill.forEach(function (k) { var r = el("div", "row"), ic = el("div", "ic"); if (k[2] != null) ic.appendChild(mobImg(k[2], k[0])); else ic.appendChild(ph(String(k[0]).charAt(0))); r.appendChild(ic); r.appendChild(el("b", null, k[0])); r.appendChild(el("div", "qty", "×" + k[1])); s2.appendChild(r); }); d.appendChild(s2); }
-    var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, "💰 " + q.meso.toLocaleString())); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
-    q.get.forEach(function (x) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); if (IDS[x[0]]) s.appendChild(img("/i/" + IDS[x[0]] + ".png", null, IO + "item/" + IDS[x[0]] + "/icon")); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); a.appendChild(s); rw.appendChild(a); });
-    if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); d.appendChild(s3); }
-    if (q.pre.length) { var pids = q.pre.filter(function (id) { return BYID[id]; }); if (pids.length) { var pp = el("p", "pre", "After: "); pids.forEach(function (id, k) { if (k) pp.appendChild(document.createTextNode(", ")); pp.appendChild(questLink(BYID[id].n, id)); }); if (preDone(q)) pp.appendChild(document.createTextNode(" ✓")); d.appendChild(pp); } }
-    if (q.custom) d.appendChild(el("p", "talk", "Not in our quest list yet, so no details. Kept so your log matches the game."));
-    else if (!q.need.length && !q.kill.length) d.appendChild(el("p", "talk", "Talk and deliver: no items to bring and nothing to hunt."));
+  function value(q) { return q.exp / (costOf(q) + 300 + 120 * q.need.length + 4 * q.kill.reduce(function (a, k) { return a + k[1]; }, 0)); }
+
+  // ---- one quest: a compact row; tap for everything
+  function card(q, win) {
+    var st = stateOf(q.n), open = !!OPEN[q.id] || FOCUS === q.id;
+    var d = el("div", "q" + (st ? " " + st : "") + (open ? " open" : "") + (win ? " win" : "") + (FOCUS === q.id ? " focus" : "")); d.id = (win ? "w-" : "q-") + q.id;
+    var h = el("button", "qrow"); h.type = "button"; h.setAttribute("aria-expanded", open ? "true" : "false");
+    var npc = el("span", "npc"); npc.appendChild(npcImg(q)); h.appendChild(npc);
+    var t = el("span", "qt"); t.appendChild(el("b", null, qname(q)));
+    t.appendChild(el("small", null, [q.lv ? "Lv " + q.lv + (q.lv2 ? " to turn in Lv " + q.lv2 : "") : "", q.g, q.town || (q.a !== "Victoria Island" ? q.a : "")].filter(Boolean).join(" · ")));
+    var sp = el("span", "strip");
+    if (st) sp.appendChild(el("span", "st" + (st === "done" ? " done" : ""), st === "done" ? "Done ✓" : "Started"));
+    q.need.slice(0, 5).forEach(function (x) { var i = itemImg(x[0]); if (i) sp.appendChild(i); });
+    q.kill.slice(0, 3).forEach(function (k) { if (k[2] != null) sp.appendChild(mobImg(k[2], k[0])); });
+    if (q.rep) sp.appendChild(el("span", "t", "repeatable"));
+    if (q.ended) sp.appendChild(el("span", "t", "event ended"));
+    if (!q.custom && !q.need.length && !q.kill.length) sp.appendChild(el("span", "t", "talk only"));
+    if (q.need.some(function (x) { return recipe(x[0]); })) sp.appendChild(el("span", "t", "crafted item"));
+    if (sp.childNodes.length) t.appendChild(sp);
+    h.appendChild(t);
+    var r = el("span", "qr"); r.appendChild(el("b", null, q.exp ? q.exp.toLocaleString() + " EXP" : q.get.length ? "item reward" : ""));
+    var c = costOf(q); r.appendChild(el("small", null, !q.need.length ? "free" : c ? (priced(q) ? "~" : "from ") + meso(c) + " to buy" : "gather"));
+    r.appendChild(el("span", "chev", "▾")); h.appendChild(r);
+    h.addEventListener("click", function () { if (OPEN[q.id] || FOCUS === q.id) { delete OPEN[q.id]; if (FOCUS === q.id) FOCUS = 0; } else OPEN[q.id] = 1; var n = card(q, win); d.parentNode.replaceChild(n, d); });
+    d.appendChild(h);
+    if (open) d.appendChild(detail(q, st));
     return d;
+  }
+  function detail(q, st) {
+    var b = el("div", "qbody");
+    var acts = el("div", "acts");
+    var b1 = el("button", st === "doing" ? "on" : "", st === "doing" ? "Started ✓" : "Start"); b1.type = "button"; b1.addEventListener("click", function () { OPEN[q.id] = 1; setState(q.n, st === "doing" ? null : "doing"); });
+    var b2 = el("button", "ok" + (st === "done" ? " on" : ""), st === "done" ? "Done ✓" : "Done"); b2.type = "button"; b2.addEventListener("click", function () { setState(q.n, st === "done" ? null : "done"); });
+    acts.appendChild(b1); acts.appendChild(b2);
+    if (PLAY.q[q.id]) { var gp = el("a", null, "Quest guide"); gp.href = "/quest/" + PLAY.q[q.id] + "/"; acts.appendChild(gp); }
+    b.appendChild(acts);
+    var notes = [];
+    var where = PLAY.npc[q.g]; if (where && where.length) notes.push(["Start", q.g + " in " + where[0][0], "/map/" + where[0][1] + "/"]);
+    if (q.cost) notes.push(["Costs", meso(q.cost) + " mesos to accept"]);
+    if (q.prof) q.prof.forEach(function (p) { notes.push(["Needs", p[0] + " Lv " + p[1]]); });
+    if (q.ended) notes.push(["Event ended", "this quest can't be started now"]);
+    else if (q.from || q.to) notes.push(["Event", (q.from ? "from " + q.from.slice(0, 10) : "") + (q.to ? " until " + q.to.slice(0, 10) : "")]);
+    if (q.unconfirmed && q.unconfirmed.length) notes.push(["Unconfirmed", "sources disagree on " + q.unconfirmed.join(", ")]);
+    notes.forEach(function (n) { var p = el("p", "pre"); p.appendChild(el("b", null, n[0] + ": ")); if (n[2]) { var a = el("a", null, n[1]); a.href = n[2]; p.appendChild(a); } else p.appendChild(document.createTextNode(n[1])); b.appendChild(p); });
+    if (q.start && q.start.length) { var s0 = el("div", "sec"); s0.appendChild(el("h4", null, "You're given")); var rw0 = el("div", "rw"); q.start.forEach(function (x) { var s = el("span"); var i = itemImg(x[0]); if (i) s.appendChild(i); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); rw0.appendChild(s); }); s0.appendChild(rw0); b.appendChild(s0); }
+    if (q.need.length) {
+      var s1 = el("div", "sec"); s1.appendChild(el("h4", null, "Bring")); q.need.forEach(function (x) { s1.appendChild(needRow(q, x[0], x[1])); }); b.appendChild(s1);
+      var acc = questPlan(q);
+      if (acc) {
+        var bx = el("div", "base"); bx.appendChild(el("b", null, "Everything to gather for this quest"));
+        var bi = el("div", "bi"); Object.keys(acc.base).sort(function (a, c) { return acc.base[c] - acc.base[a]; }).forEach(function (n) { var s = el("span"); var i = itemImg(n); if (i) s.appendChild(i); s.appendChild(document.createTextNode(shown(n) + " ×" + acc.base[n].toLocaleString())); bi.appendChild(s); });
+        bx.appendChild(bi);
+        var ex = []; if (acc.fee) ex.push(meso(acc.fee) + " mesos in crafting fees"); Object.keys(acc.cat).forEach(function (n) { ex.push("catalyst " + shown(n) + " ×" + acc.cat[n]); });
+        if (ex.length) bx.appendChild(el("div", null, ex.join(" · ")));
+        b.appendChild(bx);
+      }
+      var c = costOf(q); if (c) { var cp = el("p", "cost"); cp.appendChild(document.createTextNode("Buy it all on the Free Market: ")); cp.appendChild(el("b", null, (priced(q) ? "about " : "at least ") + meso(c) + " mesos")); if (!priced(q)) cp.appendChild(document.createTextNode(" (some items aren't traded yet)")); b.appendChild(cp); }
+    }
+    if (q.kill.length) {
+      var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt"));
+      q.kill.forEach(function (k) {
+        var key = String(q.id), nm = "kill:" + k[0], got = !!(CHECK[key] && CHECK[key][nm]);
+        var r = el("div", "row" + (got ? " got" : "")), cb = el("input"); cb.type = "checkbox"; cb.checked = got; cb.setAttribute("aria-label", "Done hunting " + k[0]);
+        cb.addEventListener("change", function () { CHECK[key] = CHECK[key] || {}; if (cb.checked) CHECK[key][nm] = 1; else delete CHECK[key][nm]; if (!Object.keys(CHECK[key]).length) delete CHECK[key]; saveCheck(); r.classList.toggle("got", cb.checked); });
+        r.appendChild(cb); var ic = el("div", "ic"); ic.appendChild(k[2] != null ? mobImg(k[2], k[0]) : ph(String(k[0]).charAt(0))); r.appendChild(ic);
+        var mid = el("div"), h = mobHref(k[0]); if (h) { var a = el("a", null, k[0]); a.href = h; mid.appendChild(a); } else mid.appendChild(el("b", null, k[0]));
+        var homes = (PLAY.mob[k[0]] || [])[1] || []; if (homes.length) { var src = el("div", "src"); homes.slice(0, 3).forEach(function (m) { var a = el("a", null, m[0]); a.href = "/map/" + m[1] + "/"; src.appendChild(a); }); mid.appendChild(src); }
+        r.appendChild(mid); r.appendChild(el("div", "qty", "×" + k[1])); s2.appendChild(r);
+      });
+      b.appendChild(s2);
+    }
+    var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, "💰 " + q.meso.toLocaleString())); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
+    function rwItem(x, note) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); var i = itemImg(x[0]); if (i) s.appendChild(i); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); if (note) s.appendChild(el("small", null, " " + note)); a.appendChild(s); rw.appendChild(a); }
+    q.get.forEach(function (x) { rwItem(x); }); (q.get2 || []).forEach(function (x) { rwItem(x, x[2]); });
+    (q.skill || []).forEach(function (n) { rw.appendChild(el("span", null, "📘 " + n)); });
+    if (rw.childNodes.length) { var s3 = el("div", "sec"); s3.appendChild(el("h4", null, "Rewards")); s3.appendChild(rw); b.appendChild(s3); }
+    if (q.pre.length) { var pids = q.pre.filter(function (id) { return BYID[id]; }); if (pids.length) { var pp = el("p", "pre"); pp.appendChild(el("b", null, "Finish first: ")); pids.forEach(function (id, k) { if (k) pp.appendChild(document.createTextNode(", ")); pp.appendChild(questLink(qname(BYID[id]), id)); }); if (preDone(q)) pp.appendChild(document.createTextNode(" ✓")); b.appendChild(pp); } }
+    var nx = NEXT[q.id] || []; if (nx.length) { var np = el("p", "pre"); np.appendChild(el("b", null, "Opens next: ")); nx.slice(0, 3).forEach(function (x, k) { if (k) np.appendChild(document.createTextNode(", ")); np.appendChild(questLink(qname(x), x.id)); }); b.appendChild(np); }
+    if (q.custom) b.appendChild(el("p", "talk", "Not in our quest list yet, so no details. Kept so your log matches the game."));
+    else if (!q.need.length && !q.kill.length) b.appendChild(el("p", "talk", "Talk and deliver: nothing to bring and nothing to hunt."));
+    return b;
   }
   function render() {
     var s = $("s").value.trim().toLowerCase(), rg = $("rg").value, sort = $("sort").value, lv = LOG.level || 0;
     var counts = { open: 0, doing: 0, next: 0, done: 0, all: Q.length }, buckets = {};
     Q.forEach(function (q) { var b = bucket(q); buckets[q.id] = b; if (b === "locked") b = "open"; counts[b] = (counts[b] || 0) + 1; });
     var T = $("tabs"); T.textContent = "";
-    [["open", lv ? "Open at Lv " + lv : "Open now"], ["doing", "In progress"], ["next", "Upcoming"], ["done", "Completed"], ["all", "All quests"]].forEach(function (t) {
+    [["open", lv ? "Open at Lv " + lv : "Open"], ["doing", "Started"], ["next", "Coming up"], ["done", "Done"], ["all", "All quests"]].forEach(function (t) {
       var b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", TAB === t[0]); b.appendChild(document.createTextNode(t[1])); b.appendChild(el("em", null, counts[t[0]] || 0));
-      b.addEventListener("click", function () { TAB = t[0]; try { localStorage.setItem("fm-qtab", TAB); } catch (e) {} render(); }); T.appendChild(b);
+      b.addEventListener("click", function () { TAB = t[0]; SHOWN = 40; try { localStorage.setItem("fm-qtab", TAB); } catch (e) {} render(); }); T.appendChild(b);
     });
     fillBar(false); $("addq").hidden = TAB !== "doing";
     var inRange = Q.filter(function (q) { return (!lv || q.lv <= lv) && buckets[q.id] !== "other"; }), doneIn = inRange.filter(function (q) { return LOG.done[q.n]; }).length;
@@ -291,17 +432,25 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       if (TAB === "open" && b !== "open" && b !== "locked") return false;
       if (TAB !== "open" && TAB !== "all" && b !== TAB) return false;
       if (rg && q.a !== rg) return false;
-      if (s && (q.n + " " + q.g + " " + q.a + " " + q.need.map(function (x) { return x[0]; }).join(" ") + " " + q.kill.map(function (x) { return x[0]; }).join(" ")).toLowerCase().indexOf(s) < 0) return false;
+      if (s && q._s.indexOf(s) < 0) return false;
       return true;
     });
     if (FOCUS && BYID[FOCUS]) { list = list.filter(function (q) { return q.id !== FOCUS; }); list.unshift(BYID[FOCUS]); }
-    if (TAB === "open") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || (buckets[a.id] === "locked") - (buckets[b.id] === "locked"); });
-    if (sort === "exp") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || b.exp - a.exp; });
-    else if (sort === "cost") list.sort(function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS) || costOf(a) - costOf(b); });
+    var byFocus = function (a, b) { return (b.id === FOCUS) - (a.id === FOCUS); };
+    if (TAB === "open") list.sort(function (a, b) { return byFocus(a, b) || (buckets[a.id] === "locked") - (buckets[b.id] === "locked"); });
+    if (sort === "exp") list.sort(function (a, b) { return byFocus(a, b) || b.exp - a.exp; });
+    else if (sort === "cost") list.sort(function (a, b) { return byFocus(a, b) || costOf(a) - costOf(b); });
+    else if (sort === "value") list.sort(function (a, b) { return byFocus(a, b) || value(b) - value(a); });
     var box = $("qs"); box.textContent = "";
-    if (!list.length) box.appendChild(el("p", "empty", TAB === "doing" ? "Nothing started yet. Hit Start on a quest to track it here." : TAB === "done" ? "No quests marked done yet." : "No quests match."));
+    // quick wins: the most EXP for the least mesos and hunting, open at your level now
+    var wins = [];
+    if (TAB === "open" && lv && !s && !rg && !FOCUS) {
+      wins = list.filter(function (q) { return buckets[q.id] === "open" && q.exp > 0 && !q.custom; }).sort(function (a, b) { return value(b) - value(a); }).slice(0, 3);
+      if (wins.length) { box.appendChild(el("p", "lbl", "Quick wins for you")); wins.forEach(function (q) { box.appendChild(card(q, true)); }); box.appendChild(el("p", "lbl", "Everything open")); list = list.filter(function (q) { return wins.indexOf(q) < 0; }); }
+    }
+    if (!list.length) box.appendChild(el("p", "empty", TAB === "doing" ? "Nothing started yet. Tap a quest, then Start, to track it here." : TAB === "done" ? "No quests marked done yet." : "No quests match."));
     list.slice(0, SHOWN).forEach(function (q) { box.appendChild(card(q)); });
-    if (list.length > SHOWN) { var mb = el("button", "more", "Show " + Math.min(120, list.length - SHOWN) + " more of " + list.length); mb.type = "button"; mb.addEventListener("click", function () { SHOWN += 120; render(); }); box.appendChild(mb); }
+    if (list.length > SHOWN) { var mb = el("button", "more", "Show " + Math.min(40, list.length - SHOWN) + " more of " + list.length); mb.type = "button"; mb.addEventListener("click", function () { SHOWN += 40; render(); }); box.appendChild(mb); }
     // shopping list for started quests
     var P = $("shop"); P.textContent = ""; P.appendChild(el("h2", null, "Shopping list"));
     var mine = Q.filter(function (q) { return LOG.doing[q.n]; }), need = {};
@@ -311,7 +460,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = itemHref(n); r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
     if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
   }
-  // deep links: #q-1012 opens one quest (from item pages and the board); #q=name or ?q=name searches
+  // deep links: #q-1012 opens one quest (from item pages, quest pages and the board); #q=name or ?q=name searches
   function route(first) {
     var h = location.hash, m = /^#q-(\d+)$/.exec(h), m2 = /[?&#]q=([^&]+)/.exec(location.href);
     FOCUS = 0;
@@ -321,7 +470,6 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
     if (FOCUS) { var c = document.getElementById("q-" + FOCUS); if (c) setTimeout(function () { c.scrollIntoView({ behavior: first ? "auto" : "smooth", block: "start" }); }, 30); }
   }
   // your level straight from classicrank.com: from your account's IGN when signed in, else the IGN you type here
-  // (or the name you looked up on the board). Typing a level by hand keeps yours until the next visit.
   var HANDLV = false;
   function pullLevel(ign) {
     ign = String(ign || "").trim(); if (!/^[A-Za-z0-9]{2,16}$/.test(ign)) return;
@@ -332,7 +480,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       var s = $("lvsrc"); s.hidden = false; s.textContent = "";
       s.appendChild(document.createTextNode(d.name + (d.job ? ", " + d.job : "") + ", level " + d.level + " on "));
       var a = el("a", null, "classicrank.com"); a.href = "https://classicrank.com/user/" + encodeURIComponent(d.name); a.target = "_blank"; a.rel = "noopener"; s.appendChild(a);
-      var fam = { Warrior: 1, Magician: 2, Bowman: 3, Thief: 4, Pirate: 5 }[d.family] || 0; if (fam && LOG.fam !== fam) { LOG.fam = fam; saveLocal(); }
+      var fam = { Warrior: 1, Magician: 2, Bowman: 3, Thief: 4, Pirate: 5 }[d.family] || 0; if (fam && LOG.fam !== fam) { LOG.fam = fam; $("cls").value = fam; saveLocal(); render(); }
       if (HANDLV || LOG.level === d.level) return;
       LOG.level = d.level; $("lv").value = d.level; saveLocal(); if (SIGNED) push(null, d.level); render();
     }).catch(function () {});
@@ -341,19 +489,22 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
   function accountLine() {
     var a = $("acct"); a.textContent = "";
     if (SIGNED) a.appendChild(document.createTextNode("Synced to your Discord account."));
-    else { a.appendChild(document.createTextNode("Saved in this browser. ")); var l = el("a", null, "Sign in with Discord"); l.href = ACCT + "/login?back=quests"; a.appendChild(l); a.appendChild(document.createTextNode(" to keep it everywhere.")); }
+    else { a.appendChild(document.createTextNode("Saved on this device. ")); var l = el("a", null, "Sign in with Discord"); l.href = ACCT + "/login?back=quests"; a.appendChild(l); a.appendChild(document.createTextNode(" to keep it everywhere.")); }
   }
   $("lv").addEventListener("change", function () { HANDLV = true; var v = Math.max(0, Math.min(250, parseInt(this.value, 10) || 0)); LOG.level = v; saveLocal(); push(null, v); render(); });
-  ["s", "rg", "sort"].forEach(function (id) { $(id).addEventListener("input", function () { if (id !== "sort") FOCUS = 0; SHOWN = 120; render(); }); });
+  $("cls").addEventListener("change", function () { LOG.fam = +this.value || 0; saveLocal(); render(); });
+  var tmr = 0;
+  $("s").addEventListener("input", function () { FOCUS = 0; SHOWN = 40; clearTimeout(tmr); tmr = setTimeout(render, 120); });
+  ["rg", "sort"].forEach(function (id) { $(id).addEventListener("change", function () { if (id !== "sort") FOCUS = 0; SHOWN = 40; render(); }); });
 
   var acct = fetch(ACCT + "/me/quests", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   var meIgn = fetch(ACCT + "/me", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { return m && m.signedIn && m.account ? m.account.ign || "" : ""; }).catch(function () { return ""; });
+  var playP = fetch("/data/play.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (p) { if (p) PLAY = p; }).catch(function () {});
   Promise.all([fetch(LIVE + "data/itemguide.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
-               fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }), acct]).then(function (res) {
+               fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }), acct, playP]).then(function (res) {
     var g = res[0]; G = g.items || {}; IDS = g.ids || {}; MOBIMG = g.mobimg || {}; Q = (g.quests || []).slice();
-    Q.forEach(function (q) { BYID[q.id] = q; });
     Q.sort(function (a, b) { return a.lv - b.lv || a.n.localeCompare(b.n); });
-    Q.forEach(function (q) { BYID[q.id] = q; });
+    Q.forEach(function (q) { BYID[q.id] = q; q.pre.forEach(function (p) { (NEXT[p] = NEXT[p] || []).push(q); }); });
     ((res[1] || {}).rows || []).forEach(function (r) { if (r && r.item && r.typ) { PRICE[r.item] = r.typ; if ((r.n || 0) >= 5) PAGE[r.item] = 1; } });
     var a = res[2];
     if (a && a.signedIn) {
@@ -367,8 +518,11 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
       saveLocal();
     }
     addCustoms();
+    // what search looks through: names, givers, towns, items, and every material inside a crafted item
+    Q.forEach(function (q) { var acc = newAcc(); q.need.forEach(function (x) { plan(x[0], x[1], {}, acc); }); q._s = (q.n + " " + qname(q) + " " + q.g + " " + q.a + " " + (q.town || "") + " " + q.need.map(function (x) { return x[0] + " " + shown(x[0]); }).join(" ") + " " + Object.keys(acc.base).join(" ") + " " + q.kill.map(function (x) { return x[0]; }).join(" ") + " " + q.get.map(function (x) { return x[0]; }).join(" ")).toLowerCase(); });
     accountLine();
     if (LOG.level) $("lv").value = LOG.level;
+    if (LOG.fam) $("cls").value = LOG.fam;
     meIgn.then(function (ign) { var saved = ""; try { saved = localStorage.getItem("fm-me") || ""; } catch (e) {} pullLevel(ign || saved); });
     var regions = {}; Q.forEach(function (q) { if (q.a) regions[q.a] = 1; });
     Object.keys(regions).sort().forEach(function (r) { var o = el("option", null, r); o.value = r; $("rg").appendChild(o); });
@@ -378,4 +532,4 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
 })();
 </script>
 <script src="/assets/hit.js" defer></script>
-<!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Play</b><a href="/quests.html">Quest log</a><a href="/training/">Training guide</a><a href="/map.html">Maps and routes</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>
+<!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Play</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>

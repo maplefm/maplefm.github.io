@@ -1,26 +1,25 @@
 {
- "updated": "2026-10-26",
- "note": "What players report, by level, in our own words. Map stats on the page come from the game data and update daily; these notes are re-checked against the community every week.",
+ "updated": "2026-10-28",
+ "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io) or the MapleStory Classic Wiki. Map stats on the page come from the same data and update daily.",
  "brackets": [
   {
    "lo": 1,
    "hi": 10,
    "tips": [
-    "Do every Maple Island quest first. You leave around level 8 with free potions and a chair.",
-    "Warriors can basic attack all the way here and spend almost nothing on potions."
+    "Do the Maple Island quests before you sail: together they pay more than the 300 mesos Shanks charges for the boat to Lith Harbor."
    ],
    "picks": [
     {
      "map": "L Forest I",
-     "why": "Ribbon Pigs, usually quiet."
+     "why": "Ribbon Pigs (21 of 73 spawn points) with snails, pigs and mushrooms. One level 28 Iron Hog also spawns here."
     },
     {
      "map": "The Tree That Grew II",
-     "why": "The Slime tree north of Ellinia. Packed and safe."
+     "why": "The Slime tree north of Ellinia: 70 spawn points, every monster level 11 or lower."
     },
     {
      "map": "Henesys Hunting Ground III",
-     "why": "Slimes and mushrooms next to Henesys."
+     "why": "Slimes and mushrooms, two maps past Henesys Hunting Ground I."
     }
    ]
   },
@@ -33,7 +32,7 @@
    "picks": [
     {
      "map": "Tree Dungeon, Forest Up North IV",
-     "why": "Green Mushrooms and Slimes in the Ellinia tree dungeons. Players report coming out meso positive."
+     "why": "Green Mushrooms and Slimes in the Ellinia tree dungeons. Green Mushrooms drop 28 to 35 mesos on about 68% of kills (wiki, 620 kills)."
     },
     {
      "map": "Caution Falling Down",
@@ -50,29 +49,19 @@
    "picks": [
     {
      "map": "Line 1 (Area 1)",
-     "why": "Bubblings under Kerning City. Dense and flat, but they hit hard: go once you kill in 1 or 2 hits."
+     "why": "Bubblings under Kerning City: 64 spawn points, weak to lightning. The Grand Launch lowered its monster rate from 0.9 to 0.8."
     },
     {
      "map": "Transfer Area",
-     "why": "Stirges from about 20, for magicians, thieves and bowmen. Warriors usually skip Stirges. Crowded.",
-     "classes": [
-      "Magician",
-      "Thief",
-      "Bowman"
-     ]
+     "why": "Stirges (level 20): 38 spawn points."
     },
     {
      "map": "Dangerous Steam",
-     "why": "More Stirges, same advice.",
-     "classes": [
-      "Magician",
-      "Thief",
-      "Bowman"
-     ]
+     "why": "38 Stirge spawn points with a few Horny and Zombie Mushrooms."
     },
     {
      "map": "Damp Forest",
-     "why": "Jr. Neckis from 21, called the safest Necki map. A common pick for mesos and EXP until 30 to 35."
+     "why": "Jr. Neckis (level 21) and Octopus: 11 and 15 spawn points."
     }
    ]
   },
@@ -80,18 +69,17 @@
    "lo": 21,
    "hi": 30,
    "tips": [
-    "Kerning PQ (21+, party of 4) is fun, but most guides say party grinding gives more EXP: about half a level a run at 21 to 22.",
-    "Iron Hogs: 500 physical defense, so physical attacks do about a sixth of normal damage. Mages with lightning do best.",
-    "Melee profit in the Ant Tunnels is disputed: several warriors said it was their first meso-negative map; ranged classes report profit."
+    "Kerning PQ (First Time Together): level 21+, 30 minutes. A full run gives 1,234 EXP at level 21 and 3,000 from level 30.",
+    "Iron Hogs have 500 weapon defense but 100 magic defense, and are weak to lightning."
    ],
    "picks": [
     {
      "map": "Ant Tunnel III",
-     "why": "Zombie and Horny Mushrooms, the classic 21 to 30 map."
+     "why": "61 Zombie Mushroom and 38 Horny Mushroom spawn points, three maps from Sleepywood. Zombie Mushrooms are undead."
     },
     {
      "map": "Ant Tunnel Park",
-     "why": "Has a shop on the map, so refills cost no walking."
+     "why": "The 24 Hr Mobile Store on the map sells Fried Chicken, Pizza, Unagi, Cake and Pure Water."
     },
     {
      "map": "Deep Ant Tunnel I",
@@ -103,11 +91,7 @@
     },
     {
      "map": "The Land of Wild Boar II",
-     "why": "The alternative for warriors and crossbowmen.",
-     "classes": [
-      "Warrior",
-      "Bowman"
-     ]
+     "why": "23 Wild Boar spawn points (level 25) near Perion."
     }
    ]
   },
@@ -115,39 +99,28 @@
    "lo": 30,
    "hi": 40,
    "tips": [
-    "Jr. Wraiths need roughly 82 accuracy to hit reliably."
+    "Jr. Wraiths (level 34) need about 82 accuracy to hit every time at level 34, about 95 at level 30, by the site's hit formula."
    ],
    "picks": [
     {
      "map": "Line 2 (Area 1)",
-     "why": "Jr. Wraiths under Kerning, the densest map for the range. Best for clerics.",
-     "classes": [
-      "Magician",
-      "Thief",
-      "Bowman",
-      "Warrior"
-     ]
+     "why": "Jr. Wraiths under Kerning City: 83 of 97 spawn points, the most of any map for the range. They are undead, so Heal hurts them."
     },
     {
      "map": "The Burnt Land V",
-     "why": "Fire Boars, weak to ice: best for ice and lightning magicians; warriors and bowmen do well too.",
-     "classes": [
-      "Magician",
-      "Warrior",
-      "Bowman"
-     ]
+     "why": "Fire Boars: weak to ice, resist fire."
     },
     {
      "map": "Lorang Lorang",
-     "why": "Lorangs at 36 to 40, best with lightning."
+     "why": "Lorangs (level 38), weak to lightning."
     },
     {
      "map": "The Swamp of Despair II",
-     "why": "Ligators, Horny Mushrooms and Jr. Neckis at 30 to 36. One of the densest early-30s maps."
+     "why": "Ligators (level 31) with Horny Mushrooms and Jr. Neckis: 79 spawn points. Ligators are weak to fire and resist ice."
     },
     {
      "map": "A Look-Out Shed Around the Beach",
-     "why": "Lorangs at 36 to 42, weak to lightning. One portal from potions."
+     "why": "Lorangs (level 38), weak to lightning, with Lupins. One portal from Florina Beach."
     }
    ]
   },
@@ -155,36 +128,39 @@
    "lo": 40,
    "hi": 50,
    "tips": [
-    "The Wraith lines are a long walk from Kerning City: carry plenty of potions.",
-    "Wraiths hit hard: clerics turn Magic Guard on here."
+    "Line 2 (Area 3) is six maps from Kerning City: carry potions."
    ],
    "picks": [
     {
      "map": "Monkey Swamp III",
-     "why": "Zombie Lupins at 41 to 45: undead, low defense, good drops. Clerics love it."
+     "why": "Zombie Lupins (level 41): undead, 0 weapon defense. Heal hurts them."
     },
     {
      "map": "Line 2 (Area 3)",
-     "why": "Wraiths from about 46."
+     "why": "68 Wraith spawn points (level 48). Wraiths are undead."
     },
     {
      "map": "Dangerous Valley",
-     "why": "Ice and lightning magicians report strong party rates.",
+     "why": "Copper Drakes (level 45) and Fire Boars: both weak to ice, both resist fire.",
      "classes": [
       "Magician"
      ]
     },
     {
      "map": "Hot Sand",
-     "why": "Torties."
+     "why": "Torties (level 46) with Clangs. Clangs are weak to lightning."
     },
     {
      "map": "Line 2 (Area 2)",
-     "why": "Jr. Wraiths and Wraiths at 44 to 55. Top Victoria Island map for the range in two guides."
+     "why": "107 spawn points under Kerning City: 57 Wraiths, 32 Jr. Wraiths and 18 Jr. Neckis."
     },
     {
      "map": "The Tunnel That Lost Light I",
-     "why": "Cold Eyes and Drakes at 40 to 46. Long walk, few players. Cold Eyes are weak to fire."
+     "why": "Cold Eyes (level 40) and Drakes (level 50), 15 maps from Sleepywood. Cold Eyes are weak to fire; Drakes resist fire and ice."
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "why": "Skeledogs (level 44) and Mummydogs (47), both undead. Part of the Excavation Site, added at the Grand Launch on 21 October 2026."
     }
    ]
   },
@@ -192,32 +168,28 @@
    "lo": 50,
    "hi": 60,
    "tips": [
-    "Sleepy Dungeon V is disputed: one database ranks it first, players and spawn data favor other maps, and its spawns were lowered at launch."
+    "Sleepy Dungeon V: the Grand Launch lowered its monster rate setting from 0.6 to 0.4."
    ],
    "picks": [
     {
      "map": "The Forest of Evil II",
-     "why": "Maladies and Zombie Lupins; strong for thieves and melee from 55."
-    },
-    {
-     "map": "Remains (Tomb) I",
-     "why": "The new Excavation Site tombs."
+     "why": "Maladies (level 55) and Zombie Lupins. Maladies resist fire and ice and are weak to holy."
     },
     {
      "map": "Line 2 (Area 3)",
-     "why": "Wraiths are still the densest fallback."
+     "why": "68 Wraith spawn points, the most of any map around level 48."
     },
     {
      "map": "Lorang and Clang",
-     "why": "Clangs at 47 to 55, the Wraith alternative. Lightning magicians do best."
+     "why": "Clangs (level 49) and Lorangs (38), both weak to lightning."
     },
     {
      "map": "Dangerous Croko II",
-     "why": "Crocos at 52 to 58. Weak to fire, resist ice; need about 101 accuracy."
+     "why": "Crocos (level 52), weak to fire, resist ice: about 101 accuracy hits every time at level 52, 109 at 50. Crocos are 24 of 54 spawn points; the rest are Jr. Neckis and Slimes."
     },
     {
      "map": "Golem's Temple III",
-     "why": "Stone Golems at 55 to 62. Small maps, fine for a duo."
+     "why": "Stone Golems (level 56): 10 of 23 spawn points. The Golem's Temple maps are among the smallest with monsters."
     }
    ]
   },
@@ -225,50 +197,41 @@
    "lo": 60,
    "hi": 100,
    "tips": [
-    "Every source calls this range thin: slow respawns, and some maps are held by groups or bots."
+    "Several maps here respawn slowly (wiki): Wild Kargos and Tauromacis every 120 s, Red Drakes every 20 to 60 s."
    ],
    "picks": [
     {
      "map": "Wild Kargo's Area",
-     "why": "Wild Kargos at 58 to 68 when the Drake maps are crowded. Need about 117 accuracy."
+     "why": "14 Wild Kargo spawn points (level 62) among 17 Cold Eyes. About 117 accuracy hits every time at level 62, 135 at 58."
     },
     {
      "map": "Dangerous Valley II",
-     "why": "Red Drakes. Slow respawns."
+     "why": "17 Red Drake spawn points (level 60) with Copper Drakes and Fire Boars. Red Drakes are weak to ice."
     },
     {
      "map": "Sanctuary Entrance I",
-     "why": "Tauromacis and Taurospear. Slow respawns."
+     "why": "4 Tauromacis (level 70) among 13 Cold Eyes. Taurospears start at Sanctuary Entrance III."
     }
    ]
   }
  ],
  "economy": [
-  "HP costs about half a meso per HP: Meat and Red Potions are the best value. MP costs about one meso per MP: Lemons, or Pure Water bought on the Free Market.",
-  "Cake restores 100 HP and 100 MP for 150 mesos: the best NPC item for both.",
-  "White and Blue Potions are poor value. Unagi, Pure Water and Elixirs are often cheaper on the Free Market than at the NPC.",
-  "Citizenship from level 12 (Henesys or Kerning): 5% to 25% off shops and taxis, plus Supreme Sniper Potions or Wolbis.",
-  "Monsters at 10 to 30 drop more potions in Classic.",
-  "Magicians: put 3 points in Magic Guard to unlock Magic Armor. Keep it off while grinding, on for bosses and Wraiths.",
-  "Ice-weak: Fire Boar, Copper Drake, Red Drake, Tauromacis. Ice-resistant: Ligator, Cold Eye, Drake, Croco. Lightning-weak: Iron Hog, Lorang, Clang.",
-  "Most mid-level monsters give 5 to 10% less EXP than old GMS and have a little more avoid."
+  "NPC HP food costs half a meso per HP: Apple, Egg, Red Potion, Fried Chicken and Meat. MP costs one meso per MP: Orange and Lemon.",
+  "Cake restores 100 HP and 100 MP for 150 mesos, the same as Red Potions and Oranges. Only the 24 Hr Mobile Store in Ant Tunnel Park sells it.",
+  "White Potions cost 0.7 mesos per HP and Blue Potions 1.1 per MP.",
+  "Citizenship from level 12 (Henesys or Kerning City) opens the town hall shops: Supreme Sniper Potions in Henesys, Wolbi Throwing Stars in Kerning City.",
+  "Magicians: 3 points in Magic Guard unlock Magic Armor.",
+  "Ice-weak: Fire Boar, Copper Drake, Red Drake, Tauromacis. Ice-resistant: Ligator, Cold Eye, Drake, Croco. Lightning-weak: Iron Hog, Lorang, Clang."
  ],
  "party": [
-  "Kerning PQ: level 21+, no upper limit in Classic, party of 4, 30 minutes, three players can finish. Most guides say party grinding gives more EXP.",
-  "Party EXP bonus: sources disagree. Reported from +10% for 2 members up to 30% or more for 4 to 6.",
-  "To share EXP you must be on the map and have attacked, been hit or used a skill in the last 10 seconds.",
-  "Mesos are split in a party, not increased."
+  "Kerning PQ: level 21+, 30 minutes. Stages 2 to 4 need three members on the right spots while the leader talks to Cloto, so bring four.",
+  "Party EXP: each kill's EXP is divided among the party. The wiki lists no party bonus."
  ],
  "upcoming": [
   {
    "name": "Forgotten Hollow",
-   "date": "2026-11-18",
-   "note": "New area with Glowshrooms, Raffles, Golden Stirges and more. Shows up here automatically once it is in the game."
-  },
-  {
-   "name": "Forgotten Hollow party quest",
-   "date": "2026-12-09",
-   "note": "Level 41+."
+   "date": "2026-11-30",
+   "note": "Nexon says it opens in November; no exact date yet. New monsters in the game files include Glowshrooms, Raffles and Golden Stirges."
   }
  ]
 }

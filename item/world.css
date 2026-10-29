@@ -15,4 +15,16 @@
 .sprite{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;background:var(--panel2);border-radius:14px;padding:6px}
 .mk.you{width:14px;height:14px;background:#2ee08a;border:3px solid #fff;box-shadow:0 0 0 2px #0a5}
 a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
-.cta{margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2)}.cta a{font-weight:800}
+.cta{display:block;margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink)}.cta a{font-weight:800}
+.need{border-top:1px solid var(--line2);padding:8px 0}.need:first-of-type{border-top:0}
+.nl{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.nl .n{margin-left:auto;font-weight:800;white-space:nowrap}.nl .n small{font-weight:600;color:var(--muted)}
+.gi{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:4px}
+.srcs{font-size:.82rem;color:var(--muted);margin:3px 0 0 30px}.srcs img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated;vertical-align:middle}
+.crt{font-size:.8rem;color:var(--muted);margin:2px 0 0 30px}.crt b{color:var(--ink)}
+.tk{margin:4px 0 0 18px;padding-left:10px;border-left:2px dashed var(--line2)}
+.tk .nl{font-size:.92rem}
+.basebox{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;margin:10px 0}.basebox b{display:block;margin-bottom:4px}
+.basebox span{display:inline-flex;align-items:center;margin:2px 10px 2px 0;font-weight:700}
+.ms{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:6px}
+.npcpic{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;background:var(--panel2);border-radius:10px}
+.nextbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.nextbar a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:9px 14px;border-radius:999px}.nextbar a.alt{background:var(--panel2);color:var(--accent);border:1px solid var(--line2)}

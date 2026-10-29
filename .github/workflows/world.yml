@@ -9,6 +9,7 @@ on:
 concurrency: world
 permissions:
   contents: write
+  actions: write
 env:
   DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
 jobs:
@@ -45,3 +46,5 @@ jobs:
           git commit -q -m "Refresh map and training data"
           for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
           if [ -n "$ch" ]; then cd "$GITHUB_WORKSPACE"; python3 tools/discord.py note "New in the game: maps and training updated" "$ch\nSee them on https://maplefm.gg/map.html" || true; fi
+          # map, monster and training pages rebuild right away instead of waiting for tomorrow's run
+          cd "$GITHUB_WORKSPACE"; GH_TOKEN=${{ github.token }} gh api -X POST repos/${{ github.repository }}/actions/workflows/itempages.yml/dispatches -f ref=main || true

@@ -1283,9 +1283,12 @@ body.sheet .nudge { display: none; }
   .plbl .mbar { order: 3; max-width: calc(100% - 130px); }
   .plbl .plt { flex-basis: 100%; }
   .picks:empty { min-height: 136px; }
+  #cards:empty { min-height: 40px; }
+  .hrow:has(.picks:empty) .hdeal[hidden] { display: inline-flex !important; visibility: hidden; min-height: 54px; width: 100%; box-sizing: border-box; }
 }
 @media (min-width: 701px) {
   .picks:empty { min-height: 66px; }
+  #cards:empty { min-height: 31px; }
   /* the biggest mover always starts its own line, so it doesn't hop when the picks fill in */
   .hrow::after { content: ""; flex-basis: 100%; height: 0; margin-top: -10px; order: 1; }
   .hrow .hdeal { order: 2; }

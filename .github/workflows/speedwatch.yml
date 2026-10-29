@@ -1,0 +1,43 @@
+name: Speed watch
+# Daily: the live site's busiest pages on a slowed phone and a desktop, in Chromium, WebKit and Firefox (tools/speedwatch.cjs).
+# Numbers go to data/speed.json on live. A page that stays slower than its baseline two runs in a row fails this job,
+# and the watchdog DMs the admins. Run it by hand with rebase=true after an intended change to reset the baseline.
+on:
+  schedule:
+    - cron: "23 14 * * *"
+  workflow_dispatch:
+    inputs:
+      rebase:
+        description: "Reset the baseline to this run"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency: speedwatch
+jobs:
+  speed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium webkit firefox
+      - name: Measure
+        run: |
+          git config user.name maplefm
+          git config user.email maplefm@users.noreply.github.com
+          git fetch -q origin live
+          git worktree add -q /tmp/live origin/live
+          mkdir -p /tmp/live/data
+          set +e
+          node tools/speedwatch.cjs /tmp/live/data ${{ inputs.rebase && 'rebase' || '' }}
+          code=$?
+          set -e
+          cd /tmp/live
+          git add -f data/speed.json data/speed-base.json
+          if ! git diff --cached --quiet; then
+            git commit -q -m "Speed watch"
+            for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
+          fi
+          exit $code

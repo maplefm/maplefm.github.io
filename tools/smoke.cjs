@@ -12,7 +12,7 @@ const srv = http.createServer((q, r) => {
   r.writeHead(200, { "Content-Type": TYPES[p.split(".").pop()] || "application/octet-stream" }); fs.createReadStream(p).pipe(r);
 });
 const PAGES = [["/", ".sitenav"], ["/market.html", ".ctl"], ["/shop.html", "#q"], ["/map.html", ".sitenav"], ["/quests.html", ".sitenav"], ["/contribute.html", ".sitenav"],
-  ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"], ["/items/", ".sitenav"], ["/item/work-gloves/", ".crumbs"], ["/map/sleepywood/", ".crumbs"], ["/training/", ".crumbs"], ["/quests/", ".crumbs"]];
+  ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"], ["/items/", ".sitenav"], ["/item/work-gloves/", ".crumbs"], ["/map/sleepywood/", ".crumbs"], ["/training/", ".crumbs"], ["/quests/", ".crumbs"], ["/training/level-30-40/", ".crumbs"], ["/quest/pios-collecting-recycled-goods/", ".crumbs"]];
 const fails = []; let checks = 0;
 const ok = (c, name) => { checks++; if (!c) fails.push(name); };
 (async () => {
@@ -32,12 +32,20 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       });
       await ctx.route(/fonts\.(googleapis|gstatic)\.com|googletagmanager|google-analytics/, (r) => r.abort());
       if (tag === "small phone") await ctx.addInitScript(() => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = '*{font-family:"DejaVu Sans",Verdana,sans-serif!important}'; document.head.appendChild(st); }));
+      // layout jumps: summed the way browsers score them, for the pages most visitors open
+      await ctx.addInitScript(() => { window.__cls = 0; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: "layout-shift", buffered: true }); } catch (e) {} });
       const p = await ctx.newPage(), errs = [];
       p.on("pageerror", (e) => errs.push(e.message));
+      const t0 = Date.now();
       await p.goto("http://localhost:" + PORT + pg, { waitUntil: "domcontentloaded" });
-      const found = await p.waitForSelector(must, { timeout: 15000 }).then(() => true, () => false);
+      const found = await p.waitForSelector(must, { timeout: 15000 }).then(() => true, () => false), readyMs = Date.now() - t0;
+      ok(readyMs < 6000, `${tag} ${pg}: usable in ${readyMs} ms (limit 6000)`);
       await p.waitForTimeout(pg === "/" ? 5000 : 1500);
       ok(found, `${tag} ${pg}: shows ${must}`);
+      if (["/", "/market.html", "/quests.html", "/map.html", "/training/level-30-40/", "/quest/pios-collecting-recycled-goods/", "/item/work-gloves/"].includes(pg) && !tag.startsWith("small")) {
+        const cls = await p.evaluate(() => window.__cls || 0);
+        ok(cls < 0.15, `${tag} ${pg}: layout jumps ${cls.toFixed(3)} (limit 0.15)`);
+      }
       const wide = await p.evaluate(() => {
         const over = document.documentElement.scrollWidth - window.innerWidth; if (over <= 1) return "";
         const bad = [...document.querySelectorAll("body *")].filter((e) => { const r = e.getBoundingClientRect(); if (!r.width || r.right <= window.innerWidth + 1 || getComputedStyle(e).position === "fixed") return false;
@@ -48,7 +56,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         return over + "px wider: " + bad.join(" ");
       });
       ok(!wide, `${tag} ${pg}: no sideways scroll ${wide}`);
-      ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length === 5), `${tag} ${pg}: site menu`);
+      ok(await p.evaluate(() => document.querySelectorAll(".sitenav .sn-links a").length === 4), `${tag} ${pg}: site menu`);
       // all five menu links fit on screen, nothing hidden off the side
       ok(await p.evaluate(() => [...document.querySelectorAll(".sitenav .sn-links a")].every((a) => { const r = a.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; })), `${tag} ${pg}: whole menu visible`);
       ok(await p.evaluate(() => !!document.querySelector(".clubfoot .sf-cols a[href='/market.html']")), `${tag} ${pg}: site footer`);

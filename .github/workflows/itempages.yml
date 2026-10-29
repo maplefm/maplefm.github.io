@@ -33,7 +33,7 @@ jobs:
           python3 tools/iconmirror.py /tmp/live/data/itemdb.json i /tmp/itemguide.json || true
           (cd /tmp/live && git add og && (git diff --cached --quiet || (git commit -q -m "Share images" && for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done)))
           python3 tools/indexnow.py sitemap.xml || true
-          git add -A item items map monster quest training maps monsters quests recap sitemap.xml data/mobs.json index.html i
+          git add -A item items map monster quest training maps monsters quests crafting recap sitemap.xml data/mobs.json index.html i data/play.json
           git diff --cached --quiet && exit 0
           b=item-pages-$(date -u +%Y%m%d)
           git checkout -q -b "$b"
