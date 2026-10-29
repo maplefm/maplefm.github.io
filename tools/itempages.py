@@ -142,7 +142,7 @@ def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=Non
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/assets/nav.css?v=2">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/assets/nav.css?v=3">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
@@ -330,9 +330,9 @@ def main():
         fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
         price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
         l3 = r.get("last3"); r1 = r.get("r1")
-        extra = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
+        more_txt = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
         if price_first or not fx:
-            desc = (f"{nm} {price_txt} in MapleStory Classic.{extra} {r.get('salesN') or 0:,} Free Market sales seen, "
+            desc = (f"{nm} {price_txt} in MapleStory Classic.{more_txt} {r.get('salesN') or 0:,} Free Market sales seen, "
                     f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
             title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} price", "Cash Shop · MapleStory Classic", "Club FM")
         else:
