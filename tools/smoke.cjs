@@ -11,7 +11,7 @@ const srv = http.createServer((q, r) => {
   if (!p.startsWith(ROOT) || !fs.existsSync(p) || !fs.statSync(p).isFile()) { r.writeHead(404); return r.end("nf"); }
   r.writeHead(200, { "Content-Type": TYPES[p.split(".").pop()] || "application/octet-stream" }); fs.createReadStream(p).pipe(r);
 });
-const PAGES = [["/", ".sitenav"], ["/market.html", ".tabs"], ["/shop.html", "#q"], ["/map.html", ".sitenav"], ["/quests.html", ".sitenav"], ["/contribute.html", ".sitenav"],
+const PAGES = [["/", ".sitenav"], ["/market.html", ".ctl"], ["/shop.html", "#q"], ["/map.html", ".sitenav"], ["/quests.html", ".sitenav"], ["/contribute.html", ".sitenav"],
   ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"], ["/items/", ".sitenav"], ["/item/work-gloves/", ".crumbs"], ["/map/sleepywood/", ".crumbs"], ["/training/", ".crumbs"], ["/quests/", ".crumbs"]];
 const fails = []; let checks = 0;
 const ok = (c, name) => { checks++; if (!c) fails.push(name); };
