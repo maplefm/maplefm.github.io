@@ -295,7 +295,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     v.appendChild(side);
   }
   // ---------------------------------------------------------------- an hour of training, estimated
-  // Classic formulas (meowdb, henesys.gg, maplestory.quest). Damage: main skill per hit, typical gear, scaled from level 30 and 50 benchmarks.
+  // Classic formulas. Damage: main skill per hit, typical gear, scaled from level 30 and 50 benchmarks.
   // Defense: damage x 100/(DEF+100). Higher-level monster: /(1+gap²x0.005) under 10 levels, /(1+gap x0.05) from 10.
   // Accuracy: class formula with typical stats; hit chance from ACC x100/(10 x gap+255) against the monster's avoid.
   var SKILL = { Warrior: [672, 1427, 0.6, 80, "wdef"], Thief: [643, 1238, 0.72, 100, "wdef"], Bowman: [620, 1314, 0.7, 85, "wdef"], Magician: [383, 789, 0.92, 74, "mdef"], Beginner: [235, 500, 0.6, 70, "wdef"] },
@@ -334,7 +334,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   function mobMesos(n, mb) {
     var x = MOBX[n], z = x && x[5];
     if (z && z[1]) return { v: (z[0] + z[1]) / 2 * (z[2] || 70) / 100, rep: true };
-    return { v: (Math.floor(2.1 * mb.lv) + 3) * 0.7, rep: false };  // Classic meso formula (meowdb); mesos drop about 70% of kills
+    return { v: (Math.floor(2.1 * mb.lv) + 3) * 0.7, rep: false };  // Classic meso formula; mesos drop about 70% of kills
   }
   function mobDrops(n) {
     var x = MOBX[n], d = x && x[6], v = 0; if (!d) return 0;
