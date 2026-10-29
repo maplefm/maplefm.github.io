@@ -328,6 +328,11 @@ def main():
         # equipment and scrolls are searched for their price; materials, potions and cosmetics for what they are and where they drop
         price_first = bool(r.get("equip")) or "Scroll" in name
         fx = facts(name, GUIDE); al = aliases(name, r.get("baseName") or name)
+        # scrolls: the game's own name ("Gloves Attack Scroll: Intermediate") is what many people search, so it goes
+        # in the title when it fits with "MapleStory Classic", and always in the description
+        tw = re.match(r"^.*Scroll: (Lesser|Intermediate|Greater)$", name)
+        if tw and name not in al: al = [name] + al
+
         price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
         l3 = r.get("last3"); r1 = r.get("r1")
         more_txt = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
@@ -335,6 +340,9 @@ def main():
             desc = (f"{nm} {price_txt} in MapleStory Classic.{more_txt} {r.get('salesN') or 0:,} Free Market sales seen, "
                     f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
             title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} price", "Cash Shop · MapleStory Classic", "Club FM")
+            if tw and not nx:
+                tt = fit_title(f"{nm} ({tw.group(1)}) price", "MapleStory Classic", "Club FM", cap=66)
+                if "MapleStory Classic" in tt: title = tt
         else:
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
             title = fit_title(f"{nm} price, drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
