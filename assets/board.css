@@ -1414,3 +1414,6 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
 .fold:not(.open) > :not(h4) { display: none !important; }
 .fold:not(.open) { border: 2px solid var(--accent, var(--wood)) !important; background: var(--accent-soft, var(--panel2)); border-radius: 12px; padding: 8px 12px !important; }
 .fold.open > h4 { margin-bottom: 8px; }
+
+/* the stats strip under the search keeps its height while the numbers load, so the board never jumps */
+.cards.strip { min-height: 34px; }
