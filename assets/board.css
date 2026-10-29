@@ -1310,3 +1310,39 @@ body.sheet .nudge { display: none; }
   .top-right .menu { top: 44px; right: 0; }
 }
 @media (max-width: 640px) { .top { position: relative; } }
+
+/* ---- the item card opens big, over the board ---- */
+.sheetback, .hsph { display: none; }
+body.bigcard .hsph, body.sheet .hsph { display: block; }
+.ipwrap > .ip { min-width: 0; }
+.bchartw svg { width: 100%; height: auto; display: block; }
+@media (min-width: 1181px) {
+  /* the board always takes the full width; the card is a framed layer above it with board showing on every side */
+  .main { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  body.bigcard .side { display: block; position: fixed; z-index: 55; top: var(--cardtop, 150px); bottom: 26px; left: max(36px, calc((100vw - 1320px) / 2)); right: max(36px, calc((100vw - 1320px) / 2));
+    max-height: none; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; border: 3px solid var(--wood); border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.38); }
+  .scrim { position: fixed; inset: 0; z-index: 54; background: rgba(10,12,16,.45); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+  body.bigcard .scrim { opacity: 1; pointer-events: auto; cursor: pointer; }
+  html:has(body.bigcard) { overflow: hidden; }
+  /* header, menu and search stay on top of the dimmed board */
+  body.bigcard .top { z-index: 58; }
+  body.bigcard .hsearch { position: fixed; z-index: 59; top: var(--srchtop, 80px); left: max(36px, calc((100vw - 1320px) / 2)); right: max(36px, calc((100vw - 1320px) / 2)); }
+  body.bigcard .ipwrap { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  body.bigcard .ipwrap:has(> #ipr:not([hidden])) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+  body.bigcard #ip { padding: 16px 20px 22px; }
+  body.bigcard #ipr { padding: 16px 20px 22px 4px; }
+  body.bigcard #ipr .list { max-height: none; }
+  body.bigcard .side .wtitle { padding-left: 20px; }
+}
+@media (max-width: 1180px) {
+  /* phones and tablets: the card fills the screen under the search, with a back button at the top */
+  body.sheet .side { top: var(--cardtop, 76px) !important; bottom: 0; max-height: none !important; height: auto; border-radius: 0; max-width: none; box-shadow: none; }
+  body.sheet .hsearch { position: fixed; top: 0; left: 0; right: 0; z-index: 60; padding: 8px 16px; margin: 0; background: var(--bg, var(--panel)); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  .side .wtitle::before { display: none; }
+  .sheetback { all: unset; display: inline-flex; align-items: center; cursor: pointer; font-weight: 900; font-size: 1rem; color: var(--ink); padding: 6px 12px 6px 2px; margin-right: auto; border-radius: 10px; flex: none; }
+  body.sheet .side .wtitle { flex-wrap: nowrap; }
+  body.sheet #itemtitle { display: none; }
+  .sheetback:focus-visible { outline: 3px solid var(--orange); }
+  .sheetx { display: none !important; }
+}
