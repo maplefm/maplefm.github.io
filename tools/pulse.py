@@ -61,7 +61,7 @@ def rows(data_dir, texts=None):
             if not stream and "shop" not in src: continue
             who = str((d.get("by") if stream else d.get("who")) or d.get("inbox") or "Guest")[:24]
             for r in d.get("rows") or []:
-                rm = fm_room(r.get("r")); ch = r.get("c")
+                rm = fm_room(r.get("r")) if not r.get("ri") else None; ch = r.get("c")   # an inferred room was not read
                 ch = ch if isinstance(ch, int) and ch >= 1 else 0
                 spot = str(rm) + "|" + str(ch) if rm and ch else "?|" + str(ch)   # counted as a shop, not placed on the map
                 s = str(r.get("s") or "").lower()
