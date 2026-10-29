@@ -262,8 +262,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   }
   function saveBuild(b) {
     BUILD = b; try { localStorage.setItem("fm-build", JSON.stringify(b)); localStorage.setItem("fm-build-mode", MODE); } catch (e) {}
-    // the account keeps the base type (a hybrid's stats, skills, weapons and swap level carry the rest)
-    var send = Object.assign({}, b, { type: CD.baseType(b.type) });
+    var send = b;
     if (ACCT.signedIn) fetch(window.FM_API + "/me/build", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(send) })
       .then(function (r) { ACCT.synced = r.ok; var s = $("bsave"); if (s) s.textContent = r.ok ? "Saved on this device and to your Discord account" : "Saved on this device"; }).catch(function () {});
   }
