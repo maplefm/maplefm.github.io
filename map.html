@@ -107,18 +107,32 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 .warn{border-left:4px solid var(--gold);background:var(--gold-soft);border-radius:10px;padding:8px 10px;font-size:.88rem;margin:8px 0}
 .foot{color:var(--muted);font-size:.78rem;margin-top:20px}
 [hidden]{display:none!important}
+  .bld { display: grid; gap: 8px; }
+  .bld .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+  .bld label { display: grid; gap: 2px; font-size: .78rem; font-weight: 700; color: var(--muted); }
+  .bld input, .bld select { font: 700 .95rem Inter, sans-serif; border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 8px; background: var(--card); color: var(--ink); width: 100%; min-width: 0; }
+  .bld h3 { margin: 6px 0 0; font: 800 .95rem Outfit, sans-serif; }
+  .bld .row2 { display: flex; gap: 6px; align-items: center; }
+  .mode { display: inline-flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--soft); }
+  .mode button { border: 0; background: transparent; color: var(--ink); font: 700 .85rem Inter, sans-serif; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+  .mode button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .est { display: inline-block; font-size: .74rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--gold-soft); color: var(--warn); }
+  .est.me2 { background: var(--ok-soft); color: var(--ok); }
+  .why2 { font-size: .86rem; font-weight: 600; margin: 4px 0 0; }
+  .math { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+  .math li { margin: 2px 0; }
   .facts { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
   .facts li { margin: 2px 0; }
   .facts li.lw { color: var(--warn); font-weight: 600; }
-</style><link rel="stylesheet" href="/assets/nav.css?v=3"></head><body><main>
-<!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html" aria-current="page"><span class="sn-l">Quests and training</span><span class="sn-s">Play</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><nav class="playbar" aria-label="Quests and training"><a href="/quests.html">Quests</a><a href="/map.html" aria-current="page">Training</a><a href="/maps/">Maps</a><a href="/monsters/">Monsters</a></nav><!--/nav-->
+</style><link rel="stylesheet" href="/assets/nav.css?v=4"></head><body><main>
+<!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html" aria-current="page"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><nav class="playbar" aria-label="Training and maps"><a href="/map.html" aria-current="page">Where to train</a><a href="/training/">Training guides</a><a href="/maps/">Maps</a><a href="/monsters/">Monsters</a></nav><script src="/assets/hscroll.js?v=2" defer></script><!--/nav-->
 
 <section class="hero">
   <div><h1>Training and maps</h1><p><b>Where to train</b> at your level, <b>what it costs</b> in potions, and <b>how to get there</b>.</p></div>
   <div class="me">
-    <label>Level <input type="number" id="lv" min="1" max="200" placeholder="?"> <select id="cls" aria-label="Class"><option value="">Class</option><option>Warrior</option><option>Magician</option><option>Bowman</option><option>Thief</option><option>Beginner</option></select></label>
+    <label>Level <input type="number" id="lv" min="1" max="200" placeholder="?"> <select id="cls" aria-label="Job"><option value="">Job</option><option>Beginner</option><optgroup label="Warrior"><option>Warrior</option><option>Fighter</option><option>Page</option><option>Spearman</option></optgroup><optgroup label="Magician"><option>Magician</option><option>Fire Poison Wizard</option><option>Ice Lightning Wizard</option><option>Cleric</option></optgroup><optgroup label="Bowman"><option>Bowman</option><option>Hunter</option><option>Crossbowman</option></optgroup><optgroup label="Thief"><option>Thief</option><option>Assassin</option><option>Bandit</option></optgroup></select></label>
     <label>IGN <input type="text" id="ign" maxlength="16" placeholder="fills your level" autocomplete="off"></label>
-    <small id="lvsrc">Your level and class come from classicrank.com when you enter your character name.</small>
+    <small id="lvsrc">Your level and job come from classicrank.com when you enter your character name.</small>
   </div>
 </section>
 
@@ -149,6 +163,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 </section>
 <p class="foot" id="credit"></p>
 </main>
+<script src="/assets/classic-dmg.js?v=1"></script>
 <script>
 (function () {
   "use strict";
@@ -164,7 +179,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   var FAM = { Warrior: 1, Magician: 2, Bowman: 3, Thief: 4, Pirate: 5, Beginner: 0 }, FAMCLS = ["", "Warrior", "Magician", "Bowman", "Thief", "Warrior"];
   try { var p0 = JSON.parse(localStorage.getItem("fm-play") || "null"); if (p0) { if (p0.lv) ME.lv = p0.lv; if (p0.fam && !ME.cls) ME.cls = FAMCLS[p0.fam] || ""; } } catch (e) {}
   // level and class are shared with the Quests page
-  function saveMe() { try { localStorage.setItem("fm-map-me", JSON.stringify(ME)); var p1 = JSON.parse(localStorage.getItem("fm-play") || "{}") || {}; p1.lv = ME.lv; if (ME.cls && FAM[ME.cls] != null) p1.fam = FAM[ME.cls]; localStorage.setItem("fm-play", JSON.stringify(p1)); } catch (e) {} }
+  function saveMe() { try { localStorage.setItem("fm-map-me", JSON.stringify(ME)); var p1 = JSON.parse(localStorage.getItem("fm-play") || "{}") || {}; p1.lv = ME.lv; var fm0 = ME.cls && window.ClassicDmg && window.ClassicDmg.JOBS[ME.cls] ? FAM[window.ClassicDmg.JOBS[ME.cls].fam] : FAM[ME.cls]; if (fm0 != null) p1.fam = fm0; localStorage.setItem("fm-play", JSON.stringify(p1)); } catch (e) {} }
   var TAB = "train", FROM = "", TO = "";
   try { FROM = localStorage.getItem("fm-map-from") || ""; } catch (e) {}
 
@@ -222,64 +237,204 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     return best || { name: "Red Potion", per: 0.5, price: 50 };
   }
 
-  // ---------------------------------------------------------------- where to train
-  function mapStats(m) {
-    var tot = 0, e = 0, hp = 0, lv = 0, maxlv = 0, worst = null;
-    m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; tot += x[1]; e += mb.exp * x[1]; hp += mb.hp * x[1]; lv += mb.lv * x[1]; maxlv = Math.max(maxlv, mb.lv); if (!worst || mb.atk > worst.atk) { worst = mb; worst.name = x[0]; } });
-    if (!tot) return null;
-    return { n: tot, exp: e / tot, hp: hp / tot, lv: lv / tot, maxlv: maxlv, eph: e / hp * 100, worst: worst };
+  // ---------------------------------------------------------------- your character: typical gear or your own build
+  // The damage engine (assets/classic-dmg.js) works out how hard a build hits each monster, how often it lands and how
+  // fast it kills, from the game files' skills and weapons. "Typical gear" is a clean weapon for the level and the usual
+  // skill order; "My build" is what the player types (or, later, reads from a screenshot of the Stats and Skills windows).
+  var CD = window.ClassicDmg, ENG = null, BUILD = null, MODE = "typical";
+  try { BUILD = JSON.parse(localStorage.getItem("fm-build") || "null"); MODE = localStorage.getItem("fm-build-mode") || (BUILD ? "mine" : "typical"); } catch (e) {}
+  var BTYPE = "", SWAP = 0; try { var bt0 = JSON.parse(localStorage.getItem("fm-build-type") || "{}"); BTYPE = bt0.type || ""; SWAP = bt0.swap || 0; } catch (e) {}
+  var ACCT = { signedIn: false, synced: false };
+  function famOf(job) { var j = CD && CD.JOBS[CD.jobName(job)]; return j ? j.fam : ""; }
+  function thiefTypes(job) { return job === "Assassin" ? ["assassin"] : job === "Bandit" ? ["bandit", "sindit"] : job === "Thief" ? ["assassin", "bandit", "sindit"] : []; }
+  function buildType(job) { var t = thiefTypes(job); return t.indexOf(BTYPE) >= 0 ? BTYPE : t[0] || "pure"; }
+  // the build the ranking uses right now
+  function current() {
+    var L = ME.lv, job = CD.jobName(ME.cls) || (L < 10 ? "Beginner" : "Bowman");
+    if (MODE === "mine" && BUILD && BUILD.job === job) {
+      var b = JSON.parse(JSON.stringify(BUILD)); b.lv = L; b.generic = false; b.notes = [];
+      if (b.type !== "sindit") delete b.w2;
+      return b;
+    }
+    return ENG.typical(job, L, buildType(job), buildType(job) === "sindit" && SWAP ? SWAP : null);
   }
+  function saveBuild(b) {
+    BUILD = b; try { localStorage.setItem("fm-build", JSON.stringify(b)); localStorage.setItem("fm-build-mode", MODE); } catch (e) {}
+    if (ACCT.signedIn) fetch(window.FM_API + "/me/build", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b) })
+      .then(function (r) { ACCT.synced = r.ok; var s = $("bsave"); if (s) s.textContent = r.ok ? "Saved on this device and to your Discord account" : "Saved on this device"; }).catch(function () {});
+  }
+  // the build from the Discord account, when the account has one and this device doesn't
+  function loadAccountBuild() {
+    if (!window.FM_API) return;
+    fetch(window.FM_API + "/me/build", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.signedIn) return; ACCT.signedIn = true;
+      if (BUILD && !j.build) saveBuild(BUILD);
+      if (j.build && j.build.job && !BUILD) { BUILD = j.build; MODE = "mine"; try { localStorage.setItem("fm-build", JSON.stringify(BUILD)); } catch (e) {} if (TAB === "train") renderTrain(); }
+    }).catch(function () {});
+  }
+  // for the screenshot reader later: hand it the numbers it read and the form fills in
+  window.fmFillBuild = function (o) { if (!o || !ENG) return; var b = BUILD && BUILD.job === CD.jobName(ME.cls) ? BUILD : current(); Object.keys(o).forEach(function (k) { if (k === "skills") Object.assign(b.skills, o.skills); else b[k] = o[k]; }); MODE = "mine"; saveBuild(b); renderTrain(); };
+
+  function numIn(lbl, val, on, o) {
+    o = o || {}; var l = el("label"); l.appendChild(document.createTextNode(lbl));
+    var i = el("input"); i.type = "number"; i.inputMode = "numeric"; i.min = o.min != null ? o.min : 0; if (o.max) i.max = o.max; if (val != null && val !== "") i.value = val; if (o.ph) i.placeholder = o.ph; if (o.key) i.dataset.build = o.key;
+    i.addEventListener("change", function () { var v = i.value === "" ? null : Math.max(+i.min, Math.min(o.max || 99999, Math.round(+i.value))); on(v); });
+    l.appendChild(i); return l;
+  }
+  function selIn(lbl, opts, val, on, key) {
+    var l = el("label"); l.appendChild(document.createTextNode(lbl)); var s = el("select"); if (key) s.dataset.build = key;
+    opts.forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; if (String(o[0]) === String(val)) op.selected = true; s.appendChild(op); });
+    s.addEventListener("change", function () { on(s.value); }); l.appendChild(s); return l;
+  }
+  // the build card at the top of Where to train
+  function buildCard(b) {
+    var c = el("div", "card bld"), job = b.job, fam = famOf(job);
+    var top = el("div", "row"); top.style.justifyContent = "space-between";
+    var md = el("div", "mode"); md.setAttribute("role", "group"); md.setAttribute("aria-label", "Numbers from");
+    [["typical", "Typical gear"], ["mine", "My build"]].forEach(function (x) {
+      var bt = el("button", null, x[1]); bt.type = "button"; bt.setAttribute("aria-pressed", MODE === x[0]);
+      bt.addEventListener("click", function () {
+        MODE = x[0]; try { localStorage.setItem("fm-build-mode", MODE); } catch (e) {}
+        if (MODE === "mine" && (!BUILD || BUILD.job !== job)) { var t = ENG.typical(job, ME.lv, buildType(job), SWAP || null); t.generic = false; delete t.notes; saveBuild(t); }
+        renderTrain();
+      });
+      md.appendChild(bt);
+    });
+    top.appendChild(md);
+    top.appendChild(el("span", "est" + (b.generic ? "" : " me2"), b.generic ? "Typical gear estimate" : "Your build"));
+    c.appendChild(top);
+    var tt = thiefTypes(job);
+    if (tt.length) {
+      var r = el("div", "grid"); r.style.gridTemplateColumns = "repeat(auto-fill,minmax(230px,1fr))";
+      r.appendChild(selIn("Build", tt.map(function (k) { return [k, CD.BUILDS[k].name]; }), b.type, function (v) { BTYPE = v; try { localStorage.setItem("fm-build-type", JSON.stringify({ type: BTYPE, swap: SWAP })); } catch (e) {} if (MODE === "mine" && BUILD) { BUILD.type = v; if (v === "sindit") { BUILD.w = "Claw"; BUILD.w2 = "Dagger"; } else { BUILD.w = v === "bandit" ? "Dagger" : "Claw"; delete BUILD.w2; } fillGear(BUILD); saveBuild(BUILD); } renderTrain(); }, "type"));
+      if (b.type === "sindit") r.appendChild(numIn("Swap to dagger at level", b.swap, function (v) { SWAP = v || 0; try { localStorage.setItem("fm-build-type", JSON.stringify({ type: BTYPE || "sindit", swap: SWAP })); } catch (e) {} if (MODE === "mine" && BUILD) { BUILD.swap = v; saveBuild(BUILD); } renderTrain(); }, { min: 30, max: 100, key: "swap" }));
+      c.appendChild(r);
+    }
+    // what the numbers use, in one line
+    var w = ENG.weaponAt(b, b.lv), g = (b.gear || {})[w] || {}, atk = bestAtk(b);
+    var line = el("p", "note");
+    line.appendChild(el("b", null, (atk ? atk.name + (atk.lv > 1 ? " " + atk.lv : "") : "Regular attack")));
+    line.appendChild(document.createTextNode(" · " + (fam === "Magician" ? "INT " + b.int + " · " + (g.name || w) + " " + (b.matk != null ? b.matk : g.matk) + " magic attack" : (g.name || w) + " " + ((g.watk || 0) + (g.scroll || 0)) + " attack" + (g.ammoAtk ? " + " + (g.ammo || "ammo") + " " + g.ammoAtk : "") + " · " + statLine(b, w)) + " · ACC " + ENG.acc(b) + (atk ? " · " + Math.round(atk.min) + " to " + Math.round(atk.max * (atk.lines > 1 ? 1 : 1)) + " a hit" : "")));
+    if (b.type === "sindit") line.appendChild(document.createTextNode(" · dagger from level " + b.swap));
+    c.appendChild(line);
+    if (ME.lv >= 30 && CD.JOBS[job] && !CD.JOBS[job].job && fam !== "Beginner") c.appendChild(el("p", "warn", "Level 30 and up: pick your 2nd job at the top for its skills."));
+    if (b.generic) c.appendChild(el("p", "note", "Typical: " + typicalNote(fam)));
+    if (MODE === "mine") c.appendChild(buildForm(b));
+    return c;
+  }
+  function statLine(b, w) { return w === "Claw" || w === "Dagger" ? "LUK " + b.luk + ", DEX " + b.dex : w === "Bow" || w === "Crossbow" ? "DEX " + b.dex + ", STR " + b.str : "STR " + b.str + ", DEX " + b.dex; }
+  function typicalNote(fam) {
+    return { Warrior: "STR, DEX = level", Magician: "all INT", Bowman: "all DEX", Thief: "LUK, 25 DEX", Beginner: "all STR" }[fam || "Beginner"] +
+      " · best clean shop weapon, no scrolls" + (fam === "Thief" ? " · stars by level" : "") + " · usual skill order";
+  }
+  function bestAtk(b) { var a = ENG.attacks(b).filter(function (o) { return !o.undeadOnly; }); a.sort(function (x, y) { return y.avgHit * y.lines / y.ms - x.avgHit * x.lines / x.ms; }); return a[0]; }
+  function fillGear(b) { [b.w, b.w2].forEach(function (cl) { if (cl && !(b.gear || {})[cl]) { var t = ENG.typical(b.job, b.lv, b.type, b.swap); b.gear = b.gear || {}; b.gear[cl] = (t.gear || {})[cl] || { watk: 0, spd: 6 }; } }); }
+  // the editable build. Every field has data-build so the screenshot reader can fill it.
+  function buildForm(b) {
+    var f = el("details", "tmore"); f.open = !BUILD || !BUILD.updated; var sm = el("summary", null, "Edit my build"); f.appendChild(sm);
+    var fam = famOf(b.job), J = CD.JOBS[b.job] || CD.JOBS.Beginner, set = function (k) { return function (v) { b[k] = v; b.updated = Date.now(); saveBuild(b); renderTrain(); }; };
+    f.appendChild(el("h3", null, "Stats"));
+    var g1 = el("div", "grid");
+    [["STR", "str"], ["DEX", "dex"], ["INT", "int"], ["LUK", "luk"]].forEach(function (x) { g1.appendChild(numIn(x[0], b[x[1]], set(x[1]), { min: 4, max: 999, key: x[1] })); });
+    g1.appendChild(numIn("Accuracy (stat window)", b.accTotal, set("accTotal"), { max: 999, ph: "auto " + ENG.acc(Object.assign({}, b, { accTotal: 0 })), key: "accTotal" }));
+    if (fam === "Magician") g1.appendChild(numIn("Magic attack (gear)", b.matk != null ? b.matk : ((b.gear || {})[b.w] || {}).matk, set("matk"), { max: 999, key: "matk" }));
+    f.appendChild(g1);
+    // one row per weapon the build holds (two for a sindit)
+    [b.w, b.type === "sindit" ? b.w2 : null].forEach(function (cl, k) {
+      if (!cl) return; var g = (b.gear || {})[cl] || {};
+      f.appendChild(el("h3", null, k ? "Second weapon (from level " + (b.swap || "?") + ")" : "Weapon"));
+      var g2 = el("div", "grid");
+      g2.appendChild(selIn("Type", J.w.map(function (x) { return [x, x]; }), cl, function (v) { if (k) b.w2 = v; else b.w = v; fillGear(b); b.updated = Date.now(); saveBuild(b); renderTrain(); }, k ? "w2" : "w"));
+      g2.appendChild(numIn("Weapon attack (with scrolls)", g.watk, function (v) { g.watk = v || 0; b.gear[cl] = g; b.updated = Date.now(); saveBuild(b); renderTrain(); }, { max: 999, key: "watk" + (k ? "2" : "") }));
+      if (cl === "Claw" || cl === "Bow" || cl === "Crossbow") {
+        var am = (ENG && window.__CDATA && window.__CDATA.ammo[cl]) || [];
+        g2.appendChild(selIn(cl === "Claw" ? "Stars" : "Arrows", am.map(function (a) { return [a[0], a[0].replace(/ Throwing Stars| Throwing Knives| for Bows| for Crossbows/, "") + " +" + a[1]]; }), g.ammo, function (v) { var a = am.filter(function (x) { return x[0] === v; })[0]; g.ammo = v; g.ammoAtk = a ? a[1] : 0; b.gear[cl] = g; b.updated = Date.now(); saveBuild(b); renderTrain(); }, "ammo"));
+      }
+      g2.appendChild(selIn("Attack speed", [[2, "Faster (2)"], [3, "Faster (3)"], [4, "Fast (4)"], [5, "Fast (5)"], [6, "Normal (6)"], [7, "Slow (7)"], [8, "Slow (8)"], [9, "Slower (9)"]], g.spd || 6, function (v) { g.spd = +v || 6; b.gear[cl] = g; b.updated = Date.now(); saveBuild(b); renderTrain(); }, "spd" + (k ? "2" : "")));
+      f.appendChild(g2);
+    });
+    f.appendChild(el("h3", null, "Damage range in game (optional)"));
+    var g3 = el("div", "grid"), rw = fam === "Magician" ? "magic" : ENG.weaponAt(b, b.lv), rg = b.range || [];
+    g3.appendChild(numIn("Min", rg[0], function (v) { b.range = [v || 0, (b.range || [])[1] || 0]; b.rangeW = rw; b.updated = Date.now(); saveBuild(b); renderTrain(); }, { max: 99999, key: "rangeMin" }));
+    g3.appendChild(numIn("Max", rg[1], function (v) { b.range = [(b.range || [])[0] || 0, v || 0]; b.rangeW = rw; b.updated = Date.now(); saveBuild(b); renderTrain(); }, { max: 99999, key: "rangeMax" }));
+    f.appendChild(g3);
+    f.appendChild(el("p", "note", "From your Stats window, holding the weapon you train with. Replaces the stat estimate."));
+    f.appendChild(el("h3", null, "Skills"));
+    var g4 = el("div", "grid"), books = [J.base, J.job].filter(Boolean);
+    Object.keys(window.__CDATA.skills).forEach(function (id) {
+      var s = window.__CDATA.skills[id]; if (books.indexOf(s.job) < 0) return;
+      if (!/Strike|Blast|Rush|Bolt|Claw|Arrow|Beam|Breath|Heal|Blow|Shot|Bomb|Stab|Seven|Drain|Savage|Mastery|Booster|Precise|Nimble Body|Critical Shot|Critical Throw|Focus/.test(s.n) || /MP|HP/.test(s.n)) return;
+      g4.appendChild(numIn(s.n, b.skills[id] || 0, function (v) { if (v) b.skills[id] = Math.min(v, s.max); else delete b.skills[id]; b.updated = Date.now(); saveBuild(b); renderTrain(); }, { max: s.max, key: "skill-" + id }));
+    });
+    f.appendChild(g4);
+    var bar = el("div", "row"); bar.style.marginTop = "8px";
+    var rs = el("button", "btn", "Start over from typical"); rs.type = "button";
+    rs.addEventListener("click", function () { var t = ENG.typical(b.job, ME.lv, buildType(b.job), SWAP || null); t.generic = false; delete t.notes; t.updated = Date.now(); saveBuild(t); renderTrain(); });
+    bar.appendChild(rs); bar.appendChild(el("small", "note", "")).id = "bsave";
+    f.appendChild(bar);
+    setTimeout(function () { var s = $("bsave"); if (s) s.textContent = ACCT.synced ? "Saved on this device and to your Discord account" : "Saved on this device"; }, 0);
+    return f;
+  }
+
+  // ---------------------------------------------------------------- where to train
   function bracket(L) { var b = null; (NOTES && NOTES.brackets || []).forEach(function (x) { if (L >= x.lo && L < x.hi + (x.hi >= 100 ? 1 : 0)) b = x; }); return b || (NOTES && NOTES.brackets ? NOTES.brackets[NOTES.brackets.length - 1] : null); }
   function renderTrain() {
     var v = $("v-train"); v.textContent = "";
-    var L = ME.lv, cls = ME.cls || "Bowman";
-    if (!L) { var c0 = el("div", "card"); c0.appendChild(el("h2", null, "Set your level")); c0.appendChild(el("p", "note", "Type your level and class at the top, or your character name and it fills in from classicrank.com.")); v.appendChild(c0); return; }
+    var L = ME.lv;
+    if (!L) { var c0 = el("div", "card"); c0.appendChild(el("h2", null, "Set your level")); c0.appendChild(el("p", "note", "Type your level and job at the top, or your character name and it fills in from classicrank.com.")); v.appendChild(c0); return; }
+    if (!ENG) { v.appendChild(el("div", "card note", "Loading the damage numbers…")); return; }
+    var b = current(), fam = famOf(b.job) || "Bowman", cls = fam === "Beginner" ? "Beginner" : fam;
     var hpPot = bestPot("hp"), mpPot = bestPot("mp"), br = bracket(L);
     if (!QIDX) setTimeout(loadQuests, 400);
     var head = el("div", "card");
-    head.appendChild(el("h2", null, "Level " + L + (ME.cls ? " " + ME.cls : "") + ": where to train"));
-    head.appendChild(el("p", "note", "Maps for your level, ranked. EXP and mesos an hour, potions included."));
+    head.appendChild(el("h2", null, "Level " + L + " " + b.job + (b.type && b.type !== "pure" ? " (" + CD.BUILDS[b.type].name.split(" (")[0].toLowerCase() + ")" : "") + ": where to train"));
+    head.appendChild(el("p", "note", "Maps where you hit and kill reliably, ranked by EXP an hour. Potions and mesos included."));
     var pr = el("div", "row"); pr.style.marginTop = "6px";
     pr.appendChild(el("span", "chip ok wrap", "Cheapest HP now: " + hpPot.name + " · " + hpPot.per.toFixed(2) + " mesos per HP" + (hpPot.fm ? " on the Free Market" : " at the NPC")));
     pr.appendChild(el("span", "chip wrap", "Cheapest MP now: " + mpPot.name + " · " + mpPot.per.toFixed(2) + " per MP" + (mpPot.fm ? " on the Free Market" : " at the NPC")));
     head.appendChild(pr);
     if (br) br.tips.forEach(function (t) { head.appendChild(el("div", "warn", t)); });
     v.appendChild(head);
-    var picks = {}; (br ? br.picks : []).forEach(function (p) { if (!p.classes || !ME.cls || p.classes.indexOf(ME.cls) >= 0) picks[p.map] = p; });
-    var cand = [];
-    Object.keys(MAPS).forEach(function (pg) {
-      var m = MAPS[pg]; if (m.type === "Town" || !m.mobs.length) return;
-      // not a training spot: a boss room or quest map (Mushmom's house), or test monsters
-      if (m.mobs.some(function (x) { var mb = W.mobs[x[0]]; return !mb || mb.boss || mb.lv >= 150 || !mb.hp; })) return;
-      var st = mapStats(m); if (!st) return;
-      if (st.lv < L - 9 || st.lv > L + 4 || st.maxlv > L + 12) { if (!picks[pg]) return; }
+    v.appendChild(buildCard(b));
+    var picks = {}; (br ? br.picks : []).forEach(function (p) { picks[p.map] = p; });
+    var rk = ENG.rankMaps(b, W), cand = [];
+    rk.fit.forEach(function (h) {
+      var st = mapStats(h.m); if (!st) return;
       var t = touch(st.worst, L, cls), cost = t.dmg * t.hit * hpPot.per;
-      var hc = hourly({ pg: pg, m: m, st: st, t: t, cost: cost, pick: picks[pg] }, L, cls, hpPot); if (hc.kph > 0) cand.push(hc);
+      var c = hourly({ pg: h.pg, m: h.m, st: st, t: t, cost: cost, pick: picks[h.pg], h: h }, L, cls, hpPot); if (c.kph > 0) cand.push(c);
     });
     var KEY = { exp: "eph", meso: "mph", safe: "safe" };
-    function order(k) { return cand.slice().sort(function (a, b) { return k === "safe" ? (a.potHr - b.potHr) || (b.eph - a.eph) : b[KEY[k]] - a[KEY[k]]; }); }
+    function order(k) { return cand.slice().sort(function (a, c) { return k === "safe" ? (a.potHr - c.potHr) || (c.eph - a.eph) : c[KEY[k]] - a[KEY[k]]; }); }
     if (cand.length) {
       var top = el("div", "card");
       var bx = order("exp")[0], bm = order("meso")[0];
-      top.appendChild(el("h2", null, "Best for level " + L));
+      top.appendChild(el("h2", null, "Best for you at level " + L));
       var tl = el("div", "stats");
       [[bx.m.name, "Most EXP · " + short(bx.eph) + " an hour"], [bm.m.name, "Most mesos · " + short(bm.mph) + " an hour"]].forEach(function (x) { var s = el("div", "stat"); s.appendChild(el("b", null, x[0])); s.appendChild(el("small", null, x[1])); tl.appendChild(s); });
       top.appendChild(tl);
       var sb = el("div", "seg"); sb.setAttribute("role", "tablist"); sb.setAttribute("aria-label", "Rank maps by");
       [["exp", "Most EXP an hour"], ["meso", "Most mesos an hour"], ["safe", "Fewest potions"]].forEach(function (x) {
-        var b = el("button", SORT === x[0] ? "on" : "", x[1]); b.type = "button"; b.setAttribute("aria-pressed", SORT === x[0] ? "true" : "false");
-        b.addEventListener("click", function () { SORT = x[0]; try { localStorage.setItem("fm-train-sort", SORT); } catch (e) {} renderTrain(); var c = document.querySelector("#v-train .seg"); if (c) c.scrollIntoView({ block: "start" }); });
-        sb.appendChild(b);
+        var bt = el("button", SORT === x[0] ? "on" : "", x[1]); bt.type = "button"; bt.setAttribute("aria-pressed", SORT === x[0] ? "true" : "false");
+        bt.addEventListener("click", function () { SORT = x[0]; try { localStorage.setItem("fm-train-sort", SORT); } catch (e) {} renderTrain(); var c = document.querySelector("#v-train .seg"); if (c) c.scrollIntoView({ block: "start" }); });
+        sb.appendChild(bt);
       });
       top.appendChild(sb);
-      top.appendChild(el("p", "note", "Level " + L + " " + cls.toLowerCase() + ", typical gear, solo, nonstop. Your gear shifts the numbers, not the order."));
+      top.appendChild(el("p", "note", (b.generic ? "Typical gear estimate" : "Your build") + ", solo, nonstop. Every map here passes the bar: " + Math.round(ENG.HIT_BAR * 100) + "% hit or better and " + ENG.KILL_BAR + " s a kill or less for each common monster."));
       v.appendChild(top);
     }
     var list = order(SORT), shown = 3;
     var holder = el("div"); v.appendChild(holder);
-    function more() { holder.textContent = ""; list.slice(0, shown).forEach(function (c, i) { holder.appendChild(trainCard(c, i, L, hpPot)); }); if (list.length > shown) { var mb = el("button", "btn", "Show " + Math.min(5, list.length - shown) + " more maps"); mb.type = "button"; mb.style.margin = "0 auto 14px"; mb.style.display = "block"; mb.addEventListener("click", function () { shown += 5; more(); }); holder.appendChild(mb); } }
+    function more() { holder.textContent = ""; list.slice(0, shown).forEach(function (c, i) { holder.appendChild(trainCard(c, i, L, hpPot, b)); }); if (list.length > shown) { var mb = el("button", "btn", "Show " + Math.min(5, list.length - shown) + " more maps"); mb.type = "button"; mb.style.margin = "0 auto 14px"; mb.style.display = "block"; mb.addEventListener("click", function () { shown += 5; more(); }); holder.appendChild(mb); } }
     more();
-    if (!cand.length) v.appendChild(el("div", "card note", "Nothing on the map fits this level yet."));
+    if (!cand.length) v.appendChild(el("div", "card note", "No map near level " + L + " passes the bar for this build yet: every one has a common monster you'd hit under " + Math.round(ENG.HIT_BAR * 100) + "% of the time or take over " + ENG.KILL_BAR + " s to kill. More attack, accuracy or a higher skill level opens them up."));
+    // near your level but not ranked, and why: the monster you can't hit or kill
+    var near = rk.skip.filter(function (h) { return Math.abs(h.lv - L) <= 6; }).sort(function (a, c) { return Math.abs(a.lv - L) - Math.abs(c.lv - L); }).slice(0, 6);
+    if (near.length) {
+      var sk = el("details", "card tmore"), ss = el("summary"); ss.appendChild(el("h2", null, "Not ranked near your level")); ss.firstChild.style.display = "inline"; sk.appendChild(ss);
+      var su = el("ul", "list");
+      near.forEach(function (h) { var f = h.fail[0], r = f && f.r, li = el("li"); li.appendChild(el("b", null, h.pg)); li.appendChild(el("span", "note", f ? f.name + ": " + (!r || r.hc < 0.05 ? "can't hit it yet, needs " + ENG.accNeeded(L, f.mob) + " ACC" : r.hc < ENG.HIT_BAR ? Math.round(r.hc * 100) + "% hit, needs " + ENG.accNeeded(L, f.mob) + " ACC" : r.el === 0 ? "immune to " + r.atk.el.toLowerCase() : r.kill.toFixed(0) + " s a kill") : "")); su.appendChild(li); });
+      sk.appendChild(su); v.appendChild(sk);
+    }
     var side = el("details", "card tmore"); var sh2 = el("summary"); sh2.appendChild(el("h2", null, "Potions, prices and party play")); sh2.firstChild.style.display = "inline"; side.appendChild(sh2);
     var ul = el("ul", "list"); (NOTES ? NOTES.economy : []).forEach(function (t) { ul.appendChild(el("li", null, t)); }); side.appendChild(ul);
     side.appendChild(el("h3", null, "Price check")); side.lastChild.style.marginTop = "10px";
@@ -294,43 +449,14 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     side.appendChild(el("p", "note", "Notes from the game data and the MapleStory Classic Wiki, checked " + (NOTES ? NOTES.updated : "") + ". Map and monster data refreshed " + W.built + "."));
     v.appendChild(side);
   }
+  function mapStats(m) {
+    var tot = 0, worst = null;
+    m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; tot += x[1]; if (!worst || mb.atk > worst.atk) { worst = mb; worst.name = x[0]; } });
+    return tot ? { n: tot, worst: worst } : null;
+  }
   // ---------------------------------------------------------------- an hour of training, estimated
-  // Classic formulas (meowdb, henesys.gg, maplestory.quest). Damage: main skill per hit, typical gear, scaled from level 30 and 50 benchmarks.
-  // Defense: damage x 100/(DEF+100). Higher-level monster: /(1+gap²x0.005) under 10 levels, /(1+gap x0.05) from 10.
-  // Accuracy: class formula with typical stats; hit chance from ACC x100/(10 x gap+255) against the monster's avoid.
-  var SKILL = { Warrior: [672, 1427, 0.6, 80, "wdef"], Thief: [643, 1238, 0.72, 100, "wdef"], Bowman: [620, 1314, 0.7, 85, "wdef"], Magician: [383, 789, 0.92, 74, "mdef"], Beginner: [235, 500, 0.6, 70, "wdef"] },
-      TOUCH = { Warrior: 0.35, Beginner: 0.35, Magician: 0.15, Bowman: 0.15, Thief: 0.2 };
-  function perHit(cls, L) {
-    var k = SKILL[L < 10 ? "Beginner" : cls] || SKILL.Bowman, a = k[0] * k[2], e = Math.log(k[1] / k[0]) / Math.log(50 / 30);
-    var h = L >= 30 ? a * Math.pow(L / 30, e) : a * Math.pow(L / 30, 1.3);
-    return Math.max(12 + 5 * L, h);
-  }
-  function myAcc(cls, L) {
-    if (L < 10) cls = "Beginner";
-    if (cls === "Warrior") return Math.floor((1.2 * (20 + 0.4 * L) + 2 * L + 2.4) / 2.5 + 10) + 0.15 * L;
-    if (cls === "Thief") return Math.floor((1.2 * (25 + 0.5 * L) + 2 * L + 2.4 * L) / 4 + 15) + 0.4 * L;
-    if (cls === "Bowman") return Math.floor((1.2 * Math.max(25, 4.5 * L) + 2 * L + 2.4) / 4.8 + 20) + 0.3 * L;
-    if (cls === "Magician") return Math.floor((1.2 * (5 * L + 5) + 2 * L + 0.6 * (4 + 0.5 * L)) / 5.1 + 20);
-    return Math.floor((1.2 * (4 + L) + 2 * L + 2.4) / 2.5 + 5);
-  }
-  function hitChance(acc, L, mb) {
-    var G = Math.max(0, mb.lv - L), A = acc * 100 / (10 * G + 255), av = mb.eva || 0;
-    if (!av || A - av >= 25 + G * (L / 2 + 15)) return 1;
-    var f = 0.15 + 0.2 / (1 + Math.exp((A - av) / 12)), q = av / A;
-    return q <= 1 - f ? 1 : q >= 1 + f ? 0 : (1 + f - q) / (2 * f);
-  }
-  function dmgOn(mb, cls, L) {
-    var k = SKILL[L < 10 ? "Beginner" : cls] || SKILL.Bowman, d = perHit(cls, L) * 100 / ((mb[k[4]] || 0) + 100), g = mb.lv - L;
-    if (g >= 10) d /= 1 + g * 0.05; else if (g > 0) d /= 1 + g * g * 0.005;
-    return Math.max(1, d);
-  }
-  // seconds to kill one monster: hits needed, missed swings, the attack speed of the class's main skill
-  function killTime(mb, cls, L) {
-    var k = SKILL[L < 10 ? "Beginner" : cls] || SKILL.Bowman, hc = hitChance(myAcc(cls, L), L, mb);
-    if (hc < 0.05) return { s: Infinity, hc: hc };
-    return { s: Math.ceil(mb.hp / dmgOn(mb, cls, L)) / hc * 60 / k[3], hc: hc };
-  }
-  function accNeeded(L, mb) { for (var a = 1; a < 400; a++) if (hitChance(a, L, mb) >= 1) return a; return 400; }
+  // Kills an hour, EXP and hit chance come from the engine (ENG.mapHour); this adds mesos, drops and potions.
+  var TOUCH = { Warrior: 0.35, Beginner: 0.35, Magician: 0.15, Bowman: 0.15, Thief: 0.2 };
   function mobMesos(n, mb) {
     var x = MOBX[n], z = x && x[5];
     if (z && z[1]) return { v: (z[0] + z[1]) / 2 * (z[2] || 70) / 100, rep: true };
@@ -342,23 +468,12 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     d.forEach(function (it) { if (PRICE[it[0]] && !EQUIP[it[0]] && it[1] >= 1) v += it[1] / 100 * PRICE[it[0]]; }); return v;
   }
   function hourly(c, L, cls, hpPot) {
-    var m = c.m, tot = 0, all = 0, exp = 0, mz = 0, dv = 0, rep = 0, ks = 0, acc = myAcc(cls, L), low = null;
-    m.mobs.forEach(function (x) {
-      var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; var k = x[1], kt = killTime(mb, cls, L); all += k;
-      if (kt.hc < 1 && (!low || kt.hc < low.hc)) low = { name: x[0], hc: kt.hc, need: accNeeded(L, mb) };
-      if (!isFinite(kt.s)) return;   // can't hit it yet: walk past it
-      tot += k; exp += mb.exp * k; ks += kt.s * k; var mm = mobMesos(x[0], mb); mz += mm.v * k; if (mm.rep) rep += k; dv += mobDrops(x[0]) * k; });
-    c.acc = acc; c.low = low;
-    if (!tot) { c.kph = 0; c.eph = 0; c.mph = 0; c.mpk = 0; c.mesoKill = 0; c.dropKill = 0; c.mesoRep = 0; c.potHr = 0; c.potCost = 0; c.safe = 0; c.killsPerPot = 0; return c; }
-    exp /= tot; mz /= tot; dv /= tot; ks /= tot;
-    var walk = 0.8 + 12 / Math.sqrt(all), kill = ks + walk;
-    // most maps refill every 7.5 s and you reach about 3 of 4 spawn points solo; monsters with their own timer (drakes,
-    // Tauromacis, Wild Kargos) refill no faster than that timer
-    var cap = 0; m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (!mb || mb.boss) return; var rt = m.respawn && typeof m.respawn === "object" ? m.respawn[x[0]] : 0; cap += rt ? x[1] * 3600 / Math.max(rt, 7.56) : x[1] * 0.75 * 3600 / 7.56; });
-    var kph = Math.min(3600 / kill, cap * 0.8);
-    var hpHr = kph * (TOUCH[cls] || 0.2) * c.t.hit * c.t.dmg;
+    var h = c.h, mz = 0, dv = 0, rep = 0, tot = 0;
+    h.rows.forEach(function (row) { if (!row.ok) return; var mm = mobMesos(row.name, row.mob); tot += row.n; mz += mm.v * row.n; if (mm.rep) rep += row.n; dv += mobDrops(row.name) * row.n; });
+    mz /= tot; dv /= tot;
+    var kph = h.kph, hpHr = kph * (TOUCH[cls] || 0.2) * c.t.hit * c.t.dmg;
     var potHr = hpHr / (W.pots[hpPot.name] && W.pots[hpPot.name].hp || 100), potCost = hpHr * hpPot.per;
-    c.kph = kph; c.eph = kph * exp; c.mpk = mz + dv; c.mesoKill = mz; c.dropKill = dv; c.mesoRep = rep / tot; c.ks = ks;
+    c.kph = kph; c.eph = h.eph; c.mpk = mz + dv; c.mesoKill = mz; c.dropKill = dv; c.mesoRep = rep / tot; c.ks = h.ks;
     c.potHr = potHr; c.potCost = potCost; c.mph = kph * (mz + dv) - potCost; c.safe = -potHr;
     c.killsPerPot = potHr > 0 ? kph / potHr : 0;
     return c;
@@ -380,19 +495,18 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     m.mobs.forEach(function (x) { (QIDX[x[0]] || []).forEach(function (q) { if (!seen[q.id] && q.lv <= L + 5) { seen[q.id] = 1; out.push(q); } }); });
     return out.sort(function (a, b) { return b.exp - a.exp; });
   }
-  function trainCard(c, i, L, hpPot) {
-    var m = c.m, st = c.st, card = el("div", "card tcard"), left = el("div");
-    var h = el("div", "row"); h.appendChild(el("span", "chip gold", "#" + (i + 1))); h.appendChild(el("h3", null, m.name)); if (c.pick) h.appendChild(el("span", "chip ok", "Players recommend")); if (st.worst && st.worst.undead) h.appendChild(el("span", "chip", "Undead: Heal hurts them"));
-    var weak = {}; m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (mb && mb.weak) weak[mb.weak] = 1; }); Object.keys(weak).forEach(function (k) { h.appendChild(el("span", "chip", "Weak to " + k.toLowerCase())); });
-    if (m.since && Date.now() - Date.parse(m.since) < 14 * 864e5 && m.since > (W.first0 || "")) h.appendChild(el("span", "chip gold", "New"));
-    left.appendChild(h);
+  function trainCard(c, i, L, hpPot, b) {
+    var m = c.m, st = c.st, h = c.h, card = el("div", "card tcard"), left = el("div");
+    var hd = el("div", "row"); hd.appendChild(el("span", "chip gold", "#" + (i + 1))); hd.appendChild(el("h3", null, m.name)); if (c.pick) hd.appendChild(el("span", "chip ok", "Players recommend"));
+    var weak = {}; m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; if (mb && mb.weak) weak[mb.weak] = 1; }); Object.keys(weak).forEach(function (k) { hd.appendChild(el("span", "chip", "Weak to " + k.toLowerCase())); });
+    if (m.since && Date.now() - Date.parse(m.since) < 14 * 864e5 && m.since > (W.first0 || "")) hd.appendChild(el("span", "chip gold", "New"));
+    left.appendChild(hd);
     left.appendChild(el("div", "note", (m.region || "") + (m.near ? " · nearest town " + m.near : "")));
-    if (c.pick) left.appendChild(el("p", "why", c.pick.why));
-    var ms = el("div", "mobs"), tally = {};
-    m.mobs.forEach(function (x) { tally[x[0]] = (tally[x[0]] || 0) + x[1]; });
-    Object.keys(tally).sort(function (a, b) { return tally[b] - tally[a]; }).forEach(function (n) {
-      var mb = W.mobs[n]; if (!mb || mb.boss) return; var d = el("a", "mob"); d.href = "/monster/" + n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "/"; d.appendChild(sprite(n));
-      var t = el("div"); t.appendChild(el("b", null, n + " ×" + tally[n])); d.title = tally[n] + " spawn points"; t.appendChild(el("small", null, "Lv " + mb.lv + " · " + fmt(mb.hp) + " HP · " + fmt(mb.exp) + " EXP")); d.appendChild(t); ms.appendChild(d);
+    left.appendChild(el("p", "why2", ENG.why(h)));
+    var ms = el("div", "mobs");
+    h.rows.slice().sort(function (a, z) { return z.n - a.n; }).forEach(function (row) {
+      var mb = row.mob, n = row.name, d = el("a", "mob"); d.href = "/monster/" + n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "/"; d.appendChild(sprite(n));
+      var t = el("div"); t.appendChild(el("b", null, n + " ×" + row.n)); d.title = row.n + " spawn points"; t.appendChild(el("small", null, "Lv " + mb.lv + " · " + fmt(mb.hp) + " HP · " + fmt(mb.exp) + " EXP")); d.appendChild(t); ms.appendChild(d);
     });
     left.appendChild(ms);
     var sts = el("div", "stats"), pn = hpPot.name;
@@ -404,21 +518,34 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     else if (!qh.length) qb.appendChild(el("small", null, "none for these monsters"));
     left.appendChild(qb);
     if (qh.length) {
-      qh.slice(0, 3).forEach(function (q, k) { if (k) qb.appendChild(document.createTextNode(" · ")); var a = el("a", null, q.n.replace(/[?\uFFFD]/g, " ")); a.href = "/quests.html#q-" + q.id; qb.appendChild(a); if (q.exp) qb.appendChild(el("small", null, " " + fmt(q.exp) + " EXP")); });
+      qh.slice(0, 3).forEach(function (q, k) { if (k) qb.appendChild(document.createTextNode(" · ")); var a = el("a", null, q.n.replace(/[?�]/g, " ")); a.href = "/quests.html#q-" + q.id; qb.appendChild(a); if (q.exp) qb.appendChild(el("small", null, " " + fmt(q.exp) + " EXP")); });
       if (qh.length > 3) qb.appendChild(el("small", null, " +" + (qh.length - 3) + " more"));
     }
-    // the rest is one tap away: touch damage, accuracy, mesos a kill, the minimap and the route
-    var det = el("details", "tmore"), sm = el("summary", null, "Details, minimap and route"); det.appendChild(sm);
-    var nl = el("ul", "facts");
-    nl.appendChild(el("li", null, "Touch from " + st.worst.name + ": ~" + fmt(c.t.dmg) + " HP, lands " + Math.round(c.t.hit * 100) + "%" + (c.killsPerPot >= 1.5 ? " · 1 " + pn + " per " + fmt(c.killsPerPot) + " kills" : c.killsPerPot > 0 ? " · about 1 " + pn + " a kill" : "") + " · " + fmt(c.cost) + " mesos of potion a touch"));
+    // the full math, one tap away
+    var det = el("details", "tmore"), sm = el("summary", null, "The math, minimap and route"); det.appendChild(sm);
+    var nl = el("ul", "math");
+    h.rows.slice().sort(function (a, z) { return z.n - a.n; }).forEach(function (row) {
+      var r = row.r, li = el("li", row.ok ? null : "lw");
+      if (!r) { li.textContent = row.name + " ×" + row.n + ": no attack works on it · walked past"; nl.appendChild(li); return; }
+      li.appendChild(el("b", null, row.name + " ×" + row.n + ": "));
+      li.appendChild(document.createTextNode(r.atk.name + " " + fmt(r.line) + " a " + (r.atk.lines > 1 ? (r.atk.id === "4001003" ? "star" : "hit") + " ×" + r.atk.lines : "hit") +
+        " (" + Math.round(r.defMult * r.gap * r.el * 100) + "% gets through: " + fmt(row.mob[r.atk.def] || 0) + " " + (r.atk.def === "wdef" ? "weapon" : "magic") + " defense" + (r.gap < 1 ? ", level gap" : "") + (r.el !== 1 ? ", " + (r.el > 1 ? "weak" : r.el === 0 ? "immune" : "resists") : "") + ")" +
+        " · " + r.casts + (r.casts === 1 ? " cast" : " casts") + " · " + Math.round(r.hc * 100) + "% hit · " + r.kill.toFixed(1) + " s" + (row.ok ? "" : " · under the bar, walked past")));
+      nl.appendChild(li);
+    });
+    var rt = m.respawn && typeof m.respawn === "object" ? Object.keys(m.respawn) : [];
+    nl.appendChild(el("li", null, "Walking between kills: about " + h.walk.toFixed(1) + " s (estimate, shorter on busy maps; " + h.all + " spawn points)"));
+    nl.appendChild(el("li", null, "Respawn: the map refills about every 7.5 s and you reach about 3 of 4 points solo" + (rt.length ? "; " + rt.map(function (n) { return n + " every " + m.respawn[n] + " s"; }).join(", ") : "") + " · at most " + fmt(h.cap) + " kills an hour"));
+    nl.appendChild(el("li", null, "Kills an hour: " + (h.capped ? "respawn-limited at " + fmt(h.kph) : "3,600 ÷ (" + h.ks.toFixed(1) + " s a kill + " + h.walk.toFixed(1) + " s walking) = " + fmt(h.kph))));
+    nl.appendChild(el("li", null, "EXP an hour: " + fmt(h.kph) + " × " + fmt(h.exp) + " EXP a kill = " + fmt(h.eph)));
+    nl.appendChild(el("li", null, "Touch from " + st.worst.name + ": ~" + fmt(c.t.dmg) + " HP, lands " + Math.round(c.t.hit * 100) + "%" + (c.killsPerPot >= 1.5 ? " · 1 " + pn + " per " + fmt(c.killsPerPot) + " kills" : c.killsPerPot > 0 ? " · about 1 " + pn + " a kill" : "") + " · typical gear for your class"));
     nl.appendChild(el("li", null, "Mesos a kill: " + fmt(c.mesoKill) + (c.mesoRep < 0.5 ? " (level estimate)" : "") + (c.dropKill >= 1 ? " + " + fmt(c.dropKill) + " etc and potions" : "") + " · equips not counted"));
-    if (c.low) nl.appendChild(el("li", "lw", c.low.name + ": " + (c.low.hc < 0.05 ? "you can't hit it yet" : "you hit " + Math.round(c.low.hc * 100) + "%") + " · needs " + c.low.need + " ACC, you ~" + Math.round(c.acc)));
-    nl.appendChild(el("li", null, "How it's worked out: game stats for each monster, your damage and hit chance in typical gear for your level and class, the map refilling every 7.5 s (slower where the game data gives a monster its own timer) with 3 of 4 spawn points solo, and today's potion prices."));
+    nl.appendChild(el("li", null, "Formulas: Classic models from the game files and the MapleStory Classic Wiki, not yet checked against in-game numbers. Area attacks counted on one monster."));
     det.appendChild(nl);
-    var b = el("div", "row"); b.style.marginTop = "6px";
-    var r = el("button", "btn pri", "Route here"); r.type = "button"; r.addEventListener("click", function () { TO = c.pg; showTab("route"); $("to").value = c.pg; if (FROM) findRoute(); else $("from").focus(); });
+    var bb = el("div", "row"); bb.style.marginTop = "6px";
+    var r1 = el("button", "btn pri", "Route here"); r1.type = "button"; r1.addEventListener("click", function () { TO = c.pg; showTab("route"); $("to").value = c.pg; if (FROM) findRoute(); else $("from").focus(); });
     var o = el("button", "btn", "Open map"); o.type = "button"; o.addEventListener("click", function () { showMap(c.pg); });
-    b.appendChild(r); b.appendChild(o); det.appendChild(b);
+    bb.appendChild(r1); bb.appendChild(o); det.appendChild(bb);
     det.addEventListener("toggle", function () { if (det.open && !det.dataset.mm) { det.dataset.mm = 1; det.appendChild(minimap(m, { size: 260, maxh: 280 })); } });
     left.appendChild(det);
     card.appendChild(left); return card;
@@ -567,7 +694,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(ign) + "?fields=name,level,job,family").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       var d = j && j.data; if (!d || !d.level) { $("lvsrc").textContent = "No character named " + ign + " on classicrank.com yet."; return; }
       try { localStorage.setItem("fm-me", d.name); } catch (e) {}
-      $("ign").value = d.name; ME.lv = d.level; ME.cls = JOBCLS[d.family] || ME.cls; $("lv").value = ME.lv; $("cls").value = ME.cls; saveMe();
+      $("ign").value = d.name; ME.lv = d.level; ME.cls = (CD && CD.jobName(d.job)) || JOBCLS[d.family] || ME.cls; $("lv").value = ME.lv; $("cls").value = ME.cls; saveMe();
       $("lvsrc").textContent = d.name + ", " + (d.job || d.family) + ", level " + d.level + " on classicrank.com";
       renderTrain();
     }).catch(function () {});
@@ -590,9 +717,11 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     fetch(LIVE + "data/world.json?h=" + Math.floor(Date.now() / 36e5)).then(function (r) { return r.json(); }),
     fetch("/assets/training-notes.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
     fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
-    fetch("/data/mobs.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+    fetch("/data/mobs.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
+    fetch("/assets/classic-skills.json?v=1").then(function (r) { return r.json(); })
   ]).then(function (res) {
     MOBX = res[3] || {};
+    window.__CDATA = res[4]; ENG = CD.Engine(res[4]);
     W = res[0]; NOTES = res[1]; MAPS = W.maps; PAGES = Object.keys(MAPS).sort();
     // one row per monster: the game lists some spawn groups twice ("Iron Hog x12" and "Iron Hog x1")
     PAGES.forEach(function (pg) { var m = MAPS[pg], by = {}, out = []; (m.mobs || []).forEach(function (x) { if (by[x[0]]) by[x[0]][1] += x[1]; else { by[x[0]] = [x[0], x[1]]; out.push(by[x[0]]); } }); m.mobs = out; });
@@ -610,9 +739,10 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var h = location.hash, mr = /^#route=([^|]*)\|(.+)$/.exec(h), mm = /^#map=(.+)$/.exec(h);
     if (mr) { showTab("route"); $("from").value = decodeURIComponent(mr[1]) || FROM; $("to").value = decodeURIComponent(mr[2]); findRoute(); }
     else if (mm) showMap(decodeURIComponent(mm[1]));
+    loadAccountBuild();
     meIgn.then(function (ign) { var saved = ""; try { saved = localStorage.getItem("fm-me") || ""; } catch (e) {} if (ign || saved) { $("ign").value = ign || saved; pullLevel(ign || saved); } });
   }).catch(function (e) { $("v-train").appendChild(el("div", "card note", "Couldn't load the map data. Try again in a minute.")); console.error(e); });
 })();
 </script>
 <script src="/assets/hit.js" defer></script>
-<!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Play</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>
+<!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Quests and training</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>

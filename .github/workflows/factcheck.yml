@@ -27,11 +27,20 @@ jobs:
           set +e
           python3 tools/factcheck.py /tmp/live/data/itemguide.json /tmp/live/data/world.json /tmp/factcheck.json
           code=$?
+          # training picks can't drift: every recommended map must pass the hit and kill bar for its build
+          node tools/trainbar.cjs /tmp/live/data/world.json assets/classic-skills.json assets/training-notes.json /tmp/trainbar.json
+          tcode=$?
+          # skill and weapon numbers in the repo against today's game files (a patch can change them)
+          if python3 tools/skilldata.py /tmp/skills-now.json /tmp/live/data/itemdb.json; then
+            python3 -c "import json,sys;a=json.load(open('assets/classic-skills.json'));b=json.load(open('/tmp/skills-now.json'));[x.pop('built',None) for x in (a,b)];sys.exit(0 if a==b else 1)" || { echo "game files changed skill or weapon numbers: run tools/skilldata.py and commit assets/classic-skills.json"; tcode=1; }
+          fi
           set -e
           if [ ! -s /tmp/factcheck.json ]; then echo "fact check wrote nothing (exit $code)"; exit 1; fi
+          if [ "$code" = "0" ]; then code=$tcode; fi
           cp /tmp/factcheck.json /tmp/live/data/factcheck.json
+          [ -s /tmp/trainbar.json ] && cp /tmp/trainbar.json /tmp/live/data/trainbar.json
           cd /tmp/live
-          git add -f data/factcheck.json
+          git add -f data/factcheck.json data/trainbar.json 2>/dev/null || git add -f data/factcheck.json
           if ! git diff --cached --quiet; then
             git commit -q -m "Weekly fact check"
             for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done

@@ -1298,3 +1298,15 @@ body.sheet .nudge { display: none; }
 
 /* the price table holds a screen's worth of space until its rows arrive, so the panels under it don't jump */
 #prices-view .tbox:has(#rows:empty) { min-height: min(1060px, calc(100vh - 110px)); }
+
+/* phones: the menu button sits at the top right, level with the logo, so it never wraps onto a line of its own */
+@media (max-width: 820px) {
+  .top { position: relative; }
+  .top .brand { padding-right: 46px; }
+  /* the tagline sits beside the logo in two short lines when there's room, under it when there isn't */
+  .top .brand p { flex: 1 1 140px; min-width: 140px; line-height: 1.25; }
+  .top-right { position: static; }
+  .top-right #menubtn { position: absolute; top: 2px; right: 0; margin: 0; }
+  .top-right .menu { top: 44px; right: 0; }
+}
+@media (max-width: 640px) { .top { position: relative; } }
