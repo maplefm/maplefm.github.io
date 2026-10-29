@@ -1,10 +1,15 @@
 {
- "version": "2026.10.29.2",
- "date": "2026-10-29T16:26:55+00:00",
- "notes": "Hover counts now reach Club FM with your shop scans, so we can see why some equips come in without stats.",
- "sha256": "ae07e79bf44410735522997004ee98b1752c3ec305b6952643746fba6642b9f6",
- "size": 154888,
+ "version": "2026.10.29.3",
+ "date": "2026-10-29T19:12:55+00:00",
+ "notes": "Popups and room names the watcher can't read are sent as small pictures (up to 30 a day) so Club FM can fix the reader without asking for your review folder.",
+ "sha256": "2931d24dcbb05841d528155255992b41f167406f7fecdb4286f75973cede26ab",
+ "size": 155445,
  "history": [
+  {
+   "version": "2026.10.29.3",
+   "date": "2026-10-29",
+   "notes": "Popups and room names the watcher can't read are sent as small pictures (up to 30 a day) so Club FM can fix the reader without asking for your review folder."
+  },
   {
    "version": "2026.10.29.2",
    "date": "2026-10-29",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.2",
    "date": "2026-10-24",
    "notes": "Scrolled items whose tooltip title reads badly keep their stats: the row under the pointer is used. Fixes 10 attack Work Gloves showing no stats."
-  },
-  {
-   "version": "2026.10.24.1",
-   "date": "2026-10-24",
-   "notes": "A short chime when a hovered item's stats are read, a low tone when a hover couldn't be read. Tooltips that open above the pointer are read too."
   }
  ],
  "pip": [],
- "sig": "3844db86366e2f42972893b862bfb75ec4c0cd08a9f9b29b4f0c5088feec8d7a607a8a5388642ff54db346f607b2b37bbf673a3f2ceceac24ad68b8a78c6867ab16b29bc976fadaa35ef1da991c9e224853a95d2766a9647463733167d892eade9c31e71d42c67c775bc8ca014627a8da80b3ce19a885c1ce0835d37c625c4f62aa93167d1122f685240969ef0b599a3f3fca0348975bf6c2b273608448423b94febd891ce0d00c27dc5bb6110436a332893ce11771e9fbcf9b630a890531efda0c91d8470be5378938e0f948119c519cb893a8229cc34e85850620393c2fb2f3811dff1c36835e122831863c28e85df85b38bf2b497562d6123a143d58b9157"
+ "sig": "3417dea27e60a6e22e59bf51f2e34945895ecf1313f272fae0852981c9765336aa6d549e68cdbac3fc8b5232faeae8228a4c93f4741d117a72c097cc4c646c06364b9a54057fd46f35089d09cb162e1a105718f2dfcd50d7148bd759fff578f105cd92097df7ec889a070c82eb87d95233cf2e4742d397544e976d32ca55425d03664d5b0ebef1fecb44b4af4211c3f960bbf86009012a47da31cb4c7600e69923ccc7810e692e2e19f46b8199426189695f299aded6241d6addfa49c08822ae475ca9f36dfbe0557abf8d5e115233dd05183fa4f49f75f6dbf59faa3d7b7e4d300952a44b063eeca688c6a420e1c0940e46f2479674ca889d9530099dc1aaf9"
 }

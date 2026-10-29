@@ -89,6 +89,9 @@ async function route(req, env, url) {
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
   if (p === "/tipimg" && req.method === "POST") return tipImgPut(req, env);
   if (p.startsWith("/tipimg/") && req.method === "GET") return tipImgGet(p, env);
+  if (p === "/missimg" && req.method === "POST") return missPut(req, env);
+  if (p === "/inbox/miss" && req.method === "GET") return missList(req, env, url);
+  if (p.startsWith("/inbox/miss/") && req.method === "GET") return missGet(req, env, p);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/inbox/rejects" && req.method === "GET") return inboxRejects(req, env);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
@@ -541,6 +544,48 @@ async function tipImgPut(req, env) {
   const hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", buf))].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
   await env.ACCOUNTS.put("tipimg:" + hash, buf, { expirationTtl: 30 * 86400, metadata: { w, h, t: Date.now() } });
   return json({ ok: true, h: hash });
+}
+// Readings the watcher couldn't make (an item popup it couldn't read, a room title it couldn't place), sent as small
+// pictures so the readers can be fixed without asking scanners for their review folders. Never public: only the
+// pump (INBOX_PULL_KEY) lists and fetches them, into the private archive. 40 a day per watcher, kept 14 days.
+async function missPut(req, env) {
+  const ip = req.headers.get("CF-Connecting-IP") || "", hid = req.headers.get("X-Watcher") || "", kind = req.headers.get("X-Kind") || "";
+  if (overLimit("mi:" + ip, 60, 600)) return json({ error: "slow down" }, 429);
+  if (!/^[0-9a-f]{16}$/.test(hid) || !/^(tip|room|bar)$/.test(kind)) return json({ error: "no" }, 403);
+  const buf = new Uint8Array(await req.arrayBuffer());
+  if (buf.length < 200 || buf.length > 300000) return json({ error: "size" }, 413);
+  const png = [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => buf[i] === v);
+  const dv = new DataView(buf.buffer), w = png ? dv.getUint32(16) : 0, h = png ? dv.getUint32(20) : 0;
+  if (!png || w < 20 || w > 1000 || h < 8 || h > 1000) return json({ error: "not a picture" }, 400);
+  const day = new Date().toISOString().slice(0, 10), ck = "misscnt:" + day + ":" + hid, n = Number(await env.ACCOUNTS.get(ck) || 0);
+  if (n >= 40) return json({ ok: true, full: true });
+  await env.ACCOUNTS.put(ck, String(n + 1), { expirationTtl: 2 * DAY });
+  const info = String(req.headers.get("X-Info") || "").replace(/[^\x20-\x7e]/g, "").slice(0, 300), t = Date.now();
+  await env.ACCOUNTS.put("miss:" + t + ":" + hid + ":" + kind, buf, { expirationTtl: 14 * DAY, metadata: { w, h, t, hid, kind, info, ver: String(req.headers.get("User-Agent") || "").slice(0, 40) } });
+  return json({ ok: true });
+}
+async function pullOK(req, env) {
+  const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
+  return !!want && got.length === want.length && (await same(got, want));
+}
+async function missList(req, env, url) {
+  if (!(await pullOK(req, env))) return json({ error: "no" }, 403);
+  const after = Math.max(0, parseInt(url.searchParams.get("after") || "0", 10) || 0), out = [];
+  let cursor;
+  do {
+    const l = await env.ACCOUNTS.list({ prefix: "miss:", cursor, limit: 1000 });
+    for (const k of l.keys) if (k.metadata && k.metadata.t > after) out.push({ key: k.name, ...k.metadata });
+    cursor = l.list_complete ? null : l.cursor;
+  } while (cursor && out.length < 400);
+  out.sort((a, b) => a.t - b.t);
+  return json({ items: out.slice(0, 400) }, 200, { "Cache-Control": "no-store" });
+}
+async function missGet(req, env, p) {
+  if (!(await pullOK(req, env))) return json({ error: "no" }, 403);
+  const key = decodeURIComponent(p.slice("/inbox/miss/".length));
+  if (!/^miss:\d+:[0-9a-f]{16}:(tip|room|bar)$/.test(key)) return json({ error: "no" }, 400);
+  const v = await env.ACCOUNTS.get(key, "arrayBuffer");
+  return v ? new Response(v, { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } }) : json({ error: "gone" }, 404);
 }
 async function tipImgGet(p, env) {
   const m = /^\/tipimg\/([0-9a-f]{16})\.png$/.exec(p);
