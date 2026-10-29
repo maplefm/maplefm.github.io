@@ -119,6 +119,10 @@ def ident(r):
     return json.dumps([r.get("s"), r.get("i"), r.get("p"), r.get("q", 1), r.get("k", ""), r.get("_o", 0)])
 
 
+DROPS = {}   # why uploads or rows were dropped this run, folded into the state per day (merge)
+def drop(why, n=1): DROPS[why] = DROPS.get(why, 0) + n
+
+
 def payloads(rows, block, now):
     """Complete uploads from the sheet, oldest first: [(sid, name, docs)]"""
     parts = {}
@@ -139,15 +143,16 @@ def payloads(rows, block, now):
         reg = m.get("reg") if m.get("v") == 3 else None
         if m.get("v") == 3:
             if not (isinstance(reg, str) and re.fullmatch(r"[0-9a-f]{64}", reg)) or not sig_ok(reg, m):
-                continue                                    # a v3 post that doesn't verify against its own key is junk
-        p = parts.setdefault((sid, seq), {"n": n, "nm": m.get("nm") or m.get("ign"), "v": m.get("v"), "k": {}, "reg": reg})
+                drop("bad signature"); continue             # a v3 post that doesn't verify against its own key is junk
+        p = parts.setdefault((sid, seq), {"n": n, "nm": m.get("nm") or m.get("ign"), "v": m.get("v"), "k": {}, "reg": reg,
+                                          "ver": str(m.get("ver") or "")[:24] if re.fullmatch(r"[0-9.]{4,24}", str(m.get("ver") or "")) else ""})
         if p["reg"] != reg:
             continue
         p["k"][k] = z
     out = []
     for (sid, seq), p in sorted(parts.items(), key=lambda x: x[0][1]):
         if len(p["k"]) != p["n"]:
-            continue
+            drop("incomplete upload"); continue
         try:
             raw = zlib.decompress(base64.b64decode("".join(p["k"][i] for i in range(p["n"]))), bufsize=1 << 20)
             if len(raw) > 8_000_000:
@@ -156,7 +161,7 @@ def payloads(rows, block, now):
         except Exception:
             continue
         if isinstance(docs, list):
-            out.append((sid, p["nm"], p["v"], docs, p["reg"]))
+            out.append((sid, p["nm"], p["v"], docs, p["reg"], p["ver"]))
     return out
 
 
@@ -172,7 +177,7 @@ def merge(state, rows, block=()):
     for h in ids:
         if not ids[h].get("nm") and h in NAMES:
             ids[h]["nm"] = NAMES[h]
-    for sid, nm, v, docs, reg in payloads(rows, block, now):
+    for sid, nm, v, docs, reg, ver in payloads(rows, block, now):
         h = hid(sid)
         me = ids.setdefault(h, {"nm": "", "docs": {}, "h": 1})
         # the first key a watcher registers is pinned; a post under this id with another key, or with none once
@@ -180,11 +185,13 @@ def merge(state, rows, block=()):
         if INBOX_KEY:
             if reg:
                 if me.get("key") and not hmac.compare_digest(me["key"], mask(reg, sid)):
-                    continue
+                    drop("key changed: " + h[:4]); continue
                 if not me.get("key"):
                     me["key"] = mask(reg, sid)
             elif me.get("key"):
-                continue
+                drop("no key: " + h[:4]); continue
+        if ver:                                         # the watcher version it runs, and when we last heard from it
+            me["ver"] = ver; me["vt"] = now
         if nm:                                          # an empty name never wipes the one we already know
             me["nm"] = str(nm)[:16]
         if not me["nm"] and h in NAMES:
@@ -212,8 +219,8 @@ def merge(state, rows, block=()):
             for r in (d.get("rows") or [])[:MAX_ROWS_DOC]:
                 c = clean_row(r, now)
                 if not c:
-                    continue
-                if v == 2 and i_(r.get("_o"), 0, 999):
+                    drop("bad row: " + h[:4]); continue
+                if v in (2, 3) and i_(r.get("_o"), 0, 999):   # the watcher numbers identical listings in a shop
                     c["_o"] = r["_o"]
                 else:                                   # old whole-snapshot uploads: number repeats in order
                     k0 = json.dumps([c.get("s"), c.get("i"), c.get("p"), c.get("q", 1), c.get("k", "")])
@@ -221,7 +228,7 @@ def merge(state, rows, block=()):
                 ik = ident(c)
                 old = doc["rows"].get(ik)
                 if old is None and len(doc["rows"]) >= MAX_ROWS_DOC:
-                    continue
+                    drop("day cap: " + h[:4]); continue
                 # when the pump first saw this listing, and first saw it sold: a claimed time earlier than that is
                 # a watcher's word, and credits trust the pump's clock over it
                 c["fs"] = (old or {}).get("fs") or now
@@ -230,7 +237,14 @@ def merge(state, rows, block=()):
                 elif old and old.get("ss"):
                     c["ss"] = old["ss"]
                 if old is None or c.get("t", 0) >= old.get("t", 0):
+                    if old != c: doc["u"] = now            # when this day's copy last changed: late rows count too
                     doc["rows"][ik] = c
+    # drops by day, kept for the daily scanner health check
+    if DROPS:
+        dd = state.setdefault("drops", {}).setdefault(datetime.date.today().isoformat(), {})
+        for k, n in DROPS.items(): dd[k] = dd.get(k, 0) + n
+        DROPS.clear()
+    for day in [d for d in state.get("drops", {}) if d < cutoff]: del state["drops"][day]
     # forget old days and blocked watchers
     for sid in list(ids):
         if sid in block:
@@ -258,12 +272,14 @@ def publish(state):
             day, src = key.split("|", 1)
             doc = me["docs"][key]
             rows = []
-            for r in doc["rows"].values():
-                r = dict(r); r.pop("_o", None); rows.append(r)
+            for k in sorted(doc["rows"]):              # a fixed order, so an unchanged copy writes the same file
+                r = dict(doc["rows"][k]); r.pop("_o", None); rows.append(r)
             total += len(rows)
             if total > MAX_ROWS_ID:
                 break
-            o = {"at": doc["at"], "src": src, "rows": rows, "who": names[sid], "inbox": sid[:4]}
+            o = {"at": doc["at"], "src": src, "rows": rows, "who": names[sid], "inbox": sid[:4], "day": day}
+            if doc.get("u"): o["u"] = doc["u"]
+            if me.get("ver"): o["ver"] = me["ver"]
             if doc.get("hv"): o["hv"] = doc["hv"]
             out.append(o)
     out.sort(key=lambda d: (d["at"], d["who"], d["src"]))
