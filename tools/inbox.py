@@ -119,6 +119,7 @@ def ident(r):
     return json.dumps([r.get("s"), r.get("i"), r.get("p"), r.get("q", 1), r.get("k", ""), r.get("_o", 0)])
 
 
+FMROOM = re.compile(r"^FM\d{1,2}$")
 DROPS = {}   # why uploads or rows were dropped this run, folded into the state per day (merge)
 def drop(why, n=1): DROPS[why] = DROPS.get(why, 0) + n
 
@@ -265,6 +266,21 @@ def publish(state):
             nm = nm[:11] + "-" + sid[:4]
         taken[nm.lower()] = sid
         names[sid] = nm
+    # A shop with no room read gets one only when a scanner (itself included) placed the same seller on the same channel within
+    # 6 hours in exactly one room. Marked ri (room inferred), so the site says "likely". Worked out each run from the
+    # stored rows, never written back, so it can be switched off or changed without touching the data.
+    seen = {}
+    for sid, me in state.get("ids", {}).items():
+        for key, doc in me["docs"].items():
+            if not key.endswith("|watcher-shop"): continue
+            for r in doc["rows"].values():
+                if FMROOM.match(str(r.get("r") or "")) and r.get("c") and not r.get("ri"):
+                    seen.setdefault((str(r.get("s", "")).lower(), r["c"]), []).append((r.get("t", 0), r["r"], sid))
+    def infer(r, sid):
+        if FMROOM.match(str(r.get("r") or "")) or not r.get("c") or r.get("ri"): return r
+        rooms = {rm for t, rm, s2 in seen.get((str(r.get("s", "")).lower(), r["c"]), ()) if abs(t - r.get("t", 0)) <= 6 * 3600}
+        if len(rooms) == 1: r["r"] = rooms.pop(); r["ri"] = 1
+        return r
     out = []
     for sid, me in state.get("ids", {}).items():
         total = 0
@@ -273,7 +289,8 @@ def publish(state):
             doc = me["docs"][key]
             rows = []
             for k in sorted(doc["rows"]):              # a fixed order, so an unchanged copy writes the same file
-                r = dict(doc["rows"][k]); r.pop("_o", None); rows.append(r)
+                r = dict(doc["rows"][k]); r.pop("_o", None)
+                rows.append(infer(r, sid) if src == "watcher-shop" else r)
             total += len(rows)
             if total > MAX_ROWS_ID:
                 break
