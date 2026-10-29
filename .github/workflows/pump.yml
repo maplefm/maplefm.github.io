@@ -57,6 +57,8 @@ jobs:
             if [ $(( n % 15 )) -eq 0 ]; then curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/kofi-income -o /tmp/kofi.json || echo '{}' > /tmp/kofi.json; python3 -I $T/credits.py data data/credits.json /tmp/main/data/pay.json /tmp/main/data/itemdb.json /tmp/links.json data/credits_ledger.json /tmp/kofi.json || true; fi
             # the board's item list: the public copy is the one the item build keeps current
             git -C "$PUB" show origin/live:data/itemdb.json > /tmp/itemdb.json 2>/dev/null && [ -s /tmp/itemdb.json ] && ! cmp -s /tmp/itemdb.json data/itemdb.json && cp /tmp/itemdb.json data/itemdb.json || true
+            # scanner health (room read rate, late rows, watcher version, dropped uploads) for the watchdog's alert
+            if [ $(( n % 15 )) -eq 0 ]; then python3 $T/health.py data data/health.json /tmp/main/download/version.json || true; fi
             git add -A data
             # the finished price board, built by the page itself (the full copy stays private, a price-only copy goes public)
             if ! git diff --cached --quiet || [ $(( n % 15 )) -eq 0 ]; then timeout 300 python3 $T/snapshot.py /tmp/main . data/summary.json || true; git add -A data; git add -f data/hoverwanted.json 2>/dev/null || true; fi
@@ -71,7 +73,7 @@ jobs:
             cd "$PUB"
             git reset -q --hard origin/live
             git rm -q --ignore-unmatch data/*.enc data/live.json
-            for f in summary-public ranks report credits names covhours; do [ -f /tmp/arch/data/$f.json ] && cp /tmp/arch/data/$f.json data/; done
+            for f in summary-public ranks report credits names covhours health; do [ -f /tmp/arch/data/$f.json ] && cp /tmp/arch/data/$f.json data/; done
             for f in /tmp/arch/data/*-icons.json; do [ -f "$f" ] && cp "$f" data/; done
             sig=$(cat /tmp/arch/data/watcher*.json /tmp/arch/data/streams.json /tmp/arch/data/streams-vods.json /tmp/arch/data/inbox.json 2>/dev/null | sha1sum | cut -c1-12)
             if [ "$sig" != "$lastsig" ]; then echo "{\"at\":$(date +%s%3N),\"v\":\"$sig\"}" > data/live.sig; lastsig="$sig"; fi

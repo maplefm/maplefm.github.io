@@ -118,6 +118,15 @@ except Exception:
     n = 0
 check("Price data", n > 100, f"{n} items" if n else f"unreadable (status {st})", ms)
 
+# 3b. Scanners: the pump's hourly health check (tools/health.py): a watcher that stops reading rooms, falls behind or
+# runs an old release
+st, body, ms = get("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/health.json?t=" + str(int(NOW)))
+try:
+    hj = json.loads(body); hf = hj.get("flags") or []; hage = (NOW * 1000 - hj.get("at", 0)) / 3600000
+    check("Scanner health", not hf and hage < 6, "all scanners within the bars" if not hf and hage < 6 else ("; ".join(hf)[:300] if hf else f"health check last ran {hage:.0f} h ago"), ms)
+except Exception:
+    check("Scanner health", True, "no health file yet", ms)
+
 # 4. Workflows: failed scheduled jobs get one automatic re-run; the pump gets restarted when prices go stale
 if TOKEN:
     st, runs = gh("/actions/runs?per_page=60")
