@@ -19,6 +19,7 @@
 
 import { statReport, densify, itemdb } from "./statcheck.js";
 import { cleanAlert, runAlerts, reindex, ALERT_MAX } from "./alerts.js";
+import { fastPut, fastPulled, fastDocs } from "./fast.js";
 import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
@@ -474,7 +475,17 @@ async function archSig(env) {
 }
 async function dataSig(env) {
   const sha = await archSig(env).catch(() => null);
-  return json({ v: sha ? sha.slice(0, 12) : "", at: Date.now() }, 200, { "Cache-Control": "no-store" });
+  // the fast lane's newest row moves the stamp too, so open boards fetch a new deal as soon as it lands
+  const f = await fastStamp(env);
+  return json({ v: (sha ? sha.slice(0, 12) : "") + (f ? "-" + f : ""), at: Date.now() }, 200, { "Cache-Control": "no-store" });
+}
+async function fastStamp(env) {
+  const key = new Request("https://archive.cache/faststamp?b=" + Math.floor(Date.now() / 5000));
+  const hit = await caches.default.match(key);
+  if (hit) return Number(await hit.text()) || 0;
+  const v = (await fastDocs(env)).ver;
+  await caches.default.put(key, new Response(String(v), { headers: { "Cache-Control": "public, max-age=5" } })).catch(() => {});
+  return v;
 }
 async function archFetch(env, path, ttl = 60, ref = null) {
   const key = new Request("https://archive.cache/" + path + (ref ? "?ref=" + ref : "?b=" + Math.floor(Date.now() / 1000 / ttl)));
@@ -524,7 +535,17 @@ async function inboxPost(req, env) {
   let m = null; try { m = JSON.parse(msg); } catch (e) {}
   if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") { await inboxReject(env, "bad post"); return json({ error: "bad post" }, 400); }
   await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
+  // new shop rows also go to the fast lane, so a deal reaches the board in seconds instead of at the next pump pass
+  await fastPut(env, msg, await blockedIds(env));
   return json({ ok: true });
+}
+// Watchers the owner blocked (the archive's data/inbox_block.json, hashed ids), checked again every 10 minutes
+async function blockedIds(env) {
+  try {
+    const r = await archFetch(env, "data/inbox_block.json", 600);
+    const a = r ? await r.json() : [];
+    return new Set(Array.isArray(a) ? a.map(String) : []);
+  } catch (e) { return new Set(); }
 }
 // Rejected uploads, counted per UTC day and reason (KV inbox:rej:<day>, kept 15 days) for the daily scanner check.
 async function inboxReject(env, why) {
@@ -638,6 +659,7 @@ async function inboxPull(req, env, url) {
   const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
   if (!want || got.length !== want.length || !(await same(got, want))) return json({ error: "no" }, 403);
   const after = Math.max(0, parseInt(url.searchParams.get("after") || "0", 10) || 0);
+  if (!after) await fastPulled(env);       // a pump pass starts: what it pulls now is in the board after this pass
   const r = await env.INBOX_DB.prepare("SELECT id, t, msg FROM posts WHERE id > ? ORDER BY id LIMIT 2000").bind(after).all();
   const rows = (r.results || []).map((x) => [new Date(x.t).toISOString(), x.msg, x.id]);
   if (!after) await env.INBOX_DB.prepare("DELETE FROM posts WHERE t < ?").bind(Date.now() - 15 * DAY * 1000).run();
@@ -742,7 +764,9 @@ async function dataLive(req, env) {
       body = out + "}";
       if (ref) await caches.default.put(ck, new Response(body, { headers: { "Cache-Control": "public, max-age=900" } })).catch(() => {});
     }
-    if (!club) { const hp = await holdPrices(env); const o = JSON.parse(body); Object.keys(o).forEach((k) => holdDeals(o[k], hp)); body = JSON.stringify(o); }
+    const o = JSON.parse(body); o["data/fast.json"] = (await fastDocs(env)).docs;
+    if (!club) { const hp = await holdPrices(env); Object.keys(o).forEach((k) => holdDeals(o[k], hp)); }
+    body = JSON.stringify(o);
     return new Response(mk === null ? body : markTimes(body, mk), { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store", "X-Delta": hit ? "cached" : "1" } });
   }
   const hp = club ? null : await holdPrices(env);
@@ -762,6 +786,10 @@ async function dataLive(req, env) {
       else if (mk === null) { const rd = parts[i].body.getReader(); for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); } }
       else await w.write(enc.encode(markTimes(await parts[i].text(), mk)));
     }
+    // the fast lane: new rows the pump hasn't folded in yet
+    const fd = (await fastDocs(env)).docs; if (hp) holdDeals(fd, hp);
+    const ft = JSON.stringify(fd);
+    await w.write(enc.encode((first ? "" : ",") + '"data/fast.json":' + (mk === null ? ft : markTimes(ft, mk))));
     await w.write(enc.encode("}")); await w.close();
   })();
   return new Response(readable, { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } });

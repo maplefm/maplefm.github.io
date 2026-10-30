@@ -1,5 +1,5 @@
 {
- "version": "2026.10.30.4",
+ "version": "2026.10.30.5",
  "files": {
   "fmparse.py": "f7a204a3bee3",
   "glyphs.py": "610c9f0239fc",
@@ -12,8 +12,8 @@
   "tiers.png": "e401f89149c7",
   "statfit.json": "9809ccd4d8cd",
   "tipglyphs.json": "e32d7ca1b288",
-  "watcher.py": "016ab7b97dde",
-  "scanglue.py": "97468b961397",
+  "watcher.py": "2de590ebed5c",
+  "scanglue.py": "7b7606b0db27",
   "cursor.json": "017a90f1f96b"
  }
 }

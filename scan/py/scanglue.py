@@ -293,13 +293,27 @@ def frame(buf, w, h, x0=0, fw=0, room=None):
                 hit = S.add_tooltip(dict(res, rows=rows))
                 out["tip"]["kept"] = bool(hit and hit != "pending")
             S.flush_pending(res)
+            quick_publish()
     return json.dumps(out)
 
 
-def publish(name="", ign=""):
+WHO = {"name": "", "ign": "", "last": 0.0}
+
+
+def publish(name=None, ign=None):
     """What FM Watcher would send now: the same listings, the same signed inbox posts (sent by the patched urlopen)."""
+    if name is not None: WHO["name"] = name
+    if ign is not None: WHO["ign"] = ign
+    S = store(); S.fresh = False; WHO["last"] = time.time()
+    return bool(watcher.send_inbox({"name": WHO["name"], "ign": WHO["ign"]}, S.published_docs()))
+
+
+def quick_publish():
+    """New listings go up within half a minute, like FM Watcher, so deals reach the site fast."""
     S = store()
-    return bool(watcher.send_inbox({"name": name, "ign": ign}, S.published_docs()))
+    if S.fresh and time.time() - WHO["last"] >= 30:
+        try: publish()
+        except Exception: pass
 
 
 def counts():

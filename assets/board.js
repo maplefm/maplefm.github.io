@@ -15,7 +15,7 @@
   var CREW = ["Maya", "Jack", "Matt", "Jimmy"];
   // trade chat rows read wrong before a reader fix, corrected by hand: seller|item as read|price -> real item
   var CHATFIX = { "videogame|Claw Attack Scroll: Intermediate|140000": "Earring LUK Scroll: Intermediate" };
-  var FILES = [["data/watcher.json", "Maya"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"], ["data/inbox.json", null]];
+  var FILES = [["data/watcher.json", "Maya"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"], ["data/inbox.json", null], ["data/fast.json", null]];   // fast.json: new rows from the Worker before the pump folds them in
   var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5;
   var $ = function (id) { return document.getElementById(id); };
   var ICONS = {}; try { ICONS = JSON.parse($("icon-ids").textContent); } catch (e) {}

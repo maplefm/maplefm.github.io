@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.4",
- "date": "2026-10-30T05:47:46+00:00",
- "notes": "Weapons with a Knockback Chance line now read exactly too.",
- "sha256": "bd23a98ee13035a8f9a09ea26876c0b482aa708c8e2f162655c8f43f1a08f060",
- "size": 161664,
+ "version": "2026.10.30.5",
+ "date": "2026-10-30T06:41:07+00:00",
+ "notes": "Deals reach the site in about a minute: new listings are sent within half a minute instead of every 10 minutes.",
+ "sha256": "e623bc26f2c3460e36b677f2d29669467cef6315131a9f1967decb28c8c43308",
+ "size": 161834,
  "history": [
+  {
+   "version": "2026.10.30.5",
+   "date": "2026-10-30",
+   "notes": "Deals reach the site in about a minute: new listings are sent within half a minute instead of every 10 minutes."
+  },
   {
    "version": "2026.10.30.4",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.7",
    "date": "2026-10-24",
    "notes": "New items: when a shop has an item the watcher has never seen, hovering it once reads its full name off the tooltip, and from then on that item is read, priced and uploaded with its icon. Cut-off names also finish themselves from items other scanners found. Close your watcher and open start.bat to update."
-  },
-  {
-   "version": "2026.10.24.6",
-   "date": "2026-10-24",
-   "notes": "FM Entrance reading: dark chalkboards (black, brown, purple) are read now, rolls like +2 or 65 watk are kept, (2) is read as how many they have, prices without a k are fixed, and a post read with one digit wrong (90K vs 30K) keeps the right one. Close your watcher and open start.bat to update."
   }
  ],
  "pip": [],
- "sig": "a90816a13aa1148c0b9faaff16d1fde456527faa006d62b55f9616ea20e9ea542b157a45b7fd10de96ee6eec6c960f344ef7732a8afc4a1fbcd94523c4b826a3e7edeba9e50cf8b1c9d1bef5fe7ad5d35773e0635ae5017075292f5cc6ad6e2ba8642a50fcf04a31299b5a81958853aee582b7fc5e67e348fd3223da8e0c9b4a8e36dc8f0b3a447de2495e3149e2b5acca4c2e006f71c7075092025b2d5a4fe6fb2aa664de63527d1f1910ac4a463ebf69b46f3b2b991b74ce1349d9c1cf8a10b4c4458298c1db8e3b6854a69a9c428633291c8a0839f6fb7ef3f8e399a53fd3aee76bd0cfc99242c6d4c4d453ce4d34e2e8562b46dbbeee62645e8f21a91b8f"
+ "sig": "95f02653417258687e9a1e6faa22f68d74e21a349662cab43467eea083adf2d5a5605344c68c2f3e73c3bfe985dd2164ca714ac13d27258eb0140e27833ed638772ad1c2dcd3a71ef23843face3aa13b0010649c2680ed568df60a8bfdc26c31adbb4d5a0702c351c15acd0149ea12bd90eef968c7da4b27003883440753e575475cbcdbd0682953fb7d09dd56c355c15ad027339f461be04352d5542db07387c074163a2505162a63cf0bd7d2fb9036f1508689d25e3223eb087b083370d757d0c20d3cc447c98b2460f7f61012b957bf6e76df51aa5996a7e481fc7ddd8ffe8c4eba31a2e05a4be31f30a53f4271d877ff3f6ea03e4f42b9dd034360f68204"
 }
