@@ -1,12 +1,12 @@
 {
- "at": 1793329586396,
+ "at": 1793332324987,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.29.3",
+ "current": "2026.10.30.1",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.956,
    "late_share7": 0.023,
-   "behind": 3
+   "behind": 4
   },
   "Faif": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": 0.954,
    "late_share7": 0.0,
-   "behind": 20
+   "behind": 21
   },
   "yinisera": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": 0.992,
    "late_share7": 0.0,
-   "behind": 24
+   "behind": 25
   },
   "acter": {
    "rows24": 0,
@@ -102,23 +102,23 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.417,
-   "behind": 20
+   "behind": 21
   },
   "Zik": {
-   "rows24": 23336,
-   "room24": 272,
-   "ch24": 23336,
-   "rows7": 78188,
-   "room7": 2811,
-   "late7": 1127,
-   "chat24": 117,
-   "last": 1793270922,
-   "ver": "2026.10.28.1",
-   "lag_median_min": 6.1,
-   "room_rate24": 0.012,
-   "room_rate7": 0.036,
-   "late_share7": 0.014,
-   "behind": 3
+   "rows24": 22287,
+   "room24": 546,
+   "ch24": 22209,
+   "rows7": 79127,
+   "room7": 3085,
+   "late7": 1714,
+   "chat24": 108,
+   "last": 1793331604,
+   "ver": "2026.10.29.3",
+   "lag_median_min": 6.2,
+   "room_rate24": 0.024,
+   "room_rate7": 0.039,
+   "late_share7": 0.022,
+   "behind": 1
   },
   "laclac": {
    "rows24": 15171,
@@ -134,7 +134,7 @@
    "room_rate24": 0.826,
    "room_rate7": 0.26,
    "late_share7": 0.008,
-   "behind": 0
+   "behind": 1
   },
   "DivineFeces": {
    "rows24": 0,
@@ -143,20 +143,24 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 6,
-   "last": 1793317789,
+   "chat24": 7,
+   "last": 1793329199,
    "ver": "2026.10.29.3",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   }
  },
- "drops": {},
+ "drops": {
+  "2026-10-30": {
+   "bad row: 3a3a": 4
+  }
+ },
  "rejects": {},
  "flags": [
-  "Zik: 1% of shops placed in a room in the last 24 hours (23336 shop rows)",
-  "Zik: watcher 2026.10.28.1, 3 releases behind"
+  "Zik: 2% of shops placed in a room in the last 24 hours (22287 shop rows)",
+  "Zik: 2.2% of rows reached us over an hour late this week"
  ]
 }
