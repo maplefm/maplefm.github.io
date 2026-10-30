@@ -3372,6 +3372,7 @@
     stb.addEventListener("click", function () { if (WATCH[i.item]) delete WATCH[i.item]; else WATCH[i.item] = { t: Date.now() }; saveLS("fm-watch", WATCH); render(); }); btns.appendChild(stb);
     var as = el("button", "pbtn", SELL.some(function (s) { return s.i === i.item; }) ? "In sell list ✓" : "+ Sell list"); as.type = "button";
     as.addEventListener("click", function () { addSell(i.item, 1); render(); }); btns.appendChild(as);
+    if (i.equip) { var ab = el("button", "pbtn", "🔔 Stat alert"); ab.type = "button"; ab.title = "Get a Discord DM when this item is read with the stats you want (Mega Deals)"; ab.addEventListener("click", function () { alertDlg(i.item); }); btns.appendChild(ab); }
     var pb = el("button", "pbtn", "+ Log a trade"); pb.type = "button"; pb.title = "Log that you bought or sold this, to track your profit in My positions";
     pb.addEventListener("click", function () { state.tab = "pos"; render(); pform("buy", i.item, 1, 0); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); }); btns.appendChild(pb);
     ip.appendChild(btns);
@@ -3904,14 +3905,104 @@
     if (id !== "q") $(id).addEventListener("change", go);
   });
   $("wonly").addEventListener("click", function () { state.wonly = !state.wonly; this.setAttribute("aria-pressed", state.wonly); digestBtn(); renderView(); });
+  // ---------- stat alerts (Mega Deals): set on an equip's card or from the watchlist, a Discord DM when a listing
+  // with those stats is read. The Worker checks access on every save and every DM; this only draws the form.
+  var ALERTS = null, ALERTS_OK = null, ALERT_MAX = 25, STATN2 = { ATT: "Attack", MATT: "Magic attack", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", HP: "HP", MP: "MP", WDEF: "Weapon def", MDEF: "Magic def", ACC: "Accuracy", AVOID: "Avoid", SPEED: "Speed", JUMP: "Jump", CRIT: "Crit rate", CRITDMG: "Crit damage" };
+  function alertsLoad() {
+    if (ALERTS) return Promise.resolve(ALERTS);
+    return fetch(ACCT + "/me/alerts", { credentials: "include" }).then(function (r) { return r.json(); }).then(function (j) { ALERTS_OK = !!j.allowed; ALERT_MAX = j.max || 25; ALERTS = j.alerts || []; return ALERTS; }).catch(function () { ALERTS_OK = null; return []; });
+  }
+  function alertsSave(list) {
+    return fetch(ACCT + "/me/alerts", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ alerts: list }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || "Couldn't save"); ALERTS = j.alerts; return ALERTS; }); });
+  }
+  function alertText(a) {
+    var p = a.stats.map(function (s) { return (s.rel ? "+" + s.min + " " : s.min + "+ ") + (STATN2[s.k] || s.k); });
+    if (a.clean) p.push("clean"); else if (a.used != null) p.push("at most " + a.used + (a.used === 1 ? " slot" : " slots") + " used");
+    return p.join(", ") + (a.max ? " · under " + short(a.max) : "");
+  }
+  function alertDlg(item) {
+    var d = $("alertdlg"); if (!d) { d = document.createElement("dialog"); d.id = "alertdlg"; d.className = "alertdlg"; document.body.appendChild(d); }
+    d.textContent = "";
+    var hd = el("div", "adh"); hd.appendChild(el("b", null, item ? "Stat alert: " + showName(item) : "Your stat alerts"));
+    var x = el("button", "nx", "×"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", function () { d.close(); }); hd.appendChild(x); d.appendChild(hd);
+    var body = el("div", "adb"); d.appendChild(body);
+    if (!d.open) d.showModal();
+    if (!ME_ACCT) {
+      body.appendChild(el("p", null, "Get a Discord DM when an equip with the stats you want is read in a shop."));
+      var si = el("a", "pbtn", "Sign in with Discord"); si.href = ACCT + "/login?back=home"; body.appendChild(si); return;
+    }
+    body.appendChild(el("p", "note", "Loading…"));
+    alertsLoad().then(function (list) {
+      body.textContent = "";
+      if (ALERTS_OK === null) { body.appendChild(el("p", null, "Couldn't load your alerts. Try again in a minute.")); return; }
+      if (!ALERTS_OK) {
+        body.appendChild(el("p", null, "Stat alerts come with Mega Deals. Unlock them any of three ways:"));
+        var ul = el("ol", "aunl");
+        [["Join the Club", "https://discord.gg/cXnVBTUUPk"], ["Catch 50,000 sales scanning", "contribute.html"], ["Support $100 on Ko-fi", "https://ko-fi.com/maplefm"]].forEach(function (u) { var li = el("li"); var a = el("a", null, u[0]); a.href = u[1]; if (/^https/.test(u[1])) { a.target = "_blank"; a.rel = "noopener"; } li.appendChild(a); ul.appendChild(li); });
+        body.appendChild(ul); return;
+      }
+      if (item) body.appendChild(alertForm(item, list, function () { alertDlg(item); }));
+      var mine = item ? list.filter(function (a) { return a.item === item; }) : list;
+      body.appendChild(el("h4", null, item ? "On this item" : list.length + " of " + ALERT_MAX + " alerts"));
+      if (!mine.length) body.appendChild(el("p", "note", item ? "None yet." : "None yet. Open an equip's card and tap 🔔 Stat alert."));
+      mine.forEach(function (a) {
+        var r = el("div", "arow" + (a.on ? "" : " off"));
+        var t = el("span"); if (!item) { var lk = el("a", null, showName(a.item)); lk.href = "#item=" + encodeURIComponent(a.item); lk.addEventListener("click", function () { d.close(); }); t.appendChild(lk); t.appendChild(document.createTextNode(" · ")); }
+        t.appendChild(document.createTextNode(alertText(a))); r.appendChild(t);
+        var tg = el("button", "pbtn", a.on ? "Pause" : "Resume"); tg.type = "button";
+        var del = el("button", "pbtn", "Delete"); del.type = "button";
+        var redo = function (fn) { var nl = ALERTS.map(function (z) { return Object.assign({}, z); }); fn(nl); alertsSave(nl).then(function () { alertDlg(item); }, function (e) { alert0(body, e.message); }); };
+        tg.addEventListener("click", function () { redo(function (nl) { nl.forEach(function (z) { if (z.id === a.id) z.on = !z.on; }); }); });
+        del.addEventListener("click", function () { redo(function (nl) { for (var k = nl.length - 1; k >= 0; k--) if (nl[k].id === a.id) nl.splice(k, 1); }); });
+        r.appendChild(tg); r.appendChild(del); body.appendChild(r);
+      });
+      body.appendChild(el("p", "note", "One DM per listing, up to 20 a day. Only stats read with full confidence count. A listing may be gone by the time you get there."));
+    });
+  }
+  function alert0(box, msg) { var m = box.querySelector(".aerr") || box.insertBefore(el("p", "aerr"), box.firstChild); m.textContent = msg; }
+  function alertForm(item, list, done) {
+    var f = el("div", "aform"), base = fullBase(item).s;
+    var keys = BSTATS.filter(function (k) { return base[k]; }); ["ATT", "MATT"].forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); });
+    var rows = el("div", "astats"); f.appendChild(rows);
+    function statRow() {
+      var r = el("div", "astat"), sel = document.createElement("select"); sel.setAttribute("aria-label", "Stat");
+      keys.forEach(function (k) { var o = document.createElement("option"); o.value = k; o.textContent = STATN2[k] || k; sel.appendChild(o); });
+      var mode = document.createElement("select"); mode.setAttribute("aria-label", "How to count it");
+      [["abs", "at least"], ["rel", "above clean, at least +"]].forEach(function (m) { var o = document.createElement("option"); o.value = m[0]; o.textContent = m[1]; mode.appendChild(o); });
+      var n = document.createElement("input"); n.type = "number"; n.min = "-20"; n.max = "500"; n.value = "1"; n.setAttribute("aria-label", "Value"); n.inputMode = "numeric";
+      var hint = el("small", "ahint");
+      var upd = function () { var b = base[sel.value]; hint.textContent = b ? "clean " + b : ""; };
+      sel.addEventListener("change", upd); upd();
+      r.appendChild(sel); r.appendChild(mode); r.appendChild(n); r.appendChild(hint); rows.appendChild(r);
+    }
+    statRow();
+    var more = el("button", "linkb", "+ another stat"); more.type = "button"; more.addEventListener("click", function () { if (rows.children.length < 3) statRow(); if (rows.children.length >= 3) more.hidden = true; }); f.appendChild(more);
+    var cond = document.createElement("select"); cond.setAttribute("aria-label", "Scrolls used");
+    [["", "Any scroll state"], ["clean", "Clean only"], ["1", "At most 1 slot used"], ["2", "At most 2 slots used"], ["3", "At most 3 slots used"]].forEach(function (c) { var o = document.createElement("option"); o.value = c[0]; o.textContent = c[1]; cond.appendChild(o); });
+    var mx = document.createElement("input"); mx.type = "text"; mx.placeholder = "Max price, like 2m"; mx.setAttribute("aria-label", "Max price");
+    var r2 = el("div", "arow2"); r2.appendChild(cond); r2.appendChild(mx); f.appendChild(r2);
+    var sv = el("button", "pbtn go", "Save alert"); sv.type = "button"; f.appendChild(sv);
+    sv.addEventListener("click", function () {
+      if (list.length >= ALERT_MAX) { alert0(f, "That's " + ALERT_MAX + " alerts. Delete one first."); return; }
+      var stats = Array.prototype.map.call(rows.children, function (r) { var s = r.querySelectorAll("select"), v = r.querySelector("input"); return { k: s[0].value, rel: s[1].value === "rel", min: Math.round(+v.value || 0) }; });
+      var mp = mx.value.trim() ? parseMesos(mx.value) : 0; if (isNaN(mp)) { alert0(f, "Max price: a number like 500k or 2m."); return; }
+      var a = { item: item, stats: stats, clean: cond.value === "clean", used: cond.value && cond.value !== "clean" ? +cond.value : null, max: mp, on: true };
+      sv.disabled = true;
+      alertsSave(list.concat([a])).then(done, function (e) { sv.disabled = false; alert0(f, e.message); });
+    });
+    return f;
+  }
   // Daily DM: a free once-a-day Discord DM of the watchlist (the Worker's watchDigest reads fm-digest from synced
   // settings). Shown while the watchlist is open; signing in comes first.
   function digestBtn() {
     var b = $("wdm"); if (!b) return;
+    var ab = $("walerts"); if (ab) ab.hidden = !state.wonly;
     b.hidden = !state.wonly; var on = !!loadLS("fm-digest", false) && !!ME_ACCT;
     b.setAttribute("aria-pressed", on); b.textContent = on ? "📬 Daily DM on" : "📬 Daily DM";
     b.title = !ME_ACCT ? "Sign in with Discord to get your watchlist by DM once a day" : on ? "On: your watchlist arrives by Discord DM at 10 AM Eastern. Click to turn off." : "Once a day at 10 AM Eastern, a Discord DM with your watched items' prices and how they moved";
   }
+  if ($("walerts")) $("walerts").addEventListener("click", function () { alertDlg(null); });
   $("wdm").addEventListener("click", function () {
     if (!ME_ACCT) { location.href = ACCT + "/login?back=home"; return; }
     var on = !loadLS("fm-digest", false); saveLS("fm-digest", on); digestBtn();

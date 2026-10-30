@@ -17,7 +17,8 @@
 // Storage (KV): acct:<discord id> -> account JSON; code:<link code> -> discord id; watcher:<hid> -> discord id
 // Nothing here holds a watcher's real id or key: the watcher sends hid (its hashed id), and keys are masked.
 
-import { statReport, densify } from "./statcheck.js";
+import { statReport, densify, itemdb } from "./statcheck.js";
+import { cleanAlert, runAlerts, reindex, ALERT_MAX } from "./alerts.js";
 import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
@@ -68,6 +69,8 @@ async function route(req, env, url) {
   if (p === "/me/build" && req.method === "GET") return getBuild(req, env);
   if (p === "/me/build" && req.method === "POST") return putBuild(req, env);
   if (p === "/watcher/quests" && req.method === "POST") return watcherQuests(req, env);
+  if (p === "/me/alerts" && req.method === "GET") return alertsGet(req, env);
+  if (p === "/me/alerts" && req.method === "POST") return alertsPut(req, env);
   if (p === "/me/settings" && req.method === "GET") return getSettings(req, env);
   if (p === "/me/settings" && req.method === "POST") return putSettings(req, env);
   if (p === "/link" && req.method === "POST") return link(req, env);
@@ -666,6 +669,8 @@ async function snapPut(req, env) {
   await env.ACCOUNTS.put("snap:board", body);
   // shops by owner for the shop pages, and "Seen in game" on market listings
   const shopsN = await snapShops(env, sj).catch((e) => "error " + (e && e.message || e));
+  // stat alerts: new listings with read stats against members' alerts
+  await runAlerts(env, sj, alertCtx(env)).catch((e) => env.ACCOUNTS.put("alerts:err", String(e && e.stack || e).slice(0, 500)));
   await note({ ok: true, bytes: body.length, seen: shopsN });
   return json({ ok: true, bytes: body.length });
 }
@@ -2427,6 +2432,39 @@ async function notifyWatchers(env) {
     }
     cursor = page.list_complete ? null : page.cursor;
   } while (cursor);
+}
+
+// stat alerts (alerts.js): saved per account, only for Mega Deals holders
+async function alertsGet(req, env) {
+  const a = await whoami(req, env);
+  if (!a) return json({ signedIn: false, allowed: false, alerts: [] });
+  const allowed = await hasMega(a, env);
+  return json({ signedIn: true, allowed, max: ALERT_MAX, alerts: allowed ? ((await env.ACCOUNTS.get("alerts:" + a.id, "json")) || []) : [] }, 200, { "Cache-Control": "no-store" });
+}
+async function alertsPut(req, env) {
+  const a = await whoami(req, env);
+  if (!a) return json({ error: "sign in first" }, 401);
+  if (!(await hasMega(a, env))) return json({ error: "Stat alerts are for Mega Deals: Club members, scanners with 50,000 sales caught, and Ko-fi supporters at $100." }, 403);
+  const b = await req.json().catch(() => ({}));
+  const list = (Array.isArray(b.alerts) ? b.alerts : []).map(cleanAlert).filter(Boolean);
+  if (list.length > ALERT_MAX) return json({ error: "Up to " + ALERT_MAX + " alerts." }, 400);
+  const seen = new Set(), out = list.filter((x) => !seen.has(x.id) && seen.add(x.id));
+  await env.ACCOUNTS.put("alerts:" + a.id, JSON.stringify(out));
+  await reindex(env, String(a.id), out);
+  return json({ ok: true, alerts: out });
+}
+function alertCtx(env) {
+  const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" }, chans = {};
+  return {
+    hasMega: (acct) => hasMega(acct, env), meso,
+    base: async (item) => { const d = await itemdb(env); return (d[String(item).toLowerCase()] || {}).base || null; },
+    dm: async (id, emb) => {
+      if (!env.DISCORD_BOT_TOKEN) return 0;
+      if (!chans[id]) { const c = await (await fetch(DISCORD + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null); chans[id] = c && c.id; }
+      if (!chans[id]) return 403;
+      return (await fetch(DISCORD + "/channels/" + chans[id] + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [emb] }) })).status;
+    },
+  };
 }
 
 // ---------------------------------------------------------------- admin

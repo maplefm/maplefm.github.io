@@ -5,7 +5,7 @@
 const STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP"];
 
 let DB = null;
-async function itemdb(env) {
+export async function itemdb(env) {
   if (DB) return DB;
   const r = await fetch(env.ITEMDB_URL || "https://maplefm.gg/data/itemdb.json", { cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
   const d = r && r.ok ? await r.json().catch(() => null) : null;
