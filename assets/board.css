@@ -1435,3 +1435,10 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
   .tabs { gap: 2px; padding-top: 10px; }
   .tabs button { padding: 6px 8px; font-size: .8rem; }
 }
+
+/* report a wrong price */
+.ifoot .wrongl { background: none; border: 0; padding: 0; font: inherit; color: var(--muted); font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.wrongf { display: grid; gap: 8px; margin: 10px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.wrongf textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: .85rem; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg, #fff); color: var(--ink); resize: vertical; }
+.wrongb { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wrongm { color: var(--muted); }

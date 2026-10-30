@@ -92,6 +92,8 @@ async function route(req, env, url) {
   if (p === "/missimg" && req.method === "POST") return missPut(req, env);
   if (p === "/inbox/miss" && req.method === "GET") return missList(req, env, url);
   if (p.startsWith("/inbox/miss/") && req.method === "GET") return missGet(req, env, p);
+  if (p === "/wrongprice" && req.method === "POST") return wrongPut(req, env);
+  if (p === "/inbox/wrong" && req.method === "GET") return wrongList(req, env, url);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
   if (p === "/inbox/rejects" && req.method === "GET") return inboxRejects(req, env);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
@@ -563,6 +565,42 @@ async function missPut(req, env) {
   const info = String(req.headers.get("X-Info") || "").replace(/[^\x20-\x7e]/g, "").slice(0, 300), t = Date.now();
   await env.ACCOUNTS.put("miss:" + t + ":" + hid + ":" + kind, buf, { expirationTtl: 14 * DAY, metadata: { w, h, t, hid, kind, info, ver: String(req.headers.get("User-Agent") || "").slice(0, 40) } });
   return json({ ok: true });
+}
+// Report a wrong price, from the item card: the item, what the card showed and an optional note. No sign-in. 10 a day
+// per visitor (a daily hash of the address, never the address itself), kept 30 days, pulled into the private archive
+// by the pump. Admins get a DM for the first 30 reports a day so a broken price is seen the same day.
+async function wrongPut(req, env) {
+  const ip = req.headers.get("CF-Connecting-IP") || "", day = new Date().toISOString().slice(0, 10);
+  if (overLimit("wp:" + ip, 10, 600)) return json({ error: "slow down" }, 429);
+  let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: "bad" }, 400); }
+  const item = String(b && b.i || "").replace(/[^\x20-\x7e]/g, "").slice(0, 80).trim();
+  if (item.length < 2) return json({ error: "bad" }, 400);
+  const vh = (await hmac(env.SESSION_SECRET || "x", "wrong|" + day + "|" + ip)).slice(0, 12), ck = "wrongcnt:" + day + ":" + vh;
+  const n = Number(await env.ACCOUNTS.get(ck) || 0);
+  if (n >= 10) return json({ error: "limit" }, 429);
+  await env.ACCOUNTS.put(ck, String(n + 1), { expirationTtl: 2 * DAY });
+  const num = (v) => Math.max(0, Math.min(1e11, Math.round(Number(v) || 0)));
+  const rec = { t: Date.now(), v: vh, i: item, typ: num(b.typ), best: num(b.best), last3: num(b.last3), ls: num(b.ls), note: String(b.note || "").replace(/[\u0000-\u001f]/g, " ").slice(0, 300) };
+  while (new TextEncoder().encode(JSON.stringify(rec)).length > 1000 && rec.note) rec.note = rec.note.slice(0, -20);   // KV metadata holds 1 KB
+  await env.ACCOUNTS.put("wrong:" + rec.t + ":" + vh, "1", { expirationTtl: 30 * DAY, metadata: rec });
+  const dk = "wrongdm:" + day, dn = Number(await env.ACCOUNTS.get(dk) || 0);
+  if (dn < 30) {
+    await env.ACCOUNTS.put(dk, String(dn + 1), { expirationTtl: 2 * DAY });
+    try { await mkCtx(env).dmAdmins("**" + item + "**\nCard showed: typical " + meso(rec.typ) + (rec.best ? " · cheapest " + meso(rec.best) : "") + (rec.last3 ? " · last 3 avg " + meso(rec.last3) : "") + (rec.note ? "\nNote: " + rec.note.replace(/[*_`~|<>@]/g, "") : "\nNo note"), "Wrong price report"); } catch (e) {}
+  }
+  return json({ ok: true });
+}
+async function wrongList(req, env, url) {
+  if (!(await pullOK(req, env))) return json({ error: "no" }, 403);
+  const after = Math.max(0, parseInt(url.searchParams.get("after") || "0", 10) || 0), out = [];
+  let cursor;
+  do {
+    const l = await env.ACCOUNTS.list({ prefix: "wrong:", cursor, limit: 1000 });
+    for (const k of l.keys) if (k.metadata && k.metadata.t > after) out.push(k.metadata);
+    cursor = l.list_complete ? null : l.cursor;
+  } while (cursor);
+  out.sort((a, b) => a.t - b.t);
+  return json({ items: out.slice(0, 1000) }, 200, { "Cache-Control": "no-store" });
 }
 async function pullOK(req, env) {
   const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
