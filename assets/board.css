@@ -1442,3 +1442,13 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
 .wrongf textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: .85rem; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg, #fff); color: var(--ink); resize: vertical; }
 .wrongb { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .wrongm { color: var(--muted); }
+/* big sales strip: sits above the header, never pinned, height reserved before data loads */
+.ticker { position: relative; top: auto; z-index: 1; height: 30px; }
+.ticker .run span { display: inline-flex; gap: 4px; align-items: center; }
+.ticker .run .tq { color: var(--muted); }
+.ticker .run { padding-left: 0; animation-name: runhalf; }
+.ticker .run span { padding-right: 40px; } .ticker .run { gap: 0; }
+@keyframes runhalf { to { transform: translateX(-50%); } }
+.ticker.paused .run { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .ticker .run { animation: none; padding-left: 12px; } .ticker .run .dup { display: none; } }
+@media (max-width: 600px) { .ticker { height: 28px; font-size: .74rem; } .ticker .tag { padding: 0 8px; } }

@@ -1529,22 +1529,30 @@
   }
 
   // ---------- ticker
+  // Big sales strip at the top of the board: sales of 250K and up in the last 24 hours (the same bar as #big-sales),
+  // newest first, from sales the board accepts. Seller, item, price, room and how long ago. Hovering pauses it, a
+  // hidden tab stops it, and reduced motion gets a still line instead of a scroll.
+  var TICK_MIN = 250000;
   function renderTicker() {
-    var run = $("ticker"), ev = []; if (!run) return;
-    D.sales.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 18).forEach(function (l) {
-      ev.push({ t: l.t, cls: "sold", parts: [l.s + " : Sold ", [l.i], " for " + fmt(l.p) + " mesos!"] });
-    });
-    D.list.filter(function (i) { return i.n >= MIN && i.deal >= 0.4 && (i.equip ? i.rd && i.rd.length && i.rd[0].l && Date.now() - i.rd[0].t < 6 * H : i.bestL && Date.now() - i.bestL.t < 6 * H); }).slice(0, 10).forEach(function (i) {
-      var dl = i.equip ? i.rd[0].l : i.bestL, du = i.equip ? i.rd[0].p : i.best, dt = i.equip ? ", " + Math.round(i.deal * 100) + "% under what this roll sells for" : ", " + Math.round(i.deal * 100) + "% under typical";
-      ev.push({ t: dl.t, cls: "deal", parts: [dl.s + " : Selling ", [i.item], " for " + fmt(du) + dt + (where(dl) ? " (" + where(dl) + ")" : "")] });
-    });
-    ev.sort(function (a, b) { return b.t - a.t; });
-    var sig = JSON.stringify(ev.map(function (e) { return e.parts; }));
+    var run = $("ticker"); if (!run || !D || D.preview) return;
+    var now = Date.now(), seen = {};
+    var ev = D.sales.filter(function (l) { var it = D.byName[l.i]; return l.p >= TICK_MIN && now - l.t <= DAY && !(it && it.typ && l.p > it.typ * 8) && !/\u2026$/.test(l.i); })
+      .sort(function (a, b) { return b.t - a.t; }).filter(function (l) { var k = l.s + "|" + l.i + "|" + l.p; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 20);
+    var sig = ev.map(function (l) { return l.s + l.i + l.p + l.t; }).join("|") + "|" + Math.floor(now / 6e4);
     if (run.dataset.sig === sig) return; run.dataset.sig = sig; run.textContent = "";
-    if (!ev.length) { run.appendChild(el("span", null, "Waiting for the next scan")); return; }
-    ev.forEach(function (e) { var s = el("span", e.cls); e.parts.forEach(function (p) { if (typeof p === "string") s.appendChild(document.createTextNode(p)); else s.appendChild(el("b", null, p[0])); }); run.appendChild(s); });
-    run.style.setProperty("--dur", Math.max(40, ev.length * 7) + "s");
+    if (!ev.length) { run.appendChild(el("span", "tq", "No sales over 250K in the last 24 hours")); return; }
+    ev.forEach(function (l) {
+      var sp = el("span"); sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
+      sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", null, short(l.p)));
+      var rm = /^FM\d+$/.test(l.r || "") ? roomLabel(l.r) : "";
+      sp.appendChild(document.createTextNode((rm ? " · " + (l.c && !l.ci ? "CH " + l.c + ", " : "") + rm : "") + " · " + ago(l.t)));
+      run.appendChild(sp);
+    });
+    // a second copy right after the first makes the loop seamless: the strip is full from the first frame
+    Array.prototype.slice.call(run.children).forEach(function (n) { var c = n.cloneNode(true); c.setAttribute("aria-hidden", "true"); c.classList.add("dup"); run.appendChild(c); });
+    run.style.setProperty("--dur", Math.max(30, ev.length * 8) + "s");
   }
+  document.addEventListener("visibilitychange", function () { var b = $("tickbar"); if (b) b.classList.toggle("paused", document.hidden); });
 
   // ---------- category chips
   var CATS = [["All", 0], ["Scrolls", 2040000], ["Weapons", 1302000], ["Equips", 1082002], ["Stars", 2070000], ["Use", 2000000], ["Etc", 4000019], ["Cash", 1007077], ["Other", 3010000]];
