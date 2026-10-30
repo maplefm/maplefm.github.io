@@ -305,6 +305,7 @@ button, input, select { font: inherit; color: inherit; }
 .pod b { display: block; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pod .n { font: 800 1.05rem var(--body); }
 .pod .n small { font-weight: 600; color: var(--muted); font-size: .7rem; }
+.pod .rk-paid { display: block; font: 700 .72rem var(--body); color: var(--ok, #1f7a46); margin-top: 2px; }
 .pod.p1 { padding-top: 22px; border-color: var(--gold); background: linear-gradient(180deg, var(--gold-soft), var(--panel)); box-shadow: 0 0 0 3px rgba(217,165,32,.18), 0 10px 26px rgba(217,165,32,.25); }
 .pod.p1 .av { width: 64px; height: 64px; font-size: 1.6rem; }
 .pod.p1 .rbadge.r1 { top: -20px; right: -12px; } .pod.p1 .rbadge.r1 svg { width: 34px; height: 34px; }

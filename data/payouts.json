@@ -1,1 +1,23 @@
-{}
+{
+ "Zik": [
+  {
+   "date": "2026-10-30",
+   "amount": 50.0,
+   "via": "direct"
+  }
+ ],
+ "laclac": [
+  {
+   "date": "2026-10-30",
+   "amount": 50.0,
+   "via": "direct"
+  }
+ ],
+ "Yint": [
+  {
+   "date": "2026-10-30",
+   "amount": 24.3,
+   "via": "paypal"
+  }
+ ]
+}
