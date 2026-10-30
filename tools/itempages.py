@@ -54,6 +54,25 @@ def meso(n):
 def full(n): return f"{float(n or 0):,.0f}"
 
 
+def ladder_html(lad):
+    """An equip's price by grade (Clean, +1 ATT...), from the board's summary: the middle of each grade's last 7 days
+    of sales, or its asking prices when it has under 3 sales."""
+    if not lad: return ""
+    trs = ""
+    for g in lad:
+        try: name, basis, lo, hi, mid, ns, na = g[:7]
+        except Exception: continue
+        if basis in ("sold", "asking"): price = meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi))
+        elif basis == "few": price = meso(mid)
+        else: continue
+        note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed" if basis == "asking" else (f"{ns} sold" if ns else f"{na} listed")
+        trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
+    if not trs: return ""
+    return ('<h2>Price by grade</h2><p class="note">Clean has no scroll used; +1, +2 and up count what scrolls added. '
+            'Prices are the middle of the last 7 days of sales, or asking prices where there are under 3 sales.</p>'
+            f'<table><tr><th>Grade</th><th>Price</th><th>Based on</th></tr>{trs}</table>')
+
+
 CONF = {"verified": ("Verified", "fresh sales caught by two or more trusted scanners"),
         "watched": ("Watched", "fresh sales caught by one trusted scanner"),
         "lead": ("Lead", "older sales or asking prices; treat as a guide")}
@@ -351,6 +370,7 @@ def main():
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
 <div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
+{ladder_html(r.get('lad'))}
 {f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
 {equip_html(dbrow.get(name), KINDS)}
 <p class="ctaw"><a class="cta" href="/#item={html.escape(name)}">Where to buy now <span>→</span></a></p>
