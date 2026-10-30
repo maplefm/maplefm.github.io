@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.30.4"
+VERSION = "2026.10.30.5"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -644,6 +644,7 @@ class Store:
         if os.path.exists(rp):
             self.ref = json.load(open(rp, encoding="utf-8"))
         self.hot = False
+        self.fresh = False
         self.pending = {}
         self.hot_fraction = 0.5
         self.inv_changed = True
@@ -744,6 +745,7 @@ class Store:
                     cut = 0.7 if typ and typ >= 10000 else self.hot_fraction   # pricier items: 30% off is worth a flip
                     if typ and price / max(1, qty) <= typ * cut:
                         self.hot = True             # a big deal: publish soon instead of waiting the usual interval
+                if key not in self.d["shop"] and not when: self.fresh = True     # a new listing: send it soon (fast lane)
                 o = self.d["shop"].setdefault(key, {"n": 1, "reads": 0, "first": now, "known": g["known"], "so": False, "so_reads": 0})
                 o["reads"] += 1; o["last"] = max(o.get("last", 0), now)
                 o["known"] = o["known"] or g["known"]
@@ -839,7 +841,7 @@ class Store:
                     for k, v in rd.items():
                         vote.setdefault(k, {}); vote[k][v] = vote[k].get(v, 0) + 1
                 o["x"] = {k: max(c, key=lambda v: (c[v], v)) for k, c in vote.items() if sum(c.values()) * 2 > len(reads)}
-            if o["x"] and not o.get("xat"): o["xat"] = time.time()   # first time this listing's stats were read
+            if o["x"] and not o.get("xat"): o["xat"] = time.time(); self.fresh = True   # first time this listing's stats were read
             if not o.get("xt") or len(tip["lines"]) >= len(o.get("xt", [])): o["xt"] = tip["lines"]
             if tip.get("job"): o["xj"] = tip["job"]
             # 500K and up: the site shows the real popup on hover. Sent again when this read has the upgrades line
@@ -1863,9 +1865,12 @@ def main():
                     log("Restarting to update...")
                     os._exit(RESTART_FOR_UPDATE)
                 if cfg["publish"] and not has_token(cfg):
-                    if t - last_pub > max(5, cfg.get("inbox_every_minutes", 10)) * 60:
-                        last_pub = t; store.hot = False
-                        threading.Thread(target=send_inbox, args=(cfg, store.published_docs()), daemon=True).start()
+                    # new listings go up within half a minute, so deals reach the site fast; the rest every 10 minutes
+                    due = t - last_pub > max(5, cfg.get("inbox_every_minutes", 10)) * 60
+                    quick = store.fresh and t - last_pub >= cfg.get("fast_send_seconds", 30)
+                    if (due or quick) and not (getattr(main, "sender", None) and main.sender.is_alive()):
+                        last_pub = t; store.hot = False; store.fresh = False
+                        main.sender = threading.Thread(target=send_inbox, args=(cfg, store.published_docs()), daemon=True); main.sender.start()
                     hot_due = False
                 else:
                     hot_due = store.hot and t - last_pub >= cfg.get("hot_publish_seconds", 60)

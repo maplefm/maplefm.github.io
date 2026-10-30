@@ -23,7 +23,7 @@
     acct = me && me.signedIn ? me.account : null;
     $("who").innerHTML = acct ? "Signed in as <b></b>. Your scans count toward your Earn total." : 'Scanning as a guest. <a href="' + API + '/login?back=scan">Sign in with Discord</a> to earn from them.';
     if (acct) $("who").querySelector("b").textContent = acct.ign || acct.name || "you";
-    link();
+    link(); who();
   }).catch(function () { $("who").textContent = "Scanning as a guest."; });
   function link() {
     if (!/(^|\.)maplefm\.gg$/.test(location.hostname)) return;
@@ -37,7 +37,7 @@
     w = new Worker("/scan/worker.js?v=1");
     w.onmessage = function (e) {
       var m = e.data;
-      if (m.type === "ready") { hid = m.hid || ""; link(); if (running) { say("Reading. Open shops in the Free Market as usual.", "ok"); loop(); } else say("Ready. Press Start and pick the MapleStory window.", "ok"); }
+      if (m.type === "ready") { hid = m.hid || ""; link(); who(); if (running) { say("Reading. Open shops in the Free Market as usual.", "ok"); loop(); } else say("Ready. Press Start and pick the MapleStory window.", "ok"); }
       if (m.type === "error") say("The reader didn't start: " + m.error + ". Try Chrome or Edge.", "no");
       if (m.type === "result") done(m);
       if (m.type === "tick") loop();
@@ -72,6 +72,7 @@
     say("Stopped. Sending what you read…");
     send();
   }
+  function who() { if (w && hid) w.postMessage({ type: "who", name: (ls("fm-scan-name") || "").slice(0, 16), ign: acct && acct.ign || "" }); }
   function send() { if (w) { lastSend = Date.now(); w.postMessage({ type: "publish", name: (ls("fm-scan-name") || "").slice(0, 16), ign: acct && acct.ign || "" }); } }
 
   // one frame at a time: the next is taken only once the last is read, and never sooner than a second later
@@ -157,7 +158,7 @@
   }
 
   $("name").value = ls("fm-scan-name") || "";
-  $("name").addEventListener("change", function () { ls("fm-scan-name", $("name").value.trim().slice(0, 16)); });
+  $("name").addEventListener("change", function () { ls("fm-scan-name", $("name").value.trim().slice(0, 16)); who(); });
   $("start").addEventListener("click", start);
   $("stop").addEventListener("click", stop);
   addEventListener("pagehide", function () { if (running && w) send(); });

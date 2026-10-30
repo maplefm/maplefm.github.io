@@ -111,6 +111,7 @@ onmessage = async (e) => {
     postMessage({ type: "published", ok, counts: JSON.parse(glue.counts()) });
   }
   if (m.type === "mem") { postMessage({ type: "mem", py: py && py._module.HEAPU8.length, tess: TM && TM.HEAPU8.length }); return; }
+  if (m.type === "who") { await ready; glue.WHO.set("name", String(m.name || "").slice(0, 16)); glue.WHO.set("ign", String(m.ign || "").slice(0, 13)); return; }
   if (m.type === "counts") { await ready; postMessage({ type: "counts", counts: JSON.parse(glue.counts()) }); }
   if (m.type === "save") { await ready; await keep(); postMessage({ type: "saved" }); }
 };
