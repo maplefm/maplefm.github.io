@@ -373,6 +373,8 @@ async function publicLinks(env) {
     for (const k of page.keys) {
       const a = await env.ACCOUNTS.get(k.name, "json");
       if (!a || !a.ign) continue;
+      // the owner's and site names can't be claimed by typing them in: only an admin account links under them
+      if (["maya", "streams", "guest", "clubfm"].includes(a.ign.toLowerCase()) && !isAdmin(a, env)) continue;
       for (const w of a.watchers || []) out[w.hid.slice(0, 4)] = a.ign;
       if (a.twitch && a.twitch.login) out["stream:" + a.twitch.login] = a.ign;   // a verified streamer's captures earn under this name
     }
