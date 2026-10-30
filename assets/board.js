@@ -1344,7 +1344,18 @@
     return (D._lst = { at: now, lastT: lastT, live: Object.keys(live).length, streams: by, cov: n ? { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length } : null });
   }
   // players whose watcher sent shop rows in the last 15 minutes (streams and chat don't count)
-  function liveScanners() { var s = Lstat(); return s ? s.live : 0; }
+  // Scanners uploading in the last 15 minutes, FM Watcher and the browser scanner alike, counted by the server
+  // (/public/scanners, one per person); the board's own rows are the fallback when the server can't be reached.
+  var LIVE_N = -1, LIVE_AT = 0;
+  function loadLive() {
+    if (Date.now() - LIVE_AT < 60e3) return; LIVE_AT = Date.now();
+    fetch((window.FM_API || "https://api.maplefm.gg") + "/public/scanners").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || typeof j.live !== "number") return;
+      var was = LIVE_N; LIVE_N = j.live; if (was !== LIVE_N && D) renderCards();
+    }).catch(function () {});
+  }
+  setInterval(function () { if (!document.hidden) loadLive(); }, 90e3);
+  function liveScanners() { loadLive(); var s = Lstat(), b = s ? s.live : 0; return Math.max(LIVE_N, b); }
   function coverage24() { var s = Lstat(); return s ? s.cov : null; }
   // Streamers whose broadcasts fed the board this week, credited by name with a link to their channel
   function renderStreams() {
@@ -1422,7 +1433,8 @@
       help = el("button", "st scannow"); help.type = "button"; help.setAttribute("data-scannow", ""); help.title = "Scan shops from this tab while you browse the Free Market and earn from them. No download.";
       var ss = el("img"); ss.src = "/assets/superstar@4x.png"; ss.alt = ""; help.appendChild(ss);
       help.appendChild(el("b", null, "Scan from this tab"));
-      help.appendChild(el("span", "scn", liveN >= 2 ? "join " + liveN + " scanners" : "earn, no download"));
+      if (liveN > 2) { var lv = el("span", "scn live"); lv.appendChild(el("i")); lv.appendChild(document.createTextNode(liveN + " scanning now")); help.appendChild(lv); }
+      else help.appendChild(el("span", "scn", "earn, no download"));
     } else {
       help = el("a", "st"); help.href = "contribute.html"; help.title = "Run FM Watcher while you shop and get paid for the shops you browse";
       help.appendChild(el("span", "heart", "♥"));

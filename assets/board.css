@@ -1512,3 +1512,6 @@ dialog.scandlg { max-width: 480px; }
 .scanpill img { width: 22px; height: 22px; animation: scspin 6s linear infinite; }
 @keyframes scspin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .scanpill img { animation: none; } }
+.strip button.st.scannow .scn.live { display: inline-flex; align-items: center; gap: 5px; color: var(--up); font-weight: 800; }
+.strip button.st.scannow .scn.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--up); box-shadow: 0 0 0 2px var(--up-soft); }
+.strip button.st.scannow:hover .scn.live { color: #fff; } .strip button.st.scannow:hover .scn.live i { background: #fff; }
