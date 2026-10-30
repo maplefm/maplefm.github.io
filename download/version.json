@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.5",
- "date": "2026-10-30T06:41:07+00:00",
- "notes": "Deals reach the site in about a minute: new listings are sent within half a minute instead of every 10 minutes.",
- "sha256": "e623bc26f2c3460e36b677f2d29669467cef6315131a9f1967decb28c8c43308",
- "size": 161834,
+ "version": "2026.10.30.6",
+ "date": "2026-10-30T14:41:54+00:00",
+ "notes": "Faster hovers: when every stat line reads exactly, one text pass is enough, so popups read in about half the time. The watcher's loop is now shared with the browser scanner.",
+ "sha256": "c75ac5bf3fddef416a5d7b0375fe69d7d4cbf454d4650099119f681c6678cd99",
+ "size": 162711,
  "history": [
+  {
+   "version": "2026.10.30.6",
+   "date": "2026-10-30",
+   "notes": "Faster hovers: when every stat line reads exactly, one text pass is enough, so popups read in about half the time. The watcher's loop is now shared with the browser scanner."
+  },
   {
    "version": "2026.10.30.5",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.1",
    "date": "2026-10-26",
    "notes": "Hover stats are checked before they're kept: attack on earrings, boots or hats means the popup belonged to another item and is skipped, and a requirement read as a bonus is dropped. start.bat now installs any missing Python package itself, and works with VPN or proxy apps that broke the install (SOCKS). Updates itself."
-  },
-  {
-   "version": "2026.10.24.7",
-   "date": "2026-10-24",
-   "notes": "New items: when a shop has an item the watcher has never seen, hovering it once reads its full name off the tooltip, and from then on that item is read, priced and uploaded with its icon. Cut-off names also finish themselves from items other scanners found. Close your watcher and open start.bat to update."
   }
  ],
  "pip": [],
- "sig": "95f02653417258687e9a1e6faa22f68d74e21a349662cab43467eea083adf2d5a5605344c68c2f3e73c3bfe985dd2164ca714ac13d27258eb0140e27833ed638772ad1c2dcd3a71ef23843face3aa13b0010649c2680ed568df60a8bfdc26c31adbb4d5a0702c351c15acd0149ea12bd90eef968c7da4b27003883440753e575475cbcdbd0682953fb7d09dd56c355c15ad027339f461be04352d5542db07387c074163a2505162a63cf0bd7d2fb9036f1508689d25e3223eb087b083370d757d0c20d3cc447c98b2460f7f61012b957bf6e76df51aa5996a7e481fc7ddd8ffe8c4eba31a2e05a4be31f30a53f4271d877ff3f6ea03e4f42b9dd034360f68204"
+ "sig": "76adc926f0e5da60dc3bb21353c441bf38e241b8b5ff9dabbd85735c073f40fd808946a4707e1d3eae693cabed55ed8a01050e8869dd5ea2f8343475c221a3ed043fbcd2d2640c058e44162357a600e7538d599c2de5df0c265fed68a08d2afa75b6ad6ba7c3a30afd7e1bc49675e12b5c514d45bd189544540dff00b0db0cde1a0b077c36b56fcd9ffa485ebefd1556b7e140cb79878cda1dc09a49f9fabd384342d744c915fc2f600454bc125e292213e55171906fc63dcf62e1c820e83379f1a91ade7b575ad89126a3d87fcc64fa31caf3e80de30cbbd92a8812f4bed9daa0776057a8712705510dfd99323bcce46ce735fd42214489584a8a80bba43e4b"
 }
