@@ -1473,3 +1473,51 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
 .arow.off > span { opacity: .55; }
 .aerr { color: var(--down); font-weight: 700; margin: 0; }
 .aunl { margin: 0; padding-left: 20px; line-height: 1.8; }
+
+/* Scan now: the browser scanner, started from the price board (assets/scannow.js) */
+.strip button.st.scannow { gap: 7px; padding: 5px 12px 5px 10px; border-radius: 999px; background: linear-gradient(135deg, var(--accent2), var(--accent)); color: #fff; box-shadow: 0 4px 12px rgba(109,63,209,.28); }
+.strip button.st.scannow b { color: #fff; }
+.strip button.st.scannow .scn { color: rgba(255,255,255,.85); font-weight: 700; }
+.strip button.st.scannow:hover b { text-decoration: none; }
+.strip button.st.scannow:hover { filter: brightness(1.06); }
+.sc-dot { width: 9px; height: 9px; border-radius: 50%; background: #ff4d5e; box-shadow: 0 0 0 3px rgba(255,77,94,.28); flex: none; animation: scpulse 1.6s ease-in-out infinite; }
+@keyframes scpulse { 50% { box-shadow: 0 0 0 6px rgba(255,77,94,0); } }
+@media (prefers-reduced-motion: reduce) { .sc-dot { animation: none; } }
+dialog.scandlg { max-width: 640px; }
+.scandlg .wtitle .meta { gap: 12px; }
+.scandlg .wtitle .meta a { text-decoration: underline; }
+#sc-step { color: var(--muted); font-weight: 800; }
+.scandlg .dbody { gap: 12px; }
+.sc-lead { font-size: .98rem; color: var(--ink); }
+.sc-btn, .sc-skip, .sc-go { font: inherit; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 12px; width: 100%; }
+.sc-btn.discord { background: #5865f2; color: #fff; padding: 12px 16px; font-weight: 800; font-size: 1rem; flex-wrap: wrap; }
+.sc-btn.discord svg { width: 22px; height: 22px; }
+.sc-btn.discord small { width: 100%; text-align: center; font-weight: 700; font-size: .78rem; opacity: .85; margin-top: -6px; }
+.sc-btn.discord:hover { background: #4752c4; }
+.sc-skip { background: none; border: 1px solid var(--line2); color: var(--ink); padding: 10px 16px; font-weight: 800; }
+.sc-skip:hover { border-color: var(--accent); }
+.sc-rec { justify-self: center; display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--accent); border-radius: 999px; padding: 3px 12px 3px 3px; font-weight: 800; font-size: .85rem; }
+.sc-rec b { background: var(--accent); color: #fff; border-radius: 999px; padding: 2px 10px; font-size: .75rem; }
+.sc-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.sc-card { position: relative; display: grid; gap: 3px; justify-items: center; text-align: center; padding: 10px 8px 12px; border: 1.5px solid var(--line2); border-radius: 14px; background: var(--panel2); }
+.sc-card svg { width: 100%; max-width: 150px; height: auto; border-radius: 8px; margin-bottom: 4px; }
+.sc-card b { font-family: var(--display); font-size: .98rem; line-height: 1.2; }
+.sc-card small { color: var(--muted); font-size: .76rem; line-height: 1.3; }
+.sc-n { position: absolute; top: 6px; left: 6px; font-style: normal; font-weight: 900; font-size: .72rem; background: var(--accent); color: #fff; border-radius: 6px; padding: 0 6px; }
+.sc-tick { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line2); background: var(--panel); }
+.sc-card.done { border-color: var(--up); }
+.sc-card.done .sc-tick { background: var(--up); border-color: var(--up); }
+.sc-card.done .sc-tick::after { content: ""; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+.sc-go { border: 0; background: #e5384a; color: #fff; padding: 14px 16px; font-weight: 900; font-size: 1.05rem; box-shadow: 0 6px 16px rgba(229,56,74,.3); }
+.sc-go .sc-dot { background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+.sc-go:hover { background: #cf2a3c; }
+.sc-go:disabled { opacity: .5; cursor: default; }
+.sc-go.stop { background: var(--panel2); color: var(--ink); border: 1.5px solid var(--line2); box-shadow: none; }
+.sc-go.stop .sc-dot { background: #ff4d5e; }
+.sc-status { min-height: 1.3em; text-align: center; font-weight: 800; }
+.sc-status.ok { color: var(--up); } .sc-status.no { color: var(--down); }
+.sc-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; color: var(--muted); font-size: .8rem; }
+.scanpill { position: fixed; left: 16px; bottom: 64px; z-index: 50; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 800; font-size: .82rem; cursor: pointer; border: 1.5px solid var(--line2); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 7px 14px 7px 11px; box-shadow: 0 8px 22px rgba(0,0,0,.18); max-width: calc(100vw - 32px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 560px) { .sc-steps { grid-template-columns: 1fr; } .sc-card { grid-template-columns: 96px 1fr; justify-items: start; text-align: left; column-gap: 12px; padding-top: 10px; } .sc-card svg { grid-row: span 2; max-width: 96px; margin: 0; } .sc-n { top: 4px; left: 4px; } }
+.sc-foot a, .scandlg .wtitle .meta a { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 560px) { .sc-card b, .sc-card small { padding-right: 24px; } }
