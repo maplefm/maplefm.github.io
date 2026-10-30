@@ -14,6 +14,7 @@ REF = (1920, 1080)
 SHOP_REGION = (696, 311, 939, 707)       # FM Watcher's defaults, measured on a 1920 x 1080 game
 ROOM_REGION = (60, 20, 400, 60)
 BAR_REGION = (0, 0, 360, 30)
+TOP = (460, 110)                         # the frame's top left corner the page sends: room title and bar, plus room for a border
 CUR = json.load(open(watcher.HERE + "/cursor.json"))
 STORE = None
 
@@ -50,12 +51,27 @@ def find_shop(img, fw=None, x0=0):
         b = (b[0] - x0, b[1], b[2] - x0, b[3])
         if b[0] < 0 or b[1] < 0 or b[2] > img.size[0] or b[3] > h: continue
         crop = img.crop(b)
-        # the navy name plate is a loose check; the seller's name reading exactly in the game's font pins it down
-        if fmparse.looks_like_shop(crop) and glyphs.read_seller(crop.crop(fmparse.SHOP["seller"])):
-            STATE["off"] = t
-            return crop, b
-        if STATE["off"] and t == STATE["off"]: break   # the shop is closed; don't search every frame
+        # the navy name plate is a loose check; its 1-pixel white frame, exactly where it belongs, pins the offset down
+        if fmparse.looks_like_shop(crop) and plate_frame(crop):
+            if glyphs.read_seller(crop.crop(fmparse.SHOP["seller"])):
+                STATE["off"] = t
+                return crop, b
+        elif STATE["off"] and t == STATE["off"]: break   # the shop is closed; don't search every frame
     return None, None
+
+
+def plate_frame(crop):
+    """The seller plate's white frame: a white column down its left edge and a white row along its top, with navy just
+    inside. A shop window read even one pixel off fails this, so the shop is only taken at its exact spot."""
+    x0, y0 = fmparse.SHOP["plate"][0], fmparse.SHOP["plate"][1]
+    px = crop.load()
+    W = lambda p: p[0] >= 250 and p[1] >= 250 and p[2] >= 250
+    N = lambda p: p[2] > p[0] + 30 and p[0] < 60
+    try:
+        return (all(W(px[x0, y]) for y in range(y0 + 4, y0 + 18)) and all(W(px[x, y0 + 3]) for x in range(x0 + 1, x0 + 20))
+                and N(px[x0 + 1, y0 + 4]) and N(px[x0 + 2, y0 + 5]) and not W(px[x0 - 1, y0 + 8]))
+    except IndexError:
+        return False
 
 
 def read_rows(region):
@@ -180,7 +196,7 @@ def channel_step(img, fw, fh, x0):
 
 def frame(buf, w, h, x0=0, fw=0, room=None):
     """buf: RGBA pixels, w x h. x0, fw: buf is the strip of a fw-wide frame starting at x0. room: the minimap
-    title and title bar's RGBA pixels (the frame's top-left 400 x 60) when the strip leaves them out."""
+    title and title bar's RGBA pixels (the frame's top-left 460 x 110) when the strip leaves them out."""
     img = Image.frombuffer("RGBA", (w, h), _raw(buf), "raw", "RGBA", 0, 1).convert("RGB")
     STATE["ch_note"] = None
     if channel_step(img, fw or w, h, x0):
@@ -192,11 +208,14 @@ def frame(buf, w, h, x0=0, fw=0, room=None):
     # the minimap title names the room: read again only when it changed
     # the minimap title names the room (or, minimized, the one-line title bar): read again only when it changed
     if room is not None:
-        top = Image.frombuffer("RGBA", (400, 60), _raw(room), "raw", "RGBA", 0, 1).convert("RGB")
+        top = Image.frombuffer("RGBA", TOP, _raw(room), "raw", "RGBA", 0, 1).convert("RGB")
     else:
-        top = img.crop((0, 0, 400, 60))
-    room_img, bar_img = top.crop(ROOM_REGION), top.crop(BAR_REGION)
-    rh = hashlib.md5(top.resize((80, 12)).tobytes()).hexdigest()
+        top = img.crop((0, 0) + TOP)
+    # a window border or title bar moves the game's corner by the same offset the shop was found at
+    ox, oy = max(0, STATE["off"][0]) if STATE["off"] else 0, STATE["off"][1] if STATE["off"] else 0
+    mv = lambda r: (r[0] + ox, r[1] + oy, r[2] + ox, r[3] + oy)
+    room_img, bar_img = top.crop(mv(ROOM_REGION)), top.crop(mv(BAR_REGION))
+    rh = hashlib.md5(room_img.tobytes() + bar_img.tobytes()).hexdigest()
     if rh != STATE["room_hash"]:
         STATE["room_hash"] = rh
         try: r = watcher.shop_room(fmparse.read_room(room_img))

@@ -93,9 +93,11 @@
         var strip = ctx2.getImageData(x0, 0, x1 - x0, fh).data;
         var sig = sample(strip);
         // nothing there changed: skip the reading entirely
-        if (sig !== lastSig) {
+        // a popup waiting for its second look is read again even when nothing on screen changed
+        if (sig !== lastSig || again) {
+          again = false;
           lastSig = sig; lastChange = Date.now();
-          var room = fw >= 400 && fh >= 60 ? ctx2.getImageData(0, 0, 400, 60).data : null;   // minimap title and title bar
+          var room = fw >= 460 && fh >= 110 ? ctx2.getImageData(0, 0, 460, 110).data : null;   // minimap title and title bar, with room for a window border
           job = { type: "frame", id: Date.now(), px: strip, w: x1 - x0, h: fh, x0: x0, fw: fw, room: room };
         }
       }
@@ -117,6 +119,7 @@
     busy = false;
     stat.frames++; stat.ms.push(m.ms); if (stat.ms.length > 50) stat.ms.shift();
     var o = m.out || {};
+    again = !!(o.tip && o.tip.wait);
     if (o.ch_set || (o.channel && o.channel.n)) chan = o.ch_set || o.channel.n;
     if (o.ch !== undefined) chan = o.ch;
     $("chnote").textContent = chan ? "Channel " + chan : "Channel not known yet: open the Change Channel window once (Esc, then Change Channel).";
@@ -127,7 +130,7 @@
     later(Math.max(MIN_GAP, m.ms * 3));
     if (stat.frames % 5 === 1) w.postMessage({ type: "counts" });
   }
-  var lastView = "", chan = null;
+  var lastView = "", chan = null, again = false;
   function shopView(s, tip) {
     var key = JSON.stringify([s.seller, s.room, s.ch, s.rows, tip && tip.stats && tip.stats._ok ? tip.item + JSON.stringify(tip.stats) : ""]);
     if (key === lastView) return; lastView = key;
