@@ -1419,9 +1419,10 @@
     // Scan now: starts the browser scanner right here (assets/scannow.js); without it, the Earn page
     var liveN = liveScanners(), help;
     if (window.openScanNow) {
-      help = el("button", "st scannow"); help.type = "button"; help.setAttribute("data-scannow", ""); help.title = "Scan shops from this tab while you browse the Free Market. No download.";
-      help.appendChild(el("span", "sc-dot")); help.appendChild(el("b", null, "Scan now"));
-      if (liveN >= 2) help.appendChild(el("span", "scn", liveN + " scanning live"));
+      help = el("button", "st scannow"); help.type = "button"; help.setAttribute("data-scannow", ""); help.title = "Scan shops from this tab while you browse the Free Market and earn from them. No download.";
+      var ss = el("img"); ss.src = "/assets/superstar@4x.png"; ss.alt = ""; help.appendChild(ss);
+      help.appendChild(el("b", null, "Scan from this tab"));
+      help.appendChild(el("span", "scn", liveN >= 2 ? "join " + liveN + " scanners" : "earn, no download"));
     } else {
       help = el("a", "st"); help.href = "contribute.html"; help.title = "Run FM Watcher while you shop and get paid for the shops you browse";
       help.appendChild(el("span", "heart", "♥"));
