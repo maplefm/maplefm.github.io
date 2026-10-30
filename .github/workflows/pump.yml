@@ -85,7 +85,19 @@ jobs:
               for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
             fi
             n=$(( n + 1 ))
-            sleep 90
+            # between passes: every 15 seconds, deals from the Worker's fast lane go to #mega-deals right away
+            for q in 1 2 3 4 5 6; do
+              sleep 15
+              cd /tmp/arch
+              curl -sS -m 10 -H "Authorization: Bearer ${INBOX_PULL_KEY}" https://clubfm-accounts.aaweaver93.workers.dev/inbox/fast -o /tmp/fast.json || continue
+              if [ -s /tmp/fast.json ] && [ "$(head -c 2 /tmp/fast.json)" != "[]" ]; then
+                FAST_DOCS=/tmp/fast.json FAST_LINKS=/tmp/links.json python3 $T/discord.py deals data data/summary.json data/discord_deals.json || true
+                if ! git diff --quiet -- data/discord_deals.json data/discord_dealfeed.json 2>/dev/null; then
+                  git add data/discord_deals.json data/discord_dealfeed.json 2>/dev/null
+                  git commit -q -m "Pump: fast deals" && for i in 1 2 3; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 3; done
+                fi
+              fi
+            done
           done
       - name: Start the next run
         if: always()
