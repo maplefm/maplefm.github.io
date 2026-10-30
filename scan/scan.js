@@ -87,14 +87,15 @@
         if (!canvas || canvas.width !== fw || canvas.height !== fh) { canvas = new OffscreenCanvas(fw, fh); ctx2 = canvas.getContext("2d", { willReadFrequently: true }); }
         ctx2.drawImage(bmp, 0, 0);
         if (reader) bmp.close();
-        // only the middle of the game goes to the reader (the shop, its popups) plus the minimap title
-        var dx = Math.round((fw - 1920) / 2), x0 = Math.max(0, dx + 670), x1 = Math.min(fw, dx + 1340);
+        // only the middle of the game goes to the reader, plus the top left corner for the room
+        // the middle 1040 pixels: the shop, its popups and the Change Channel window all open there
+        var x0 = Math.max(0, Math.round(fw / 2) - 528), x1 = Math.min(fw, Math.round(fw / 2) + 528);
         var strip = ctx2.getImageData(x0, 0, x1 - x0, fh).data;
         var sig = sample(strip);
         // nothing there changed: skip the reading entirely
         if (sig !== lastSig) {
           lastSig = sig; lastChange = Date.now();
-          var room = fw >= 400 && fh >= 60 ? ctx2.getImageData(60, 20, 340, 40).data : null;
+          var room = fw >= 400 && fh >= 60 ? ctx2.getImageData(0, 0, 400, 60).data : null;   // minimap title and title bar
           job = { type: "frame", id: Date.now(), px: strip, w: x1 - x0, h: fh, x0: x0, fw: fw, room: room };
         }
       }
@@ -116,17 +117,21 @@
     busy = false;
     stat.frames++; stat.ms.push(m.ms); if (stat.ms.length > 50) stat.ms.shift();
     var o = m.out || {};
-    if (o.shop && o.shop.rows) { stat.shops++; stat.rows += o.shop.rows.length; shopView(o.shop, o.tip); }
+    if (o.ch_set || (o.channel && o.channel.n)) chan = o.ch_set || o.channel.n;
+    if (o.ch !== undefined) chan = o.ch;
+    $("chnote").textContent = chan ? "Channel " + chan : "Channel not known yet: open the Change Channel window once (Esc, then Change Channel).";
+    $("chnote").className = "small" + (chan ? "" : " warn");
+    if (o.shop && o.shop.rows) { stat.shops++; stat.rows += o.shop.rows.length; shopView(Object.assign({ ch: chan }, o.shop), o.tip); }
     $("perf").textContent = "Last read " + Math.round(m.ms) + " ms";
     // wait at least as long as the reading took, so the reader stays a small share of the computer
     later(Math.max(MIN_GAP, m.ms * 3));
     if (stat.frames % 5 === 1) w.postMessage({ type: "counts" });
   }
-  var lastView = "";
+  var lastView = "", chan = null;
   function shopView(s, tip) {
-    var key = JSON.stringify([s.seller, s.room, s.rows, tip && tip.stats && tip.stats._ok ? tip.item + JSON.stringify(tip.stats) : ""]);
+    var key = JSON.stringify([s.seller, s.room, s.ch, s.rows, tip && tip.stats && tip.stats._ok ? tip.item + JSON.stringify(tip.stats) : ""]);
     if (key === lastView) return; lastView = key;
-    $("seller").textContent = s.seller + (s.room ? " · " + s.room : "");
+    $("seller").textContent = s.seller + (s.room ? " · " + s.room : "") + (s.ch ? " ch " + s.ch : "");
     var tb = $("rows"); tb.textContent = "";
     s.rows.forEach(function (r) {
       var tr = document.createElement("tr"), unit = r.p / Math.max(1, r.q), t = typ[r.i.toLowerCase()];

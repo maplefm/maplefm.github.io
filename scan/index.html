@@ -65,8 +65,9 @@ col.c1 { width: auto; } col.c2, col.c3 { width: 110px; } col.c4 { width: 90px; }
 td.n { text-align: right; font-variant-numeric: tabular-nums; }
 td.deal { color: var(--ok); font-weight: 800; }
 .tablewrap { overflow-x: auto; }
-#lastshop { min-height: 330px; } #rows { display: table-row-group; } .tablewrap { min-height: 240px; } #who { min-height: 1.5em; } #lasttip, #perf { min-height: 1.4em; }
+#lastshop { min-height: 330px; } #rows { display: table-row-group; } .tablewrap { min-height: 240px; } #who, #chnote { min-height: 1.5em; } #lasttip, #perf { min-height: 1.4em; }
 .clubfoot { color: #cbb9f0; } .clubfoot b { color: #fff3c4; } .clubfoot a { color: #e8dcff; }
+.warn { color: var(--no); font-weight: 800; }
 .idle { background: var(--panel2); border-radius: 10px; padding: 6px 10px; display: inline-block; font-size: .9rem; }
 </style>
 <link rel="stylesheet" href="/assets/nav.css?v=4"><style>.sitenav .sn-brand{color:#fff3c4}.sitenav .sn-brand b{color:var(--gold-hi)}.sitenav.sn-pin{--bg:var(--bg1);--line:rgba(255,255,255,.12)}</style></head>
@@ -86,10 +87,12 @@ td.deal { color: var(--ok); font-weight: 800; }
     </div>
     <p class="status" id="status" role="status" aria-live="polite">Loading…</p>
     <p class="small" id="who">Checking sign-in…</p>
+    <p class="small" id="chnote">Channel: open the Change Channel window once after you start.</p>
     <p class="idle" id="idle" style="visibility:hidden">Paused: nothing on screen changed for 30 seconds. It picks up again on its own.</p>
     <ol>
       <li><b>Press Start</b> and pick the MapleStory window in the share list.</li>
       <li><b>Open shops</b> in the Free Market and scroll to the bottom, like with FM Watcher.</li>
+      <li><b>Open Change Channel once</b> (Esc, then Change Channel) so your scans land on the right channel. Changing channels is picked up too.</li>
       <li><b>Hover equips</b> to read their stats. Only popups read exactly are kept.</li>
       <li><b>Leave this tab open.</b> It can sit behind the game.</li>
     </ol>
@@ -111,7 +114,6 @@ td.deal { color: var(--ok); font-weight: 800; }
       <li><b>Game size:</b> the default 1920 × 1080 window reads best. Share the game window, not the whole screen.</li>
       <li><b>Speed:</b> it reads only when the picture changes and waits between reads, so the game keeps its frame rate.</li>
       <li><b>Earn:</b> sign in with Discord and your scans join your account. FM Watcher and this page on one account count as one scanner.</li>
-      <li><b>Channels:</b> FM Watcher still reads the channel number. Use it if you want credit for scanning quiet spots.</li>
       <li><b>Privacy:</b> frames are read inside this tab and thrown away. Nothing is recorded or uploaded except the listings.</li>
       <li><b>Problem?</b> <a href="https://discord.gg/cXnVBTUUPk">Tell us in Discord</a> with your browser and game size.</li>
     </ul>
