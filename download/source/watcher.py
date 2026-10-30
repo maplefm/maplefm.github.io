@@ -19,19 +19,9 @@ except Exception:          # numpy missing: everything else still works
 
 VERSION = "2026.10.30.1"
 
-# Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
-# hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
-# doesn't have ("LUK 70" on a claw) is a requirement line read as a bonus and is dropped on its own.
-_SCROLLABLE = {"Earrings": "STR DEX INT LUK AVOID CRITDMG", "Glove": "ATT MATT ACC CRIT", "Hat": "ACC HP MP", "Cape": "ACC DEX INT LUK MDEF STR WDEF", "Top": "WDEF HP MP",
-               "Bottom": "WDEF HP MP", "Overall": "WDEF DEX INT LUK STR", "Shield": "ACC WDEF", "Shoes": "AVOID JUMP SPEED", "Pet Equipment": "JUMP SPEED", "Wand": "MATT", "Staff": "MATT"}
-_WEAPON = re.compile(r"Sword|Axe|Blunt|Dagger|Spear|Pole Arm|Bow|Crossbow|Claw|Knuckle|Gun")
-_STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP", "CRIT", "CRITDMG"]
-_SMALL = {"STR": 15, "DEX": 15, "INT": 15, "LUK": 15, "ACC": 15, "AVOID": 15, "SPEED": 15, "JUMP": 15, "HP": 60, "MP": 60, "WDEF": 40, "MDEF": 40, "CRIT": 15, "CRITDMG": 15}
-try:
-    _FIT = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "statfit.json"), encoding="utf-8"))
-except (OSError, ValueError):
-    _FIT = {}
-_FIT_LOW = {k.lower(): v for k, v in _FIT.items()}
+# Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
+from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
+
 
 # the text reader's usual digit slips: a 1 read as 4 or 7, and back
 _SLIPS = {("1", "4"), ("4", "1"), ("1", "7"), ("7", "1")}
@@ -67,30 +57,6 @@ def stats_fit(name, stats):
         if stats[k] > _SMALL.get(k, 0):
             out.pop(k, None); out.pop(k + "_b", None)
     return out
-def exact_fits(name, stats):
-    """An exactly read popup, checked against the item (statfit.json): every base stat is there, a value without a
-    bracket is exactly the base (the game brackets any stat that differs from it), no stat the item can't have, and
-    the upgrades left fit the slots and the scrolls passed. (True, "") or (False, why)."""
-    f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(name)).strip().lower())
-    if not f: return False, "item not known"
-    sub, base, cash = f[0], f[1], f[2]
-    vals = f[3] if len(f) > 3 else {}
-    allow = set(base) | set((_SCROLLABLE.get(sub) or ("ATT" if _WEAPON.search(sub) else "")).split())
-    keys = [k for k in stats if k in _STATS]
-    for k in keys:
-        if k not in allow: return False, "other item" if k in ("ATT", "MATT") and k not in allow else "stat %s not on this item" % k
-        if stats.get(k + "_b") is None:
-            if k in vals and stats[k] != vals[k]: return False, "%s %s without a bracket, base is %s" % (k, stats[k], vals[k])
-            if k not in vals: return False, "%s without a bracket on a stat the item has no base for" % k
-    for k, v in vals.items():
-        if k == "SLOTS": continue
-        if k in _STATS and k not in stats: return False, "%s line missing" % k
-    if "SLOTS" not in stats: return False, "upgrades line missing"
-    if vals.get("SLOTS") is not None:
-        if stats["SLOTS"] > vals["SLOTS"]: return False, "more slots than the item has"
-        if stats.get("UP") is not None and stats["SLOTS"] > vals["SLOTS"] - stats["UP"]: return False, "slots and scrolls passed don't add up"
-    return True, ""
-
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
