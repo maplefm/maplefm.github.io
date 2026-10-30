@@ -27,7 +27,7 @@ MEMBER = ["watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", 
 
 # the public price summary: prices only. Listings, sellers, the cheapest ask and deals stay for signed-in members.
 KEEP = ("last3", "rk", "item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "daily", "salesN",
-        "vol", "equip", "move", "basis", "typWho", "conf", "capped")
+        "vol", "equip", "move", "basis", "typWho", "conf", "capped", "lad")
 
 
 def top_roll(r):

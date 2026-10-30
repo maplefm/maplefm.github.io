@@ -1667,13 +1667,15 @@
     if (D && D.list.length) { mark("rows"); if (!D.preview) mark("live"); }
     var basel = visible(); renderChips(basel);
     var shown = basel.filter(function (i) { return (state.cat === "All" || i.cat === state.cat) && (!state.wonly || WATCH[i.item]); });
+    // equips show (and sort by) the price of their busiest grade once it has 3+ sales; the rest keep the typical
+    shown.forEach(function (i) { if (!i.equip || D.preview) { i.ltop = null; return; } var L = ladderOf(i); i.ltop = L && L.top && L.top.basis === "sold" ? L.top : null; });
     $("wcount").textContent = Object.keys(WATCH).length;
     var k = state.sortK, dir = state.sortDir;
     var hasQ = boardQ().trim() !== "";
     shown.sort(function (a, b) {
       if (hasQ && QHIT[a.item] !== QHIT[b.item] && Math.max(QHIT[a.item], QHIT[b.item]) >= 900) return QHIT[b.item] - QHIT[a.item];
       if (k === "item") return dir * a.item.localeCompare(b.item);
-      var x = a[k] || 0, y = b[k] || 0; if (k === "best") { x = a.best || (dir > 0 ? 1e15 : -1); y = b.best || (dir > 0 ? 1e15 : -1); }
+      var x = a[k] || 0, y = b[k] || 0; if (k === "typ") { x = a.ltop ? a.ltop.mid : x; y = b.ltop ? b.ltop.mid : y; } if (k === "best") { x = a.best || (dir > 0 ? 1e15 : -1); y = b.best || (dir > 0 ? 1e15 : -1); }
       if (k === "chg" || k === "trend") { var ax = x === -9, bx = y === -9; if (ax !== bx) return ax ? 1 : -1; }   // rows with no data sit last either way
       return dir * (x - y) || b.n - a.n || a.item.localeCompare(b.item);
     });
@@ -1687,7 +1689,10 @@
       st.addEventListener("click", function (e) { e.stopPropagation(); if (WATCH[i.item]) delete WATCH[i.item]; else WATCH[i.item] = { t: Date.now() }; saveLS("fm-watch", WATCH); st.textContent = WATCH[i.item] ? "★" : "☆"; st.setAttribute("aria-pressed", !!WATCH[i.item]); $("wcount").textContent = Object.keys(WATCH).length; });
       ncell.firstChild.insertBefore(st, ncell.firstChild.firstChild);
       tr.appendChild(ncell);
-      var tc = el("td"); tc.appendChild(money(i.typ)); tr.appendChild(tc);
+      var tc = el("td"), LT = i.equip && i.ltop;
+      if (LT) { tc.appendChild(money(LT.mid)); var gt = el("small", "lgt", LT.name.replace(/^Slots used, no gain$/, "no gain").toLowerCase().replace(/ (att|matt|str|dex|int|luk|hp|mp)\b/gi, function (z) { return z.toUpperCase(); })); gt.title = "The price of the grade most copies sell at. Open the item for every grade."; tc.appendChild(gt); }
+      else tc.appendChild(money(i.typ));
+      tr.appendChild(tc);
       var cc = el("td", "c"); cc.appendChild(pctPill(i.mv[0])); tr.appendChild(cc);
       var bc = el("td", "c col-src clubonly");
       if (i.bestL) { var sp = el("span", "srcp" + (i.deal >= 0.25 ? " deal" : "")); sp.appendChild(coin()); sp.appendChild(document.createTextNode(short(i.best))); if (i.deal >= 0.25) sp.appendChild(el("small", null, "−" + Math.round(i.deal * 100) + "%")); sp.title = i.bestL.s + (where(i.bestL) ? ", " + where(i.bestL) : "") + ", " + ago(i.bestL.t); bc.appendChild(sp); }
@@ -2498,6 +2503,70 @@
     return out.length ? "natural " + out.join(", ") : "";
   }
   // slots taken from the item's base count: 0 is clean. Null when the hover didn't reach Remaining Enhancements.
+  // ---------------------------------------------------------------- the equip price ladder
+  // An equip's price split into named grades a buyer or seller can click, instead of one number blending clean and
+  // scrolled copies: Clean (no slot used), Clean with a good natural roll on a stat buyers pay for, Slots used with
+  // no gain, then +1, +2... on the item's key stat (the stat its scrolled copies most often gained), at most 5 grades.
+  // Only hovers that pass the roll checks count (rollKeyOk, slots read). A grade with 3+ sales in the board's window
+  // shows the middle of its sales; otherwise its asking prices, labeled as asking.
+  var LADMIN = 3, LADSEL = {};
+  function ladderOf(i) {
+    if (!i || !i.equip) return null;
+    var stamp = (i.buy || []).length + "|" + i.sales.length + "|" + (D.L ? D.L.length : 0);
+    if (i._lad && i._lad.at === stamp) return i._lad;
+    var n = i.item, trusted = function (l) { return l.x && !l.chat && rollKeyOk(n, l) && slotsUsed(n, l) != null && rollPick(n, l); };
+    var seenA = {}, asks = (i.buy || []).filter(function (x) { if (x.st === "gone" || x.st === "sold" || !trusted(x)) return false; var k = x.s + "|" + x.u + "|" + (x.x.SLOTS || "") + "|" + (rollPick(n, x).combo || ""); if (seenA[k]) return false; seenA[k] = 1; return true; });
+    var sold = i.sales.filter(trusted), all = sold.map(function (l) { return [l, 1]; }).concat(asks.map(function (l) { return [l, 0]; }));
+    var kc = {};
+    all.forEach(function (a) { var p = rollPick(n, a[0]); if (slotsUsed(n, a[0]) > 0 && p.g > 0 && p.k) kc[p.k] = (kc[p.k] || 0) + 1; });
+    // weapons and gloves are bought by attack; other equips by the stat their scrolled copies most often gained
+    var fixed = isWeapon(n) || subKind(n) === "Glove" ? keyStat(n, null) : null;
+    var key = fixed || Object.keys(kc).sort(function (a, b) { return kc[b] - kc[a]; })[0] || keyStat(n, null) || "ATT";
+    var G = {};
+    function put(id, a) { var g = G[id] || (G[id] = { id: id, sold: [], asks: [] }); g[a[1] ? "sold" : "asks"].push(a[0]); }
+    all.forEach(function (a) {
+      var l = a[0], su = slotsUsed(n, l), p = rollPick(n, l);
+      if (su === 0) { var pos = (p.combo || "").split(".").filter(function (c) { return /\+\d/.test(c); }).join("."); put(pos ? "C|" + pos : "C|", a); }
+      else if (p.g <= 0) put("S|0", a);
+      else if (p.k === key) put("S|" + p.g, a);
+    });
+    // clean: plain first, then the busiest good natural roll; scrolled: no gain, then +1, +2... merged at the top into
+    // "+N or more" until there are at most 5 grades; grades with nothing at all are left out
+    var busy = function (g) { return g.sold.length * 4 + g.asks.length; };
+    var clean = Object.keys(G).filter(function (k) { return k.indexOf("C|") === 0 && k !== "C|"; }).map(function (k) { return G[k]; }).sort(function (a, b) { return busy(b) - busy(a); });
+    var out = []; if (G["C|"]) out.push(G["C|"]); if (clean[0] && busy(clean[0]) >= 2) out.push(clean[0]);
+    if (G["S|0"]) out.push(G["S|0"]);
+    var lv = Object.keys(G).filter(function (k) { return /^S\|[1-9]/.test(k); }).map(function (k) { return +k.slice(2); }).sort(function (a, b) { return a - b; });
+    var room = 5 - out.length, ups = lv.map(function (v) { var g = G["S|" + v]; return { id: "S|" + v, v: v, sold: g.sold.slice(), asks: g.asks.slice() }; });
+    while (ups.length > room && ups.length > 1) { var t = ups.pop(), u = ups[ups.length - 1]; u.sold = u.sold.concat(t.sold); u.asks = u.asks.concat(t.asks); u.plus = 1; }
+    if (room <= 0 && ups.length) { var m0 = ups[0]; ups.slice(1).forEach(function (t) { m0.sold = m0.sold.concat(t.sold); m0.asks = m0.asks.concat(t.asks); }); m0.plus = 1; ups = [m0]; out.pop(); }
+    out = out.concat(ups);
+    var ab = STATABBR[key] || key; if (key === "TOTAL") ab = "stats";
+    var q = function (v, f) { v = v.slice().sort(function (a, b) { return a - b; }); var x = (v.length - 1) * f, lo = Math.floor(x), hi = Math.min(lo + 1, v.length - 1); return v[lo] + (v[hi] - v[lo]) * (x - lo); };
+    out.forEach(function (g) {
+      if (g.id === "C|") g.name = "Clean";
+      else if (g.id.indexOf("C|") === 0) g.name = "Clean, " + g.id.slice(2).split(".").map(function (c) { var m = /^([A-Z]+)\+(\d+)$/.exec(c); return m ? "+" + m[2] + " " + (STATABBR[m[1]] || m[1]).toLowerCase().replace(/^(att|matt|str|dex|int|luk|hp|mp)$/, function (z) { return z.toUpperCase(); }) : c; }).join(" ");
+      else if (g.id === "S|0") g.name = "Slots used, no gain";
+      else g.name = "+" + g.id.slice(2) + " " + ab + (g.plus ? " or more" : "");
+      g.sold.sort(function (a, b) { return b.t - a.t; }); g.asks.sort(function (a, b) { return a.u - b.u; });
+      var su = g.sold.map(function (l) { return l.u; }), au = g.asks.map(function (l) { return l.u; });
+      if (su.length >= LADMIN) { g.basis = "sold"; g.lo = q(su, 0.25); g.hi = q(su, 0.75); g.mid = q(su, 0.5); }
+      else if (au.length >= 2) { g.basis = "asking"; g.lo = q(au, 0.25); g.hi = q(au, 0.75); g.mid = q(au, 0.5); }
+      else if (su.length || au.length) { g.basis = "few"; g.mid = (su.length ? su : au)[0]; }
+      else g.basis = "none";
+    });
+    var top = out.filter(function (g) { return g.basis === "sold"; }).sort(function (a, b) { return b.sold.length - a.sold.length; })[0] ||
+      out.filter(function (g) { return g.basis !== "none"; }).sort(function (a, b) { return busy(b) - busy(a); })[0] || null;
+    return (i._lad = { at: stamp, key: key, grades: out, top: top });
+  }
+  // the small colored tag naming a copy's grade; the color follows the grade's place on the ladder
+  function gradeTag(L, g) { var k = L.grades.indexOf(g), t = el("span", "lgt g" + Math.max(0, k), g.name); t.title = "Grade on the price ladder"; return t; }
+  // which grade a listing or sale falls in, for the small tag next to it (null when its stats weren't read well)
+  function gradeOf(i, l) {
+    var L = ladderOf(i); if (!L || !l || !l.x) return null;
+    for (var k = 0; k < L.grades.length; k++) { var g = L.grades[k]; if (g.sold.indexOf(l) >= 0 || g.asks.indexOf(l) >= 0) return g; }
+    return null;
+  }
   function slotsUsed(name, l) {
     var x = l && l.x; if (!x || x.SLOTS == null) return null;
     var b = fullBase(name).s.SLOTS; if (!b || x.SLOTS > b) return null;
@@ -3205,6 +3274,7 @@
   }
   function renderItem() {
     var r = $("ipr"); if (r) { r.textContent = ""; r.hidden = true; }
+    $("ip").classList.remove("lclosed"); if ($("ipr")) $("ipr").classList.remove("lclosed");
     renderItem0();
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
@@ -3215,25 +3285,41 @@
   // phones and tablets: Price by stat starts folded so Where to buy is a short scroll away; one tap opens it, and it
   // stays open for that item. A search for a roll ("wg 3 att") opens it on its own.
   var STATOPEN = "";
+  // equips with a price ladder: Price by stat and the listings start folded at every width, and stay open once opened
+  // (remembered in this browser for every item)
+  var OPENS = loadLS("fm-open", {}) || {};
+  function ladItem() { var i = state.sel && D && D.byName && D.byName[state.sel]; var L = i && i.equip && ladderOf(i); return !!(L && L.top); }
   function foldStats(ip) {
-    if (!ip || window.innerWidth > 1180) return;
+    var lad = ladItem();
+    if (!ip || (window.innerWidth > 1180 && !lad)) return;
+    if (lad) foldLists(ip);
     ip.querySelectorAll(":scope > .rollbox, :scope > .pbs").forEach(function (box) {
       var h = box.querySelector(":scope > h4"); if (!h) return;
-      var open = STATOPEN === state.sel;
+      var open = STATOPEN === state.sel || (lad && !!OPENS.stats);
       box.classList.add("fold"); box.classList.toggle("open", open);
       h.setAttribute("role", "button"); h.tabIndex = 0; h.setAttribute("aria-expanded", open);
-      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
+      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : lad && window.innerWidth > 1180 ? "Open" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
       var go = function (e) {
         if (e.target.closest(".inf")) return; if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return; e.preventDefault();
-        var now = !box.classList.contains("open"); STATOPEN = now ? state.sel : "";
-        ip.querySelectorAll(":scope > .fold").forEach(function (b) { b.classList.toggle("open", now); var hh = b.querySelector(":scope > h4"); hh.setAttribute("aria-expanded", now); var fh = hh.querySelector(".fhint"); if (fh) fh.textContent = now ? "Hide" : "Tap to open"; });
+        var now = !box.classList.contains("open"); STATOPEN = now ? state.sel : ""; if (lad) { OPENS.stats = now ? 1 : 0; saveLS("fm-open", OPENS); }
+        ip.querySelectorAll(":scope > .fold").forEach(function (b) { b.classList.toggle("open", now); var hh = b.querySelector(":scope > h4"); hh.setAttribute("aria-expanded", now); var fh = hh.querySelector(".fhint"); if (fh) fh.textContent = now ? "Hide" : lad && window.innerWidth > 1180 ? "Open" : "Tap to open"; });
       };
       h.addEventListener("click", go); h.addEventListener("keydown", go);
     });
   }
+  // Where to buy and the full sales list behind one bar: a ladder card is short enough to read at a glance until opened
+  function foldLists(ip) {
+    var i = D.byName[state.sel]; if (!i || ip.querySelector(":scope > .lfold")) return;
+    var open = !!OPENS.lists, n = ip.querySelector(":scope > .ltabs em"), b = el("button", "lfold"); b.type = "button";
+    b.appendChild(el("span", null, "Where to buy" + (n ? " (" + n.textContent + ")" : "") + " and all sales")); b.appendChild(el("span", "fhint", open ? "Hide" : "Open")); b.appendChild(el("span", "fchev"));
+    b.setAttribute("aria-expanded", open);
+    ip.classList.toggle("lclosed", !open);
+    b.addEventListener("click", function () { OPENS.lists = OPENS.lists ? 0 : 1; saveLS("fm-open", OPENS); renderItem(); });
+    var lt = ip.querySelector(":scope > .ltabs"); ip.insertBefore(b, lt || null);
+  }
   // the card's reading order: price first, then what to do, how to get it, prices by roll, listings, links.
   // Anything without a place stays right after the part it was added next to.
-  var CARDORDER = [["ih", 0], ["chkbox", 1], ["rollmiss", 2], ["big", 3], ["tline", 4], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["ltabs", 13], ["bsort", 14], ["list", 15], ["ifoot", 20]];
+  var CARDORDER = [["ih", 0], ["chkbox", 1], ["rollmiss", 2], ["gladder", 2.5], ["big", 3], ["tline", 4], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["lfold", 12.9], ["ltabs", 13], ["bsort", 14], ["list", 15], ["ifoot", 20]];
   function orderCard(ip) {
     if (!ip || !state.sel) return;
     var last = -1, kids = [].slice.call(ip.children).map(function (k, ix) {
@@ -3246,7 +3332,8 @@
   function splitCard() {
     var r = $("ipr"), ip = $("ip"); if (!r || !ip || window.innerWidth <= 1180 || !state.sel) return;
     var i = D && D.byName && D.byName[state.sel];
-    var mv = ip.querySelectorAll(":scope > .ltabs, :scope > .bsort, :scope > .list"); if (!mv.length) return;
+    var mv = ip.querySelectorAll(":scope > .lfold, :scope > .ltabs, :scope > .bsort, :scope > .list"); if (!mv.length) return;
+    r.classList.toggle("lclosed", ip.classList.contains("lclosed"));
     var ch = i && bigChart(i); if (ch) r.appendChild(ch);
     mv.forEach(function (n) { r.appendChild(n); });
     r.hidden = false;
@@ -3293,6 +3380,64 @@
     nbIO.observe(hd);
   }
 
+  // The ladder on an equip's card: one button per grade with its price range and how many sold, the busiest picked
+  // first; under it the picked grade's recent sales and its cheapest listings. The search's roll ("wg 3 att") picks
+  // that grade.
+  function ladderBox(i, L) {
+    var box = el("div", "gladder"), h = el("h4");
+    h.appendChild(document.createTextNode("Price by grade"));
+    h.appendChild(infoTip("Every copy is sorted into a grade from its hovered stats: Clean has no scroll used; a Clean grade with a stat is a better natural roll; Slots used, no gain had scrolls fail; +1, +2 and up count what scrolls added to the item's key stat (" + (STATABBR[L.key] || L.key) + "). Prices are the middle half of the last 7 days of sales; with fewer than " + LADMIN + " sales, the asking prices of copies up now, marked asking. Copies nobody hovered aren't counted."));
+    box.appendChild(h);
+    if (PENDROLL && PENDROLL.n === i.item && PENDROLL.k === L.key) {
+      var pv = +PENDROLL.v, hit = L.grades.filter(function (g) { var v = g.id.indexOf("S|") === 0 ? +g.id.slice(2) : null; return v != null && v > 0 && (v === pv || (g.plus && pv >= v)); })[0];
+      if (hit) LADSEL[i.item] = hit.id;
+    }
+    var sel = LADSEL[i.item]; if (!L.grades.some(function (g) { return g.id === sel; })) sel = L.top.id;
+    var row = el("div", "lgrades"); row.setAttribute("role", "radiogroup"); row.setAttribute("aria-label", "Grades");
+    L.grades.forEach(function (g) {
+      var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "none" ? " empty" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
+      b.appendChild(el("span", "lgn", g.name));
+      var pr = el("span", "lgp");
+      if (g.basis === "sold" || g.basis === "asking") { pr.appendChild(money(g.lo)); if (short(g.lo) !== short(g.hi)) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g.hi))); } }
+      else if (g.basis === "few") pr.appendChild(money(g.mid));
+      else pr.appendChild(el("span", "tfd", "none yet"));
+      b.appendChild(pr);
+      b.appendChild(el("span", "lgc", g.basis === "asking" ? "asking · " + g.asks.length + " listed" : g.sold.length ? g.sold.length + " sold" + (g.basis === "few" ? ", too few" : "") : g.asks.length ? g.asks.length + " listed" : ""));
+      b.addEventListener("click", function () { LADSEL[i.item] = g.id; var nb = ladderBox(i, L); box.replaceWith(nb); var o = nb.querySelector(".lg.on"); if (o) o.focus(); });
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+    var g = L.grades.filter(function (x) { return x.id === sel; })[0], det = el("div", "lgsel");
+    var head = el("p", "lgh");
+    if (g.basis === "sold") { head.appendChild(el("b", null, g.name + ": ")); head.appendChild(document.createTextNode("most sold between ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" and ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.sold.length + " sold in 7 days")); }
+    else if (g.basis === "asking") { head.appendChild(el("b", null, g.name + ": ")); head.appendChild(document.createTextNode("not enough sales yet. Asking ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" to ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.asks.length + " listed")); }
+    else { head.appendChild(el("b", null, g.name + ": ")); head.appendChild(document.createTextNode("not enough sales yet.")); }
+    det.appendChild(head);
+    function line(l, sold) {
+      var li = el("div", "lgl"); li.appendChild(money(l.u));
+      var who = el("span", "lgw", l.s); li.appendChild(who);
+      var chip = statChip(i.item, l.x, l.xj); if (chip) li.appendChild(chip);
+      li.appendChild(el("small", null, sold ? ago(l.t) : (buyWhere(l) + " · " + ago(l.t))));
+      tipAttach(li, l, i.item);
+      return li;
+    }
+    if (g.sold.length) { det.appendChild(el("h5", null, "Recent sales")); g.sold.slice(0, 6).forEach(function (l) { det.appendChild(line(l, true)); }); }
+    if (g.asks.length) { det.appendChild(el("h5", null, "Cheapest listed now")); g.asks.slice(0, 5).forEach(function (l) { det.appendChild(line(l, false)); }); }
+    box.appendChild(det);
+    return box;
+  }
+  // signed out (the saved summary has no listings): the grades and their prices only
+  function ladderStatic(lad) {
+    var box = el("div", "gladder"); box.appendChild(el("h4", null, "Price by grade"));
+    var row = el("div", "lgrades");
+    lad.forEach(function (g) {
+      var b = el("div", "lg" + (g[7] ? " on" : "") + (g[1] === "none" ? " empty" : "")); b.appendChild(el("span", "lgn", g[0]));
+      var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking") { pr.appendChild(money(g[2])); if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g[3]))); } } else if (g[1] === "few") pr.appendChild(money(g[4])); else pr.appendChild(el("span", "tfd", "none yet"));
+      b.appendChild(pr); b.appendChild(el("span", "lgc", g[1] === "asking" ? "asking · " + g[6] + " listed" : g[5] ? g[5] + " sold" : g[6] ? g[6] + " listed" : ""));
+      row.appendChild(b);
+    });
+    box.appendChild(row); return box;
+  }
   function renderItem0() {
     nameBar(null);
     if (state.sel) loadBase(state.sel);
@@ -3304,7 +3449,8 @@
       if (MEMBER !== false) { pt.appendChild(el("p", null, "Loading the latest prices…")); ph.appendChild(pt); ip.appendChild(ph); return; }
       pt.appendChild(el("p", null, (pi.cat || "") + (pi.salesN ? " · " + pi.salesN + " sales" : ""))); ph.appendChild(pt); ip.appendChild(ph);
       // signed out: the price, the range and the move are open to everyone; listings and deals are for members
-      ip.appendChild(el("p", "pvbig", short(pi.typ)));
+      if (pi.lad && pi.lad.length) ip.appendChild(ladderStatic(pi.lad));
+      else ip.appendChild(el("p", "pvbig", short(pi.typ)));
       if (pi.hi > pi.lo && short(pi.lo) !== short(pi.hi)) ip.appendChild(el("p", "note", "Typical price. Recent sales ran " + short(pi.lo) + " to " + short(pi.hi) + "."));
       var mv = pi.mv && pi.mv[0]; if (typeof mv === "number" && Math.abs(mv) >= 0.01) ip.appendChild(el("p", "note", (mv > 0 ? "Up " : "Down ") + Math.round(Math.abs(mv) * 100) + "% in the last 24 hours"));
       var gate = el("a", "gate"); gate.href = ACCT + "/login?back=home"; gate.appendChild(el("b", null, "Live listings for this item")); gate.appendChild(el("span", null, "Sellers, prices, rolls and recent sales. A Mega Deals perk.")); gate.appendChild(el("i", null, "Sign in with Discord")); ip.appendChild(gate);
@@ -3334,21 +3480,24 @@
     var cb = null; if (i.check) { cb = el("div", "chkbox"); cb.appendChild(el("b", null, "⚠ Double check this price before you act on it")); var ul = el("ul"); i.flags.forEach(function (f) { ul.appendChild(el("li", null, f)); }); cb.appendChild(ul); }
     if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); else if (i.typ && vp >= 100) { var mult = i.typ / vp; vl.appendChild(el("span", "tg ok", mult >= 2 ? "FM pays " + (mult >= 10 ? Math.round(mult) : Math.round(mult * 10) / 10) + "× more" : "FM pays " + Math.round((mult - 1) * 100) + "% more")); vl.title += " The Free Market typical is " + fmt(i.typ) + ", so listing it beats the NPC."; } ht.appendChild(vl); }
     hd.appendChild(ht); ip.appendChild(hd); if (cb) ip.appendChild(cb);
+    // equips: the price ladder replaces the one blended price, its 24h move and its sale boxes
+    var LD = i.equip ? ladderOf(i) : null; if (LD && !LD.top) LD = null;
+    if (LD) { ip.appendChild(ladderBox(i, LD)); nameBar(i); }
     var big = el("div", "big");
     if (i.hi > i.lo) { big.appendChild(money(i.lo)); big.appendChild(el("span", "dash", "–")); var hiS = el("span", "num", short(i.hi)); big.appendChild(hiS); }
     else big.appendChild(money(i.typ));
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
-    ip.appendChild(big); nameBar(i);
+    if (!LD) { ip.appendChild(big); nameBar(i); }
     var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
     var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
     var tnote = el("p", "tline"); tnote.appendChild(el("span", null, "Typical ")); tnote.appendChild(el("b", null, short(i.typ))); tnote.appendChild(el("span", "tsep", " · " + (SHORTWHY[i.basis] || "recent sales")));
     var cb1 = confBadge(i, false); if (cb1) tnote.appendChild(cb1);
     tnote.appendChild(infoTip(full));
-    ip.appendChild(tnote);
+    if (!LD) ip.appendChild(tnote);
     var st = el("div", "stats");
     [[i.lastSale ? i.lastSale.u : 0, "Last sale"], [i.last3, "Last 3 avg"], [null, "Sales" + (i.saleDays ? " · " + i.saleDays + (i.saleDays === 1 ? " day" : " days") : ""), i.salesN]].forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "None")); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
-    ip.appendChild(st);
+    if (!LD) ip.appendChild(st);
     if (i.equip && (i.bands || i.rolls.length)) ip.appendChild(rollBox(i));
     var smx = scrollMath(i.item); if (smx) ip.appendChild(smx);
     var lt = el("div", "ltabs");
@@ -3385,6 +3534,7 @@
         if (x.st !== "gone" && !x.chat) li.appendChild(soldBtn(x, mine));
       }
       tipAttach(li, x, i.item);   // hover (or tap) for the item as the game shows it
+      if (LD) { var gx = gradeOf(i, x); if (gx) nb.appendChild(gradeTag(LD, gx)); }
       if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); var ksx = keyStat(i.item, x.x, x.xj); if (ksx && x.x[ksx] != null) li.dataset.sv = String(x.x[ksx]); }
       var rr = i.rolls && i.rolls.filter(function (r) { return r.l === x; })[0]; if (rr) li.dataset.g = String(rr.g);
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
@@ -3403,7 +3553,7 @@
     pb.addEventListener("click", function () { state.tab = "pos"; render(); pform("buy", i.item, 1, 0); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); }); btns.appendChild(pb);
     ip.appendChild(btns);
     var mvs = el("div", "mvs"); [["1 day", 0], ["3 days", 1], ["7 days", 2]].forEach(function (x) { var s = el("span"); s.appendChild(el("span", "lbl", x[0] + " ")); if (i.mv[x[1]] != null) s.appendChild(moveTag(i.mv[x[1]])); else s.appendChild(el("span", "tfd", "n/a")); mvs.appendChild(s); });
-    ip.appendChild(mvs);
+    if (!LD) ip.appendChild(mvs);
     if (i.bid) { var bd = el("div", "bids"); bd.appendChild(document.createTextNode("Buyers in chat: top offer ")); bd.appendChild(money(i.bid)); bd.appendChild(document.createTextNode(" from " + i.bids.length + (i.bids.length === 1 ? " offer" : " offers"))); ip.appendChild(bd); }
     // listings with stats actually read (a trade chat "clean" tag alone has none)
     var withX = i.all.filter(function (x) { return x.x && !x.b && Object.keys(x.x).some(function (k) { return /^[A-Z]+$/.test(k) && k !== "SLOTS"; }); });
@@ -3835,7 +3985,7 @@
   }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
-    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) { o.bestS = i.bestL.s; o.bestT = i.bestL.t; var bw = where(i.bestL); if (bw) o.bestW = bw; } if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
+    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) { o.bestS = i.bestL.s; o.bestT = i.bestL.t; var bw = where(i.bestL); if (bw) o.bestW = bw; } if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; var LDs = ladderOf(i); if (LDs && LDs.top) o.lad = LDs.grades.map(function (g) { return [g.name, g.basis, Math.round(g.lo || 0), Math.round(g.hi || 0), Math.round(g.mid || 0), g.sold.length, g.asks.length, g === LDs.top ? 1 : 0]; }); } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
       // rt: sold typical per "roll|slots used|stat|every stat that moved" ("1|0|CRIT|CRIT+1": a clean pair with +1 crit rate);
       // the cheapest open listing for each roll, from the last 2 days, per "roll|stat|moves|slots used": what the chat bot quotes for "7 att wg"
       if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; var ak = r.g + "|" + (r.k || "") + "|" + (r.combo || "") + "|" + (function (su) { return su == null ? "" : su; })(slotsUsed(i.item, l)); if (ra[ak] == null || l.u < ra[ak]) ra[ak] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }
@@ -4405,10 +4555,11 @@
     d.hidden = !s.length; if (!s.length) return;
     var f = s[0], dl = $("dlast"); dl.textContent = "";
     dl.appendChild(el("b", null, f.s)); dl.appendChild(document.createTextNode(" sold " + showName(f.i) + " for ")); dl.appendChild(money(f.p)); dl.appendChild(document.createTextNode(" · " + ago(f.t)));
-    var box = $("dlist"), sig = s.map(function (l) { return l.s + l.i + l.p + ago(l.t); }).join("|");
+    var box = $("dlist"), sig = s.map(function (l) { return l.s + l.i + l.p + ago(l.t) + (l.x ? 1 : 0); }).join("|");
     if (box.dataset.sig === sig) return; box.dataset.sig = sig; box.textContent = "";
     s.forEach(function (l) {
-      var b = el("button"); b.type = "button"; b.appendChild(iconBox(l.i)); b.appendChild(el("b", null, l.i));
+      var b = el("button"); b.type = "button"; b.appendChild(iconBox(l.i)); var bn = el("b", null, l.i); b.appendChild(bn);
+      var di = l.x && D.byName[l.i], dg = di && di.equip && gradeOf(di, l); if (dg) bn.appendChild(gradeTag(ladderOf(di), dg));
       b.appendChild(el("small", null, l.s + (where(l) ? " · " + where(l) : "") + " · " + ago(l.t))); b.appendChild(money(l.p));
       tipAttach(b, l, l.i);
       b.addEventListener("click", function () { $("drawer").classList.remove("open"); pick(l.i); }); box.appendChild(b);
