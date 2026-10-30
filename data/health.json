@@ -1,12 +1,12 @@
 {
- "at": 1793339022990,
+ "at": 1793341844924,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.30.3",
+ "current": "2026.10.30.4",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.956,
    "late_share7": 0.023,
-   "behind": 6
+   "behind": 7
   },
   "Faif": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": 0.954,
    "late_share7": 0.0,
-   "behind": 23
+   "behind": 24
   },
   "yinisera": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": 0.992,
    "late_share7": 0.0,
-   "behind": 27
+   "behind": 28
   },
   "acter": {
    "rows24": 0,
@@ -102,7 +102,7 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.417,
-   "behind": 23
+   "behind": 24
   },
   "Zik": {
    "rows24": 21713,
@@ -111,9 +111,9 @@
    "rows7": 85237,
    "room7": 9052,
    "late7": 1714,
-   "chat24": 125,
-   "last": 1793338761,
-   "ver": "2026.10.30.3",
+   "chat24": 160,
+   "last": 1793341218,
+   "ver": "2026.10.30.4",
    "lag_median_min": 6.5,
    "room_rate24": 0.287,
    "room_rate7": 0.106,
@@ -134,7 +134,7 @@
    "room_rate24": 0.826,
    "room_rate7": 0.26,
    "late_share7": 0.008,
-   "behind": 3
+   "behind": 4
   },
   "DivineFeces": {
    "rows24": 0,
@@ -143,9 +143,9 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 5,
+   "chat24": 4,
    "last": 1793329199,
-   "ver": "2026.10.30.3",
+   "ver": "2026.10.30.4",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
@@ -155,12 +155,12 @@
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 159
+   "bad row: 3a3a": 330
   }
  },
  "rejects": {},
  "flags": [
   "Zik: 29% of shops placed in a room in the last 24 hours (21713 shop rows)",
-  "laclac: watcher 2026.10.29.3, 3 releases behind"
+  "laclac: watcher 2026.10.29.3, 4 releases behind"
  ]
 }
