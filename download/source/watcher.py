@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.29.3"
+VERSION = "2026.10.30.1"
 
 # Which stats an equip can carry: its base stats, plus what a scroll for its slot adds. Attack on earrings, boots or a
 # hat means the popup on screen belonged to another item, so its stats are not attached; a big main stat the item
@@ -67,6 +67,30 @@ def stats_fit(name, stats):
         if stats[k] > _SMALL.get(k, 0):
             out.pop(k, None); out.pop(k + "_b", None)
     return out
+def exact_fits(name, stats):
+    """An exactly read popup, checked against the item (statfit.json): every base stat is there, a value without a
+    bracket is exactly the base (the game brackets any stat that differs from it), no stat the item can't have, and
+    the upgrades left fit the slots and the scrolls passed. (True, "") or (False, why)."""
+    f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(name)).strip().lower())
+    if not f: return False, "item not known"
+    sub, base, cash = f[0], f[1], f[2]
+    vals = f[3] if len(f) > 3 else {}
+    allow = set(base) | set((_SCROLLABLE.get(sub) or ("ATT" if _WEAPON.search(sub) else "")).split())
+    keys = [k for k in stats if k in _STATS]
+    for k in keys:
+        if k not in allow: return False, "other item" if k in ("ATT", "MATT") and k not in allow else "stat %s not on this item" % k
+        if stats.get(k + "_b") is None:
+            if k in vals and stats[k] != vals[k]: return False, "%s %s without a bracket, base is %s" % (k, stats[k], vals[k])
+            if k not in vals: return False, "%s without a bracket on a stat the item has no base for" % k
+    for k, v in vals.items():
+        if k == "SLOTS": continue
+        if k in _STATS and k not in stats: return False, "%s line missing" % k
+    if "SLOTS" not in stats: return False, "upgrades line missing"
+    if vals.get("SLOTS") is not None:
+        if stats["SLOTS"] > vals["SLOTS"]: return False, "more slots than the item has"
+        if stats.get("UP") is not None and stats["SLOTS"] > vals["SLOTS"] - stats["UP"]: return False, "slots and scrolls passed don't add up"
+    return True, ""
+
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
@@ -483,8 +507,18 @@ def send_miss(cfg, img, kind, info=""):
         MISS["n"][kind] = MISS["n"].get(kind, 0) + 1; MISS["at"][kind] = time.time()
         import io
         pic = img.convert("RGB")
-        if pic.width > 1000 or pic.height > 1000: pic.thumbnail((1000, 1000))
-        buf = io.BytesIO(); pic.quantize(64).save(buf, "PNG", optimize=True); data = buf.getvalue()
+        if kind == "tip":
+            # a popup goes as it is on screen, cropped to its panel and not reduced in colour: the exact reader learns
+            # from its true pixels
+            try:
+                box = fmparse._tip_panel(pic)
+                if box: pic = pic.crop(box)
+            except Exception: pass
+            buf = io.BytesIO(); pic.save(buf, "PNG", optimize=True); data = buf.getvalue()
+            if len(data) > 300000: buf = io.BytesIO(); pic.quantize(256).save(buf, "PNG", optimize=True); data = buf.getvalue()
+        else:
+            if pic.width > 1000 or pic.height > 1000: pic.thumbnail((1000, 1000))
+            buf = io.BytesIO(); pic.quantize(64).save(buf, "PNG", optimize=True); data = buf.getvalue()
         if len(data) > 300000: return
         hid = hashlib.sha256(("fm-inbox:" + anon_id()).encode()).hexdigest()[:16]
         info = re.sub(r"[^\x20-\x7e]", "", str(info))[:300]
@@ -793,24 +827,41 @@ class Store:
                     return None
             tip = dict(tip, name=r["i"])
         # the stats have to be ones this item can carry, or the popup was another item's
-        fixed = stats_fit(r["i"], tip["stats"])
-        if fixed is None:
-            log("hover skipped: those stats can't be on", r["i"])
-            return None
-        tip = dict(tip, stats=fixed)
+        if tip["stats"].get("_ex"):
+            # read exactly: never "fixed", only checked against the item. Passing marks the read trusted (_ok).
+            ok, why = exact_fits(r["i"], tip["stats"])
+            st = dict(tip["stats"])
+            if ok: st["_ok"] = 1
+            else:
+                log("hover read exactly but", why, "on", r["i"], "- kept, not trusted")
+                if why == "other item": return None
+            tip = dict(tip, stats=st)
+        else:
+            fixed = stats_fit(r["i"], tip["stats"])
+            if fixed is None:
+                log("hover skipped: those stats can't be on", r["i"])
+                return None
+            tip = dict(tip, stats=fixed)
         key = json.dumps([day, seller, r["i"], r["p"], r["q"]])
         with self.lock:
             o = self.d["shop"].get(key)
             if not o:
                 return None
-            # the same popup is read several times while the pointer rests; vote per stat so one misread does not stick
-            reads = (o.get("xr") or [])[-5:] + [tip["stats"]]
-            o["xr"] = reads
-            vote = {}
-            for rd in reads:
-                for k, v in rd.items():
-                    vote.setdefault(k, {}); vote[k][v] = vote[k].get(v, 0) + 1
-            o["x"] = {k: max(c, key=lambda v: (c[v], v)) for k, c in vote.items()}
+            # A trusted exact read is the listing's stats, whole, and nothing weaker replaces it. Otherwise the same popup
+            # read several times votes per stat, and a stat only counts when most reads have it (one stray misread used
+            # to add a stat the item doesn't have).
+            if tip["stats"].get("_ok"):
+                o["x"] = dict(tip["stats"]); o["xr"] = [tip["stats"]]
+            elif (o.get("x") or {}).get("_ok"):
+                pass
+            else:
+                reads = [rd for rd in (o.get("xr") or [])[-5:] if not rd.get("_ok")] + [tip["stats"]]
+                o["xr"] = reads
+                vote = {}
+                for rd in reads:
+                    for k, v in rd.items():
+                        vote.setdefault(k, {}); vote[k][v] = vote[k].get(v, 0) + 1
+                o["x"] = {k: max(c, key=lambda v: (c[v], v)) for k, c in vote.items() if sum(c.values()) * 2 > len(reads)}
             if o["x"] and not o.get("xat"): o["xat"] = time.time()   # first time this listing's stats were read
             if not o.get("xt") or len(tip["lines"]) >= len(o.get("xt", [])): o["xt"] = tip["lines"]
             if tip.get("job"): o["xj"] = tip["job"]
@@ -1563,6 +1614,10 @@ def worker(cfg, jobs, store):
                             if tip:
                                 tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
                                 review_save(cfg, "tip", extra["tip"], tip)
+                                # read, but not every line exactly: the picture helps the exact reader learn the rest
+                                if not tip["stats"].get("_ex") and extra.get("hid"):
+                                    rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
+                                    send_miss(cfg, extra["tip"], "tip", f"not exact | row {extra.get('row')} | {rn}")
                             if not tip and extra.get("hid"):
                                 rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
                                 send_miss(cfg, extra["tip"], "tip", f"row {extra.get('row')} | {rn}")

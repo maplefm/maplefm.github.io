@@ -1046,7 +1046,24 @@ def read_tooltip(img, need_stats=True):
         # most reads agree; on a tie, the value that fits the base in brackets ("+7 (6 +1)")
         stats[k] = max(c.items(), key=lambda x: (x[1], -abs(x[0] - b) if b is not None else 0))[0]
         if b is not None and abs(stats[k] - b) <= 10: stats[k + "_b"] = b
-    if need_stats and not any(not k.endswith("_b") for k in stats): return None
+    # The exact reader (tipexact.py): every stat line read pixel for pixel in the game's own font. Where it reads a
+    # line, its value replaces the text reader's. When it reads every line of the popup, its stats are the stats:
+    # the text reader's extra lines are dropped and the read is marked exact (_ex).
+    exact = None
+    try:
+        import tipexact
+        exact = tipexact.read_tip(img)
+    except Exception:
+        exact = None
+    if exact and exact["stats"]:
+        es = exact["stats"]
+        for k in [k for k in es if not k.endswith("_b")]:
+            stats[k] = es[k]
+            if k + "_b" in es: stats[k + "_b"] = es[k + "_b"]
+            else: stats.pop(k + "_b", None)
+        if not exact["bad"] and any(l.get("stat") for l in exact["lines"]):
+            stats = dict(es); stats["_ex"] = 1
+    if need_stats and not any(not k.endswith("_b") and not k.startswith("_") for k in stats): return None
     # the upgrades line is the bottom one, and the popup is see-through: over a pink or yellow megaphone it fades.
     # When an equip read has no upgrades line, read the bottom of the panel once more by whiteness (white text stays,
     # coloured ground drops out).
@@ -1056,7 +1073,7 @@ def read_tooltip(img, need_stats=True):
             # little further down in the uncropped picture too
             sl = _tip_slots_white(img)
             if sl is None and box: sl = _tip_slots_white(full.crop((box[0], box[1] + (box[3] - box[1]) // 2, box[2], min(full.height, box[3] + 70))), top=0)
-            if sl is not None: stats["SLOTS"] = sl
+            if sl is not None: stats["SLOTS"] = sl; stats.pop("_ex", None)   # not read exactly
         except Exception: pass
     out = dict(base); out["stats"] = stats
     if not out.get("name"):

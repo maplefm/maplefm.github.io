@@ -2166,6 +2166,7 @@
   var CONS = {}, SMALL = { STR: 15, DEX: 15, INT: 15, LUK: 15, ACC: 15, AVOID: 15, SPEED: 15, JUMP: 15, HP: 60, MP: 60, WDEF: 40, MDEF: 40, CRIT: 15, CRITDMG: 15 };
   function statsFix(name, x) {
     if (!x || typeof x !== "object") return x;
+    if (x._ok) return x;                        // read exactly by FM Watcher and checked against the item: never "fixed"
     var r = dbRow(name); if (!r) return x;
     var kind = DBK[r[5]] || "", sub = kind.split(":")[1] || "", base = dbBase(name) || {};
     if (!/^Equip/.test(kind)) return x;        // a scroll's tooltip lists what it adds; that's not a roll
@@ -2221,7 +2222,9 @@
   // When the reads agree on every stat they share, the complete one fills in what the other missed.
   function mergeReads(all) {
     var by = {};
-    all.forEach(function (l) { if (!l.x || l.b || l.chat) return; var k = String(l.s).toLowerCase() + "|" + l.u + "|" + (l.q || 1); (by[k] || (by[k] = [])).push(l); });
+    // the same copy: same seller, same item, same price and bundle (the item was missing from this once, so two
+    // different items one seller priced alike could share stats)
+    all.forEach(function (l) { if (!l.x || l.b || l.chat || l.x._ok) return; var k = String(l.s).toLowerCase() + "|" + String(l.i).toLowerCase() + "|" + l.u + "|" + (l.q || 1); (by[k] || (by[k] = [])).push(l); });
     Object.keys(by).forEach(function (k) {
       var g = by[k]; if (g.length < 2) return;
       var full = g.filter(function (l) { return l.x.SLOTS != null; }).sort(function (a, b) { return b.t - a.t; });
@@ -2230,7 +2233,8 @@
         if (l.x.SLOTS != null || l.x._merged) return;
         var m = full.filter(function (f) { return Math.abs(f.t - l.t) < 3 * DAY && BSTATS.every(function (s) { return l.x[s] == null || f.x[s] == null || l.x[s] === f.x[s]; }); })[0];
         if (!m) return;
-        var x = Object.assign({}, m.x, l.x); x.SLOTS = m.x.SLOTS; x._merged = 1; l.x = x;
+        // only the upgrades line comes across; the other read's stats never do (that added stats a copy didn't have)
+        var x = Object.assign({}, l.x); x.SLOTS = m.x.SLOTS; if (m.x.UP != null && x.UP == null) x.UP = m.x.UP; x._merged = 1; delete x._ok; l.x = x;
       });
     });
   }

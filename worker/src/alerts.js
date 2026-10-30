@@ -2,7 +2,7 @@
 // Mega Deals holders (the same hasMega check the watchlist DMs use: Club, 50,000+ sales caught, Ko-fi $100+) save
 // alerts like "Work Gloves with 3+ ATT under 2M". Every board upload (/snap) is checked for new listings whose stats
 // were read with full confidence (the board's own x, never a set-aside read) and a match gets a Discord DM from the
-// Club FM bot. 25 alerts per account, one DM per listing, 20 DMs a day. Losing access pauses alerts, nothing is
+// Club FM bot. Only exact reads (x._ok: every line read pixel for pixel and checked against the item) can match. 25 alerts per account, one DM per listing, 20 DMs a day. Losing access pauses alerts, nothing is
 // deleted. Someone without access can never save one or be sent one.
 export const ALERT_MAX = 25, ALERT_DM_DAY = 20;
 export const ALERT_STATS = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "HP", "MP", "WDEF", "MDEF", "ACC", "AVOID", "SPEED", "JUMP", "CRIT", "CRITDMG"];
@@ -55,7 +55,7 @@ export function freshRows(snap, since) {
   const nowS = Math.floor(Date.now() / 1000);
   for (let i = 0; i < (snap.n || 0); i++) {
     const x = c.x ? c.x[i] : 0;
-    if (!x || typeof x !== "object") continue;
+    if (!x || typeof x !== "object" || !x._ok) continue;     // only reads FM Watcher made exactly and checked against the item
     if ((c.so && c.so[i]) || (c.b && c.b[i]) || (c.chat && c.chat[i]) || (c.spot && c.spot[i])) continue;
     const st = word("st", i); if (st === "gone" || st === "sold") continue;
     const t = Math.floor((T - (c.t ? c.t[i] || 0 : 0) * 1000) / 1000);

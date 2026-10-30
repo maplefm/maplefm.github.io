@@ -1,10 +1,15 @@
 {
- "version": "2026.10.29.3",
- "date": "2026-10-29T19:12:55+00:00",
- "notes": "Popups and room names the watcher can't read are sent as small pictures (up to 30 a day) so Club FM can fix the reader without asking for your review folder.",
- "sha256": "2931d24dcbb05841d528155255992b41f167406f7fecdb4286f75973cede26ab",
- "size": 155445,
+ "version": "2026.10.30.1",
+ "date": "2026-10-30T03:16:52+00:00",
+ "notes": "Popups are read exactly in the game's own font: stats are trusted only when every line reads exactly and fits the item. A popup that can't be read fully is sent as a lossless picture so the reader can learn it.",
+ "sha256": "35f2be36bc6bc64b65fe5be03b19e0a0b5c783128f5a6f54ebc136959c42f9bf",
+ "size": 160357,
  "history": [
+  {
+   "version": "2026.10.30.1",
+   "date": "2026-10-29",
+   "notes": "Popups are read exactly in the game's own font: stats are trusted only when every line reads exactly and fits the item. A popup that can't be read fully is sent as a lossless picture so the reader can learn it."
+  },
   {
    "version": "2026.10.29.3",
    "date": "2026-10-29",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.3",
    "date": "2026-10-24",
    "notes": "Hover wanted: the watcher now tells you (with a two-note chime) when a shop has an equip the board needs stats for. Just rest your mouse on that row."
-  },
-  {
-   "version": "2026.10.24.2",
-   "date": "2026-10-24",
-   "notes": "Scrolled items whose tooltip title reads badly keep their stats: the row under the pointer is used. Fixes 10 attack Work Gloves showing no stats."
   }
  ],
  "pip": [],
- "sig": "3417dea27e60a6e22e59bf51f2e34945895ecf1313f272fae0852981c9765336aa6d549e68cdbac3fc8b5232faeae8228a4c93f4741d117a72c097cc4c646c06364b9a54057fd46f35089d09cb162e1a105718f2dfcd50d7148bd759fff578f105cd92097df7ec889a070c82eb87d95233cf2e4742d397544e976d32ca55425d03664d5b0ebef1fecb44b4af4211c3f960bbf86009012a47da31cb4c7600e69923ccc7810e692e2e19f46b8199426189695f299aded6241d6addfa49c08822ae475ca9f36dfbe0557abf8d5e115233dd05183fa4f49f75f6dbf59faa3d7b7e4d300952a44b063eeca688c6a420e1c0940e46f2479674ca889d9530099dc1aaf9"
+ "sig": "567eba721572b7e95657bcbb3bb1f648f2c5388341b10c80738d76c4f82efd82e47be2d8e1b06f400e3432b3c00b9d49c051bf8fb2b7aa34fdb7fe026c727a3c147b503bd152eec9ac7938d2d37eb3d01b7a2d0f74fcc2298989c032e1956d972bc2764856b93d8f484aad49988ca2a3a56eb54b572e768afaa40839b325196d7ea224cbb4c0ce50787c138fd1f76ef21356d1ec974a494b9f6ed82af16a0751bbbc698a8aed2fe35ed27e8a7d01cc0e90551dab887e255c796faae0185375b28e77af11fa742c686ae4e0fb0a1e5dca85d7ba642cd78859600f9cb6454c5c03b77a9f004dfaf251f96b7da4530951e43352fdbd8c6451c64869ce3ca85a7bbd"
 }
