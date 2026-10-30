@@ -1026,13 +1026,26 @@ def read_tooltip(img, need_stats=True):
     box = _tip_panel(img) if TIP_CFG["crop"] else None
     full = img
     if box: img = img.crop(box)
+    # The exact reader first: when every stat line of the popup reads exactly, those are the stats, so one pass of
+    # the text reader (for the title and its "(+N)") is all that's left. Saves a whole pass on most popups.
+    passes = TIP_PASSES
+    try:
+        import tipexact
+        ex0 = tipexact.read_tip(img)
+        if ex0 and not ex0["bad"] and any(l.get("stat") for l in ex0["lines"]): passes = TIP_PASSES[:1]
+    except Exception:
+        pass
     # both contrast passes at once: the text reader is a separate program, so two run side by side in about the time of one
-    if len(TIP_PASSES) > 1:
-        from concurrent.futures import ThreadPoolExecutor
-        with ThreadPoolExecutor(len(TIP_PASSES)) as ex:
-            reads = [r for r in ex.map(lambda p: _read_tip_once(img, need_stats=False, lo=p[0], hi=p[1]), TIP_PASSES) if r]
-    else:
-        reads = [r for r in (_read_tip_once(img, need_stats=False, lo=lo, hi=hi) for lo, hi in TIP_PASSES) if r]
+    reads = None
+    if len(passes) > 1:
+        try:
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(len(passes)) as ex:
+                reads = [r for r in ex.map(lambda p: _read_tip_once(img, need_stats=False, lo=p[0], hi=p[1]), passes) if r]
+        except RuntimeError:
+            reads = None                    # no threads here (the browser scanner): the same passes one after another
+    if reads is None:
+        reads = [r for r in (_read_tip_once(img, need_stats=False, lo=lo, hi=hi) for lo, hi in passes) if r]
     if not reads: return None
     base = max(reads, key=lambda r: len(r["stats"]))
     votes = {}
