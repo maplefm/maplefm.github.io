@@ -117,21 +117,29 @@ def locate_game(fw, fh):
 # ---------------------------------------------------------------- the in-game pointer
 
 def _find_hand(img, x0=0, y0=0):
-    """The game's pointing hand in a picture: every spot at once, where all but 3 of its outline pixels are near black."""
+    """The game's pointing hand in a picture: the first spot, top to bottom then left to right, where all but 3 of its
+    outline pixels are near black. A quick pass over 8 spread outline pixels keeps only spots with 5 or more of them
+    dark (a real hand misses at most 3), then those few are checked against the whole outline."""
     blk = CUR["black"]
     a = np.asarray(img)
     if a.ndim != 3: return None
     mx = max(dx for dx, dy in blk); my = max(dy for dx, dy in blk); ny = min(dy for dx, dy in blk)
     H, W = a.shape[0] - my + ny - 1, a.shape[1] - mx - 1
     if H <= 0 or W <= 0: return None
-    dark = (a < 40).all(axis=2)
-    cnt = np.zeros((H, W), np.int16)
-    for dx, dy in blk:
+    dark = (a[..., 0] < 40) & (a[..., 1] < 40) & (a[..., 2] < 40)
+    few = blk[::max(1, len(blk) // 8)][:8]
+    cnt = np.zeros((H, W), np.int8)
+    for dx, dy in few:
         cnt += dark[dy - ny:dy - ny + H, dx:dx + W]
-    hit = np.argwhere(cnt >= len(blk) - 3)
-    if not len(hit): return None
-    yy, xx = hit[0]
-    return int(x0 + xx), int(y0 + yy - ny)
+    ys, xs = np.nonzero(cnt >= len(few) - 3)
+    if not len(ys): return None
+    full = np.zeros(len(ys), np.int16)
+    for dx, dy in blk:
+        full += dark[ys + (dy - ny), xs + dx]
+    ok = np.nonzero(full >= len(blk) - 3)[0]
+    if not len(ok): return None
+    k = ok[0]                      # nonzero lists spots top to bottom, then left to right, like argwhere
+    return int(x0 + xs[k]), int(y0 + ys[k] - ny)
 
 
 def track_cursor(game):
