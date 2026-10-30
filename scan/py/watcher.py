@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.30.5"
+VERSION = "2026.10.30.7"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -119,14 +119,27 @@ def load_config():
         cfg["publish"] = False
     return cfg
 
+# Hooks for running the same loop somewhere else (the browser scanner): where pictures, the pointer, sounds and
+# log lines come from and go. Left as None, FM Watcher uses the screen, Windows and its own window.
+HOOKS = {"grab": None, "cursor": None, "sound": None, "log": None, "defer": None}
+
+def spawn(fn, *args):
+    """Run fn on its own thread; where threads aren't available (the browser), run it now."""
+    try:
+        threading.Thread(target=fn, args=args, daemon=True).start()
+    except RuntimeError:
+        if HOOKS["defer"]: HOOKS["defer"](fn, args)       # the browser runs it between looks
+        else: fn(*args)
+
 def chime(ok=True):
     """A short sound so you know a hover was read (high) or missed (low) without looking at the log."""
     if not CFG_CHIME[0]: return
+    if HOOKS["sound"]: HOOKS["sound"]("ok" if ok else "miss"); return
     def go():
         try:
             import winsound; winsound.Beep(1400 if ok else 500, 70 if ok else 140)
         except Exception: pass
-    threading.Thread(target=go, daemon=True).start()
+    spawn(go)
 CFG_CHIME = [True]
 
 # Equips the price board most needs a hover on (worth 50K+ and mostly listed without stats). Item names only,
@@ -296,17 +309,18 @@ def refresh_itemdb():
             if n: log(f"{n} new items from the site's item list")
         except Exception:
             pass
-    threading.Thread(target=go, daemon=True).start()
+    spawn(go)
 def short_meso(v):
     return f"{v / 1e6:.1f}M" if v >= 1e6 else f"{v // 1000}K" if v >= 1000 else str(v)
 def nudge():
     """Two rising notes: an item in this shop is on the hover-wanted list."""
     if not CFG_CHIME[0]: return
+    if HOOKS["sound"]: HOOKS["sound"]("nudge"); return
     def go():
         try:
             import winsound; winsound.Beep(900, 60); winsound.Beep(1300, 90)
         except Exception: pass
-    threading.Thread(target=go, daemon=True).start()
+    spawn(go)
 def hover_nudge(res):
     wanted = hover_wanted()
     if not wanted: return
@@ -324,6 +338,7 @@ def hover_nudge(res):
 
 def log(*a):
     line = datetime.datetime.now().strftime("%H:%M:%S ") + " ".join(str(x) for x in a)
+    if HOOKS["log"]: HOOKS["log"](line); return
     print(line, flush=True)
     try:
         with open(os.path.join(HERE, "watcher.log"), "a", encoding="utf-8") as f:
@@ -416,6 +431,7 @@ def place(cfg, game):
 
 def cursor_pos():
     """Where the mouse pointer is, in screen pixels. Reading it does not move it."""
+    if HOOKS["cursor"]: return HOOKS["cursor"]()
     try:
         import ctypes
         from ctypes import wintypes
@@ -457,7 +473,7 @@ def send_tip_image(img):
             req = urllib.request.Request(ACCOUNTS + "/tipimg", data=data, headers={"Content-Type": "image/png", "X-Watcher": hid, "User-Agent": "fm-watcher/" + VERSION})
             urllib.request.urlopen(req, timeout=30).read()
         except Exception as e: log("popup picture not sent:", e)
-    threading.Thread(target=up, daemon=True).start()
+    spawn(up)
     return h
 
 # A popup or room title the readers couldn't make sense of goes to Club FM as a small picture, so the readers can be
@@ -493,7 +509,7 @@ def send_miss(cfg, img, kind, info=""):
                 req = urllib.request.Request(ACCOUNTS + "/missimg", data=data, headers={"Content-Type": "image/png", "X-Watcher": hid, "X-Kind": kind, "X-Info": info, "User-Agent": "fm-watcher/" + VERSION})
                 urllib.request.urlopen(req, timeout=30).read()
             except Exception: pass
-        threading.Thread(target=up, daemon=True).start()
+        spawn(up)
     except Exception:
         pass
 
@@ -619,6 +635,7 @@ def tooltip_in(img):
     return img.crop((max(0, x0 - 4), max(0, y0 - 4), min(img.width, x1 + 6), min(img.height, y1 + 6)))
 
 def grab(sct, game, box):
+    if HOOKS["grab"]: return HOOKS["grab"](game, box)
     l, t, r, b = box
     shot = sct.grab({"left": game[0] + l, "top": game[1] + t, "width": r - l, "height": b - t})
     return Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
@@ -1570,156 +1587,161 @@ def frame_save(cfg, kind, img, info, keep=80):
     except OSError: pass
 
 def worker(cfg, jobs, store):
-    worker.room_hash = getattr(worker, "room_hash", None); worker.room_text = getattr(worker, "room_text", "")
     while True:
         kind, img, extra = jobs.get()
         try:
-            if kind == "shop":
-                # a hover over a shop that hasn't changed since the last read: reuse that read and go straight to the
-                # popup, so the "read" chime comes as soon as the stats are in (the shop list itself takes a while)
-                sh = (extra or {}).get("h") or quick_hash(img, (40, 66))
-                last = getattr(worker, "last_shop", None)
-                # the popup covers part of the list, so a hover over the same seller's shop read in the last minute
-                # reuses that read too (the name plate above the list isn't covered)
-                ph = (extra or {}).get("ph")
-                if extra and extra.get("tip") is not None and last and (last[0] == sh and time.time() - last[1] < 120 or (ph and len(last) > 3 and last[3] == ph and time.time() - last[1] < 60)):
-                    import copy; res = copy.deepcopy(last[2])
-                else:
-                    res = fmparse.read_shop_checked(img)
-                    if res and res.get("rows"): import copy; worker.last_shop = (sh, time.time(), copy.deepcopy(res), ph)
-                if res:
-                    extra = extra or {}
-                    # the minimap title barely changes between frames: read it once per look, not once per shop frame
-                    try:
-                        if extra.get("room") is None: res["room"] = ""
-                        else:
-                            rh = quick_hash(extra["room"], (40, 8))
-                            if rh == worker.room_hash: res["room"] = worker.room_text
-                            else: res["room"] = fmparse.read_room(extra["room"]); worker.room_hash, worker.room_text = rh, res["room"]
-                    except Exception: res["room"] = ""
-                    res["room"] = shop_room(res["room"])
-                    # minimap minimized: the room is in the one-line title bar at the top left instead
-                    if not re.match(r"^FM\d", res["room"]) and extra.get("bar") is not None:
-                        try:
-                            bh = quick_hash(extra["bar"], (60, 5))
-                            if bh != getattr(worker, "bar_hash", None): worker.bar_hash, worker.bar_text = bh, fmparse.read_room_bar(extra["bar"])
-                            if re.match(r"^FM\d", worker.bar_text or ""): res["room"] = worker.bar_text
-                        except Exception: pass
-                    res["tip"] = None; res["hovering"] = extra.get("tip") is not None
-                    if extra.get("tip") is not None:
-                        try:
-                            tip = fmparse.read_tooltip(extra["tip"])
-                            if extra.get("hid"): hv("read" if tip else "unread")
-                            if tip:
-                                tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
-                                review_save(cfg, "tip", extra["tip"], tip)
-                                # read, but not every line exactly: the picture helps the exact reader learn the rest
-                                if not tip["stats"].get("_ex") and extra.get("hid"):
-                                    rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
-                                    send_miss(cfg, extra["tip"], "tip", f"not exact | row {extra.get('row')} | {rn}")
-                            if not tip and extra.get("hid"):
-                                rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
-                                send_miss(cfg, extra["tip"], "tip", f"row {extra.get('row')} | {rn}")
-                            if not tip and extra.get("hover"):
-                                review_save(cfg, "tipmiss", extra["tip"], {"row": extra["row"]}); chime(False)
-                                log(f"hover: couldn't read a tooltip on row {extra['row'] + 1} yet")
-                        except Exception as e:
-                            log("tooltip error:", e)
-                    # the channel when the shop was on screen, not when it got read: reading can run behind
-                    res["ch"] = extra["ch"] if "ch" in extra else current_channel(cfg)
-                    review_save(cfg, kind, img, res)
-                    # a shop whose room couldn't be read: the minimap title (and the title bar) as pictures
-                    if extra.get("room") is not None and not re.match(r"^FM\d", res["room"] or "") and res.get("rows"):
-                        send_miss(cfg, extra["room"], "room", f"read '{res['room']}'")
-                        if extra.get("bar") is not None: send_miss(cfg, extra["bar"], "bar", f"read '{getattr(worker, 'bar_text', '')}'")
-                    if extra.get("room") is not None and res["room"] != getattr(worker, "last_room", None):
-                        worker.last_room = res["room"]; review_save(cfg, "room", extra["room"], {"room": res["room"]})
-                        if extra.get("bar") is not None: review_save(cfg, "roombar", extra["bar"], {"room": res["room"]})
-                    if res["rows"] and extra.get("tip") is not None:
-                        try: learn_new(res, extra["tip"])
-                        except Exception as e: log("new item error:", e)
-                    if res["rows"]:
-                        store.add_shop(res)
-                        if res["tip"]:
-                            store.last_ok = False
-                            hit = store.add_tooltip(res)
-                            if hit and hit != "pending" and store.last_ok and extra.get("since"): tip_ready.done = extra["since"]
-                            if extra.get("hid"):
-                                hv("matched" if hit else "nomatch")
-                                if hit and extra["hid"] not in HV_GOT: HV_GOT.add(extra["hid"]); hv("got")
-                            if hit == "pending": log(f"hover: read {res['tip']['name']}, stats saved until its row reads clearly")
-                            elif hit:
-                                log(f"read  {hit[0]} {hit[1]}: " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items() if not k.endswith("_b")))
-                                chime(True)
-                                # a read without the upgrades line isn't done: the hover list may ask for this one again
-                                if "SLOTS" in res["tip"].get("stats", {}) or not any(k in res["tip"].get("stats", {}) for k in ("ATT", "MATT", "WDEF", "MDEF", "STR", "DEX", "INT", "LUK")):
-                                    NUDGED[(res.get("seller") or "", res["tip"].get("name") or "")] = time.time() + 86400
-                            else: log(f"hover: read {res['tip']['name']} but couldn't match it to a row in this shop")
-                        for hit in store.flush_pending(res):
-                            log(f"stats {hit[0]} {hit[1]} (from an earlier hover)")
-                        try: hover_nudge(res)
-                        except Exception as e: log("hover list error:", e)
-                        try: store.add_icons(img, res)
-                        except Exception as e: log("icon error:", e)
-                        behind = jobs.qsize()
-                        try:
-                            deal_spot(res); session_tally(res)
-                            if res.get("room") and res.get("ch"): cov_tip((res["room"], res["ch"]))
-                        except Exception as e: log("tips error:", e)
-                        log(f"shop  {res['seller'] or '?':<14} {res['room'] or 'room ?':<8} {('ch ' + str(res['ch'])) if res['ch'] else 'ch ?':<6} {len(res['rows'])} rows read, {res['dropped']} unsure" + (f"  ({behind} still to read)" if behind >= 4 else ""))
-            elif kind == "chattip":
-                tip = fmparse.read_tooltip(img, need_stats=False)
-                if tip:
-                    review_save(cfg, "chattip", img, tip)
-                    hit = store.add_chat_tip(tip)
-                    if isinstance(hit, tuple):
-                        log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,}: " + " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
-                        chime(True)
-                    else: log(f"chat  read {tip['name']}: {hit}")
-            elif kind == "inv":
-                tip = fmparse.read_tooltip(img, need_stats=False)
-                if tip:
-                    review_save(cfg, "inv", img, tip)
-                    added = store.add_inventory(tip)
-                    if added:
-                        log("sell list +" if added is True else "sell list (again)", tip["name"], " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
-            elif kind == "board":
-                hover_wanted()
-                rh = quick_hash(extra["room"], (40, 8))
-                if rh != getattr(worker, "board_hash", None):
-                    worker.board_hash = rh; worker.board_room = fmparse.read_room(extra["room"])
-                    if worker.board_room != "FM Entrance" and extra.get("bar") is not None:
-                        try:
-                            if fmparse.read_room_bar(extra["bar"]) == "FM Entrance": worker.board_room = "FM Entrance"
-                        except Exception: pass
-                if worker.board_room != "FM Entrance":
-                    continue
-                posts = boards.read_boards(img, scale=img.height / 1080)
-                for player, side, item, price, x in posts:
-                    store.add_chat(player, side, item, price, x)
-                for hit in store.flush_chat_pending():
-                    log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,} (from an earlier click)")
-                if posts:
-                    review_save(cfg, "board", img, {"rows": [list(p[:4]) for p in posts]})
-                    log(f"board {len(posts)} chalkboard posts: " + ", ".join(f"{p[0]} {p[2]} {p[3]:,}" for p in posts[:4]) + (" ..." if len(posts) > 4 else ""))
-            else:
-                hover_wanted()
-                msgs = fmparse.read_chat(img)
-                found = []
-                for player, msg in msgs:
-                    store.add_chat_mentions(player, msg)
-                    for side, item, price, x in fmparse.parse_chat_message_x(msg):
-                        store.add_chat(player, side, item, price, x); found.append([player, side, item, price] + ([x] if x else []))
-                review_save(cfg, kind, img, {"messages": msgs, "rows": found})
-                if found:
-                    log(f"chat  {len(found)} priced messages")
-                for hit in store.flush_chat_pending():
-                    log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,} (from an earlier click)")
-                    chime(True)
+            handle_job(cfg, kind, img, extra, store, jobs.qsize())
         except Exception:
             log("reader error:", traceback.format_exc().splitlines()[-1])
         finally:
             jobs.task_done()
+
+def handle_job(cfg, kind, img, extra, store, backlog=0):
+    """One reading job from the loop (a shop, a popup, trade chat, the Entrance boards, a sell-list hover). FM Watcher
+    runs these on reader threads; the browser scanner calls this directly. Same code, same results."""
+    worker.room_hash = getattr(worker, "room_hash", None); worker.room_text = getattr(worker, "room_text", "")
+    if kind == "shop":
+        # a hover over a shop that hasn't changed since the last read: reuse that read and go straight to the
+        # popup, so the "read" chime comes as soon as the stats are in (the shop list itself takes a while)
+        sh = (extra or {}).get("h") or quick_hash(img, (40, 66))
+        last = getattr(worker, "last_shop", None)
+        # the popup covers part of the list, so a hover over the same seller's shop read in the last minute
+        # reuses that read too (the name plate above the list isn't covered)
+        ph = (extra or {}).get("ph")
+        if extra and extra.get("tip") is not None and last and (last[0] == sh and time.time() - last[1] < 120 or (ph and len(last) > 3 and last[3] == ph and time.time() - last[1] < 60)):
+            import copy; res = copy.deepcopy(last[2])
+        else:
+            res = fmparse.read_shop_checked(img)
+            if res and res.get("rows"): import copy; worker.last_shop = (sh, time.time(), copy.deepcopy(res), ph)
+        if res:
+            extra = extra or {}
+            # the minimap title barely changes between frames: read it once per look, not once per shop frame
+            try:
+                if extra.get("room") is None: res["room"] = ""
+                else:
+                    rh = quick_hash(extra["room"], (40, 8))
+                    if rh == worker.room_hash: res["room"] = worker.room_text
+                    else: res["room"] = fmparse.read_room(extra["room"]); worker.room_hash, worker.room_text = rh, res["room"]
+            except Exception: res["room"] = ""
+            res["room"] = shop_room(res["room"])
+            # minimap minimized: the room is in the one-line title bar at the top left instead
+            if not re.match(r"^FM\d", res["room"]) and extra.get("bar") is not None:
+                try:
+                    bh = quick_hash(extra["bar"], (60, 5))
+                    if bh != getattr(worker, "bar_hash", None): worker.bar_hash, worker.bar_text = bh, fmparse.read_room_bar(extra["bar"])
+                    if re.match(r"^FM\d", worker.bar_text or ""): res["room"] = worker.bar_text
+                except Exception: pass
+            res["tip"] = None; res["hovering"] = extra.get("tip") is not None
+            if extra.get("tip") is not None:
+                try:
+                    tip = fmparse.read_tooltip(extra["tip"])
+                    if extra.get("hid"): hv("read" if tip else "unread")
+                    if tip:
+                        tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
+                        review_save(cfg, "tip", extra["tip"], tip)
+                        # read, but not every line exactly: the picture helps the exact reader learn the rest
+                        if not tip["stats"].get("_ex") and extra.get("hid"):
+                            rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
+                            send_miss(cfg, extra["tip"], "tip", f"not exact | row {extra.get('row')} | {rn}")
+                    if not tip and extra.get("hid"):
+                        rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
+                        send_miss(cfg, extra["tip"], "tip", f"row {extra.get('row')} | {rn}")
+                    if not tip and extra.get("hover"):
+                        review_save(cfg, "tipmiss", extra["tip"], {"row": extra["row"]}); chime(False)
+                        log(f"hover: couldn't read a tooltip on row {extra['row'] + 1} yet")
+                except Exception as e:
+                    log("tooltip error:", e)
+            # the channel when the shop was on screen, not when it got read: reading can run behind
+            res["ch"] = extra["ch"] if "ch" in extra else current_channel(cfg)
+            review_save(cfg, kind, img, res)
+            # a shop whose room couldn't be read: the minimap title (and the title bar) as pictures
+            if extra.get("room") is not None and not re.match(r"^FM\d", res["room"] or "") and res.get("rows"):
+                send_miss(cfg, extra["room"], "room", f"read '{res['room']}'")
+                if extra.get("bar") is not None: send_miss(cfg, extra["bar"], "bar", f"read '{getattr(worker, 'bar_text', '')}'")
+            if extra.get("room") is not None and res["room"] != getattr(worker, "last_room", None):
+                worker.last_room = res["room"]; review_save(cfg, "room", extra["room"], {"room": res["room"]})
+                if extra.get("bar") is not None: review_save(cfg, "roombar", extra["bar"], {"room": res["room"]})
+            if res["rows"] and extra.get("tip") is not None:
+                try: learn_new(res, extra["tip"])
+                except Exception as e: log("new item error:", e)
+            if res["rows"]:
+                store.add_shop(res)
+                if res["tip"]:
+                    store.last_ok = False
+                    hit = store.add_tooltip(res)
+                    if hit and hit != "pending" and store.last_ok and extra.get("since"): tip_ready.done = extra["since"]
+                    if extra.get("hid"):
+                        hv("matched" if hit else "nomatch")
+                        if hit and extra["hid"] not in HV_GOT: HV_GOT.add(extra["hid"]); hv("got")
+                    if hit == "pending": log(f"hover: read {res['tip']['name']}, stats saved until its row reads clearly")
+                    elif hit:
+                        log(f"read  {hit[0]} {hit[1]}: " + " ".join(f"{k} {v}" for k, v in res['tip']['stats'].items() if not k.endswith("_b")))
+                        chime(True)
+                        # a read without the upgrades line isn't done: the hover list may ask for this one again
+                        if "SLOTS" in res["tip"].get("stats", {}) or not any(k in res["tip"].get("stats", {}) for k in ("ATT", "MATT", "WDEF", "MDEF", "STR", "DEX", "INT", "LUK")):
+                            NUDGED[(res.get("seller") or "", res["tip"].get("name") or "")] = time.time() + 86400
+                    else: log(f"hover: read {res['tip']['name']} but couldn't match it to a row in this shop")
+                for hit in store.flush_pending(res):
+                    log(f"stats {hit[0]} {hit[1]} (from an earlier hover)")
+                try: hover_nudge(res)
+                except Exception as e: log("hover list error:", e)
+                try: store.add_icons(img, res)
+                except Exception as e: log("icon error:", e)
+                behind = backlog
+                try:
+                    deal_spot(res); session_tally(res)
+                    if res.get("room") and res.get("ch"): cov_tip((res["room"], res["ch"]))
+                except Exception as e: log("tips error:", e)
+                log(f"shop  {res['seller'] or '?':<14} {res['room'] or 'room ?':<8} {('ch ' + str(res['ch'])) if res['ch'] else 'ch ?':<6} {len(res['rows'])} rows read, {res['dropped']} unsure" + (f"  ({behind} still to read)" if behind >= 4 else ""))
+    elif kind == "chattip":
+        tip = fmparse.read_tooltip(img, need_stats=False)
+        if tip:
+            review_save(cfg, "chattip", img, tip)
+            hit = store.add_chat_tip(tip)
+            if isinstance(hit, tuple):
+                log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,}: " + " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
+                chime(True)
+            else: log(f"chat  read {tip['name']}: {hit}")
+    elif kind == "inv":
+        tip = fmparse.read_tooltip(img, need_stats=False)
+        if tip:
+            review_save(cfg, "inv", img, tip)
+            added = store.add_inventory(tip)
+            if added:
+                log("sell list +" if added is True else "sell list (again)", tip["name"], " ".join(f"{k} {v}" for k, v in tip["stats"].items() if not k.endswith("_b")))
+    elif kind == "board":
+        hover_wanted()
+        rh = quick_hash(extra["room"], (40, 8))
+        if rh != getattr(worker, "board_hash", None):
+            worker.board_hash = rh; worker.board_room = fmparse.read_room(extra["room"])
+            if worker.board_room != "FM Entrance" and extra.get("bar") is not None:
+                try:
+                    if fmparse.read_room_bar(extra["bar"]) == "FM Entrance": worker.board_room = "FM Entrance"
+                except Exception: pass
+        if worker.board_room != "FM Entrance":
+            return
+        posts = boards.read_boards(img, scale=img.height / 1080)
+        for player, side, item, price, x in posts:
+            store.add_chat(player, side, item, price, x)
+        for hit in store.flush_chat_pending():
+            log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,} (from an earlier click)")
+        if posts:
+            review_save(cfg, "board", img, {"rows": [list(p[:4]) for p in posts]})
+            log(f"board {len(posts)} chalkboard posts: " + ", ".join(f"{p[0]} {p[2]} {p[3]:,}" for p in posts[:4]) + (" ..." if len(posts) > 4 else ""))
+    else:
+        hover_wanted()
+        msgs = fmparse.read_chat(img)
+        found = []
+        for player, msg in msgs:
+            store.add_chat_mentions(player, msg)
+            for side, item, price, x in fmparse.parse_chat_message_x(msg):
+                store.add_chat(player, side, item, price, x); found.append([player, side, item, price] + ([x] if x else []))
+        review_save(cfg, kind, img, {"messages": msgs, "rows": found})
+        if found:
+            log(f"chat  {len(found)} priced messages")
+        for hit in store.flush_chat_pending():
+            log(f"chat  stats for {hit[0]} from {hit[1]} at {hit[2]:,} (from an earlier click)")
+            chime(True)
 
 def snapshot(cfg):
     import mss
@@ -1737,6 +1759,121 @@ def snapshot(cfg):
         draw.rectangle(chat_box, outline=(0, 160, 255), width=2)
         full.save(os.path.join(d, "snapshot.png"))
     print("Saved review/snapshot.png. Game window is", game[2], "x", game[3], "pixels.")
+
+class LoopState:
+    """What the loop remembers between looks: last shop and chat fingerprints, when things were last read or sent."""
+    def __init__(self):
+        self.last_shop_hash = self.last_chat_hash = None
+        self.last_shop_read = self.shop_seen = 0.0
+        self.nudge_at = 0.0
+        self.last_chat = self.last_save = self.last_board = 0.0
+        self.last_pub = time.time()
+        self.chw = ChannelWatch(); self.last_chw = 0.0
+
+def look(cfg, sct, game, t, L, jobs, store):
+    """One look at the game: the Change Channel window, the shop and its popup, a sell-list or chat-link hover,
+    the Entrance boards, trade chat. Puts reading jobs on jobs. FM Watcher calls this ten times a second while a
+    shop is open; the browser scanner calls it on every frame it shares. Returns "channel" while that window is up."""
+    shop_box, chat_box = place(cfg, game)
+    hud_name(sct, game, cfg)
+    if L.chw.open or L.chw.closed or t - L.last_chw >= 1.0:
+        L.last_chw = t
+        stay = L.chw.step(sct, game, t)
+        if L.chw.pic: frame_save(cfg, "channel", L.chw.pic[0], L.chw.pic[1]); L.chw.pic = None
+        if stay:
+            return "channel"
+    shop = grab(sct, game, shop_box)
+    if fmparse.looks_like_shop(shop):
+        L.shop_seen = t
+        h = masked_hash(shop, game, shop_box)
+        tr = tip_ready(game, shop_box, t, sct)
+        if tr and jobs.full(): hv("busy")   # the reader was behind, so this popup wasn't looked at
+        # a changed shop is read at most once a second; a hover is read right away
+        if ((h != L.last_shop_hash and t - L.last_shop_read >= 0.9) or tr) and not jobs.full():
+            L.last_shop_read = t
+            extra = {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30])), "ch": current_channel(cfg)}
+            if extra["ch"] is None and t - L.nudge_at > 600:
+                L.nudge_at = t; log("No channel known yet: open the Change Channel window once (Esc, then Change Channel) so these scans land on the right channel.")
+            idx, tbox = tr if tr else hovered_row(game, shop_box)
+            if idx is not None:
+                extra["row"] = idx; extra["tip"] = grab(sct, game, tbox); extra["hover"] = bool(tr) and not tip_ready.early   # a first quick look that misses stays quiet
+                if tr: extra["hid"] = tip_ready.hid; hv("shots")
+            extra["h"] = h; extra["ph"] = quick_hash(shop.crop(fmparse.SHOP["plate"]), (30, 8))
+            if tr: extra["since"] = tip_ready.since
+            # a whole-game picture now and then (each new window size, then hovers, 40 a day) for testing
+            fk = (game[2], game[3], datetime.date.today().isoformat())
+            if fk != getattr(main, "frame_key", None) or (tr and getattr(main, "frames_today", 0) < 40 and t - getattr(main, "frame_t", 0) > 20):
+                if fk != getattr(main, "frame_key", None): main.frame_key = fk; main.frames_today = 0
+                main.frames_today = getattr(main, "frames_today", 0) + 1; main.frame_t = t
+                try: frame_save(cfg, "frame", grab(sct, game, [0, 0, game[2], game[3]]), {"game": [game[2], game[3]], "shop_box": shop_box, "ch": extra["ch"], "row": extra.get("row"), "hover": bool(tr), "cursor": [c[0] - game[0], c[1] - game[1]] if (c := cursor_pos()) else None})
+                except Exception: pass
+            L.last_shop_hash = h; jobs.put(("shop", shop, extra))
+    elif cfg.get("sell_hover", True) and inv_ready(game, t) is not None and not jobs.full():
+        cx, cy = inv_ready.at
+        if getattr(main, "rest_frames", 0) < 10 and t - getattr(main, "rest_t", 0) > 60:
+            main.rest_frames = getattr(main, "rest_frames", 0) + 1; main.rest_t = t
+            try: frame_save(cfg, "rest", grab(sct, game, [0, 0, game[2], game[3]]), {"game": [game[2], game[3]], "cursor": [cx, cy]})
+            except Exception: pass
+        cb = chat_box
+        if cb[0] - 20 <= cx <= cb[2] + 20 and cb[1] - 20 <= cy <= cb[3] + 20:
+            # an item linked in trade chat, clicked open: its stats belong to that chat listing,
+            # never to your sell list. The popup can open above the pointer, so look all around it.
+            area = [max(0, cx - 420), max(0, cy - 560), min(game[2], cx + 420), min(game[3], cy + 60)]
+            tipimg = tooltip_in(grab(sct, game, area))
+            if tipimg is not None:
+                jobs.put(("chattip", tipimg, None))
+        else:
+            box = inv_ready.box
+            tipimg = grab(sct, game, box)
+            if fmparse.looks_like_tooltip(tipimg):
+                jobs.put(("inv", tipimg, None))
+    elif boards and cfg.get("boards", True) and t - L.last_board >= cfg.get("board_every_seconds", 45) and jobs.qsize() < 2:
+        # Free Market Entrance: read the chat bubbles over everyone's head (the worker checks the map first)
+        L.last_board = t
+        jobs.put(("board", grab(sct, game, [0, 0, game[2], game[3]]), {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30]))}))
+    elif t - L.last_chat >= cfg["chat_every_seconds"]:
+        L.last_chat = t
+        chat = grab(sct, game, chat_box)
+        h = quick_hash(chat, (80, 48))
+        if h != L.last_chat_hash and not jobs.full():
+            L.last_chat_hash = h; jobs.put(("chat", chat, None))
+
+def chores(cfg, t, L, store):
+    """Hourly stats, saving, updates and sending what was read."""
+    if int(t // 3600) != getattr(main, "stats_hour", None):
+        if getattr(main, "stats_hour", None) is not None:
+            try: log("scan stats, " + stats_text(scan_stats(store))); day_history(store)
+            except Exception as e: log("stats error:", e)
+        main.stats_hour = int(t // 3600)
+    if store.dirty and t - L.last_save > 30:
+        store.dirty = False; store.save(); L.last_save = t
+    if t - check_update.last > 900:
+        check_update.last = t; spawn(check_update)
+    if check_update.restart:
+        store.save()
+        log("Restarting to update...")
+        os._exit(RESTART_FOR_UPDATE)
+    if cfg["publish"] and not has_token(cfg):
+        # new listings go up within half a minute, so deals reach the site fast; the rest every 10 minutes
+        due = t - L.last_pub > max(5, cfg.get("inbox_every_minutes", 10)) * 60
+        quick = store.fresh and t - L.last_pub >= cfg.get("fast_send_seconds", 30)
+        if (due or quick) and not (getattr(main, "sender", None) and main.sender.is_alive()):
+            L.last_pub = t; store.hot = False; store.fresh = False
+            main.sender = threading.Thread(target=send_inbox, args=(cfg, store.published_docs()), daemon=True)
+            try: main.sender.start()
+            except RuntimeError: main.sender = None; send_inbox(cfg, store.published_docs())   # no threads (the browser): send now
+        hot_due = False
+    else:
+        hot_due = store.hot and t - L.last_pub >= cfg.get("hot_publish_seconds", 60)
+    if cfg["publish"] and has_token(cfg) and (hot_due or t - L.last_pub > cfg["publish_every_minutes"] * 60):
+        if hot_due: log("hot deal spotted, publishing now")
+        store.hot = False
+        L.last_pub = t
+        publish(cfg, store.published_docs())
+        publish_icons(cfg, store)
+        if store.inv_changed:
+            if publish(cfg, store.inventory_list(), path=cfg["github_path"].replace(".json", "-sell.json"), what="sell list"):
+                store.inv_changed = False
 
 def main():
     cfg = load_config(); CFG_CHIME[0] = cfg.get("hover_sound", True); CFG_DEALS[0] = cfg.get("deal_alerts", True); CFG_COV[0] = cfg.get("coverage_tips", True)
@@ -1772,13 +1909,7 @@ def main():
     if not os.path.exists(cp):
         open(cp, "w", encoding="utf-8").write("")
     log("channel:", current_channel(cfg) or "not known yet. Open the Change Channel window once and it is picked up.")
-    last_shop_hash = last_chat_hash = None
-    last_shop_read = shop_seen = 0.0
-    nudge_at = 0.0
-    last_chat = last_save = last_board = 0.0
-    last_pub = time.time()
-    announced = None
-    chw = ChannelWatch(); last_chw = 0.0
+    L = LoopState(); announced = None
     with getattr(mss, "MSS", mss.mss)() as sct:
         while True:
             t = time.time()
@@ -1792,103 +1923,15 @@ def main():
                     if announced is not True:
                         log("watching MapleStory,", game[2], "x", game[3]); announced = True
                         log("shop area", place(cfg, game)[0], "chat area", place(cfg, game)[1])
-                    shop_box, chat_box = place(cfg, game)
-                    hud_name(sct, game, cfg)
-                    if chw.open or chw.closed or t - last_chw >= 1.0:
-                        last_chw = t
-                        stay = chw.step(sct, game, t)
-                        if chw.pic: frame_save(cfg, "channel", chw.pic[0], chw.pic[1]); chw.pic = None
-                        if stay:
-                            time.sleep(0.25); continue
-                    shop = grab(sct, game, shop_box)
-                    if fmparse.looks_like_shop(shop):
-                        shop_seen = t
-                        h = masked_hash(shop, game, shop_box)
-                        tr = tip_ready(game, shop_box, t, sct)
-                        if tr and jobs.full(): hv("busy")   # the reader was behind, so this popup wasn't looked at
-                        # a changed shop is read at most once a second; a hover is read right away
-                        if ((h != last_shop_hash and t - last_shop_read >= 0.9) or tr) and not jobs.full():
-                            last_shop_read = t
-                            extra = {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30])), "ch": current_channel(cfg)}
-                            if extra["ch"] is None and t - nudge_at > 600:
-                                nudge_at = t; log("No channel known yet: open the Change Channel window once (Esc, then Change Channel) so these scans land on the right channel.")
-                            idx, tbox = tr if tr else hovered_row(game, shop_box)
-                            if idx is not None:
-                                extra["row"] = idx; extra["tip"] = grab(sct, game, tbox); extra["hover"] = bool(tr) and not tip_ready.early   # a first quick look that misses stays quiet
-                                if tr: extra["hid"] = tip_ready.hid; hv("shots")
-                            extra["h"] = h; extra["ph"] = quick_hash(shop.crop(fmparse.SHOP["plate"]), (30, 8))
-                            if tr: extra["since"] = tip_ready.since
-                            # a whole-game picture now and then (each new window size, then hovers, 40 a day) for testing
-                            fk = (game[2], game[3], datetime.date.today().isoformat())
-                            if fk != getattr(main, "frame_key", None) or (tr and getattr(main, "frames_today", 0) < 40 and t - getattr(main, "frame_t", 0) > 20):
-                                if fk != getattr(main, "frame_key", None): main.frame_key = fk; main.frames_today = 0
-                                main.frames_today = getattr(main, "frames_today", 0) + 1; main.frame_t = t
-                                try: frame_save(cfg, "frame", grab(sct, game, [0, 0, game[2], game[3]]), {"game": [game[2], game[3]], "shop_box": shop_box, "ch": extra["ch"], "row": extra.get("row"), "hover": bool(tr)})
-                                except Exception: pass
-                            last_shop_hash = h; jobs.put(("shop", shop, extra))
-                    elif cfg.get("sell_hover", True) and inv_ready(game, t) is not None and not jobs.full():
-                        cx, cy = inv_ready.at
-                        cb = chat_box
-                        if cb[0] - 20 <= cx <= cb[2] + 20 and cb[1] - 20 <= cy <= cb[3] + 20:
-                            # an item linked in trade chat, clicked open: its stats belong to that chat listing,
-                            # never to your sell list. The popup can open above the pointer, so look all around it.
-                            area = [max(0, cx - 420), max(0, cy - 560), min(game[2], cx + 420), min(game[3], cy + 60)]
-                            tipimg = tooltip_in(grab(sct, game, area))
-                            if tipimg is not None:
-                                jobs.put(("chattip", tipimg, None))
-                        else:
-                            box = inv_ready.box
-                            tipimg = grab(sct, game, box)
-                            if fmparse.looks_like_tooltip(tipimg):
-                                jobs.put(("inv", tipimg, None))
-                    elif boards and cfg.get("boards", True) and t - last_board >= cfg.get("board_every_seconds", 45) and jobs.qsize() < 2:
-                        # Free Market Entrance: read the chat bubbles over everyone's head (the worker checks the map first)
-                        last_board = t
-                        jobs.put(("board", grab(sct, game, [0, 0, game[2], game[3]]), {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30]))}))
-                    elif t - last_chat >= cfg["chat_every_seconds"]:
-                        last_chat = t
-                        chat = grab(sct, game, chat_box)
-                        h = quick_hash(chat, (80, 48))
-                        if h != last_chat_hash and not jobs.full():
-                            last_chat_hash = h; jobs.put(("chat", chat, None))
-                if int(t // 3600) != getattr(main, "stats_hour", None):
-                    if getattr(main, "stats_hour", None) is not None:
-                        try: log("scan stats, " + stats_text(scan_stats(store))); day_history(store)
-                        except Exception as e: log("stats error:", e)
-                    main.stats_hour = int(t // 3600)
-                if store.dirty and t - last_save > 30:
-                    store.dirty = False; store.save(); last_save = t
-                if t - check_update.last > 900:
-                    check_update.last = t; threading.Thread(target=check_update, daemon=True).start()
-                if check_update.restart:
-                    store.save()
-                    log("Restarting to update...")
-                    os._exit(RESTART_FOR_UPDATE)
-                if cfg["publish"] and not has_token(cfg):
-                    # new listings go up within half a minute, so deals reach the site fast; the rest every 10 minutes
-                    due = t - last_pub > max(5, cfg.get("inbox_every_minutes", 10)) * 60
-                    quick = store.fresh and t - last_pub >= cfg.get("fast_send_seconds", 30)
-                    if (due or quick) and not (getattr(main, "sender", None) and main.sender.is_alive()):
-                        last_pub = t; store.hot = False; store.fresh = False
-                        main.sender = threading.Thread(target=send_inbox, args=(cfg, store.published_docs()), daemon=True); main.sender.start()
-                    hot_due = False
-                else:
-                    hot_due = store.hot and t - last_pub >= cfg.get("hot_publish_seconds", 60)
-                if cfg["publish"] and has_token(cfg) and (hot_due or t - last_pub > cfg["publish_every_minutes"] * 60):
-                    if hot_due: log("hot deal spotted, publishing now")
-                    store.hot = False
-                    last_pub = t
-                    publish(cfg, store.published_docs())
-                    publish_icons(cfg, store)
-                    if store.inv_changed:
-                        if publish(cfg, store.inventory_list(), path=cfg["github_path"].replace(".json", "-sell.json"), what="sell list"):
-                            store.inv_changed = False
+                    if look(cfg, sct, game, t, L, jobs, store) == "channel":
+                        time.sleep(0.25); continue
+                chores(cfg, t, L, store)
             except KeyboardInterrupt:
                 break
             except Exception:
                 log("loop error:", traceback.format_exc().splitlines()[-1]); time.sleep(3)
             # ten looks a second while a shop is open (cheap: one small screenshot), so hovers are caught quickly
-            period = 0.1 if time.time() - shop_seen < 3 else cfg["shop_every_seconds"]
+            period = 0.1 if time.time() - L.shop_seen < 3 else cfg["shop_every_seconds"]
             time.sleep(max(0.03, period - (time.time() - t)))
     store.save()
 

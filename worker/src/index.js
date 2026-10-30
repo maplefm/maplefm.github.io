@@ -2810,7 +2810,7 @@ async function kofiThanks(env, id, ti, mega) {
 // ---------------------------------------------------------------- helpers
 function corsHeaders(env, origin) {
   const ok = origin === env.SITE || origin === "https://maplefm.github.io";
-  return ok ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Credentials": "true", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Vary": "Origin" } : {};
+  return ok ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Credentials": "true", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Watcher, X-Kind, X-Info", "Vary": "Origin" } : {};
 }
 function json(obj, status = 200, extra = {}) { return new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json", ...extra } }); }
 function text(s, status = 200) { return new Response(s, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } }); }
