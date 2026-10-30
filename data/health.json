@@ -1,5 +1,5 @@
 {
- "at": 1793335065608,
+ "at": 1793336157685,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,19 +105,19 @@
    "behind": 21
   },
   "Zik": {
-   "rows24": 22673,
-   "room24": 3963,
-   "ch24": 22595,
-   "rows7": 82978,
-   "room7": 6774,
+   "rows24": 22558,
+   "room24": 5615,
+   "ch24": 22480,
+   "rows7": 84611,
+   "room7": 8426,
    "late7": 1714,
-   "chat24": 115,
-   "last": 1793334908,
+   "chat24": 122,
+   "last": 1793336110,
    "ver": "2026.10.30.1",
-   "lag_median_min": 6.4,
-   "room_rate24": 0.175,
-   "room_rate7": 0.082,
-   "late_share7": 0.021,
+   "lag_median_min": 6.5,
+   "room_rate24": 0.249,
+   "room_rate7": 0.1,
+   "late_share7": 0.02,
    "behind": 0
   },
   "laclac": {
@@ -143,7 +143,7 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 7,
+   "chat24": 6,
    "last": 1793329199,
    "ver": "2026.10.30.1",
    "lag_median_min": null,
@@ -155,12 +155,11 @@
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 58
+   "bad row: 3a3a": 78
   }
  },
  "rejects": {},
  "flags": [
-  "Zik: 18% of shops placed in a room in the last 24 hours (22673 shop rows)",
-  "Zik: 2.1% of rows reached us over an hour late this week"
+  "Zik: 25% of shops placed in a room in the last 24 hours (22558 shop rows)"
  ]
 }
