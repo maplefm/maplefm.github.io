@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.2",
- "date": "2026-10-30T05:07:04+00:00",
- "notes": "Fixes weapons not getting their stats: the popup's Type line (like Two-handed Sword) was being read as the item's name, so the stats didn't match the row.",
- "sha256": "bbb67c3b7e4a644be162b6faee6e354c65c75e535f0f6b27af436d09f10d6d67",
- "size": 160717,
+ "version": "2026.10.30.3",
+ "date": "2026-10-30T05:19:15+00:00",
+ "notes": "Faster hovers: an open shop is no longer read again every second because the seller's character moves, and an item read exactly isn't read twice more. Saves a few whole-game pictures in a frames folder for testing other window sizes.",
+ "sha256": "3c5faf8dbf05b5d1f109d084f2dc232b54348b39e2a2fbfde7f7f199bbb5f952",
+ "size": 161653,
  "history": [
+  {
+   "version": "2026.10.30.3",
+   "date": "2026-10-30",
+   "notes": "Faster hovers: an open shop is no longer read again every second because the seller's character moves, and an item read exactly isn't read twice more. Saves a few whole-game pictures in a frames folder for testing other window sizes."
+  },
   {
    "version": "2026.10.30.2",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.5",
    "date": "2026-10-24",
    "notes": "Scan stats: the watcher prints your last hour and today (new listings, shops, sales caught, listings per active hour) at the top of every hour, and stats.bat shows them any time."
-  },
-  {
-   "version": "2026.10.24.4",
-   "date": "2026-10-24",
-   "notes": "Hover wanted list now reads from the public price summary."
   }
  ],
  "pip": [],
- "sig": "08073424f034c595b5e18f0f1acf9b85d3aeb5e060fa225accedb340d0cf7723931f7b92e95876deaa48d702a21a36fc153fc61667572c231364f7bab9656612791b9025f55f8131655d17d001ceff97b769200e5d054449cc07099e3f895b58e1cb73912d940ac159b49afae53edbfe208c5e38df52e8dfe49d66e32e8df3a421e4e0b518bc723d5addbe5cacc4ee97a00e5dab3c2f6d46fb99213f04ec69e8bcf40c9a6f4edbe1ea4fc40546a713893ff3e1faba2e4d736dbf9ff044948495058225f89f11b2af1861e2acddecbb3fee2fe1ac1b1dbbd005501053bc60ce20875265bd786cb725519925ee9359999a97836d1e3d0539cf97eec809640d1fca"
+ "sig": "31d80d22707189ab57a363ab86031eac4c9b47943e96e3ad9634b421c2af893d232ab91307ae06308fecd3cd014edf08f6bd7e4bfd196f9b9933484fd648e9bbb7c8bebacaddf1c944df4048e7da9663faf9e0f5bda3c3d418169689ae2fa6e134d9de0367429a6237c888362013f5137c42c3d9493b9d6c644eeafaa6a74bb8b6dc3ca4982179f6c6e095dcbba0e5601d8c8b4ccbaa0cb61b6cfcf820927c5713565e9c5810f62b2e88820f45223fc4699e752fda5ef213295b8b156fcedae8b8e7305e22721ef4345407cf97ae7f8730cd84eb67fa918cb6aaa4cb85006c9e5818695bf4947ee5dbd6291ca6360d311d468fe2567abf30e6c58cb8aaca70c6"
 }

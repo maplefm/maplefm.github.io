@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.30.2"
+VERSION = "2026.10.30.3"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -538,7 +538,7 @@ def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots":
     if idx is None:
         st["row"] = None; return None
     if st["row"] != idx:
-        st.update(row=idx, since=t, shots=0, fired=0, check=0, hid=0); return None
+        st.update(row=idx, since=t, shots=0, fired=0, check=0, hid=0); tip_ready.since = t; return None
     if st["shots"] == 0:
         if t - st["since"] < 0.12 or t - st["check"] < 0.08: return None
         st["check"] = t
@@ -552,21 +552,30 @@ def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots":
             return idx, tbox
         return None
     due = (0.6, 1.5)
+    if getattr(tip_ready, "done", None) == st["since"]:
+        return None                         # already read exactly and trusted: no need to look again
     if st["shots"] <= len(due) and t - st["fired"] >= due[st["shots"] - 1]:
         st["shots"] += 1; tip_ready.early = False; tip_ready.hid = st.get("hid", 0); return idx, tbox
     return None
 tip_ready.early = False
 tip_ready.hid = 0
+tip_ready.since = 0
 
-def masked_hash(img, game, box, size=(40, 66)):
-    """The shop's fingerprint with the pointer blanked out, so moving the mouse over the list isn't a change."""
+def masked_hash(img, game, box, size=(40, 40)):
+    """The shop's fingerprint with the pointer blanked out, so moving the mouse over the list isn't a change.
+    Only the seller's name plate and the list count: the seller's character above them is animated, and hashing it
+    made an unchanged shop read again every second, which kept the reader too busy for hovers."""
     c = cursor_pos()
     if c:
         from PIL import ImageDraw
         cx, cy = c[0] - game[0] - box[0], c[1] - game[1] - box[1]
         if -40 <= cx <= img.width + 40 and -40 <= cy <= img.height + 40:
             img = img.copy(); ImageDraw.Draw(img).rectangle([cx - 6, cy - 6, cx + 30, cy + 40], fill=(0, 0, 0))
-    return quick_hash(img, size)
+    # the list (from just above the first row) and the lower part of the name plate; not the window's left edge,
+    # where the map behind shows through, nor the plate's top rows, which the character's feet overlap
+    S = fmparse.SHOP; pl = S["plate"]
+    lst = img.crop((6, int(S["row0"]) - 2, img.width, img.height)); plate = img.crop((pl[0], pl[1] + 4, pl[2], pl[3]))
+    return quick_hash(lst, size) + quick_hash(plate, (30, 8))
 
 def inv_ready(game, t, state={"pos": None, "since": 0, "done": None}):
     """True once the pointer has rested on one spot inside the game for most of a second, once per spot."""
@@ -802,7 +811,9 @@ class Store:
                 log("hover read exactly but", why, "on", r["i"], "- kept, not trusted")
                 if why == "other item": return None
             tip = dict(tip, stats=st)
+            self.last_ok = bool(st.get("_ok"))
         else:
+            self.last_ok = False
             fixed = stats_fit(r["i"], tip["stats"])
             if fixed is None:
                 log("hover skipped: those stats can't be on", r["i"])
@@ -1486,7 +1497,7 @@ class ChannelWatch:
     you are on. If the screen goes dark right after it closes, you changed channel, to the button that
     was highlighted last; if not, you cancelled. Either way channel.txt is kept up to date for you."""
     def __init__(self):
-        self.open = False; self.first = None; self.last = None; self.closed = 0.0; self.saved = None; self.since = 0.0
+        self.open = False; self.first = None; self.last = None; self.closed = 0.0; self.saved = None; self.since = 0.0; self.pic = None
 
     def box(self, game):
         w, h = game[2], game[3]
@@ -1501,6 +1512,8 @@ class ChannelWatch:
             if not self.open:
                 self.open = True; self.first = sel; self.since = t
                 self.save(sel, "on")
+                try: self.pic = (grab(sct, game, [0, 0, game[2], game[3]]), {"ch": sel, "game": [game[2], game[3]], "box": self.box(game)})
+                except Exception: self.pic = None
             self.last = sel
             # nobody keeps the window open for long; if it "stays open", it's something else on screen,
             # so keep reading shops and chat instead of waiting on it
@@ -1539,6 +1552,21 @@ def review_save(cfg, kind, img, reading):
     with open(os.path.join(d, f"{stamp}-{kind}.json"), "w", encoding="utf-8") as fh:
         json.dump(reading, fh, indent=1, default=lambda o: None)
 
+def frame_save(cfg, kind, img, info, keep=80):
+    """Whole game pictures for testing the readers at every window size (frames/, kept apart from review/ so the
+    busy shop pictures don't push them out). Only with save_review on; never uploaded."""
+    if not cfg.get("save_review"): return
+    d = os.path.join(HERE, "frames"); os.makedirs(d, exist_ok=True)
+    files = sorted(os.listdir(d))
+    for f in files[:max(0, len(files) - keep * 2)]:
+        try: os.remove(os.path.join(d, f))
+        except OSError: pass
+    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")[:-3]
+    try:
+        img.save(os.path.join(d, f"{stamp}-{kind}.png"))
+        with open(os.path.join(d, f"{stamp}-{kind}.json"), "w", encoding="utf-8") as fh: json.dump(info, fh, indent=1, default=lambda o: None)
+    except OSError: pass
+
 def worker(cfg, jobs, store):
     worker.room_hash = getattr(worker, "room_hash", None); worker.room_text = getattr(worker, "room_text", "")
     while True:
@@ -1549,11 +1577,14 @@ def worker(cfg, jobs, store):
                 # popup, so the "read" chime comes as soon as the stats are in (the shop list itself takes a while)
                 sh = (extra or {}).get("h") or quick_hash(img, (40, 66))
                 last = getattr(worker, "last_shop", None)
-                if extra and extra.get("tip") is not None and last and last[0] == sh and time.time() - last[1] < 120:
+                # the popup covers part of the list, so a hover over the same seller's shop read in the last minute
+                # reuses that read too (the name plate above the list isn't covered)
+                ph = (extra or {}).get("ph")
+                if extra and extra.get("tip") is not None and last and (last[0] == sh and time.time() - last[1] < 120 or (ph and len(last) > 3 and last[3] == ph and time.time() - last[1] < 60)):
                     import copy; res = copy.deepcopy(last[2])
                 else:
                     res = fmparse.read_shop_checked(img)
-                    if res and res.get("rows"): import copy; worker.last_shop = (sh, time.time(), copy.deepcopy(res))
+                    if res and res.get("rows"): import copy; worker.last_shop = (sh, time.time(), copy.deepcopy(res), ph)
                 if res:
                     extra = extra or {}
                     # the minimap title barely changes between frames: read it once per look, not once per shop frame
@@ -1608,7 +1639,9 @@ def worker(cfg, jobs, store):
                     if res["rows"]:
                         store.add_shop(res)
                         if res["tip"]:
+                            store.last_ok = False
                             hit = store.add_tooltip(res)
+                            if hit and hit != "pending" and store.last_ok and extra.get("since"): tip_ready.done = extra["since"]
                             if extra.get("hid"):
                                 hv("matched" if hit else "nomatch")
                                 if hit and extra["hid"] not in HV_GOT: HV_GOT.add(extra["hid"]); hv("got")
@@ -1761,7 +1794,9 @@ def main():
                     hud_name(sct, game, cfg)
                     if chw.open or chw.closed or t - last_chw >= 1.0:
                         last_chw = t
-                        if chw.step(sct, game, t):
+                        stay = chw.step(sct, game, t)
+                        if chw.pic: frame_save(cfg, "channel", chw.pic[0], chw.pic[1]); chw.pic = None
+                        if stay:
                             time.sleep(0.25); continue
                     shop = grab(sct, game, shop_box)
                     if fmparse.looks_like_shop(shop):
@@ -1779,7 +1814,15 @@ def main():
                             if idx is not None:
                                 extra["row"] = idx; extra["tip"] = grab(sct, game, tbox); extra["hover"] = bool(tr) and not tip_ready.early   # a first quick look that misses stays quiet
                                 if tr: extra["hid"] = tip_ready.hid; hv("shots")
-                            extra["h"] = h
+                            extra["h"] = h; extra["ph"] = quick_hash(shop.crop(fmparse.SHOP["plate"]), (30, 8))
+                            if tr: extra["since"] = tip_ready.since
+                            # a whole-game picture now and then (each new window size, then hovers, 40 a day) for testing
+                            fk = (game[2], game[3], datetime.date.today().isoformat())
+                            if fk != getattr(main, "frame_key", None) or (tr and getattr(main, "frames_today", 0) < 40 and t - getattr(main, "frame_t", 0) > 20):
+                                if fk != getattr(main, "frame_key", None): main.frame_key = fk; main.frames_today = 0
+                                main.frames_today = getattr(main, "frames_today", 0) + 1; main.frame_t = t
+                                try: frame_save(cfg, "frame", grab(sct, game, [0, 0, game[2], game[3]]), {"game": [game[2], game[3]], "shop_box": shop_box, "ch": extra["ch"], "row": extra.get("row"), "hover": bool(tr)})
+                                except Exception: pass
                             last_shop_hash = h; jobs.put(("shop", shop, extra))
                     elif cfg.get("sell_hover", True) and inv_ready(game, t) is not None and not jobs.full():
                         cx, cy = inv_ready.at
