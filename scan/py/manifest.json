@@ -1,0 +1,19 @@
+{
+ "version": "2026.10.30.1",
+ "files": {
+  "fmparse.py": "7beda2ad65aa",
+  "glyphs.py": "610c9f0239fc",
+  "ocrlib.py": "e7a6c74d23ab",
+  "tipexact.py": "8ac264bbf4ac",
+  "items.json": "282be285cc74",
+  "glyphs.json": "13531b9ab781",
+  "names.json": "0ea452ac85a2",
+  "chat_names.json": "6ed37e3c5a2d",
+  "tiers.png": "e401f89149c7",
+  "statfit.json": "9809ccd4d8cd",
+  "tipglyphs.json": "a1dc3c533c3b",
+  "watcher.py": "aa9caab1b237",
+  "scanglue.py": "2c4ebace64fb",
+  "cursor.json": "017a90f1f96b"
+ }
+}
