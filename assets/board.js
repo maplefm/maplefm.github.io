@@ -1416,11 +1416,18 @@
     c.appendChild(st("🛒", fmt(k ? k.active : D.active.length), "for sale right now"));
     var cov = coverage24();
     if (cov) c.appendChild(st("🗺️", fmt(cov.shops), "shops read today", "button", openCoverage, fmt(cov.spots) + " of " + (40 * 20) + " room and channel spots visited in the last day, by " + cov.scanners + (cov.scanners === 1 ? " scanner" : " scanners") + (cov.streams ? " and " + cov.streams + (cov.streams === 1 ? " stream" : " streams") : "") + ". Click for the coverage map."));
-    var help = el("a", "st"); help.href = "contribute.html"; help.title = "Run FM Watcher while you shop and get paid for the shops you browse";
-    var liveN = liveScanners();
-    help.appendChild(el("span", "heart", "♥"));
-    if (liveN >= 2) { help.appendChild(el("b", null, liveN + " scanning now")); help.appendChild(document.createTextNode(" · Earn by scanning")); }
-    else help.appendChild(el("b", null, "Earn by scanning"));
+    // Scan now: starts the browser scanner right here (assets/scannow.js); without it, the Earn page
+    var liveN = liveScanners(), help;
+    if (window.openScanNow) {
+      help = el("button", "st scannow"); help.type = "button"; help.setAttribute("data-scannow", ""); help.title = "Scan shops from this tab while you browse the Free Market. No download.";
+      help.appendChild(el("span", "sc-dot")); help.appendChild(el("b", null, "Scan now"));
+      if (liveN >= 2) help.appendChild(el("span", "scn", liveN + " scanning live"));
+    } else {
+      help = el("a", "st"); help.href = "contribute.html"; help.title = "Run FM Watcher while you shop and get paid for the shops you browse";
+      help.appendChild(el("span", "heart", "♥"));
+      if (liveN >= 2) { help.appendChild(el("b", null, liveN + " scanning now")); help.appendChild(document.createTextNode(" · Earn by scanning")); }
+      else help.appendChild(el("b", null, "Earn by scanning"));
+    }
     c.appendChild(help);
     // the hook: the biggest sales caught, one at a time
     // skip one-off sales far above the item's normal price (a lucky roll or a typo reads as a mistake next to "about 2K")
