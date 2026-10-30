@@ -1,12 +1,12 @@
 {
- "at": 1793369744208,
+ "at": 1793372597396,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.30.5",
+ "current": "2026.10.30.6",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.956,
    "late_share7": 0.023,
-   "behind": 8
+   "behind": 9
   },
   "Faif": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": 0.954,
    "late_share7": 0.0,
-   "behind": 25
+   "behind": 26
   },
   "yinisera": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": 0.992,
    "late_share7": 0.0,
-   "behind": 29
+   "behind": null
   },
   "acter": {
    "rows24": 0,
@@ -102,7 +102,7 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.417,
-   "behind": 25
+   "behind": 26
   },
   "Zik": {
    "rows24": 17173,
@@ -118,7 +118,7 @@
    "room_rate24": 0.969,
    "room_rate7": 0.203,
    "late_share7": 0.018,
-   "behind": 1
+   "behind": 2
   },
   "laclac": {
    "rows24": 13633,
@@ -134,7 +134,7 @@
    "room_rate24": 0.916,
    "room_rate7": 0.26,
    "late_share7": 0.008,
-   "behind": 5
+   "behind": 6
   },
   "DivineFeces": {
    "rows24": 0,
@@ -145,7 +145,7 @@
    "late7": 0,
    "chat24": 5,
    "last": 1793347993,
-   "ver": "2026.10.30.4",
+   "ver": "2026.10.30.5",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
@@ -166,16 +166,17 @@
    "room_rate24": 0.979,
    "room_rate7": 0.979,
    "late_share7": 0.0,
-   "behind": 1
+   "behind": 2
   }
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 2267
+   "bad row: 3a3a": 2462
   }
  },
  "rejects": {},
  "flags": [
-  "laclac: watcher 2026.10.29.3, 5 releases behind"
+  "Zik: watcher 2026.10.30.4, 2 releases behind",
+  "laclac: watcher 2026.10.29.3, 6 releases behind"
  ]
 }
