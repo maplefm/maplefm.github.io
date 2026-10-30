@@ -120,6 +120,7 @@ async function route(req, env, url) {
   if (p === "/public/links") return publicLinks(env);
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
+  if (p === "/public/scanners") return publicScanners(env);
   if (p === "/public/popular") return publicPopular(env);
   if (p === "/gone" && req.method === "POST") return gonePost(req, env);
   if (p === "/public/gone") return goneList(env);
@@ -537,8 +538,33 @@ async function inboxPost(req, env) {
   if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") { await inboxReject(env, "bad post"); return json({ error: "bad post" }, 400); }
   await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
   // new shop rows also go to the fast lane, so a deal reaches the board in seconds instead of at the next pump pass
-  await fastPut(env, msg, await blockedIds(env));
+  const blocked = await blockedIds(env);
+  await fastPut(env, msg, blocked);
+  await scannerSeen(env, m, blocked);
   return json({ ok: true });
+}
+// Scanners active right now, FM Watcher and the browser scanner alike: one row per scanner with its last upload
+// time. A named scanner counts once even when it runs both; guests count by their hashed id. Blocked ids never count.
+let seenMade = false;
+async function sha256hex(x) { return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(x)))].map((b) => b.toString(16).padStart(2, "0")).join(""); }
+async function scannerSeen(env, m, blocked) {
+  try {
+    const h = (await sha256hex("fm-inbox:" + m.id)).slice(0, 16);
+    if (blocked && (blocked.has(h) || blocked.has(m.id))) return;
+    const nm = String(m.nm || m.ign || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 16);
+    const k = nm && nm !== "guest" ? "n:" + nm : "h:" + h;
+    if (!seenMade) { await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS seen (k TEXT PRIMARY KEY, t INTEGER NOT NULL)").run(); seenMade = true; }
+    await env.INBOX_DB.prepare("INSERT OR REPLACE INTO seen (k, t) VALUES (?, ?)").bind(k, Date.now()).run();
+  } catch (e) {}
+}
+let liveCache = null;
+async function publicScanners(env) {
+  if (!liveCache || Date.now() - liveCache.at > 30e3) {
+    let live = 0;
+    try { const r = await env.INBOX_DB.prepare("SELECT COUNT(*) AS n FROM seen WHERE t > ?").bind(Date.now() - 15 * 60e3).first(); live = r ? r.n : 0; } catch (e) {}
+    liveCache = { at: Date.now(), live };
+  }
+  return json({ live: liveCache.live, window: 15 }, 200, { "Cache-Control": "public, max-age=30" });
 }
 // Watchers the owner blocked (the archive's data/inbox_block.json, hashed ids), checked again every 10 minutes
 async function blockedIds(env) {
