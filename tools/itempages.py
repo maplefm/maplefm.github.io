@@ -353,7 +353,7 @@ def main():
 {f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
 {equip_html(dbrow.get(name), KINDS)}
-<p class="ctaw"><a class="cta" href="/#item={html.escape(name)}">See live listings and recent sales <span>→</span></a></p>
+<p class="ctaw"><a class="cta" href="/#item={html.escape(name)}">Where to buy now <span>→</span></a></p>
 {guide_html(name, GUIDE.get(name), page_of)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
 <p class="note" id="upd">Updated {when}.</p></div>

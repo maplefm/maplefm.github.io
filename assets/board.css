@@ -716,6 +716,7 @@ tbody tr.thin { opacity: .72; }   /* one layer of fade per row, not one per cell
 .li .p .num { display: inline-flex; align-items: center; }
 .li .p small { display: block; }
 .li.gone b, .li.gone .p { opacity: .55; }
+.li.stale b, .li.stale .p, .li.stale .wh { opacity: .6; }
 .li .soldbtn { grid-column: 3; justify-self: end; align-self: center; font: 800 .68rem var(--body); padding: 2px 8px; border-radius: 999px; border: 1.5px solid var(--line2); background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; }
 .li .soldbtn:hover { border-color: #d64545; color: #d64545; }
 .li .soldbtn.on, .li .soldbtn:disabled { border-color: transparent; color: var(--muted); cursor: default; }

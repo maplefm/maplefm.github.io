@@ -1075,7 +1075,7 @@
         var sl = String(x.s).toLowerCase(), lastShop = sellerLast[sl] || 0, lastItem = itemLast[sl + "|" + x.i] || x.t;
         // gone only after a later visit with the item missing for over an hour: watchers re-send an unchanged listing
         // once an hour, so a visit sooner than that can't tell a listing that left from one that wasn't re-sent yet
-        x.st = !x.chat && lastShop - lastItem > 65 * 6e4 ? "gone" : now - x.t < 3 * H ? "up" : "old";
+        x.st = !x.chat && lastShop - lastItem > 65 * 6e4 ? "gone" : now - x.t < 2 * H ? "up" : "old";   // over 2 hours unseen: dimmed, may be gone
         var gv = GONE.items[soldKey(x)]; x.sold = gv && gv[1] > x.t ? gv[0] : 0;
         if (x.sold >= GONE.need || (MYSOLD[soldKey(x)] || 0) > x.t) x.st = "sold";
       });
@@ -3318,7 +3318,9 @@
     if (i.equip && (i.bands || i.rolls.length)) ip.appendChild(rollBox(i));
     var smx = scrollMath(i.item); if (smx) ip.appendChild(smx);
     var lt = el("div", "ltabs");
-    var seenS = {}, buyRows = i.buy.filter(function (x) { if (seenS[x.s]) return false; seenS[x.s] = 1; return true; });
+    // Where to buy shows only what can still be bought: gone and sold listings drop off (one you marked sold yourself
+    // stays, struck through, until enough players agree)
+    var seenS = {}, buyRows = i.buy.filter(function (x) { if (x.st === "gone" || (x.st === "sold" && x.sold >= GONE.need)) return false; if (x.st === "sold" && !((MYSOLD[soldKey(x)] || 0) > x.t)) return false; if (seenS[x.s]) return false; seenS[x.s] = 1; return true; });
     var bb = el("button"); bb.type = "button"; bb.appendChild(document.createTextNode("Where to buy")); bb.appendChild(el("em", null, buyRows.length)); bb.setAttribute("aria-selected", state.list === "buy");
     var rb = el("button"); rb.type = "button"; rb.appendChild(document.createTextNode("Recent sales")); rb.setAttribute("aria-selected", state.list === "sales");
     bb.addEventListener("click", function () { state.list = "buy"; renderItem(); }); rb.addEventListener("click", function () { state.list = "sales"; renderItem(); });
@@ -3333,7 +3335,7 @@
     }
     var ls = el("div", "list"), rows = state.list === "buy" ? buyRows : i.sales;
     rows.slice(0, 40).forEach(function (x) {
-      var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : ""));
+      var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : state.list === "buy" && x.st === "old" ? " stale" : ""));
       li.appendChild(avatar(x.s));
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
@@ -3345,7 +3347,7 @@
       if (x.spot) li.appendChild(el("span", "stt gone", "Spot holder"));
       if (state.list === "buy") {
         var mine = (MYSOLD[soldKey(x)] || 0) > x.t;
-        li.appendChild(el("span", "stt " + (x.st === "sold" ? "gone" : x.st), x.st === "sold" ? (mine && x.sold < GONE.need ? "You marked this sold" : "Marked sold by " + x.sold + (x.sold === 1 ? " player" : " players")) : x.st === "gone" ? "Not seen on the shop's later visit" : (x.st === "up" ? "Likely still up" : "May be gone by now") + (x.sold ? " · " + x.sold + " said sold" : "")));
+        li.appendChild(el("span", "stt " + (x.st === "sold" ? "gone" : x.st), x.st === "sold" ? (mine && x.sold < GONE.need ? "You marked this sold" : "Marked sold by " + x.sold + (x.sold === 1 ? " player" : " players")) : x.st === "gone" ? "Not seen on the shop's later visit" : (x.st === "up" ? "Likely still up" : "Seen over 2 hours ago, may be gone") + (x.sold ? " · " + x.sold + " said sold" : "")));
         if (x.st !== "gone" && !x.chat) li.appendChild(soldBtn(x, mine));
       }
       tipAttach(li, x, i.item);   // hover (or tap) for the item as the game shows it
@@ -3354,7 +3356,7 @@
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
       ls.appendChild(li);
     });
-    if (!rows.length) { var e0 = el("div", "li"); e0.appendChild(el("small", null, state.list === "buy" ? "None up in a known channel and room. Its price still counts trade chat and streams." : "No sales seen yet.")); ls.appendChild(e0); }
+    if (!rows.length) { var e0 = el("div", "li"); e0.appendChild(el("small", null, state.list === "buy" ? "None up right now. Its price still counts trade chat and streams." : "No sales seen yet.")); ls.appendChild(e0); }
     ip.appendChild(ls);
     // our extras: watch, sell, positions, moves, offers, base stats, price by roll
     var btns = el("div", "panelbtns");
@@ -3768,7 +3770,7 @@
   }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
-    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) o.bestS = i.bestL.s; if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
+    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) { o.bestS = i.bestL.s; o.bestT = i.bestL.t; var bw = where(i.bestL); if (bw) o.bestW = bw; } if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
       // rt: sold typical per "roll|slots used|stat|every stat that moved" ("1|0|CRIT|CRIT+1": a clean pair with +1 crit rate);
       // the cheapest open listing for each roll, from the last 2 days, per "roll|stat|moves|slots used": what the chat bot quotes for "7 att wg"
       if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; var ak = r.g + "|" + (r.k || "") + "|" + (r.combo || "") + "|" + (function (su) { return su == null ? "" : su; })(slotsUsed(i.item, l)); if (ra[ak] == null || l.u < ra[ak]) ra[ak] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }

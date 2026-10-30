@@ -1121,6 +1121,8 @@ async function discordPrice(env, q) {
   const lines = [];
   if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
   if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
+  // where to find it: the seller, channel and room of that cheapest listing, when they were read
+  if (r.best && r.bestS && r.bestW) lines.push("Where: " + String(r.bestS).replace(/[*_`~|<>@]/g, "").slice(0, 20) + " · " + String(r.bestW).replace(/[*_`~|<>@]/g, "").slice(0, 40) + (r.bestT > 0 ? " · <t:" + Math.floor(r.bestT / 1000) + ":R>" : ""));
   // mv[0] is the last 24 hours against the 24 before; daily is the typical per day, so the week comes from its ends
   const d = Array.isArray(r.daily) ? r.daily.filter((x) => x && x[1] > 0) : [];
   const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
@@ -1323,7 +1325,7 @@ async function priceLine(env, raw) {
   if (!hits.length) return "No recent listings for " + q + ". Check maplefm.gg";
   const r = hits[0], bits = [shown(r.item) + ":"];
   if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? " from " + (r.salesN || 0) + " sales" : " from asks"));
-  if (r.best) bits.push("· cheapest now " + meso(r.best));
+  if (r.best) bits.push("· cheapest now " + meso(r.best) + (r.bestS && r.bestW ? " (" + String(r.bestS).replace(/[^A-Za-z0-9]/g, "").slice(0, 20) + ", " + String(r.bestW).replace(/[^A-Za-z0-9 ,()]/g, "").slice(0, 40) + ")" : ""));
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
   const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   bits.push("· maplefm.gg/item/" + slug);
