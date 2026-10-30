@@ -1,12 +1,12 @@
 {
- "at": 1793336157685,
+ "at": 1793339022990,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.30.1",
+ "current": "2026.10.30.3",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.956,
    "late_share7": 0.023,
-   "behind": 4
+   "behind": 6
   },
   "Faif": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": 0.954,
    "late_share7": 0.0,
-   "behind": 21
+   "behind": 23
   },
   "yinisera": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": 0.992,
    "late_share7": 0.0,
-   "behind": 25
+   "behind": 27
   },
   "acter": {
    "rows24": 0,
@@ -102,21 +102,21 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.417,
-   "behind": 21
+   "behind": 23
   },
   "Zik": {
-   "rows24": 22558,
-   "room24": 5615,
-   "ch24": 22480,
-   "rows7": 84611,
-   "room7": 8426,
+   "rows24": 21713,
+   "room24": 6241,
+   "ch24": 21635,
+   "rows7": 85237,
+   "room7": 9052,
    "late7": 1714,
-   "chat24": 122,
-   "last": 1793336110,
-   "ver": "2026.10.30.1",
+   "chat24": 125,
+   "last": 1793338761,
+   "ver": "2026.10.30.3",
    "lag_median_min": 6.5,
-   "room_rate24": 0.249,
-   "room_rate7": 0.1,
+   "room_rate24": 0.287,
+   "room_rate7": 0.106,
    "late_share7": 0.02,
    "behind": 0
   },
@@ -134,7 +134,7 @@
    "room_rate24": 0.826,
    "room_rate7": 0.26,
    "late_share7": 0.008,
-   "behind": 1
+   "behind": 3
   },
   "DivineFeces": {
    "rows24": 0,
@@ -143,9 +143,9 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 6,
+   "chat24": 5,
    "last": 1793329199,
-   "ver": "2026.10.30.1",
+   "ver": "2026.10.30.3",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
@@ -155,11 +155,12 @@
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 78
+   "bad row: 3a3a": 159
   }
  },
  "rejects": {},
  "flags": [
-  "Zik: 25% of shops placed in a room in the last 24 hours (22558 shop rows)"
+  "Zik: 29% of shops placed in a room in the last 24 hours (21713 shop rows)",
+  "laclac: watcher 2026.10.29.3, 3 releases behind"
  ]
 }
