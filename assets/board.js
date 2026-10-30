@@ -159,6 +159,8 @@
     var isL = new Set(D.L), idx = new Map(), n = 0, cols = {}, words = {}, wix = {}, now = Date.now(), T = D.latest || now;
     function put(k, v) {
       if ((full ? ENG_DROP : SNAP_DROP)[k] || v === undefined || v === null || v === false || v === "") return;
+      // the scroll-split memo (x._ss) is rebuilt on demand by scrollSplit; sending it made the board too big to upload
+      if (k === "x" && !full && typeof v === "object" && v._ss) { v = Object.assign({}, v); delete v._ss; }
       var c = cols[k] || (cols[k] = []);
       if (typeof v === "string") { var w = words[k] || (words[k] = []), m = wix[k] || (wix[k] = {}); if (m[v] == null) { m[v] = w.length; w.push(v); } c[n] = m[v] + 1; }
       else if (v === true) c[n] = 1;
