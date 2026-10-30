@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.6",
- "date": "2026-10-30T14:41:54+00:00",
- "notes": "Faster hovers: when every stat line reads exactly, one text pass is enough, so popups read in about half the time. The watcher's loop is now shared with the browser scanner.",
- "sha256": "c75ac5bf3fddef416a5d7b0375fe69d7d4cbf454d4650099119f681c6678cd99",
- "size": 162711,
+ "version": "2026.10.30.7",
+ "date": "2026-10-30T15:25:13+00:00",
+ "notes": "A shop row whose name picks up a stray letter or two from the pointer now still reads when the rest is a real item.",
+ "sha256": "54dc6a7bb4fe8de1445f2c17304d41585a20e0d560e5e8e1f4089a992b26d1c3",
+ "size": 162829,
  "history": [
+  {
+   "version": "2026.10.30.7",
+   "date": "2026-10-30",
+   "notes": "A shop row whose name picks up a stray letter or two from the pointer now still reads when the rest is a real item."
+  },
   {
    "version": "2026.10.30.6",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.2",
    "date": "2026-10-26",
    "notes": "Works with VPN and proxy apps that switch on a SOCKS system proxy: start.bat and install.bat go around it, and start.bat installs any missing Python package itself. Hover stats are checked against what the item can carry before they're kept."
-  },
-  {
-   "version": "2026.10.26.1",
-   "date": "2026-10-26",
-   "notes": "Hover stats are checked before they're kept: attack on earrings, boots or hats means the popup belonged to another item and is skipped, and a requirement read as a bonus is dropped. start.bat now installs any missing Python package itself, and works with VPN or proxy apps that broke the install (SOCKS). Updates itself."
   }
  ],
  "pip": [],
- "sig": "76adc926f0e5da60dc3bb21353c441bf38e241b8b5ff9dabbd85735c073f40fd808946a4707e1d3eae693cabed55ed8a01050e8869dd5ea2f8343475c221a3ed043fbcd2d2640c058e44162357a600e7538d599c2de5df0c265fed68a08d2afa75b6ad6ba7c3a30afd7e1bc49675e12b5c514d45bd189544540dff00b0db0cde1a0b077c36b56fcd9ffa485ebefd1556b7e140cb79878cda1dc09a49f9fabd384342d744c915fc2f600454bc125e292213e55171906fc63dcf62e1c820e83379f1a91ade7b575ad89126a3d87fcc64fa31caf3e80de30cbbd92a8812f4bed9daa0776057a8712705510dfd99323bcce46ce735fd42214489584a8a80bba43e4b"
+ "sig": "750be78eecfe0fa68a39966ac76a230d81e7e03ebb5a5c28526b1b442179e20be50e1841876882ad8f8878331708c375d2942d1c8fd7b606790acdf7fade3cb1c263083e18edd0a809165efd94c9999b65ad729801927cf2256160a3169b203dff11f503e3a7611008e24c9d75bbf8e1b469e81b7bf0a2c3d5c4bc59fab95b0ffeb185f1f702ddcf2d6ab72f7f58be7f6060a0e34bb910e216f46dcf042d479a9a82d7a0ceefc4e40ff298ca834780fdce5ce264263bd4526def49bb87f896590e67286915cb806f844f8117fbc008f18636dac248e68a424541b21a2cb8ba9e39bd4d51d78087b44effcd6e1fbac24e9fe477356b80b094350056b3dab5d262"
 }

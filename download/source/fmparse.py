@@ -466,6 +466,13 @@ def read_shop_checked(region):
                 out["dropped"] += 1; continue
         gname, gk = glyph_item(glyphs.read_name(region.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38))))
         name, known = (gname, True) if gk else clean_item(tname)
+        if not known and tname:
+            # a stray letter or two read off the pointer or the row's edge after the name ("Star Earrings re"):
+            # the name without them, only when that is a real item
+            t2 = re.sub(r"(\s+\S{1,2})+\s*$", "", tname.strip())
+            if t2 != tname.strip():
+                n3, k3 = clean_item(t2)
+                if k3: name, known = n3, True
         if not known:
             rname = re.split(r"\d+\s*[ft1l]?[o0]?r?\s*\d", rjoin)[0]
             n2, k2 = clean_item(rname)
