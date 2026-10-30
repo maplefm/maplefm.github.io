@@ -5,7 +5,7 @@ shop, the in-game pointer and the hovered row, and keeps track of what changed.
 frame(rgba bytes, width, height) -> JSON text:
   {"shop": None | {"seller", "rows": [{i, p, q, so}], "room"}, "tip": None | {"row", "item", "stats"}, "why": "..."}
 """
-import io, json, re, hashlib
+import io, json, re, hashlib, time
 from PIL import Image
 import fmparse, glyphs, tipexact
 import watcher            # the watcher's own listing store and inbox sender: same rules for what counts and what goes up
@@ -98,9 +98,9 @@ def find_cursor(img, box):
     return int(x0 + xx), int(y0 + yy)
 
 
-def hovered(img, box):
+def hovered(img, box, c=None):
     """(row index, popup picture) when the pointer rests on a shop row and its popup is drawn; else None."""
-    c = find_cursor(img, box)
+    c = c or find_cursor(img, box)
     if not c: return None
     S = fmparse.SHOP; ry = c[1] - box[1]
     idx = int((ry - S["row0"]) // S["pitch"])
@@ -128,34 +128,102 @@ def _raw(buf):
     return buf.to_bytes() if hasattr(buf, "to_bytes") else bytes(buf)
 
 
+CH_FILE = watcher.HERE + "/scan_channel.json"
+CH = {"open": False, "first": None, "last": None, "closed": 0.0, "since": 0.0}
+
+
+def channel_now():
+    """The channel last seen in the Change Channel window, if it was seen in the last 6 hours (FM Watcher's rule)."""
+    try:
+        c = json.load(open(CH_FILE))
+        if time.time() - c["t"] <= 6 * 3600 and 1 <= c["n"] <= 40: return c["n"]
+    except Exception: pass
+    return None
+
+
+def _set_channel(n):
+    try: json.dump({"n": int(n), "t": time.time()}, open(CH_FILE, "w"))
+    except Exception: pass
+    STATE["ch_note"] = n
+
+
+def channel_step(img, fw, fh, x0):
+    """FM Watcher's ChannelWatch on the shared picture: the highlighted button when the Change Channel window opens
+    is your channel; a different highlight when it closes (followed by the dark loading screen) is the new one."""
+    t = time.time()
+    ox, oy = STATE["off"] or (0, 0)
+    gw, gh = fw - max(0, ox) * 2, fh - oy
+    b = (max(0, gw // 2 - 520 + ox - x0), int(gh * 0.18) + oy, min(img.size[0], gw // 2 + 520 + ox - x0), min(img.size[1], int(gh * 0.82) + oy))
+    sel = None
+    if b[2] > b[0] + 200 and b[3] > b[1] + 100:
+        try: sel = fmparse.read_channel_dialog(img.crop(b))
+        except Exception: sel = None
+    if sel:
+        if not CH["open"]:
+            CH.update(open=True, first=sel, since=t); _set_channel(sel)
+        CH["last"] = sel
+        return True
+    if CH["open"]:
+        CH["open"] = False; CH["closed"] = t
+        if CH["last"] and CH["first"] and CH["last"] != CH["first"]:
+            _set_channel(CH["last"]); CH["closed"] = 0
+    if CH["closed"] and t - CH["closed"] < 8 and CH["last"] and CH["last"] != CH["first"]:
+        m = (max(0, gw // 4 + ox - x0), gh // 4 + oy, min(img.size[0], gw * 3 // 4 + ox - x0), gh * 3 // 4 + oy)
+        if m[2] > m[0]:
+            mid = img.crop(m).convert("L").resize((32, 18))
+            if sum(mid.getdata()) / (32 * 18) < 30:          # the loading screen between channels
+                _set_channel(CH["last"]); CH["closed"] = 0
+    elif CH["closed"] and t - CH["closed"] >= 8:
+        CH["closed"] = 0
+    return False
+
+
 def frame(buf, w, h, x0=0, fw=0, room=None):
     """buf: RGBA pixels, w x h. x0, fw: buf is the strip of a fw-wide frame starting at x0. room: the minimap
-    title's RGBA pixels (340 x 40, the frame's ROOM_REGION) when the strip leaves it out."""
+    title and title bar's RGBA pixels (the frame's top-left 400 x 60) when the strip leaves them out."""
     img = Image.frombuffer("RGBA", (w, h), _raw(buf), "raw", "RGBA", 0, 1).convert("RGB")
+    STATE["ch_note"] = None
+    if channel_step(img, fw or w, h, x0):
+        return json.dumps({"shop": None, "channel": {"open": True, "n": CH["last"]}})
     shop, box = find_shop(img, fw or w, x0)
     if shop is None:
         STATE["hover"] = None
-        return json.dumps({"shop": None, "why": "no shop open"})
+        return json.dumps({"shop": None, "why": "no shop open", "ch": channel_now(), "ch_set": STATE.get("ch_note")})
     # the minimap title names the room: read again only when it changed
+    # the minimap title names the room (or, minimized, the one-line title bar): read again only when it changed
     if room is not None:
-        rw, rh = ROOM_REGION[2] - ROOM_REGION[0], ROOM_REGION[3] - ROOM_REGION[1]
-        room_img = Image.frombuffer("RGBA", (rw, rh), _raw(room), "raw", "RGBA", 0, 1).convert("RGB")
+        top = Image.frombuffer("RGBA", (400, 60), _raw(room), "raw", "RGBA", 0, 1).convert("RGB")
     else:
-        room_img = img.crop(ROOM_REGION)
-    rh = hashlib.md5(room_img.resize((40, 8)).tobytes()).hexdigest()
+        top = img.crop((0, 0, 400, 60))
+    room_img, bar_img = top.crop(ROOM_REGION), top.crop(BAR_REGION)
+    rh = hashlib.md5(top.resize((80, 12)).tobytes()).hexdigest()
     if rh != STATE["room_hash"]:
         STATE["room_hash"] = rh
-        try: STATE["room"] = fmparse.read_room(room_img)
-        except Exception: STATE["room"] = ""
+        try: r = watcher.shop_room(fmparse.read_room(room_img))
+        except Exception: r = ""
+        if not re.match(r"^FM\d", r or ""):
+            try:
+                b = fmparse.read_room_bar(bar_img)
+                if re.match(r"^FM\d", b or ""): r = b
+            except Exception: pass
+        STATE["room"] = r or ""
     out = {"shop": None, "tip": None}
-    sh = hashlib.md5(shop.tobytes()).hexdigest()
+    # the list and the lower name plate only: the seller's character above them moves all the time
+    S = fmparse.SHOP; pl = S["plate"]
+    cur = find_cursor(img, box); hs = shop
+    if cur:                                   # the pointer moving over the list isn't a change either
+        from PIL import ImageDraw
+        hs = shop.copy(); cx, cy = cur[0] - box[0], cur[1] - box[1]
+        ImageDraw.Draw(hs).rectangle([cx - 6, cy - 6, cx + 30, cy + 40], fill=(0, 0, 0))
+    sh = hashlib.md5(hs.crop((6, int(S["row0"]) - 2, hs.width, hs.height)).tobytes() + hs.crop((pl[0], pl[1] + 4, pl[2], pl[3])).tobytes()).hexdigest()
     if sh == STATE["shop_hash"] and STATE.get("res") is not None:
         res = dict(STATE["res"], rows=[dict(r) for r in STATE["res"]["rows"]]); out["same"] = True
     else:
         res = read_rows(shop)
         STATE["shop_hash"], STATE["res"] = sh, (dict(res, rows=[dict(r) for r in res["rows"]]) if res else None)
     if res:
-        res["room"] = STATE["room"]; res["dropped"] = 0; res["tip"] = None
+        res["room"] = STATE["room"]; res["dropped"] = 0; res["tip"] = None; res["ch"] = channel_now()
+        out["ch"] = res["ch"]
         out["shop"] = {"seller": res["seller"], "room": res["room"], "rows": [{k: r[k] for k in ("i", "p", "q", "so")} for r in res["rows"]]}
         # a scrolled or changed list makes every remembered row suspect: start over unless all visible rows agree
         mem = STATE["rows"].get(res["seller"]) or {}
@@ -163,7 +231,7 @@ def frame(buf, w, h, x0=0, fw=0, room=None):
         if any(r["y"] in mem and key(mem[r["y"]]) != key(r) for r in res["rows"]) or not res["rows"]: mem = {}
         STATE["rows"] = {res["seller"]: mem}          # one shop at a time
         for r in res["rows"]: mem[r["y"]] = r
-        hv = hovered(img, box)
+        hv = hovered(img, box, cur)
         tiprow = None
         prev, STATE["hover"] = STATE.get("hover"), None
         if hv:

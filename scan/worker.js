@@ -5,7 +5,7 @@ importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js", "tess/
 let py = null, api = null, TM = null, ready = null, glue = null, API = "https://api.maplefm.gg";
 // what this browser's scanner keeps between visits: its random id, its signing key and the listings it has seen
 // (FM Watcher keeps the same three files next to itself). IndexedDB, in this browser only.
-const KEEP = ["anon_id.txt", "inbox_key.txt", "watcher_data_v2.json"];
+const KEEP = ["anon_id.txt", "inbox_key.txt", "watcher_data_v2.json", "scan_channel.json"];
 function idb() { return new Promise((ok, no) => { const r = indexedDB.open("fm-scan", 1); r.onupgradeneeded = () => r.result.createObjectStore("f"); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
 async function idbGet(k) { const d = await idb(); return new Promise((ok) => { const q = d.transaction("f").objectStore("f").get(k); q.onsuccess = () => ok(q.result); q.onerror = () => ok(null); }); }
 async function idbPut(k, v) { const d = await idb(); return new Promise((ok) => { const t = d.transaction("f", "readwrite"); t.objectStore("f").put(v, k); t.oncomplete = ok; t.onerror = ok; }); }
