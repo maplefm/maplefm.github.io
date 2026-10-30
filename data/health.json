@@ -1,5 +1,5 @@
 {
- "at": 1793353281034,
+ "at": 1793356149872,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,17 +105,17 @@
    "behind": 24
   },
   "Zik": {
-   "rows24": 21768,
+   "rows24": 19052,
    "room24": 16637,
-   "ch24": 21690,
+   "ch24": 18974,
    "rows7": 95948,
    "room7": 19448,
    "late7": 1714,
-   "chat24": 205,
+   "chat24": 191,
    "last": 1793353158,
    "ver": "2026.10.30.4",
-   "lag_median_min": 6.7,
-   "room_rate24": 0.764,
+   "lag_median_min": 6.8,
+   "room_rate24": 0.873,
    "room_rate7": 0.203,
    "late_share7": 0.018,
    "behind": 0
@@ -171,12 +171,11 @@
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 1110
+   "bad row: 3a3a": 1292
   }
  },
  "rejects": {},
  "flags": [
-  "Zik: 76% of shops placed in a room in the last 24 hours (21768 shop rows)",
   "laclac: watcher 2026.10.29.3, 4 releases behind"
  ]
 }
