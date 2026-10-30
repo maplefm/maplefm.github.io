@@ -99,6 +99,7 @@ async function route(req, env, url) {
   if (p === "/wrongprice" && req.method === "POST") return wrongPut(req, env);
   if (p === "/inbox/wrong" && req.method === "GET") return wrongList(req, env, url);
   if (p === "/inbox/pull" && req.method === "GET") return inboxPull(req, env, url);
+  if (p === "/inbox/fast" && req.method === "GET") return inboxFast(req, env);
   if (p === "/inbox/rejects" && req.method === "GET") return inboxRejects(req, env);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
   if (p === "/hit" && req.method === "POST") return hit(req, env);
@@ -664,6 +665,12 @@ async function inboxPull(req, env, url) {
   const rows = (r.results || []).map((x) => [new Date(x.t).toISOString(), x.msg, x.id]);
   if (!after) await env.INBOX_DB.prepare("DELETE FROM posts WHERE t < ?").bind(Date.now() - 15 * DAY * 1000).run();
   return json({ rows, last: rows.length ? rows[rows.length - 1][2] : after }, 200, { "Cache-Control": "no-store" });
+}
+// the fast lane's rows for the pump's quick deal check between passes (same key as /inbox/pull)
+async function inboxFast(req, env) {
+  const want = env.INBOX_PULL_KEY || "", got = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
+  if (!want || got.length !== want.length || !(await same(got, want))) return json({ error: "no" }, 403);
+  return json((await fastDocs(env)).docs, 200, { "Cache-Control": "no-store" });
 }
 // the last 7 days of rejected uploads, for the pump's daily scanner check (same key as /inbox/pull)
 async function inboxRejects(req, env) {

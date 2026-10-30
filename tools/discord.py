@@ -155,6 +155,15 @@ def scan_docs(data_dir):
         for d in docs:
             if isinstance(d, dict) and isinstance(d.get("rows"), list):
                 yield names.get(b) or d.get("who") or d.get("by") or "Guest", d
+    # the Worker's fast lane: rows sent in the last minutes that the pump hasn't folded in yet (FAST_DOCS, written by
+    # the pump's quick deal check). The scanner's name is the one its linked account shows, as the inbox gives it.
+    fp = os.environ.get("FAST_DOCS")
+    if fp and os.path.exists(fp):
+        links = load(os.environ.get("FAST_LINKS") or "", {}) if os.environ.get("FAST_LINKS") else {}
+        for d in load(fp, []) or []:
+            if isinstance(d, dict) and isinstance(d.get("rows"), list) and d["rows"]:
+                tag = str(d.get("inbox") or "").replace("fast-", "")[:4]
+                yield (links.get(tag) if isinstance(links, dict) else None) or d.get("who") or "Guest", d
 
 # ---------------------------------------------------------------- sales
 def job_sales(data_dir, state_path):
