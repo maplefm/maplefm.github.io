@@ -431,7 +431,13 @@ def main():
             {"@type": "ListItem", "position": 3, "name": what[0].upper() + what[1:], "item": f"{SITE}/items/{hs}/"}]}) + "</script>"
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(title, desc, f"{SITE}/items/{hs}/", body, ld, crumbs=[("Prices", "/"), ("All items", "/items/"), (what[0].upper() + what[1:], "")]))
         hubs.append((hs, what))
-    hublinks = '<p class="note" style="margin:6px 0 10px">By category: ' + " · ".join(f'<a href="/items/{h}/">{html.escape(w[0].upper() + w[1:])}</a>' for h, w in hubs) + "</p>"
+    # guides and items-by-class pages, from the same summary (tools/guidepages.py)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import guidepages
+    guide_paths = guidepages.build(out, rows, ids, dbrow, KINDS, GUIDE, vendor, when,
+                                   {"page": page, "slug": slug, "shown": shown, "meso": meso, "full": full, "SITE": SITE, "BSLUG": BSLUG})
+    print(len(guide_paths), "guide and class pages")
+    hublinks = '<p class="note" style="margin:6px 0 10px">By category: ' + " · ".join(f'<a href="/items/{h}/">{html.escape(w[0].upper() + w[1:])}</a>' for h, w in hubs) + (' · <a href="/items/class/">By class</a> · <a href="/guides/">Guides</a>' if guide_paths else "") + "</p>"
     idx = idx.replace('<input id="q"', hublinks + '<input id="q"', 1)
     os.makedirs(os.path.join(out, "items"), exist_ok=True)
     open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx))
@@ -446,7 +452,7 @@ def main():
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
     today = datetime.date.today().isoformat()
-    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
+    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [SITE + p for p in guide_paths] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
     # lastmod only moves when a page's content does: item prices daily, world pages when the game data changed
     wbuilt = (WBUILT[0] or today)[:10]
     world = {SITE + p for p in world_paths}

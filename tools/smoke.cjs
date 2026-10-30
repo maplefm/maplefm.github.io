@@ -12,7 +12,7 @@ const srv = http.createServer((q, r) => {
   r.writeHead(200, { "Content-Type": TYPES[p.split(".").pop()] || "application/octet-stream" }); fs.createReadStream(p).pipe(r);
 });
 const PAGES = [["/", ".sitenav"], ["/market.html", ".ctl"], ["/shop.html", "#q"], ["/map.html", ".sitenav"], ["/quests.html", ".sitenav"], ["/contribute.html", ".sitenav"],
-  ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"], ["/items/", ".sitenav"], ["/item/work-gloves/", ".crumbs"], ["/map/sleepywood/", ".crumbs"], ["/training/", ".crumbs"], ["/quests/", ".crumbs"], ["/training/level-30-40/", ".crumbs"], ["/quest/pios-collecting-recycled-goods/", ".crumbs"]];
+  ["/report.html", ".sitenav"], ["/streamers.html", ".sitenav"], ["/how-it-works.html", ".sitenav"], ["/shortcuts.html", ".sitenav"], ["/terms.html", ".sitenav"], ["/bot/", ".sitenav"], ["/items/", ".sitenav"], ["/item/work-gloves/", ".crumbs"], ["/map/sleepywood/", ".crumbs"], ["/training/", ".crumbs"], ["/quests/", ".crumbs"], ["/training/level-30-40/", ".crumbs"], ["/quest/pios-collecting-recycled-goods/", ".crumbs"], ["/guides/", ".crumbs"], ["/guides/make-mesos/", ".crumbs"], ["/items/class/thief/", ".crumbs"]];
 const fails = []; let checks = 0;
 const ok = (c, name) => { checks++; if (!c) fails.push(name); };
 (async () => {

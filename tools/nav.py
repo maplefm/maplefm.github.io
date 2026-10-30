@@ -46,7 +46,7 @@ def nav_html(active="", home=False):
 
 
 FOOT_COLS = [
-    ("Prices", [("Price board", "/"), ("All items", "/items/"), ("Weekly recap", "/recap/"), ("How prices work", "/how-it-works.html")]),
+    ("Prices", [("Price board", "/"), ("All items", "/items/"), ("Items by class", "/items/class/"), ("Guides", "/guides/"), ("Weekly recap", "/recap/"), ("How prices work", "/how-it-works.html")]),
     ("Trade", [("Player market", "/market.html"), ("Shops", "/shop.html"), ("List an item", "/market.html#new"), ("My positions", "/#positions")]),
     ("Quests and training", [("Quests", "/quests.html"), ("Training", "/map.html"), ("Training guides", "/training/"), ("All maps", "/maps/"), ("Monsters", "/monsters/"), ("Crafting recipes", "/crafting/")]),
     ("Club FM", [("Earn by scanning", "/contribute.html"), ("For streamers", "/streamers.html"), ("Add /price to Discord", "/bot/"), ("Discord", "https://discord.gg/cXnVBTUUPk"), ("Terms", "/terms.html")]),
