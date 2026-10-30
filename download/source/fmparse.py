@@ -1090,6 +1090,8 @@ def read_tooltip(img, need_stats=True):
             up = _tip_passed(img)
             if up is not None: stats["UP"] = up
         except Exception: pass
+    # a type or stat line is never the name ("Type: Earrings", "Type: Two-handed Sword"): better no name than that
+    if re.search(r"\btype\s*[:;.]", out.get("name") or "", re.I): out["name"] = ""
     return out
 
 def _tip_slots_white(img, top=0.45):
@@ -1240,6 +1242,10 @@ def _read_tip_once(img, need_stats=True, lo=140, hi=215):
             lines.append(t)
     name = ""
     for t in lines:
+        # the "Type: Two-handed Sword" line names the weapon type, which is also an item ("Two-Handed Sword"):
+        # a type or stat line is never the item's name
+        if re.match(r"\W{0,3}\w{0,3}\W{0,3}(re[q@]|type|attack speed|weapon|magic|remaining)", t, re.I) or re.search(r"\btype\s*[:;.]", t, re.I):
+            continue
         k = _known_name(t)
         if k:
             name = k; break
