@@ -4191,7 +4191,19 @@
     getJSON("data/covhours.json").then(function (j) { COVH = j; COVHAT = Date.now(); draw(j); }, function () { draw(null); });
   }
   function openCoverage() { coverageMap(); coverageHours(); if (!$("covdlg").open) $("covdlg").showModal(); }
-  function openRanks() { renderRanks(); if (!$("ranks").open) $("ranks").showModal(); }
+  function openRanks() { renderRanks(); if (!$("ranks").open) $("ranks").showModal(); loadPaid(); }
+  // lifetime payouts per scanner, from the payout record (data/payouts.json), shown on the ranks
+  var PAIDOUT = null, PAID_AT = 0;
+  function loadPaid() {
+    if (Date.now() - PAID_AT < 10 * 6e4) return; PAID_AT = Date.now();
+    fetch("/data/payouts.json?t=" + Math.floor(Date.now() / 6e5), { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (po) {
+      if (!po) return; var m = {};
+      Object.keys(po).forEach(function (n) { var t = 0; (po[n] || []).forEach(function (x) { t += +x.amount || 0; }); if (t > 0) m[n.toLowerCase()] = Math.round(t * 100) / 100; });
+      PAIDOUT = m; if ($("ranks").open) renderRanks();
+    }).catch(function () {});
+  }
+  function paidOf(name) { return PAIDOUT && PAIDOUT[String(name || "").toLowerCase()] || 0; }
+  function paidTxt(name) { var v = paidOf(name); return v ? " · 💵 $" + (v % 1 ? v.toFixed(2) : v) + " paid out" : ""; }
   // ---------- the live leaderboard on the left: every scanner, first to last. Rows are kept between renders and
   // slide to their new place when the order changes, so a climb is seen rather than just read.
   var BROWS = {}, BLAST = {}, BSHOWN = 30;
@@ -4251,7 +4263,7 @@
       var box = el("div", "rk-me"); box.appendChild(badgeFor(me.name, me.rank));
       var t = el("div"), h = el("h3"); h.appendChild(document.createTextNode(me.name)); h.appendChild(tierBadge(me)); h.appendChild(el("span", "rk-num", "#" + me.rank + " of " + all.length)); t.appendChild(h);
       t.appendChild(rkBar(me)); var pr = progressOf(me), sub = el("div", "rk-sub");
-      sub.innerHTML = "<b>" + fmt(me.sales) + "</b> sales caught · " + esc(pr.txt) + (me.week ? " · <b>+" + fmt(me.week) + "</b> this week" : "");
+      sub.innerHTML = "<b>" + fmt(me.sales) + "</b> sales caught · " + esc(pr.txt) + (me.week ? " · <b>+" + fmt(me.week) + "</b> this week" : "") + esc(paidTxt(me.name));
       t.appendChild(sub); box.appendChild(t); mb.appendChild(box);
     }
     var pick = el("label", "rk-pick"); pick.appendChild(document.createTextNode(me ? "Not you?" : "Which one is you? Pick your name to track your climb:"));
@@ -4264,14 +4276,15 @@
       var w = all[k]; if (!w) { pod.appendChild(el("div")); return; }
       var d = el("div", "pod p" + (k + 1)); d.appendChild(el("span", "place", k === 0 ? "THE CROWN" : "#" + (k + 1)));
       d.appendChild(badgeFor(w.name, k + 1)); d.appendChild(el("b", null, w.name)); var tb = tierBadge(w); d.appendChild(tb);
-      var n = el("div", "n", fmt(w.sales)); n.appendChild(el("small", null, " sales")); d.appendChild(n); pod.appendChild(d);
+      var n = el("div", "n", fmt(w.sales)); n.appendChild(el("small", null, " sales")); d.appendChild(n);
+      if (paidOf(w.name)) d.appendChild(el("small", "rk-paid", paidTxt(w.name).replace(/^ · /, ""))); pod.appendChild(d);
     });
     var list = $("rk-list"); list.textContent = "";
     var rows = all.slice(3, 25); if (me && me.rank > 25) rows.push(me);
     rows.forEach(function (w) {
       var r = el("div", "rk-row" + (w.name === RK_ME ? " me" : "")); r.appendChild(el("span", "pos", "#" + w.rank)); r.appendChild(badgeFor(w.name, w.rank));
       var nm = el("div", "rk-nm"), top = el("div"); top.appendChild(el("b", null, w.name)); var sp2 = supporterOf(w.name); if (sp2) top.appendChild(heart(sp2)); top.appendChild(tierBadge(w)); if (w.club) top.appendChild(el("span", "clubtag", "Club")); if (w.stream) top.appendChild(el("span", "clubtag", "Stream"));
-      nm.appendChild(top); nm.appendChild(rkBar(w)); nm.appendChild(el("div", "rk-sub", progressOf(w).txt)); r.appendChild(nm);
+      nm.appendChild(top); nm.appendChild(rkBar(w)); nm.appendChild(el("div", "rk-sub", progressOf(w).txt + paidTxt(w.name))); r.appendChild(nm);
       var tot = el("div", "tot", fmt(w.sales)); tot.appendChild(el("small", null, w.week ? "+" + fmt(w.week) + " this week" : fmt(w.daysN) + (w.daysN === 1 ? " day" : " days"))); if (w.week) tot.lastChild.className = "wk"; r.appendChild(tot);
       list.appendChild(r);
     });
