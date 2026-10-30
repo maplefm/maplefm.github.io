@@ -105,7 +105,7 @@ urllib.request.urlopen = _urlopen
 fmparse.rapid_lines = lambda img, scale: []
 import watcher
 watcher.urllib.request.urlopen = _urlopen
-watcher.INBOX_FORM = API + "/inbox"; watcher.ACCOUNTS = API
+watcher.INBOX_FORM = API + "/inbox?via=browser"; watcher.ACCOUNTS = API
 import scanglue
 `);
   glue = py.globals.get("scanglue");

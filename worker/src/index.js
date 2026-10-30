@@ -540,21 +540,31 @@ async function inboxPost(req, env) {
   // new shop rows also go to the fast lane, so a deal reaches the board in seconds instead of at the next pump pass
   const blocked = await blockedIds(env);
   await fastPut(env, msg, blocked);
-  await scannerSeen(env, m, blocked);
+  await scannerSeen(env, m, blocked, new URL(req.url).searchParams.get("via") === "browser" ? "b" : "w");
   return json({ ok: true });
 }
 // Scanners active right now, FM Watcher and the browser scanner alike: one row per scanner with its last upload
 // time. A named scanner counts once even when it runs both; guests count by their hashed id. Blocked ids never count.
 let seenMade = false;
 async function sha256hex(x) { return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(x)))].map((b) => b.toString(16).padStart(2, "0")).join(""); }
-async function scannerSeen(env, m, blocked) {
+async function scannerSeen(env, m, blocked, via) {
   try {
     const h = (await sha256hex("fm-inbox:" + m.id)).slice(0, 16);
     if (blocked && (blocked.has(h) || blocked.has(m.id))) return;
     const nm = String(m.nm || m.ign || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 16);
     const k = nm && nm !== "guest" ? "n:" + nm : "h:" + h;
-    if (!seenMade) { await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS seen (k TEXT PRIMARY KEY, t INTEGER NOT NULL)").run(); seenMade = true; }
-    await env.INBOX_DB.prepare("INSERT OR REPLACE INTO seen (k, t) VALUES (?, ?)").bind(k, Date.now()).run();
+    if (!seenMade) {
+      await env.INBOX_DB.batch([
+        env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS seen (k TEXT PRIMARY KEY, t INTEGER NOT NULL)"),
+        // one row per scanner, tool (w FM Watcher, b browser) and hour, for the traffic report's scanner counts
+        env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS scanhr (k TEXT NOT NULL, via TEXT NOT NULL, hr INTEGER NOT NULL, PRIMARY KEY (k, via, hr))"),
+      ]);
+      seenMade = true;
+    }
+    await env.INBOX_DB.batch([
+      env.INBOX_DB.prepare("INSERT OR REPLACE INTO seen (k, t) VALUES (?, ?)").bind(k, Date.now()),
+      env.INBOX_DB.prepare("INSERT OR IGNORE INTO scanhr (k, via, hr) VALUES (?, ?, ?)").bind(k, via || "w", Math.floor(Date.now() / 3600e3)),
+    ]);
   } catch (e) {}
 }
 let liveCache = null;
@@ -1898,11 +1908,18 @@ async function trafficStats(env, from, to) {
   const [ev] = await q(`SELECT SUM(p LIKE '#find:%') f, SUM(p LIKE '#pick:%') k FROM hits WHERE t >= ? AND t < ?`, from, to);
   const [rt] = await q(`SELECT COUNT(DISTINCT CASE WHEN ret = 1 THEN v END) back, COUNT(DISTINCT CASE WHEN ret IS NOT NULL THEN v END) known FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
   const [si] = await q(`SELECT COUNT(DISTINCT id) n FROM signin WHERE t >= ? AND t < ?`, from, to);
+  // scanners that sent listings in the window, by tool; someone running both counts once in the total
+  let scan = null;
+  try {
+    const h0 = Math.floor(from / 3600e3), h1 = Math.ceil(to / 3600e3);
+    const [sc] = await q(`SELECT COUNT(DISTINCT k) n, COUNT(DISTINCT CASE WHEN via = 'w' THEN k END) w, COUNT(DISTINCT CASE WHEN via = 'b' THEN k END) b FROM scanhr WHERE hr >= ? AND hr < ?`, h0, h1);
+    scan = { n: (sc && sc.n) || 0, w: (sc && sc.w) || 0, b: (sc && sc.b) || 0 };
+  } catch (e) {}
   const by = {}; pages.forEach((r) => { const k = pageLabel(r.p).startsWith("Item: ") ? "Item pages" : pageLabel(r.p); by[k] = (by[k] || 0) + r.n; });
   const items = pages.filter((r) => /^\/item\//.test(r.p)).slice(0, 3).map((r) => pageLabel(r.p).slice(6) + " " + r.n);
-  return { returning: (rt && rt.back) || 0, retKnown: (rt && rt.known) || 0, signedIn: (si && si.n) || 0, views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
+  return { scan, returning: (rt && rt.back) || 0, retKnown: (rt && rt.known) || 0, signedIn: (si && si.n) || 0, views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
 }
-function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.returning + "** returning · **" + t.signedIn + "** signed in · **" + t.views + "** views · **" + pc + "** !price"; }
+function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.returning + "** returning · **" + t.signedIn + "** signed in · **" + t.views + "** views · **" + pc + "** !price" + (t.scan ? " · **" + t.scan.n + "** scanners (" + t.scan.w + " FM Watcher, " + t.scan.b + " browser)" : ""); }
 function trafficEmbed(st, prev, title, from, to, extra) {
   // change against the same hours yesterday, as a count and a percent: "(+12, ▲ 25% vs yesterday)"
   const d = (a, b) => {
@@ -1920,6 +1937,7 @@ function trafficEmbed(st, prev, title, from, to, extra) {
   // returning: came back from an earlier day; new: first day on the site. Counted from browsers that report it.
   f.push({ name: "Returning visitors", value: "**" + st.returning + "**" + d(st.returning, prev && prev.returning) + (st.retKnown ? "\n" + Math.max(0, st.retKnown - st.returning) + " new" : ""), inline: true });
   f.push({ name: "Signed in with Discord", value: "**" + st.signedIn + "**" + d(st.signedIn, prev && prev.signedIn) + (st.accounts != null ? "\n" + st.accounts + " accounts all time" : ""), inline: true });
+  if (st.scan) f.push({ name: "Scanners", value: "**" + st.scan.n + "**" + d(st.scan.n, prev && prev.scan && prev.scan.n) + "\n⬇ FM Watcher " + st.scan.w + " · 🌐 Browser " + st.scan.b, inline: true });
   if (st.pages.length) f.push({ name: "Top pages", value: st.pages.map((x) => x[0] + " · " + x[1]).join("\n") + (st.items.length ? "\nMost viewed items: " + st.items.join(", ") : "") });
   if (st.opens && st.opens.length) f.push({ name: "Most opened on the board", value: st.opens.map((x) => x.i + " · " + x.n).join("\n") + "\nSearches " + st.finds + " · quick picks clicked " + st.picks });
   if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });

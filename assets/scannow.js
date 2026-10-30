@@ -12,7 +12,7 @@
     if (engine) return engine;
     engine = new Promise(function (ok, no) {
       if (window.FMScan) return ok(window.FMScan);
-      var s = document.createElement("script"); s.src = "/scan/engine.js?v=1";
+      var s = document.createElement("script"); s.src = "/scan/engine.js?v=2";
       s.onload = function () { ok(window.FMScan); }; s.onerror = no; document.head.appendChild(s);
     }).then(function (F) { wire(F); F.boot(); return F; });
     return engine;
