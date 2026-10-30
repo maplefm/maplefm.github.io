@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.1",
- "date": "2026-10-30T03:24:32+00:00",
- "notes": "Popups are read exactly in the game's own font: stats are trusted only when every line reads exactly and fits the item. A popup that can't be read fully is sent as a lossless picture so the reader can learn it.",
- "sha256": "4c5ac266d2562ece6f2d4706e8a9cf91e5e8a674db334c2c173046144b11542c",
- "size": 160604,
+ "version": "2026.10.30.2",
+ "date": "2026-10-30T05:07:04+00:00",
+ "notes": "Fixes weapons not getting their stats: the popup's Type line (like Two-handed Sword) was being read as the item's name, so the stats didn't match the row.",
+ "sha256": "bbb67c3b7e4a644be162b6faee6e354c65c75e535f0f6b27af436d09f10d6d67",
+ "size": 160717,
  "history": [
+  {
+   "version": "2026.10.30.2",
+   "date": "2026-10-30",
+   "notes": "Fixes weapons not getting their stats: the popup's Type line (like Two-handed Sword) was being read as the item's name, so the stats didn't match the row."
+  },
   {
    "version": "2026.10.30.1",
    "date": "2026-10-29",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.4",
    "date": "2026-10-24",
    "notes": "Hover wanted list now reads from the public price summary."
-  },
-  {
-   "version": "2026.10.24.3",
-   "date": "2026-10-24",
-   "notes": "Hover wanted: the watcher now tells you (with a two-note chime) when a shop has an equip the board needs stats for. Just rest your mouse on that row."
   }
  ],
  "pip": [],
- "sig": "aefff4ac3707db8e16fd27c9358b3465dfc8d3547c17bc2739d3f4977cfac2cb09ef34089e5049da92af77f7031fa2e912fe87b4f068afd342e99bb5ba3a64a620a5e94e252d0c0d5a4017ac5770dfdaa20bd88d3f48dfe2dbb249d67a3c7fe024a05a4f9deeec4802df6b5e1e40368489603ed42375c902927f3c4f6f618798dfcbc534aae449f58e49ddf8951788f725316972ed1f3576d795f69a11859b869f2bb645c3497d8ad08767432dace456a0ecad49fc7d2d7d9d61ad00812dd2f49bc100ffbb7a7f0d31210b2fdc22cc2fcb72e3bcba6c2ff061baf43b0e8f4fdf94ae289a067d6eba77104a71baf3506ca7a81ab5e729b98d02b5059ec1f2e429"
+ "sig": "08073424f034c595b5e18f0f1acf9b85d3aeb5e060fa225accedb340d0cf7723931f7b92e95876deaa48d702a21a36fc153fc61667572c231364f7bab9656612791b9025f55f8131655d17d001ceff97b769200e5d054449cc07099e3f895b58e1cb73912d940ac159b49afae53edbfe208c5e38df52e8dfe49d66e32e8df3a421e4e0b518bc723d5addbe5cacc4ee97a00e5dab3c2f6d46fb99213f04ec69e8bcf40c9a6f4edbe1ea4fc40546a713893ff3e1faba2e4d736dbf9ff044948495058225f89f11b2af1861e2acddecbb3fee2fe1ac1b1dbbd005501053bc60ce20875265bd786cb725519925ee9359999a97836d1e3d0539cf97eec809640d1fca"
 }
