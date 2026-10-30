@@ -59,6 +59,11 @@ a { color: var(--accent-ink); }
 .card h2 { font: 700 1.3rem var(--display); margin: 0 0 10px; }
 .card h3 { font: 700 1.05rem var(--display); margin: 14px 0 6px; }
 .dl { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+.two .opt { display: flex; flex-direction: column; gap: 6px; }
+.two .opt .btn { text-align: center; justify-content: center; min-height: 76px; }
+.two .opt .note { margin: 0; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
 .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 14px; text-decoration: none; cursor: pointer;
   font: 700 1.15rem var(--display); color: #fff3c4; background: linear-gradient(135deg, #6d3fd1, #3b1a7a);
   border: 2.5px solid var(--gold); box-shadow: 0 4px 0 #24104d; transition: transform .12s; }
@@ -187,18 +192,25 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     <p class="pitch"><b>Get paid for the shops you already browse.</b> Up to $50 a week, paid on PayPal.</p>
     <p>Run Club FM Watcher while you play. Every shop you open becomes a price on the site. Climb the ranks, clear the bar, and your whole balance pays out.</p>
     <div class="trust"><span>Free</span><span>Windows</span><span>Never touches your game</span><span>Pay starts at <b id="barn0">500</b> credits</span><span id="trial" hidden>Trial: real numbers, payouts start after</span><span id="wk" hidden></span></div>
-    <div class="jump"><a href="#download">Download</a><a href="#gatherer">Becoming an intel gatherer</a><a href="#earn">Earn</a><a href="#safety">Safe to run</a><a href="#setup">Setup</a></div>
+    <div class="jump"><a href="#download">Start scanning</a><a href="#gatherer">Becoming an intel gatherer</a><a href="#earn">Earn</a><a href="#safety">Safe to run</a><a href="#setup">Setup</a></div>
   </div>
 
   <div class="pair">
   <section class="card" id="download" aria-labelledby="dl-t">
-    <h2 id="dl-t">Download</h2>
-    <div class="dl">
-      <a class="btn" id="dlbtn" href="download/FMWatcher.zip" download>⬇ Club FM Watcher</a>
-      <div class="meta" id="dlmeta">Windows · free</div>
+    <h2 id="dl-t">Start scanning</h2>
+    <p class="note two-lead">Two ways, the same scanner: same readers, same results, same Earn credit. Pick either.</p>
+    <div class="two">
+      <div class="opt">
+        <a class="btn" id="dlbtn" href="download/FMWatcher.zip" download>⬇ FM Watcher</a>
+        <div class="meta" id="dlmeta">Windows · free</div>
+        <p class="note">Unzip it anywhere, like Documents. It updates itself.</p>
+      </div>
+      <div class="opt">
+        <a class="btn" href="/scan/">🌐 In your browser</a>
+        <div class="meta">Chrome or Edge · free · no download</div>
+        <p class="note">Pick the game window each time you start, and keep the tab open behind the game. Phones and Safari can't share a game window.</p>
+      </div>
     </div>
-    <p class="note">Unzip it anywhere, like Documents. It updates itself once installed.</p>
-    <p class="note"><b>No download?</b> <a href="/scan/">Scan in your browser</a> instead. Same readers, same Earn credit.</p>
   </section>
   <section class="card" id="setup" aria-labelledby="setup-t">
     <h2 id="setup-t">Setup, about five minutes</h2>
