@@ -32,7 +32,7 @@
 
   function boot() {
     if (w || !supported()) return;
-    w = new Worker("/scan/worker.js?v=2");
+    w = new Worker("/scan/worker.js?v=3");
     w.onmessage = function (e) {
       var m = e.data;
       if (m.type === "ready") { ready = true; hid = m.hid || ""; link(); who(); emit("ready", m); if (running) next(0); }
