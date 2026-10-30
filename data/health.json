@@ -1,5 +1,5 @@
 {
- "at": 1793372597396,
+ "at": 1793373397081,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -145,12 +145,12 @@
    "late7": 0,
    "chat24": 5,
    "last": 1793347993,
-   "ver": "2026.10.30.5",
+   "ver": "2026.10.30.6",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 1
+   "behind": 0
   },
   "Moch1": {
    "rows24": 284,
@@ -171,7 +171,7 @@
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 2462
+   "bad row: 3a3a": 2514
   }
  },
  "rejects": {},
