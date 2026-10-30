@@ -57,6 +57,18 @@ def main():
         m = led["who"].setdefault("Maya", {})
         for day, v in led["who"].pop(k).items():
             m[day] = [max(a, b) for a, b in zip(m.get(day, [0, 0, 0]), v)]   # the same scans logged under both names
+    # a linked scanner used to show as "Name-tag" when its account already had another scanner under Name;
+    # links.json (scanner tag -> account name) folds those days into Name, the same scans counted once
+    links = {}
+    if len(sys.argv) > 3:
+        try: links = {str(k)[:4]: v for k, v in json.load(open(sys.argv[3])).items() if isinstance(v, str) and not str(k).startswith("stream:")}
+        except Exception: links = {}
+    for k in list(led.get("who", {})):
+        base, _, tag = k.rpartition("-")
+        if base and links.get(tag, "").lower() == base.lower():
+            m = led["who"].setdefault(links[tag], {})
+            for day, v in led["who"].pop(k).items():
+                m[day] = [max(a, b) for a, b in zip(m.get(day, [0, 0, 0]), v)]
     for who, days in tally(data_dir).items():
         w = led["who"].setdefault(who, {})
         for day, c in days.items():

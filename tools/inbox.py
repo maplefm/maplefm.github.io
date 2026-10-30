@@ -68,11 +68,11 @@ def fetch_rows():
     return rows
 
 
-def clean_name(nm, sid):
+def clean_name(nm, sid, linked=False):
     nm = re.sub(r"[^A-Za-z0-9 _.\-]", "", str(nm or "")).strip()[:16]
     if not nm:
         return "Guest-" + sid[:4]
-    if nm.lower() in CREW:
+    if nm.lower() in CREW and not linked:     # a linked name was checked by the accounts service
         nm = nm + "-" + sid[:4]
     return nm
 
@@ -261,10 +261,14 @@ def publish(state):
     """The site's copy: one document per watcher, day and kind, with the watcher's name as who."""
     names, taken = {}, {}
     for sid in sorted(state.get("ids", {})):
-        nm = clean_name(LINKS.get(sid[:4]) or state["ids"][sid].get("nm"), sid)
-        if nm.lower() in taken and taken[nm.lower()] != sid:
+        linked = LINKS.get(sid[:4])
+        nm = clean_name(linked or state["ids"][sid].get("nm"), sid, bool(linked))
+        # two scanners can share a name only when both are linked to the same Discord account (FM Watcher and the
+        # browser scanner, or two PCs); any other clash gets the scanner's tag, so nobody shows under someone else's name
+        owner = "link:" + linked.lower() if linked else sid
+        if nm.lower() in taken and taken[nm.lower()] != owner:
             nm = nm[:11] + "-" + sid[:4]
-        taken[nm.lower()] = sid
+        taken.setdefault(nm.lower(), owner)
         names[sid] = nm
     # A shop with no room read gets one only when a scanner (itself included) placed the same seller on the same channel within
     # 6 hours in exactly one room. Marked ri (room inferred), so the site says "likely". Worked out each run from the
