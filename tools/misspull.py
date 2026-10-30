@@ -1,4 +1,5 @@
-"""Bring the watchers' unreadable pictures (popups and room titles they couldn't read) into the private archive.
+"""Bring the watchers' unreadable pictures (popups and room titles they couldn't read), and wrong price reports
+from item cards, into the private archive.
 
   python3 tools/misspull.py DATA_DIR
 
@@ -58,6 +59,22 @@ def main():
     idx["items"] = [x for x in idx["items"] if x["file"][:10] >= cut]
     json.dump(idx, open(ip, "w", encoding="utf-8"), indent=0)
     print("misspull:", got, "new")
+    wrong()
+
+
+def wrong():
+    """Wrong price reports from item cards: DATA_DIR/wrong.json, newest last, 30 days kept."""
+    wp = os.path.join(D, "wrong.json")
+    try: w = json.load(open(wp, encoding="utf-8"))
+    except Exception: w = {"after": 0, "items": []}
+    try: new = json.loads(get("/inbox/wrong?after=" + str(w.get("after", 0)))).get("items", [])
+    except Exception as e: print("wrong reports:", e); return
+    for r in new:
+        w["items"].append(r); w["after"] = max(w.get("after", 0), int(r.get("t", 0)))
+    cut = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).timestamp() * 1000
+    w["items"] = [r for r in w["items"] if r.get("t", 0) >= cut]
+    json.dump(w, open(wp, "w", encoding="utf-8"), indent=0)
+    print("wrong reports:", len(new), "new")
 
 
 if __name__ == "__main__":

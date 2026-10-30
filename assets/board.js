@@ -3461,6 +3461,35 @@
       var mk = ip.querySelector(".mkt"); ip.insertBefore(box, mk ? mk.nextSibling : (ip.children[1] || null));
     });
   }
+  // Report a wrong price: the item, what the card showed and an optional note go to our review inbox. No sign-in;
+  // 10 a day from one browser (the Worker holds the same limit per visitor).
+  function wrongLink(n, ip) {
+    var a = el("button", "wrongl", "Report a wrong price"); a.type = "button";
+    a.addEventListener("click", function () {
+      if (ip.querySelector(".wrongf")) return;
+      var i = D ? D.list.filter(function (x) { return x.item === n; })[0] : null;
+      var day = new Date().toISOString().slice(0, 10), used = loadLS("fm-wrong", {});
+      var box = el("div", "wrongf"); box.setAttribute("role", "group"); box.setAttribute("aria-label", "Report a wrong price");
+      box.appendChild(el("b", null, "What looks wrong?"));
+      var ta = document.createElement("textarea"); ta.maxLength = 300; ta.rows = 2; ta.placeholder = "Optional: what you think it sells for, or what's off"; box.appendChild(ta);
+      var row = el("div", "wrongb"), go = el("button", "pbtn", "Send"), no = el("button", "pbtn", "Cancel"); go.type = no.type = "button";
+      var msg = el("small", "wrongm"); row.appendChild(go); row.appendChild(no); row.appendChild(msg); box.appendChild(row);
+      no.addEventListener("click", function () { box.remove(); });
+      go.addEventListener("click", function () {
+        if ((used[day] || 0) >= 10) { msg.textContent = "That's 10 reports today from this browser. Thanks, try again tomorrow."; return; }
+        go.disabled = true; msg.textContent = "Sending…";
+        var body = { i: n, typ: i ? Math.round(i.typ || 0) : 0, best: i ? Math.round(i.best || 0) : 0, last3: i ? Math.round(i.last3 || 0) : 0, ls: i && i.lastSale ? Math.round(i.lastSale.u || 0) : 0, note: ta.value.slice(0, 300) };
+        fetch("https://api.maplefm.gg/wrongprice", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(body) }).then(function (r) {
+          if (r.status === 429) { msg.textContent = "That's 10 reports today. Thanks, try again tomorrow."; return; }
+          if (!r.ok) throw 0;
+          used = {}; used[day] = (loadLS("fm-wrong", {})[day] || 0) + 1; saveLSRaw("fm-wrong", JSON.stringify(used));
+          box.textContent = ""; box.appendChild(el("b", null, "Thanks, sent. We check every report."));
+        }).catch(function () { go.disabled = false; msg.textContent = "Couldn't send. Try again in a minute."; });
+      });
+      var foot = ip.querySelector(".ifoot"); ip.insertBefore(box, foot); ta.focus();
+    });
+    return a;
+  }
   var renderItemBody = renderItem0;
   renderItem0 = function () {
     renderItemBody();
@@ -3471,7 +3500,8 @@
     if (ITEMPAGES[n] && idOf(n)) fb.appendChild(fbtn("/item/" + itemSlug(n) + "/", "📈", "Full price history", "Charts, quests and drops"));
     fb.appendChild(fbtn("/market.html#new=" + encodeURIComponent(n), "🏷️", "Sell yours", "List it on maplefm.gg", "isell"));
     f.appendChild(fb);
-    var e = el("p", "iearn"); var ea = el("a", null, "Prices come from players scanning. Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea); f.appendChild(e);
+    var e = el("p", "iearn"); var ea = el("a", null, "Prices come from players scanning. Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea);
+    e.appendChild(document.createTextNode(" · ")); e.appendChild(wrongLink(n, ip)); f.appendChild(e);
     ip.appendChild(f);
     // members' own listings for this item: shown apart from the shop listings and never counted in the price
     mktLoad().then(function (L) {
