@@ -1,22 +1,18 @@
-// Club FM browser scanner page: shares the game window, hands frames to scan/worker.js (FM Watcher's own readers),
-// shows what it read, and sends listings up the same way FM Watcher does. Pictures never leave this browser.
+// Club FM browser scanner page: shares the game window and hands its frames to scan/worker.js, where FM Watcher
+// itself runs. Shows the watcher's own window (its log lines, deal alerts, tips, counts) and plays its sounds.
+// Pictures never leave this browser; the watcher sends listings up exactly as the download does.
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var API = window.FM_API || "https://api.maplefm.gg";
-  var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
-  var SEND_MS = 10 * 60e3, IDLE_MS = 30e3, MIN_GAP = 1000;
-  var w = null, stream = null, track = null, reader = null, video = null, canvas = null, ctx2 = null;
-  var running = false, busy = false, lastSend = 0, lastChange = 0, lastSig = "", hid = "", acct = null, typ = {};
-  var stat = { frames: 0, shops: 0, rows: 0, ms: [] };
+  var SEND_MS = 10 * 60e3, FAST = 120, SLOW = 1000;
+  var w = null, stream = null, track = null, reader = null, video = null;
+  var running = false, waiting = false, lastSend = 0, hid = "", acct = null, chan = null, ready = false;
+  var stat = { looks: 0, ms: [] };
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
   function num(n) { return Math.round(n).toLocaleString("en-US"); }
   function say(t, cls) { var s = $("status"); s.textContent = t; s.className = "status" + (cls ? " " + cls : ""); }
   function supported() { return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && typeof Worker !== "undefined" && typeof OffscreenCanvas !== "undefined"; }
-
-  // typical prices for the "under typical" column: the board's public summary
-  fetch(LIVE + "data/summary-public.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (sm) {
-    (sm && sm.rows || []).forEach(function (r) { if (r.typ > 0 && r.kind === "sale") typ[r.item.toLowerCase()] = r.typ; });
-  }).catch(function () {});
+  function onSite() { return /(^|\.)maplefm\.gg$/.test(location.hostname); }
 
   // signed in: this browser's scanner joins the account like a linked FM Watcher, so pay and ranks see one person
   fetch(API + "/me", { credentials: "include" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (me) {
@@ -26,41 +22,42 @@
     link(); who();
   }).catch(function () { $("who").textContent = "Scanning as a guest."; });
   function link() {
-    if (!/(^|\.)maplefm\.gg$/.test(location.hostname)) return;
-    if (!acct || !acct.code || !hid || ls("fm-scan-linked") === hid) return;
+    if (!onSite() || !acct || !acct.code || !hid || ls("fm-scan-linked") === hid) return;
     fetch(API + "/link", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: acct.code, hid: hid }) })
       .then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) ls("fm-scan-linked", hid); }).catch(function () {});
   }
+  function myName() { return (ls("fm-scan-name") || "").slice(0, 16); }
+  function who() { if (w && ready) w.postMessage({ type: "who", name: myName(), ign: acct && acct.ign || "" }); }
 
   function boot() {
     if (w) return;
-    w = new Worker("/scan/worker.js?v=1");
+    w = new Worker("/scan/worker.js?v=2");
     w.onmessage = function (e) {
       var m = e.data;
-      if (m.type === "ready") { hid = m.hid || ""; link(); who(); if (running) { say("Reading. Open shops in the Free Market as usual.", "ok"); loop(); } else say("Ready. Press Start and pick the MapleStory window.", "ok"); }
+      if (m.type === "ready") { ready = true; hid = m.hid || ""; link(); who(); say(running ? "Reading. Open shops in the Free Market as usual." : "Ready. Press Start and pick the MapleStory window.", "ok"); if (running) next(0); }
       if (m.type === "error") say("The reader didn't start: " + m.error + ". Try Chrome or Edge.", "no");
       if (m.type === "result") done(m);
-      if (m.type === "tick") loop();
+      if (m.type === "tick") look();
       if (m.type === "published" || m.type === "counts") show(m.counts);
     };
-    w.postMessage({ type: "init", api: API, dry: !/(^|\.)maplefm\.gg$/.test(location.hostname) });
-    say("Loading the reader, about 20 MB the first time…");
+    w.postMessage({ type: "init", api: API, dry: !onSite(), name: myName(), ign: acct && acct.ign || "" });
+    say("Loading the reader, about 25 MB the first time…");
   }
 
   async function start() {
     if (!supported()) { say("This browser can't share a window. Use Chrome, Edge or Firefox on a computer.", "no"); return; }
-    try { stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 5, displaySurface: "window" }, audio: false, selfBrowserSurface: "exclude", preferCurrentTab: false }); }
+    try { stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 10, displaySurface: "window", cursor: "always" }, audio: false, selfBrowserSurface: "exclude", preferCurrentTab: false }); }
     catch (e) { say("Nothing shared. Press Start and pick the MapleStory window.", ""); return; }
     track = stream.getVideoTracks()[0];
     track.addEventListener("ended", stop);
     // Chrome and Edge hand frames over directly, even while this tab is in the background; others draw a hidden video
     if (window.MediaStreamTrackProcessor) reader = new MediaStreamTrackProcessor({ track: track, maxBufferSize: 1 }).readable.getReader();
     else { video = document.createElement("video"); video.muted = true; video.playsInline = true; video.srcObject = stream; await video.play().catch(function () {}); }
-    running = true; lastChange = Date.now(); lastSend = Date.now();
+    running = true; lastSend = Date.now();
     $("start").hidden = true; $("stop").hidden = false;
     boot();
     say("Reading. Open shops in the Free Market as usual.", "ok");
-    if (hid) loop();
+    if (ready) next(0);
   }
   function stop() {
     if (!running) return;
@@ -72,83 +69,63 @@
     say("Stopped. Sending what you read…");
     send();
   }
-  function who() { if (w && hid) w.postMessage({ type: "who", name: (ls("fm-scan-name") || "").slice(0, 16), ign: acct && acct.ign || "" }); }
-  function send() { if (w) { lastSend = Date.now(); w.postMessage({ type: "publish", name: (ls("fm-scan-name") || "").slice(0, 16), ign: acct && acct.ign || "" }); } }
+  function send() { if (w && ready) { lastSend = Date.now(); w.postMessage({ type: "publish" }); } }
 
-  // one frame at a time: the next is taken only once the last is read, and never sooner than a second later
-  async function loop() {
-    if (!running || busy) return;
-    busy = true;
-    var job = null, fw = 0, fh = 0;
+  // one look at a time, at FM Watcher's pace: ten a second while a shop is open, once a second otherwise.
+  // The timer runs in the worker, so it keeps its pace while this tab sits behind the game.
+  function next(ms) { if (w) w.postMessage({ type: "wait", ms: ms }); }
+  async function look() {
+    if (!running || waiting) return;
+    waiting = true;
     try {
-      var bmp = null;
-      if (reader) { var r = await reader.read(); if (r.done) { busy = false; stop(); return; } bmp = r.value; fw = bmp.displayWidth; fh = bmp.displayHeight; }
-      else if (video && video.videoWidth) { bmp = video; fw = video.videoWidth; fh = video.videoHeight; }
-      if (bmp && fw) {
-        if (!canvas || canvas.width !== fw || canvas.height !== fh) { canvas = new OffscreenCanvas(fw, fh); ctx2 = canvas.getContext("2d", { willReadFrequently: true }); }
-        ctx2.drawImage(bmp, 0, 0);
-        if (reader) bmp.close();
-        // only the middle of the game goes to the reader, plus the top left corner for the room
-        // the middle 1040 pixels: the shop, its popups and the Change Channel window all open there
-        var x0 = Math.max(0, Math.round(fw / 2) - 528), x1 = Math.min(fw, Math.round(fw / 2) + 528);
-        var strip = ctx2.getImageData(x0, 0, x1 - x0, fh).data;
-        var sig = sample(strip);
-        // nothing there changed: skip the reading entirely
-        // a popup waiting for its second look is read again even when nothing on screen changed
-        if (sig !== lastSig || again) {
-          again = false;
-          lastSig = sig; lastChange = Date.now();
-          var room = fw >= 460 && fh >= 110 ? ctx2.getImageData(0, 0, 460, 110).data : null;   // minimap title and title bar, with room for a window border
-          job = { type: "frame", id: Date.now(), px: strip, w: x1 - x0, h: fh, x0: x0, fw: fw, room: room };
-        }
-      }
+      var f = null;
+      if (reader) { var r = await reader.read(); if (r.done) { waiting = false; stop(); return; } f = r.value; }
+      else if (video && video.videoWidth) f = await createImageBitmap(video);
+      if (f) { w.postMessage({ type: "frame", frame: f }, [f]); return; }   // waiting until the result
     } catch (e) {}
-    var idle = Date.now() - lastChange > IDLE_MS;
-    $("idle").style.visibility = idle ? "visible" : "hidden";
-    if (Date.now() - lastSend > SEND_MS) send();
-    if (job) { w.postMessage(job, [job.px.buffer].concat(job.room ? [job.room.buffer] : [])); return; }   // busy until the result
-    busy = false; later(idle ? 3000 : MIN_GAP);
-  }
-  // a timer from the worker side keeps its pace while this tab is in the background
-  function later(ms) { if (w) w.postMessage({ type: "wait", ms: ms }); }
-  function sample(d) {
-    var h = 0;
-    for (var i = 0; i < d.length; i += 4 * 97) h = (h * 31 + d[i] + d[i + 1] * 3 + d[i + 2] * 7) | 0;
-    return String(h);
+    waiting = false; next(SLOW);
   }
   function done(m) {
-    busy = false;
-    stat.frames++; stat.ms.push(m.ms); if (stat.ms.length > 50) stat.ms.shift();
+    waiting = false;
+    stat.looks++; stat.ms.push(m.ms); if (stat.ms.length > 50) stat.ms.shift();
     var o = m.out || {};
-    again = !!(o.tip && o.tip.wait);
-    if (o.ch_set || (o.channel && o.channel.n)) chan = o.ch_set || o.channel.n;
+    if (window.__outs) window.__outs.push(o);
     if (o.ch !== undefined) chan = o.ch;
+    if (o.channel) chan = o.channel;
     $("chnote").textContent = chan ? "Channel " + chan : "Channel not known yet: open the Change Channel window once (Esc, then Change Channel).";
     $("chnote").className = "small" + (chan ? "" : " warn");
-    if (o.shop && o.shop.rows) { stat.shops++; stat.rows += o.shop.rows.length; shopView(Object.assign({ ch: chan }, o.shop), o.tip); }
-    $("perf").textContent = "Last read " + Math.round(m.ms) + " ms";
-    // wait at least as long as the reading took, so the reader stays a small share of the computer
-    later(Math.max(MIN_GAP, m.ms * 3));
-    if (stat.frames % 5 === 1) w.postMessage({ type: "counts" });
+    (o.log || []).forEach(addLog);
+    (o.sound || []).forEach(beep);
+    if (o.error) addLog("error: " + o.error);
+    var avg = stat.ms.reduce(function (a, b) { return a + b; }, 0) / stat.ms.length;
+    $("perf").textContent = "Average look " + Math.round(avg) + " ms";
+    if (Date.now() - lastSend > SEND_MS) send();
+    if (stat.looks % 20 === 1) w.postMessage({ type: "counts" });
+    // never more than a third of the time reading, so the game keeps its frame rate
+    next(Math.max(o.busy ? FAST : SLOW, m.ms * 2));
   }
-  var lastView = "", chan = null, again = false;
-  function shopView(s, tip) {
-    var key = JSON.stringify([s.seller, s.room, s.ch, s.rows, tip && tip.stats && tip.stats._ok ? tip.item + JSON.stringify(tip.stats) : ""]);
-    if (key === lastView) return; lastView = key;
-    $("seller").textContent = s.seller + (s.room ? " · " + s.room : "") + (s.ch ? " ch " + s.ch : "");
-    var tb = $("rows"); tb.textContent = "";
-    s.rows.forEach(function (r) {
-      var tr = document.createElement("tr"), unit = r.p / Math.max(1, r.q), t = typ[r.i.toLowerCase()];
-      var off = t && unit < t ? Math.round((1 - unit / t) * 100) : 0;
-      [r.i + (r.q > 1 ? " ×" + r.q : ""), num(r.p), t ? num(t) : "", off >= 10 ? off + "% under" : "", r.so ? "Sold" : ""].forEach(function (v, i) {
-        var td = document.createElement("td"); td.textContent = v; if (i && i < 3) td.className = "n"; if (i === 3 && off >= 25) td.className = "deal"; tr.appendChild(td);
-      });
-      tb.appendChild(tr);
-    });
-    if (tip && tip.stats && tip.stats._ok) {
-      var st = Object.keys(tip.stats).filter(function (k) { return !/^_|_b$/.test(k); }).map(function (k) { return k + " " + tip.stats[k]; }).join(", ");
-      $("lasttip").textContent = "Stats read: " + tip.item + " " + st;
-    }
+  // the watcher's window: its own lines, newest at the bottom
+  var LOGN = 60;
+  function addLog(line) {
+    var box = $("log"), p = document.createElement("div");
+    p.textContent = line;
+    if (/ DEAL |^\S+ DEAL|deal/i.test(line)) p.className = "deal";
+    else if (/^\S+ (read |stats )/.test(line)) p.className = "ok";
+    var stick = box.scrollTop + box.clientHeight >= box.scrollHeight - 8;
+    box.appendChild(p);
+    while (box.childNodes.length > LOGN) box.removeChild(box.firstChild);
+    if (stick) box.scrollTop = box.scrollHeight;
+  }
+  // the watcher's sounds: a high blip for a popup read, a low one for a miss, two rising notes for a hover wanted
+  var AC = null;
+  function tone(f, ms, at) {
+    var o = AC.createOscillator(), g = AC.createGain(); o.frequency.value = f; g.gain.value = 0.06;
+    o.connect(g); g.connect(AC.destination); o.start(AC.currentTime + at); o.stop(AC.currentTime + at + ms / 1000);
+  }
+  function beep(kind) {
+    if (!$("sound").checked) return;
+    try { AC = AC || new AudioContext(); } catch (e) { return; }
+    if (kind === "ok") tone(1400, 70, 0); else if (kind === "miss") tone(500, 140, 0); else { tone(900, 60, 0); tone(1300, 90, 0.07); }
   }
   function show(c) {
     if (!c || !c.today) return;
@@ -157,8 +134,10 @@
     });
   }
 
-  $("name").value = ls("fm-scan-name") || "";
+  $("name").value = myName();
   $("name").addEventListener("change", function () { ls("fm-scan-name", $("name").value.trim().slice(0, 16)); who(); });
+  $("sound").checked = ls("fm-scan-sound") !== "0";
+  $("sound").addEventListener("change", function () { ls("fm-scan-sound", $("sound").checked ? "1" : "0"); });
   $("start").addEventListener("click", start);
   $("stop").addEventListener("click", stop);
   addEventListener("pagehide", function () { if (running && w) send(); });

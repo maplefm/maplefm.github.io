@@ -1,7 +1,7 @@
 {
- "version": "2026.10.30.5",
+ "version": "2026.10.30.7",
  "files": {
-  "fmparse.py": "f7a204a3bee3",
+  "fmparse.py": "12ad883bd9d0",
   "glyphs.py": "610c9f0239fc",
   "ocrlib.py": "e7a6c74d23ab",
   "tipexact.py": "8ac264bbf4ac",
@@ -12,8 +12,10 @@
   "tiers.png": "e401f89149c7",
   "statfit.json": "9809ccd4d8cd",
   "tipglyphs.json": "e32d7ca1b288",
-  "watcher.py": "2de590ebed5c",
-  "scanglue.py": "7b7606b0db27",
+  "watcher.py": "42c10d2bcd2f",
+  "boards.py": "da2c2295c4ca",
+  "reference.json": "df0dae63d305",
+  "scanglue.py": "4f8b7d8410e3",
   "cursor.json": "017a90f1f96b"
  }
 }

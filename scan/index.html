@@ -65,7 +65,11 @@ col.c1 { width: auto; } col.c2, col.c3 { width: 110px; } col.c4 { width: 90px; }
 td.n { text-align: right; font-variant-numeric: tabular-nums; }
 td.deal { color: var(--ok); font-weight: 800; }
 .tablewrap { overflow-x: auto; }
-#lastshop { min-height: 330px; } #rows { display: table-row-group; } .tablewrap { min-height: 240px; } #who, #chnote { min-height: 1.5em; } #lasttip, #perf { min-height: 1.4em; }
+#who, #chnote { min-height: 1.5em; } #perf { min-height: 1.4em; }
+.log { height: 300px; overflow-y: auto; margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: #120a24; color: #e9e2ff;
+  font: 500 .82rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.log .deal { color: #ffe27a; font-weight: 700; } .log .ok { color: #8ee6a8; } .log .dim { color: #a99bd0; }
+.chk { display: inline-flex; align-items: center; gap: 6px; }
 .clubfoot { color: #cbb9f0; } .clubfoot b { color: #fff3c4; } .clubfoot a { color: #e8dcff; }
 .warn { color: var(--no); font-weight: 800; }
 .idle { background: var(--panel2); border-radius: 10px; padding: 6px 10px; display: inline-block; font-size: .9rem; }
@@ -84,11 +88,11 @@ td.deal { color: var(--ok); font-weight: 800; }
       <button class="btn" id="start" type="button">Start scanning</button>
       <button class="btn alt" id="stop" type="button" hidden>Stop</button>
       <label>Scanner name <input id="name" maxlength="16" placeholder="Guest"></label>
+      <label class="chk"><input type="checkbox" id="sound" checked> Sounds</label>
     </div>
     <p class="status" id="status" role="status" aria-live="polite">Loading…</p>
     <p class="small" id="who">Checking sign-in…</p>
     <p class="small" id="chnote">Channel: open the Change Channel window once after you start.</p>
-    <p class="idle" id="idle" style="visibility:hidden">Paused: nothing on screen changed for 30 seconds. It picks up again on its own.</p>
     <ol>
       <li><b>Press Start</b> and pick the MapleStory window in the share list.</li>
       <li><b>Open shops</b> in the Free Market and scroll to the bottom, like with FM Watcher.</li>
@@ -100,11 +104,7 @@ td.deal { color: var(--ok); font-weight: 800; }
   <div class="card">
     <h2>What you've read</h2>
     <div class="counts"><b>This hour</b><span id="hour">Nothing yet</span><b>Today</b><span id="today">Nothing yet</span></div>
-    <div id="lastshop">
-      <h3 id="seller">No shop read yet</h3>
-      <div class="tablewrap"><table><colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"></colgroup><thead><tr><td>Item</td><td class="n">Price</td><td class="n">Typical</td><td></td><td></td></tr></thead><tbody id="rows"></tbody></table></div>
-      <p class="small" id="lasttip"></p>
-    </div>
+    <div class="log" id="log" aria-live="off"><div class="dim">The watcher's window: shops, popups read, deals and tips show here as they happen.</div></div>
     <p class="small" id="perf"></p>
   </div>
   <div class="card">
@@ -119,6 +119,6 @@ td.deal { color: var(--ok); font-weight: 800; }
     </ul>
   </div>
 </div>
-<script src="/scan/scan.js?v=1" defer></script>
+<script src="/scan/scan.js?v=2" defer></script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/items/class/">Items by class</a><a href="/guides/">Guides</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Quests and training</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body>
 </html>
