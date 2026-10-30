@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.3",
- "date": "2026-10-30T05:19:15+00:00",
- "notes": "Faster hovers: an open shop is no longer read again every second because the seller's character moves, and an item read exactly isn't read twice more. Saves a few whole-game pictures in a frames folder for testing other window sizes.",
- "sha256": "3c5faf8dbf05b5d1f109d084f2dc232b54348b39e2a2fbfde7f7f199bbb5f952",
- "size": 161653,
+ "version": "2026.10.30.4",
+ "date": "2026-10-30T05:47:46+00:00",
+ "notes": "Weapons with a Knockback Chance line now read exactly too.",
+ "sha256": "bd23a98ee13035a8f9a09ea26876c0b482aa708c8e2f162655c8f43f1a08f060",
+ "size": 161664,
  "history": [
+  {
+   "version": "2026.10.30.4",
+   "date": "2026-10-30",
+   "notes": "Weapons with a Knockback Chance line now read exactly too."
+  },
   {
    "version": "2026.10.30.3",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.24.6",
    "date": "2026-10-24",
    "notes": "FM Entrance reading: dark chalkboards (black, brown, purple) are read now, rolls like +2 or 65 watk are kept, (2) is read as how many they have, prices without a k are fixed, and a post read with one digit wrong (90K vs 30K) keeps the right one. Close your watcher and open start.bat to update."
-  },
-  {
-   "version": "2026.10.24.5",
-   "date": "2026-10-24",
-   "notes": "Scan stats: the watcher prints your last hour and today (new listings, shops, sales caught, listings per active hour) at the top of every hour, and stats.bat shows them any time."
   }
  ],
  "pip": [],
- "sig": "31d80d22707189ab57a363ab86031eac4c9b47943e96e3ad9634b421c2af893d232ab91307ae06308fecd3cd014edf08f6bd7e4bfd196f9b9933484fd648e9bbb7c8bebacaddf1c944df4048e7da9663faf9e0f5bda3c3d418169689ae2fa6e134d9de0367429a6237c888362013f5137c42c3d9493b9d6c644eeafaa6a74bb8b6dc3ca4982179f6c6e095dcbba0e5601d8c8b4ccbaa0cb61b6cfcf820927c5713565e9c5810f62b2e88820f45223fc4699e752fda5ef213295b8b156fcedae8b8e7305e22721ef4345407cf97ae7f8730cd84eb67fa918cb6aaa4cb85006c9e5818695bf4947ee5dbd6291ca6360d311d468fe2567abf30e6c58cb8aaca70c6"
+ "sig": "a90816a13aa1148c0b9faaff16d1fde456527faa006d62b55f9616ea20e9ea542b157a45b7fd10de96ee6eec6c960f344ef7732a8afc4a1fbcd94523c4b826a3e7edeba9e50cf8b1c9d1bef5fe7ad5d35773e0635ae5017075292f5cc6ad6e2ba8642a50fcf04a31299b5a81958853aee582b7fc5e67e348fd3223da8e0c9b4a8e36dc8f0b3a447de2495e3149e2b5acca4c2e006f71c7075092025b2d5a4fe6fb2aa664de63527d1f1910ac4a463ebf69b46f3b2b991b74ce1349d9c1cf8a10b4c4458298c1db8e3b6854a69a9c428633291c8a0839f6fb7ef3f8e399a53fd3aee76bd0cfc99242c6d4c4d453ce4d34e2e8562b46dbbeee62645e8f21a91b8f"
 }
