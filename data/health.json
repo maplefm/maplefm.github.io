@@ -1,12 +1,12 @@
 {
- "at": 1793477432055,
+ "at": 1793480971955,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.31.5",
+ "current": "2026.10.31.6",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.95,
    "late_share7": 0.022,
-   "behind": 15
+   "behind": 16
   },
   "Faif": {
    "rows24": 0,
@@ -118,20 +118,20 @@
    "room_rate24": 0.968,
    "room_rate7": 0.313,
    "late_share7": 0.015,
-   "behind": 1
+   "behind": 2
   },
   "laclac": {
-   "rows24": 11381,
-   "room24": 11172,
-   "ch24": 11308,
+   "rows24": 9396,
+   "room24": 9187,
+   "ch24": 9323,
    "rows7": 87772,
    "room7": 37853,
    "late7": 709,
-   "chat24": 24,
+   "chat24": 20,
    "last": 1793472742,
-   "ver": "2026.10.31.5",
+   "ver": "2026.10.31.6",
    "lag_median_min": 3.1,
-   "room_rate24": 0.982,
+   "room_rate24": 0.978,
    "room_rate7": 0.431,
    "late_share7": 0.008,
    "behind": 0
@@ -143,9 +143,9 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 34,
-   "last": 1793475522,
-   "ver": "2026.10.31.5",
+   "chat24": 28,
+   "last": 1793480277,
+   "ver": "2026.10.31.6",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
@@ -166,23 +166,23 @@
    "room_rate24": null,
    "room_rate7": 0.979,
    "late_share7": 0.0,
-   "behind": 8
+   "behind": 9
   },
   "Maya": {
-   "rows24": 157,
-   "room24": 157,
-   "ch24": 157,
+   "rows24": 0,
+   "room24": 0,
+   "ch24": 0,
    "rows7": 157,
    "room7": 157,
    "late7": 0,
-   "chat24": 54,
+   "chat24": 32,
    "last": 1793397535,
    "ver": "2026.10.30.7",
-   "lag_median_min": 1.9,
-   "room_rate24": 1.0,
+   "lag_median_min": null,
+   "room_rate24": null,
    "room_rate7": 1.0,
    "late_share7": 0.0,
-   "behind": 5
+   "behind": 6
   },
   "click": {
    "rows24": 0,
@@ -198,7 +198,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 5
+   "behind": 6
   },
   "smurp": {
    "rows24": 0,
@@ -214,7 +214,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 1
+   "behind": 2
   },
   "LocalBucket": {
    "rows24": 0,
@@ -230,7 +230,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 1
+   "behind": 2
   }
  },
  "drops": {
@@ -239,10 +239,12 @@
   },
   "2026-10-31": {
    "bad row: 3a3a": 10803,
-   "bad row: 3a3a (p zero)": 120,
-   "incomplete upload": 486
+   "bad row: 3a3a (p zero)": 720,
+   "incomplete upload": 516
   }
  },
  "rejects": {},
- "flags": []
+ "flags": [
+  "Zik: watcher 2026.10.31.4, 2 releases behind"
+ ]
 }
