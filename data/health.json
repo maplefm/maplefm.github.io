@@ -1,12 +1,12 @@
 {
- "at": 1793416447389,
+ "at": 1793419641179,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.30.7",
+ "current": "2026.10.31.1",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.955,
    "late_share7": 0.024,
-   "behind": 10
+   "behind": 11
   },
   "Faif": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": 0.954,
    "late_share7": 0.0,
-   "behind": 27
+   "behind": 28
   },
   "yinisera": {
    "rows24": 0,
@@ -102,22 +102,22 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.417,
-   "behind": 27
+   "behind": 28
   },
   "Zik": {
-   "rows24": 18580,
-   "room24": 17847,
-   "ch24": 18305,
-   "rows7": 97355,
-   "room7": 20658,
+   "rows24": 17793,
+   "room24": 17053,
+   "ch24": 17596,
+   "rows7": 98721,
+   "room7": 21939,
    "late7": 1714,
-   "chat24": 191,
-   "last": 1793416342,
-   "ver": "2026.10.30.7",
-   "lag_median_min": 6.2,
-   "room_rate24": 0.961,
-   "room_rate7": 0.212,
-   "late_share7": 0.018,
+   "chat24": 192,
+   "last": 1793418720,
+   "ver": "2026.10.31.1",
+   "lag_median_min": 5.6,
+   "room_rate24": 0.958,
+   "room_rate7": 0.222,
+   "late_share7": 0.017,
    "behind": 0
   },
   "laclac": {
@@ -134,7 +134,7 @@
    "room_rate24": 0.999,
    "room_rate7": 0.366,
    "late_share7": 0.009,
-   "behind": 0
+   "behind": 1
   },
   "DivineFeces": {
    "rows24": 0,
@@ -150,7 +150,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   },
   "Moch1": {
    "rows24": 284,
@@ -166,7 +166,7 @@
    "room_rate24": 0.979,
    "room_rate7": 0.979,
    "late_share7": 0.0,
-   "behind": 3
+   "behind": 4
   },
   "Maya": {
    "rows24": 157,
@@ -182,7 +182,7 @@
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": 1
   },
   "click": {
    "rows24": 0,
@@ -198,7 +198,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   },
   "smurp": {
    "rows24": 0,
@@ -214,7 +214,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   }
  },
  "drops": {
@@ -222,8 +222,8 @@
    "bad row: 3a3a": 4776
   },
   "2026-10-31": {
-   "bad row: 3a3a": 878,
-   "incomplete upload": 1
+   "bad row: 3a3a": 1154,
+   "incomplete upload": 3
   }
  },
  "rejects": {},
