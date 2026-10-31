@@ -42,7 +42,7 @@ def nav_html(active="", home=False):
     return ('<!--nav--><nav class="sitenav' + (' sn-home' if home else ' sn-pin') + '" aria-label="Club FM">'
             '<a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a>'
             + ('' if home else SEARCH) +
-            '<div class="sn-links">' + "".join(out) + '</div></nav>' + ('' if home else PIN_JS) + (play_html(active, sub) if active in SUB else '') + '<script src="/assets/hscroll.js?v=2" defer></script><!--/nav-->')
+            '<div class="sn-links">' + "".join(out) + '</div></nav>' + ('' if home else PIN_JS) + (play_html(active, sub) if active in SUB else '') + '<script src="/assets/hscroll.js?v=3" defer></script><!--/nav-->')
 
 
 FOOT_COLS = [
