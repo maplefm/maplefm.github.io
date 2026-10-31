@@ -320,11 +320,13 @@
     if (!searchItems.inner) QROLL = null;   // only the query typed last can ask for a roll
     // a roll typed with the item ("5 att wg", "work gloves +3 att") finds the item, then opens that roll's listings
     // the stat can be any word people use: att, attack, watk, matt, magic attack, str, dex, int, luk, wdef, acc...
-    var RW = "(magic attack|magic att|weapon attack|attack|att|watk|atk|w\\.?att|matt|matk|m\\.?att|str|dex|int|luk|w\\.?def|wdef|m\\.?def|mdef|acc|accuracy|avoid|speed|jump|hp|mp)";
+    var RW = "(crit damage|crit dmg|cdmg|crit rate|crit|magic attack|magic att|weapon attack|attack|att|watk|atk|w\\.?att|matt|matk|m\\.?att|str|dex|int|luk|w\\.?def|wdef|m\\.?def|mdef|acc|accuracy|avoid|speed|jump|hp|mp)";
     var rm = new RegExp("(^|\\s)\\+?(\\d{1,3})\\s*" + RW + "(?![a-z])").exec(ql) || new RegExp("(^|\\s)" + RW + "\\s*\\+?(\\d{1,3})(?![0-9%])").exec(ql);
+    var cm0 = /(^|\s)(clean|unscrolled|stock)(?=\s|$)/.exec(ql);
+    if (cm0) { var rest0 = ql.replace(cm0[0], " ").replace(/\s+/g, " ").trim(); if (rest0) { QROLL = { k: "CLEAN", v: 0, at: Date.now() }; ql = rest0; } }
     if (rm) {
       var rword = isNaN(rm[2]) ? rm[2] : rm[3], rv = +(isNaN(rm[2]) ? rm[3] : rm[2]);
-      var rk = /^(magic|matt|matk|m\.?att)/.test(rword) ? "MATT" : /^(att|attack|weapon|watk|atk|w\.?att)/.test(rword) ? "ATT" : /def/.test(rword) ? (/^m/.test(rword) ? "MDEF" : "WDEF") : rword === "accuracy" ? "ACC" : rword.toUpperCase();
+      var rk = /^(crit ?d|cdmg)/.test(rword) ? "CRITDMG" : /^crit/.test(rword) ? "CRIT" : /^(magic|matt|matk|m\.?att)/.test(rword) ? "MATT" : /^(att|attack|weapon|watk|atk|w\.?att)/.test(rword) ? "ATT" : /def/.test(rword) ? (/^m/.test(rword) ? "MDEF" : "WDEF") : rword === "accuracy" ? "ACC" : rword.toUpperCase();
       var rest = ql.replace(rm[0], " ").replace(/\s+/g, " ").trim();
       if (rest && rv > 0 && rv <= (/^(HP|MP)$/.test(rk) ? 300 : 40)) { QROLL = { k: rk, v: rv, at: Date.now() }; ql = rest; }
     }
@@ -1099,13 +1101,21 @@
       if (it.equip) {
         // Equips: only listings with their stats read, priced against their own roll's sales
         it.rd = [];
-        var rdSeen = {};
+        var rdSeen = {}, LG = ladderOf(it);
+        // the grade a listing falls in, when that grade's price rests on sales: deals are judged against it, the same
+        // price the card shows; otherwise against the listing's exact roll
+        var gradeRef = function (x) {
+          if (!LG) return null; var hit = null;
+          LG.stats.some(function (k) { return LG.views[k].some(function (g) { if (g.basis === "sold" && g.asks.indexOf(x) >= 0) { hit = g; return true; } return false; }); });
+          if (!hit) return null; var w = {}; hit.use.forEach(function (l) { if (l.who) w[l.who] = 1; });
+          return { typ: hit.mid, n: hit.use.length, who: Object.keys(w), name: hit.name };
+        };
         still.forEach(function (x) {
           if (!x.x || x.chat || !rollKeyOk(it.item, x)) return;
           if (!trusted(x.who)) return;                        // stats uploaded by a fresh watcher id prove nothing yet
           var g = rollOf(it.item, x); if (g == null) return;
           var su = slotsUsed(it.item, x); if (su == null) return;
-          var rt = it.rollTyp[rollKey(it.item, x, su)]; if (!rt) return;
+          var rt = gradeRef(x) || it.rollTyp[rollKey(it.item, x, su)]; if (!rt) return;
           var off = 1 - x.u / rt.typ;
           if (off < 0.15 || off > 0.85 || rt.typ - x.u < 100) return;
           if (x.who && String(x.who).toLowerCase() === String(x.s).toLowerCase()) return;   // a seller's own watcher vouching for the seller's own roll
@@ -1113,7 +1123,7 @@
           if (it.sales.some(function (y) { return y.s === x.s && y.u === x.u && y.t >= x.t - 6e4; })) return;
           var dk = x.s + "|" + x.u + "|" + g; if (rdSeen[dk]) return; rdSeen[dk] = 1;
           var ks = keyStat(it.item, x.x, x.xj);
-          it.rd.push({ s: x.s, p: x.u, q: x.q || 1, g: g, k: ks, v: ks && x.x[ks] != null ? x.x[ks] : null, slots: x.x.SLOTS != null ? x.x.SLOTS : null, used: su, typ: rt.typ, n: rt.n, who: rt.who, by: x.who || "", t: x.t, r: x.r || "", c: x.c || 0, off: off, l: x });
+          it.rd.push({ s: x.s, p: x.u, q: x.q || 1, g: g, k: ks, v: ks && x.x[ks] != null ? x.x[ks] : null, slots: x.x.SLOTS != null ? x.x.SLOTS : null, used: su, typ: rt.typ, n: rt.n, who: rt.who, grade: rt.name || "", by: x.who || "", t: x.t, r: x.r || "", c: x.c || 0, off: off, l: x });
         });
         it.rd.sort(function (a, b) { return b.off - a.off; });
         it.deal = it.rd.length ? it.rd[0].off : -1;
@@ -1695,7 +1705,11 @@
       tr.appendChild(tc);
       var cc = el("td", "c"); cc.appendChild(pctPill(i.mv[0])); tr.appendChild(cc);
       var bc = el("td", "c col-src clubonly");
-      if (i.bestL) { var sp = el("span", "srcp" + (i.deal >= 0.25 ? " deal" : "")); sp.appendChild(coin()); sp.appendChild(document.createTextNode(short(i.best))); if (i.deal >= 0.25) sp.appendChild(el("small", null, "−" + Math.round(i.deal * 100) + "%")); sp.title = i.bestL.s + (where(i.bestL) ? ", " + where(i.bestL) : "") + ", " + ago(i.bestL.t); bc.appendChild(sp); }
+      // equips showing a grade price: the cheapest copy of that same grade, and how far under the grade it sits
+      var LB = LT && (LT.okAsks || LT.asks).filter(function (x) { return x.st !== "gone" && x.st !== "sold"; })[0];
+      if (LB) { var lsp = el("span", "srcp"), loff = 1 - LB.u / LT.mid; if (loff >= 0.25) lsp.classList.add("deal"); lsp.appendChild(coin()); lsp.appendChild(document.createTextNode(short(LB.u))); if (loff >= 0.25) lsp.appendChild(el("small", null, "−" + Math.round(loff * 100) + "%")); lsp.title = LT.name + " · " + LB.s + (where(LB) ? ", " + where(LB) : "") + ", " + ago(LB.t); bc.appendChild(lsp); }
+      else if (LT) bc.appendChild(el("span", "srcp none", "No " + LT.name.toLowerCase().replace(/ (att|matt|str|dex|int|luk)\b/gi, function (z) { return z.toUpperCase(); }) + " up"));
+      else if (i.bestL) { var sp = el("span", "srcp" + (i.deal >= 0.25 ? " deal" : "")); sp.appendChild(coin()); sp.appendChild(document.createTextNode(short(i.best))); if (i.deal >= 0.25) sp.appendChild(el("small", null, "−" + Math.round(i.deal * 100) + "%")); sp.title = i.bestL.s + (where(i.bestL) ? ", " + where(i.bestL) : "") + ", " + ago(i.bestL.t); bc.appendChild(sp); }
       else bc.appendChild(el("span", "srcp none", "Not on sale now"));
       tr.appendChild(bc);
       var trc = el("td", "c col-trend"); if (i.daily.length >= 3) trc.appendChild(spark(i.daily)); else trc.appendChild(el("span", "tfd", "Too few days")); tr.appendChild(trc);
@@ -2509,64 +2523,115 @@
   // no gain, then +1, +2... on the item's key stat (the stat its scrolled copies most often gained), at most 5 grades.
   // Only hovers that pass the roll checks count (rollKeyOk, slots read). A grade with 3+ sales in the board's window
   // shows the middle of its sales; otherwise its asking prices, labeled as asking.
-  var LADMIN = 3, LADSEL = {};
+  var LADMIN = 2, LADSEL = {}, LADSTAT = {};
+  var CRITK = { CRIT: 1, CRITDMG: 1 };
+  function ladName(k) { return k === "TOTAL" ? "stats" : k === "CRIT" ? "crit rate" : k === "CRITDMG" ? "crit damage" : STATABBR[k] || k; }
   function ladderOf(i) {
     if (!i || !i.equip) return null;
-    var stamp = (i.buy || []).length + "|" + i.sales.length + "|" + (D.L ? D.L.length : 0);
+    var stamp = (i.buy || []).length + "|" + i.sales.length + "|" + (D && D.L ? D.L.length : 0);
     if (i._lad && i._lad.at === stamp) return i._lad;
-    var n = i.item, trusted = function (l) { return l.x && !l.chat && rollKeyOk(n, l) && slotsUsed(n, l) != null && rollPick(n, l); };
-    var seenA = {}, asks = (i.buy || []).filter(function (x) { if (x.st === "gone" || x.st === "sold" || !trusted(x)) return false; var k = x.s + "|" + x.u + "|" + (x.x.SLOTS || "") + "|" + (rollPick(n, x).combo || ""); if (seenA[k]) return false; seenA[k] = 1; return true; });
-    var sold = i.sales.filter(trusted), all = sold.map(function (l) { return [l, 1]; }).concat(asks.map(function (l) { return [l, 0]; }));
-    var kc = {};
-    all.forEach(function (a) { var p = rollPick(n, a[0]); if (slotsUsed(n, a[0]) > 0 && p.g > 0 && p.k) kc[p.k] = (kc[p.k] || 0) + 1; });
-    // weapons and gloves are bought by attack; other equips by the stat their scrolled copies most often gained
-    var fixed = isWeapon(n) || subKind(n) === "Glove" ? keyStat(n, null) : null;
-    var key = fixed || Object.keys(kc).sort(function (a, b) { return kc[b] - kc[a]; })[0] || keyStat(n, null) || "ATT";
-    var G = {};
-    function put(id, a) { var g = G[id] || (G[id] = { id: id, sold: [], asks: [] }); g[a[1] ? "sold" : "asks"].push(a[0]); }
+    var n = i.item, wep = isWeapon(n), wk = wep ? keyStat(n, null) : null, base = fullBase(n).s;
+    // a copy counts only when its popup was read well: the roll checks pass, its slots were read, and its stats fit
+    // what the game allows (a drop moves a stat at most 5 off base; scrolls add only what their slots could)
+    var ok = function (l) {
+      if (!l.x || l.chat || !rollKeyOk(n, l) || slotsUsed(n, l) == null || !rollPick(n, l)) return false;
+      var sp = scrollSplit(n, l); if (sp && sp.ok === false) return false;
+      if (wep && (l.x[wk] == null || !(base[wk] > 0))) return false;
+      return true;
+    };
+    var seenA = {}, asks = (i.buy || []).filter(function (x) { if (x.st === "gone" || x.st === "sold" || !ok(x)) return false; var k = x.s + "|" + x.u + "|" + x.x.SLOTS + "|" + (rollPick(n, x).combo || "") + "|" + (wep ? x.x[wk] : ""); if (seenA[k]) return false; seenA[k] = 1; return true; });
+    var sold = i.sales.filter(ok), all = sold.map(function (l) { return [l, 1]; }).concat(asks.map(function (l) { return [l, 0]; }));
+    var scrollable = null; (SCROLLS[subKind(n)] || []).forEach(function (ln) { ln[1].forEach(function (g) { Object.keys(g[1] || {}).forEach(function (k) { if (g[1][k] > 0) (scrollable || (scrollable = {}))[k] = 1; }); }); });
+    var G = {}, order = [];
+    function put(id, a, name, sortv) { var g = G[id]; if (!g) { g = G[id] = { id: id, name: name, sv: sortv, sold: [], asks: [] }; order.push(g); } g[a[1] ? "sold" : "asks"].push(a[0]); }
+    var statN = {};
     all.forEach(function (a) {
-      var l = a[0], su = slotsUsed(n, l), p = rollPick(n, l);
-      if (su === 0) { var pos = (p.combo || "").split(".").filter(function (c) { return /\+\d/.test(c); }).join("."); put(pos ? "C|" + pos : "C|", a); }
-      else if (p.g <= 0) put("S|0", a);
-      else if (p.k === key) put("S|" + p.g, a);
+      var l = a[0], su = slotsUsed(n, l), p = rollPick(n, l), mv = p.mv || {};
+      if (wep) {
+        // weapons go by their attack number, the way players quote them: clean ones by their own roll, then scrolled
+        var v = l.x[wk];
+        if (su === 0) put("WC|" + v, a, "Clean " + v + " " + ladName(wk), v); else put("WS|" + v, a, "Scrolled " + v + " " + ladName(wk), 1000 + v);
+        return;
+      }
+      var up = Object.keys(mv).filter(function (k) { return mv[k] > 0; });
+      if (su === 0) {
+        // clean: plain, or a natural roll above base on a stat buyers pay for (crit on gloves and earrings first)
+        if (!up.length) put("C|", a, "Clean", 0);
+        else { var key = up.sort().map(function (k) { return k + "+" + mv[k]; }).join("."); put("C|" + key, a, "Clean, " + up.map(function (k) { return "+" + mv[k] + " " + ladName(k); }).join(" "), up.some(function (k) { return CRITK[k]; }) ? 0.5 : 0.7); }
+        return;
+      }
+      if (!up.length) { put("S|0", a, "Slots used, no gain", 1); return; }
+      // scrolled: one grade per stat it gained, so a hat with +3 INT shows under INT and one with +3 DEX under DEX
+      // only stats a scroll for this slot can add get a ladder (the game's scroll table); a glove's natural +1 crit
+      // isn't a scroll job, so it stays with the copy's attack grade
+      var sk = up.filter(function (k) { return !scrollable || scrollable[k]; }); if (!sk.length) sk = up;
+      // stats are offered in order of how much money trades on them (gloves: attack before crit)
+      sk.forEach(function (k) { statN[k] = (statN[k] || 0) + l.u * (a[1] ? 1 : 0.3); put("S|" + k + "|" + mv[k], a, "+" + mv[k] + " " + ladName(k), 10 + mv[k]); });
     });
-    // clean: plain first, then the busiest good natural roll; scrolled: no gain, then +1, +2... merged at the top into
-    // "+N or more" until there are at most 5 grades; grades with nothing at all are left out
-    var busy = function (g) { return g.sold.length * 4 + g.asks.length; };
-    var clean = Object.keys(G).filter(function (k) { return k.indexOf("C|") === 0 && k !== "C|"; }).map(function (k) { return G[k]; }).sort(function (a, b) { return busy(b) - busy(a); });
-    var out = []; if (G["C|"]) out.push(G["C|"]); if (clean[0] && busy(clean[0]) >= 2) out.push(clean[0]);
-    if (G["S|0"]) out.push(G["S|0"]);
-    var lv = Object.keys(G).filter(function (k) { return /^S\|[1-9]/.test(k); }).map(function (k) { return +k.slice(2); }).sort(function (a, b) { return a - b; });
-    var room = 5 - out.length, ups = lv.map(function (v) { var g = G["S|" + v]; return { id: "S|" + v, v: v, sold: g.sold.slice(), asks: g.asks.slice() }; });
-    while (ups.length > room && ups.length > 1) { var t = ups.pop(), u = ups[ups.length - 1]; u.sold = u.sold.concat(t.sold); u.asks = u.asks.concat(t.asks); u.plus = 1; }
-    if (room <= 0 && ups.length) { var m0 = ups[0]; ups.slice(1).forEach(function (t) { m0.sold = m0.sold.concat(t.sold); m0.asks = m0.asks.concat(t.asks); }); m0.plus = 1; ups = [m0]; out.pop(); }
-    out = out.concat(ups);
-    var ab = STATABBR[key] || key; if (key === "TOTAL") ab = "stats";
     var q = function (v, f) { v = v.slice().sort(function (a, b) { return a - b; }); var x = (v.length - 1) * f, lo = Math.floor(x), hi = Math.min(lo + 1, v.length - 1); return v[lo] + (v[hi] - v[lo]) * (x - lo); };
-    out.forEach(function (g) {
-      if (g.id === "C|") g.name = "Clean";
-      else if (g.id.indexOf("C|") === 0) g.name = "Clean, " + g.id.slice(2).split(".").map(function (c) { var m = /^([A-Z]+)\+(\d+)$/.exec(c); return m ? "+" + m[2] + " " + (STATABBR[m[1]] || m[1]).toLowerCase().replace(/^(att|matt|str|dex|int|luk|hp|mp)$/, function (z) { return z.toUpperCase(); }) : c; }).join(" ");
-      else if (g.id === "S|0") g.name = "Slots used, no gain";
-      else g.name = "+" + g.id.slice(2) + " " + ab + (g.plus ? " or more" : "");
+    function finish(g) {
       g.sold.sort(function (a, b) { return b.t - a.t; }); g.asks.sort(function (a, b) { return a.u - b.u; });
-      var su = g.sold.map(function (l) { return l.u; }), au = g.asks.map(function (l) { return l.u; });
+      // one sale per seller, price and grade every 10 minutes (a shop selling a stack, or two scanners seeing one sale)
+      var once = {}; g.uniq = g.sold.filter(function (l) { var k = l.s + "|" + l.u + "|" + Math.floor(l.t / 6e5); if (once[k]) return false; once[k] = 1; return true; });
+      // a sale 4 times above or below the grade's middle is set aside (a misread line or a one-off), listed on request
+      var m0 = g.uniq.length >= 3 ? q(g.uniq.map(function (l) { return l.u; }), 0.5) : null;
+      g.odd = m0 ? g.uniq.filter(function (l) { return l.u > m0 * 4 || l.u < m0 / 4; }) : [];
+      g.use = g.uniq.filter(function (l) { return g.odd.indexOf(l) < 0; });
+      var su = g.use.map(function (l) { return l.u; }), au = g.asks.map(function (l) { return l.u; });
       if (su.length >= LADMIN) { g.basis = "sold"; g.lo = q(su, 0.25); g.hi = q(su, 0.75); g.mid = q(su, 0.5); }
-      else if (au.length >= 2) { g.basis = "asking"; g.lo = q(au, 0.25); g.hi = q(au, 0.75); g.mid = q(au, 0.5); }
-      else if (su.length || au.length) { g.basis = "few"; g.mid = (su.length ? su : au)[0]; }
-      else g.basis = "none";
-    });
-    var top = out.filter(function (g) { return g.basis === "sold"; }).sort(function (a, b) { return b.sold.length - a.sold.length; })[0] ||
-      out.filter(function (g) { return g.basis !== "none"; }).sort(function (a, b) { return busy(b) - busy(a); })[0] || null;
-    return (i._lad = { at: stamp, key: key, grades: out, top: top });
+      else if (au.length >= LADMIN) { g.basis = "asking"; g.lo = q(au, 0.25); g.hi = q(au, 0.75); g.mid = q(au, 0.5); }
+      else { g.basis = su.length || au.length ? "few" : "none"; g.mid = null; }
+      // listings 4 times off a grade priced from sales are set aside the same way (a misread price or roll, a troll ask)
+      g.oddA = g.basis === "sold" ? g.asks.filter(function (l) { return l.u > g.mid * 4 || l.u < g.mid / 4; }) : [];
+      g.okAsks = g.asks.filter(function (l) { return g.oddA.indexOf(l) < 0; });
+      return g;
+    }
+    // merge the thin ends of a run of numbered grades ("27 ATT or less", "+4 LUK or more") so a row stays short
+    function squeeze(list, max, lowEnd) {
+      list = list.slice().sort(function (a, b) { return a.sv - b.sv; }).map(function (g) { return { id: g.id, sv: g.sv, base: g.name, sold: g.sold.slice(), asks: g.asks.slice(), lo: false, hi: false }; });
+      var busy = function (g) { return g.sold.length * 3 + g.asks.length; };
+      while (list.length > max) {
+        if (lowEnd && busy(list[0]) <= busy(list[list.length - 1])) { var t = list.shift(), f = list[0]; f.sold = f.sold.concat(t.sold); f.asks = f.asks.concat(t.asks); f.lo = true; }
+        else { var t2 = list.pop(), l2 = list[list.length - 1]; l2.sold = l2.sold.concat(t2.sold); l2.asks = l2.asks.concat(t2.asks); l2.hi = true; }
+      }
+      list.forEach(function (g) { g.name = g.base + (g.lo ? " or less" : g.hi ? " or more" : ""); if (g.lo) g.id += "-"; if (g.hi) g.id += "+"; });
+      return list;
+    }
+    var clean = order.filter(function (g) { return /^C\|/.test(g.id); }), nogain = G["S|0"] || null, views = {}, stats = [];
+    var cleanShow = [];
+    if (G["C|"]) cleanShow.push(G["C|"]);
+    // good natural rolls: every one with 2+ copies, crit first; gloves with +1 crit rate and earrings with crit damage
+    // are their own markets
+    clean.filter(function (g) { return g.id !== "C|" && g.sold.length + g.asks.length >= 2; }).sort(function (a, b) { return a.sv - b.sv || (b.sold.length * 3 + b.asks.length) - (a.sold.length * 3 + a.asks.length); }).slice(0, 3).forEach(function (g) { cleanShow.push(g); });
+    if (wep) {
+      var wc = squeeze(order.filter(function (g) { return /^WC\|/.test(g.id); }), 4, true), ws = squeeze(order.filter(function (g) { return /^WS\|/.test(g.id); }), 3, false);
+      views[wk] = wc.concat(ws); stats = [wk];
+    } else {
+      stats = Object.keys(statN).sort(function (a, b) { return statN[b] - statN[a]; });
+      if (!stats.length) stats = [keyStat(n, null) || "ATT"];
+      stats.forEach(function (k) {
+        var lv = squeeze(order.filter(function (g) { return g.id.indexOf("S|" + k + "|") === 0; }), 3, false);
+        views[k] = cleanShow.concat(nogain ? [nogain] : []).concat(lv);
+      });
+    }
+    var seen = [];
+    Object.keys(views).forEach(function (k) { views[k].forEach(function (g) { if (seen.indexOf(g) < 0) { finish(g); seen.push(g); } }); });
+    var top = seen.filter(function (g) { return g.basis === "sold"; }).sort(function (a, b) { return b.use.length - a.use.length; })[0] ||
+      seen.filter(function (g) { return g.basis !== "none" && g.basis !== "few"; }).sort(function (a, b) { return b.asks.length - a.asks.length; })[0] || null;
+    var pick = stats[0];
+    if (top) stats.some(function (k) { if (views[k].indexOf(top) >= 0) { pick = k; return true; } return false; });
+    return (i._lad = { at: stamp, wep: wep, key: wk || stats[0], stats: stats, views: views, pick: pick, top: top, grades: views[pick] || [] });
   }
   // the small colored tag naming a copy's grade; the color follows the grade's place on the ladder
-  function gradeTag(L, g) { var k = L.grades.indexOf(g), t = el("span", "lgt g" + Math.max(0, k), g.name); t.title = "Grade on the price ladder"; return t; }
+  function gradeTag(L, g) { var k = -1; L.stats.some(function (s0) { k = L.views[s0].indexOf(g); return k >= 0; }); var t = el("span", "lgt g" + Math.min(4, Math.max(0, k)), g.name); t.title = "Grade on the price ladder"; return t; }
   // which grade a listing or sale falls in, for the small tag next to it (null when its stats weren't read well)
   function gradeOf(i, l) {
     var L = ladderOf(i); if (!L || !l || !l.x) return null;
-    for (var k = 0; k < L.grades.length; k++) { var g = L.grades[k]; if (g.sold.indexOf(l) >= 0 || g.asks.indexOf(l) >= 0) return g; }
+    var vk = LADSTAT[i.item] && L.views[LADSTAT[i.item]] ? LADSTAT[i.item] : L.pick, order = [vk].concat(L.stats.filter(function (k) { return k !== vk; }));
+    for (var j = 0; j < order.length; j++) { var gs = L.views[order[j]]; for (var k = 0; k < gs.length; k++) { var g = gs[k]; if (g.sold.indexOf(l) >= 0 || g.asks.indexOf(l) >= 0) return g; } }
     return null;
   }
+
   function slotsUsed(name, l) {
     var x = l && l.x; if (!x || x.SLOTS == null) return null;
     var b = fullBase(name).s.SLOTS; if (!b || x.SLOTS > b) return null;
@@ -2757,7 +2822,11 @@
   function pick(name, nav) {
     earnNudge(1);
     var was = cardOpen(), h = "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "");
-    PENDROLL = QROLL && Date.now() - QROLL.at < 15000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;
+    // the roll typed with the item ("wg 4 att") can be cleared by a board refresh between typing and opening: read it
+    // again from the search box when that search still names this item
+    if (!QROLL && $("q") && $("q").value) { searchItems.inner = true; try { var rq0 = searchItems($("q").value, 1); if (!rq0.length || rq0[0].n !== name) QROLL = null; } finally { searchItems.inner = false; } }
+    PENDROLL = QROLL && Date.now() - QROLL.at < 60000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;   // a slow phone can take a while between typing and the card
+    if (PENDROLL) window.__ladroll = { n: PENDROLL.n, k: PENDROLL.k, v: PENDROLL.v, at: Date.now() };   // the price ladder's own copy, kept until its card shows
     if (PENDROLL) STATOPEN = name;
     state.sel = name; state.list = "buy"; hideHov();
     // opening from the board adds a history step, so the browser's back button (or a phone's back gesture) closes
@@ -3356,10 +3425,27 @@
     if (i.hi > i.lo) svg.appendChild(svgEl("rect", { x: pl, y: Y(i.hi), width: W - pl - pr, height: Math.max(2, Y(i.lo) - Y(i.hi)), fill: "rgba(124,77,230,.13)" }));
     pts.forEach(function (p) { svg.appendChild(p[2] ? svgEl("circle", { cx: X(p[0]), cy: Y(p[1]), r: 3.2, fill: "var(--orange)", "fill-opacity": ".6" }) : svgEl("circle", { cx: X(p[0]), cy: Y(p[1]), r: 3.2, fill: "none", stroke: "var(--wood)", "stroke-width": "1.3", "stroke-opacity": ".8" })); });
     if (dl.length >= 2) svg.appendChild(svgEl("polyline", { points: dl.map(function (d) { return X(Math.min(t1, Math.max(t0, d[0] + DAY / 2))).toFixed(1) + "," + Y(d[1]).toFixed(1); }).join(" "), fill: "none", stroke: "var(--orange-lo)", "stroke-width": "2.4", "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    // equips with a ladder: the Clean grade's daily middle (green) and the grade picked on the card (blue), so the
+    // chart reads the same way as the buttons
+    var LC = i.equip ? ladderOf(i) : null, glines = [];
+    if (LC && LC.top) {
+      var gv = LC.views[LADSTAT[i.item] && LC.views[LADSTAT[i.item]] ? LADSTAT[i.item] : LC.pick] || [], gsel = LADSEL[i.item + "|" + (LADSTAT[i.item] || LC.pick)];
+      var gc = gv.filter(function (g) { return /^Clean( \d+ (M?ATT))?$/.test(g.name) && g.basis === "sold"; }).sort(function (a, b) { return b.use.length - a.use.length; })[0] || LC.top;
+      var gs = gv.filter(function (g) { return g.id === gsel; })[0];
+      [[gc, "#1f9d55"], [gs && gs !== gc ? gs : null, "#2f6fe0"]].forEach(function (pair) {
+        var g = pair[0]; if (!g || !g.use || g.use.length < 2) return;
+        var by = {}; g.use.forEach(function (l) { var d = new Date(l.t).toDateString(); (by[d] || (by[d] = [])).push(l.u); });
+        var line = Object.keys(by).map(function (d) { return [Date.parse(d), median(by[d])]; }).sort(function (a, b) { return a[0] - b[0]; });
+        if (line.length >= 2) { svg.appendChild(svgEl("polyline", { points: line.map(function (d) { return X(Math.min(t1, Math.max(t0, d[0] + DAY / 2))).toFixed(1) + "," + Y(d[1]).toFixed(1); }).join(" "), fill: "none", stroke: pair[1], "stroke-width": "2.4", "stroke-linejoin": "round", "stroke-linecap": "round" })); glines.push([g.name, pair[1]]); }
+        else if (line.length === 1) { svg.appendChild(svgEl("circle", { cx: X(line[0][0] + DAY / 2), cy: Y(line[0][1]), r: 5, fill: pair[1] })); glines.push([g.name, pair[1]]); }
+      });
+    }
     var multi = t1 - t0 > 1.5 * DAY;
     [t0, (t0 + t1) / 2, t1].forEach(function (t, k) { svg.appendChild(txt(k === 0 ? pl : k === 1 ? (pl + W - pr) / 2 : W - pr, Hh - 6, new Date(t).toLocaleString("en-US", multi ? { month: "short", day: "numeric" } : { hour: "numeric", minute: "2-digit" }), { "text-anchor": k === 0 ? "start" : k === 1 ? "middle" : "end" })); });
     var box = el("div", "subw bchartw"), hd = el("h4"); hd.appendChild(document.createTextNode("Price over time"));
-    hd.appendChild(el("small", null, pts.length ? "dots: sales and asks · line: typical by day" : "typical price by day")); box.appendChild(hd); box.appendChild(svg);
+    var sm0 = el("small", null, pts.length ? "dots: sales and asks · line: typical by day" : "typical price by day");
+    glines.forEach(function (gl) { var k0 = el("span", "glk"); k0.style.color = gl[1]; k0.textContent = " · " + gl[0]; sm0.appendChild(k0); });
+    hd.appendChild(sm0); box.appendChild(hd); box.appendChild(svg);
     return box;
   }
 
@@ -3369,74 +3455,108 @@
     var w = $("side") && $("side").querySelector(".wtitle"); if (!w) return;
     if (nbIO) { nbIO.disconnect(); nbIO = null; }
     var old = w.querySelector(".nbar"); if (old) old.remove();
-    var hd = i && $("ip").querySelector(".big");
+    var hd = i && $("ip").querySelector(".big, .gladder");
     if (!hd || !window.IntersectionObserver) { w.classList.remove("named"); return; }
     var nb = el("div", "nbar"); nb.setAttribute("aria-hidden", "true");
     nb.appendChild(iconBox(i.item)); var t = el("div", "nbt"); t.appendChild(el("b", null, showName(i.item)));
-    t.appendChild(el("small", null, "typical " + short(i.typ) + (i.salesN ? " · " + fmt(i.salesN) + " sales" : ""))); nb.appendChild(t);
+    var NL = i.equip && ladderOf(i), NT = NL && NL.top && NL.top.basis === "sold" ? NL.top : null;
+    t.appendChild(el("small", null, (NT ? NT.name.toLowerCase().replace(/ (att|matt)\b/g, function (z) { return z.toUpperCase(); }) + " " + short(NT.lo) + "–" + short(NT.hi) : "typical " + short(i.typ)) + (i.salesN ? " · " + fmt(i.salesN) + " sales" : ""))); nb.appendChild(t);
     nb.appendChild(el("span", "nbrand", "maplefm.gg"));
     w.insertBefore(nb, w.querySelector(".meta"));
     nbIO = new IntersectionObserver(function (es) { var e = es[es.length - 1]; w.classList.toggle("named", !e.isIntersecting && e.boundingClientRect.top < e.rootBounds.top + 80); }, { root: $("side"), rootMargin: "-56px 0px 0px 0px" });
     nbIO.observe(hd);
   }
 
-  // The ladder on an equip's card: one button per grade with its price range and how many sold, the busiest picked
-  // first; under it the picked grade's recent sales and its cheapest listings. The search's roll ("wg 3 att") picks
-  // that grade.
+  // The ladder on an equip's card: for items scrolled for more than one stat, a stat picker first (any class finds its
+  // stat at once); then one button per grade with its price range and how many sold, the busiest picked first; under
+  // it the picked grade's recent sales and its cheapest listings. The search's roll ("wg 1 crit", "hat 3 int") picks
+  // that stat and grade.
+  var LADODD = {};
+  function redrawChart(i) { var old = document.querySelector("#ipr .bchartw, #ip .bchartw"); if (!old) return; var nc = bigChart(i); if (nc) old.replaceWith(nc); }
   function ladderBox(i, L) {
     var box = el("div", "gladder"), h = el("h4");
     h.appendChild(document.createTextNode("Price by grade"));
-    h.appendChild(infoTip("Every copy is sorted into a grade from its hovered stats: Clean has no scroll used; a Clean grade with a stat is a better natural roll; Slots used, no gain had scrolls fail; +1, +2 and up count what scrolls added to the item's key stat (" + (STATABBR[L.key] || L.key) + "). Prices are the middle half of the last 7 days of sales; with fewer than " + LADMIN + " sales, the asking prices of copies up now, marked asking. Copies nobody hovered aren't counted."));
+    h.appendChild(infoTip("Every hovered copy is sorted into a grade: Clean has no scroll used, and a Clean grade with a stat is a better natural roll (crit on gloves and earrings sells for far more). Slots used, no gain had its scrolls fail. +1, +2 and up are the total over the item's base on that stat" + (L.wep ? "; weapons go by their attack number" : "") + ". Prices are the middle half of the last 7 days of sales, one per seller and price every 10 minutes, leaving out sales 4 times above or below the rest; with under " + LADMIN + " sales, the asking prices of copies up now. Copies nobody hovered, or whose popup didn't read right, aren't counted."));
     box.appendChild(h);
-    if (PENDROLL && PENDROLL.n === i.item && PENDROLL.k === L.key) {
-      var pv = +PENDROLL.v, hit = L.grades.filter(function (g) { var v = g.id.indexOf("S|") === 0 ? +g.id.slice(2) : null; return v != null && v > 0 && (v === pv || (g.plus && pv >= v)); })[0];
-      if (hit) LADSEL[i.item] = hit.id;
+    var vk = LADSTAT[i.item] && L.views[LADSTAT[i.item]] ? LADSTAT[i.item] : L.pick;
+    var LR = window.__ladroll;   // set by pick(), which sits in another part of this file
+    if (LR && LR.n === i.item && Date.now() - LR.at < 60000) {
+      var pk = LR.k, pv = +LR.v, want = null; window.__ladroll = null;
+      // "1 crit" means whichever crit line the item has (crit rate on gloves, crit damage on earrings)
+      if (/^CRIT/.test(pk)) { var hasK = function (k0) { return L.stats.some(function (s0) { return L.views[s0].some(function (g) { return g.id.indexOf(k0 + "+") > 0 || g.id.indexOf("S|" + k0 + "|") === 0; }); }); }; if (!hasK(pk) && hasK(pk === "CRIT" ? "CRITDMG" : "CRIT")) pk = pk === "CRIT" ? "CRITDMG" : "CRIT"; }
+      if (pk === "CLEAN") { var cg = (L.views[vk] || []).filter(function (g) { return g.id === "C|" || /^WC\|/.test(g.id); }).sort(function (a, b) { return (b.use ? b.use.length : 0) - (a.use ? a.use.length : 0); })[0]; if (cg) { LADSEL[i.item + "|" + vk] = cg.id; } pk = null; }
+      if (L.views[pk] && !L.wep) vk = pk;
+      if (pk) L.stats.some(function (s0) { return L.views[s0].some(function (g) {
+        var m = L.wep ? /^W[CS]\|(\d+)/.exec(g.id) : g.id.indexOf("S|" + pk + "|") === 0 ? [0, g.id.split("|")[2]] : g.id.indexOf("C|") === 0 && g.id.indexOf(pk + "+") > 0 ? [0, (new RegExp(pk + "\\+(\\d+)").exec(g.id) || [])[1]] : null;
+        if (!m || m[1] == null) return false; var v = parseInt(m[1], 10);
+        if (v === pv || (/\+$/.test(g.id) && pv >= v) || (/-$/.test(g.id) && pv <= v)) { want = g; vk = s0; return true; } return false; }); });
+      if (want) { LADSEL[i.item + "|" + vk] = want.id; LADSTAT[i.item] = vk; }
     }
-    var sel = LADSEL[i.item]; if (!L.grades.some(function (g) { return g.id === sel; })) sel = L.top.id;
+    if (L.stats.length > 1) {
+      var sp = el("div", "lstats"); sp.appendChild(el("span", "lsl", "Stat"));
+      L.stats.forEach(function (k) { var b = el("button", null, ladName(k)); b.type = "button"; b.setAttribute("aria-pressed", k === vk); b.addEventListener("click", function () { LADSTAT[i.item] = k; box.replaceWith(ladderBox(i, L)); redrawChart(i); }); sp.appendChild(b); });
+      box.appendChild(sp);
+    }
+    var grades = L.views[vk] || [], sel = LADSEL[i.item + "|" + vk];
+    if (!grades.some(function (g) { return g.id === sel; })) sel = (grades.indexOf(L.top) >= 0 ? L.top : grades.filter(function (g) { return g.basis === "sold"; })[0] || grades.filter(function (g) { return g.basis === "asking"; })[0] || grades[0] || {}).id;
     var row = el("div", "lgrades"); row.setAttribute("role", "radiogroup"); row.setAttribute("aria-label", "Grades");
-    L.grades.forEach(function (g) {
-      var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "none" ? " empty" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
+    grades.forEach(function (g) {
+      var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "few" || g.basis === "none" ? " empty" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
       b.appendChild(el("span", "lgn", g.name));
       var pr = el("span", "lgp");
       if (g.basis === "sold" || g.basis === "asking") { pr.appendChild(money(g.lo)); if (short(g.lo) !== short(g.hi)) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g.hi))); } }
-      else if (g.basis === "few") pr.appendChild(money(g.mid));
-      else pr.appendChild(el("span", "tfd", "none yet"));
+      else pr.appendChild(el("span", "tfd", "not enough yet"));
       b.appendChild(pr);
-      b.appendChild(el("span", "lgc", g.basis === "asking" ? "asking · " + g.asks.length + " listed" : g.sold.length ? g.sold.length + " sold" + (g.basis === "few" ? ", too few" : "") : g.asks.length ? g.asks.length + " listed" : ""));
-      b.addEventListener("click", function () { LADSEL[i.item] = g.id; var nb = ladderBox(i, L); box.replaceWith(nb); var o = nb.querySelector(".lg.on"); if (o) o.focus(); });
+      var ns = g.use ? g.use.length : 0;
+      b.appendChild(el("span", "lgc", g.basis === "sold" ? ns + " sold" : g.basis === "asking" ? "asking · " + g.asks.length + " listed" : (g.sold.length + g.asks.length) + " seen"));
+      b.addEventListener("click", function () { LADSEL[i.item + "|" + vk] = g.id; LADSTAT[i.item] = vk; var nb = ladderBox(i, L); box.replaceWith(nb); var o = nb.querySelector(".lg.on"); if (o) o.focus(); redrawChart(i); });
       row.appendChild(b);
     });
     box.appendChild(row);
-    var g = L.grades.filter(function (x) { return x.id === sel; })[0], det = el("div", "lgsel");
-    var head = el("p", "lgh");
-    if (g.basis === "sold") { head.appendChild(el("b", null, g.name + ": ")); head.appendChild(document.createTextNode("most sold between ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" and ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.sold.length + " sold in 7 days")); }
-    else if (g.basis === "asking") { head.appendChild(el("b", null, g.name + ": ")); head.appendChild(document.createTextNode("not enough sales yet. Asking ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" to ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.asks.length + " listed")); }
-    else { head.appendChild(el("b", null, g.name + ": ")); head.appendChild(document.createTextNode("not enough sales yet.")); }
+    var g = grades.filter(function (x) { return x.id === sel; })[0];
+    if (!g) return box;
+    var det = el("div", "lgsel"), head = el("p", "lgh");
+    head.appendChild(el("b", null, g.name + ": "));
+    if (g.basis === "sold") { head.appendChild(document.createTextNode("most sold between ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" and ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.use.length + " sold in 7 days")); }
+    else if (g.basis === "asking") { head.appendChild(document.createTextNode("not enough sales yet. Asking ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" to ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.asks.length + " listed")); }
+    else head.appendChild(document.createTextNode("not enough sales yet, " + (g.sold.length + g.asks.length) + " seen."));
     det.appendChild(head);
     function line(l, sold) {
-      var li = el("div", "lgl"); li.appendChild(money(l.u));
-      var who = el("span", "lgw", l.s); li.appendChild(who);
+      var li = el("div", "lgl" + ((g.odd && g.odd.indexOf(l) >= 0) || (g.oddA && g.oddA.indexOf(l) >= 0) ? " odd" : "")); li.appendChild(money(l.u));
+      li.appendChild(el("span", "lgw", l.s));
       var chip = statChip(i.item, l.x, l.xj); if (chip) li.appendChild(chip);
       li.appendChild(el("small", null, sold ? ago(l.t) : (buyWhere(l) + " · " + ago(l.t))));
       tipAttach(li, l, i.item);
       return li;
     }
-    if (g.sold.length) { det.appendChild(el("h5", null, "Recent sales")); g.sold.slice(0, 6).forEach(function (l) { det.appendChild(line(l, true)); }); }
-    if (g.asks.length) { det.appendChild(el("h5", null, "Cheapest listed now")); g.asks.slice(0, 5).forEach(function (l) { det.appendChild(line(l, false)); }); }
+    var showOdd = LADODD[i.item + "|" + g.id], list = (g.uniq || g.sold).filter(function (l) { return showOdd || !g.odd || g.odd.indexOf(l) < 0; });
+    if (list.length) { det.appendChild(el("h5", null, "Recent sales")); list.slice(0, 6).forEach(function (l) { det.appendChild(line(l, true)); }); }
+    var nOdd = (g.odd ? g.odd.length : 0) + (g.oddA ? g.oddA.length : 0);
+    if (nOdd) {
+      var ob = el("button", "lodd", showOdd ? "Hide " + nOdd + " unusual " + (nOdd === 1 ? "price" : "prices") : nOdd + " unusual " + (nOdd === 1 ? "price" : "prices") + " left out · show"); ob.type = "button";
+      ob.title = "Sales and listings 4 times above or below the rest of this grade: often a stat line or price the reader missed, or a one-off. They don't count toward the price.";
+      ob.addEventListener("click", function () { LADODD[i.item + "|" + g.id] = !showOdd; box.replaceWith(ladderBox(i, L)); }); det.appendChild(ob);
+    }
+    var alist = showOdd ? g.asks : (g.okAsks || g.asks);
+    if (alist.length) { det.appendChild(el("h5", null, "Cheapest listed now")); alist.slice(0, 5).forEach(function (l) { det.appendChild(line(l, false)); }); }
     box.appendChild(det);
     return box;
   }
   // signed out (the saved summary has no listings): the grades and their prices only
   function ladderStatic(lad) {
     var box = el("div", "gladder"); box.appendChild(el("h4", null, "Price by grade"));
-    var row = el("div", "lgrades");
-    lad.forEach(function (g) {
-      var b = el("div", "lg" + (g[7] ? " on" : "") + (g[1] === "none" ? " empty" : "")); b.appendChild(el("span", "lgn", g[0]));
-      var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking") { pr.appendChild(money(g[2])); if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g[3]))); } } else if (g[1] === "few") pr.appendChild(money(g[4])); else pr.appendChild(el("span", "tfd", "none yet"));
-      b.appendChild(pr); b.appendChild(el("span", "lgc", g[1] === "asking" ? "asking · " + g[6] + " listed" : g[5] ? g[5] + " sold" : g[6] ? g[6] + " listed" : ""));
-      row.appendChild(b);
+    lad.forEach(function (sv) {
+      if (lad.length > 1) box.appendChild(el("h5", "lsh", sv[0]));
+      var row = el("div", "lgrades");
+      sv[1].forEach(function (g) {
+        var b = el("div", "lg" + (g[7] ? " on" : "") + (g[1] === "few" || g[1] === "none" ? " empty" : "")); b.appendChild(el("span", "lgn", g[0]));
+        var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking") { pr.appendChild(money(g[2])); if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g[3]))); } } else pr.appendChild(el("span", "tfd", "not enough yet"));
+        b.appendChild(pr); b.appendChild(el("span", "lgc", g[1] === "sold" ? g[5] + " sold" : g[1] === "asking" ? "asking · " + g[6] + " listed" : (g[5] + g[6]) + " seen"));
+        row.appendChild(b);
+      });
+      box.appendChild(row);
     });
-    box.appendChild(row); return box;
+    return box;
   }
   function renderItem0() {
     nameBar(null);
@@ -3707,6 +3827,7 @@
     // where to farm it: the monsters that drop it, with their picture, up near the price
     dropsBox(n, ip);
     // a roll asked for in the search: jump to its row in "Price by ATT", or say none has been seen
+    if (PENDROLL && PENDROLL.n === n && (PENDROLL.k === "CLEAN" || ladItem())) PENDROLL = null;   // the price ladder picked the grade already
     if (PENDROLL && PENDROLL.n === n) {
       var want = PENDROLL.k + " " + PENDROLL.v, row = ip.querySelector('.rollbox .rc[data-k="' + PENDROLL.k + '"][data-abs="' + PENDROLL.v + '"]') || [].filter.call(ip.querySelectorAll(".pbs tr.jump"), function (tr) { return tr.firstChild && new RegExp("^" + want + "(\\D|$)").test(tr.firstChild.textContent); })[0];
       PENDROLL = null;
@@ -3961,19 +4082,20 @@
   // The table from the last visit is kept in this browser, so it shows the moment the page opens; the live
   // prices take over as soon as they arrive, and rows move to their new places.
   var SUMK = ["item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "best", "deal", "daily", "salesN", "vol", "equip", "move", "basis", "typWho", "conf", "last3"];
-  // Equips worth 50K+ whose open listings mostly have no hover yet: the watcher tells scanners to rest the mouse on
+  // Equips (every price) whose open listings mostly have no hover yet: the watcher tells scanners to rest the mouse on
   // these first. Item names only, never sellers or spots.
   function hoverWanted() {
     var by = {}, t = Date.now() - 7 * DAY;
     (D.active || []).forEach(function (l) {
       if (!l || !l.i || (l.t && l.t < t)) return;
-      var it = D.byName && D.byName[l.i]; if (!it || !it.equip || !(it.typ >= 50000)) return;
+      // every equip, cheap ones too: each graded price needs its copies hovered (the price ladder counts no others)
+      var it = D.byName && D.byName[l.i]; if (!it || !it.equip || !(it.typ > 0)) return;
       var b = by[l.i] || (by[l.i] = { i: l.i, typ: it.typ, n: 0, x: 0 }); b.n++;
       // a read counts once it has the upgrades line, for any equip that comes with slots
       if (l.x && (l.x.SLOTS != null || (l.x._tip && !(dbBase(l.i) || {}).SLOTS))) b.x++;
     });
     return Object.keys(by).map(function (k) { return by[k]; }).filter(function (b) { return b.n >= 1 && b.x / b.n < 0.5; })
-      .sort(function (a, b) { return b.typ * (b.n - b.x) - a.typ * (a.n - a.x); }).slice(0, 40)
+      .sort(function (a, b) { return b.typ * (b.n - b.x) - a.typ * (a.n - a.x); }).slice(0, 600)
       .map(function (b) { return { i: b.i, typ: b.typ, miss: b.n - b.x }; });
   }
   // the stat an item's roll prices are about, for the bots and item pages: "+1 Crit damage", "+6 LUK"
@@ -3985,7 +4107,7 @@
   }
   function saveSummary() {
     if (!D || D.preview || !D.list.length) return;
-    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) { o.bestS = i.bestL.s; o.bestT = i.bestL.t; var bw = where(i.bestL); if (bw) o.bestW = bw; } if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; var LDs = ladderOf(i); if (LDs && LDs.top) o.lad = LDs.grades.map(function (g) { return [g.name, g.basis, Math.round(g.lo || 0), Math.round(g.hi || 0), Math.round(g.mid || 0), g.sold.length, g.asks.length, g === LDs.top ? 1 : 0]; }); } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
+    var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) { o.bestS = i.bestL.s; o.bestT = i.bestL.t; var bw = where(i.bestL); if (bw) o.bestW = bw; } if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; var LDs = ladderOf(i); if (LDs && LDs.top) o.lad = [LDs.pick].concat(LDs.stats.filter(function (k) { return k !== LDs.pick; })).map(function (k) { return [ladName(k), LDs.views[k].map(function (g) { return [g.name, g.basis, Math.round(g.lo || 0), Math.round(g.hi || 0), Math.round(g.mid || 0), g.use ? g.use.length : 0, g.asks.length, g === LDs.top ? 1 : 0]; })]; }); } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
       // rt: sold typical per "roll|slots used|stat|every stat that moved" ("1|0|CRIT|CRIT+1": a clean pair with +1 crit rate);
       // the cheapest open listing for each roll, from the last 2 days, per "roll|stat|moves|slots used": what the chat bot quotes for "7 att wg"
       if (i.rolls && i.rolls.length) { var ra = {}, cut = Date.now() - 2 * DAY; i.rolls.forEach(function (r) { var l = r.l; if (!l || l.so || !(l.u > 0) || (l.t && l.t < cut)) return; var ak = r.g + "|" + (r.k || "") + "|" + (r.combo || "") + "|" + (function (su) { return su == null ? "" : su; })(slotsUsed(i.item, l)); if (ra[ak] == null || l.u < ra[ak]) ra[ak] = l.u; }); if (Object.keys(ra).length) o.ra = ra; }

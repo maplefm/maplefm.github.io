@@ -1440,6 +1440,14 @@ async function priceLine(env, raw) {
   if (hits.length && /\bscr(oll)?s?\b/i.test(q) && !/scroll/i.test(hits[0].item)) return "No recent listings for " + q + ". Try the full name, like gloves attack scroll 60, or check maplefm.gg";
   if (!hits.length) return "No recent listings for " + q + ". Check maplefm.gg";
   const r = hits[0], bits = [shown(r.item) + ":"];
+  // equips answer with their price ladder (the grades on the item card), busiest stat first, so a chat doesn't get one
+  // number that mixes clean and scrolled copies
+  const lad = Array.isArray(r.lad) && Array.isArray(r.lad[0]) && Array.isArray(r.lad[0][1]) ? r.lad[0][1].filter((g) => g[1] === "sold" || g[1] === "asking") : [];
+  if (lad.length) {
+    const slugL = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const parts = lad.slice(0, 4).map((g) => g[0].replace(/^Clean, /, "clean ").replace(/^Clean$/, "clean").replace(/^Slots used, no gain$/, "no gain") + " " + (meso(g[2]) === meso(g[3]) ? meso(g[2]) : meso(g[2]) + " to " + meso(g[3])) + (g[1] === "sold" ? " (" + g[5] + " sold)" : " (asking)"));
+    return (shown(r.item) + ": " + parts.join(" · ") + (r.lad.length > 1 ? " · by " + r.lad.slice(1, 4).map((x) => x[0]).join(", ") + " too" : "") + " · maplefm.gg/item/" + slugL).slice(0, 390);
+  }
   if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? " from " + (r.salesN || 0) + " sales" : " from asks"));
   if (r.best) bits.push("· cheapest now " + meso(r.best) + (r.bestS && r.bestW ? " (" + String(r.bestS).replace(/[^A-Za-z0-9]/g, "").slice(0, 20) + ", " + String(r.bestW).replace(/[^A-Za-z0-9 ,()]/g, "").slice(0, 40) + ")" : ""));
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");

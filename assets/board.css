@@ -1546,3 +1546,10 @@ td:has(> .lgt) { white-space: nowrap; }
 .lclosed > .ltabs, .lclosed > .bsort, .lclosed > .list { display: none !important; }
 :root[data-theme="dark"] .lgt { background: #173826; color: #8ee6a8; } :root[data-theme="dark"] .lgt.g1 { background: #16284a; color: #9cc3ff; } :root[data-theme="dark"] .lgt.g2 { background: #251a40; color: #cbb4ff; } :root[data-theme="dark"] .lgt.g3 { background: #3d2f10; color: #f0c24a; } :root[data-theme="dark"] .lgt.g4 { background: #4a1d16; color: #ff8a7a; }
 @media (max-width: 560px) { .lgrades { grid-template-columns: repeat(2, 1fr); } .lgl small { margin-left: 0; width: 100%; } }
+.lstats { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; }
+.lstats .lsl { font-size: .72rem; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-right: 2px; }
+.lstats button { font: inherit; font-weight: 800; font-size: .82rem; cursor: pointer; padding: 4px 12px; border-radius: 999px; border: 1.5px solid var(--line2); background: var(--panel); color: var(--ink); }
+.lstats button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.gladder h5.lsh { margin: 10px 0 6px; font-size: .78rem; color: var(--muted); }
+.lodd { font: inherit; font-size: .76rem; font-weight: 800; color: var(--muted); background: none; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline; }
+.lgl.odd { opacity: .6; }

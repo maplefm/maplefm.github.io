@@ -578,6 +578,7 @@ def job_deals(data_dir, summary_path, state_path):
             roll = (f'{d.get("k")} {d.get("v")}' if d.get("k") and d.get("v") is not None else ("average roll" if not g else "roll"))
             roll += f' ({"+" if g > 0 else ""}{int(g)})' if g else ""
             if d.get("slots") is not None: roll += f', {int(d["slots"])} slots left'
+            if d.get("grade"): roll = str(d["grade"])[:40]          # the grade on the card's price ladder, priced from its own sales
             r = {"i": it["item"], "s": d.get("s"), "p": u, "q": q, "r": d.get("r"), "c": d.get("c"), "x": True, "roll": roll, "rolln": int(d.get("n") or 0)}
             hot.append((flip, off, r, dict(it, typ=typ), d.get("by") or who_caught(docs, d), key))
     hot.sort(key=lambda x: -x[0])
@@ -592,7 +593,7 @@ def job_deals(data_dir, summary_path, state_path):
         pk = f"{day}|{str(who).lower()}"; pinged[pk] = pinged.get(pk, 0) + 1
         q = int(r.get("q") or 1)
         where = spot(r)
-        roll = f" · **{plain(r['roll'], 40)}**, typical for this roll from {r['rolln']} sales" if r.get("roll") else ""
+        roll = f" · **{plain(r['roll'], 40)}**, typical for this grade from {r['rolln']} sales" if r.get("roll") else ""
         line = (f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" listed at **{meso(int(r['p']))}**" + (" each" if q > 1 else "")
                 + f"\n**+{meso(int(flip))}** to flip · {int(round(off * 100))}% under typical {meso(int(it['typ']))}{roll}")
         emb = {"title": "Mega deal", "description": line, "color": GREEN,
