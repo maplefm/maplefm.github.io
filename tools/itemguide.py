@@ -194,6 +194,17 @@ def main():
             names[iid] = nm
         return nm
 
+    def qsteps(txt):
+        out = []
+        for ln in str(txt or "").replace("\\n", "\n").replace("\\r", "").split("\n"):
+            ln = re.sub(r"#questorder\d*#", "", ln)
+            ln = re.sub(r"#p(\d+)#", lambda m: npcn(int(m.group(1))) or "", ln)
+            ln = re.sub(r"#t(\d+)#", lambda m: item_name(int(m.group(1))) or "", ln)
+            ln = re.sub(r"#o(\d+)#", lambda m: mob_name.get(int(m.group(1)), "") if isinstance(mob_name, dict) else "", ln)
+            ln = re.sub(r"#m(\d+)#", lambda m: "{m:" + m.group(1) + "}", ln)
+            ln = re.sub(r"#[a-zA-Z](?:\d+#)?", "", ln).strip()
+            if len(ln) >= 4 and ln not in out: out.append(ln)
+        return out[:12]
     def npcn(nid):
         if nid and nid not in npc_name:
             n = get(f"{IO}/npc/{nid}/name"); npc_name[nid] = str((n.get("name") if isinstance(n, dict) else n) or "").strip()
@@ -273,6 +284,10 @@ def main():
                 "from": t_from.strftime("%Y-%m-%dT%H:%M") if t_from else None,
                 "to": t_to.strftime("%Y-%m-%dT%H:%M") if t_to else None,
                 "town": npc_town.get(giver.lower()) or npc_town.get(npcn(gid0).lower()) if (giver or gid0) else None,
+                # the quest window's own to-do list ("Find the child in the dark tunnel"): what a player reads in game,
+                # so the page says the same. #p NPC and #t item codes become names; #m map codes stay as {m:id} for
+                # the page builder, which knows the maps.
+                "steps": qsteps(d.get("demandSummary")),
                 "ended": True if ended else None,
             }
             # where the game and the wiki disagree, keep the game's value and say so
