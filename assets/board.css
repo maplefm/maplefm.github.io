@@ -1242,7 +1242,8 @@ body.sheet .nudge { display: none; }
 .plbl .allitems { display: block; margin-top: 4px; font-size: .72rem; letter-spacing: 0; text-transform: none; color: var(--accent, var(--wood)); text-decoration: none; font-weight: 800; }
 .plbl .allitems:hover { text-decoration: underline; }
 /* the shared footer clears the recent sales bar */
-.clubfoot { padding-bottom: 96px; }
+footer.clubfoot { padding-bottom: 96px; }
+@media (max-width: 760px) { footer.clubfoot { padding-bottom: 128px; } }
 /* the count badge on the picked category stays readable: white on the accent, not dark on dark */
 .cchip[aria-pressed="true"] em { background: #6d3fd1; color: #fff; }
 
@@ -1610,3 +1611,6 @@ td:has(> .lgt) { white-space: nowrap; }
 .nbar .nbrand { flex: none; }
 /* the board drops its least needed columns until it fits (fitBoard in board.js) */
 table.fit1 .col-vol, table.fit2 .col-trend, table.fit3 .col-src, table.fit4 .col-sales, table.fit5 .col-chg { display: none; }
+/* the card's top bar never wraps: the name stays on one line and the web address steps aside on small phones */
+.wtitle h2.cbrand, .wtitle h2.cbrand span { white-space: nowrap; min-width: 0; }
+@media (max-width: 400px) { .wtitle h2.cbrand em { display: none; } }

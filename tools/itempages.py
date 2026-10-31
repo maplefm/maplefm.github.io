@@ -111,7 +111,7 @@ table{width:100%;border-collapse:collapse;margin-top:6px}td,th{padding:6px 8px;b
 h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px 4px 6px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink);display:inline-flex;align-items:center;gap:6px}.rel a img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated}
 .foot{color:var(--muted);font-size:.82rem;margin-top:22px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
-td.n{text-align:right;white-space:nowrap;font-weight:800}th{white-space:nowrap}.navh{white-space:nowrap}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
+td.n{text-align:right;white-space:nowrap;font-weight:800}@media (min-width:600px){th{white-space:nowrap}}.navh{white-space:nowrap}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
 .craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
 .ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
 .gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}

@@ -4777,7 +4777,7 @@
   var PH = ["Try GFA 60, work gloves, white label ring...", "Try GFA 60, work gloves...", "Try GFA 60...", "Search items"];
   function fitPh() {
     var q = $("q"); if (!q || !q.clientWidth) return; var cs = getComputedStyle(q), cx = document.createElement("canvas").getContext("2d"); cx.font = cs.font;
-    var room = q.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
+    var room = q.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 24;   // search boxes keep room for their clear button
     q.placeholder = PH.filter(function (t) { return cx.measureText(t).width <= room; })[0] || PH[PH.length - 1];
   }
   fitPh(); window.addEventListener("resize", fitPh); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitPh);
