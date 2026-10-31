@@ -1,12 +1,12 @@
 {
- "at": 1793473871642,
+ "at": 1793477432055,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.10.31.4",
+ "current": "2026.10.31.5",
  "scanners": {
   "Yint": {
    "rows24": 0,
@@ -54,7 +54,7 @@
    "room_rate24": null,
    "room_rate7": 0.95,
    "late_share7": 0.022,
-   "behind": 14
+   "behind": 15
   },
   "Faif": {
    "rows24": 0,
@@ -118,20 +118,20 @@
    "room_rate24": 0.968,
    "room_rate7": 0.313,
    "late_share7": 0.015,
-   "behind": 0
+   "behind": 1
   },
   "laclac": {
-   "rows24": 14029,
-   "room24": 13814,
-   "ch24": 13956,
+   "rows24": 11381,
+   "room24": 11172,
+   "ch24": 11308,
    "rows7": 87772,
    "room7": 37853,
    "late7": 709,
-   "chat24": 30,
+   "chat24": 24,
    "last": 1793472742,
-   "ver": "2026.10.31.4",
+   "ver": "2026.10.31.5",
    "lag_median_min": 3.1,
-   "room_rate24": 0.985,
+   "room_rate24": 0.982,
    "room_rate7": 0.431,
    "late_share7": 0.008,
    "behind": 0
@@ -143,9 +143,9 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 32,
-   "last": 1793473207,
-   "ver": "2026.10.31.4",
+   "chat24": 34,
+   "last": 1793475522,
+   "ver": "2026.10.31.5",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
@@ -166,7 +166,7 @@
    "room_rate24": null,
    "room_rate7": 0.979,
    "late_share7": 0.0,
-   "behind": 7
+   "behind": 8
   },
   "Maya": {
    "rows24": 157,
@@ -182,7 +182,7 @@
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
-   "behind": 4
+   "behind": 5
   },
   "click": {
    "rows24": 0,
@@ -198,7 +198,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 4
+   "behind": 5
   },
   "smurp": {
    "rows24": 0,
@@ -214,7 +214,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   },
   "LocalBucket": {
    "rows24": 0,
@@ -230,7 +230,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   }
  },
  "drops": {
@@ -238,8 +238,9 @@
    "bad row: 3a3a": 4776
   },
   "2026-10-31": {
-   "bad row: 3a3a": 10323,
-   "incomplete upload": 455
+   "bad row: 3a3a": 10803,
+   "bad row: 3a3a (p zero)": 120,
+   "incomplete upload": 486
   }
  },
  "rejects": {},
