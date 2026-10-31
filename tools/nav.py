@@ -13,7 +13,7 @@ ALIAS = {"items": "prices", "shop": "market", "qlevels": "quests", "crafting": "
 SEARCH = ('<form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span>'
           '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/>'
           '<path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'
-          '<input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form>')
+          '<input type="search" name="q" placeholder="Search any item price" data-ph="Search any item price|Search items|Search" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form>')
 
 
 # phones: the pinned menu slides away while you scroll down a page and comes back as soon as you scroll up

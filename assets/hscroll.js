@@ -53,7 +53,7 @@
     var ins = document.querySelectorAll("input[data-ph]");
     for (var i = 0; i < ins.length; i++) {
       var q = ins[i]; if (!q.clientWidth) continue; var cs = getComputedStyle(q); cx.font = cs.font;
-      var room = q.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4, opts = q.getAttribute("data-ph").split("|"), pick = opts[opts.length - 1];
+      var room = q.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - (q.type === "search" ? 24 : 6), opts = q.getAttribute("data-ph").split("|"), pick = opts[opts.length - 1];
       for (var k = 0; k < opts.length; k++) if (cx.measureText(opts[k]).width <= room) { pick = opts[k]; break; }
       if (q.placeholder !== pick) q.placeholder = pick;
     }
