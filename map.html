@@ -94,7 +94,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 .steps{display:grid;gap:10px}
 .step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .step .n{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font:800 .9rem Outfit}
-.step.cab .n{background:var(--gold)}.step.scroll .n{background:var(--ok)}
+.step.k-cab .n{background:var(--gold)}.step.k-scroll .n{background:var(--ok)}
 .step h4{margin:0 0 4px;font:700 1rem Outfit,sans-serif}
 .step .mm{margin-top:8px}
 .list{display:grid;gap:4px;margin:6px 0 0;padding:0;list-style:none;font-size:.88rem}
@@ -634,7 +634,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var same = ROUTES.fast && ROUTES.free && ROUTES.fast.mesos === 0; if (same) box.appendChild(el("p", "note", "Walking is already the fastest way here: no fare saves time."));
     var steps = el("div", "steps");
     r.steps.forEach(function (s, i) {
-      var m = MAPS[s.from], d = el("div", "step" + (s.e.kind !== "walk" ? " " + s.e.kind : "")); d.appendChild(el("div", "n", String(i + 1)));
+      var m = MAPS[s.from], d = el("div", "step" + (s.e.kind !== "walk" ? " k-" + s.e.kind : ""));   // not plain "scroll": that class means a sideways scroller site-wide d.appendChild(el("div", "n", String(i + 1)));
       var body = el("div"), h = el("h4");
       if (s.e.kind === "walk") {
         var p = m.portals[s.e.portal], dir = p[2] > s.pos[0] + 60 ? "right" : p[2] < s.pos[0] - 60 ? "left" : "", up = p[3] < s.pos[1] - 80 ? "up" : p[3] > s.pos[1] + 80 ? "down" : "";
