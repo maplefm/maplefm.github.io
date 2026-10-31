@@ -1563,3 +1563,14 @@ td:has(> .lgt) { white-space: nowrap; }
 .gladder .lg.lone .lgc { color: var(--ask); }
 /* rank up: the badge sits centred under "Rank up" (the shared .big price style made it a left-aligned row) */
 .lvlup .card2 .big { display: flex; justify-content: center; align-items: center; width: 100%; }
+
+/* Weapons and Equips: type chips and the level range under the categories */
+.subchips { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 2px; }
+.schip { font: 700 .8rem var(--body); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.schip em { font-style: normal; font-size: .68rem; color: var(--muted); }
+.schip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.schip[aria-pressed="true"] em { color: #fff; opacity: .85; }
+.slv { display: inline-flex; gap: 6px; align-items: center; margin-left: 6px; font-size: .8rem; color: var(--muted); }
+.slv b { color: var(--ink); }
+.slv input { width: 58px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 700 .8rem var(--body); }
+.tools > .subchips { flex: 0 0 100%; }
