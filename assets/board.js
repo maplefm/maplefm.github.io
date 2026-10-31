@@ -3379,14 +3379,15 @@
       h.addEventListener("click", go); h.addEventListener("keydown", go);
     });
   }
-  // Where to buy and the full sales list behind one bar: a ladder card is short enough to read at a glance until opened
+  // Where to buy and the full sales list behind one bar, open by default; closing it is remembered in this browser.
+  // The list scrolls inside its own box, so the card never runs on past it
   function foldLists(ip) {
     var i = D.byName[state.sel]; if (!i || ip.querySelector(":scope > .lfold")) return;
-    var open = !!OPENS.lists, n = ip.querySelector(":scope > .ltabs em"), b = el("button", "lfold"); b.type = "button";
+    var open = OPENS.lists !== 0, n = ip.querySelector(":scope > .ltabs em"), b = el("button", "lfold"); b.type = "button";   // open unless this browser closed it
     b.appendChild(el("span", null, "Where to buy" + (n ? " (" + n.textContent + ")" : "") + " and all sales")); b.appendChild(el("span", "fhint", open ? "Hide" : "Open")); b.appendChild(el("span", "fchev"));
     b.setAttribute("aria-expanded", open);
     ip.classList.toggle("lclosed", !open);
-    b.addEventListener("click", function () { OPENS.lists = OPENS.lists ? 0 : 1; saveLS("fm-open", OPENS); renderItem(); });
+    b.addEventListener("click", function () { OPENS.lists = open ? 0 : 1; saveLS("fm-open", OPENS); renderItem(); });
     var lt = ip.querySelector(":scope > .ltabs"); ip.insertBefore(b, lt || null);
   }
   // the card's reading order: price first, then what to do, how to get it, prices by roll, listings, links.
