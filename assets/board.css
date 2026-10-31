@@ -1614,3 +1614,5 @@ table.fit1 .col-vol, table.fit2 .col-trend, table.fit3 .col-src, table.fit4 .col
 /* the card's top bar never wraps: the name stays on one line and the web address steps aside on small phones */
 .wtitle h2.cbrand, .wtitle h2.cbrand span { white-space: nowrap; min-width: 0; }
 @media (max-width: 400px) { .wtitle h2.cbrand em { display: none; } }
+/* the card's link and picture buttons: emoji dead center in the box */
+.share .sh { display: inline-grid; place-items: center; padding: 0; line-height: 1; text-align: center; }
