@@ -4337,7 +4337,7 @@
       if (!ALERTS_OK) {
         body.appendChild(el("p", null, "Stat alerts come with Mega Deals. Unlock them any of three ways:"));
         var ul = el("ol", "aunl");
-        [["Join the Club", "https://discord.gg/cXnVBTUUPk"], ["Catch 50,000 sales scanning", "contribute.html"], ["Support $100 on Ko-fi", "https://ko-fi.com/maplefm"]].forEach(function (u) { var li = el("li"); var a = el("a", null, u[0]); a.href = u[1]; if (/^https/.test(u[1])) { a.target = "_blank"; a.rel = "noopener"; } li.appendChild(a); ul.appendChild(li); });
+        [["Ko-fi Tiger tier or higher, while it runs", "https://ko-fi.com/maplefm/tiers"], ["$100 of Ko-fi support in total, kept for good", "https://ko-fi.com/maplefm"], ["Catch 50,000 sales scanning", "contribute.html"]].forEach(function (u) { var li = el("li"); var a = el("a", null, u[0]); a.href = u[1]; if (/^https/.test(u[1])) { a.target = "_blank"; a.rel = "noopener"; } li.appendChild(a); ul.appendChild(li); });
         body.appendChild(ul); return;
       }
       if (item) body.appendChild(alertForm(item, list, function () { alertDlg(item); }));
@@ -4982,7 +4982,7 @@
   function gateText(signedIn) {
     var g = $("gate"); if (!g) return;
     g.querySelector("b").textContent = signedIn ? "Live listings and deals are a Mega Deals perk" : "See every live listing, seller, roll and deal";
-    g.querySelector("span").textContent = signedIn ? "Prices are free for everyone. Mega Deals unlocks at 50,000 sales caught or the $100 Ko-fi tier." : "Prices are free for everyone. Listings and deals need Mega Deals.";
+    g.querySelector("span").textContent = signedIn ? "Prices are free for everyone. Mega Deals comes with Ko-fi Tiger and up, $100 of Ko-fi support, or 50,000 sales caught." : "Prices are free for everyone. Listings and deals need Mega Deals.";
     g.querySelector("i").textContent = signedIn ? "How to earn it" : "Sign in with Discord";
     g.href = signedIn ? "contribute.html#earn" : ACCT + "/login?back=home";
   }
