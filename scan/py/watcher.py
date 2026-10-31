@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.5"
+VERSION = "2026.10.31.6"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -189,6 +189,22 @@ def learn_new(res, tip_img):
                 log(f"new item: learned {full} from its tooltip. It goes on the board with its icon from now on.")
             hit = full
         row["i"] = hit; row["known"] = True
+TIERS_N = ("lesser", "intermediate", "greater", "chaos", "superior")
+def title_other(title, row):
+    """True when a popup title, even cut short on the left, can only be another item than this row."""
+    a = fmparse.norm(row).replace("namecutoff", "").replace("tiercutoff", "")
+    f = fmparse.norm(re.sub(r"\(\+\d+\)", "", title or ""))
+    if len(f) < 10 or not a: return False
+    f2 = f[:-2] if len(f) >= 14 else f                  # the tier word at the end can be cut too ("Greate")
+    if f2 in a: return False
+    stem = a
+    for t in TIERS_N:
+        if stem.endswith(t): stem = stem[:-len(t)]
+    owners = [n for n in fmparse._ITEM_NORM if f2 in n]
+    if not owners: return False
+    return not any(n.startswith(stem) or stem.startswith(n) or n[:12] == a[:12] for n in owners)
+
+
 def digit_twins(a, b):
     """Two prices one misread digit apart: 30000 and 90000, 50000 and 60000."""
     a, b = str(a), str(b)
@@ -797,6 +813,7 @@ class Store:
             # copies of the same item at the same price: count the sold ones and the open ones separately
             groups = {}
             for r in res["rows"]:
+                if not r.get("p") or r["p"] < 1 or not r.get("q") or r["q"] < 1: continue   # a 0 price is a bad read
                 g = groups.setdefault((r["i"], r["p"], r["q"]), {"S": 0, "U": 0, "known": False})
                 g["S" if r["so"] else "U"] += 1
                 g["known"] = g["known"] or r["known"]
@@ -864,6 +881,11 @@ class Store:
             if fmparse._known_name(tip["name"]) or any(fmparse.norm(r["i"])[:8] in fmparse.norm(l) for l in tip["lines"][:1]):
                 if not any(a[:10] and a[:10] in fmparse.norm(l) for l in tip["lines"]):
                     return None
+            # a title cut short on the left still names its item: "curacy Scroll: Greater" is a Hat Accuracy Scroll's
+            # popup, never an Earring LUK Scroll's, and "roll: Greater" is never on Emerald Earrings
+            if title_other(tip["name"], r["i"]):
+                log("hover skipped: popup", tip["name"][:40], "isn't", r["i"])
+                return None
             tip = dict(tip, name=r["i"])
         # the stats have to be ones this item can carry, or the popup was another item's
         if tip["stats"].get("_ex"):
@@ -1101,6 +1123,8 @@ class Store:
                     del self.d[kind][key]
             for key, o in self.d["shop"].items():
                 day, seller, item, price, qty = json.loads(key)
+                if not isinstance(price, int) or price < 1 or not isinstance(qty, int) or qty < 1:
+                    continue                    # kept by an older version: a bad read the site turns away anyway
                 if "nu" in o:
                     sold = o.get("sb", 0) + o.get("ns", 0)
                     opn = o["nu"] if o["reads"] >= (1 if o["known"] else 2) else 0

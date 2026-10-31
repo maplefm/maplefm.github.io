@@ -99,7 +99,9 @@ def read_price(tile):
             if s.endswith("mesos"): break
         p = _PR.match(s)
         if not p: return None
-        return int(p.group(1)), int(p.group(2).replace(",", ""))
+        q, pr = int(p.group(1)), int(p.group(2).replace(",", ""))
+        if q < 1 or pr < 1: return None          # nothing in a shop costs 0 or comes 0 at a time: a bad read
+        return q, pr
     except Exception:
         return None
 
