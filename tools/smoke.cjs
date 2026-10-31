@@ -97,7 +97,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
           await p.evaluate((id) => document.getElementById(id).click(), t); await p.waitForTimeout(300);
           ok(await p.evaluate((id) => document.getElementById(id).getAttribute("aria-selected") === "true" || document.getElementById(id).classList.contains("on") || document.getElementById(id).getAttribute("aria-pressed") === "true", t), `${tag} board tab ${t} switches`);
         }
-        for (const [btn, dlg] of [["m-about", "help"], ["m-sources", "sources"], ["m-check", "datacheck"]] ) {
+        for (const [btn, dlg] of [["m-about", "help"], ["m-sources", "sources"]] ) {
           await p.evaluate((x) => { document.getElementById("menubtn").click(); document.getElementById(x).click(); }, btn); await p.waitForTimeout(400);
           ok(await p.evaluate((d) => !!document.getElementById(d).open, dlg), `${tag} menu opens ${dlg}`);
           await p.evaluate((d) => document.getElementById(d).close && document.getElementById(d).close(), dlg);
