@@ -3453,8 +3453,8 @@
   // worth: the header, the chart, price by grade and the rest. On wide screens buying is the left column and the
   // worth side the right (splitCard); on phones it is one column, header, lists, chart and grades, then the rest.
   // Anything without a place stays right after the part it was added next to.
-  var CARDORDER = [["ih", 0], ["lfold", 0.2], ["ltabs", 0.3], ["bsort", 0.4], ["list", 0.5], ["bchartw", 0.6], ["rollmiss", 2], ["gladder", 2.5], ["big", 3], ["tline", 4], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["ifoot", 20]];
-  var BUYSIDE = ["lfold", "ltabs", "bsort", "list", "guide", "drops", "panelbtns", "mkt"];
+  var CARDORDER = [["ih", 0], ["big", 0.05], ["tline", 0.06], ["lfold", 0.2], ["ltabs", 0.3], ["bsort", 0.4], ["list", 0.5], ["bchartw", 0.6], ["rollmiss", 2], ["gladder", 2.5], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["ifoot", 20]];
+  var BUYSIDE = ["ih", "big", "tline", "lfold", "ltabs", "bsort", "list", "guide", "drops", "panelbtns", "mkt"];
   function orderCard(ip) {
     if (!ip || !state.sel) return;
     var last = -1, kids = [].slice.call(ip.children).map(function (k, ix) {
@@ -3471,9 +3471,10 @@
     var i = D && D.byName && D.byName[state.sel];
     var kids = [].slice.call(ip.children); if (!kids.some(isBuy)) return;
     var ch = i && !D.preview && bigChart(i), at = 0;
-    kids.forEach(function (k) { if (isBuy(k)) return; r.appendChild(k); if (k.classList.contains("ih") && ch) { r.appendChild(ch); ch = null; } });
+    kids.forEach(function (k) { if (isBuy(k)) return; r.appendChild(k); });
     if (ch) r.insertBefore(ch, r.firstChild);
-    var order = ["lfold", "ltabs", "bsort", "list", "mkt", "guide", "drops", "panelbtns"];
+    // left, top to bottom: the item and its price (people read left to right, top down), then where to buy it
+    var order = ["ih", "big", "tline", "lfold", "ltabs", "bsort", "list", "mkt", "guide", "drops", "panelbtns"];
     [].slice.call(ip.children).map(function (k, ix) { var o = order.findIndex(function (c) { return k.classList.contains(c); }); return [o < 0 ? 99 : o, ix, k]; })
       .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).forEach(function (x) { ip.appendChild(x[2]); });
     r.hidden = false;
@@ -3614,7 +3615,7 @@
       var li = el("div", "lgl" + ((g.odd && g.odd.indexOf(l) >= 0) || (g.oddA && g.oddA.indexOf(l) >= 0) ? " odd" : "")); li.appendChild(money(l.u));
       li.appendChild(el("span", "lgw", l.s));
       var chip = statChip(i.item, l.x, l.xj); if (chip) li.appendChild(chip);
-      li.appendChild(el("small", null, sold ? ago(l.t) : (buyWhere(l) + " · " + ago(l.t))));
+      var lsm = el("small"); if (!sold) { lsm.appendChild(el("b", "wh", buyWhere(l))); lsm.appendChild(document.createTextNode(" · ")); } lsm.appendChild(document.createTextNode(ago(l.t))); li.appendChild(lsm);
       tipAttach(li, l, i.item);
       return li;
     }
@@ -3695,6 +3696,13 @@
     else big.appendChild(money(i.typ));
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
     if (!LD) { ip.appendChild(big); nameBar(i); }
+    else if (LD.top) {
+      // equips: the busiest grade's price up top beside the item, the same as the grade buttons show
+      var eb = el("div", "big"); eb.appendChild(money(LD.top.lo)); if (short(LD.top.lo) !== short(LD.top.hi)) { eb.appendChild(el("span", "dash", "–")); eb.appendChild(el("span", "num", short(LD.top.hi))); }
+      ip.appendChild(eb);
+      var et = el("p", "tline etop"); var etb = el("b", null, LD.top.name); et.appendChild(etb); et.appendChild(document.createTextNode(" · " + (LD.top.basis === "sold" ? LD.top.use.length + " sold in 7 days" : "asking · " + LD.top.asks.length + " listed") + " · the busiest grade. Every grade is in Price by grade."));
+      ip.appendChild(et);
+    }
     var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
     var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
@@ -3730,13 +3738,14 @@
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var sm = el("small"); li.appendChild(sm);
       if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not (seen|read)/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
-      else { var w = where(x); sm.appendChild(document.createTextNode((w ? w + " · " : "") + ago(x.t))); }
+      else { var w = where(x); if (w) { sm.appendChild(el("b", "wh", w)); sm.appendChild(document.createTextNode(" · ")); } sm.appendChild(document.createTextNode(ago(x.t))); }
       // seen on a stream: a small TV that opens the broadcast at that moment; the streamer's name is on hover
       if (x.stream) { var tv = streamLink(x); tv.textContent = "📺"; tv.classList.add("tv"); tv.title = "Seen on " + x.who + "'s stream. " + tv.title; tv.setAttribute("aria-label", tv.title); sm.appendChild(document.createTextNode(" ")); sm.appendChild(tv); }
       if (x.spot) li.appendChild(el("span", "stt gone", "Spot holder"));
       if (state.list === "buy") {
         var mine = (MYSOLD[soldKey(x)] || 0) > x.t;
-        li.appendChild(el("span", "stt " + (x.st === "sold" ? "gone" : x.st), x.st === "sold" ? (mine && x.sold < GONE.need ? "You marked this sold" : "Marked sold by " + x.sold + (x.sold === 1 ? " player" : " players")) : x.st === "gone" ? "Not seen on the shop's later visit" : (x.st === "up" ? "Likely still up" : "Seen over 2 hours ago, may be gone") + (x.sold ? " · " + x.sold + " said sold" : "")));
+        var sttx = x.st === "sold" ? (mine && x.sold < GONE.need ? "You marked this sold" : "Marked sold by " + x.sold + (x.sold === 1 ? " player" : " players")) : x.st === "gone" ? "Not seen on the shop's later visit" : (x.st === "up" ? "Likely still up" : "") + (x.sold ? (x.st === "up" ? " · " : "") + x.sold + " said sold" : "");
+        if (sttx) li.appendChild(el("span", "stt " + (x.st === "sold" ? "gone" : x.st), sttx));
         if (x.st !== "gone" && !x.chat) li.appendChild(soldBtn(x, mine));
       }
       tipAttach(li, x, i.item);   // hover (or tap) for the item as the game shows it
