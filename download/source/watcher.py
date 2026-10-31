@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.30.7"
+VERSION = "2026.10.31.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -429,9 +429,33 @@ def place(cfg, game):
     fit = lambda b: [max(0, b[0]), max(0, b[1]), min(w, b[2]), min(h, b[3])]
     return fit(shop), fit(chat)
 
+# The game draws everything bigger or smaller with its window (a 2560 x 1440 window shows the same picture as
+# 1920 x 1080, a third larger). Every reader is measured on 1920 x 1080, so the watcher works on that picture at
+# any size: view() turns the real window into a 1920 x 1080 one, grab() scales each piece to it, and the pointer
+# is mapped the same way. A 1920 x 1080 window is read as is, pixel for pixel.
+VIEW = {"k": (1.0, 1.0), "o": (0, 0), "s": (1920, 1080)}
+def view(cfg, game):
+    rw, rh = cfg.get("reference_size", [1920, 1080])
+    w, h = game[2], game[3]
+    if (w, h) == (rw, rh) or not w or not h:
+        VIEW["k"] = (1.0, 1.0); VIEW["o"] = (game[0], game[1]); return list(game)
+    VIEW["k"] = (w / rw, h / rh); VIEW["o"] = (game[0], game[1]); VIEW["s"] = (w, h)
+    return [game[0], game[1], rw, rh]
+
+def scaled():
+    return VIEW["k"] != (1.0, 1.0)
+
 def cursor_pos():
-    """Where the mouse pointer is, in screen pixels. Reading it does not move it."""
-    if HOOKS["cursor"]: return HOOKS["cursor"]()
+    """Where the mouse pointer is, in the 1920 x 1080 picture's pixels (screen pixels on a 1920 x 1080 game).
+    Reading it does not move it."""
+    if HOOKS["cursor"]: return HOOKS["cursor"]()      # the browser scanner hands it over already in picture pixels
+    c = _cursor_raw()
+    if c and scaled():
+        (kx, ky), (ox, oy) = VIEW["k"], VIEW["o"]
+        return (ox + (c[0] - ox) / kx, oy + (c[1] - oy) / ky)
+    return c
+
+def _cursor_raw():
     try:
         import ctypes
         from ctypes import wintypes
@@ -635,10 +659,25 @@ def tooltip_in(img):
     return img.crop((max(0, x0 - 4), max(0, y0 - 4), min(img.width, x1 + 6), min(img.height, y1 + 6)))
 
 def grab(sct, game, box):
-    if HOOKS["grab"]: return HOOKS["grab"](game, box)
-    l, t, r, b = box
-    shot = sct.grab({"left": game[0] + l, "top": game[1] + t, "width": r - l, "height": b - t})
-    return Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
+    """A piece of the game, in the 1920 x 1080 picture: box is in its pixels. On another window size the matching
+    piece of the real window is taken and scaled to the box's size (averaged down when the window is bigger)."""
+    l, t, r, b = [int(round(v)) for v in box]
+    if not scaled():
+        if HOOKS["grab"]: return HOOKS["grab"](game, [l, t, r, b])
+        shot = sct.grab({"left": game[0] + l, "top": game[1] + t, "width": r - l, "height": b - t})
+        return Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
+    (kx, ky), (ox, oy), (sw, sh) = VIEW["k"], VIEW["o"], VIEW["s"]
+    # the exact real rectangle, a little padded so the scaling filter has its neighbours, then cut to the box exactly
+    fl, ft, fr, fb = l * kx, t * ky, r * kx, b * ky
+    rl, rt = max(0, int(fl) - 3), max(0, int(ft) - 3)
+    rr, rb = min(sw, int(fr) + 4), min(sh, int(fb) + 4)
+    if rr <= rl or rb <= rt: return Image.new("RGB", (max(1, r - l), max(1, b - t)))
+    if HOOKS["grab"]: im = HOOKS["grab"]([ox, oy, 0, 0], [rl, rt, rr, rb])
+    else:
+        shot = sct.grab({"left": ox + rl, "top": oy + rt, "width": rr - rl, "height": rb - rt})
+        im = Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
+    # Lanczos read best of the filters tried, at every size from 1440 to 5120 wide
+    return im.resize((max(1, r - l), max(1, b - t)), Image.LANCZOS, box=(fl - rl, ft - rt, min(fr, rr) - rl, min(fb, rb) - rt))
 
 def quick_hash(img, size):
     small = img.convert("L").resize(size).point(lambda v: v >> 4)
@@ -1519,12 +1558,18 @@ class ChannelWatch:
         self.open = False; self.first = None; self.last = None; self.closed = 0.0; self.saved = None; self.since = 0.0; self.pic = None
 
     def box(self, game):
-        w, h = game[2], game[3]
-        return [max(0, w // 2 - 520), int(h * 0.18), min(w, w // 2 + 520), int(h * 0.82)]
+        # the middle of the game, wide enough for the window at any size the game is drawn at (4K, ultrawide, stretched)
+        w, h = game[2], game[3]; half = max(520, int(w * 0.3))
+        return [max(0, w // 2 - half), int(h * 0.12), min(w, w // 2 + half), int(h * 0.88)]
+
+    def read(self, img):
+        # small games are read at double size, so the buttons are never too few pixels to measure
+        if img.width < 900: img = img.resize((img.width * 2, img.height * 2), Image.NEAREST)
+        return fmparse.read_channel_dialog(img)
 
     def step(self, sct, game, t):
         try:
-            sel = fmparse.read_channel_dialog(grab(sct, game, self.box(game)))
+            sel = self.read(grab(sct, game, self.box(game)))
         except Exception:
             sel = None
         if sel:
@@ -1748,6 +1793,7 @@ def snapshot(cfg):
     game = find_game(cfg["window_title"])
     if not game:
         print("MapleStory window not found. Open the game first."); return
+    real = game; game = view(cfg, game)
     d = os.path.join(HERE, "review"); os.makedirs(d, exist_ok=True)
     with getattr(mss, "MSS", mss.mss)() as sct:
         full = grab(sct, game, [0, 0, game[2], game[3]])
@@ -1758,7 +1804,7 @@ def snapshot(cfg):
         draw.rectangle(shop_box, outline=(255, 0, 0), width=2)
         draw.rectangle(chat_box, outline=(0, 160, 255), width=2)
         full.save(os.path.join(d, "snapshot.png"))
-    print("Saved review/snapshot.png. Game window is", game[2], "x", game[3], "pixels.")
+    print("Saved review/snapshot.png. Game window is", real[2], "x", real[3], "pixels" + (", read as 1920 x 1080." if scaled() else "."))
 
 class LoopState:
     """What the loop remembers between looks: last shop and chat fingerprints, when things were last read or sent."""
@@ -1922,8 +1968,9 @@ def main():
                 else:
                     if announced is not True:
                         log("watching MapleStory,", game[2], "x", game[3]); announced = True
-                        log("shop area", place(cfg, game)[0], "chat area", place(cfg, game)[1])
-                    if look(cfg, sct, game, t, L, jobs, store) == "channel":
+                        if (game[2], game[3]) != tuple(cfg.get("reference_size", [1920, 1080])): log("reading it scaled to 1920 x 1080, the size every reader is measured on")
+                        if game[2] < 1600: log("Tip: a game window under 1600 wide draws text very small. A bigger window reads more reliably.")
+                    if look(cfg, sct, view(cfg, game), t, L, jobs, store) == "channel":
                         time.sleep(0.25); continue
                 chores(cfg, t, L, store)
             except KeyboardInterrupt:

@@ -1,10 +1,15 @@
 {
- "version": "2026.10.30.7",
- "date": "2026-10-30T15:25:13+00:00",
- "notes": "A shop row whose name picks up a stray letter or two from the pointer now still reads when the rest is a real item.",
- "sha256": "54dc6a7bb4fe8de1445f2c17304d41585a20e0d560e5e8e1f4089a992b26d1c3",
- "size": 162829,
+ "version": "2026.10.31.1",
+ "date": "2026-10-31T03:35:47+00:00",
+ "notes": "Reads the game at any window size: 4K, ultrawide and stretched windows now read shops, item popups, chat and the Change Channel window. Channel reads are stricter: a picture it can't be sure of is skipped, never guessed.",
+ "sha256": "cf5413c9501fc07e9e419dae084fa44d8373218dc3cad62580b42483d8bbcd37",
+ "size": 164460,
  "history": [
+  {
+   "version": "2026.10.31.1",
+   "date": "2026-10-30",
+   "notes": "Reads the game at any window size: 4K, ultrawide and stretched windows now read shops, item popups, chat and the Change Channel window. Channel reads are stricter: a picture it can't be sure of is skipped, never guessed."
+  },
   {
    "version": "2026.10.30.7",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.3",
    "date": "2026-10-26",
    "notes": "A config.json with a typo no longer stops the watcher: it's set aside as config-broken.json and fresh settings are used. Works with VPN and proxy apps that switch on a SOCKS system proxy."
-  },
-  {
-   "version": "2026.10.26.2",
-   "date": "2026-10-26",
-   "notes": "Works with VPN and proxy apps that switch on a SOCKS system proxy: start.bat and install.bat go around it, and start.bat installs any missing Python package itself. Hover stats are checked against what the item can carry before they're kept."
   }
  ],
  "pip": [],
- "sig": "750be78eecfe0fa68a39966ac76a230d81e7e03ebb5a5c28526b1b442179e20be50e1841876882ad8f8878331708c375d2942d1c8fd7b606790acdf7fade3cb1c263083e18edd0a809165efd94c9999b65ad729801927cf2256160a3169b203dff11f503e3a7611008e24c9d75bbf8e1b469e81b7bf0a2c3d5c4bc59fab95b0ffeb185f1f702ddcf2d6ab72f7f58be7f6060a0e34bb910e216f46dcf042d479a9a82d7a0ceefc4e40ff298ca834780fdce5ce264263bd4526def49bb87f896590e67286915cb806f844f8117fbc008f18636dac248e68a424541b21a2cb8ba9e39bd4d51d78087b44effcd6e1fbac24e9fe477356b80b094350056b3dab5d262"
+ "sig": "9eedd506add4ec2b27f2292069d013ee419d9a2b67466b86c566b5e2f560d0eaabed789ae86daa0b7e10ddf7ca1624c27118681f7c9122fd2af65e63adbb2861dfc6f2ba697c84f4113ed516e4be1624bba3537ae6617316775e9691c64ac54457fc26839d00ecb32ec44f93130d0959b856947ee9fa4547937b376d35062af6f2e1e7793be50462d81d6e4c7d6cac17b5189884823ecb204db6f6f678099f93efb384cbd75c8aafbb05a2401d91293783474d689c9aac9d0df1fe6fe4b14cd1d8f2ee6d734152eb982058f6816c9e3aceec78bbcd37fe1225c84c2306b29abe2d9aed80945831ed6bbb450e56f07773ef7b3c96f8fc7a67769e2e2f2780a3fe"
 }

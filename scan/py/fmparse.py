@@ -1296,10 +1296,28 @@ def _read_tip_once(img, need_stats=True, lo=140, hi=215):
 
 # ---------------------------------------------------------------- channel window
 
+def _split_merged(spans):
+    """Buttons drawn small can lose the thin gap between two of them, leaving one span twice (or three times) as long
+    as the rest. Split those back evenly, judged against the usual span length."""
+    if len(spans) < 3: return spans
+    m = sorted(e - s for s, e in spans)[len(spans) // 2]
+    out = []
+    for s, e in spans:
+        k = round((e - s) / m) if m else 1
+        if k >= 2 and abs((e - s) - k * m) <= 0.25 * m * k and k <= 4:
+            step = (e - s) / k
+            out.extend((int(s + j * step), int(s + (j + 1) * step) - 1) for j in range(k))
+        else:
+            out.append((s, e))
+    return out
+
+
 def read_channel_dialog(img):
     """The Change Channel window: a grid of grey channel buttons, eight or ten to a row, with the
     highlighted one in blue. Grand launch went to 40 channels, so the grid can be five rows deep.
-    Returns the highlighted channel number, or None if the window is not there."""
+    Works at any size the game is drawn at (every measure is taken from the buttons themselves, not from
+    pixel counts tuned to one screen), and on a game stretched to a wide screen.
+    Returns the highlighted channel number, or None if the window is not there or can't be read for sure."""
     import numpy as np
     a = np.asarray(img.convert("RGB")).astype(np.int16)
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
@@ -1308,15 +1326,15 @@ def read_channel_dialog(img):
     cells = grey | blue
     rows = cells.sum(axis=1)
     W = a.shape[1]
-    # bands of rows that are mostly buttons
+    # bands of rows that hold a row of buttons; kept loose here, the row's shape below is what decides
     bands, start = [], None
     for y, n in enumerate(rows):
-        on = n > max(150, W * 0.18)
+        on = n > max(90, W * 0.06)
         if on and start is None: start = y
         if not on and start is not None:
-            if y - start >= 8: bands.append((start, y))
+            if y - start >= 4: bands.append((start, y))
             start = None
-    if start is not None and len(rows) - start >= 8: bands.append((start, len(rows)))
+    if start is not None and len(rows) - start >= 4: bands.append((start, len(rows)))
     if not bands:
         return None
     def button_runs(y0, y1):
@@ -1325,44 +1343,46 @@ def read_channel_dialog(img):
         for x, on in enumerate(col):
             if on and s is None: s = x
             if not on and s is not None:
-                if x - s >= 25: runs.append((s, x))
+                if x - s >= 12: runs.append((s, x))
                 s = None
-        if s is not None and len(col) - s >= 25: runs.append((s, len(col)))
-        return runs
-    # the first row of buttons is always full: eight (or ten) buttons the same width, evenly spaced. Other bright
-    # strips on screen (clouds, shop signs) can sit above it, so look for that row instead of trusting the first strip.
+        if s is not None and len(col) - s >= 12: runs.append((s, len(col)))
+        return _split_merged(runs)
+    def even(rr):
+        if len(rr) not in (8, 10): return False
+        widths = [e - s for s, e in rr]; pitch = (rr[-1][0] - rr[0][0]) / (len(rr) - 1)
+        return (max(widths) <= min(widths) * 1.4 and pitch > min(widths)
+                and all(abs((rr[k + 1][0] - rr[k][0]) - pitch) <= max(3, pitch * 0.06) for k in range(len(rr) - 1)))
+    def header_above(y0, y1, x0, x1):
+        # the window's blue title bar ("WINDIA") sits just above the first row of buttons; shop signs, clouds and
+        # the second row of buttons don't have it. Measured in button heights, so it holds at any size.
+        bh = y1 - y0
+        top = a[max(0, int(y0 - 1.7 * bh)):max(0, int(y0 - 0.2 * bh)), x0:x1]
+        if top.size == 0: return False
+        tr, tb = top[..., 0], top[..., 2]
+        return ((tb > 150) & (tr < 130) & (tb - tr > 70)).any(axis=0).mean() >= 0.6
+    # the first row of buttons is always full: eight (or ten) buttons the same width, evenly spaced, under the title
     runs, start = None, None
     for i, (y0, y1) in enumerate(bands):
         rr = button_runs(y0, y1)
-        if len(rr) in (8, 10):
-            widths = [e - s for s, e in rr]
-            if max(widths) <= min(widths) * 1.4 and all(abs((rr[k + 1][0] - rr[k][0]) - (rr[1][0] - rr[0][0])) <= 4 for k in range(len(rr) - 1)):
-                runs, start = rr, i; break
+        if even(rr) and header_above(y0, y1, rr[0][0], rr[-1][1]):
+            runs, start = rr, i; break
     if runs is None:
         return None
-    # the rows that follow it closely are the other channel rows
+    # the rows that follow it closely, with the same buttons, are the other channel rows
+    bh = bands[start][1] - bands[start][0]
     keep = [bands[start]]
     for y0, y1 in bands[start + 1:]:
-        if y0 - keep[-1][1] > 14 or len(keep) >= 6: break
+        if y0 - keep[-1][1] > max(4, 0.7 * bh) or len(keep) >= 6: break
+        if abs((y1 - y0) - bh) > max(3, 0.35 * bh): break
         keep.append((y0, y1))
     if len(keep) < 2:
         return None
-    bands = keep
-    # the window's blue title bar ("WINDIA") sits just above the buttons; shop signs and clouds don't have it
-    y0 = bands[0][0]; x0, x1 = runs[0][0], runs[-1][1]
-    top = a[max(0, y0 - 50):max(0, y0 - 8), x0:x1]
-    if top.size == 0:
-        return None
-    tr, tg, tb = top[..., 0], top[..., 1], top[..., 2]
-    hdr = ((tb > 150) & (tr < 130) & (tb - tr > 70)).any(axis=0).mean()
-    if hdr < 0.6:
-        return None
-    for bi, (y0, y1) in enumerate(bands):
+    hits = []
+    for bi, (y0, y1) in enumerate(keep):
         for ci, (x0, x1) in enumerate(runs):
-            cell = blue[y0:y1, x0:x1]
-            if cell.mean() > 0.35:
-                return bi * len(runs) + ci + 1
-    return None
+            if blue[y0:y1, x0:x1].mean() > 0.35:
+                hits.append(bi * len(runs) + ci + 1)
+    return hits[0] if len(hits) == 1 else None   # two lit buttons is not a reading we can trust
 
 
 # ---------------------------------------------------------------- scroll tier from the icon
