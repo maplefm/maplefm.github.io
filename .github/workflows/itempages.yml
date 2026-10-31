@@ -12,7 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # check out main as it is now, not the commit that queued this run: a queued run would build on an old main and its PR would conflict
       - uses: actions/checkout@v4
+        with:
+          ref: main
       # one page per priced item for search engines; the numbers refresh live on open, this keeps the baked copy close
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -40,5 +43,5 @@ jobs:
           git commit -q -m "item pages: daily refresh"
           git push -q -f origin "$b"
           n=$(gh pr create --base main --head "$b" --title "item pages: daily refresh" --body "Daily rebuild of the item price pages." | grep -o '[0-9]*$')
-          gh pr merge "$n" --rebase --delete-branch
+          gh pr merge "$n" --rebase --delete-branch || { gh pr close "$n" --delete-branch; exit 1; }
           gh api -X POST repos/${{ github.repository }}/pages/builds || true
