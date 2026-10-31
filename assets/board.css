@@ -425,7 +425,7 @@ a.slink:hover { text-decoration-color: var(--accent); }
 .btog .bsum b { color: var(--ink); }
 .btog .chev { width: 9px; height: 9px; margin-left: 10px; border-right: 2.5px solid var(--muted); border-bottom: 2.5px solid var(--muted); transform: rotate(45deg); transition: transform .18s; }
 .btog[aria-expanded="true"] .chev { transform: rotate(-135deg); }
-.board .bbody { max-height: 420px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-gutter: stable; scrollbar-color: var(--line2) transparent; }
+.board .bbody { max-height: 420px; overflow-y: auto; scrollbar-width: thin; scrollbar-gutter: stable; scrollbar-color: var(--line2) transparent; }
 .board .bbody::-webkit-scrollbar { width: 8px; } .board .bbody::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 8px; }
 .bsearch { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 6px; padding: 7px 8px 6px; background: var(--panel); border-bottom: 1px solid var(--line); }
 .bsearch svg { width: 14px; height: 14px; color: var(--muted); flex: none; }
@@ -1335,7 +1335,7 @@ body.bigcard .hsph, body.sheet .hsph { display: block; }
   body.bigcard .ipwrap:has(> #ipr:not([hidden])) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
   body.bigcard #ip { padding: 16px 20px 22px; }
   body.bigcard #ipr { padding: 16px 20px 22px 4px; }
-  body.bigcard #ipr .list { max-height: none; }
+  body.bigcard #ipr .list:not(.lfold ~ .list) { max-height: none; }
   body.bigcard .side .wtitle { padding-left: 20px; }
 }
 @media (max-width: 1180px) {
@@ -1556,5 +1556,7 @@ td:has(> .lgt) { white-space: nowrap; }
 .lgnone { margin: 0 0 10px; padding: 9px 12px; border-radius: 12px; background: var(--panel2); border: 1.5px dashed var(--line2); font-size: .88rem; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .lgnone .lgtip { color: var(--muted); font-size: .8rem; width: 100%; }
 /* equip cards: Where to buy and all sales scroll inside their own box */
-.lfold ~ .list { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 12px; }
+/* inner boxes never trap the wheel: at the end of a box, or when it has nothing to scroll, the card or page carries on.
+   Only the card and dialogs themselves use overscroll-behavior: contain */
+.lfold ~ .list { max-height: 460px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
 @media (max-width: 820px) { .lfold ~ .list { max-height: 60vh; } }
