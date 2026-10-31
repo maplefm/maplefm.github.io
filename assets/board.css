@@ -1597,3 +1597,10 @@ td:has(> .lgt) { white-space: nowrap; }
 .tg.unread { background: transparent; color: var(--muted); border: 1px dashed var(--line2); font-weight: 700; }
 .xs.tot, .xs.tot.upx, .xs.tot.downx { color: var(--ink); gap: 0; }
 .xs.tot em.up { color: var(--up); } .xs.tot em.down { color: var(--down); }
+
+/* channel and room stand out on every listing line */
+.li small .wh, .lgl small .wh { font-weight: 900; color: var(--ink); }
+
+/* a listing's name line wraps its tags instead of cutting them off */
+.li > b { white-space: normal; overflow: visible; line-height: 1.6; }
+.tline.etop { display: block; font-size: .82rem; color: var(--muted); margin: 2px 0 10px; } .tline.etop b { color: var(--ink); }
