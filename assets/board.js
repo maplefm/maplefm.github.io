@@ -477,7 +477,7 @@
   // hour, so a name's place can still change as more spellings of it come in.
   var CNC = { cl: {}, out: {}, db: -1, at: 0 }, NAMES_IN = null;
   // bump when cleanName or the name resolver changes, so a published names.json from older rules is not reused
-  var CLEANV = 5;   // 5: colour items (Buddy Overall Jeans) kept apart
+  var CLEANV = 6;   // 5: colour items (Buddy Overall Jeans) kept apart; 6: misspellings seen often snap to the real item
   window.fmClean = function () { return { cl: CNC.cl, out: CNC.out, v: CLEANV }; };
   window.fmQA = { statsFit: function (n, x) { return statsFit(n, x); }, statsFix: function (n, x) { return statsFix(n, x); }, canonAll: function (r) { return canonAll(r); }, pick: function (n) { pick(n); }, items: function () { return D ? D.list.map(function (i) { return i.item; }) : []; }, item: function (n) { return D && D.byName[n]; }, all: function () { return D ? D.list : []; }, D: function () { return D; } };
   // the server runs this same page and publishes the tidied spelling of every raw name it saw; seeded here, the
@@ -570,7 +570,8 @@
         return;
       }
       if (!DB[k] && !known[k]) { var sn = ocrSnap(k, false); if (sn && caps(DB[sn][0]) === caps(c.s)) res = sn; }
-      if (!res) { if (solidSet[k]) res = k; else res = fuzzy(k) || k; }
+      // a misspelling seen often ("Cursed Dall") still loses to the real item one letter away
+      if (!res) { if (solidSet[k] && (DB[k] || known[k])) res = k; else if (solidSet[k]) { var fz0 = fuzzy(k); res = fz0 && (DB[fz0] || known[fz0]) ? fz0 : k; } else res = fuzzy(k) || k; }
       // still nothing: screen scraps like "an | Blue Sauna Robe" or "ee) fom) Return Scroll" carry stray short
       // tokens before the real name. Peel them off one at a time; a scrap that never resolves is marked unknown.
       if (res === k && !DB[k] && !known[k]) {
@@ -706,8 +707,8 @@
     var seen = {}, L = [], who = {}, sellerLast = {}, itemLast = {};
     // A shop row read as "4 for 133,333" when the same seller's same item at the same price was also read
     // as "1 for 133,333" is a misread bundle size; equipment never comes in bundles.
-    var oneSeen = {};
-    ordered.forEach(function (s) { s.rows.forEach(function (r) { if ((r.q || 1) === 1) oneSeen[String(r.s).toLowerCase() + "|" + canon(r.i).n + "|" + r.p] = 1; }); });
+    var oneSeen = {}, bundleSeen = {};
+    ordered.forEach(function (s) { s.rows.forEach(function (r) { var k = String(r.s).toLowerCase() + "|" + canon(r.i).n + "|" + r.p; if ((r.q || 1) === 1) oneSeen[k] = 1; else if (r.q >= 50) bundleSeen[k] = Math.max(bundleSeen[k] || 0, r.q); }); });
     var latest = ordered.length ? Date.parse(ordered[0].at) : now;
     // One player, one name: IGNs don't care about case, and the reader mixes up look-alike letters
     // (I l i, rn m, vv w, v w, t f). Every spelling of the same name goes under the one seen most.
@@ -734,12 +735,19 @@
         if (chat && CHATFIX[sl + "|" + name + "|" + r.p]) name = CHATFIX[sl + "|" + name + "|" + r.p];
         if (!chat) itemLast[sl + "|" + name] = Math.max(itemLast[sl + "|" + name] || 0, t);
         var cat0 = category(name), qty = r.q || 1;
-        if (qty > 1 && (oneSeen[sl + "|" + name + "|" + r.p] || !canStack(name, cat0))) qty = 1;
+        // The other way round for real bundles: arrows read once as 975 and once as 1 at the same price are the bundle.
+        // A bundle of 50 or more is never a misread 1; only small counts ("4 for") fall back to 1.
+        if (qty === 1 && bundleSeen[sl + "|" + name + "|" + r.p] && canStack(name, cat0)) qty = bundleSeen[sl + "|" + name + "|" + r.p];
+        else if (qty > 1 && qty < 50 && (oneSeen[sl + "|" + name + "|" + r.p] || !canStack(name, cat0))) qty = 1;
+        else if (qty >= 50 && !canStack(name, cat0)) qty = 1;
         var key = r.s + "|" + name + "|" + r.p + "|" + qty + "|" + (r.k || "");
         if (!chat && r.k !== "b") {
           var g = G[key]; if (!g) { g = G[key] = { obs: {}, x: null }; GO.push(key); }
           var ok = si + "|" + t, o = g.obs[ok] || (g.obs[ok] = { t: t, S: 0, U: 0, s: s, by: by, stream: stream, cn: cn, name: name, qty: qty, cat: cat0 });
-          if (r.so) { o.S++; o.rs = o.rs || r; } else { o.U++; o.ru = o.ru || r; }
+          // one look at a shop can reach us under two spellings of the same item (a watcher kept "Mystery Paletle
+          // Exchange" and "Mystery Palette Exchange Coupon" both): each spelling is the whole count, never added up
+          var rk = (r.so ? "S|" : "U|") + r.i; o.n = o.n || {}; o.n[rk] = (o.n[rk] || 0) + 1;
+          if (r.so) { o.S = Math.max(o.S, o.n[rk]); o.rs = o.rs || r; } else { o.U = Math.max(o.U, o.n[rk]); o.ru = o.ru || r; }
           if (r.x && !g.x) g.x = r;
           return;
         }
@@ -796,6 +804,28 @@
       });
       if (nr) mark("rooms inferred " + nr);
     })();
+    // A popup whose title, even cut short on the left, names another item was read off the wrong row (older watchers
+    // attached it anyway): "curacy Scroll: Greater" on an Earring LUK Scroll, "roll: Greater" on Emerald Earrings.
+    // Its stats are dropped so they never grade, tier or price the listing.
+    (function () {
+      var nk = function (x) { return String(x || "").toLowerCase().replace(/[^a-z0-9]+/g, ""); };
+      var norms = null, dropN = 0, memo = {};
+      L.forEach(function (l) {
+        if (!l.x || !l.xt || !l.xt.length) return;
+        var a = nk(l.raw).replace("namecutoff", "").replace("tiercutoff", ""), b = nk(l.xt[0]);
+        if (!a || b.indexOf(a.slice(0, 10)) === 0) return;
+        var f = nk(String(l.xt[0]).replace(/\(\+\d+\)/g, "")); if (f.length < 10) return;
+        var f2 = f.length >= 14 ? f.slice(0, -2) : f; if (a.indexOf(f2) >= 0) return;
+        var mk0 = a + "|" + f2; if (memo[mk0] == null) {
+          if (!norms) norms = Object.keys(DB).map(nk);
+          var stem = a.replace(/(lesser|intermediate|greater|chaos|superior)$/, "");
+          var owners = norms.filter(function (n) { return n.indexOf(f2) >= 0; });
+          memo[mk0] = owners.length > 0 && !owners.some(function (n) { return n.indexOf(stem) === 0 || stem.indexOf(n) === 0 || n.slice(0, 12) === a.slice(0, 12); });
+        }
+        if (memo[mk0]) { l.x = null; l.xt = null; l.xj = ""; dropN++; }
+      });
+      if (dropN) mark("popups on the wrong row " + dropN);
+    })();
     // A scroll whose tier was cut off joins the tier it's priced like, when one is close.
     var byN = {}; L.forEach(function (l) { if (!l.tl && !l.b) (byN[l.i] || (byN[l.i] = [])).push(l.u); });
     // The hover text gives the success rate, and the rate tells the tier: 100% Lesser, 60% Intermediate, 10% Greater.
@@ -816,6 +846,13 @@
           if (bk.length === 1) { var row = DB[bk[0] + ": " + t.toLowerCase()] || DB[Object.keys(DB).filter(function (k) { return k.indexOf(bk[0] + ": ") === 0; })[0]]; if (row) b = String(row[0]).split(": ")[0]; }
         }
       }
+      // the row's own tier comes from its icon; a popup rate that disagrees wins only when the price agrees with it
+      // (a 10% scroll at the 10% price, carrying a 60% popup from the next row, stays a 10%: no fake 80% deal)
+      var nt = !l.tl && splitTier(l.i).t;
+      if (nt && nt !== t && /Scroll$/.test(b)) {
+        var an = byN[b + ": " + nt], ar = byN[b + ": " + t];
+        if (an && ar && an.length >= 3 && ar.length >= 3 && Math.abs(Math.log(l.u / median(an))) < Math.abs(Math.log(l.u / median(ar)))) { delete l.x.SUCCESS; return; }
+      }
       if (/Scroll$/.test(b) && tieredBase(b)) { l.i = b + ": " + t; l.tl = false; rateTier[String(l.s).toLowerCase() + "|" + b + "|" + l.p] = t; }
     });
     L.forEach(function (l) { var t = l.tl && rateTier[String(l.s).toLowerCase() + "|" + l.i + "|" + l.p]; if (t) { l.i = l.i + ": " + t; l.tl = false; } });
@@ -835,6 +872,33 @@
       var near = vs.filter(function (v) { var a = colMed[v]; return a && a.length >= 3 && Math.abs(Math.log(l.u / median(a))) < Math.log(1.5); });
       l.i = near.length === 1 ? near[0] : l.i + "\u2026";
     });
+    // A name that isn't a real item but is the start of several ("Green Mushroom", "Blue Chinese Undead...", or the same
+    // with its last letter misread: "Blue Chinese Undeac") is the one whose price it sits on: Green Mushroom at 10 is the
+    // Cap, at 30,000 the Hat. Only when that candidate is clearly closer than every other; else it stays cut off.
+    var realMed = {}; L.forEach(function (l) { if (!l.b && DB[String(l.i).toLowerCase()]) (realMed[l.i] || (realMed[l.i] = [])).push(l.u); });
+    var candCache = {}, fitN = 0;
+    function candsOf(nm) {
+      if (candCache[nm]) return candCache[nm];
+      var base = String(nm).replace(/\u2026$/, "").toLowerCase().replace(/[^a-z0-9)]+$/, "").trim(), out = [];
+      for (var cut = 0; cut <= 2 && !out.length; cut++) {
+        var pre = cut ? base.slice(0, -cut) : base;
+        if (pre.length < 8 || / scroll/.test(pre)) break;
+        (DBB[pre.slice(0, 2)] || []).forEach(function (t) { if (t.indexOf(pre) === 0 && t !== base && !/ scroll/.test(t) && out.indexOf(DB[t][0]) < 0) out.push(DB[t][0]); });   // scrolls: stat and tier can't be told by price
+      }
+      return (candCache[nm] = out);
+    }
+    L.forEach(function (l) {
+      if (l.b || l.tl || DB[String(l.i).toLowerCase()] || / Scroll/.test(l.i)) return;
+      var cs = candsOf(l.i); if (!cs.length) return;
+      // every candidate seen on the market is weighed; one never listed in the window is unlikely to be the one
+      var fit = cs.map(function (c) { var a = realMed[c]; return { c: c, n: a ? a.length : 0, d: a ? Math.abs(Math.log(l.u / median(a))) : null }; }).filter(function (x) { return x.d != null; }).sort(function (a, b) { return a.d - b.d; });
+      var pickC = "";
+      if (cs.length === 1 && (!fit.length || fit[0].d < Math.log(4))) pickC = cs[0];
+      else if (fit.length && fit[0].n >= 3 && fit[0].d < Math.log(2) && (fit.length === 1 || fit[1].d > Math.log(4))) pickC = fit[0].c;
+      if (pickC) { l.i = pickC; l.nameFit = true; fitN++; }
+      else if (!/\u2026$/.test(l.i) && cs.length > 1) l.i = l.i + "\u2026";
+    });
+    if (fitN) mark("names fitted by price " + fitN);
     L.forEach(function (l) {
       if (!l.tl) return;
       var best = "", bd = Math.log(2.5);
