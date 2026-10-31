@@ -2533,20 +2533,23 @@
     var n = i.item, wep = isWeapon(n), wk = wep ? keyStat(n, null) : null, base = fullBase(n).s;
     // a copy counts only when its popup was read well: the roll checks pass, its slots were read, and its stats fit
     // what the game allows (a drop moves a stat at most 5 off base; scrolls add only what their slots could)
+    // An item whose base has no stat buyers pay for (defense earrings, plain hats) has no roll to key on: a copy with its
+    // slots read and its stats fitting the game still counts, as Clean or as slots used with no gain.
     var ok = function (l) {
-      if (!l.x || l.chat || !rollKeyOk(n, l) || slotsUsed(n, l) == null || !rollPick(n, l)) return false;
+      if (!l.x || l.chat || slotsUsed(n, l) == null) return false;
       var sp = scrollSplit(n, l); if (sp && sp.ok === false) return false;
-      if (wep && (l.x[wk] == null || !(base[wk] > 0))) return false;
-      return true;
+      if (wep) return l.x[wk] != null && base[wk] > 0 && rollKeyOk(n, l) && !!rollPick(n, l);
+      return (rollKeyOk(n, l) && !!rollPick(n, l)) || !!sp;
     };
-    var seenA = {}, asks = (i.buy || []).filter(function (x) { if (x.st === "gone" || x.st === "sold" || !ok(x)) return false; var k = x.s + "|" + x.u + "|" + x.x.SLOTS + "|" + (rollPick(n, x).combo || "") + "|" + (wep ? x.x[wk] : ""); if (seenA[k]) return false; seenA[k] = 1; return true; });
+    var pickOf = function (l) { return (rollKeyOk(n, l) && rollPick(n, l)) || { g: 0, k: "", mv: {}, combo: "" }; };
+    var seenA = {}, asks = (i.buy || []).filter(function (x) { if (x.st === "gone" || x.st === "sold" || !ok(x)) return false; var k = x.s + "|" + x.u + "|" + x.x.SLOTS + "|" + (pickOf(x).combo || "") + "|" + (wep ? x.x[wk] : ""); if (seenA[k]) return false; seenA[k] = 1; return true; });
     var sold = i.sales.filter(ok), all = sold.map(function (l) { return [l, 1]; }).concat(asks.map(function (l) { return [l, 0]; }));
     var scrollable = null; (SCROLLS[subKind(n)] || []).forEach(function (ln) { ln[1].forEach(function (g) { Object.keys(g[1] || {}).forEach(function (k) { if (g[1][k] > 0) (scrollable || (scrollable = {}))[k] = 1; }); }); });
     var G = {}, order = [];
     function put(id, a, name, sortv) { var g = G[id]; if (!g) { g = G[id] = { id: id, name: name, sv: sortv, sold: [], asks: [] }; order.push(g); } g[a[1] ? "sold" : "asks"].push(a[0]); }
     var statN = {};
     all.forEach(function (a) {
-      var l = a[0], su = slotsUsed(n, l), p = rollPick(n, l), mv = p.mv || {};
+      var l = a[0], su = slotsUsed(n, l), p = pickOf(l), mv = p.mv || {};
       if (wep) {
         // weapons go by their attack number, the way players quote them: clean ones by their own roll, then scrolled
         var v = l.x[wk];
@@ -3357,7 +3360,7 @@
   // equips with a price ladder: Price by stat and the listings start folded at every width, and stay open once opened
   // (remembered in this browser for every item)
   var OPENS = loadLS("fm-open", {}) || {};
-  function ladItem() { var i = state.sel && D && D.byName && D.byName[state.sel]; var L = i && i.equip && ladderOf(i); return !!(L && L.top); }
+  function ladItem() { var i = state.sel && D && D.byName && D.byName[state.sel]; return !!(i && i.equip && ladderOf(i)); }
   function foldStats(ip) {
     var lad = ladItem();
     if (!ip || (window.innerWidth > 1180 && !lad)) return;
@@ -3498,7 +3501,16 @@
       box.appendChild(sp);
     }
     var grades = L.views[vk] || [], sel = LADSEL[i.item + "|" + vk];
-    if (!grades.some(function (g) { return g.id === sel; })) sel = (grades.indexOf(L.top) >= 0 ? L.top : grades.filter(function (g) { return g.basis === "sold"; })[0] || grades.filter(function (g) { return g.basis === "asking"; })[0] || grades[0] || {}).id;
+    // no grade has 2 copies yet: say so, and give the price of every sale (stats unread) so the card still prices it
+    if (!L.top) {
+      var nt = el("p", "lgnone");
+      nt.appendChild(el("b", null, grades.length ? "Not enough hovered copies to price each grade yet. " : "No copies hovered yet, so no grades. "));
+      if (i.typ) { nt.appendChild(document.createTextNode("All sales, stats unread: ")); if (i.hi > i.lo && short(i.lo) !== short(i.hi)) { nt.appendChild(money(i.lo)); nt.appendChild(document.createTextNode(" to ")); nt.appendChild(money(i.hi)); } else nt.appendChild(money(i.typ)); nt.appendChild(document.createTextNode(" · " + fmt(i.salesN) + " sales.")); }
+      nt.appendChild(el("span", "lgtip", " Hover this item in game while scanning to fill in its grades."));
+      box.appendChild(nt);
+      if (!grades.length) return box;
+    }
+    if (!grades.some(function (g) { return g.id === sel; })) sel = (L.top && grades.indexOf(L.top) >= 0 ? L.top : grades.filter(function (g) { return g.basis === "sold"; })[0] || grades.filter(function (g) { return g.basis === "asking"; })[0] || grades[0] || {}).id;
     var row = el("div", "lgrades"); row.setAttribute("role", "radiogroup"); row.setAttribute("aria-label", "Grades");
     grades.forEach(function (g) {
       var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "few" || g.basis === "none" ? " empty" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
@@ -3601,7 +3613,8 @@
     if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); else if (i.typ && vp >= 100) { var mult = i.typ / vp; vl.appendChild(el("span", "tg ok", mult >= 2 ? "FM pays " + (mult >= 10 ? Math.round(mult) : Math.round(mult * 10) / 10) + "× more" : "FM pays " + Math.round((mult - 1) * 100) + "% more")); vl.title += " The Free Market typical is " + fmt(i.typ) + ", so listing it beats the NPC."; } ht.appendChild(vl); }
     hd.appendChild(ht); ip.appendChild(hd); if (cb) ip.appendChild(cb);
     // equips: the price ladder replaces the one blended price, its 24h move and its sale boxes
-    var LD = i.equip ? ladderOf(i) : null; if (LD && !LD.top) LD = null;
+    // every equip gets the price ladder, even before any grade has 2 copies (then it says so and gives the overall price)
+    var LD = i.equip ? ladderOf(i) : null;
     if (LD) { ip.appendChild(ladderBox(i, LD)); nameBar(i); }
     var big = el("div", "big");
     if (i.hi > i.lo) { big.appendChild(money(i.lo)); big.appendChild(el("span", "dash", "–")); var hiS = el("span", "num", short(i.hi)); big.appendChild(hiS); }
