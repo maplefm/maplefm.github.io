@@ -1,8 +1,59 @@
 {
- "_about": "Where a quest step happens, when the game's quest data doesn't say (event quests that send you to NPCs by a hint). Keyed by quest id, then the step text as the quest window shows it: [NPC, map]. Checked in game and against public guides. worldpages.py shows each with a Nav here button.",
+ "_about": "Where a quest step happens, when the game's quest data doesn't say (event quests that send you to NPCs by a hint). Keyed by quest id, then the step text as the quest window shows it: [who or what, map, where on the map]. Checked in game and against public guides. worldpages.py shows each with a Nav here button.",
  "500011": {
-  "Find the child in the dark tunnel": ["Ronnie", "The Tree Tunnel At the Forest Up North"],
-  "Find the child on the open field": ["Anne", "The Hill East of Henesys"],
-  "Find the child up on the high ground": ["Estelle", "The Field South of Ellinia"]
+  "Find the child in the dark tunnel": [
+   "Ronnie",
+   "The Tree Tunnel At the Forest Up North"
+  ],
+  "Find the child on the open field": [
+   "Anne",
+   "The Hill East of Henesys"
+  ],
+  "Find the child up on the high ground": [
+   "Estelle",
+   "The Field South of Ellinia"
+  ]
+ },
+ "600005": {
+  "Find the secluded shore hidden somewhere on Victoria Island.": [
+   "A page",
+   "The Pig Beach",
+   "on the lower ground, between the trees"
+  ]
+ },
+ "600006": {
+  "Search for an unfamiliar dwelling and investigate the area around it.": [
+   "A page",
+   "Someone Else's House",
+   "at the door of the mushroom house"
+  ]
+ },
+ "600007": {
+  "Search the high branches deep in the ancient woods.": [
+   "A page",
+   "Marr's Forest",
+   "bottom right corner"
+  ]
+ },
+ "600008": {
+  "Search the alleyways for the next trail.": [
+   "Mong from Kong",
+   "Kerning City",
+   "next to the pharmacy; he asks 10 mesos for the page"
+  ]
+ },
+ "600009": {
+  "Track down the wild beasts in the rocky lands.": [
+   "A page",
+   "The Land of Wild Boar II",
+   "second small stepping stone from the left, just before the rope"
+  ]
+ },
+ "600010": {
+  "Follow the footsteps underground to the final treasure.": [
+   "The last spot",
+   "Ant Tunnel Park",
+   "upper right, just below the portal to The Grave of Mushmom"
+  ]
  }
 }
