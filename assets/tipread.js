@@ -7,8 +7,8 @@
   var LABELS = [
     ["ATT", /[wvy]{1,2}eapon\s*att\w*/i], ["MATT", /(?:m|hi|rn)agic\s*att\w*/i], ["WDEF", /[wvy]{1,2}eapon\s*de[ft]\w*\.?/i], ["MDEF", /(?:m|hi|rn)agic\s*de[ft]\w*\.?/i],
     ["HP", /max\s*hp/i], ["MP", /max\s*mp/i], ["ACC", /accura\w*/i], ["AVOID", /evasion|avoid\w*/i],
-    ["SPEED", /speed/i], ["JUMP", /jump/i], ["STR", /\bstr\b/i], ["DEX", /\bdex\b/i], ["INT", /\bint\b/i], ["LUK", /\bluk\b/i],
-    ["SLOTS", /remaining\s*enhanc\w*|upgrades?\s*avail\w*|number\s*of\s*upgrades?\w*/i], ["SUCCESS", /success\s*rate|success/i]
+    ["SPEED", /speed/i], ["JUMP", /jump/i], ["STR", /\bstr\b/i], ["DEX", /\bdex\b/i], ["INT", /\bint\b/i], ["LUK", /\bluke?\b/i],
+    ["SLOTS", /re(?:m|rn)aining\s*enhanc\w*|upgrades?\s*avail\w*|number\s*of\s*upgrades?\w*/i], ["SUCCESS", /success\s*rate|success/i]
   ];
   // the sign is small and often misread ("«7", "t7"), so up to two stray marks may sit between the label and the number
   var VAL = /^\s*[.:;]*\s*[^\d\s(]{0,2}\s*(\d{1,4})\s*%?(?:\s*[\(\[{]\s*(\d{1,4})(?:\s*([+\-~]?)\s*(\d{1,3}))?)?/;
@@ -80,6 +80,22 @@
     return best ? { x: best.x * S, y: best.y * S, w: best.w * S, h: best.h * S } : null;
   }
 
+  // a found box can be the frame around the icon inside the tooltip: grow it out to the edges of the dark tooltip panel,
+  // so the name at the top and the last stat line are inside too
+  function grow(px, W, H, box) {
+    function dark(x, y) { var p = (y * W + x) * 4, r = px[p], g = px[p + 1], b = px[p + 2]; return Math.max(r, g, b) < 150 && b >= r - 8; }
+    function rowOk(y, x0, x1) { var n = 0, t = 0; for (var x = x0; x <= x1; x += 2) { t++; if (dark(x, y)) n++; } return t && n / t >= 0.55; }
+    function colOk(x, y0, y1) { var n = 0, t = 0; for (var y = y0; y <= y1; y += 2) { t++; if (dark(x, y)) n++; } return t && n / t >= 0.55; }
+    var x0 = box.x, y0 = box.y, x1 = box.x + box.w - 1, y1 = box.y + box.h - 1, lim = Math.max(W, H), miss;
+    for (var pass = 0; pass < 2; pass++) {
+      for (miss = 0; y0 > 0 && miss < 4 && box.y - y0 < lim; ) { if (rowOk(y0 - 1, x0, x1)) { y0--; miss = 0; } else { y0--; miss++; } } y0 += miss;
+      for (miss = 0; y1 < H - 1 && miss < 4; ) { if (rowOk(y1 + 1, x0, x1)) { y1++; miss = 0; } else { y1++; miss++; } } y1 -= miss;
+      for (miss = 0; x0 > 0 && miss < 4; ) { if (colOk(x0 - 1, y0, y1)) { x0--; miss = 0; } else { x0--; miss++; } } x0 += miss;
+      for (miss = 0; x1 < W - 1 && miss < 4; ) { if (colOk(x1 + 1, y0, y1)) { x1++; miss = 0; } else { x1++; miss++; } } x1 -= miss;
+    }
+    return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+  }
+
   // light text on the dark tooltip becomes dark text on white, the way the reader likes it
   function prep(im) {
     var W = im.naturalWidth, H = im.naturalHeight, k = Math.min(1, 2400 / Math.max(W, H));
@@ -87,11 +103,15 @@
     var x = c.getContext("2d"); x.drawImage(im, 0, 0, c.width, c.height);
     var d = x.getImageData(0, 0, c.width, c.height), box = findBox(d.data, c.width, c.height) || findDark(d.data, c.width, c.height);
     var sx = 0, sy = 0, sw = c.width, sh = c.height;
-    if (box) { sx = box.x; sy = box.y; sw = box.w; sh = box.h; }
+    if (box) { var g0 = grow(d.data, c.width, c.height, box); sx = g0.x; sy = g0.y; sw = g0.w; sh = g0.h; }
     var scale = box ? 3 : (Math.max(sw, sh) < 900 ? 3 : 2);
     var o = document.createElement("canvas"); o.width = Math.round(sw * scale); o.height = Math.round(sh * scale);
     var ox = o.getContext("2d"); ox.imageSmoothingEnabled = true; ox.imageSmoothingQuality = "high";
     ox.drawImage(c, sx, sy, sw, sh, 0, 0, o.width, o.height);
+    // a full-colour copy of just the tooltip, for a listing's picture; never the whole screen, so chat and names stay private
+    var pic = null;
+    if (box) { var gb = grow(d.data, c.width, c.height, box), pd = 3, px0 = Math.max(0, gb.x - pd), py0 = Math.max(0, gb.y - pd), pw = Math.min(c.width - px0, gb.w + pd * 2), ph = Math.min(c.height - py0, gb.h + pd * 2);
+      pic = document.createElement("canvas"); pic.width = pw; pic.height = ph; pic.getContext("2d").drawImage(c, px0, py0, pw, ph, 0, 0, pw, ph); }
     var od = ox.getImageData(0, 0, o.width, o.height), p = od.data;
     // dark background or light? a light screenshot (rare) is read as it is
     var sum = 0; for (var i = 0; i < p.length; i += 40) sum += (p[i] + p[i + 1] + p[i + 2]) / 3;
@@ -103,7 +123,7 @@
       p[j] = p[j + 1] = p[j + 2] = v;
     }
     ox.putImageData(od, 0, 0);
-    return { canvas: o, box: !!box };
+    return { canvas: o, box: !!box, pic: pic };
   }
 
   function normName(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, ""); }
@@ -134,7 +154,10 @@
   function parse(text, names, baseOf) {
     var lines = String(text || "").split(/\n/).map(function (t) { return t.replace(/：/g, ":").replace(/\s+/g, " ").trim(); }).filter(function (t) { return t.replace(/[^A-Za-z0-9]/g, "").length >= 3; });
     var stats = {};
-    lines.forEach(function (t) {
+    // bonuses sit below the "Type:" line; above it are requirements ("REQ DEX: 25"), often misread as FEG or PER
+    var ty = -1; lines.slice(0, 14).some(function (t, i) { if (/\bt[yv]pe\b/i.test(t)) { ty = i; return true; } return false; });
+    lines.forEach(function (t, li) {
+      if (ty >= 0 && li <= ty && !/success|re(?:m|rn)aining|upgrade/i.test(t)) return;
       for (var i = 0; i < LABELS.length; i++) {
         var k = LABELS[i][0], rx = LABELS[i][1], m = rx.exec(t);
         if (!m || stats[k] != null) continue;
@@ -165,7 +188,15 @@
     if (known && !parts.length) parts.push("clean");
     delete stats.SUCCESS;
     if (stats.SLOTS != null) parts.push(stats.SLOTS + (stats.SLOTS === 1 ? " slot" : " slots"));
-    return { name: name, stats: stats, statsText: parts.join(", "), lines: lines };
+    // every stat the tooltip shows, each with its gain over the item's base: "STR 3 · LUK 8 (+5) · W.DEF 40 · 7 slots"
+    var full = [];
+    ORDER.forEach(function (k) {
+      if (stats[k] == null) return;
+      var b0 = stats[k + "_b"] != null ? stats[k + "_b"] : base ? (base[k] || 0) : null, g = b0 == null ? 0 : stats[k] - b0;
+      full.push((SHOW[k] || k) + " " + stats[k] + (g ? " (" + (g > 0 ? "+" : "") + g + ")" : ""));
+    });
+    if (stats.SLOTS != null) full.push(stats.SLOTS + (stats.SLOTS === 1 ? " slot" : " slots"));
+    return { name: name, stats: stats, statsText: parts.join(", "), statsFull: full.join(" · "), lines: lines };
   }
 
   window.fmReadTip = function (file, opt) {
@@ -174,7 +205,10 @@
       var pr = prep(im);
       return worker(opt.progress).then(function (w) { return w.recognize(pr.canvas); }).then(function (r) {
         var out = parse(r && r.data ? r.data.text : "", opt.names || [], opt.base);
-        out.box = pr.box; return out;
+        out.box = pr.box;
+        // a picture only when an item was read off it: a wrong box (the chat window, say) is never posted
+        if (pr.pic && out.name) { var u = pr.pic.toDataURL("image/png"); if (u.length > 1.9e6) u = pr.pic.toDataURL("image/jpeg", 0.9); out.pic = u.length <= 1.9e6 ? u : ""; }
+        return out;
       });
     });
   };

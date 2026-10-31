@@ -96,6 +96,9 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 .fab:hover{filter:brightness(1.08)}
 body{padding-bottom:70px}
 @media (max-width:600px){.hero h1{font-size:1.55rem}.panel{padding:14px}.btn{padding:9px 12px}}
+.shotprev{display:flex;gap:12px;align-items:flex-start;margin-top:10px;flex-wrap:wrap}.shotprev img{max-width:220px;max-height:260px;border-radius:8px;border:1px solid var(--line)}.shotprev .full{font-weight:700;margin:0 0 6px}.shotprev>div{flex:1 1 180px;min-width:0}
+.btn.sm{padding:6px 10px;font-size:.82rem}
+.tipwrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin:12px 0}.tipshot{max-width:min(100%,320px);border-radius:10px;border:1px solid var(--line);display:block}.tipstats{margin:0;padding-left:18px;font-weight:600}.tipstats li{margin:2px 0}.tipwrap h3{margin:0 0 6px}
 </style>
 <link rel="stylesheet" href="/assets/nav.css?v=6"></head><body>
 <main>
@@ -264,11 +267,22 @@ body{padding-bottom:70px}
     function fld(lbl, name, attrs, wide) { var l = el("label", wide ? "wide" : null, lbl), i = el(attrs.tag || "input"); i.name = name; Object.keys(attrs).forEach(function (k) { if (k !== "tag") i.setAttribute(k, attrs[k]); }); l.appendChild(i); f.appendChild(l); return i; }
     var it = fld("Item", "item", { list: "names", placeholder: "Start typing, like work gloves", autocomplete: "off", required: "" }, true);
     var hint = el("p", "hint"); it.parentNode.appendChild(hint);
-    // a screenshot of the item's tooltip fills in the item and its stats; the picture never leaves the browser
+    // a screenshot of the item's tooltip fills in the item and its stats. Only the tooltip itself, cut out of the screenshot,
+    // goes on the listing and its #selling post, with every stat it shows; the rest of the screen never leaves the browser
     var shot = el("div", "shot wide"), sbtn = el("button", "btn", "📷 Read it from a screenshot"), sfile = el("input"), sst = el("p", "hint");
+    var shotPic = "", shotFull = "", prev = el("div", "shotprev"); prev.hidden = true;
     sbtn.type = "button"; sfile.type = "file"; sfile.accept = "image/*"; sfile.hidden = true;
-    shot.appendChild(sbtn); shot.appendChild(el("span", "hint", "Screenshot the item's tooltip and drop, paste or pick it here. We fill in the item and stats.")); shot.appendChild(sfile); shot.appendChild(sst);
+    shot.appendChild(sbtn); shot.appendChild(el("span", "hint", "Screenshot the item's tooltip and drop, paste or pick it here. We fill in the item and stats.")); shot.appendChild(sfile); shot.appendChild(sst); shot.appendChild(prev);
     f.insertBefore(shot, it.parentNode);
+    function showPrev() {
+      prev.textContent = ""; prev.hidden = !shotPic && !shotFull; if (prev.hidden) return;
+      if (shotPic) { var im = el("img"); im.src = shotPic; im.alt = "Your item's tooltip"; prev.appendChild(im); }
+      var side = el("div");
+      if (shotFull) side.appendChild(el("p", "full", shotFull));
+      side.appendChild(el("p", "hint", shotPic ? "This picture and these stats go on your listing and its #selling post." : "These stats go on your listing. No tooltip box found, so no picture is attached."));
+      var rm = el("button", "btn sm", "Remove picture and stats"); rm.type = "button"; rm.addEventListener("click", function () { shotPic = ""; shotFull = ""; showPrev(); }); side.appendChild(rm);
+      prev.appendChild(side);
+    }
     sbtn.addEventListener("click", function () { sfile.click(); });
     sfile.addEventListener("change", function () { if (sfile.files[0]) readShot(sfile.files[0]); sfile.value = ""; });
     shot.addEventListener("dragover", function (e) { e.preventDefault(); shot.classList.add("over"); });
@@ -285,13 +299,14 @@ body{padding-bottom:70px}
           if (!r.name && !r.statsText) { sst.className = "msg err"; sst.textContent = "No item tooltip found. Hover the item so its stats show and screenshot again, or fill it in below."; return; }
           if (r.name) { it.value = shown(r.name); sync(); }
           if (r.statsText && !st.parentNode.hidden) st.value = r.statsText;
+          shotPic = r.pic || ""; shotFull = r.statsFull || ""; showPrev();
           sst.className = "msg ok";
           sst.textContent = (r.name ? "Read " + shown(r.name) : "Couldn't make out the name, so pick it below") + (r.statsText ? " · " + r.statsText : "") + ". Check it, then add your price.";
           pr.focus();
         }).catch(function (e) { sbtn.disabled = false; sst.className = "msg err"; sst.textContent = (e && e.message) || "Couldn't read that picture."; });
       };
       if (window.fmReadTip) go();
-      else { var sc = document.createElement("script"); sc.src = "/assets/tipread.js?v=1"; sc.onload = go; sc.onerror = function () { sbtn.disabled = false; sst.className = "msg err"; sst.textContent = "Couldn't load the reader. Check your connection."; }; document.head.appendChild(sc); }
+      else { var sc = document.createElement("script"); sc.src = "/assets/tipread.js?v=2"; sc.onload = go; sc.onerror = function () { sbtn.disabled = false; sst.className = "msg err"; sst.textContent = "Couldn't load the reader. Check your connection."; }; document.head.appendChild(sc); }
     }
     var pr = fld("Price each (mesos)", "price", { placeholder: "15m, 800k, 1.2b", inputmode: "decimal", required: "" });
     var qt = fld("How many", "qty", { type: "number", min: "1", max: "9999", value: "1" });
@@ -308,7 +323,9 @@ body{padding-bottom:70px}
       e.preventDefault(); var n = pick();
       if (!n) return msg(p, "Pick the item from the list so it matches the board.");
       go.disabled = true; msg(p, "");
-      api("/market", { item: n, price: pr.value, qty: qt.value === "" ? 1 : Number(qt.value), stats: st.parentNode.hidden ? "" : st.value, ign: ig.value.trim(), note: nt.value }).then(function (j) {
+      var body = { item: n, price: pr.value, qty: qt.value === "" ? 1 : Number(qt.value), stats: st.parentNode.hidden ? "" : st.value, ign: ig.value.trim(), note: nt.value };
+      if (shotFull) body.detail = shotFull; if (shotPic) body.shot = shotPic;
+      api("/market", body).then(function (j) {
         go.disabled = false;
         if (!j.ok) return msg(p, j.error || "That didn't save. Try again.");
         L.unshift(j.listing); refresh().then(function () { location.hash = "#l=" + j.listing.id + "&new"; });
@@ -335,6 +352,12 @@ body{padding-bottom:70px}
       var sn = seenTag(l); if (sn) t.appendChild(sn); var tt = tradesTag(l.seller); if (tt) t.appendChild(tt); p.appendChild(t);
       var kv = el("dl", "kv"); [["Seller", (l.seller.name || "") + (l.ign ? " · in game: " + l.ign : "") + (l.seller.trades ? " · " + l.seller.trades + (l.seller.trades === 1 ? " confirmed trade" : " confirmed trades") : " · no confirmed trades yet")], ["Listed", ago(l.created)], ["Typical on the board", refOf(ROWS[l.item]) ? meso(refOf(ROWS[l.item])) + (l.stats ? " (clean)" : "") : "not enough sales yet"]].forEach(function (x) { kv.appendChild(el("dt", null, x[0])); kv.appendChild(el("dd", null, x[1])); });
       p.appendChild(kv);
+      if (l.shot || l.detail) {
+        var tw = el("div", "tipwrap");
+        if (l.shot) { var tim = el("img", "tipshot"); tim.src = l.shot; tim.alt = shown(l.item) + " tooltip from the seller"; tim.loading = "lazy"; tw.appendChild(tim); }
+        if (l.detail) { var ul = el("ul", "tipstats"); l.detail.split(" · ").forEach(function (x) { ul.appendChild(el("li", null, x)); }); var dv = el("div"); dv.appendChild(el("h3", null, "Stats")); dv.appendChild(ul); tw.appendChild(dv); }
+        p.appendChild(tw);
+      }
       if (l.note) { p.appendChild(el("h3", null, "Seller's note")); p.appendChild(el("div", "note", l.note)); }
       var bl = el("p", "hint"); var ba = el("a", null, "See " + shown(l.item) + " on the price board →"); ba.href = "/#item=" + encodeURIComponent(l.item); bl.appendChild(ba); p.appendChild(bl);
       if (l.ign) { var sh = el("p", "hint"), sa = el("a", null, "See " + l.ign + "'s shop as our scanners saw it →"); sa.href = "/shop.html#" + encodeURIComponent(l.ign); sh.appendChild(sa); p.appendChild(sh); }

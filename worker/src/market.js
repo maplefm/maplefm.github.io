@@ -22,6 +22,33 @@ const meso = (n) => n >= 999.5e6 ? +(n / 1e9).toFixed(2) + "B" : n >= 999.5e3 ? 
 const shown = (name) => String(name || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, (m, t) => " Scroll " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%" })[t]);
 const clean = (s, n) => String(s == null ? "" : s).replace(/[\u0000-\u001f\u007f<>@`]/g, " ").replace(/\s+/g, " ").trim().slice(0, n);
 export const listingUrl = (id) => SITE_URL + "/market.html#l=" + id;
+// the seller's own screenshot of the item, kept with the listing and shown on the site and in its #selling post
+const API_URL = "https://api.maplefm.gg";
+const SHOT_MAX = 1.5e6;
+const shotUrl = (l) => (l && l.shot ? API_URL + "/market/" + l.id + "/shot?v=" + (l.shot || 1) : "");
+function shotBytes(data) {
+  const m = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(String(data || ""));
+  if (!m) return null;
+  let bin; try { bin = atob(m[2]); } catch (e) { return null; }
+  if (bin.length > SHOT_MAX || bin.length < 100) return null;
+  const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  // the bytes have to be the picture they claim to be
+  const png = u[0] === 0x89 && u[1] === 0x50 && u[2] === 0x4e && u[3] === 0x47, jpg = u[0] === 0xff && u[1] === 0xd8 && u[2] === 0xff;
+  const webp = u[0] === 0x52 && u[1] === 0x49 && u[8] === 0x57 && u[9] === 0x45 && u[10] === 0x42 && u[11] === 0x50;
+  const type = png ? "image/png" : jpg ? "image/jpeg" : webp ? "image/webp" : "";
+  return type ? { u, type } : null;
+}
+async function shotSave(env, l, data) {
+  const b = shotBytes(data); if (!b) return false;
+  await env.ACCOUNTS.put("mshot:" + l.id, b.u, { metadata: { type: b.type }, expirationTtl: 120 * DAY });
+  l.shot = now(); await run(env, "UPDATE market_listings SET shot = ? WHERE id = ?", l.shot, l.id);
+  return true;
+}
+async function shotGet(env, id) {
+  const r = await env.ACCOUNTS.getWithMetadata("mshot:" + id, "arrayBuffer");
+  if (!r || !r.value) return new Response("not found", { status: 404 });
+  return new Response(r.value, { headers: { "Content-Type": (r.metadata && r.metadata.type) || "image/png", "Cache-Control": "public, max-age=86400", "Access-Control-Allow-Origin": "*", "X-Content-Type-Options": "nosniff" } });
+}
 
 // "15m", "2.5 mil", "800k", "1b", "15,000,000"
 export function parseMesos(s) {
@@ -51,7 +78,7 @@ async function ensure(env) {
     env.INBOX_DB.prepare(`CREATE TABLE IF NOT EXISTS market_reports (id TEXT PRIMARY KEY, listing_id TEXT, reporter_id TEXT, why TEXT, created INTEGER)`),
   ]);
   // columns added after launch; adding one that's already there just fails quietly
-  for (const c of ["confirmed INTEGER", "seen_at INTEGER", "seen_price INTEGER", "deal_sent INTEGER", "sold_at INTEGER"])
+  for (const c of ["confirmed INTEGER", "seen_at INTEGER", "seen_price INTEGER", "deal_sent INTEGER", "sold_at INTEGER", "detail TEXT", "shot INTEGER"])
     await env.INBOX_DB.prepare("ALTER TABLE market_listings ADD COLUMN " + c).run().catch(() => {});
   READY = true;
 }
@@ -75,7 +102,8 @@ function pub(l, T) {
   return { id: l.id, item: l.item, qty: l.qty, price: l.price, stats: l.stats || "", note: l.note || "", ign: l.ign || "",
     seller: { id: l.seller_id, name: l.seller_name || "", avatar: l.seller_avatar || "", trades: (T && T[l.seller_id]) || 0 },
     seen: l.seen_at && now() - l.seen_at < SEEN_FOR ? { at: l.seen_at, price: l.seen_price || 0 } : null, created: l.created, updated: l.updated, expires: l.expires,
-    status: l.status, source: l.source, thread: l.thread_id ? "https://discord.com/channels/" + GUILD + "/" + l.thread_id : "", url: listingUrl(l.id) };
+    status: l.status, source: l.source, thread: l.thread_id ? "https://discord.com/channels/" + GUILD + "/" + l.thread_id : "", url: listingUrl(l.id),
+    detail: l.detail || "", shot: shotUrl(l) };
 }
 
 // ---------------------------------------------------------------- routes
@@ -87,6 +115,7 @@ export async function marketRoute(req, env, url, p, ctx) {
   const [, id, act, oid, oact] = m;
   if (req.method === "GET" && !id) return marketList(req, env, url, ctx);
   if (req.method === "GET" && id && !act) return marketOne(req, env, id, ctx);
+  if (req.method === "GET" && id && act === "shot") return shotGet(env, id);
   if (req.method !== "POST") return j({ error: "not found" }, 404);
   const me = await ctx.whoami(req, env);
   if (!me) return j({ error: "Sign in with Discord first." }, 401);
@@ -185,6 +214,9 @@ function checkFields(b, ctx, l) {
     out.qty = q;
   }
   if (b.stats !== undefined) out.stats = clean(b.stats, 60);
+  // every stat line the screenshot showed, e.g. "STR 3 · LUK 8 (+5) · W.DEF 40 · 7 slots"
+  if (b.detail !== undefined) out.detail = clean(b.detail, 300);
+  if (b.shot !== undefined && b.shot !== "" && !shotBytes(b.shot)) return { err: "That picture couldn't be used. Try a PNG or JPEG under 1.5 MB." };
   if (b.note !== undefined) out.note = clean(b.note, 200);
   if (b.ign !== undefined) {
     const g = String(b.ign == null ? "" : b.ign).trim();
@@ -205,9 +237,10 @@ async function create(env, me, b, ctx) {
   if (ctx.overLimit("mkc:" + me.id, (Number(env.MARKET_RATE) || 60) / 2, 3600)) return j({ error: "That's a lot of listings in an hour. Try again a little later." }, 429);
   const t = now(), id = rid();
   const l = { id, seller_id: String(me.id), seller_name: clean(me.name || me.username, 40), seller_avatar: me.avatar || "", ign: f.ign, item: f.item, qty: f.qty, price: f.price,
-    stats: f.stats || "", note: f.note || "", created: t, updated: t, expires: t + LIFE, status: "active", source: "site", thread_id: null, title: "" };
-  await run(env, `INSERT INTO market_listings (id, seller_id, seller_name, seller_avatar, ign, item, qty, price, stats, note, created, updated, expires, status, source)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, l.id, l.seller_id, l.seller_name, l.seller_avatar, l.ign, l.item, l.qty, l.price, l.stats, l.note, l.created, l.updated, l.expires, l.status, l.source);
+    stats: f.stats || "", note: f.note || "", detail: f.detail || "", shot: null, created: t, updated: t, expires: t + LIFE, status: "active", source: "site", thread_id: null, title: "" };
+  await run(env, `INSERT INTO market_listings (id, seller_id, seller_name, seller_avatar, ign, item, qty, price, stats, note, created, updated, expires, status, source, detail)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, l.id, l.seller_id, l.seller_name, l.seller_avatar, l.ign, l.item, l.qty, l.price, l.stats, l.note, l.created, l.updated, l.expires, l.status, l.source, l.detail);
+  if (b.shot) await shotSave(env, l, b.shot);
   const th = await threadOpen(env, l).catch((e) => ({ err: String(e.message || e) }));
   if (th && th.id) { await run(env, "UPDATE market_listings SET thread_id = ?, title = ? WHERE id = ?", th.id, th.name || "", id); l.thread_id = th.id; }
   else if (th && th.err) await run(env, "UPDATE market_listings SET dsc_err = ? WHERE id = ?", th.err.slice(0, 200), id);
@@ -219,8 +252,13 @@ async function edit(env, l, b, ctx) {
   const f = checkFields(b, ctx, l); if (f.err) return j({ error: f.err }, 400);
   delete f.equip;
   if (f.ign === "") return j({ error: "Add your in-game name so buyers can find you." }, 400);
-  const keys = Object.keys(f).filter((k) => ["item", "price", "qty", "stats", "note", "ign"].includes(k) && f[k] !== l[k]);
-  if (!keys.length) return j({ ok: true, listing: pub(l), unchanged: true });
+  const keys = Object.keys(f).filter((k) => ["item", "price", "qty", "stats", "note", "ign", "detail"].includes(k) && f[k] !== (l[k] || (k === "detail" ? "" : l[k])));
+  // a new picture replaces the old one; an empty one takes it down
+  let shotNew = false;
+  if (b.shot) shotNew = await shotSave(env, l, b.shot);
+  else if (b.shot === "" && l.shot) { await env.ACCOUNTS.delete("mshot:" + l.id); l.shot = null; await run(env, "UPDATE market_listings SET shot = NULL WHERE id = ?", l.id); shotNew = true; }
+  if (!keys.length && !shotNew) return j({ ok: true, listing: pub(l), unchanged: true });
+  if (!keys.length) { await safe(threadEdit(env, l, "Picture updated.")); return j({ ok: true, listing: pub(l) }); }
   if (keys.includes("price") || keys.includes("item") || keys.includes("stats")) {
     const dup = await one(env, "SELECT id FROM market_listings WHERE seller_id = ? AND item = ? AND price = ? AND COALESCE(stats,'') = ? AND status IN ('active','pending') AND id != ?",
       l.seller_id, f.item || l.item, f.price || l.price, (f.stats !== undefined ? f.stats : l.stats) || "", l.id);
@@ -392,11 +430,16 @@ const safe = (p) => Promise.resolve(p).catch(() => {});
 const label = (l) => "**" + shown(l.item) + "**" + (l.stats ? " (" + l.stats + ")" : "") + (l.qty > 1 ? " x" + l.qty : "");
 function title(l) { return ("WTS " + shown(l.item) + (l.stats ? " (" + l.stats + ")" : "") + (l.qty > 1 ? " x" + l.qty : "") + " · " + meso(l.price) + (l.qty > 1 ? " ea" : "")).slice(0, 100); }
 function embed(l) {
-  return { title: shown(l.item) + (l.stats ? " (" + l.stats + ")" : ""), url: listingUrl(l.id), color: 0xffb020,
+  const e = { title: shown(l.item) + (l.stats ? " (" + l.stats + ")" : ""), url: listingUrl(l.id), color: 0xffb020,
     description: [l.note || "", "Buy it now or make an offer on maplefm.gg. The seller gets a DM."].filter(Boolean).join("\n\n"),
     fields: [{ name: "Price", value: meso(l.price) + (l.qty > 1 ? " each" : ""), inline: true }, { name: "Quantity", value: String(l.qty), inline: true },
-      { name: "Seller", value: "<@" + l.seller_id + ">" + (l.ign ? " · " + l.ign : ""), inline: true }],
+      // a mention inside an embed shows as a raw id on phones, so the field gives the in-game name and the post's own
+      // message mentions the seller (Discord shows their server nickname there, never the account's real name)
+      { name: "Seller", value: l.ign ? "IGN " + l.ign : "See the mention above", inline: true }],
     footer: { text: "Listed on maplefm.gg · listings never change the board's prices" } };
+  if (l.detail) e.fields.push({ name: "Stats", value: l.detail.split(" · ").join("\n").slice(0, 1000), inline: false });
+  const s = shotUrl(l); if (s) e.image = { url: s };
+  return e;
 }
 
 // #selling sorts posts by tag (Weapon, Armor, Accessory, Scroll, Etc, Sold) and requires one: pick by what the item is
@@ -432,7 +475,7 @@ async function forumTags(env, item, sold) {
 }
 async function threadOpen(env, l) {
   if (!env.DISCORD_BOT_TOKEN) return null;
-  const body = { name: title(l), message: { content: "", embeds: [embed(l)], allowed_mentions: { parse: [] } }, applied_tags: await forumTags(env, l.item, false) };
+  const body = { name: title(l), message: { content: "Seller <@" + l.seller_id + ">", embeds: [embed(l)], allowed_mentions: { parse: [] } }, applied_tags: await forumTags(env, l.item, false) };
   const r = await fetch(api(env) + "/channels/" + SELL_FORUM + "/threads", { method: "POST", headers: H(env), body: JSON.stringify(body) });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error("forum post " + r.status + " " + (d.message || ""));
@@ -713,6 +756,8 @@ export async function marketShare(env, id) {
       (l.qty > 1 ? " · " + l.qty + " available" : "") + ". Buy it now or make an offer; the seller gets a Discord DM." + (l.note ? " " + l.note : "");
     const k = await kindId(env, l.item);
     if (k) { img = "https://maplestory.io/api/MCW/1/item/" + k + "/icon"; card = "summary"; }
+    if (l.shot) { img = shotUrl(l); card = "summary_large_image"; }
+    if (l.detail) desc = l.detail + ". " + desc;
   }
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:image" content="${esc(img)}">
