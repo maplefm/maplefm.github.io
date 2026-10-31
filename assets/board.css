@@ -1604,3 +1604,8 @@ td:has(> .lgt) { white-space: nowrap; }
 /* a listing's name line wraps its tags instead of cutting them off */
 .li > b { white-space: normal; overflow: visible; line-height: 1.6; }
 .tline.etop { display: block; font-size: .82rem; color: var(--muted); margin: 2px 0 10px; } .tline.etop b { color: var(--ink); }
+.big .etg { margin-left: 10px; font-size: .7rem; vertical-align: middle; }
+/* the name bar: the item's name and price shrink before they run into our name */
+.nbar .nbt { flex: 1 1 auto; overflow: hidden; }
+.nbar .nbt small { overflow: hidden; text-overflow: ellipsis; }
+.nbar .nbrand { flex: none; }
