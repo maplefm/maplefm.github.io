@@ -17,14 +17,7 @@
 a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
 .cta{display:block;margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink)}.cta a{font-weight:800}
 .need{border-top:1px solid var(--line2);padding:8px 0}.need:first-of-type{border-top:0}
-/* bring lists: name, how many, FM price in fixed columns that line up row to row, so the eye goes straight across.
-   A step indented under a crafted item keeps the same columns (its name column is narrower by the indent). */
-.nl{display:grid;grid-template-columns:var(--nmw,250px) 64px minmax(0,1fr);align-items:center;gap:4px 10px}
-.nl .nm{display:flex;align-items:center;gap:6px;min-width:0}
-.nl .n{font-weight:800;white-space:nowrap;text-align:right}
-.nl .fp{font-size:.84rem;color:var(--muted)}.nl .fp b{color:var(--ink)}.nl .fp.fpn{font-style:italic}
-.tk{--nmw:calc(var(--nmw0,250px) - 30px)}.tk .tk{--nmw:calc(var(--nmw0,250px) - 60px)}.tk .tk .tk{--nmw:calc(var(--nmw0,250px) - 90px)}
-@media (max-width:640px){.nl{grid-template-columns:minmax(0,1fr) auto}.nl .fp{grid-column:1 / -1;padding-left:30px}}
+.nl{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.nl .n{margin-left:auto;font-weight:800;white-space:nowrap}.nl .n small{font-weight:600;color:var(--muted)}
 .gi{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:4px}
 .srcs{font-size:.82rem;color:var(--muted);margin:3px 0 0 30px}.srcs img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated;vertical-align:middle}
 .crt{font-size:.8rem;color:var(--muted);margin:2px 0 0 30px}.crt b{color:var(--ink)}
