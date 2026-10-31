@@ -123,7 +123,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
         await p.evaluate(() => window.scrollTo(0, 0));
         await p.waitForFunction(() => window.fmQA && window.fmQA.items().length > 100, null, { timeout: 30000 }).catch(() => {});
         await p.evaluate(() => window.fmQA.pick("Work Gloves")); await p.waitForTimeout(1500);
-        ok(await p.evaluate(() => !!document.querySelector("#ip") && document.querySelector("#ip").textContent.indexOf("Work Gloves") >= 0), `${tag} search opens an item card`);
+        ok(await p.evaluate(() => !!document.querySelector("#side") && document.querySelector("#side").textContent.indexOf("Work Gloves") >= 0), `${tag} search opens an item card`);
         // stats an item can't have never count as its roll
         const sf = await p.evaluate(() => [JSON.stringify(window.fmQA.statsFix("Emerald Earrings", { ATT: 50, ATT_b: 47, SLOTS: 5 })),
           JSON.stringify(window.fmQA.statsFix("Work Gloves", { ATT: 5, WDEF: 6, SLOTS: 2 })), JSON.stringify(window.fmQA.statsFix("Korean Fan", { ATT: 58, ATT_b: 55, LUK: 70, SLOTS: 7 }))]);
@@ -136,11 +136,11 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       if (pg === "/market.html") {
         await p.fill(".sitenav .sn-search input", "work gloves"); await p.keyboard.press("Enter");
         await p.waitForFunction(() => document.querySelector("#ip") && /Work Gloves/.test(document.querySelector("#ip").textContent), null, { timeout: 30000 }).catch(() => {});
-        ok(await p.evaluate(() => location.pathname === "/" && !!document.querySelector("#ip") && /Work Gloves/.test(document.querySelector("#ip").textContent)), `${tag} menu search opens the item on the board`);
+        ok(await p.evaluate(() => location.pathname === "/" && !!document.querySelector("#side") && /Work Gloves/.test(document.querySelector("#side").textContent)), `${tag} menu search opens the item on the board`);
         // "See X on the price board" from a listing opens that item's card
         await p.goto("http://localhost:" + PORT + "/#item=" + encodeURIComponent("Pan Lid"), { waitUntil: "domcontentloaded" });
         await p.waitForFunction(() => document.querySelector("#ip") && /Pan Lid/.test(document.querySelector("#ip").textContent), null, { timeout: 30000 }).catch(() => {});
-        ok(await p.evaluate(() => !!document.querySelector("#ip") && /Pan Lid/.test(document.querySelector("#ip").textContent)), `${tag} a #item= link opens the item card`);
+        ok(await p.evaluate(() => !!document.querySelector("#side") && /Pan Lid/.test(document.querySelector("#side").textContent)), `${tag} a #item= link opens the item card`);
       }
       ok(!errs.length, `${tag} ${pg}: no page errors ${errs.slice(0, 2).join(" | ")}`);
       await ctx.close();
