@@ -194,7 +194,7 @@ def main():
             names[iid] = nm
         return nm
 
-    def qsteps(txt):
+    def quest_todo(txt):
         out = []
         for ln in str(txt or "").replace("\\n", "\n").replace("\\r", "").split("\n"):
             ln = re.sub(r"#questorder\d*#", "", ln)
@@ -287,7 +287,7 @@ def main():
                 # the quest window's own to-do list ("Find the child in the dark tunnel"): what a player reads in game,
                 # so the page says the same. #p NPC and #t item codes become names; #m map codes stay as {m:id} for
                 # the page builder, which knows the maps.
-                "steps": qsteps(d.get("demandSummary")),
+                "steps": quest_todo(d.get("demandSummary")),
                 "ended": True if ended else None,
             }
             # where the game and the wiki disagree, keep the game's value and say so
