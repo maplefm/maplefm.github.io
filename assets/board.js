@@ -3443,7 +3443,7 @@
   function foldLists(ip) {
     var i = D && D.byName && D.byName[state.sel]; if (!i || !ip.querySelector(":scope > .ltabs") || ip.querySelector(":scope > .lfold")) return;
     var open = OPENS.lists !== 0, n = ip.querySelector(":scope > .ltabs em"), b = el("button", "lfold"); b.type = "button";   // open unless this browser closed it
-    b.appendChild(el("span", null, "Where to buy" + (n ? " (" + n.textContent + ")" : "") + " and all sales")); b.appendChild(el("span", "fhint", open ? "Hide" : "Open")); b.appendChild(el("span", "fchev"));
+    b.appendChild(el("span", null, "Where to buy and all sales")); b.appendChild(el("span", "fhint", open ? "Hide" : "Open")); b.appendChild(el("span", "fchev"));
     b.setAttribute("aria-expanded", open);
     ip.classList.toggle("lclosed", !open);
     b.addEventListener("click", function () { OPENS.lists = open ? 0 : 1; saveLS("fm-open", OPENS); renderItem(); });
@@ -3535,7 +3535,7 @@
     var w = $("side") && $("side").querySelector(".wtitle"); if (!w) return;
     if (nbIO) { nbIO.disconnect(); nbIO = null; }
     var old = w.querySelector(".nbar"); if (old) old.remove();
-    var hd = i && $("side").querySelector(".ih");
+    var hd = i && ($("side").querySelector(".ih h3") || $("side").querySelector(".ih"));   // the moment the item's name scrolls away
     if (!hd || !window.IntersectionObserver) { w.classList.remove("named"); return; }
     var nb = el("div", "nbar"); nb.setAttribute("aria-hidden", "true");
     nb.appendChild(iconBox(i.item)); var t = el("div", "nbt"); t.appendChild(el("b", null, showName(i.item)));
@@ -3581,9 +3581,8 @@
     // no grade has 2 copies yet: say so, and give the price of every sale (stats unread) so the card still prices it
     if (!L.top) {
       var nt = el("p", "lgnone");
-      nt.appendChild(el("b", null, grades.length ? "Not enough hovered copies to price each grade yet. " : "No copies hovered yet, so no grades. "));
+      nt.appendChild(el("b", null, grades.length ? "Too few read copies to price every grade yet. " : "No copies read yet, so no grades. "));
       if (i.typ) { nt.appendChild(document.createTextNode("All sales, stats unread: ")); if (i.hi > i.lo && short(i.lo) !== short(i.hi)) { nt.appendChild(money(i.lo)); nt.appendChild(document.createTextNode(" to ")); nt.appendChild(money(i.hi)); } else nt.appendChild(money(i.typ)); nt.appendChild(document.createTextNode(" · " + fmt(i.salesN) + " sales.")); }
-      nt.appendChild(el("span", "lgtip", " Hover this item in game while scanning to fill in its grades."));
       box.appendChild(nt);
       if (!grades.length) return box;
     }
@@ -3604,13 +3603,7 @@
     box.appendChild(row);
     var g = grades.filter(function (x) { return x.id === sel; })[0];
     if (!g) return box;
-    var det = el("div", "lgsel"), head = el("p", "lgh");
-    head.appendChild(el("b", null, g.name + ": "));
-    if (g.basis === "sold") { head.appendChild(document.createTextNode("most sold between ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" and ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.use.length + " sold in 7 days")); }
-    else if (g.basis === "asking") { head.appendChild(document.createTextNode("not enough sales yet. Asking ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" to ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.asks.length + " listed")); }
-    else if (g.basis === "few" && g.lo) { head.appendChild(document.createTextNode(g.one === "sold" ? "only 1 sale so far, at " : "no sales yet, 1 listed at ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(". One copy is a hint, not a price yet.")); }
-    else head.appendChild(document.createTextNode("not enough sales yet, " + (g.sold.length + g.asks.length) + " seen."));
-    det.appendChild(head);
+    var det = el("div", "lgsel");   // no sentence over the lists: the grade's button already says its price and count
     function line(l, sold) {
       var li = el("div", "lgl" + ((g.odd && g.odd.indexOf(l) >= 0) || (g.oddA && g.oddA.indexOf(l) >= 0) ? " odd" : "")); li.appendChild(money(l.u));
       li.appendChild(el("span", "lgw", l.s));
@@ -3700,20 +3693,22 @@
       // equips: the busiest grade's price up top beside the item, the same as the grade buttons show
       var eb = el("div", "big"); eb.appendChild(money(LD.top.lo)); if (short(LD.top.lo) !== short(LD.top.hi)) { eb.appendChild(el("span", "dash", "–")); eb.appendChild(el("span", "num", short(LD.top.hi))); }
       ip.appendChild(eb);
-      var et = el("p", "tline etop"); var etb = el("b", null, LD.top.name); et.appendChild(etb); et.appendChild(document.createTextNode(" · " + (LD.top.basis === "sold" ? LD.top.use.length + " sold in 7 days" : "asking · " + LD.top.asks.length + " listed") + " · the busiest grade. Every grade is in Price by grade."));
-      ip.appendChild(et);
+      eb.appendChild(el("span", "tg roll etg", LD.top.name.toLowerCase()));      // which grade this price is for
     }
     var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
     var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
-    var tnote = el("p", "tline"); tnote.appendChild(el("span", null, "Typical ")); tnote.appendChild(el("b", null, short(i.typ))); tnote.appendChild(el("span", "tsep", " · " + (SHORTWHY[i.basis] || "recent sales")));
+    // the typical price once: when the big number already is the typical, this line only says where it comes from
+    var tnote = el("p", "tline"), oneNum = !(i.hi > i.lo);
+    if (!oneNum) { tnote.appendChild(el("span", null, "Typical ")); tnote.appendChild(el("b", null, short(i.typ))); }
+    tnote.appendChild(el("span", "tsep", (oneNum ? "from " : " · ") + (SHORTWHY[i.basis] || "recent sales")));
     var cb1 = confBadge(i, false); if (cb1) tnote.appendChild(cb1);
     tnote.appendChild(infoTip(full));
     if (!LD) ip.appendChild(tnote);
     var st = el("div", "stats");
-    [[i.lastSale ? i.lastSale.u : 0, "Last sale"], [i.last3, "Last 3 avg"], [null, "Sales" + (i.saleDays ? " · " + i.saleDays + (i.saleDays === 1 ? " day" : " days") : ""), i.salesN]].forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "None")); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
-    if (!LD) ip.appendChild(st);
-    if (i.equip && (i.bands || i.rolls.length)) ip.appendChild(rollBox(i));
+    [(i.lastSale && short(i.lastSale.u) !== short(i.typ)) ? [i.lastSale.u, "Last sale"] : null, (i.last3 && i.lastSale && short(i.last3) !== short(i.lastSale.u)) ? [i.last3, "Last 3 avg"] : null].filter(Boolean).forEach(function (x) { var d = el("div", "stat"); if (x[0] == null) d.appendChild(el("span", "num", fmt(x[2]))); else if (x[0]) d.appendChild(money(x[0])); else d.appendChild(el("span", "num", "None")); d.appendChild(el("small", null, x[1])); st.appendChild(d); });
+    if (!LD && st.childNodes.length) ip.appendChild(st);
+    if (i.equip && !LD && (i.bands || i.rolls.length)) ip.appendChild(rollBox(i));   // equips with grades: Price by grade covers it
     var smx = scrollMath(i.item); if (smx) ip.appendChild(smx);
     var lt = el("div", "ltabs");
     // Where to buy shows only what can still be bought: gone and sold listings drop off (one you marked sold yourself
@@ -3735,7 +3730,7 @@
     rows.slice(0, 40).forEach(function (x) {
       var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : state.list === "buy" && x.st === "old" ? " stale" : ""));
       var nb = el("b", null, x.s); li.appendChild(nb);
-      var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
+      var p = el("div", "p"); p.appendChild(money(x.u)); if (x.n > 1 || x.q > 1) p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q + " for " + short(x.p) + " · each")); li.appendChild(p);
       var sm = el("small"); li.appendChild(sm);
       if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not (seen|read)/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
       else { var w = where(x); if (w) { sm.appendChild(el("b", "wh", w)); sm.appendChild(document.createTextNode(" · ")); } sm.appendChild(document.createTextNode(ago(x.t))); }
@@ -3768,8 +3763,8 @@
     var pb = el("button", "pbtn", "+ Log a trade"); pb.type = "button"; pb.title = "Log that you bought or sold this, to track your profit in My positions";
     pb.addEventListener("click", function () { state.tab = "pos"; render(); pform("buy", i.item, 1, 0); $("pos-view").scrollIntoView({ behavior: "smooth", block: "start" }); }); btns.appendChild(pb);
     ip.appendChild(btns);
-    var mvs = el("div", "mvs"); [["1 day", 0], ["3 days", 1], ["7 days", 2]].forEach(function (x) { var s = el("span"); s.appendChild(el("span", "lbl", x[0] + " ")); if (i.mv[x[1]] != null) s.appendChild(moveTag(i.mv[x[1]])); else s.appendChild(el("span", "tfd", "n/a")); mvs.appendChild(s); });
-    if (!LD) ip.appendChild(mvs);
+    var mvs = el("div", "mvs"); [["3 days", 1], ["7 days", 2]].forEach(function (x) { if (i.mv[x[1]] == null) return; var s = el("span"); s.appendChild(el("span", "lbl", x[0] + " ")); s.appendChild(moveTag(i.mv[x[1]])); mvs.appendChild(s); });
+    if (!LD && mvs.childNodes.length) ip.appendChild(mvs);
     if (i.bid) { var bd = el("div", "bids"); bd.appendChild(document.createTextNode("Buyers in chat: top offer ")); bd.appendChild(money(i.bid)); bd.appendChild(document.createTextNode(" from " + i.bids.length + (i.bids.length === 1 ? " offer" : " offers"))); ip.appendChild(bd); }
     // listings with stats actually read (a trade chat "clean" tag alone has none)
     var withX = i.all.filter(function (x) { return x.x && !x.b && Object.keys(x.x).some(function (k) { return /^[A-Z]+$/.test(k) && k !== "SLOTS"; }); });
@@ -3901,8 +3896,8 @@
     if (ITEMPAGES[n] && idOf(n)) fb.appendChild(fbtn("/item/" + itemSlug(n) + "/", "📈", "Full price history", "Charts, quests and drops"));
     fb.appendChild(fbtn("/market.html#new=" + encodeURIComponent(n), "🏷️", "Sell yours", "List it on maplefm.gg", "isell"));
     f.appendChild(fb);
-    var e = el("p", "iearn"); var ea = el("a", null, "Prices come from players scanning. Earn by scanning"); ea.href = "contribute.html"; e.appendChild(ea);
-    e.appendChild(document.createTextNode(" · ")); e.appendChild(wrongLink(n, ip)); f.appendChild(e);
+    var e = el("p", "iearn");
+    e.appendChild(wrongLink(n, ip)); f.appendChild(e);
     ip.appendChild(f);
     // members' own listings for this item: shown apart from the shop listings and never counted in the price
     mktLoad().then(function (L) {
