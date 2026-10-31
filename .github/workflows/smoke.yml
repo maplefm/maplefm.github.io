@@ -25,6 +25,11 @@ jobs:
           for f in world itemguide summary-public; do curl -fsSL "$L/$f.json" -o /tmp/$f.json; done
           mkdir -p /tmp/wp/item && python3 tools/worldpages.py /tmp/world.json /tmp/itemguide.json /tmp/summary-public.json assets/training-notes.json /tmp/wp
           test "$(ls /tmp/wp/quest | wc -l)" -gt 200 && test "$(ls /tmp/wp/map | wc -l)" -gt 200
+          # the item pages too (they build the quest and map pages as well): a broken item page build left new quests,
+          # like the Halloween event, off the site for hours on Oct 31
+          mkdir -p /tmp/ip/item && cp item/*.css item/*.js /tmp/ip/item/
+          python3 tools/itempages.py /tmp/summary-public.json /tmp/ip /tmp/itemguide.json /tmp/world.json assets/training-notes.json
+          test "$(ls /tmp/ip/item | wc -l)" -gt 500
       - run: node tools/smoke.cjs
       - name: Every indexable page names its canonical address
         run: |
