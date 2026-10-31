@@ -2587,7 +2587,7 @@ async function alertsGet(req, env) {
 async function alertsPut(req, env) {
   const a = await whoami(req, env);
   if (!a) return json({ error: "sign in first" }, 401);
-  if (!(await hasMega(a, env))) return json({ error: "Stat alerts are for Mega Deals: Club members, scanners with 50,000 sales caught, and Ko-fi supporters at $100." }, 403);
+  if (!(await hasMega(a, env))) return json({ error: "Stat alerts are for Mega Deals: Ko-fi Tiger tier and up, $100 of Ko-fi support in total, or 50,000 sales caught scanning." }, 403);
   const b = await req.json().catch(() => ({}));
   const list = (Array.isArray(b.alerts) ? b.alerts : []).map(cleanAlert).filter(Boolean);
   if (list.length > ALERT_MAX) return json({ error: "Up to " + ALERT_MAX + " alerts." }, 400);
