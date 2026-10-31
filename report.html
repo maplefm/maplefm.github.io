@@ -178,7 +178,7 @@ html.pdfdoc .pdfhead small { color: var(--muted); font-size: .8rem; }
   function short(n) { n = Math.round(n || 0); var a = Math.abs(n); return a >= 999.5e6 ? (n / 1e9).toFixed(2) + "B" : a >= 999.5e3 ? (n / 1e6).toFixed(a >= 9.95e6 ? 1 : 2) + "M" : a >= 1e4 ? (n / 1e3).toFixed(a >= 99.95e3 ? 0 : 1) + "K" : n.toLocaleString("en-US"); }
   function pct(v) { return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v * 100).toFixed(1) + "%"; }
   function cls(v) { return v == null || Math.abs(v) < 0.0005 ? "flat" : v > 0 ? "up" : "down"; }
-  function money(n) { var s = el("span"); s.appendChild(el("span", "coin")); s.appendChild(document.createTextNode(short(n))); return s; }
+  function money(n) { return el("span", "mz", short(n)); }
   function dayName(d) { var x = new Date(d + "T12:00:00"); return x.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); }
   function icon(name) {
     var box = el("span", "ic"), r = DB[String(name).toLowerCase()];

@@ -141,7 +141,9 @@ h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;l
 /* our name at the top of every item and quest card; lives here because item.css is rewritten from this string on every build */
 .pbrand{float:right;display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 10px;font-size:.78rem;font-weight:700;color:var(--muted);text-decoration:none;white-space:nowrap}
 .pbrand img{width:20px;height:20px;border-radius:5px}
-.pbrand b{color:var(--accent,#6a3df0);font-weight:800}"""
+.pbrand b{color:var(--accent,#6a3df0);font-weight:800}
+@media (max-width:560px){.pbrand{float:none;display:flex;width:max-content;margin:0 0 10px}}
+@media (max-width:420px){td.n .chg{display:block;margin-top:2px}table td,table th{padding:6px 5px}}"""
 
 
 OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
