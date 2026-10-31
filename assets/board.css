@@ -1574,3 +1574,7 @@ td:has(> .lgt) { white-space: nowrap; }
 .slv b { color: var(--ink); }
 .slv input { width: 58px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 700 .8rem var(--body); }
 .tools > .subchips { flex: 0 0 100%; }
+
+/* the listing a Discord deal or sale post linked to */
+.li.dealhit { background: var(--gold-soft); box-shadow: inset 4px 0 0 var(--gold); animation: bhit 1.6s ease-out 2; }
+.li.dealgone small { color: var(--muted); font-style: italic; }

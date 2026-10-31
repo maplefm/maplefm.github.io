@@ -207,7 +207,7 @@ def job_sales(data_dir, state_path):
                "fields": [{"name": "Seller", "value": plain(r.get("s"), 24), "inline": True},
                           {"name": "Spot", "value": where.strip() or "?", "inline": True},
                           {"name": "Caught by", "value": plain(who, 24), "inline": True}],
-               "url": f"{SITE}/?q=" + urllib.request.quote(str(r.get("i") or "")[:64])}
+               "url": f"{SITE}/?q=" + urllib.request.quote(str(r.get("i") or "")[:64]) + "&s=" + urllib.request.quote(str(r.get("s") or "")[:24]) + f"&p={int(r.get('p') or 0)}&k=sold"}
         ic = icon_url(r.get("i"))
         if ic: emb["thumbnail"] = {"url": ic}
         post("big_sales", embeds=[emb])
@@ -600,7 +600,7 @@ def job_deals(data_dir, summary_path, state_path):
                "fields": [{"name": "Seller", "value": plain(r.get("s"), 24), "inline": True},
                           {"name": "Spot", "value": where.strip() or "?", "inline": True},
                           {"name": "Caught by", "value": plain(who, 24), "inline": True}],
-               "url": f"{SITE}/?q=" + urllib.request.quote(str(r.get("i") or "")[:64]),
+               "url": f"{SITE}/?q=" + urllib.request.quote(str(r.get("i") or "")[:64]) + "&s=" + urllib.request.quote(str(r.get("s") or "")[:24]) + f"&p={int(r['p'])}",
                "footer": {"text": "Profit assumes you relist 5% under typical. Listed in the last 12 minutes; it may already be gone."}}
         ic = icon_url(r.get("i"))
         if ic: emb["thumbnail"] = {"url": ic}

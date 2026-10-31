@@ -4784,7 +4784,8 @@
   window.addEventListener("focus", function () { clearInterval(titleTimer); document.title = baseTitle; });
   // the menu's search on every other page lands here as /?q=...: fill the search and open the best match
   (function qParam() {
-    var q = ""; try { q = new URLSearchParams(location.search).get("q") || ""; } catch (e) {}
+    var q = "", sel = "", pr = 0, sold = false;
+    try { var sp = new URLSearchParams(location.search); q = sp.get("q") || ""; sel = sp.get("s") || ""; pr = +sp.get("p") || 0; sold = sp.get("k") === "sold"; } catch (e) {}
     q = q.trim().slice(0, 80); if (!q) return;
     try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
     var tries = 0, t = setInterval(function () {
@@ -4794,11 +4795,36 @@
       var box = document.getElementById("q"); if (box) box.value = q;
       var hits = searchItems(q, 8);
       if (hits.length) {
-        if (hits.length === 1 || hits[0].score - (hits[1] ? hits[1].score : 0) >= 100 || hits[0].it) { pick(hits[0].n); jumpToCard(); }
+        if (hits.length === 1 || hits[0].score - (hits[1] ? hits[1].score : 0) >= 100 || hits[0].it) {
+          // a link straight to one item (a Discord deal or sale): open its card, leave the search closed, and show
+          // the listing the post was about
+          pick(hits[0].n); jumpToCard(); if (box) box.blur();
+          var dd = $("sugg"); if (dd) dd.hidden = true;
+          if (sel) showListing(hits[0].n, sel, pr, sold);
+          return;
+        }
         if (box) { box.dispatchEvent(new Event("input", { bubbles: true })); }
       } else if (box) { box.focus(); box.dispatchEvent(new Event("input", { bubbles: true })); }
     }, 250);
   })();
+  // The listing a Discord post was about, by seller and price: Where to buy (or Recent sales for a sale), scrolled to and
+  // lit up so it's clear which one it was. Said plainly when it's already gone.
+  function showListing(name, seller, price, sold) {
+    var n = 0, t = setInterval(function () {
+      if (++n > 240) return clearInterval(t);          // up to a minute: the listings arrive with the full board, after the quick preview
+      if (state.sel !== name || !document.querySelector("#side .list")) return;
+      clearInterval(t);
+      if (sold && state.list !== "sales") { state.list = "sales"; renderItem(); }
+      var low = String(seller).toLowerCase(), hit = null;
+      [].forEach.call(document.querySelectorAll("#side .list .li"), function (li) {
+        if (hit) return; var b = li.querySelector("b"); var nm = b && b.firstChild && b.firstChild.nodeValue || "";
+        var pv = li.querySelector(".p .num, .p"); var num = pv ? +String(pv.textContent).replace(/[^0-9]/g, "").slice(0, 12) : 0;
+        if (nm.trim().toLowerCase() === low && (!price || Math.abs(num - price) <= Math.max(1, price * 0.002))) hit = li;
+      });
+      if (hit) { hit.classList.add("dealhit"); hit.scrollIntoView({ block: "center", behavior: "smooth" }); }
+      else { var ls = document.querySelector("#side .list"); var note = el("div", "li dealgone"); note.appendChild(el("small", null, seller + "'s listing" + (price ? " at " + fmt(price) : "") + " isn't up any more, or wasn't seen again. Here's everyone else selling it.")); ls.insertBefore(note, ls.firstChild); }
+    }, 250);
+  }
   // "Log this sale in My positions" from a market listing: #positions&plog=s,price,qty,item opens the form filled in
   (function plogHash() {
     var m = /[#&]plog=([bs]),(\d+),(\d+),([^&]+)/.exec(location.hash); if (!m) return;
