@@ -125,13 +125,13 @@ body{padding-bottom:70px}
   function signIn() { var a = el("a", "btn gold", "Sign in with Discord"); a.href = API + "/login?back=market"; return a; }
   function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "/i/" + id + ".png"; i.onerror = function () { if (i.dataset.io) { i.src = i.dataset.io; i.dataset.io = ""; } else i.remove(); }; i.dataset.io = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; return i; }
   function vsTyp(l) {
-    var r = ROWS[l.item]; if (!r || !r.typ || l.stats) return null;
-    var d = l.price / r.typ - 1;
+    var r = ROWS[l.item], rt = refOf(r); if (!rt || l.stats) return null;
+    var d = l.price / rt - 1;
     var t, pc = Math.round(Math.abs(d) * 100);
     if (Math.abs(d) < 0.03) t = el("span", "tag", "fair price");
     else if (d <= -0.15) t = el("span", "tag hot", "🔥 " + pc + "% under");
     else t = el("span", "tag " + (d < 0 ? "under" : "over"), pc + "% " + (d < 0 ? "under" : "over"));
-    t.title = "Typical price " + meso(r.typ);
+    t.title = "Typical price " + meso(rt);
     return t;
   }
   function tradesTag(sel) { return sel.trades ? el("span", "tag rep", sel.trades + (sel.trades === 1 ? " trade" : " trades") + " confirmed") : null; }
@@ -168,7 +168,10 @@ body{padding-bottom:70px}
     if (!c) { var k = KIND[String(l.item).toLowerCase()] || ""; c = /Scroll/.test(l.item) ? "Scrolls" : /^Equip:Cash/.test(k) ? "Cash" : /^Equip/.test(k) ? "Equips" : /^Use/.test(k) ? "Use" : /^Cash/.test(k) ? "Cash" : /^Etc/.test(k) ? "Etc" : "Other"; }
     return c === "Weapons" ? "Equips" : c === "Stars" ? "Use" : c;
   }
-  function dealOf(l) { var r = ROWS[l.item]; return r && r.typ && !l.stats ? l.price / r.typ : 9; }
+  function dealOf(l) { var rt = refOf(ROWS[l.item]); return rt && !l.stats ? l.price / rt : 9; }
+  // equips: the price of the grade most copies sell at (the item card's price ladder), not one number mixing grades
+  function refOf(r) { if (!r) return 0; var t = 0; (r.lad || []).forEach(function (sv) { (sv[1] || []).forEach(function (g) { if (!t && g[7] && g[1] === "sold" && g[4] > 0) t = g[4]; }); }); return t || r.typ || 0; }
+
   var CATS = [["Scrolls", "📜 Scrolls"], ["Equips", "⚔️ Equips"], ["Use", "🧪 Use"], ["Etc", "📦 Etc"], ["Cash", "💎 Cash"], ["Other", "Other"]];
   function fab(on) {
     var f = $("fab");
@@ -293,7 +296,7 @@ body{padding-bottom:70px}
     var ig = fld("Your in-game name", "ign", { value: ME.ign || "", placeholder: "IGN", maxlength: "12", required: "" });
     var nt = fld("Note (optional)", "note", { tag: "textarea", maxlength: "200", placeholder: "When you're on, which channel, anything a buyer should know" }, true);
     function pick() { var v0 = it.value.trim().toLowerCase(); return NAMES.filter(function (n) { return shown(n).toLowerCase() === v0 || n.toLowerCase() === v0; })[0] || ""; }
-    function sync() { var n = pick(), r = ROWS[n]; hint.textContent = n ? (r && r.typ ? "Typical on the board: " + meso(r.typ) + (r.equip ? " for a clean one" : "") : "No typical price yet for this one.") : it.value ? "Pick a name from the list so it lines up with the board." : ""; st.parentNode.hidden = !!(n && r && !r.equip); }
+    function sync() { var n = pick(), r = ROWS[n]; hint.textContent = n ? (r && refOf(r) ? "Typical on the board: " + meso(refOf(r)) + (r.equip ? " for a clean one" : "") : "No typical price yet for this one.") : it.value ? "Pick a name from the list so it lines up with the board." : ""; st.parentNode.hidden = !!(n && r && !r.equip); }
     it.addEventListener("input", sync); it.addEventListener("change", sync);
     if (pre) { it.value = shown(pre); }
     var go = el("button", "btn go", "Post listing"); go.type = "submit";
@@ -327,7 +330,7 @@ body{padding-bottom:70px}
       var stt = { active: ["Listed · " + left(l.expires), "tag"], pending: ["Buyer on it", "tag hold"], sold: ["Sold", "tag closed"], cancelled: ["Taken down", "tag closed"], expired: ["Ended", "tag closed"] }[l.status] || [l.status, "tag"];
       t.appendChild(el("span", stt[1], stt[0])); if (l.source === "discord") t.appendChild(el("span", "tag", "From #selling"));
       var sn = seenTag(l); if (sn) t.appendChild(sn); var tt = tradesTag(l.seller); if (tt) t.appendChild(tt); p.appendChild(t);
-      var kv = el("dl", "kv"); [["Seller", (l.seller.name || "") + (l.ign ? " · in game: " + l.ign : "") + (l.seller.trades ? " · " + l.seller.trades + (l.seller.trades === 1 ? " confirmed trade" : " confirmed trades") : " · no confirmed trades yet")], ["Listed", ago(l.created)], ["Typical on the board", ROWS[l.item] && ROWS[l.item].typ ? meso(ROWS[l.item].typ) + (l.stats ? " (clean)" : "") : "not enough sales yet"]].forEach(function (x) { kv.appendChild(el("dt", null, x[0])); kv.appendChild(el("dd", null, x[1])); });
+      var kv = el("dl", "kv"); [["Seller", (l.seller.name || "") + (l.ign ? " · in game: " + l.ign : "") + (l.seller.trades ? " · " + l.seller.trades + (l.seller.trades === 1 ? " confirmed trade" : " confirmed trades") : " · no confirmed trades yet")], ["Listed", ago(l.created)], ["Typical on the board", refOf(ROWS[l.item]) ? meso(refOf(ROWS[l.item])) + (l.stats ? " (clean)" : "") : "not enough sales yet"]].forEach(function (x) { kv.appendChild(el("dt", null, x[0])); kv.appendChild(el("dd", null, x[1])); });
       p.appendChild(kv);
       if (l.note) { p.appendChild(el("h3", null, "Seller's note")); p.appendChild(el("div", "note", l.note)); }
       var bl = el("p", "hint"); var ba = el("a", null, "See " + shown(l.item) + " on the price board →"); ba.href = "/#item=" + encodeURIComponent(l.item); bl.appendChild(ba); p.appendChild(bl);

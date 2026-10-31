@@ -120,9 +120,11 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
     if (ME) { if (ME.ign) { var a = el("a", "btn gold", "My shop"); a.href = "#" + encodeURIComponent(ME.ign); w.appendChild(a); } var m = el("a", "btn", "Player market"); m.href = "/market.html"; w.appendChild(m); }
     else { var s = el("a", "btn gold", "Sign in with Discord"); s.href = API + "/login?back=shop"; w.appendChild(s); }
   }
+  // equips: the price of the grade most copies sell at (the item card's price ladder), not one number mixing grades
+  function refOf(r) { if (!r) return 0; var t = 0; (r.lad || []).forEach(function (sv) { (sv[1] || []).forEach(function (g) { if (!t && g[7] && g[1] === "sold" && g[4] > 0) t = g[4]; }); }); return t || r.typ || 0; }
   function vs(r) {
-    var row = ROWS[r.item]; if (!row || !row.typ || r.stats) return null;
-    var d = r.price / row.typ - 1;
+    var row = ROWS[r.item], rt = refOf(row); if (!rt || r.stats) return null;
+    var d = r.price / rt - 1;
     if (Math.abs(d) < 0.05) return el("span", "tag", "typical");
     return el("span", "tag " + (d < 0 ? "under" : "over"), Math.round(Math.abs(d) * 100) + "% " + (d < 0 ? "under" : "over"));
   }

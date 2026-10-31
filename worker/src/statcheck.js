@@ -70,7 +70,8 @@ export async function statReport(env, opts) {
   if (!opts.force && (await env.ACCOUNTS.get("stataudit:day")) === day) return { skipped: "done today" };
   // after 9 AM Eastern, once the night's scans are in
   if (!opts.force && new Date().getUTCHours() < 13) return { skipped: "too early" };
-  const body = await env.ACCOUNTS.get("snap:board");
+  const gz = await env.ACCOUNTS.get("snap:board.gz", "arrayBuffer");
+  const body = gz ? await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream("gzip"))).text() : await env.ACCOUNTS.get("snap:board");
   if (!body) return { skipped: "no board" };
   let snap; try { snap = JSON.parse(body); } catch (e) { return { error: "bad board" }; }
   const rep = auditSnapshot(snap, await itemdb(env));
