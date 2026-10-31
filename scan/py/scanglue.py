@@ -101,14 +101,16 @@ def plate_frame(crop):
 
 def locate_game(fw, fh):
     """The game area inside the shared picture: the whole picture, or less a window border and title bar. Found from
-    an open shop window, whose seller plate sits at a fixed spot relative to the game's centre."""
+    an open shop window, whose seller plate sits at a fixed spot relative to the game's centre. Looked for in the
+    game's 1920 x 1080 picture, so it works at any window size."""
     best = None
-    cands = sorted(((ox, oy) for oy in range(0, 48) for ox in range(0, 9)), key=lambda t: t[0] + t[1])
+    cands = sorted(((ox, oy) for oy in range(0, 64) for ox in range(0, 12)), key=lambda t: t[0] + t[1])
     for ox, oy in cands:
         game = (ox, oy, fw - 2 * ox, fh - oy)
-        shop_box, _ = watcher.place(ST["cfg"], game)
+        vg = watcher.view(ST["cfg"], game)
+        shop_box, _ = watcher.place(ST["cfg"], vg)
         pl = fmparse.SHOP["plate"]
-        crop = _img(game[0] + shop_box[0], game[1] + shop_box[1], pl[2] + 4, pl[3] + 4)
+        crop = watcher.grab(None, vg, [shop_box[0], shop_box[1], shop_box[0] + pl[2] + 4, shop_box[1] + pl[3] + 4])
         if plate_frame(crop):
             best = game; break
     return best
@@ -142,16 +144,68 @@ def _find_hand(img, x0=0, y0=0):
     return int(x0 + xs[k]), int(y0 + ys[k] - ny)
 
 
+def _inside():
+    """The pointer's inside (the white hand), from its outline: everything the outside can't reach, kept a pixel away
+    from the outline so a scaled, softened picture still has it white."""
+    blk = CUR["black"]; ny = min(dy for dx, dy in blk)
+    W = max(dx for dx, dy in blk) + 3; H = max(dy for dx, dy in blk) - ny + 3
+    wall = {(dx + 1, dy - ny + 1) for dx, dy in blk}
+    out, todo = set(), [(0, 0)]
+    while todo:
+        x, y = todo.pop()
+        if (x, y) in out or (x, y) in wall or not (0 <= x < W and 0 <= y < H): continue
+        out.add((x, y)); todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    near = {(x + i, y + j) for x, y in wall for i in (-1, 0, 1) for j in (-1, 0, 1)}
+    return [(x - 1, y - 1 + ny) for x in range(W) for y in range(H) if (x, y) not in out and (x, y) not in near]
+CUR["inside"] = _inside()
+
+
+def _find_hand_soft(img, x0=0, y0=0):
+    """The pointer in a picture scaled from another window size: its outline softens, so instead of every outline
+    pixel near black, most of the outline has to be dark and most of the hand inside it light."""
+    blk, ins = CUR["black"], CUR["inside"]
+    a = np.asarray(img)
+    if a.ndim != 3 or not ins: return None
+    pts = blk + ins
+    mx = max(dx for dx, dy in pts); my = max(dy for dx, dy in pts); ny = min(dy for dx, dy in pts)
+    H, W = a.shape[0] - my + ny - 1, a.shape[1] - mx - 1
+    if H <= 0 or W <= 0: return None
+    dark = (a.max(axis=2) < 100)
+    light = (a.min(axis=2) > 150)
+    few = blk[::max(1, len(blk) // 10)][:10]; fin = ins[::max(1, len(ins) // 10)][:10]
+    cnt = np.zeros((H, W), np.int8)
+    for dx, dy in few: cnt += dark[dy - ny:dy - ny + H, dx:dx + W]
+    for dx, dy in fin: cnt += light[dy - ny:dy - ny + H, dx:dx + W]
+    ys, xs = np.nonzero(cnt >= len(few) + len(fin) - 3)
+    if not len(ys): return None
+    od = np.zeros(len(ys), np.int16); il = np.zeros(len(ys), np.int16)
+    for dx, dy in blk: od += dark[ys + (dy - ny), xs + dx]
+    for dx, dy in ins: il += light[ys + (dy - ny), xs + dx]
+    ok = np.nonzero((od >= 0.8 * len(blk)) & (il >= 0.85 * len(ins)))[0]
+    if not len(ok): return None
+    k = ok[np.argmax(od[ok] + il[ok])]
+    return int(x0 + xs[k]), int(y0 + ys[k] - ny)
+
+
+def _hand(img, x0, y0):
+    return _find_hand_soft(img, x0, y0) if watcher.scaled() else _find_hand(img, x0, y0)
+
+
+def _vimg(game, x0, y0, w, h):
+    """A piece of the game's 1920 x 1080 picture, by its own pixel position (the shared frame scaled to it)."""
+    return watcher.grab(None, game, [x0 - game[0], y0 - game[1], x0 - game[0] + w, y0 - game[1] + h])
+
+
 def track_cursor(game):
-    """Where the pointer is, in frame pixels. First over the shop list (where hovers matter most, and cheap to search);
-    then around any item popup on screen, which opens next to the pointer."""
+    """Where the pointer is, in the game's 1920 x 1080 picture. First over the shop list (where hovers matter most, and
+    cheap to search); then around any item popup on screen, which opens next to the pointer."""
     L = ST["L"]
     shop_box, chat_box = watcher.place(ST["cfg"], game)
     S = fmparse.SHOP
     if time.time() - L.shop_seen < 3:
         x0, y0 = game[0] + shop_box[0], game[1] + shop_box[1] + int(S["row0"]) - 8
         h = int(S["pitch"] * S["rows"]) + 40
-        c = _find_hand(_img(x0, y0, shop_box[2] - shop_box[0] + 30, h), x0, y0)
+        c = _hand(_vimg(game, x0, y0, shop_box[2] - shop_box[0] + 30, h), x0, y0)
         if c: ST["cursor"] = c; ST["cur_t"] = time.time(); return
     # a popup somewhere (sell list, a linked item in chat): the pointer is at its top left corner
     small = frame_info(4)
@@ -161,8 +215,10 @@ def track_cursor(game):
     if navy.mean() > 0.003:
         ys, xs = np.nonzero(navy)
         cx, cy = int(np.median(xs)) * 4, int(np.median(ys)) * 4
-        x0, y0 = max(0, cx - 420), max(0, cy - 420)
-        c = _find_hand(_img(x0, y0, 840, 840), x0, y0)
+        (kx, ky), (ox, oy) = watcher.VIEW["k"], watcher.VIEW["o"]
+        cx, cy = int(ox + (cx - ox) / kx), int(oy + (cy - oy) / ky)         # frame pixels to the 1920 x 1080 picture
+        x0, y0 = max(game[0], cx - 420), max(game[1], cy - 420)
+        c = _hand(_vimg(game, x0, y0, 840, 840), x0, y0)
         if c: ST["cursor"] = c; ST["cur_t"] = time.time(); return
     if time.time() - ST["cur_t"] > 2: ST["cursor"] = None
 
@@ -181,12 +237,13 @@ def step():
         g = locate_game(fw, fh)
         ST["game"] = g or (0, 0, fw, fh)
         ST["game_found"] = bool(g)
+        if fw < 1600: _log("Tip: this game window is " + str(fw) + " x " + str(fh) + ". Under 1600 wide the game draws text too small to read every popup; a bigger window reads best.")
     elif not ST.get("game_found") and t - ST["find_t"] > 5:
         ST["find_t"] = t
         g = locate_game(fw, fh)
         if g: ST["game"] = g; ST["game_found"] = True
-    game = ST["game"]
     L, jobs, store, cfg = ST["L"], ST["jobs"], ST["store"], ST["cfg"]
+    game = watcher.view(cfg, ST["game"])        # every window size is read as the 1920 x 1080 picture
     track_cursor(game)
     shops0 = watcher.fmparse.STATS.get("shops", 0)
     try:
@@ -205,7 +262,7 @@ def step():
     except Exception as e: out["error"] = "chores: " + str(e)[:200]
     out["busy"] = time.time() - L.shop_seen < 3          # a shop is open: look again soon
     out["ch"] = watcher.current_channel(cfg)
-    out["game"] = list(game)
+    out["game"] = list(ST["game"])
     if ST["log"]: out["log"] = ST["log"][:]; ST["log"].clear()
     if ST["sound"]: out["sound"] = ST["sound"][:]; ST["sound"].clear()
     return json.dumps(out)
