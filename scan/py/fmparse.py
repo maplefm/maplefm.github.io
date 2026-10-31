@@ -1369,6 +1369,35 @@ def read_channel_dialog(img):
         if top.size == 0: return False
         tr, tb = top[..., 0], top[..., 2]
         return ((tb > 150) & (tr < 130) & (tb - tr > 70)).any(axis=0).mean() >= 0.6
+    # Counted from the bottom: the window's orange Cancel button sits just under the last row, so the last full row of
+    # buttons above it is row 5, and the lit button's row follows from the row spacing. This holds when the top of the
+    # window is hidden or shadowed (another window over the game, like the watcher's own).
+    def from_bottom():
+        full = [(y0, y1, button_runs(y0, y1)) for y0, y1 in bands]
+        full = [f for f in full if even(f[2])]
+        if len(full) < 2: return None
+        for k in range(len(full) - 1, 0, -1):
+            y0, y1, rr = full[k]; bh = y1 - y0
+            gx0, gx1 = rr[0][0], rr[-1][1]
+            below = a[y1:y1 + int(3 * bh), gx0 + (gx1 - gx0) * 2 // 3:gx1]
+            if not below.size: continue
+            org = ((below[..., 0] > 200) & (below[..., 1] > 100) & (below[..., 1] < 175) & (below[..., 2] < 120)).sum()
+            if org < max(20, 2 * bh): continue
+            # the row above this one, with the same buttons, gives the spacing
+            py0, py1, prr = full[k - 1]
+            if len(prr) != len(rr) or any(abs(p[0] - q[0]) > 3 for p, q in zip(prr, rr)): return None
+            pitch = y0 - py0
+            if not (bh < pitch <= 1.6 * bh): return None
+            lit = []
+            for row in range(5):
+                ry0 = int(round(y0 - (4 - row) * pitch)); ry1 = ry0 + bh
+                if ry0 < 0: continue
+                for ci, (x0, x1) in enumerate(rr):
+                    if blue[ry0:ry1, x0:x1].mean() > 0.35: lit.append(row * len(rr) + ci + 1)
+            return lit[0] if len(lit) == 1 else None
+        return None
+    fb = from_bottom()
+    if fb: return fb
     # the first row of buttons is always full: eight (or ten) buttons the same width, evenly spaced, under the title
     runs, start = None, None
     for i, (y0, y1) in enumerate(bands):
@@ -1384,8 +1413,8 @@ def read_channel_dialog(img):
         if y0 - keep[-1][1] > max(4, 0.7 * bh) or len(keep) >= 6: break
         if abs((y1 - y0) - bh) > max(3, 0.35 * bh): break
         keep.append((y0, y1))
-    if len(keep) < 2:
-        return None
+    if len(keep) != 5:
+        return None          # the window is always five rows of eight (40 channels): fewer seen means part of it is hidden
     hits = []
     for bi, (y0, y1) in enumerate(keep):
         for ci, (x0, x1) in enumerate(runs):

@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.3",
- "date": "2026-10-31T04:39:12+00:00",
- "notes": "Free Market room numbers read again where the game's small 7 and 1 looked like / and | (FM7 shops were landing as just FM). The time warning at the top of the window is gone.",
- "sha256": "a6c54d32f99273729d80ce02417e2b025b5ffb80794260259d06008e8799bf9b",
- "size": 164908,
+ "version": "2026.10.31.4",
+ "date": "2026-10-31T05:10:07+00:00",
+ "notes": "Channel window: reads right when another window covers the top of the game (it counts rows up from the Cancel button), and never guesses when part of the grid is hidden. Fixes wrong channels like 17 or 24 while on 25.",
+ "sha256": "0d368da5c966cd1cfdd75bd728ef6f787bbfac7c717ff5f0837ff444a76c3786",
+ "size": 165464,
  "history": [
+  {
+   "version": "2026.10.31.4",
+   "date": "2026-10-31",
+   "notes": "Channel window: reads right when another window covers the top of the game (it counts rows up from the Cancel button), and never guesses when part of the grid is hidden. Fixes wrong channels like 17 or 24 while on 25."
+  },
   {
    "version": "2026.10.31.3",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.6",
    "date": "2026-10-26",
    "notes": "README: how to read equip stats best (shop window high, popup off the chat box)."
-  },
-  {
-   "version": "2026.10.26.5",
-   "date": "2026-10-26",
-   "notes": "Fixes the game window not being found on some PCs (an 'int too long to convert' error repeating in the window)."
   }
  ],
  "pip": [],
- "sig": "826dd97d4e460584619d151984e3fcc9145aad63bda6a7b997fdeeb7f2927ddbfae0cfaa615bd887bb8f7a3107747baff8ee33b53ddb8fde5bd8ec4a5d55fb88aa6b67ec15b4eb9051ea1f329eb02da158ed5127872e8433259dc20d12b3199e892660e0c68c0a3de95256cd258552394ea873a17d014092bb69e966222c60b36a15690ec52a135a12e555959816a88754c03bd1b620074036f863f3985f51265a76d362e35267c0c1108469bfe3f4903c91ee66ed2a961f8417e7b7901076b2bc33a1cdb01cd342193eeffd02942b7ddb001e530c127dba543f4a6d55bae948a46b0aba507ac8ca0b4571adeb3dae8bccdff3d42fb429f76b34f8e9f991ba3f"
+ "sig": "980367bde271970e14285808253f52baa144877e0707a2af032e3a79afc8eedb68d65b3ea130ddea7996bc4851a888f4c351dea35a7355d20b4e398a9a11b94e1841079bbb107598ee78996beefd440ea25143da1385848870a0b79b00ed334df6286858aab40a95bb2c8fd55e6e43b3240b79af79abe5735f83cb861b02cdb04f64734dfc63a70c457f3f5c6fc6e402477aa8713e1aa2aeb887aa47d8e0f51a4ed9c8565f8f8913c5284b48e881f2be8baf5e055de30170fd8f9567cd1dfec845994fa7f1c7c6786e82bfdd6aac699ac03ecbc1c8e8432283cf172eceec28d010fa2631d7d7891016aed990d5856310e7f486ae117ad6fe0052b7ced6f25e98"
 }
