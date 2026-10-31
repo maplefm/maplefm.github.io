@@ -29,9 +29,9 @@
 
   // ---------- formatting
   // bundle items like arrows cost a fraction of a meso each, so small prices keep a decimal instead of rounding to 0
-  function fmt(n) { return n > 0 && n < 10 && Math.round(n) !== n ? (Math.round(n * 10) / 10).toLocaleString("en-US") : Math.round(n).toLocaleString("en-US"); }
+  function fmt(n) { return n > 0 && n < 10 && Math.round(n) !== n ? (Math.round(n * 100) / 100).toLocaleString("en-US") : Math.round(n).toLocaleString("en-US"); }
   function short(n) {
-    if (n > 0 && n < 10 && Math.round(n) !== n) return String(Math.round(n * 10) / 10);
+    if (n > 0 && n < 10 && Math.round(n) !== n) return String(Math.round(n * 100) / 100);
     n = Math.round(n);
     // a number that would print as 1000K or 10000K rolls up: 999,999 is 1M, not 1000K
     if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B";
@@ -2230,7 +2230,7 @@
   }
   // A tooltip read off the screen can belong to the item next to it. Before any stat counts toward a roll, it has to
   // be one this item can carry: one of its base stats, or one a scroll for its slot adds (no attack on earrings).
-  // Every scroll in the game, from its own description (MeowDB): per slot, each scroll line's four grades as
+  // Every scroll in the game, from its own description: per slot, each scroll line's four grades as
   // [success rate, what one pass adds]. Lesser 100%, Intermediate 60%, Greater 10%, Chaos 10% (half the fails destroy
   // the item). A failed scroll uses the slot and adds nothing. DEF scrolls above Lesser add magic defense too.
   var SCROLLS = {"Bottom":[["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]],["HP",[[100,{"HP":10}],[60,{"HP":15}],[10,{"HP":20}],[10,{"HP":25}]]],["MP",[[100,{"MP":10}],[60,{"MP":15}],[10,{"MP":20}],[10,{"MP":25}]]]],"Bow":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Cape":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["DEX",[[100,{"DEX":1}],[60,{"DEX":2}],[10,{"DEX":3}],[10,{"DEX":4}]]],["INT",[[100,{"INT":1}],[60,{"INT":2}],[10,{"INT":3}],[10,{"INT":4}]]],["LUK",[[100,{"LUK":1}],[60,{"LUK":2}],[10,{"LUK":3}],[10,{"LUK":4}]]],["Magic Def",[[100,{"MDEF":2}],[60,{"WDEF":2,"MDEF":4}],[10,{"WDEF":4,"MDEF":6}],[10,{"WDEF":6,"MDEF":8}]]],["STR",[[100,{"STR":1}],[60,{"STR":2}],[10,{"STR":3}],[10,{"STR":4}]]],["Weapon Def",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]]],"Claw":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Crossbow":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Dagger":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Earrings":[["Avoidability",[[100,{"AVOID":1}],[60,{"AVOID":2}],[10,{"AVOID":3}],[10,{"AVOID":4}]]],["Crit",[[100,{"CRITDMG":1}],[60,{"CRITDMG":2}],[10,{"CRITDMG":3}],[10,{"CRITDMG":4}]]],["DEX",[[100,{"DEX":1}],[60,{"DEX":2}],[10,{"DEX":3}],[10,{"DEX":4}]]],["INT",[[100,{"INT":1}],[60,{"INT":2}],[10,{"INT":3}],[10,{"INT":4}]]],["LUK",[[100,{"LUK":1}],[60,{"LUK":2}],[10,{"LUK":3}],[10,{"LUK":4}]]],["STR",[[100,{"STR":1}],[60,{"STR":2}],[10,{"STR":3}],[10,{"STR":4}]]]],"Glove":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":3}],[10,{"ATT":4}]]],["Crit",[[100,{"CRIT":1}],[60,{"CRIT":2}],[10,{"CRIT":3}],[10,{"CRIT":4}]]],["Magic Attack",[[100,{"MATT":2}],[60,{"MATT":4}],[10,{"MATT":6}],[10,{"MATT":8}]]]],"Hat":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["HP",[[100,{"HP":10}],[60,{"HP":15}],[10,{"HP":20}],[10,{"HP":25}]]],["MP",[[100,{"MP":10}],[60,{"MP":15}],[10,{"MP":20}],[10,{"MP":25}]]]],"One-Handed Axe":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"One-Handed Blunt Weapon":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"One-Handed Sword":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Overall":[["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]],["DEX",[[100,{"DEX":1}],[60,{"DEX":2}],[10,{"DEX":3}],[10,{"DEX":4}]]],["INT",[[100,{"INT":1}],[60,{"INT":2}],[10,{"INT":3}],[10,{"INT":4}]]],["LUK",[[100,{"LUK":1}],[60,{"LUK":2}],[10,{"LUK":3}],[10,{"LUK":4}]]],["STR",[[100,{"STR":1}],[60,{"STR":2}],[10,{"STR":3}],[10,{"STR":4}]]]],"Pet Equipment":[["Jump",[[100,{"JUMP":1}],[60,{"JUMP":2}],[10,{"JUMP":3}],[10,{"JUMP":4}]]],["Speed",[[100,{"SPEED":1}],[60,{"SPEED":2}],[10,{"SPEED":3}],[10,{"SPEED":4}]]]],"Pole Arm":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Shield":[["Accuracy",[[100,{"ACC":1}],[60,{"ACC":2}],[10,{"ACC":3}],[10,{"ACC":4}]]],["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]]],"Shoes":[["Avoidability",[[100,{"AVOID":1}],[60,{"AVOID":2}],[10,{"AVOID":3}],[10,{"AVOID":4}]]],["Jump",[[100,{"JUMP":1}],[60,{"JUMP":2}],[10,{"JUMP":3}],[10,{"JUMP":4}]]],["Speed",[[100,{"SPEED":1}],[60,{"SPEED":2}],[10,{"SPEED":3}],[10,{"SPEED":4}]]]],"Spear":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Staff":[["Magic Attack",[[100,{"MATT":2}],[60,{"MATT":4}],[10,{"MATT":8}],[10,{"MATT":10}]]]],"Top":[["DEF",[[100,{"WDEF":2}],[60,{"WDEF":4,"MDEF":2}],[10,{"WDEF":6,"MDEF":4}],[10,{"WDEF":8,"MDEF":6}]]],["HP",[[100,{"HP":10}],[60,{"HP":15}],[10,{"HP":20}],[10,{"HP":25}]]],["MP",[[100,{"MP":10}],[60,{"MP":15}],[10,{"MP":20}],[10,{"MP":25}]]]],"Two-Handed Axe":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Two-Handed Blunt":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Two-Handed Sword":[["Attack",[[100,{"ATT":1}],[60,{"ATT":2}],[10,{"ATT":4}],[10,{"ATT":5}]]]],"Wand":[["Magic Attack",[[100,{"MATT":2}],[60,{"MATT":4}],[10,{"MATT":8}],[10,{"MATT":10}]]]]};
@@ -4481,11 +4481,33 @@
   (function () {
     var q = $("q"), box = $("sugg"), hits = [], at = -1, t = null;
     function close() { box.hidden = true; q.setAttribute("aria-expanded", "false"); at = -1; }
-    function choose(k) { var r = hits[k]; if (!r) return; close(); ev("#find:" + q.value.trim().toLowerCase().slice(0, 40)); pick(r.n); jumpToCard(); }
+    function choose(k) { var r = hits[k]; if (!r) return; close(); ev("#find:" + q.value.trim().toLowerCase().slice(0, 40)); if (r.kind) return useKind(r.kind); pick(r.n); jumpToCard(); }
+    // "dagger 30", "lvl 35 claw", "1h sword", "hats": a type of weapon or equip, with a level if one is given, opens
+    // the board on that type and level range, the same as tapping its type chip and filling the level boxes
+    var KINDS = null;
+    function kn(x) { return String(x).toLowerCase().replace(/[-_]/g, " ").replace(/\bone handed\b/g, "1h").replace(/\btwo handed\b/g, "2h").replace(/\bpole ?arm\b/g, "polearm").replace(/\s+/g, " ").trim().replace(/(es|s)$/, ""); }
+    function kindQuery(v) {
+      if (!KINDS) { KINDS = {}; (D.list || []).forEach(function (i) { if (i.cat !== "Weapons" && i.cat !== "Equips") return; var k = subKind(i.item); if (k && !KINDS[kn(k)]) KINDS[kn(k)] = { k: k, cat: i.cat }; }); }
+      // a level is a number on its own ("dagger 30", "lv35 claw"), never the 1 in "1h sword"
+      var w = " " + String(v).toLowerCase().replace(/\b(lv|lvl|level|lev)\.?\s*(?=\d)/g, " ").replace(/\b(lv|lvl|level|lev)\b\.?/g, " ") + " ", NUM = /\s(\d{1,3})\+?(?=\s)/, m = NUM.exec(w), L = m ? +m[1] : null;
+      var words = kn(w.replace(NUM, " ").replace(/\b(one handed|1 handed|one hand|1 hand)\b/g, "1h").replace(/\b(two handed|2 handed|two hand|2 hand)\b/g, "2h"));
+      if (!words || (L != null && (L < 1 || L > 200))) return null;
+      var hit = KINDS[words]; if (!hit) return null;
+      return { k: hit.k, cat: hit.cat, lo: L == null ? null : Math.max(0, L - 5), hi: L };
+    }
+    function useKind(kq) {
+      q.value = ""; state.cat = kq.cat; state.sub = kq.k;
+      $("lv-min").value = kq.lo == null ? "" : kq.lo; $("lv-max").value = kq.hi == null ? "" : kq.hi;
+      ["lv-min", "lv-max"].forEach(function (id) { $(id).dispatchEvent(new Event("input", { bubbles: true })); });
+      if (state.tab !== "prices") $("tab-prices").click();
+      renderView(); var pv = $("prices-view"); if (pv) pv.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+    function kindLabel(kq) { var pl = /s$/i.test(kq.k) ? kq.k : kq.k + "s"; return kq.hi == null ? "All " + pl.toLowerCase() : pl + ", level " + kq.lo + " to " + kq.hi; }
     function mark() { box.querySelectorAll(".so").forEach(function (o, k) { o.setAttribute("aria-selected", k === at ? "true" : "false"); if (k === at) { var t0 = o.offsetTop, t1 = t0 + o.offsetHeight; if (t0 < box.scrollTop) box.scrollTop = t0; else if (t1 > box.scrollTop + box.clientHeight) box.scrollTop = t1 - box.clientHeight; } }); }
     function show() {
       var v = q.value.trim(); if (!v || !D) { close(); return; }
       hits = searchItems(v, 5); box.textContent = ""; at = -1;
+      var kq = kindQuery(v); if (kq) { hits = hits.filter(function (r) { return r.score >= 450; }).slice(0, 4); hits.unshift({ kind: kq, n: "" }); }
       if (!hits.length) { box.appendChild(el("div", "sh", "No item matches \u201c" + v + "\u201d")); }
       else {
         var top = hits[0];
@@ -4496,6 +4518,7 @@
         box.appendChild(h);
         hits.forEach(function (r, k) {
           var o = el("div", "so"); o.setAttribute("role", "option"); o.id = "so" + k;
+          if (r.kind) { o.classList.add("kind"); o.appendChild(el("span", "sn", kindLabel(r.kind))); o.appendChild(el("span", "sp", "Show them →")); o.addEventListener("mousedown", function (e) { e.preventDefault(); }); o.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); choose(k); }); box.appendChild(o); return; }
           o.appendChild(iconBox(r.n));
           var nm = el("span", "sn", showName(r.n)); if (!r.it) nm.appendChild(el("small", null, "not seen yet")); o.appendChild(nm);
           if (r.it && r.it.typ) { var sp = el("span", "sp"); sp.appendChild(money(r.it.typ)); o.appendChild(sp); } else o.appendChild(el("span", "sp none", "no price yet"));
@@ -5155,7 +5178,7 @@
   function engineUI() { return { win: { value: $("win").value }, "f-spot": { checked: $("f-spot").checked } }; }
   function engineStart() {
     if (ENGINE || ENGW || ENG_BROKEN || !window.Worker || !MYSRC) return false;
-    try { ENGW = new Worker("/fmengine.js?v=1"); } catch (e) { ENG_BROKEN = true; return false; }
+    try { ENGW = new Worker("/fmengine.js?v=2"); } catch (e) { ENG_BROKEN = true; return false; }
     var ls = {}; try { for (var k = 0; k < localStorage.length; k++) { var key = localStorage.key(k); if (/^fm-/.test(key) && key !== "fm-summary") ls[key] = localStorage.getItem(key); } } catch (e) {}
     var ids = engineUI(); ["scan-data", "icon-ids"].forEach(function (id) { var n = $(id); if (n) ids[id] = { textContent: n.textContent }; });
     ENGW.onmessage = function (e) {

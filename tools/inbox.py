@@ -41,7 +41,7 @@ def sig_ok(key_hex, m):
     return hmac.compare_digest(want, str(m.get("sig") or ""))
 
 
-WORKER_INBOX = "https://clubfm-accounts.aaweaver93.workers.dev/inbox/pull"
+WORKER_INBOX = "https://api.maplefm.gg/inbox/pull"
 
 
 def fetch_worker_rows():

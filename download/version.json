@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.4",
- "date": "2026-10-31T05:10:07+00:00",
- "notes": "Channel window: reads right when another window covers the top of the game (it counts rows up from the Cancel button), and never guesses when part of the grid is hidden. Fixes wrong channels like 17 or 24 while on 25.",
- "sha256": "0d368da5c966cd1cfdd75bd728ef6f787bbfac7c717ff5f0837ff444a76c3786",
- "size": 165464,
+ "version": "2026.10.31.5",
+ "date": "2026-10-31T17:46:27+00:00",
+ "notes": "Talks to Club FM at api.maplefm.gg",
+ "sha256": "8369750c74348a2fa63813169c2af1a8c401816bd290bc3967e705bf72cb24c9",
+ "size": 165443,
  "history": [
+  {
+   "version": "2026.10.31.5",
+   "date": "2026-10-31",
+   "notes": "Talks to Club FM at api.maplefm.gg"
+  },
   {
    "version": "2026.10.31.4",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.7",
    "date": "2026-10-26",
    "notes": "Equip stats read much more reliably: the watcher now reads only the item popup itself, so the chat box or players behind it no longer get in the way. Scrolled (orange) item names are read too."
-  },
-  {
-   "version": "2026.10.26.6",
-   "date": "2026-10-26",
-   "notes": "README: how to read equip stats best (shop window high, popup off the chat box)."
   }
  ],
  "pip": [],
- "sig": "980367bde271970e14285808253f52baa144877e0707a2af032e3a79afc8eedb68d65b3ea130ddea7996bc4851a888f4c351dea35a7355d20b4e398a9a11b94e1841079bbb107598ee78996beefd440ea25143da1385848870a0b79b00ed334df6286858aab40a95bb2c8fd55e6e43b3240b79af79abe5735f83cb861b02cdb04f64734dfc63a70c457f3f5c6fc6e402477aa8713e1aa2aeb887aa47d8e0f51a4ed9c8565f8f8913c5284b48e881f2be8baf5e055de30170fd8f9567cd1dfec845994fa7f1c7c6786e82bfdd6aac699ac03ecbc1c8e8432283cf172eceec28d010fa2631d7d7891016aed990d5856310e7f486ae117ad6fe0052b7ced6f25e98"
+ "sig": "1594dba9c1ce04cdc662f612a0a0563701f8836e318e22f5c55800a2f8d54011d4d82d95dd2a68dc1c0c0180120bba07e18291d2323e585dc9b3bf07f75fa4313ce0e02d40767637ebdbaacec261a073ca2b176ac59d1c94aa49511d4f38ee926585483bded4307e88f41ff95fbb7e2e22e9c7ca92df796469730a98bdd989957e89cc4a0d6c91c29a36033d3fe65a52728f680ca871929312184d154780ca0ab8b5685b948e6439f1658753fcee1f3da09d3faac5b847d42099dab164d13f464834b2b33416237e04a19cc9ddb9ce6befbbe17743ea402d4f38f57269b859e543fc441de1bf32ef8e71483322cdd5a1d214e530e4bcfd16720518c0f7147e52"
 }

@@ -3,7 +3,8 @@
   "use strict";
   var q = document.getElementById("q"), sort = document.getElementById("sort"), none = document.getElementById("none"), CAT = "", SHOW = 12, open = {};
   var cats = [].slice.call(document.querySelectorAll(".cat"));
-  function meso(n) { n = +n || 0; if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B"; if (n >= 999.5e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1).replace(/\.?0+$/, "") + "K"; return Math.round(n).toLocaleString("en-US"); }
+  function trim0(x) { return x.indexOf(".") < 0 ? x : x.replace(/0+$/, "").replace(/\.$/, ""); }
+  function meso(n) { n = +n || 0; if (n >= 999.5e6) return trim0((n / 1e9).toFixed(2)) + "B"; if (n >= 999.5e3) return trim0((n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2)) + "M"; if (n >= 1e4) return trim0((n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1)) + "K"; return n >= 10 || n === Math.round(n) ? Math.round(n).toLocaleString("en-US") : trim0(n.toFixed(2)); }
   // chat shortcuts (GFA, WG, WLR), initials and scroll percents, like the board's search
   var ABBR = {}, STOP = { of: 1, the: 1, a: 1, "for": 1, scroll: 1 };
   fetch("/data/abbr.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; draw(); } }).catch(function () {});

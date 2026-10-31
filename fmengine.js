@@ -58,7 +58,7 @@ if (!self.requestAnimationFrame) self.requestAnimationFrame = function (f) { ret
 if (!self.requestIdleCallback) self.requestIdleCallback = function (f) { return setTimeout(function () { f({ timeRemaining: function () { return 50; }, didTimeout: false }); }, 1); };
 // ---- reading only: price data comes in, nothing goes out
 var realFetch = self.fetch.bind(self);
-var READ = [/^https:\/\/raw\.githubusercontent\.com\/maplefm\/maplefm\.github\.io\/live\/data\//, /^https:\/\/api\.maplefm\.gg\/data\/(live|sig)\b/, /^https:\/\/clubfm-accounts\.aaweaver93\.workers\.dev\/data\/(live|sig)\b/];
+var READ = [/^https:\/\/raw\.githubusercontent\.com\/maplefm\/maplefm\.github\.io\/live\/data\//, /^https:\/\/api\.maplefm\.gg\/data\/(live|sig)\b/];
 self.fetch = function (u, o) {
   var url = new URL(String(u && u.url || u), self.location.href).href, method = (o && o.method || "GET").toUpperCase();
   var same = url.indexOf(self.location.origin + "/data/") === 0;

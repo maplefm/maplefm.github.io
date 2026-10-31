@@ -77,7 +77,7 @@ for name, path, must in PAGES:
           "itempages" if not ok and path in ("/items/", "/item/work-gloves/", "/sitemap.xml") else None)
 
 # 2. The !price answer on both addresses chat bots use
-for name, base in (("!price (api.maplefm.gg)", "https://api.maplefm.gg"), ("!price (old address)", "https://clubfm-accounts.aaweaver93.workers.dev")):
+for name, base in (("!price (api.maplefm.gg)", "https://api.maplefm.gg"),):
     st, body, ms = get(base + "/chat/price?q=work%20gloves")
     ok = st == 200 and body.startswith("Work Gloves:")
     check(name, ok, body[:90] if ok else f"status {st} {body[:60]}", ms)

@@ -9,7 +9,7 @@ The archive is private; nothing here is published.
 """
 import sys, os, json, hashlib, datetime, urllib.request, urllib.parse, shutil
 
-W = "https://clubfm-accounts.aaweaver93.workers.dev"
+W = "https://api.maplefm.gg"
 D = sys.argv[1]
 KEY = os.environ.get("INBOX_PULL_KEY") or ""
 

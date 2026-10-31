@@ -48,7 +48,7 @@ def meso(n):
     if n >= 999.5e6: return _trim(f"{n / 1e9:.2f}") + "B"
     if n >= 999.5e3: return _trim(f"{n / 1e6:.1f}" if n >= 9.95e6 else f"{n / 1e6:.2f}") + "M"
     if n >= 1e4: return _trim(f"{n / 1e3:.0f}" if n >= 99.95e3 else f"{n / 1e3:.1f}") + "K"
-    return f"{n:,.0f}" if n >= 10 else _trim(f"{n:.1f}")
+    return f"{n:,.0f}" if n >= 10 else _trim(f"{n:.2f}")
 
 
 def full(n): return f"{float(n or 0):,.0f}"
@@ -395,8 +395,8 @@ def main():
             title = fit_title(f"{nm} price, drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng" class="mz">{rng}</span>{chg}{f"<small>{html.escape(top[0])}</small>" if top else ""}</p>
-<p class="note">Typical <span id="typ" class="mz">{full(r['typ'])}</span>, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
-<div class="grid"><div><span>Typical</span><b id="t2" class="mz">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
+<p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"} <span id="typ" class="mz">{full(top[4] if top else r['typ'])}</span>, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
+<div class="grid"><div><span>{"Typical, " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"}</span><b id="t2" class="mz">{meso(top[4] if top else r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba" class="mz">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b class="mz">{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {ladder_html(r.get('lad'))}
 {f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
@@ -405,7 +405,7 @@ def main():
 {guide_html(name, GUIDE.get(name), page_of)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
 <p class="note" id="upd">Updated {when}.</p></div>
-<script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js" defer></script>"""
+<script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js?v=2" defer></script>"""
         ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Club FM", "item": SITE + "/"},
             {"@type": "ListItem", "position": 2, "name": "Item prices", "item": SITE + "/items/"},
@@ -441,13 +441,13 @@ def main():
             mv = (x.get("mv") or [None])[0]
             ch = f'<span class="mv {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"}{abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else '<span class="mv"></span>'
             li += (f'<a class="it" href="/item/{slug(x["item"])}/" data-n="{html.escape(shown(x["item"]).lower())}" data-p="{int(x["typ"])}" data-v="{int(x.get("vol") or 0)}" data-m="{round(mv or 0, 3) if isinstance(mv, (int, float)) else 0}" data-k="{html.escape(x["item"])}">'
-                   f'<img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="{html.escape(shown(x["item"]))}" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr">{meso(x["typ"])}</b>{ch}</a>')
+                   f'<img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="{html.escape(shown(x["item"]))}" width="28" height="28" loading="lazy"><span class="nm">{html.escape(shown(x["item"]))}</span><b class="pr mz">{meso(x["typ"])}</b>{ch}</a>')
         secs += f'<section class="cat" data-c="{html.escape(cat)}"><h2>{html.escape(CATS.get(cat, cat))} <small>{len(bycat[cat])}</small></h2><div class="its">{li}</div><button type="button" class="more" hidden>Show all {len(bycat[cat])}</button></section>'
     idx = (f'<div class="card"><h1>MapleStory Classic item prices</h1><p class="sub"><span id="cnt">{len(rows)}</span> items priced from Free Market sales players watched · <span id="upd">updated {when}</span></p>'
            f'<input id="q" type="search" placeholder="Find an item: work gloves, GFA 60, white label ring" data-ph="Find an item: work gloves, GFA 60, white label ring|Find an item: work gloves, GFA 60|Find an item" autocomplete="off" aria-label="Find an item">'
            f'<div class="bar"><div class="chips">{chips}</div><label class="srt">Sort <select id="sort"><option value="v">Most traded</option><option value="m">Biggest movers</option><option value="p">Highest price</option><option value="a">A to Z</option></select></label></div>'
            f'<p class="note" id="none" hidden>No priced item matches that. <a id="board" href="/">Search the live board</a> for listings.</p>{secs}</div>'
-           '<script src="/items/index.js" defer></script>')
+           '<script src="/items/index.js?v=2" defer></script>')
     # one page per category, so "maplestory classic scroll prices" has a page that is about exactly that
     HUB = {"Scrolls": ("scrolls", "scroll prices", "Every scroll players trade, 10% to 100%, with today's typical price and how many sales back it up."),
            "Equips": ("equipment", "equipment prices", "Hats, tops, gloves, earrings, capes and shoes: what clean and scrolled gear sells for."),

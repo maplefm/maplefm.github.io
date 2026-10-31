@@ -7,7 +7,7 @@
     if (n >= 999.5e6) return f(n / 1e9, 2) + "B";
     if (n >= 999.5e3) return f(n / 1e6, n >= 9.95e6 ? 1 : 2) + "M";
     if (n >= 1e4) return f(n / 1e3, n >= 99.95e3 ? 0 : 1) + "K";
-    return n >= 10 ? Math.round(n).toLocaleString("en-US") : f(n, 1);
+    return n >= 10 ? Math.round(n).toLocaleString("en-US") : f(n, 2);
   }
   // one rule for every list: the price each, then the total when there's more than one
   function fill(e, each) {

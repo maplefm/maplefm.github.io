@@ -28,7 +28,7 @@ SITE = "https://maplefm.gg"
 BIG = 250000          # a sale at or above this price gets a post in #big-sales
 MAX_SALES = 8         # per run, the biggest ones
 ROOMS, CHANNELS = 20, 40
-WORKER = "https://clubfm-accounts.aaweaver93.workers.dev"
+WORKER = "https://api.maplefm.gg"
 TIERS = [(100000, "Mythic"), (50000, "Titan"), (25000, "Immortal"), (10000, "Legend"), (5000, "Monarch"), (2500, "Royal"), (1000, "Tycoon"),
          (400, "Broker"), (150, "Trader"), (50, "Merchant"), (10, "Apprentice"), (0, "Scout")]
 PURPLE, GOLD, GREEN, RED, BLUE = 0x7c4dff, 0xf6c94a, 0x3ddc84, 0xff5c5c, 0x61d4f0
@@ -91,6 +91,23 @@ def plain(s, n=40):
 def meso(n):
     n = int(n or 0)
     return f"{n:,}"
+
+# the meso coin after every amount: the server's in-game coin emoji, looked up once a run by the Worker
+_COIN = None
+def coin():
+    global _COIN
+    if _COIN is None:
+        _COIN = "<:meso:1563233518912274512>"
+        try:
+            with urllib.request.urlopen(urllib.request.Request("https://api.maplefm.gg/public/coin", headers={"User-Agent": "clubfm"}), timeout=10) as r:
+                c = json.loads(r.read().decode()).get("coin") or ""
+            if re.fullmatch(r"<a?:\w+:\d+>", c): _COIN = c
+        except Exception: pass
+    return _COIN
+
+def mz(n):
+    """an amount with the meso coin"""
+    return f"{meso(n)} {coin()}"
 
 def tier(n):
     for at, name in TIERS:
@@ -194,15 +211,17 @@ def job_sales(data_dir, state_path):
             p = int(r.get("p") or 0)
             if p < BIG or "cut off" in str(r.get("i") or ""): continue
             if not club and len(seen_by.get(f'{str(r.get("s")).lower()}|{str(r.get("i")).lower()}|{p}', ())) < 2: continue
-            key = f'{r.get("s")}|{r.get("i")}|{p}|{r.get("t")}'
-            if key in seen: continue
+            # one sale, one post: the same seller, item and price within a day is the same sale, however many
+            # scanners caught it or re-sent it (the time each one saw it differs)
+            key = f'{str(r.get("s")).lower()}|{str(r.get("i")).lower()}|{p}'
+            if key in seen and now - seen[key] < 86400: continue
             seen[key] = now
             new.append((p, r, who))
     new.sort(key=lambda x: -x[0])
     for p, r, who in new[:MAX_SALES]:
         q = int(r.get("q") or 1)
         where = spot(r)
-        line = f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" sold for **{meso(p)}** meso"
+        line = f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" sold for **{meso(p)}** {coin()}"
         emb = {"title": "Big sale", "description": line, "color": GOLD,
                "fields": [{"name": "Seller", "value": plain(r.get("s"), 24), "inline": True},
                           {"name": "Spot", "value": where.strip() or "?", "inline": True},
@@ -276,7 +295,7 @@ def job_report(report_path, state_path, pdf_path=""):
     up = (m.get("chg") or 0) >= 0
     big_icon = None
     fields = [{"name": "FM index", "value": f'{m.get("value", 0):.2f} ({pct(m.get("chg") or 0)})', "inline": True},
-              {"name": "Sales", "value": f'{s.get("sales", 0):,} for {meso(s.get("volume"))} meso', "inline": True},
+              {"name": "Sales", "value": f'{s.get("sales", 0):,} for {mz(s.get("volume"))}', "inline": True},
               {"name": "Listings", "value": f'{s.get("listings", 0):,} across {s.get("items", 0):,} items', "inline": True}]
     g = ", ".join(f'{plain(x["item"], 48)} {pct(x["chg"])}' for x in (rep.get("gainers") or [])[:4])
     l = ", ".join(f'{plain(x["item"], 48)} {pct(x["chg"])}' for x in (rep.get("losers") or [])[:4])
@@ -284,7 +303,7 @@ def job_report(report_path, state_path, pdf_path=""):
     if l: fields.append({"name": "Losers", "value": l[:1000], "inline": False})
     b = rep.get("biggest_sale") or {}
     if b.get("item"):
-        fields.append({"name": "Biggest sale", "value": f'{plain(b["item"], 64)} for {meso(b.get("price"))} meso' + (f' by {plain(b["seller"], 24)}' if b.get("seller") else ""), "inline": False})
+        fields.append({"name": "Biggest sale", "value": f'{plain(b["item"], 64)} for {mz(b.get("price"))}' + (f' by {plain(b["seller"], 24)}' if b.get("seller") else ""), "inline": False})
         big_icon = icon_url(b.get("item"))
     cats = [c for c in (rep.get("categories") or []) if c.get("value")]
     if cats:
@@ -594,8 +613,8 @@ def job_deals(data_dir, summary_path, state_path):
         q = int(r.get("q") or 1)
         where = spot(r)
         roll = f" · **{plain(r['roll'], 40)}**, typical for this grade from {r['rolln']} sales" if r.get("roll") else ""
-        line = (f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" listed at **{meso(int(r['p']))}**" + (" each" if q > 1 else "")
-                + f"\n**+{meso(int(flip))}** to flip · {int(round(off * 100))}% under typical {meso(int(it['typ']))}{roll}")
+        line = (f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" listed at **{meso(int(r['p']))}** {coin()}" + (" each" if q > 1 else "")
+                + f"\n**+{meso(int(flip))}** {coin()} to flip · {int(round(off * 100))}% under typical {mz(int(it['typ']))}{roll}")
         emb = {"title": "Mega deal", "description": line, "color": GREEN,
                "fields": [{"name": "Seller", "value": plain(r.get("s"), 24), "inline": True},
                           {"name": "Spot", "value": where.strip() or "?", "inline": True},
@@ -644,7 +663,7 @@ def job_weekly(report_path, ranks_path, state_path):
     for d in week_days:
         b = (days[d].get("biggest_sale") or {})
         if b.get("price") and (not big or b["price"] > big["price"]): big, big_day = b, d
-    if big: fields.append({"name": "Biggest sale of the week", "value": f'{plain(shown(big["item"]), 64)} for {meso(big["price"])} meso' + (f' by {plain(big["seller"], 24)}' if big.get("seller") else ""), "inline": False})
+    if big: fields.append({"name": "Biggest sale of the week", "value": f'{plain(shown(big["item"]), 64)} for {mz(big["price"])}' + (f' by {plain(big["seller"], 24)}' if big.get("seller") else ""), "inline": False})
     # scanners: sales caught this week, from the ranks file's per-day tallies
     week_by, alias = {}, {"yinisera": "Yint"}   # one scanner under an older name, as the board folds them
     for who, dd in (ranks.get("who") or {}).items():
@@ -696,12 +715,12 @@ def job_members(summary_path, feed_path, state_path):
         ch = d[-1][1] / d[0][1] - 1
         if abs(ch) >= 0.05: moves.append((ch, r))
     moves.sort(key=lambda x: x[0])
-    def line(ch, r): return f"{plain(shown(r['item']), 48)} · {meso(int(r['typ']))} ({'+' if ch > 0 else ''}{int(round(ch * 100))}%)"
+    def line(ch, r): return f"{plain(shown(r['item']), 48)} · {mz(int(r['typ']))} ({'+' if ch > 0 else ''}{int(round(ch * 100))}%)"
     up = [line(c, r) for c, r in reversed(moves[-5:]) if c > 0]
     dn = [line(c, r) for c, r in moves[:5] if c < 0]
     now = time.time(); week = [f for f in (feed if isinstance(feed, list) else []) if isinstance(f, dict) and f.get("t", 0) >= now - 7 * 86400]
     week.sort(key=lambda f: -(f.get("flip") or 0))
-    best = [f"{plain(shown(f.get('item')), 40)} at {meso(int(f.get('p') or 0))} · {int(round((f.get('off') or 0) * 100))}% under, +{meso(int(f.get('flip') or 0))}" for f in week[:5]]
+    best = [f"{plain(shown(f.get('item')), 40)} at {mz(int(f.get('p') or 0))} · {int(round((f.get('off') or 0) * 100))}% under, +{mz(int(f.get('flip') or 0))}" for f in week[:5]]
     fields = []
     if up: fields.append({"name": "Rising", "value": "\n".join(up)[:1000], "inline": False})
     if dn: fields.append({"name": "Falling", "value": "\n".join(dn)[:1000], "inline": False})
@@ -830,8 +849,8 @@ def job_potd(summary_path, state_path):
     # the most traded item that moved the most this week leads; ties go to more sales
     pool.sort(key=lambda r: -((r.get("salesN") or 0) ** 0.5 * (1 + min(abs(week(r)), 1.5))))
     r = pool[0]; w = week(r); nm = pshown(r["item"])
-    rng = f'{meso(r["lo"])} to {meso(r["hi"])}' if r.get("hi") and r.get("lo") and meso(r["lo"]) != meso(r["hi"]) else meso(r["typ"])
-    fields = [{"name": "Typical", "value": f'{meso(r["typ"])} meso', "inline": True},
+    rng = f'{meso(r["lo"])} to {mz(r["hi"])}' if r.get("hi") and r.get("lo") and meso(r["lo"]) != meso(r["hi"]) else mz(r["typ"])
+    fields = [{"name": "Typical", "value": mz(r["typ"]), "inline": True},
               {"name": "Most sales", "value": rng, "inline": True},
               {"name": "This week", "value": pct(w) if abs(w) >= 0.01 else "steady", "inline": True},
               {"name": "Sales seen", "value": f'{r.get("salesN") or 0:,}', "inline": True}]

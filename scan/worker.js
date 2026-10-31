@@ -101,7 +101,7 @@ def _urlopen(req, timeout=0):
     return _Resp(str(txt).encode())
 urllib.request.urlopen = _urlopen
 # RapidOCR, the watcher's second text reader on Windows, isn't loaded here: on every saved shop (1,197 checked rows,
-# 181 of Adam's shops) the watcher's readers give the same rows without it, and it would triple the memory.
+# 181 of Maya's shops) the watcher's readers give the same rows without it, and it would triple the memory.
 fmparse.rapid_lines = lambda img, scale: []
 import watcher
 watcher.urllib.request.urlopen = _urlopen

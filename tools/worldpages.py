@@ -78,7 +78,7 @@ def meso(n):
     if n >= 999.5e6: return _trim(f"{n / 1e9:.2f}") + "B"
     if n >= 999.5e3: return _trim(f"{n / 1e6:.1f}" if n >= 9.95e6 else f"{n / 1e6:.2f}") + "M"
     if n >= 1e4: return _trim(f"{n / 1e3:.0f}" if n >= 99.95e3 else f"{n / 1e3:.1f}") + "K"
-    return f"{n:,.0f}"
+    return f"{n:,.0f}" if n >= 10 or n == int(n) else _trim(f"{n:.2f}")
 
 
 def quest_slugs(quests):
@@ -358,7 +358,7 @@ def build(world, guide, summary, notes, out):
         b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (
             (f" Drops {mz[0]} to {mzf(mz[1])}" + (f" {mz[2]}% of the time" if mz[2] else "") + (f" (measured over {mz[4]} kills on the wiki)." if mz[3] == "wiki" and mz[4] else " (wiki measurement)." if mz[3] == "wiki" else " (player reports).")) if mz else "") + (f" Drops worth about {mzs(ev)} a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
         if homes.get(n):
-            b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>How many</th><th>Level range</th><th></th></tr>" + "".join(
+            b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>Count</th><th>Levels</th><th></th></tr>" + "".join(
                 f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td><td>{navbtn(p)}</td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
         if drops.get(n):
             b += "<h2>Drops</h2><table><tr><th>Item</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
@@ -576,6 +576,8 @@ def build(world, guide, summary, notes, out):
     for a in sorted(areas, key=lambda a: -len(areas[a])):
         b += f"<h2>{E(a)} <small>{len(areas[a])}</small></h2><ul class=\"toc\">" + "".join(f"<li>{qlink(q)} {('<small>· Lv ' + str(q['lv']) + '</small>') if q['lv'] else ''}</li>" for q in sorted(areas[a], key=lambda q: (q["lv"], q["n"]))) + "</ul>"
     QBANDS = [(1, 10), (10, 20), (20, 30), (30, 40), (40, 50), (50, 70), (70, 200)]
+    # only bands that have quests get a page, so only those are linked (level 70 and up had none yet: a dead link)
+    QBANDS = [(lo, hi) for lo, hi in QBANDS if any(lo <= max(q["lv"], 1) < hi and not q.get("ended") for q in QS)]
     b = b.replace('<p><a href="/quests.html">', '<p><b>By level:</b> ' + " · ".join(f'<a href="/quests/level-{lo}-{hi}/">{lo} to {hi if hi < 200 else str(lo) + "+"}</a>'.replace(f"{lo} to {lo}+", f"{lo}+") for lo, hi in QBANDS) + ' · <a href="/crafting/">Crafting recipes</a></p><p><a href="/quests.html">', 1)
     write(out, "quests", page("All MapleStory Classic quests · items, monsters and rewards · Club FM", "Every MapleStory Classic quest: level, who gives it, the items to bring, monsters to hunt and the rewards.", "/quests/", [("Quest guides", "/quests/")], b)); paths.append("/quests/")
 

@@ -107,5 +107,5 @@ eq = [r for r in want if KINDS_EQUIP[r[5]]]
 print(len(eq), "equips,", sum(1 for r in eq if len(r) > 7), "with base stats,", sum(1 for r in eq if len(r) > 7 and ("ATT" in r[7] or "MATT" in r[7])), "with attack")
 out = sys.argv[1] if len(sys.argv) > 1 else "data/itemdb.json"
 with open(out, "w", encoding="utf-8") as f:
-    json.dump({"source": "maplestory.io MCW 1, MapleStory Classic World; equip stats from MeowDB (meowdb.com) with permission", "kinds": kinds, "items": rows}, f, separators=(",", ":"), ensure_ascii=False)
+    json.dump({"source": "maplestory.io MCW 1, MapleStory Classic World", "kinds": kinds, "items": rows}, f, separators=(",", ":"), ensure_ascii=False)
 print(len(rows), "items,", len(kinds), "kinds")

@@ -20,7 +20,7 @@
 import { statReport, densify, itemdb } from "./statcheck.js";
 import { cleanAlert, runAlerts, reindex, ALERT_MAX } from "./alerts.js";
 import { fastPut, fastPulled, fastDocs } from "./fast.js";
-import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand } from "./market.js";
+import { marketRoute, marketSync, marketCheck, marketShare, marketStats, setRows, snapShops, shopGet, marketCommand, coinE, kindId } from "./market.js";
 const DISCORD = "https://discord.com/api/v10";
 const COOKIE = "fm_session";
 const DAY = 86400;
@@ -102,6 +102,8 @@ async function route(req, env, url) {
   if (p === "/inbox/fast" && req.method === "GET") return inboxFast(req, env);
   if (p === "/inbox/rejects" && req.method === "GET") return inboxRejects(req, env);
   if (p === "/chat/price" && req.method === "GET") return chatPrice(req, env, url);
+  // the meso coin emoji for Discord posts made outside the Worker (the site's webhook posts)
+  if (p === "/public/coin" && req.method === "GET") return json({ coin: await coinE(env) }, 200, { "Cache-Control": "public, max-age=3600", "Access-Control-Allow-Origin": "*" });
   if (p === "/hit" && req.method === "POST") return hit(req, env);
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
   if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; if (url.searchParams.get("log")) return json((await env.ACCOUNTS.get("reddit:log", "json")) || []); return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
@@ -1234,6 +1236,7 @@ async function interactions(req, env) {
 
 // /price in Discord: the embed for one item, with the roll's own sales when a roll is asked for
 async function discordPrice(env, q) {
+  const C = " " + await coinE(env), mz = (n) => meso(n) + C;   // every amount carries the meso coin
   const rows = await summaryRows(env), ab = await abbrMap(), sr = splitRoll(q);
   // the same checks as !price: a bare slot word is a scroll search, and a real item nobody sold lately says so
   if (sr.roll && SLOT_ONLY.test(sr.q.trim()) && !sr.plus) { sr.q = q; sr.roll = ""; }
@@ -1247,13 +1250,13 @@ async function discordPrice(env, q) {
   const lines = [];
   // equips: the grades from the item card's price ladder in place of one typical that mixes clean and scrolled copies
   const ladL = Array.isArray(r.lad) && Array.isArray(r.lad[0]) ? (r.lad[0][1] || []).filter((g) => g[1] === "sold" || g[1] === "asking") : [];
-  const ladRange = (g) => (meso(g[2]) === meso(g[3]) ? meso(g[2]) : meso(g[2]) + " to " + meso(g[3])) + (g[1] === "sold" ? "  from " + g[5] + " sales" : "  asking, " + g[6] + " listed");
+  const ladRange = (g) => (meso(g[2]) === meso(g[3]) ? mz(g[2]) : meso(g[2]) + " to " + mz(g[3])) + (g[1] === "sold" ? "  from " + g[5] + " sales" : "  asking, " + g[6] + " listed");
   if (ladL.length && !sr.roll) {
     ladL.slice(0, 6).forEach((g) => lines.push((g[7] ? "**" : "") + g[0] + ": " + ladRange(g) + (g[7] ? "**" : "")));
     if (r.lad.length > 1) lines.push("Also priced by " + r.lad.slice(1, 5).map((x) => x[0]).join(", ") + " on the [item's card](" + link + ")");
   }
-  else if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
-  if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
+  else if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + C + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + mz(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
+  if (r.best) lines.push("Cheapest ask now: " + mz(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
   // where to find it: the seller, channel and room of that cheapest listing, when they were read
   if (r.best && r.bestS && r.bestW) lines.push("Where: " + String(r.bestS).replace(/[*_`~|<>@]/g, "").slice(0, 20) + " · " + String(r.bestW).replace(/[*_`~|<>@]/g, "").slice(0, 40) + (r.bestT > 0 ? " · <t:" + Math.floor(r.bestT / 1000) + ":R>" : ""));
   // mv[0] is the last 24 hours against the 24 before; daily is the typical per day, so the week comes from its ends
@@ -1274,10 +1277,10 @@ async function discordPrice(env, q) {
     if ((sr.stat === "ATT" || sr.stat === "MATT") && b0[sr.stat]) { const v = parseInt(sr.g, 10); if (v >= 15 && v >= b0[sr.stat] - 15) sr.g = String(v - b0[sr.stat]); }
     const rq = rollQuote(r, sr), rl = rq.label.charAt(0).toUpperCase() + rq.label.slice(1);
     if (/^CRIT/.test(sr.stat || "") && !b0.CRIT && !b0.CRITDMG) lines.push(shown(r.item) + " has no crit line of its own, so crit on one only comes from scrolls.");
-    if (rq.sale) lines.push("**" + rl + ": " + meso(rq.sale.p) + "** from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : "") + (rq.ask ? " · cheapest up now " + meso(rq.ask.pr) : ""));
-    else if (rq.ask) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + meso(rq.ask.pr));
+    if (rq.sale) lines.push("**" + rl + ": " + meso(rq.sale.p) + "**" + C + " from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : "") + (rq.ask ? " · cheapest up now " + mz(rq.ask.pr) : ""));
+    else if (rq.ask) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + mz(rq.ask.pr));
     else lines.push(rl + ": no sales caught at that roll lately.");
-    if (!rq.sale && rq.near.length) lines.push("Closest rolls that sold: " + rq.near.map((x) => x.label + " **" + meso(x.p) + "** (" + x.n + " sales)").join(" · "));
+    if (!rq.sale && rq.near.length) lines.push("Closest rolls that sold: " + rq.near.map((x) => x.label + " **" + meso(x.p) + "**" + C + " (" + x.n + " sales)").join(" · "));
     if (!rq.sale) lines.push("Every roll's price is on the [item's card](" + link + ")");
   } else if (r.rk && r.equip && !ladL.length) lines.push("Typical is for clean copies. Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
   lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
@@ -1287,7 +1290,7 @@ async function discordPrice(env, q) {
 
 // ---------------------------------------------------------------- !price for Twitch chat
 // Plain text for chat bots (Nightbot, StreamElements, Fossabot): one line under 400 characters.
-// Nightbot: !commands add !price $(urlfetch https://clubfm-accounts.aaweaver93.workers.dev/chat/price?q=$(querystring))
+// Nightbot: !commands add !price $(urlfetch https://api.maplefm.gg/chat/price?q=$(querystring))
 async function chatPrice(req, env, url) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
   const txt = (t) => new Response(t.slice(0, 390), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
@@ -1517,7 +1520,7 @@ async function priceLine(env, raw) {
 //    with an app token, as a reply to the asker. 3 second cooldown per channel, 20 answers a minute per channel.
 // KV: tb:bot {id, login}, tb:ch:<broadcaster id> {login, name, at, sub}, tb:apptoken {t, exp}.
 // Needs Worker secrets TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET, and the redirect URL
-// https://clubfm-accounts.aaweaver93.workers.dev/twitchbot/callback added to the Twitch app.
+// https://api.maplefm.gg/twitchbot/callback added to the Twitch app.
 const TB_CMDS = /^!(price|pc|fm)\b/i;
 const TBLAST = new Map();   // last answer per channel: 3 seconds between answers
 async function tbSecret(env) { return (await hmac(env.SESSION_SECRET || "x", "eventsub-secret")).slice(0, 48); }
@@ -2415,6 +2418,7 @@ async function dealFeedPublic(env) {
   const t = now(), due = feed.filter((d) => d && d.item && d.key && d.t <= t - 30 * 60 && d.t > t - 75 * 60).sort((a, b) => a.t - b.t);
   if (!due.length) return;
   const H = { Authorization: "Bot " + env.DISCORD_BOT_TOKEN, "Content-Type": "application/json" };
+  const C = await coinE(env);
   let n = 0;
   for (const d of due) {
     if (n >= 6) break;
@@ -2422,9 +2426,10 @@ async function dealFeedPublic(env) {
     if (await env.ACCOUNTS.get(k)) continue;
     await env.ACCOUNTS.put(k, "1", { expirationTtl: 3 * DAY });
     const emb = { title: String(d.item).slice(0, 80), color: 0xf5c542, url: "https://maplefm.gg/#item=" + encodeURIComponent(d.item),
-      description: "Listed at **" + meso(d.p) + "**" + (d.q > 1 ? " each ×" + d.q : "") + " · " + Math.round((d.off || 0) * 100) + "% under typical " + meso(d.typ) + (d.flip ? "\n**+" + meso(d.flip) + "** to flip" : "") + (d.roll ? " · " + d.roll : ""),
+      description: "Listed at **" + meso(d.p) + "** " + C + (d.q > 1 ? " each ×" + d.q : "") + " · " + Math.round((d.off || 0) * 100) + "% under typical " + meso(d.typ) + " " + C + (d.flip ? "\n**+" + meso(d.flip) + "** " + C + " to flip" : "") + (d.roll ? " · " + d.roll : ""),
       fields: [{ name: "Spot", value: String(d.where || "?").slice(0, 40), inline: true }, { name: "Caught by", value: String(d.by || "?").slice(0, 24), inline: true }, { name: "Spotted", value: "<t:" + d.t + ":R>", inline: true }],
       footer: { text: "Mega Deals members saw this 30 minutes ago, so it may be gone." } };
+    const iid = await kindId(env, d.item).catch(() => 0); if (iid) emb.thumbnail = { url: "https://maplefm.gg/i/" + iid + ".png" };   // the item's own picture
     const r = await fetch(DISCORD + "/channels/" + DEAL_FEED + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [emb] }) });
     if (!r.ok) break;
     n++;
