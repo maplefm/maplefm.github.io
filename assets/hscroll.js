@@ -21,6 +21,8 @@
   function setup(el) {
     var flex = /flex/.test(getComputedStyle(el).display);
     var head = !flex && el.querySelector("thead th, thead tr, thead"); el.style.setProperty("--hsbg", (head && solid(getComputedStyle(head).backgroundColor)) || bgOf(el));
+    // a sticky arrow stops at the row's padding; push it out to the real edge so no text peeks out beyond it
+    var ecs = getComputedStyle(el); el.style.setProperty("--hspl", ecs.paddingLeft); el.style.setProperty("--hspr", ecs.paddingRight);
     // the page may rebuild a row (new tabs, new chips): put the arrows back
     if (flex) {
       if (!el.querySelector(":scope > .hsl")) el.insertBefore(arrow("l", el), el.firstChild);
