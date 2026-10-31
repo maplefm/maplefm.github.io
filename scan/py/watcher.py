@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.2"
+VERSION = "2026.10.31.3"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -233,7 +233,7 @@ def coverage_hours():
 def et_hour():
     """The hour in US Eastern, which the coverage file uses (daylight time from the second Sunday of March to the
     first Sunday of November)."""
-    u = datetime.datetime.utcnow(); y = u.year
+    u = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None); y = u.year   # utcnow() warns on new Pythons
     def sunday(m, n):
         d = datetime.datetime(y, m, 1)
         return d + datetime.timedelta(days=(6 - d.weekday()) % 7 + 7 * (n - 1))

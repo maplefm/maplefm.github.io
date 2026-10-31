@@ -783,6 +783,14 @@ def _title_bar(img):
             end = x - 3; break
     return img.crop((0, 0, max(40, end), h))
 
+# The game's small font draws 7 like a slash and 1 like a bar, and the text reader takes them as such: "<7>" came back
+# as "</>" on every Free Market 7 shop. Between the < and > of a room number only digits can stand, so the look-alikes
+# are turned back into digits there and nowhere else.
+_ROOMLIKE = str.maketrans({"/": "7", "|": "1", "l": "1", "I": "1", "i": "1", "!": "1", "O": "0", "o": "0", "D": "0", "S": "5", "s": "5", "B": "8", "Z": "2", "z": "2", "g": "9", "q": "9", "A": "4", "T": "7"})
+def _room_digits(t):
+    return re.sub(r"<\s*([0-9/|lIi!OoDSsBZzgqAT]{1,2})\s*>", lambda m: "<" + m.group(1).translate(_ROOMLIKE) + ">", t)
+
+
 def read_room(img):
     """The minimap title is white text: area on line one, map on line two.
     Returns 'FM3' for Free Market rooms, the map name elsewhere, or '' if unreadable."""
@@ -792,7 +800,7 @@ def read_room(img):
     k = 255.0 / (hi - lo)
     g = m.point(lambda v: 255 if v <= lo else 0 if v >= hi else int(255 - (v - lo) * k))
     g = g.resize((g.width * 4, g.height * 4), Image.BICUBIC)
-    lines = [re.sub(r"[^A-Za-z0-9<>' -]", "", l["text"]).strip() for l in ocr_lines(g, 4, 6)]
+    lines = [re.sub(r"[^A-Za-z0-9<>' -]", "", _room_digits(l["text"])).strip() for l in ocr_lines(g, 4, 6)]
     lines = [l for l in lines if len(l) >= 3]
     if not lines:
         return ""
@@ -801,7 +809,8 @@ def read_room(img):
     if fm.search(text) and re.search(r"entr", lines[-1], re.I):
         return "FM Entrance"
     if fm.search(text):
-        nums = re.findall(r"<\s*(\d{1,2})\s*>?", lines[-1]) or re.findall(r"(\d{1,2})\s*>?\s*\S?\s*$", lines[-1])
+        last = _room_digits(lines[-1])
+        nums = re.findall(r"<\s*(\d{1,2})\s*>?", last) or re.findall(r"(\d{1,2})\s*>?\s*\S?\s*$", last)
         return "FM" + str(int(nums[0])) if nums and 1 <= int(nums[0]) <= 40 else "FM"
     name = lines[-1]
     return name if re.search(r"[A-Za-z]{4}", name) and len(name) <= 44 else ""
@@ -820,12 +829,12 @@ def read_room_bar(img):
             g = m.point(lambda v: 255 if v <= lo else 0 if v >= hi else int(255 - (v - lo) * k))
             g = g.resize((g.width * 4, g.height * 4), Image.BICUBIC)
             for l in ocr_lines(g, 4, 6):
-                t = re.sub(r"[^A-Za-z0-9<>:' -]", "", l["text"])
+                t = re.sub(r"[^A-Za-z0-9<>:' -]", "", _room_digits(l["text"]))
                 if not re.search(r"(fr)?e\s*e?\s*mark", t, re.I):
                     continue
                 if re.search(r"entr", t, re.I):
                     return "FM Entrance"
-                n = re.findall(r"<\s*(\d{1,2})\s*>", t)
+                n = re.findall(r"<\s*(\d{1,2})\s*>", _room_digits(t))
                 if len(n) == 1 and 1 <= int(n[0]) <= 40:
                     best = "FM" + str(int(n[0]))
             if best: return best
