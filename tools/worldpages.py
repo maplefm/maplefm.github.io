@@ -160,6 +160,10 @@ def build(world, guide, summary, notes, out):
     QSLUG = quest_slugs(QS)
     QBYID = {q["id"]: q for q in QS}
     def mlink(p): return f'<a href="/map/{MSLUG[p]}/">{E(p)}</a>' if p in M else E(p)
+    # Nav here: the route finder from wherever you are (it remembers your last spot) to this map, shortest way first.
+    # Next to every map a player has to go to: where a monster lives, where a quest starts or what it hunts.
+    def navbtn(p): return f' <a class="navh" href="/map.html#route=|{urllib.parse.quote(p, safe="")}" title="The fastest way to {E(p)} from where you are">Nav here</a>' if p in M else ""
+    def mnav(p): return mlink(p) + navbtn(p)
     def blink(n): return f'<a href="/monster/{BSLUG[n]}/">{E(n)}</a>' if n in MOB else E(n)
     def qlink(q): return f'<a href="/quest/{QSLUG[q["id"]]}/">{E(q["n"])}</a>'
     def sprite_url(n): return f"{LIVE}data/sprite/{MOB[n]['id']}.gif" if n in MOB and MOB[n].get("id") else ""
@@ -282,6 +286,7 @@ def build(world, guide, summary, notes, out):
                 (f"{', '.join(n for n, _ in mobs_sorted[:3])}, " if mobs_sorted else "") +
                 (f"{len(hid)} hidden portal{'s' if len(hid) != 1 else ''}, " if hid else "") + "the in-game minimap and every exit.")
         b = f'<h1>{E(p)}</h1><p class="sub">MapleStory Classic · {E(m.get("region") or "")}{" · " + E(m["type"]) if m.get("type") else ""}{" · " + lvtxt.capitalize() if lvtxt else ""}</p>'
+        b += f'<p class="navrow"><a class="navh big" href="/map.html#route=|{urllib.parse.quote(p, safe="")}">Nav here</a> <small>the fastest way here from where you are</small></p>'
         intro = []
         if m.get("near") and m["near"] != p: intro.append(f"Nearest town: {mlink(m['near'])}.")
         if m.get("ret") and m["ret"] != p and m["ret"] != m.get("near"): intro.append(f"Return Scroll goes to {mlink(m['ret'])}.")
@@ -293,8 +298,8 @@ def build(world, guide, summary, notes, out):
         if hid:
             b += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: stand on the purple spot ({where(m, x[2], x[3]) or "see the minimap"}) and press up.{f" Needs level {x[5]}." if x[5] else ""}</div>' for x in hid)
         if m["portals"]:
-            b += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th></tr>" + "".join(
-                f'<tr><td>{mlink(x[0])}</td><td>{"Hidden portal" if x[1] == "hidden" else "Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{where(m, x[2], x[3])}</small></td></tr>' for x in m["portals"]) + "</table>"
+            b += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th><th></th></tr>" + "".join(
+                f'<tr><td>{mlink(x[0])}</td><td>{"Hidden portal" if x[1] == "hidden" else "Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{where(m, x[2], x[3])}</small></td><td>{navbtn(x[0])}</td></tr>' for x in m["portals"]) + "</table>"
         if mobs_sorted:
             b += "<h2>Monsters</h2><p class=\"note\">×N is the number of spawn points.</p><div class=\"mobs\">" + "".join(mobcard(n, f" ×{c}") for n, c in mobs_sorted if n in MOB) + "</div>"
             dr = []
@@ -336,8 +341,8 @@ def build(world, guide, summary, notes, out):
         b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (
             (f" Drops {mz[0]} to {mz[1]} mesos" + (f" {mz[2]}% of the time" if mz[2] else "") + (f" (measured over {mz[4]} kills on the wiki)." if mz[3] == "wiki" and mz[4] else " (wiki measurement)." if mz[3] == "wiki" else " (player reports).")) if mz else "") + (f" Drops worth about {meso(ev)} mesos a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
         if homes.get(n):
-            b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>How many</th><th>Level range</th></tr>" + "".join(
-                f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
+            b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>How many</th><th>Level range</th><th></th></tr>" + "".join(
+                f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td><td>{navbtn(p)}</td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
         if drops.get(n):
             b += "<h2>Drops</h2><table><tr><th>Item</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
                 f'<tr><td>{ilink(i)}{live(i)}{" <small>(only while on the quest)</small>" if qo else ""}</td><td>{f"{r:g}%" if r is not None else ""}</td><td class="n">{meso(PRICE[i]) if i in PRICE else ""}</td></tr>'
@@ -390,7 +395,7 @@ def build(world, guide, summary, notes, out):
             ("EXP", fmt(q.get("exp"))), ("Mesos", fmt(q.get("meso"))), ("Fame", fmt(q.get("fame")))] if v not in ("0",)) + "</div>"
         if where_g:
             npic = f'<img class="npcpic" src="{IO}/npc/{q["gid"]}/icon" alt="" loading="lazy">' if q.get("gid") is not None else ""
-            b += f"<p>{npic}{E(q['g'])} stands in {', '.join(mlink(p) for p in where_g[:4])}.</p>"
+            b += f"<p>{npic}{E(q['g'])} stands in {', '.join(mnav(p) for p in where_g[:4])}.</p>"
             gm = next((M[p] for p in where_g if M[p].get("mm")), None)
             if gm:
                 np_ = next((n for n in gm.get("npcs") or [] if n[0] == q["g"]), None)
@@ -400,7 +405,7 @@ def build(world, guide, summary, notes, out):
             if pre: b += "<h2>Finish first</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in pre) + "</ul>"
         if q.get("kill"):
             b += "<h2>Hunt</h2><ul>" + "".join(
-                f"<li>" + (f'<img class="ms" src="{sprite_url(k[0])}" alt="" loading="lazy">' if sprite_url(k[0]) else "") + f"{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mlink(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
+                f"<li>" + (f'<img class="ms" src="{sprite_url(k[0])}" alt="" loading="lazy">' if sprite_url(k[0]) else "") + f"{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mnav(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
         if q.get("need"):
             acc = {"fee": 0, "cat": {}, "base": {}}; rows = ""; crafted = 0
             for i, c in q["need"]:
@@ -464,7 +469,7 @@ def build(world, guide, summary, notes, out):
             return f'<h3>{E(key)}</h3><p class="note">Nothing near level {L} passes the bar for this build in typical gear.</p>'
         if not top: return ""
         return (f'<h3>{E(key)} <small class="note">· {E(atk)}</small></h3><ol>' +
-                "".join(f'<li>{mlink(p)} <small>· {fmt(e)} EXP an hour (est.) · {E(w)}</small></li>' for p, e, k, w in top) + "</ol>")
+                "".join(f'<li>{mnav(p)} <small>· {fmt(e)} EXP an hour (est.) · {E(w)}</small></li>' for p, e, k, w in top) + "</ol>")
     def keys_at(L, fams=None):
         out = []
         for f in (["Beginner"] if L < 10 else []) + (fams or ["Warrior", "Magician", "Bowman", "Thief"]):
@@ -475,7 +480,7 @@ def build(world, guide, summary, notes, out):
     def pick_html(p, st, dmg, hit, cost, L, why=""):
         m = M[p]
         mobs = "".join(mobcard(n, f" ×{c}") for n, c in sorted(m["mobs"], key=lambda x: -x[1]) if n in MOB and not MOB[n].get("boss"))
-        return (f'<div class="pick"><h3>{mlink(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} spawn points{(" · slow respawns: " + timers(m)) if timers(m) else ""}</p>'
+        return (f'<div class="pick"><h3>{mlink(p)}{navbtn(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} spawn points{(" · slow respawns: " + timers(m)) if timers(m) else ""}</p>'
                 + (f"<p>{E(why)}</p>" if why else "") + f'<div class="mobs">{mobs}</div>'
                 f'<p class="note">Touch from {blink(st["worst"])}: about {fmt(dmg)} damage at level {L} in typical gear, hits {round(hit * 100)}% of the time, about {fmt(cost)} mesos of {E(HP[0])} each.</p></div>')
     BAR = '<p class="note"><b>Typical gear estimates.</b> Clean shop weapon for the level, usual stats and skill order. Every map shown lets that build land 80% of its attacks or more and kill each common monster in 8 s or less. <a href="/map.html#train">Enter your own build</a> for your numbers.</p>'

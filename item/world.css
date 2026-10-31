@@ -28,3 +28,11 @@ a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--pane
 .ms{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:6px}
 .npcpic{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;background:var(--panel2);border-radius:10px}
 .nextbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.nextbar a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:9px 14px;border-radius:999px}.nextbar a.alt{background:var(--panel2);color:var(--accent);border:1px solid var(--line2)}
+
+/* Nav here: the route finder to this map, next to every map a player has to get to */
+.navh{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:1px 9px 1px 7px;border-radius:999px;background:var(--accent,#6a3df0);color:#fff!important;font-size:.72rem;font-weight:800;text-decoration:none!important;white-space:nowrap;vertical-align:1px}
+.navh::before{content:"";width:0;height:0;border-left:7px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent}
+.navh:hover{filter:brightness(1.1)}
+.navh.big{font-size:.9rem;padding:5px 14px 5px 12px;margin:0 6px 0 0}
+.navrow{margin:8px 0 4px}.navrow small{color:var(--muted)}
+td .navh{margin-left:0}
