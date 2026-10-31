@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.3"
+VERSION = "2026.10.31.4"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -1566,7 +1566,7 @@ class ChannelWatch:
     def box(self, game):
         # the middle of the game, wide enough for the window at any size the game is drawn at (4K, ultrawide, stretched)
         w, h = game[2], game[3]; half = max(520, int(w * 0.3))
-        return [max(0, w // 2 - half), int(h * 0.12), min(w, w // 2 + half), int(h * 0.88)]
+        return [max(0, w // 2 - half), int(h * 0.06), min(w, w // 2 + half), int(h * 0.97)]
 
     def read(self, img):
         # small games are read at double size, so the buttons are never too few pixels to measure
