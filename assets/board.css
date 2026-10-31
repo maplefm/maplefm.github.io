@@ -1561,3 +1561,5 @@ td:has(> .lgt) { white-space: nowrap; }
 .lfold ~ .list { max-height: 460px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
 @media (max-width: 820px) { .lfold ~ .list { max-height: 60vh; } }
 .gladder .lg.lone .lgc { color: var(--ask); }
+/* rank up: the badge sits centred under "Rank up" (the shared .big price style made it a left-aligned row) */
+.lvlup .card2 .big { display: flex; justify-content: center; align-items: center; width: 100%; }
