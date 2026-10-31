@@ -72,7 +72,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
 .acts button.ok.on{background:var(--ok);border-color:var(--ok)}
 .sec{margin-top:12px}
 .sec h4{margin:0 0 6px;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.row{display:grid;grid-template-columns:22px 36px minmax(0,1fr) auto;gap:8px;align-items:start;padding:7px 0;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:22px 36px minmax(0,1fr);gap:8px;align-items:start;padding:7px 0;border-top:1px solid var(--line)}
 .row:first-of-type{border-top:0}
 .row input{width:18px;height:18px;margin:9px 0 0;accent-color:var(--accent)}
 .ic{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center}
@@ -90,7 +90,13 @@ img.px{image-rendering:pixelated;object-fit:contain}
 .tl{display:flex;align-items:center;gap:6px;font-size:.84rem;min-width:0}
 .tl img{width:22px;height:22px;flex:0 0 22px}
 .tl a{font-weight:700}
-.tl em{margin-left:auto;font-style:normal;font-weight:800;white-space:nowrap;padding-left:6px}.tl em small{font-weight:600;color:var(--muted)}
+.ql,.tl{display:grid;grid-template-columns:var(--nmw,230px) 60px minmax(0,1fr);align-items:center;gap:2px 10px;min-width:0}
+.ql .nm,.tl .nm{display:flex;align-items:center;gap:6px;min-width:0}.ql .nm a,.tl .nm a{overflow:hidden;text-overflow:ellipsis}
+.qn{font-weight:800;white-space:nowrap;text-align:right}
+.fp{font-size:.8rem;color:var(--muted);font-weight:600}.fp b{color:var(--ink)}.fp.fpn{font-style:italic}
+.tk .tl{--nmw:210px}.tk .tk .tl{--nmw:190px}.tk .tk .tk .tl{--nmw:170px}.tk .tk .tk .tk .tl{--nmw:150px}
+.panel .ql{grid-template-columns:minmax(0,1fr) auto}.panel .ql .fp{grid-column:1 / -1}
+@media (max-width:640px){.ql,.tl{grid-template-columns:minmax(0,1fr) auto}.ql .fp,.tl .fp{grid-column:1 / -1}}
 .tm{font-size:.73rem;color:var(--muted);margin:0 0 0 28px}
 .tm b{color:var(--ink)}
 .alt{font-size:.74rem;color:var(--muted);margin-top:4px}
@@ -120,7 +126,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
 .side{position:sticky;top:64px;display:grid;gap:12px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px}
 .panel h2{margin:0 0 8px;font:700 1rem Outfit,sans-serif}
-.panel .row{grid-template-columns:30px minmax(0,1fr) auto}.panel .ic{width:30px;height:30px}
+.panel .row{grid-template-columns:30px minmax(0,1fr)}.panel .ic{width:30px;height:30px}
 .tot{font-weight:800;margin-top:8px}
 .note{color:var(--muted);font-size:.84rem}
 .empty{text-align:center;padding:30px 10px;color:var(--muted)}
@@ -280,11 +286,17 @@ img.px{image-rendering:pixelated;object-fit:contain}
     if (!n && g.t) out.appendChild(el("span", null, "Found during the quest"));
     return out.childNodes.length ? out : null;
   }
+  // a price that says what it is: about X each on the FM, Y for all N (or not seen on the FM yet)
+  function fpSpan(name, qty) { var f = el("span", "fp"); f.dataset.fmq = qty; if (window.fmPriceFill) fmPriceFill(f, PRICE[name]); return f; }
+  // name, how many, FM price: fixed columns, the same on every row and every step of a crafting tree
+  function qline(cls, name, qty, extra) {
+    var l = el("div", cls), nm = el("span", "nm"), im = cls === "tl" && itemImg(name); if (im) nm.appendChild(im);   // a list row has its own big icon
+    nm.appendChild(itemLink(name)); if (extra) nm.appendChild(extra);
+    l.appendChild(nm); l.appendChild(el("span", "qn", "×" + qty.toLocaleString())); l.appendChild(fpSpan(name, qty));
+    return l;
+  }
   function treeNode(node) {
-    var d = el("div", "tn"), l = el("div", "tl"), im = itemImg(node.n); if (im) l.appendChild(im);
-    l.appendChild(itemLink(node.n)); var em = el("em", null, "×" + node.q.toLocaleString());
-    if (!node.r && PRICE[node.n]) em.appendChild(el("small", null, " · " + meso(PRICE[node.n] * node.q)));
-    l.appendChild(em); d.appendChild(l);
+    var d = el("div", "tn"), l = qline("tl", node.n, node.q); d.appendChild(l);
     if (node.r) { d.appendChild(craftMeta(node)); var k = el("div", "tk"); node.kids.forEach(function (c) { k.appendChild(treeNode(c)); }); d.appendChild(k); }
     else { var s = srcChips(node.n, 2, true); if (s) { s.style.marginLeft = "28px"; d.appendChild(s); } }
     return d;
@@ -301,9 +313,9 @@ img.px{image-rendering:pixelated;object-fit:contain}
     var r = el("div", "row" + (got ? " got" : "")), cb = el("input"); cb.type = "checkbox"; cb.checked = got; cb.setAttribute("aria-label", "Got " + shown(name));
     cb.addEventListener("change", function () { CHECK[key] = CHECK[key] || {}; if (cb.checked) CHECK[key][name] = 1; else delete CHECK[key][name]; if (!Object.keys(CHECK[key]).length) delete CHECK[key]; saveCheck(); r.classList.toggle("got", cb.checked); });
     r.appendChild(cb); r.appendChild(itemIcon(name));
-    var mid = el("div"); mid.appendChild(itemLink(name)); var rc = recipe(name);
+    var mid = el("div"), rc = recipe(name);
+    mid.appendChild(qline("ql", name, qty, rc ? el("span", "tag", "Crafted") : null));
     if (rc) {
-      mid.appendChild(el("span", "tag", "Crafted"));
       var acc = newAcc(), node = plan(name, qty, {}, acc);
       mid.appendChild(craftMeta(node)).style.marginLeft = "0";
       var tr = el("div", "tree"); node.kids.forEach(function (k) { tr.appendChild(treeNode(k)); }); mid.appendChild(tr);
@@ -318,7 +330,6 @@ img.px{image-rendering:pixelated;object-fit:contain}
       }
     } else { var src = srcChips(name, 3); if (src) mid.appendChild(src); }
     r.appendChild(mid);
-    var qd = el("div", "qty", "×" + qty.toLocaleString()); if (PRICE[name]) qd.appendChild(el("small", null, meso(PRICE[name] * qty) + " on the FM")); r.appendChild(qd);
     return r;
   }
   // every base material for the whole quest, after opening each crafted item
@@ -467,7 +478,8 @@ img.px{image-rendering:pixelated;object-fit:contain}
     mine.forEach(function (q) { q.need.forEach(function (x) { need[x[0]] = (need[x[0]] || 0) + x[1]; }); });
     var keys = Object.keys(need).sort(), tot = 0;
     if (!keys.length) P.appendChild(el("p", "note", "Start a quest and its items add up here with Free Market costs."));
-    keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var a = el("a", null, shown(n)); a.href = itemHref(n); r.appendChild(a); var q = el("div", "qty", "×" + need[n].toLocaleString()); if (PRICE[n]) { q.appendChild(el("small", null, meso(PRICE[n] * need[n]))); tot += PRICE[n] * need[n]; } r.appendChild(q); P.appendChild(r); });
+    keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var q = qline("ql", n, need[n]); r.appendChild(q); if (PRICE[n]) tot += PRICE[n] * need[n]; P.appendChild(r); });
+    if (keys.length) P.appendChild(el("p", "note", "FM prices change with the market; these are today's."));
     if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
   }
   // deep links: #q-1012 opens one quest (from item pages, quest pages and the board); #q=name or ?q=name searches
@@ -542,4 +554,5 @@ img.px{image-rendering:pixelated;object-fit:contain}
 })();
 </script>
 <script src="/assets/hit.js" defer></script>
+<script src="/assets/fmprice.js?v=1"></script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/items/class/">Items by class</a><a href="/guides/">Guides</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Quests and training</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>

@@ -1405,7 +1405,7 @@
     var grad = g.createLinearGradient(0, 0, W, Hh); grad.addColorStop(0, "#5b3df5"); grad.addColorStop(1, "#2a1763"); g.fillStyle = grad; g.fillRect(0, 0, W, Hh);
     g.fillStyle = "rgba(255,255,255,.08)"; g.beginPath(); g.arc(W - 70, 60, 150, 0, 7); g.fill();
     function txt(t, x, y, size, weight, color) { g.font = weight + " " + size + "px Inter, Segoe UI, Arial"; g.fillStyle = color; g.fillText(t, x, y); }
-    txt("CLUB FM", 28, 40, 15, "900", "#f5c542"); txt("Priced by watched sales · maplefm.gg", 110, 40, 13, "700", "rgba(255,255,255,.75)");
+    txt("CLUB FM", 62, 40, 15, "900", "#f5c542"); txt("maplefm.gg", 140, 40, 15, "800", "#fff"); txt("Priced by watched sales", 236, 40, 13, "700", "rgba(255,255,255,.7)");
     txt(showName(i.item), 28, 118, 34, "800", "#fff");
     var line = i.hi > i.lo && short(i.lo) !== short(i.hi) ? short(i.lo) + " – " + short(i.hi) : fmt(i.typ);
     txt(line, 28, 180, 52, "900", "#ffd166"); txt("typical " + fmt(i.typ) + " mesos", 28, 210, 16, "700", "rgba(255,255,255,.85)");
@@ -1413,7 +1413,10 @@
     txt(sub, 28, 244, 15, "700", "rgba(255,255,255,.8)");
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); txt((r > 0 ? "▲ " : r < 0 ? "▼ " : "") + Math.abs(r) + "% in 24h", 28, 272, 15, "800", r > 0 ? "#8fe3a8" : r < 0 ? "#ff9b8f" : "#ddd"); }
     txt(new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · MapleStory Classic Free Market", 28, Hh - 22, 12, "700", "rgba(255,255,255,.6)");
-    return new Promise(function (res) {
+    // our logo top left, so a shared picture always says where it came from
+    var logo = new Image(); logo.src = "/clubfm-icon-512.png";
+    var logoP = new Promise(function (ok) { logo.onload = function () { try { g.drawImage(logo, 26, 18, 28, 28); } catch (e) {} ok(); }; logo.onerror = ok; setTimeout(ok, 1500); });
+    return logoP.then(function () { return new Promise(function (res) {
       var done = function () { c.toBlob(function (b) { res(b); }, "image/png"); };
       var srcs = iconSrcs(i.item), k = 0, fin = false, im = new Image(); im.crossOrigin = "anonymous";
       var end = function () { if (fin) return; fin = true; done(); };
@@ -1421,7 +1424,7 @@
       // the icon host may refuse cross-origin drawing; then the icon a watcher captured in game (same origin) is used
       im.onerror = function () { k++; if (k < srcs.length) im.src = srcs[k]; else capturedAsync(i.item).then(function (src) { if (src && !fin) { im.onerror = end; im.src = src; } else end(); }, end); };
       if (srcs.length) im.src = srcs[0]; else im.onerror(); setTimeout(end, 3000);
-    });
+    }); });
   }
   // ---------- front door: trust strip, quick picks and the deal next to the search
   var HOOK_T = null, HOOK_K = 0;
@@ -2404,6 +2407,7 @@
   function totalKeys(name, x) {
     var wep = isWeapon(name), mag = /^(Wand|Staff)$/.test(subKind(name)), vs = valSet(name), ks = [];
     var add = function (k) { if (ks.indexOf(k) < 0 && x[k] != null && (x[k] !== 0 || k === "ATT" || k === "MATT")) ks.push(k); };
+    if (subKind(name) === "Glove") { ks.push("ATT"); }      // gloves always lead with attack: a popup with no attack line is 0
     if (wep) add(mag ? "MATT" : "ATT");
     else if (x.ATT || vs.ATT) add("ATT");
     if (!wep && (x.MATT || vs.MATT)) add("MATT");
@@ -2417,8 +2421,9 @@
     if (!ks.length) { cs.textContent = "average roll"; return cs; }
     ks.forEach(function (k, n) {
       if (n) cs.appendChild(document.createTextNode(" · "));
-      cs.appendChild(document.createTextNode(x[k] + " " + TOTLAB[k]));
-      var d = b[k] != null ? x[k] - b[k] : (x._tip && x._tip[k]) || 0;
+      var v = x[k] != null ? x[k] : 0;
+      cs.appendChild(document.createTextNode(v + " " + TOTLAB[k]));
+      var d = b[k] != null ? v - b[k] : (x._tip && x._tip[k]) || 0;
       if (d) cs.appendChild(el("em", d > 0 ? "up" : "down", (d > 0 ? "+" : "−") + Math.abs(d)));
     });
     return cs;
