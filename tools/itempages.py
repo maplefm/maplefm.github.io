@@ -344,7 +344,7 @@ def main():
         daily = [d for d in (r.get("daily") or []) if d and d[1]][-7:]
         dtab = ""
         if daily:
-            top = max(d[1] for d in daily) or 1
+            dtop = max(d[1] for d in daily) or 1
             rv = list(reversed(daily))
             for k, d in enumerate(rv):
                 prev = rv[k + 1][1] if k + 1 < len(rv) else None
@@ -355,7 +355,7 @@ def main():
                     else: ch = '<span class="dc">same</span>'
                 lab = datetime.datetime.fromtimestamp(d[0] / 1000, datetime.timezone.utc).strftime('%a %b %-d')
                 dtab += (f'<div class="dr{" today" if k == 0 else ""}"><span class="dd">{"Today" if k == 0 else lab}</span>'
-                         f'<span class="track"><i style="width:{max(4, round(d[1] / top * 100))}%"></i></span><b title="{full(d[1])} mesos">{meso(d[1])}</b>{ch}</div>')
+                         f'<span class="track"><i style="width:{max(4, round(d[1] / dtop * 100))}%"></i></span><b title="{full(d[1])} mesos">{meso(d[1])}</b>{ch}</div>')
         vp = vendor.get(name) or 0
         vp = vp if vp > 1 else 0
         nx = NX.get(name)
