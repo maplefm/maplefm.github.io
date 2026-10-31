@@ -1,5 +1,5 @@
 {
- "at": 1793445908783,
+ "at": 1793449027663,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -121,20 +121,20 @@
    "behind": 0
   },
   "laclac": {
-   "rows24": 11000,
-   "room24": 10994,
-   "ch24": 11000,
-   "rows7": 78398,
-   "room7": 28688,
+   "rows24": 11330,
+   "room24": 11324,
+   "ch24": 11330,
+   "rows7": 78728,
+   "room7": 29018,
    "late7": 709,
    "chat24": 15,
-   "last": 1793393514,
-   "ver": "2026.10.30.7",
+   "last": 1793448915,
+   "ver": "2026.10.31.4",
    "lag_median_min": 2.9,
    "room_rate24": 0.999,
-   "room_rate7": 0.366,
+   "room_rate7": 0.369,
    "late_share7": 0.009,
-   "behind": 4
+   "behind": 0
   },
   "DivineFeces": {
    "rows24": 0,
@@ -222,12 +222,10 @@
    "bad row: 3a3a": 4776
   },
   "2026-10-31": {
-   "bad row: 3a3a": 5283,
-   "incomplete upload": 201
+   "bad row: 3a3a": 5883,
+   "incomplete upload": 231
   }
  },
  "rejects": {},
- "flags": [
-  "laclac: watcher 2026.10.30.7, 4 releases behind"
- ]
+ "flags": []
 }
