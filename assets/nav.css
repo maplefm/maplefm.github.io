@@ -3,7 +3,7 @@
 .sitenav .sn-brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink,#22183d);font:800 1.15rem/1 Outfit,"Fredoka",system-ui,sans-serif;white-space:nowrap}
 .sitenav .sn-brand img{height:28px;image-rendering:pixelated}
 .sitenav .sn-brand b{color:var(--accent,#6d3fd1)}
-.sitenav .sn-links{display:flex;gap:4px;align-items:center;flex:0 1 auto;min-width:0;padding:4px;border-radius:999px;background:var(--card,var(--panel,#fff));border:1px solid var(--line,var(--line2,#e6ddf6));box-shadow:0 2px 10px rgba(60,30,120,.06)}
+.sitenav .sn-links{display:flex;gap:4px;align-items:center;flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;padding:4px;border-radius:999px;background:var(--card,var(--panel,#fff));border:1px solid var(--line,var(--line2,#e6ddf6));box-shadow:0 2px 10px rgba(60,30,120,.06)}
 .sitenav .sn-links a{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.9rem;line-height:1.1;color:var(--ink,#22183d);white-space:nowrap}
 .sitenav .sn-links a:hover{background:var(--soft,var(--panel2,rgba(109,63,209,.08)))}
 .sitenav .sn-links a[aria-current="page"]{background:var(--accent,#6d3fd1);color:#fff}
@@ -86,3 +86,6 @@
 /* meso amounts: the in-game gold coin right after the number, never wrapped onto its own line */
 .mz { white-space: nowrap; }
 .mz::after { content: ""; display: inline-block; width: .95em; height: 1em; margin-left: .22em; vertical-align: -.16em; background: url(/assets/meso@2x.png) center / contain no-repeat; }
+
+/* the menu is one scrolling row from the first paint, not two rows until the script runs */
+.sitenav .sn-links::-webkit-scrollbar{display:none}

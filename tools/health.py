@@ -28,7 +28,7 @@ def rejects():
     key = os.environ.get("INBOX_PULL_KEY") or ""
     if not key: return {}
     try:
-        req = urllib.request.Request("https://clubfm-accounts.aaweaver93.workers.dev/inbox/rejects", headers={"Authorization": "Bearer " + key, "User-Agent": "clubfm-pump"})
+        req = urllib.request.Request("https://api.maplefm.gg/inbox/rejects", headers={"Authorization": "Bearer " + key, "User-Agent": "clubfm-pump"})
         return json.load(urllib.request.urlopen(req, timeout=20))
     except Exception:
         return {}

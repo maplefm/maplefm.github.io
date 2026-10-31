@@ -1616,3 +1616,8 @@ table.fit1 .col-vol, table.fit2 .col-trend, table.fit3 .col-src, table.fit4 .col
 @media (max-width: 400px) { .wtitle h2.cbrand em { display: none; } }
 /* the card's link and picture buttons: emoji dead center in the box */
 .share .sh { display: inline-grid; place-items: center; padding: 0; line-height: 1; text-align: center; }
+/* search: the "Daggers, level 25 to 30" shortcut at the top of the list */
+.sugg .so.kind .sn { font-weight: 800; color: var(--accent); }
+.sugg .so.kind .sp { font-weight: 700; color: var(--accent); white-space: nowrap; }
+/* small phones: the scrolled card bar keeps the item name and price whole; maplefm.gg shrinks to its logo */
+@media (max-width: 480px) { .nbar .nbrand { font-size: 0; gap: 0; } }

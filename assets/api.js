@@ -1,8 +1,7 @@
-// Club FM talks to its server at api.maplefm.gg (same site as maplefm.gg, so phones keep the sign-in). Some networks
-// can't find that address yet; then every call quietly goes to the server's other address instead, links included,
-// and the page remembers that for ten minutes before trying api.maplefm.gg again.
+// Club FM talks to its server at api.maplefm.gg (same site as maplefm.gg, so phones keep the sign-in). The switch-over
+// below is kept for a second address; today both are api.maplefm.gg.
 (function () {
-  var A = "https://api.maplefm.gg", B = "https://clubfm-accounts.aaweaver93.workers.dev", alt = false;
+  var A = "https://api.maplefm.gg", B = "https://api.maplefm.gg", alt = false;
   try { var t = +localStorage.getItem("fm-api-alt") || 0; alt = Date.now() - t < 10 * 60e3; } catch (e) {}
   window.FM_API = alt ? B : A;
   var f0 = window.fetch.bind(window);

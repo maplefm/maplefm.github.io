@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<script src="/assets/api.js?v=3"></script>
+<script src="/assets/api.js?v=4"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Earn by Scanning · Club FM</title>
@@ -420,7 +420,14 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
       g.textContent = "";
       l.forEach(function (x) {
         var d = el("div", "wallcard" + (x.tier === "Beta Tester" ? " top" : "")), av = el("span", "wav", (x.ign || x.name).slice(0, 1).toUpperCase());
-        if (/^[A-Za-z0-9]{3,13}$/.test(x.ign || "")) fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(x.ign) + "?fields=name,photo").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { var u = j && j.data && j.data.photo; if (!u) return; var im = new Image(); im.alt = ""; im.onload = function () { av.textContent = ""; av.appendChild(im); }; im.src = u; }).catch(function () {});
+        // character pictures are remembered for a day, like on the board, so each visit doesn't ask classicrank again
+        if (/^[A-Za-z0-9]{3,13}$/.test(x.ign || "")) (function (ign, av) {
+          var key = "fm-wall-" + ign.toLowerCase(), show = function (u) { if (!u) return; var im = new Image(); im.alt = ""; im.onload = function () { av.textContent = ""; av.appendChild(im); }; im.src = u; };
+          var c = null; try { c = JSON.parse(localStorage.getItem(key) || "null"); } catch (e) {}
+          if (c && Date.now() - c.t < 864e5) return show(c.u);
+          fetch("https://classicrank.com/api/v1/characters/" + encodeURIComponent(ign) + "?fields=name,photo").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+            if (!j) return; var u = (j.data && j.data.photo) || ""; try { localStorage.setItem(key, JSON.stringify({ u: u, t: Date.now() })); } catch (e) {} show(u); }).catch(function () {});
+        })(x.ign, av);
         d.appendChild(av); d.appendChild(el("b", null, x.ign || x.name));
         d.appendChild(el("small", null, (x.tier ? x.tier + " tier" : "Supporter") + (x.lifetime ? " · lifetime" : "")));
         g.appendChild(d);
@@ -439,7 +446,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
         var b = el("li", "bar"); b.appendChild(document.createTextNode("💵 Pay unlocks here")); b.appendChild(el("small", null, num(UNLOCK) + " credits earned, all time")); o.appendChild(b); placed = true;
       }
       if (t[0] === "Titan") {
-        var m = el("li", "bar"); m.appendChild(document.createTextNode("🔔 Mega Deals unlock here")); m.appendChild(el("small", null, "the site's deal notifier and private #mega-deals channel, from " + num(t[1]) + " sales caught, or the Tiger tier and up on Ko-fi")); o.appendChild(m);
+        var m = el("li", "bar"); m.appendChild(document.createTextNode("🔔 Mega Deals unlock here")); m.appendChild(el("small", null, "the site's deal notifier and private #mega-deals channel, from " + num(t[1]) + " sales caught, Ko-fi Tiger and up, or $100 of Ko-fi support in total")); o.appendChild(m);
       }
       var li = el("li", i >= 6 ? "hi" : ""); if (i === TIERS.length - 1) { var ci = document.createElement("img"); ci.src = "assets/superstar@4x.png"; ci.alt = ""; ci.style.cssText = "height:1.05em;vertical-align:-0.15em;image-rendering:pixelated;margin-right:4px"; li.appendChild(ci); } li.appendChild(document.createTextNode(t[0]));
       li.appendChild(el("small", null, t[1] ? num(t[1]) + " sales" : "start"));

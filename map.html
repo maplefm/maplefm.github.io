@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head>
-<script src="/assets/api.js?v=3"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/assets/api.js?v=4"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maps and Training · MapleStory Classic · Club FM</title>
 <meta name="description" content="Where to train at your level in MapleStory Classic, what it costs in potions, and how to get anywhere on Victoria Island: the fastest route, the free route, hidden portals and in-game minimaps.">
 <link rel="canonical" href="https://maplefm.gg/map.html">
@@ -480,7 +480,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   function mobMesos(n, mb) {
     var x = MOBX[n], z = x && x[5];
     if (z && z[1]) return { v: (z[0] + z[1]) / 2 * (z[2] || 70) / 100, rep: true };
-    return { v: (Math.floor(2.1 * mb.lv) + 3) * 0.7, rep: false };  // Classic meso formula (meowdb); mesos drop about 70% of kills
+    return { v: (Math.floor(2.1 * mb.lv) + 3) * 0.7, rep: false };  // Classic meso formula; mesos drop about 70% of kills
   }
   function mobDrops(n) {
     var x = MOBX[n], d = x && x[6], v = 0; if (!d) return 0;

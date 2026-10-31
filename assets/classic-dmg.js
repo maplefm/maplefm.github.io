@@ -1,7 +1,7 @@
 // MapleStory Classic damage engine: how hard a character hits a monster, how often it lands and how fast it kills.
 // Numbers come from the Classic World game files (assets/classic-skills.json: skills, weapons, stars and arrows).
-// Formulas are the Classic models in claude/classic-mechanics.md; none has an in-game capture yet, so every result
-// is an estimate. Works in the browser (window.ClassicDmg) and in node (require) for the tests and the fact check.
+// Formulas are the Classic models checked against several guides; none has an in-game capture yet, so every result
+// is an estimate. Works in the browser (window.ClassicDmg) and in node (require) for the tests.
 (function (root) {
   "use strict";
 

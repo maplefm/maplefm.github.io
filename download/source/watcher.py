@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.4"
+VERSION = "2026.10.31.5"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -60,9 +60,9 @@ def stats_fit(name, stats):
 SITE = "https://maplefm.gg"
 # anonymous price inbox: watchers without a token.txt send their prices here and a GitHub Action puts them on the site
 # the price inbox: Club FM's own server, readable only by the site's jobs
-INBOX_FORM = "https://clubfm-accounts.aaweaver93.workers.dev/inbox"
+INBOX_FORM = "https://api.maplefm.gg/inbox"
 INBOX_FIELD = "m"
-ACCOUNTS = "https://clubfm-accounts.aaweaver93.workers.dev"   # the Club FM accounts service for linking a watcher to a contributor account
+ACCOUNTS = "https://api.maplefm.gg"   # the Club FM accounts service for linking a watcher to a contributor account
 
 DEFAULTS = {
     "window_title": "MapleStory",

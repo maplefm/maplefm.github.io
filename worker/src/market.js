@@ -22,6 +22,20 @@ const meso = (n) => n >= 999.5e6 ? +(n / 1e9).toFixed(2) + "B" : n >= 999.5e3 ? 
 const shown = (name) => String(name || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, (m, t) => " Scroll " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%" })[t]);
 const clean = (s, n) => String(s == null ? "" : s).replace(/[\u0000-\u001f\u007f<>@`]/g, " ").replace(/\s+/g, " ").trim().slice(0, n);
 export const listingUrl = (id) => SITE_URL + "/market.html#l=" + id;
+// The meso coin in Discord posts: the server's in-game coin emoji (meso_coin), or the older meso one until that exists.
+// Looked up by name, so a re-uploaded emoji is picked up without a deploy.
+let COIN = null;
+export async function coinE(env) {
+  if (COIN && Date.now() - COIN.at < 6 * 3600e3) return COIN.v;
+  let v = "<:meso:1563233518912274512>";
+  try {
+    const r = await fetch("https://discord.com/api/v10/guilds/" + GUILD + "/emojis", { headers: { Authorization: "Bot " + env.DISCORD_BOT_TOKEN } });
+    const l = r.ok ? await r.json() : [];
+    const e = Array.isArray(l) ? (l.find((x) => x.name === "meso_coin") || l.find((x) => x.name === "meso")) : null;
+    if (e) v = "<:" + e.name + ":" + e.id + ">";
+  } catch (e) {}
+  COIN = { v, at: Date.now() }; return v;
+}
 // the seller's own screenshot of the item, kept with the listing and shown on the site and in its #selling post
 const API_URL = "https://api.maplefm.gg";
 const SHOT_MAX = 1.5e6;
@@ -429,10 +443,11 @@ const safe = (p) => Promise.resolve(p).catch(() => {});
 
 const label = (l) => "**" + shown(l.item) + "**" + (l.stats ? " (" + l.stats + ")" : "") + (l.qty > 1 ? " x" + l.qty : "");
 function title(l) { return ("WTS " + shown(l.item) + (l.stats ? " (" + l.stats + ")" : "") + (l.qty > 1 ? " x" + l.qty : "") + " · " + meso(l.price) + (l.qty > 1 ? " ea" : "")).slice(0, 100); }
-function embed(l) {
+function embed(l, coin) {
+  const C = coin ? " " + coin : "";
   const e = { title: shown(l.item) + (l.stats ? " (" + l.stats + ")" : ""), url: listingUrl(l.id), color: 0xffb020,
     description: [l.note || "", "Buy it now or make an offer on maplefm.gg. The seller gets a DM."].filter(Boolean).join("\n\n"),
-    fields: [{ name: "Price", value: meso(l.price) + (l.qty > 1 ? " each" : ""), inline: true }, { name: "Quantity", value: String(l.qty), inline: true },
+    fields: [{ name: "Price", value: meso(l.price) + C + (l.qty > 1 ? " each" : ""), inline: true }, { name: "Quantity", value: String(l.qty), inline: true },
       // a mention inside an embed shows as a raw id on phones, so the field gives the in-game name and the post's own
       // message mentions the seller (Discord shows their server nickname there, never the account's real name)
       { name: "Seller", value: l.ign ? "IGN " + l.ign : "See the mention above", inline: true }],
@@ -475,7 +490,7 @@ async function forumTags(env, item, sold) {
 }
 async function threadOpen(env, l) {
   if (!env.DISCORD_BOT_TOKEN) return null;
-  const body = { name: title(l), message: { content: "Seller <@" + l.seller_id + ">", embeds: [embed(l)], allowed_mentions: { parse: [] } }, applied_tags: await forumTags(env, l.item, false) };
+  const body = { name: title(l), message: { content: "Seller <@" + l.seller_id + ">", embeds: [embed(l, await coinE(env))], allowed_mentions: { parse: [] } }, applied_tags: await forumTags(env, l.item, false) };
   const r = await fetch(api(env) + "/channels/" + SELL_FORUM + "/threads", { method: "POST", headers: H(env), body: JSON.stringify(body) });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error("forum post " + r.status + " " + (d.message || ""));
@@ -486,7 +501,7 @@ async function threadEdit(env, l, note) {
   if (l.source === "site") {
     // the bot wrote the post, so it can rewrite it
     await fetch(api(env) + "/channels/" + l.thread_id, { method: "PATCH", headers: H(env), body: JSON.stringify({ name: title(l) }) });
-    await fetch(api(env) + "/channels/" + l.thread_id + "/messages/" + l.thread_id, { method: "PATCH", headers: H(env), body: JSON.stringify({ embeds: [embed(l)] }) });
+    await fetch(api(env) + "/channels/" + l.thread_id + "/messages/" + l.thread_id, { method: "PATCH", headers: H(env), body: JSON.stringify({ embeds: [embed(l, await coinE(env))] }) });
     await run(env, "UPDATE market_listings SET title = ? WHERE id = ?", title(l), l.id);
   }
   await threadSay(env, l, note);
@@ -766,7 +781,7 @@ export async function marketShare(env, id) {
   return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=120" } });
 }
 let IDS = null;
-async function kindId(env, item) {
+export async function kindId(env, item) {
   if (!IDS) {
     const r = await fetch(env.ITEMDB_URL || SITE_URL + "/data/itemdb.json", { cf: { cacheTtl: 86400, cacheEverything: true } }).catch(() => null);
     const d = r && r.ok ? await r.json().catch(() => null) : null;

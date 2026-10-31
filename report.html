@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<script src="/assets/api.js?v=3"></script><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script src="/assets/api.js?v=4"></script><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Market Close · Club FM</title>
@@ -143,6 +143,8 @@ html.pdfdoc .pdfhead b { font-family: var(--display); font-weight: 800; font-siz
 html.pdfdoc .pdfhead b span { color: var(--accent); }
 html.pdfdoc .pdfhead small { color: var(--muted); font-size: .8rem; }
 @media print { .sitenav, .kofitab, .clubfoot, #pdf { display: none !important; } }
+/* the report fills in after load: hold the space so the footer never jumps */
+body > .wrap{min-height:100vh}
 </style>
 <link rel="stylesheet" href="/assets/nav.css?v=6"></head>
 <body>
@@ -281,7 +283,11 @@ html.pdfdoc .pdfhead small { color: var(--muted); font-size: .8rem; }
 
   // Export PDF: only shown to Club FM admins (the server answers its admin routes for them alone).
   // It saves the report on screen, whatever day or range is picked, as a PDF file.
-  fetch("https://api.maplefm.gg/admin/reddit", { credentials: "include", cache: "no-store" }).then(function (r) { if (r.ok) $("pdf").hidden = false; }).catch(function () {});
+  // only a signed-in visitor can be the owner: everyone else skips the owner-only check (it errors in their console)
+  fetch("https://api.maplefm.gg/me", { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+    if (!m || !m.signedIn) return;
+    return fetch("https://api.maplefm.gg/admin/reddit", { credentials: "include", cache: "no-store" }).then(function (r) { if (r.ok) $("pdf").hidden = false; });
+  }).catch(function () {});
   function script(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
   function dataUrl(src) { return new Promise(function (ok, no) { var im = new Image(); im.onload = function () { var c = document.createElement("canvas"); c.width = c.height = 128; c.getContext("2d").drawImage(im, 0, 0, 128, 128); ok(c.toDataURL("image/png")); }; im.onerror = no; im.src = src; }); }
   function exportPdf() {

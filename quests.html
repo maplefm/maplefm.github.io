@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head>
-<script src="/assets/api.js?v=3"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/assets/api.js?v=4"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quest Log · MapleStory Classic · Club FM</title>
 <meta name="description" content="Every MapleStory Classic quest at your level: what to bring, crafted items broken down to base materials, where each item drops, and what it costs on the Free Market.">
 <link rel="canonical" href="https://maplefm.gg/quests.html">
@@ -184,7 +184,9 @@ img.px{image-rendering:pixelated;object-fit:contain}
   var TIER = { Lesser: "100%", Intermediate: "60%", Greater: "10%" };
   function shown(n) { var m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(n); return m ? m[1] + " " + (TIER[m[2]] || m[2]) : n; }
   function slug(n) { return shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
-  function meso(n) { n = +n || 0; if (n >= 999.5e6) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B"; if (n >= 999.5e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1).replace(/\.?0+$/, "") + "K"; return Math.round(n).toLocaleString(); }
+  // trims only zeros after a decimal point: 100K stays 100K, 10.0M is 10M, 0.25 stays 0.25
+  function trim0(x) { return x.indexOf(".") < 0 ? x : x.replace(/0+$/, "").replace(/\.$/, ""); }
+  function meso(n) { n = +n || 0; if (n >= 999.5e6) return trim0((n / 1e9).toFixed(2)) + "B"; if (n >= 999.5e3) return trim0((n / 1e6).toFixed(n >= 9.95e6 ? 1 : 2)) + "M"; if (n >= 1e4) return trim0((n / 1e3).toFixed(n >= 99.95e3 ? 0 : 1)) + "K"; return n >= 10 || n === Math.round(n) ? Math.round(n).toLocaleString("en-US") : trim0(n.toFixed(2)); }
   function qname(q) { return String(q.n || "").replace(/[?�]/g, " ").replace(/\s{2,}/g, " ").trim(); }
   function ph(t) { return el("span", "ph", t || "?"); }
   function img(src, cls, alt) { var i = new Image(); i.loading = "lazy"; i.decoding = "async"; i.alt = ""; i.src = src; i.className = "px" + (cls ? " " + cls : "");

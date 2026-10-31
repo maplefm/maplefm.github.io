@@ -45,7 +45,7 @@ jobs:
             git -C /tmp/main reset -q --hard origin/main
             T=/tmp/main/tools
             mkdir -p data
-            curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json
+            curl -sS -m 20 https://api.maplefm.gg/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json
             python3 $T/inbox.py /tmp/inbox.json data/inbox_block.json data/inbox_state.json /tmp/links.json || true
             if [ -s /tmp/inbox.json ] && ! cmp -s /tmp/inbox.json data/inbox.json; then cp /tmp/inbox.json data/inbox.json; fi
             if [ $(( n % 15 )) -eq 0 ]; then python3 $T/ranks.py data data/ranks.json /tmp/links.json || true; fi
@@ -54,7 +54,7 @@ jobs:
             python3 $T/discord.py deals data data/summary.json data/discord_deals.json || true
             if [ $(( n % 15 )) -eq 0 ]; then python3 $T/discord.py ranks data/ranks.json data/discord_ranks.json || true; fi
             # contributor credits for the Earn board, from the rules in tools/credits.py and the rate in data/pay.json
-            if [ $(( n % 15 )) -eq 0 ]; then curl -sS -m 20 https://clubfm-accounts.aaweaver93.workers.dev/public/kofi-income -o /tmp/kofi.json || echo '{}' > /tmp/kofi.json; python3 -I $T/credits.py data data/credits.json /tmp/main/data/pay.json /tmp/main/data/itemdb.json /tmp/links.json data/credits_ledger.json /tmp/kofi.json || true; fi
+            if [ $(( n % 15 )) -eq 0 ]; then curl -sS -m 20 https://api.maplefm.gg/public/kofi-income -o /tmp/kofi.json || echo '{}' > /tmp/kofi.json; python3 -I $T/credits.py data data/credits.json /tmp/main/data/pay.json /tmp/main/data/itemdb.json /tmp/links.json data/credits_ledger.json /tmp/kofi.json || true; fi
             # the board's item list: the public copy is the one the item build keeps current
             git -C "$PUB" show origin/live:data/itemdb.json > /tmp/itemdb.json 2>/dev/null && [ -s /tmp/itemdb.json ] && ! cmp -s /tmp/itemdb.json data/itemdb.json && cp /tmp/itemdb.json data/itemdb.json || true
             # scanner health (room read rate, late rows, watcher version, dropped uploads) for the watchdog's alert
@@ -89,7 +89,7 @@ jobs:
             for q in 1 2 3 4 5 6; do
               sleep 15
               cd /tmp/arch
-              curl -sS -m 10 -H "Authorization: Bearer ${INBOX_PULL_KEY}" https://clubfm-accounts.aaweaver93.workers.dev/inbox/fast -o /tmp/fast.json || continue
+              curl -sS -m 10 -H "Authorization: Bearer ${INBOX_PULL_KEY}" https://api.maplefm.gg/inbox/fast -o /tmp/fast.json || continue
               if [ -s /tmp/fast.json ] && [ "$(head -c 2 /tmp/fast.json)" != "[]" ]; then
                 FAST_DOCS=/tmp/fast.json FAST_LINKS=/tmp/links.json python3 $T/discord.py deals data data/summary.json data/discord_deals.json || true
                 if ! git diff --quiet -- data/discord_deals.json data/discord_dealfeed.json 2>/dev/null; then

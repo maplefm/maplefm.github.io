@@ -17,7 +17,7 @@ HOST = "https://maplefm.test/"
 def ctype(f):
     return "text/html" if f.endswith(".html") else "application/json" if f.endswith(".json") else "application/octet-stream"
 
-WORKER = "https://clubfm-accounts.aaweaver93.workers.dev/"
+WORKER = "https://api.maplefm.gg/"
 CORS = {"Access-Control-Allow-Origin": "https://maplefm.test", "Access-Control-Allow-Credentials": "true"}
 
 def answer(route, req):
