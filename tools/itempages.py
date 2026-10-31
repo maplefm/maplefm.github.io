@@ -64,6 +64,10 @@ def lad_top(lad):
     return None
 
 
+# our name at the top of every item and quest card, so a screenshot of the page says where it came from
+BRAND = '<a class="pbrand" href="/"><img src="/clubfm-icon-512.png" alt="" width="20" height="20">Club FM <b>maplefm.gg</b></a>'
+
+
 def ladder_html(lad):
     """An equip's price by grade (Clean, +1 ATT...), from the board's summary, one table per stat buyers look for:
     the middle of each grade's last 7 days of sales, or its asking prices when it has under 2 sales."""
@@ -174,9 +178,9 @@ def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=Non
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/assets/nav.css?v=4">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=8"><link rel="stylesheet" href="/assets/nav.css?v=4">{ld or ''}</head><body><main>
 {NAV(active)}
-{crumbs_html(crumbs)}{body}
+{crumbs_html(crumbs)}{body.replace('<div class="card">', '<div class="card">' + BRAND, 1)}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
 
 

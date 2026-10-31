@@ -96,13 +96,13 @@ def page(title, desc, path, crumbs, body, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=7"><link rel="stylesheet" href="/item/world.css?v=3"><link rel="stylesheet" href="/assets/nav.css?v=4">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=8"><link rel="stylesheet" href="/item/world.css?v=4"><link rel="stylesheet" href="/assets/nav.css?v=4">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
-{f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{body}</div>
+{f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{itempages.BRAND}{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
-</main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
+</main>{FOOT()}<script src="/assets/hit.js" defer></script>{'<script src="/assets/fmprice.js?v=1" defer></script>' if 'data-fmi=' in body else ''}</body></html>"""
 
 
 def write(out, path, text):
@@ -149,9 +149,15 @@ def build(world, guide, summary, notes, out):
         r = nd["r"]
         return (f'<div class="crt"><b>{E(r[0])} Lv {r[1]}</b> · {nd["crafts"]} craft{"s" if nd["crafts"] > 1 else ""}' + (f" of {r[4]}" if (r[4] or 1) > 1 else "")
                 + (f" · {meso(r[3] * nd['crafts'])} in fees" if r[3] else " · no fee") + (f" · catalyst {E(itempages.shown(r[5][0]))} ×{r[5][1] * nd['crafts']}" if r[5] else "") + "</div>")
+    def fp(n, q):
+        """An FM price that says what it is: about X each on the FM, Y for all N. Today's price is swapped in by
+        assets/fmprice.js when the page opens; the built one stands until then."""
+        if n not in PRICE: return f'<span class="fp fpn" data-fmi="{E(n)}" data-fmq="{q}">not seen on the FM yet</span>'
+        each = PRICE[n]
+        txt = f"about <b>{meso(each)}</b> each on the FM, <b>{meso(each * q)}</b> for all {q:,}" if q > 1 else f"about <b>{meso(each)}</b> on the FM"
+        return f'<span class="fp" data-fmi="{E(n)}" data-fmq="{q}">{txt}</span>'
     def tree_html(nd):
-        price = f" <small>· {meso(PRICE[nd['n']] * nd['q'])}</small>" if not nd["r"] and nd["n"] in PRICE else ""
-        h = f'<div class="nl">{ilink(nd["n"])}<span class="n">×{nd["q"]:,}{price}</span></div>'
+        h = f'<div class="nl"><span class="nm">{ilink(nd["n"])}</span><span class="n">×{nd["q"]:,}</span>{fp(nd["n"], nd["q"])}</div>'
         if nd["r"]: h += craft_line(nd) + '<div class="tk">' + "".join(tree_html(k) for k in nd["kids"]) + "</div>"
         else: h += srcs(nd["n"], 2)
         return h
@@ -426,19 +432,18 @@ def build(world, guide, summary, notes, out):
             acc = {"fee": 0, "cat": {}, "base": {}}; rows = ""; crafted = 0
             for i, c in q["need"]:
                 nd = plan(i, c, frozenset(), acc)
-                price = f'<small>{meso(PRICE[i] * c)} on the FM</small>' if i in PRICE else '<small>not traded yet</small>'
-                rows += f'<div class="need"><div class="nl">{ilink(i)}{live(i)}<span class="n">×{c:,} {price}</span></div>'
+                rows += f'<div class="need"><div class="nl"><span class="nm">{ilink(i)}{live(i)}</span><span class="n">×{c:,}</span>{fp(i, c)}</div>'
                 if nd["r"]:
                     crafted += 1
                     rows += craft_line(nd) + '<div class="tk">' + "".join(tree_html(k) for k in nd["kids"]) + "</div>"
                 else: rows += srcs(i)
                 rows += "</div>"
-            b += f"<h2>Bring</h2>{rows}"
+            b += f'<h2>Bring</h2>{rows}<p class="note fpnote">FM prices change with the market; these are today\'s.</p>'
             if crafted:
                 b += ('<div class="basebox"><b>Everything to gather</b>' + "".join(f"<span>{ilink(n, c)}</span>" for n, c in sorted(acc["base"].items(), key=lambda x: -x[1]))
                       + (f"<div>{meso(acc['fee'])} mesos in crafting fees" + "".join(f" · catalyst {E(itempages.shown(n))} ×{c}" for n, c in acc["cat"].items()) + "</div>" if acc["fee"] or acc["cat"] else "") + "</div>")
             tot = sum(PRICE[i] * c for i, c in q["need"] if i in PRICE)
-            if tot: b += f'<p>Buy it all on the Free Market: <b>{"about" if all(i in PRICE for i, _ in q["need"]) else "at least"} {meso(tot)} mesos</b>.</p>'
+            if tot: b += f'<p data-fmtot="{E(json.dumps(q["need"]))}">Buy it all on the Free Market: <b>{"about" if all(i in PRICE for i, _ in q["need"]) else "at least"} {meso(tot)} mesos</b>.</p>'
         if q.get("get") or q.get("get2") or q.get("skill") or q.get("exp") or q.get("meso"):
             b += ("<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)}</li>" for i, c in q.get("get") or [])
                   + "".join(f"<li>{ilink(x[0], x[1])} <small>· {E(x[2])}</small></li>" for x in q.get("get2") or [])
