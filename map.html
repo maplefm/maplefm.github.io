@@ -125,7 +125,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   .facts { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
   .facts li { margin: 2px 0; }
   .facts li.lw { color: var(--warn); font-weight: 600; }
-</style><link rel="stylesheet" href="/assets/nav.css?v=4"></head><body><main>
+</style><link rel="stylesheet" href="/assets/nav.css?v=5"></head><body><main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html" aria-current="page"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><nav class="playbar" aria-label="Training and maps"><a href="/map.html" aria-current="page">Where to train</a><a href="/training/">Training guides</a><a href="/maps/">Maps</a><a href="/monsters/">Monsters</a></nav><script src="/assets/hscroll.js?v=2" defer></script><!--/nav-->
 
 <section class="hero">
@@ -170,7 +170,11 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   "use strict";
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/", IO = "https://maplestory.io/api/MCW/1/";
   var $ = function (id) { return document.getElementById(id); };
-  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) { if (typeof txt === "string" && txt.indexOf("\uE000") >= 0) rich(e, txt); else e.textContent = txt; } return e; }
+  // M(n) / MF(n) mark a meso amount in a sentence; el() and rich() draw it as the number plus the in-game meso coin (.mz in nav.css)
+  function rich(e, t) { e.textContent = ""; String(t).split(/(\uE000[^\uE001]*\uE001)/).forEach(function (p) { if (!p) return; if (p.charCodeAt(0) === 0xE000) { var z = document.createElement("span"); z.className = "mz"; z.textContent = p.slice(1, -1); e.appendChild(z); } else e.appendChild(document.createTextNode(p)); }); return e; }
+  function M(n) { return "\uE000" + short(n) + "\uE001"; }
+  function MF(n) { return "\uE000" + fmt(n) + "\uE001"; }
   function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
   function short(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "K" : fmt(n); }
   function secs(t) { t = Math.round(t); return t < 60 ? t + "s" : Math.floor(t / 60) + "m " + (t % 60 < 10 ? "0" : "") + (t % 60) + "s"; }
@@ -426,7 +430,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       var bx = order("exp")[0], bm = order("meso")[0];
       top.appendChild(el("h2", null, "Best for you at level " + L));
       var tl = el("div", "stats");
-      [[bx.m.name, "Most EXP · " + short(bx.eph) + " an hour"], [bm.m.name, "Most mesos · " + short(bm.mph) + " an hour"]].forEach(function (x) { var s = el("div", "stat"); s.appendChild(el("b", null, x[0])); s.appendChild(el("small", null, x[1])); tl.appendChild(s); });
+      [[bx.m.name, "Most EXP · " + short(bx.eph) + " an hour"], [bm.m.name, "Most mesos · " + M(bm.mph) + " an hour"]].forEach(function (x) { var s = el("div", "stat"); s.appendChild(el("b", null, x[0])); s.appendChild(el("small", null, x[1])); tl.appendChild(s); });
       top.appendChild(tl);
       var sb = el("div", "seg"); sb.setAttribute("role", "tablist"); sb.setAttribute("aria-label", "Rank maps by");
       [["exp", "Most EXP an hour"], ["meso", "Most mesos an hour"], ["safe", "Fewest potions"]].forEach(function (x) {
@@ -457,7 +461,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var pl = el("ul", "list");
     ["Red Potion", "Meat", "Orange Potion", "White Potion", "Unagi", "Elixir", "Lemon", "Blue Potion", "Pure Water", "Mana Elixir"].forEach(function (n) {
       var p = W.pots[n]; if (!p) return; var li = el("li"); var a = el("span"); a.appendChild(el("b", null, n)); a.appendChild(document.createTextNode(" " + (p.hp ? p.hp + (p.pct ? "% HP" : " HP") : "") + (p.hp && p.mp ? " · " : "") + (p.mp && !(p.hp && p.pct) ? p.mp + (p.pct ? "% MP" : " MP") : "")));
-      li.appendChild(a); li.appendChild(el("span", "note", (p.npc ? "NPC " + fmt(p.npc) : "no NPC") + (PRICE[n] ? " · FM " + fmt(PRICE[n]) : ""))); pl.appendChild(li);
+      li.appendChild(a); li.appendChild(el("span", "note", (p.npc ? "NPC " + MF(p.npc) : "no NPC") + (PRICE[n] ? " · FM " + MF(PRICE[n]) : ""))); pl.appendChild(li);
     });
     side.appendChild(pl);
     if (NOTES && NOTES.party) { side.appendChild(el("h3", null, "Party play")); side.lastChild.style.marginTop = "10px"; var pu = el("ul", "list"); NOTES.party.forEach(function (t) { pu.appendChild(el("li", null, t)); }); side.appendChild(pu); }
@@ -526,7 +530,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     });
     left.appendChild(ms);
     var sts = el("div", "stats"), pn = hpPot.name;
-    [[short(c.eph), "EXP an hour (est.)", SORT === "exp"], [(c.mph < 0 ? "−" : "") + short(Math.abs(c.mph)), "Mesos an hour after potions (est.)", SORT === "meso"], [c.potHr < 0.5 ? "under 1" : fmt(c.potHr), pn + "s an hour (est.)", SORT === "safe"], [fmt(c.kph), "Kills an hour (est.)"]].forEach(function (x) {
+    [[short(c.eph), "EXP an hour (est.)", SORT === "exp"], [(c.mph < 0 ? "−" : "") + M(Math.abs(c.mph)), "Mesos an hour after potions (est.)", SORT === "meso"], [c.potHr < 0.5 ? "under 1" : fmt(c.potHr), pn + "s an hour (est.)", SORT === "safe"], [fmt(c.kph), "Kills an hour (est.)"]].forEach(function (x) {
       var s2 = el("div", "stat" + (x[2] ? " hi" : "")); s2.appendChild(el("b", null, String(x[0]))); s2.appendChild(el("small", null, x[1])); sts.appendChild(s2); });
     left.appendChild(sts);
     var qh = questsHere(m, L), qb = el("div", "qhere"); qb.appendChild(el("b", null, "Quests here: "));
@@ -555,7 +559,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     nl.appendChild(el("li", null, "Kills an hour: " + (h.capped ? "respawn-limited at " + fmt(h.kph) : "3,600 ÷ (" + h.ks.toFixed(1) + " s a kill + " + h.walk.toFixed(1) + " s walking) = " + fmt(h.kph))));
     nl.appendChild(el("li", null, "EXP an hour: " + fmt(h.kph) + " × " + fmt(h.exp) + " EXP a kill = " + fmt(h.eph)));
     nl.appendChild(el("li", null, "Touch from " + st.worst.name + ": ~" + fmt(c.t.dmg) + " HP, lands " + Math.round(c.t.hit * 100) + "%" + (c.killsPerPot >= 1.5 ? " · 1 " + pn + " per " + fmt(c.killsPerPot) + " kills" : c.killsPerPot > 0 ? " · about 1 " + pn + " a kill" : "") + " · typical gear for your class"));
-    nl.appendChild(el("li", null, "Mesos a kill: " + fmt(c.mesoKill) + (c.mesoRep < 0.5 ? " (level estimate)" : "") + (c.dropKill >= 1 ? " + " + fmt(c.dropKill) + " etc and potions" : "") + " · equips not counted"));
+    nl.appendChild(el("li", null, "Mesos a kill: " + MF(c.mesoKill) + (c.mesoRep < 0.5 ? " (level estimate)" : "") + (c.dropKill >= 1 ? " + " + MF(c.dropKill) + " etc and potions" : "") + " · equips not counted"));
     nl.appendChild(el("li", null, "Formulas: Classic models from the game files and the MapleStory Classic Wiki, not yet checked against in-game numbers. Area attacks counted on one monster."));
     det.appendChild(nl);
     var bb = el("div", "row"); bb.style.marginTop = "6px";
@@ -625,7 +629,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var opts = el("div", "opts");
     [["fast", "Fastest", "Any cab or scroll that saves time"], ["value", "Quick and cheap", "Pays only when it saves real time"], ["free", "Free", "Walking only, no mesos"]].forEach(function (o) {
       var r = ROUTES[o[0]]; var b0 = el("button", "opt"); b0.type = "button"; b0.setAttribute("aria-pressed", RMODE === o[0]);
-      b0.appendChild(el("b", null, o[1])); b0.appendChild(el("span", null, r ? "about " + secs(r.t) + " · " + r.maps + (r.maps === 1 ? " step" : " steps") + " · " + (r.mesos ? fmt(r.mesos) + " mesos" : "free") : (o[0] === "free" && ROUTES.fast ? "No free way: needs a paid ride" : "No route"))); b0.appendChild(el("span", null, ""));
+      b0.appendChild(el("b", null, o[1])); b0.appendChild(el("span", null, r ? "about " + secs(r.t) + " · " + r.maps + (r.maps === 1 ? " step" : " steps") + " · " + (r.mesos ? MF(r.mesos) : "free") : (o[0] === "free" && ROUTES.fast ? "No free way: needs a paid ride" : "No route"))); b0.appendChild(el("span", null, ""));
       b0.lastChild.textContent = " " + o[2]; b0.lastChild.style.display = "block";
       b0.disabled = !r; b0.addEventListener("click", function () { RMODE = o[0]; findRoute(); }); opts.appendChild(b0);
     });
@@ -647,7 +651,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       } else {
         h.textContent = (s.e.kind === "cab" ? s.e.what + ": " : "Use a ") + (s.e.kind === "scroll" ? s.e.what + " → " : m.name + " → ") + MAPS[s.e.to].name;
         body.appendChild(h);
-        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to " + (/Cab$/.test(s.e.what) ? "the " : "") + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + (s.e.mesos ? fmt(s.e.mesos) + " mesos" : s.e.unknown ? "Fare not confirmed yet" : "Free") + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." : "Use it anywhere: " + fmt(s.e.mesos) + " mesos from a potion shop. Buy it before you set out."));
+        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to " + (/Cab$/.test(s.e.what) ? "the " : "") + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + (s.e.mesos ? MF(s.e.mesos) : s.e.unknown ? "Fare not confirmed yet" : "Free") + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." : "Use it anywhere: " + MF(s.e.mesos) + " from a potion shop. Buy it before you set out."));
       }
       d.appendChild(body); steps.appendChild(d);
     });

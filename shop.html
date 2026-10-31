@@ -85,7 +85,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 .foot{margin-top:24px;font-size:.78rem;color:var(--muted)}
 @media (max-width:600px){.hero h1{font-size:1.55rem}.panel{padding:14px}.btn{padding:9px 12px}}
 </style>
-<link rel="stylesheet" href="/assets/nav.css?v=4"></head><body>
+<link rel="stylesheet" href="/assets/nav.css?v=5"></head><body>
 <main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html" aria-current="page"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><script src="/assets/hscroll.js?v=2" defer></script><!--/nav-->
 <nav class="crumbs" aria-label="You are here"><a href="/market.html">Market</a> <i>›</i> <span aria-current="page">Shops</span></nav>
@@ -102,7 +102,10 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
 (function () {
   var API = "https://api.maplefm.gg", ROWS = {}, NAMES = {}, IDS = {}, ME = null, CUR = null;
   function $(id) { return document.getElementById(id); }
-  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) { if (typeof x === "string" && x.indexOf("\uE000") >= 0) rich(e, x); else e.textContent = x; } return e; }
+  // M(n) marks a meso amount in a sentence; el() and rich() draw it as the number plus the in-game meso coin (.mz in nav.css)
+  function rich(e, t) { e.textContent = ""; String(t).split(/(\uE000[^\uE001]*\uE001)/).forEach(function (p) { if (!p) return; if (p.charCodeAt(0) === 0xE000) { var z = document.createElement("span"); z.className = "mz"; z.textContent = p.slice(1, -1); e.appendChild(z); } else e.appendChild(document.createTextNode(p)); }); return e; }
+  function M(n) { return "\uE000" + meso(n) + "\uE001"; }
   function meso(n) { n = +n || 0; return n >= 999.5e6 ? +(n / 1e9).toFixed(2) + "B" : n >= 999.5e3 ? +(n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + "M" : n >= 999.5 ? Math.round(n / 1e3) + "K" : String(Math.round(n)); }
   function shown(n) { return String(n || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, function (m, t) { return " Scroll " + { Lesser: "100%", Intermediate: "60%", Greater: "10%" }[t]; }); }
   function ago(t) { var s = Date.now() / 1000 - t; return s < 90 ? "just now" : s < 5400 ? Math.round(s / 60) + " min ago" : s < 129600 ? Math.round(s / 3600) + "h ago" : Math.round(s / 86400) + "d ago"; }
@@ -153,7 +156,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
         var c = el("a", "it"); c.href = "/#item=" + encodeURIComponent(r.item);
         var ic = icon(r.item); c.appendChild(ic || el("span"));
         var t = el("div"); t.appendChild(el("div", "nm", shown(r.item)));
-        var p = el("div", "pr", meso(r.price)); p.appendChild(el("small", null, r.qty > 1 ? " each · " + r.qty : "")); t.appendChild(p);
+        var p = el("div", "pr", M(r.price)); p.appendChild(el("small", null, r.qty > 1 ? " each · " + r.qty : "")); t.appendChild(p);
         if (r.stats) t.appendChild(el("div", "st", r.stats));
         var tg = vs(r); if (tg) { var tw = el("div", "tags"); tw.appendChild(tg); t.appendChild(tw); }
         c.appendChild(t); it.appendChild(c);

@@ -80,7 +80,7 @@ def ladder_html(lad):
         for g in grades:
             try: name, basis, lo, hi, mid, ns, na = g[:7]
             except Exception: continue
-            if basis in ("sold", "asking") or (basis == "few" and lo): price = meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi))
+            if basis in ("sold", "asking") or (basis == "few" and lo): price = '<span class="mz">' + meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi)) + "</span>"
             else: continue
             note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed" if basis == "asking" else "only 1 sold" if ns else "asking, only 1 listed"
             trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
@@ -137,7 +137,11 @@ h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;l
 .it{display:grid;grid-template-columns:28px minmax(0,1fr) auto 46px;gap:8px;align-items:center;padding:5px 6px;border-radius:10px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line2)}.it:hover{background:var(--panel2)}
 .it img{width:28px;height:28px;object-fit:contain}.it .nm{font-weight:600;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}.it .pr{font-size:.95rem}.mv{font-size:.74rem;font-weight:800;text-align:right}.mv.up{color:var(--up)}.mv.down{color:var(--down)}
 .more{margin:8px 0 0;font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--accent);padding:6px 12px;border-radius:10px;cursor:pointer}
-.top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}"""
+.top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}
+/* our name at the top of every item and quest card; lives here because item.css is rewritten from this string on every build */
+.pbrand{float:right;display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 10px;font-size:.78rem;font-weight:700;color:var(--muted);text-decoration:none;white-space:nowrap}
+.pbrand img{width:20px;height:20px;border-radius:5px}
+.pbrand b{color:var(--accent,#6a3df0);font-weight:800}"""
 
 
 OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
@@ -178,7 +182,7 @@ def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=Non
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=8"><link rel="stylesheet" href="/assets/nav.css?v=4">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=9"><link rel="stylesheet" href="/assets/nav.css?v=5">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body.replace('<div class="card">', '<div class="card">' + BRAND, 1)}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""
@@ -270,7 +274,7 @@ def guide_html(name, g, page_of):
     for c in g.get("c") or []:
         rows = "".join(f'<tr><td>{ico(x[0])} {link(x[0])}</td><td class=n>×{x[1]:,}</td></tr>' for x in c[2])
         if c[5]: rows += f'<tr><td>{ico(c[5][0])} {link(c[5][0])} <small>catalyst</small></td><td class=n>×{c[5][1]:,}</td></tr>'
-        if c[3]: rows += f'<tr><td><small>Crafting fee</small></td><td class=n>{full(c[3])} mesos</td></tr>'
+        if c[3]: rows += f'<tr><td><small>Crafting fee</small></td><td class=n><span class="mz">{full(c[3])}</span></td></tr>'
         get += (f'<div class="craft"><p class="ch"><span class="tag">Crafted</span> <b>{html.escape(c[0])}</b> Lv {c[1]} · makes {c[4]:,} per craft</p>'
                 f'<table>{rows}</table></div>')
     if g.get("d"):
@@ -282,7 +286,7 @@ def guide_html(name, g, page_of):
     for x in g.get("g") or []:
         get += f'<p class="rc">{"Given by the NPC during" if x[2] == "given" else "Reward from the quest"} {qlink(x[0], x[1])}</p>'
     if g.get("s"):
-        get += "<table>" + "".join(f"<tr><td><b>{html.escape(x[0])}</b><br><small>Sold by NPC{(' · ' + html.escape(x[1])) if x[1] else ''}</small></td><td class=n>{full(x[2])} {html.escape(x[3] or 'mesos')}</td></tr>" for x in g["s"]) + "</table>"
+        get += "<table>" + "".join(f"<tr><td><b>{html.escape(x[0])}</b><br><small>Sold by NPC{(' · ' + html.escape(x[1])) if x[1] else ''}</small></td><td class=n>{(full(x[2]) + ' ' + html.escape(x[3])) if x[3] else '<span class="mz">' + full(x[2]) + '</span>'}</td></tr>" for x in g["s"]) + "</table>"
     for x in g.get("r") or []:
         get += f'<p class="rc">From {html.escape(x[0])}{f" ({x[1]}%)" if x[1] is not None else ""}{(" · during " + html.escape(x[2])) if x[2] else ""}</p>'
     if not get and g.get("t"):
@@ -359,7 +363,7 @@ def main():
                     else: ch = '<span class="dc">same</span>'
                 lab = datetime.datetime.fromtimestamp(d[0] / 1000, datetime.timezone.utc).strftime('%a %b %-d')
                 dtab += (f'<div class="dr{" today" if k == 0 else ""}"><span class="dd">{"Today" if k == 0 else lab}</span>'
-                         f'<span class="track"><i style="width:{max(4, round(d[1] / dtop * 100))}%"></i></span><b title="{full(d[1])} mesos">{meso(d[1])}</b>{ch}</div>')
+                         f'<span class="track"><i style="width:{max(4, round(d[1] / dtop * 100))}%"></i></span><b class="mz" title="{full(d[1])} mesos">{meso(d[1])}</b>{ch}</div>')
         vp = vendor.get(name) or 0
         vp = vp if vp > 1 else 0
         nx = NX.get(name)
@@ -388,10 +392,10 @@ def main():
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
             title = fit_title(f"{nm} price, drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
-<p class="big"><span id="rng">{rng}</span>{chg}<small>mesos{(" · " + html.escape(top[0])) if top else ""}</small></p>
-<p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
-<div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
-{f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
+<p class="big"><span id="rng" class="mz">{rng}</span>{chg}{f"<small>{html.escape(top[0])}</small>" if top else ""}</p>
+<p class="note">Typical <span id="typ" class="mz">{full(r['typ'])}</span>, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
+<div class="grid"><div><span>Typical</span><b id="t2" class="mz">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
+{f'<div><span>Cheapest ask now</span><b id="ba" class="mz">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b class="mz">{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {ladder_html(r.get('lad'))}
 {f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
 {equip_html(dbrow.get(name), KINDS)}
@@ -459,7 +463,7 @@ def main():
             mv = (x.get("mv") or [None])[0]
             ch = (f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else "")
             trs += (f'<tr><td><a href="/item/{slug(x["item"])}/"><img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="{html.escape(shown(x["item"]))}" width="24" height="24" loading="lazy"> {html.escape(shown(x["item"]))}</a></td>'
-                    f'<td class="n">{meso(x["typ"])} {ch}</td><td class="n">{full(x.get("salesN") or 0)}</td></tr>')
+                    f'<td class="n"><span class="mz">{meso(x["typ"])}</span> {ch}</td><td class="n">{full(x.get("salesN") or 0)}</td></tr>')
         others = " · ".join(f'<a href="/items/{v[0]}/">{html.escape(v[1][0].upper() + v[1][1:])}</a>' for k, v in HUB.items() if k != cat and len(bycat.get(k) or []) >= 5)
         body = (f'<div class="card"><h1>MapleStory Classic {html.escape(what)}</h1><p class="sub">{len(lst)} items · updated {when}</p><p>{html.escape(intro)} '
                 f'Typical prices from watched Free Market sales, most traded first.</p>'

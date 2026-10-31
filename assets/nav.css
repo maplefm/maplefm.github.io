@@ -83,3 +83,6 @@
 .hsrail .hsr{right:0;justify-content:flex-end;padding-right:4px;background:linear-gradient(to left,var(--panel,var(--card,#fff)) 40%,transparent)}
 .hsk.hs-l>.hsrail .hsl,.hsk.hs-r>.hsrail .hsr{display:flex}
 @media (hover:hover){.hsb:hover{filter:brightness(1.15)}}
+/* meso amounts: the in-game gold coin right after the number, never wrapped onto its own line */
+.mz { white-space: nowrap; }
+.mz::after { content: ""; display: inline-block; width: .95em; height: 1em; margin-left: .22em; vertical-align: -.16em; background: url(/assets/meso@2x.png) center / contain no-repeat; }
