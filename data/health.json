@@ -1,5 +1,5 @@
 {
- "at": 1793403968019,
+ "at": 1793406552392,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -44,15 +44,15 @@
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
-   "rows7": 9924,
-   "room7": 9467,
-   "late7": 237,
+   "rows7": 9899,
+   "room7": 9453,
+   "late7": 236,
    "chat24": 0,
    "last": 1793210457,
    "ver": "2026.10.28.1",
    "lag_median_min": null,
    "room_rate24": null,
-   "room_rate7": 0.954,
+   "room_rate7": 0.955,
    "late_share7": 0.024,
    "behind": 10
   },
@@ -143,7 +143,7 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 12,
+   "chat24": 11,
    "last": 1793396333,
    "ver": "2026.10.30.7",
    "lag_median_min": null,
@@ -183,11 +183,30 @@
    "room_rate7": 1.0,
    "late_share7": 0.0,
    "behind": 0
+  },
+  "smurp": {
+   "rows24": 0,
+   "room24": 0,
+   "ch24": 0,
+   "rows7": 0,
+   "room7": 0,
+   "late7": 0,
+   "chat24": 4,
+   "last": 1793405800,
+   "ver": "2026.10.30.7",
+   "lag_median_min": null,
+   "room_rate24": null,
+   "room_rate7": null,
+   "late_share7": null,
+   "behind": 0
   }
  },
  "drops": {
   "2026-10-30": {
-   "bad row: 3a3a": 4724
+   "bad row: 3a3a": 4776
+  },
+  "2026-10-31": {
+   "bad row: 3a3a": 143
   }
  },
  "rejects": {},
