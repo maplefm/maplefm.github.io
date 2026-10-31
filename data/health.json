@@ -1,5 +1,5 @@
 {
- "at": 1793413382254,
+ "at": 1793416447389,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,20 +105,20 @@
    "behind": 27
   },
   "Zik": {
-   "rows24": 17173,
-   "room24": 16637,
-   "ch24": 17095,
-   "rows7": 95948,
-   "room7": 19448,
+   "rows24": 18580,
+   "room24": 17847,
+   "ch24": 18305,
+   "rows7": 97355,
+   "room7": 20658,
    "late7": 1714,
-   "chat24": 179,
-   "last": 1793353158,
-   "ver": "2026.10.30.4",
-   "lag_median_min": 6.6,
-   "room_rate24": 0.969,
-   "room_rate7": 0.203,
+   "chat24": 191,
+   "last": 1793416342,
+   "ver": "2026.10.30.7",
+   "lag_median_min": 6.2,
+   "room_rate24": 0.961,
+   "room_rate7": 0.212,
    "late_share7": 0.018,
-   "behind": 3
+   "behind": 0
   },
   "laclac": {
    "rows24": 11000,
@@ -143,7 +143,7 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 11,
+   "chat24": 10,
    "last": 1793396333,
    "ver": "2026.10.30.7",
    "lag_median_min": null,
@@ -222,11 +222,10 @@
    "bad row: 3a3a": 4776
   },
   "2026-10-31": {
-   "bad row: 3a3a": 650
+   "bad row: 3a3a": 878,
+   "incomplete upload": 1
   }
  },
  "rejects": {},
- "flags": [
-  "Zik: watcher 2026.10.30.4, 3 releases behind"
- ]
+ "flags": []
 }
