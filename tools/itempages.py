@@ -111,7 +111,7 @@ table{width:100%;border-collapse:collapse;margin-top:6px}td,th{padding:6px 8px;b
 h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px 4px 6px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink);display:inline-flex;align-items:center;gap:6px}.rel a img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated}
 .foot{color:var(--muted);font-size:.82rem;margin-top:22px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
-td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
+td.n{text-align:right;white-space:nowrap;font-weight:800}th{white-space:nowrap}.navh{white-space:nowrap}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
 .craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
 .ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
 .gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}
@@ -182,7 +182,7 @@ def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=Non
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=9"><link rel="stylesheet" href="/assets/nav.css?v=5">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=9"><link rel="stylesheet" href="/assets/nav.css?v=6">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body.replace('<div class="card">', '<div class="card">' + BRAND, 1)}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script></body></html>"""

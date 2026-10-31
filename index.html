@@ -22,8 +22,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.maplefm.gg" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/assets/board.min.css?v=4fc5e902">
-<link rel="stylesheet" href="/assets/nav.css?v=5"></head>
+<link rel="stylesheet" href="/assets/board.min.css?v=b021b918">
+<link rel="stylesheet" href="/assets/nav.css?v=6"></head>
 <body>
 <div class="clouds" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="cloud c4"></i></div>
 <div class="drawer" id="drawer" hidden><button type="button" id="drawerbtn" aria-expanded="false" aria-controls="dlist"><span class="dl">Recent sales</span><span class="dlast" id="dlast"></span></button><div class="dlist" id="dlist"></div></div>
@@ -58,7 +58,7 @@
       </div>
     </div>
   </header>
-  <!--nav--><nav class="sitenav sn-home" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><div class="sn-links"><a href="/" aria-current="page"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script src="/assets/hscroll.js?v=3" defer></script><!--/nav-->
+  <!--nav--><nav class="sitenav sn-home" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><div class="sn-links"><a href="/" aria-current="page"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script src="/assets/hscroll.js?v=4" defer></script><!--/nav-->
 
   <div class="ubar" id="ubar" hidden><span><img class="ssi" src="assets/superstar@4x.png" alt=""></span><span id="utext"></span><button type="button" id="ubarx" aria-label="Hide this notice">×</button></div>
 
@@ -135,10 +135,10 @@
             <thead><tr>
               <th><button data-k="item">Item</button></th>
               <th><button data-k="typ">Typical</button></th>
-              <th class="c"><button data-k="chg" title="The typical sale of the last 24 hours against the 24 hours before">24h</button></th>
+              <th class="c col-chg"><button data-k="chg" title="The typical sale of the last 24 hours against the 24 hours before">24h</button></th>
               <th class="c col-src clubonly"><button data-k="best" title="Cheapest listing still up, seen in the last day">Cheapest now</button></th>
               <th class="c col-trend"><button data-k="trend">Trend</button></th>
-              <th class="c"><button data-k="salesN">Sales</button></th>
+              <th class="c col-sales"><button data-k="salesN">Sales</button></th>
               <th class="col-vol"><button data-k="vol">Volume</button></th>
             </tr></thead>
             <tbody id="rows"></tbody>

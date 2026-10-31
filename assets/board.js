@@ -1741,7 +1741,7 @@
       if (LT) { tc.appendChild(money(LT.mid)); var gt = el("small", "lgt", LT.name.replace(/^Slots used, no gain$/, "no gain").toLowerCase().replace(/ (att|matt|str|dex|int|luk|hp|mp)\b/gi, function (z) { return z.toUpperCase(); })); gt.title = "The price of the grade most copies sell at. Open the item for every grade."; tc.appendChild(gt); }
       else tc.appendChild(money(i.typ));
       tr.appendChild(tc);
-      var cc = el("td", "c"); cc.appendChild(pctPill(i.mv[0])); tr.appendChild(cc);
+      var cc = el("td", "c col-chg"); cc.appendChild(pctPill(i.mv[0])); tr.appendChild(cc);
       var bc = el("td", "c col-src clubonly");
       // equips showing a grade price: the cheapest copy of that same grade, and how far under the grade it sits
       var LB = LT && (LT.okAsks || LT.asks).filter(function (x) { return x.st !== "gone" && x.st !== "sold"; })[0];
@@ -1751,7 +1751,7 @@
       else bc.appendChild(el("span", "srcp none", "Not on sale now"));
       tr.appendChild(bc);
       var trc = el("td", "c col-trend"); if (i.daily.length >= 3) trc.appendChild(spark(i.daily)); else trc.appendChild(el("span", "tfd", "Too few days")); tr.appendChild(trc);
-      var sc = el("td", "c"); sc.appendChild(el("span", "cnt" + (i.salesN ? "" : " zero"), fmt(i.salesN))); tr.appendChild(sc);
+      var sc = el("td", "c col-sales"); sc.appendChild(el("span", "cnt" + (i.salesN ? "" : " zero"), fmt(i.salesN))); tr.appendChild(sc);
       var vc = el("td", "col-vol"); if (i.vol) vc.appendChild(money(i.vol)); tr.appendChild(vc);
       return tr;
     }
@@ -1784,6 +1784,7 @@
     }
     if (!shown.length) { $("empty").textContent = ""; $("empty").appendChild(el("strong", null, D.list.length ? "No items match" : "No prices yet")); $("empty").appendChild(document.createTextNode(D.list.length ? "Clear the search, pick another category or class, or open Filters." : "Waiting for the first scan.")); }
     $("count").textContent = "Showing " + shown.length + " of " + D.list.length + " items";
+    fitBoard();
     document.querySelectorAll("thead button[data-k]").forEach(function (b) { if (b.dataset.k === state.sortK) b.setAttribute("aria-sort", state.sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort"); });
   }
 
@@ -4764,6 +4765,14 @@
     var n = ""; try { n = decodeURIComponent(m[1]); } catch (e) { return; }
     if (D && D.byName && D.byName[n] && (n !== state.sel || !cardOpen())) pick(n, true);
   });
+  // The board shows only the columns that fit its box, dropping the least needed first, so no column is ever cut in half
+  // at the edge of a phone or tablet: Volume, then Trend, Cheapest now, Sales, and last 24h. Item and Typical always stay.
+  function fitBoard() {
+    var tb = $("rows"), t = tb && tb.closest("table"), w = t && t.parentNode; if (!w || !w.clientWidth) return;
+    for (var k = 1; k <= 5; k++) t.classList.remove("fit" + k);
+    for (k = 1; k <= 5 && w.scrollWidth > w.clientWidth + 1; k++) t.classList.add("fit" + k);
+  }
+  var fbT = 0; window.addEventListener("resize", function () { if (!fbT) fbT = requestAnimationFrame(function () { fbT = 0; fitBoard(); }); });
   // the search hint is the longest version that fits the box, so a phone never shows it cut off mid-word
   var PH = ["Try GFA 60, work gloves, white label ring...", "Try GFA 60, work gloves...", "Try GFA 60...", "Search items"];
   function fitPh() {

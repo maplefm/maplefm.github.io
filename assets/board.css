@@ -569,7 +569,7 @@ tbody tr.thin { opacity: .72; }   /* one layer of fade per row, not one per cell
 .nm .t { min-width: 0; }
 .nm b { display: block; font-weight: 800; font-size: .92rem; line-height: 1.2; max-width: 25ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nm small { display: inline-block; color: var(--muted); font-weight: 700; font-size: .72rem; }
-.tg { display: inline-block; font-size: .6rem; font-weight: 900; letter-spacing: .05em; padding: 0 5px; border-radius: 4px; margin-left: 5px; vertical-align: 1px; text-transform: uppercase; }
+.tg { display: inline-block; white-space: nowrap; font-size: .6rem; font-weight: 900; letter-spacing: .05em; padding: 0 5px; border-radius: 4px; margin-left: 5px; vertical-align: 1px; text-transform: uppercase; }
 .tg.tier { background: #eaf1ff; color: #2c5bb8; border: 1px solid #9db6ea; }
 :root[data-theme="dark"] .tg.tier { background: #1f2c48; color: #a9c2ff; border-color: #3e5384; }
 .tg.ask { background: var(--panel2); color: var(--ask); border: 1px solid var(--line2); }
@@ -1608,3 +1608,5 @@ td:has(> .lgt) { white-space: nowrap; }
 .nbar .nbt { flex: 1 1 auto; overflow: hidden; }
 .nbar .nbt small { overflow: hidden; text-overflow: ellipsis; }
 .nbar .nbrand { flex: none; }
+/* the board drops its least needed columns until it fits (fitBoard in board.js) */
+table.fit1 .col-vol, table.fit2 .col-trend, table.fit3 .col-src, table.fit4 .col-sales, table.fit5 .col-chg { display: none; }
