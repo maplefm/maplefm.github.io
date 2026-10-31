@@ -203,7 +203,7 @@ def main():
             ln = re.sub(r"#o(\d+)#", lambda m: mob_name.get(int(m.group(1)), "") if isinstance(mob_name, dict) else "", ln)
             ln = re.sub(r"#m(\d+)#", lambda m: "{m:" + m.group(1) + "}", ln)
             ln = re.sub(r"#[a-zA-Z](?:\d+#)?", "", ln).strip()
-            if len(ln) >= 4 and ln not in out: out.append(ln)
+            if len(re.findall(r"[A-Za-z]", ln)) >= 6 and ln not in out: out.append(ln)   # item counters ("4031129:# / 100") are not steps
         return out[:12]
     def npcn(nid):
         if nid and nid not in npc_name:

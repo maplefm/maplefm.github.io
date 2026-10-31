@@ -421,7 +421,7 @@ def build(world, guide, summary, notes, out):
                 t2 = re.sub(r"\{m:(\d+)\}", lambda mm: MBYID.get(int(mm.group(1)), "") , t)
                 hit = qw.get(t.strip()) or qw.get(t2.strip())
                 if hit and hit[1] in M:
-                    return f"<li>{E(t2)}: {E(hit[0])} in {mnav(hit[1])}</li>"
+                    return f"<li>{E(t2)}: {E(hit[0])} in {mnav(hit[1])}" + (f" <small>· {E(hit[2])}</small>" if len(hit) > 2 and hit[2] else "") + "</li>"
                 maps = [MBYID[int(x)] for x in re.findall(r"\{m:(\d+)\}", t) if int(x) in MBYID]
                 return f"<li>{E(t2)}" + (" " + " ".join(navbtn(x) for x in maps) if maps else "") + "</li>"
             b += "<h2>Steps</h2><ol>" + "".join(stepl(t) for t in steps) + "</ol>"
