@@ -73,14 +73,14 @@
 .window .chips,.window .tabs,.window .seg,.panel .chips,.card .seg{--hsbg:var(--panel,var(--card,#fff))}
 .hsb{display:none;cursor:pointer;user-select:none;-webkit-user-select:none;align-items:center;z-index:6}
 .hsb i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent,#6d3fd1);color:#fff;font:800 1.05rem/1 system-ui,sans-serif;font-style:normal;box-shadow:0 2px 6px rgba(40,20,90,.25);padding-bottom:2px;box-sizing:border-box}
-.hsf>.hsb{position:sticky;flex:0 0 40px;width:40px;align-self:stretch;margin:0}
-.hsf>.hsl{left:0;margin-right:-40px;justify-content:flex-start;padding-left:3px;background:linear-gradient(to right,var(--hsbg,#fff) 40%,transparent)}
-.hsf>.hsr{right:0;margin-left:-40px;justify-content:flex-end;padding-right:3px;background:linear-gradient(to left,var(--hsbg,#fff) 40%,transparent)}
+.hsf>.hsb{position:sticky;flex:0 0 46px;width:46px;align-self:stretch;margin:0}
+.hsf>.hsl{left:0;margin-right:-46px;justify-content:flex-start;padding-left:3px;background:linear-gradient(to right,var(--hsbg,#fff) 31px,transparent)}
+.hsf>.hsr{right:0;margin-left:-46px;justify-content:flex-end;padding-right:3px;background:linear-gradient(to left,var(--hsbg,#fff) 31px,transparent)}
 .hsf.hs-l>.hsl,.hsf.hs-r>.hsr{display:flex}
 .hsrail{position:sticky;left:0;top:0;width:100%;height:0;z-index:6;pointer-events:none}
-.hsrail .hsb{position:absolute;top:0;height:40px;width:44px;pointer-events:auto}
-.hsrail .hsl{left:0;justify-content:flex-start;padding-left:4px;background:linear-gradient(to right,var(--panel,var(--card,#fff)) 40%,transparent)}
-.hsrail .hsr{right:0;justify-content:flex-end;padding-right:4px;background:linear-gradient(to left,var(--panel,var(--card,#fff)) 40%,transparent)}
+.hsrail .hsb{position:absolute;top:0;height:40px;width:50px;pointer-events:auto}
+.hsrail .hsl{left:0;justify-content:flex-start;padding-left:4px;background:linear-gradient(to right,var(--hsbg,var(--panel,var(--card,#fff))) 32px,transparent)}
+.hsrail .hsr{right:0;justify-content:flex-end;padding-right:4px;background:linear-gradient(to left,var(--hsbg,var(--panel,var(--card,#fff))) 32px,transparent)}
 .hsk.hs-l>.hsrail .hsl,.hsk.hs-r>.hsrail .hsr{display:flex}
 @media (hover:hover){.hsb:hover{filter:brightness(1.15)}}
 /* meso amounts: the in-game gold coin right after the number, never wrapped onto its own line */

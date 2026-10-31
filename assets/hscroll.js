@@ -15,8 +15,12 @@
     el.classList.toggle("hs-l", max > 4 && el.scrollLeft > 4);
     el.classList.toggle("hs-r", max > 4 && max - el.scrollLeft > 4);
   }
+  // the fade under an arrow takes the colour actually behind the row, so no text ever shows through around the arrow
+  function solid(c) { var m = /rgba?\(([^)]+)\)/.exec(c || ""); if (!m) return c && c !== "transparent" ? c : null; var p = m[1].split(","); return p.length < 4 || +p[3] >= 0.85 ? "rgb(" + p.slice(0, 3).join(",") + ")" : null; }
+  function bgOf(el) { for (var x = el; x && x.nodeType === 1; x = x.parentElement) { var c = solid(getComputedStyle(x).backgroundColor); if (c) return c; } return "#fff"; }
   function setup(el) {
     var flex = /flex/.test(getComputedStyle(el).display);
+    var head = !flex && el.querySelector("thead th, thead tr, thead"); el.style.setProperty("--hsbg", (head && solid(getComputedStyle(head).backgroundColor)) || bgOf(el));
     // the page may rebuild a row (new tabs, new chips): put the arrows back
     if (flex) {
       if (!el.querySelector(":scope > .hsl")) el.insertBefore(arrow("l", el), el.firstChild);
