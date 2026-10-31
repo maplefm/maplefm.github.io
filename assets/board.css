@@ -1560,3 +1560,4 @@ td:has(> .lgt) { white-space: nowrap; }
    Only the card and dialogs themselves use overscroll-behavior: contain */
 .lfold ~ .list { max-height: 460px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
 @media (max-width: 820px) { .lfold ~ .list { max-height: 60vh; } }
+.gladder .lg.lone .lgc { color: var(--ask); }

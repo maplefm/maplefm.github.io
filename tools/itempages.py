@@ -76,9 +76,9 @@ def ladder_html(lad):
         for g in grades:
             try: name, basis, lo, hi, mid, ns, na = g[:7]
             except Exception: continue
-            if basis in ("sold", "asking"): price = meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi))
+            if basis in ("sold", "asking") or (basis == "few" and lo): price = meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi))
             else: continue
-            note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed"
+            note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed" if basis == "asking" else "only 1 sold" if ns else "asking, only 1 listed"
             trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
         if trs: out += (f"<h3>{html.escape(str(stat))}</h3>" if len(lad) > 1 else "") + f"<table><tr><th>Grade</th><th>Price</th><th>Based on</th></tr>{trs}</table>"
     if not out: return ""

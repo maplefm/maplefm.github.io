@@ -2583,7 +2583,9 @@
       var su = g.use.map(function (l) { return l.u; }), au = g.asks.map(function (l) { return l.u; });
       if (su.length >= LADMIN) { g.basis = "sold"; g.lo = q(su, 0.25); g.hi = q(su, 0.75); g.mid = q(su, 0.5); }
       else if (au.length >= LADMIN) { g.basis = "asking"; g.lo = q(au, 0.25); g.hi = q(au, 0.75); g.mid = q(au, 0.5); }
-      else { g.basis = su.length || au.length ? "few" : "none"; g.mid = null; }
+      // a single copy still shows its price, marked as one sale or one listing; it never sets the board's price
+      else if (su.length || au.length) { g.basis = "few"; g.one = su.length ? "sold" : "asking"; var ov = su.length ? su : au; g.lo = Math.min.apply(null, ov); g.hi = Math.max.apply(null, ov); g.mid = null; }
+      else { g.basis = "none"; g.mid = null; }
       // listings 4 times off a grade priced from sales are set aside the same way (a misread price or roll, a troll ask)
       g.oddA = g.basis === "sold" ? g.asks.filter(function (l) { return l.u > g.mid * 4 || l.u < g.mid / 4; }) : [];
       g.okAsks = g.asks.filter(function (l) { return g.oddA.indexOf(l) < 0; });
@@ -3514,14 +3516,14 @@
     if (!grades.some(function (g) { return g.id === sel; })) sel = (L.top && grades.indexOf(L.top) >= 0 ? L.top : grades.filter(function (g) { return g.basis === "sold"; })[0] || grades.filter(function (g) { return g.basis === "asking"; })[0] || grades[0] || {}).id;
     var row = el("div", "lgrades"); row.setAttribute("role", "radiogroup"); row.setAttribute("aria-label", "Grades");
     grades.forEach(function (g) {
-      var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "few" || g.basis === "none" ? " empty" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
+      var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "none" ? " empty" : g.basis === "few" ? " lone" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
       b.appendChild(el("span", "lgn", g.name));
       var pr = el("span", "lgp");
-      if (g.basis === "sold" || g.basis === "asking") { pr.appendChild(money(g.lo)); if (short(g.lo) !== short(g.hi)) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g.hi))); } }
+      if (g.basis === "sold" || g.basis === "asking" || (g.basis === "few" && g.lo)) { pr.appendChild(money(g.lo)); if (short(g.lo) !== short(g.hi)) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g.hi))); } }
       else pr.appendChild(el("span", "tfd", "not enough yet"));
       b.appendChild(pr);
       var ns = g.use ? g.use.length : 0;
-      b.appendChild(el("span", "lgc", g.basis === "sold" ? ns + " sold" : g.basis === "asking" ? "asking · " + g.asks.length + " listed" : (g.sold.length + g.asks.length) + " seen"));
+      b.appendChild(el("span", "lgc", g.basis === "sold" ? ns + " sold" : g.basis === "asking" ? "asking · " + g.asks.length + " listed" : g.basis === "few" ? (g.one === "sold" ? "only 1 sold" : "asking · only 1 listed") : (g.sold.length + g.asks.length) + " seen"));
       b.addEventListener("click", function () { LADSEL[i.item + "|" + vk] = g.id; LADSTAT[i.item] = vk; var nb = ladderBox(i, L); box.replaceWith(nb); var o = nb.querySelector(".lg.on"); if (o) o.focus(); redrawChart(i); });
       row.appendChild(b);
     });
@@ -3532,6 +3534,7 @@
     head.appendChild(el("b", null, g.name + ": "));
     if (g.basis === "sold") { head.appendChild(document.createTextNode("most sold between ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" and ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.use.length + " sold in 7 days")); }
     else if (g.basis === "asking") { head.appendChild(document.createTextNode("not enough sales yet. Asking ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(" to ")); head.appendChild(money(g.hi)); head.appendChild(document.createTextNode(" · " + g.asks.length + " listed")); }
+    else if (g.basis === "few" && g.lo) { head.appendChild(document.createTextNode(g.one === "sold" ? "only 1 sale so far, at " : "no sales yet, 1 listed at ")); head.appendChild(money(g.lo)); head.appendChild(document.createTextNode(". One copy is a hint, not a price yet.")); }
     else head.appendChild(document.createTextNode("not enough sales yet, " + (g.sold.length + g.asks.length) + " seen."));
     det.appendChild(head);
     function line(l, sold) {
@@ -3562,9 +3565,9 @@
       if (lad.length > 1) box.appendChild(el("h5", "lsh", sv[0]));
       var row = el("div", "lgrades");
       sv[1].forEach(function (g) {
-        var b = el("div", "lg" + (g[7] ? " on" : "") + (g[1] === "few" || g[1] === "none" ? " empty" : "")); b.appendChild(el("span", "lgn", g[0]));
-        var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking") { pr.appendChild(money(g[2])); if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g[3]))); } } else pr.appendChild(el("span", "tfd", "not enough yet"));
-        b.appendChild(pr); b.appendChild(el("span", "lgc", g[1] === "sold" ? g[5] + " sold" : g[1] === "asking" ? "asking · " + g[6] + " listed" : (g[5] + g[6]) + " seen"));
+        var b = el("div", "lg" + (g[7] ? " on" : "") + (g[1] === "none" || (g[1] === "few" && !(g[2] > 0)) ? " empty" : g[1] === "few" ? " lone" : "")); b.appendChild(el("span", "lgn", g[0]));
+        var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking" || (g[1] === "few" && g[2] > 0)) { pr.appendChild(money(g[2])); if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g[3]))); } } else pr.appendChild(el("span", "tfd", "not enough yet"));
+        b.appendChild(pr); b.appendChild(el("span", "lgc", g[1] === "sold" ? g[5] + " sold" : g[1] === "asking" ? "asking · " + g[6] + " listed" : g[1] === "few" && g[2] > 0 ? (g[5] ? "only 1 sold" : "asking · only 1 listed") : (g[5] + g[6]) + " seen"));
         row.appendChild(b);
       });
       box.appendChild(row);
