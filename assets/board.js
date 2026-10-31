@@ -23,7 +23,7 @@
   base.forEach(function (s) { s.who = "Maya"; });
   var live = {}, scans = base.slice(), D = null;
   var BUYSORT = (function () { try { return JSON.parse(localStorage.getItem("fm-buy-sort") || '"price"'); } catch (e) { return "price"; } })();
-  var state = { tab: "prices", cat: "All", sortK: "vol", sortDir: -1, dK: "pct", dDir: -1, sel: null, chart: "time", list: "buy", actDays: 7 };
+  var state = { tab: "prices", cat: "All", sub: "", sortK: "vol", sortDir: -1, dK: "pct", dDir: -1, sel: null, chart: "time", list: "buy", actDays: 7 };
   // Names the watcher already knows, plus full Classic names that shop windows cut short.
   var KNOWN = ["Adamantium Ore","Amethyst Ore","Angel Halo","Angel Wand","Animal Fur Bundle","Aquamarine","Aquamarine Ore","Arrows for Bows","Arrows for Crossbows","Baby Angel Wings","Battle Axe","Beetle Long Sleeve","Beige Nitty","Beige Plain Robe","Beret","Black Bandana","Black Cat Beanie","Black Enamel Shoes","Black Kitty","Black Knucklevest Pants","Black Pig","Black Sneak Pants","Black Sunglasses","Blue Bucket Hat","Blue Cap","Blue Guise","Blue Hawkeye","Blue Headband","Blue Jewelry Boots","Blue Lappy Boots","Blue Mushroom Cap","Blue Pao","Blue Qi Pao","Blue Qi Pao Pants","Blue Snail Shell","Blue Training Shirt","Blue Watch","Blue Wizardry Hat","Blue Woodsman Boots","Bronze Aroa Boots","Bronze Helmet","Bronze Ingot","Bronze Koif","Bronze Ore","Brown Bamboo Hat","Brown Doloress Robe","Brown Hard Leather Boots","Brown Kitty","Brown Lamelle","Brown Puppy","Bubbling's Huge Bubble","Bunny Earmuffs","Bunny Ears","Butterfly Skirt","Cake","Cape STR Scroll: Lesser","Cat Hat","Cat Suit","Charm of the Undead","Cherub's Bow","Chocolate Chat Ring","Chocolate Label Ring","Claw Attack Scroll: Intermediate","Composite Bow","Crossbow Attack Scroll: Intermediate","Cutlus","Dagger Attack Scroll: Intermediate","Dark Master Sergeant","Diamond Ore","Dollish Pink","Double Axe","Eagle Crow","Earring DEX Scroll: Intermediate","Earring INT Scroll: Intermediate","Earring LUK Scroll: Intermediate","Earring STR Scroll: Intermediate","Emerald Ore","Emerald Staff","Evil Eye Tail","Firewood","Fish Spear","Fork on a Stick","Fragment of Magic","Fruit Knife","Garnet","Garnet Ore","Gloves Magic Attack Scroll: Greater","Gold Kitty Slippers","Gold Ore","Green Armine Skirt","Green Bamboo Hat","Green Bennis Chainmail","Green Feather Hat","Green Mushroom Cap","Green Woodsman Boots","Grey Able Armor","Hardwood Wand","Hat Accuracy Scroll: Greater","Hat Accuracy Scroll: Intermediate","Hat Accuracy Scroll: Lesser","Heart Sunglasses","Holy Water","Horny Mushroom Cap","Ink-and-Wash Chat Ring","Ink-and-Wash Label Ring","Iron Ball","Iron Dagger","Iron Ingot","Iron Ore","Jr. Necki Skin","Kitty Chat Ring","Leaf","Leaf Earrings","Leather","Lemon","Lemona","Lined Hip-Hop Pants","Long Sword","Mace","Magic Potion","Meba","Meshcap","Metal Axe","Metal Gear","Metal Wand","Mithril Ore","Mithril Pole Arm","Mushroom Spore","Mystery Face Coupon","Mystery Hair Coupon","Nakamaki","Octopus Leg","Opal Ore","Orange Baseball Jacket","Orange Hooded Shirt","Orange Mushroom Balloon","Orange Mushroom Cap","Orange Split Piece","Orange Toy Hammer","Orihalcon Ore","Overall Armor INT Scroll: Greater","Pan Lid","Patissier Hat","Patissier Uniform","Pet Equip Speed Scroll: Intermediate","Pet Equip Speed Scroll: Lesser","Pig & Mushroom Omok Set","Pig & Octopus Omok Set","Pig Illustrated","Pig's Head","Pig's Ribbon","Pink Allstar","Pink Bunny","Pink Bunny Sweater","Pole Arm","Polearm Attack Scroll: Intermediate","Processed Cloth","Processed Leather","Processed Wood","Pure Water","Purple Dorothy Dress","Rainbow Knit","Red Bandana","Red Check Rider","Red Hwarang Shirt","Red Loosecap","Red Ninja Sandals","Red Potion","Red Sailor Shirt","Red Sailor Skirt","Red Snail Shell","Red Thief Hood","Red Trainer Jacket","Red Trainer Pants","Reggae Hat","Ribboned Pig Headband","Ripped Jeans","Sailor Hat","Sailor Outfit","Sandblasted Jeans","Sap of Ancient Tree","Sapphire Ore","Screw","Selective 5-slot Coupon","Set of Match Cards","Shoes Jump Scroll: Greater","Shoes Speed Scroll: Intermediate","Signature Hair Coupon","Silver Ore","Slime & Octopus Omok Set","Slime & Pig Omok Set","Slime Bubble","Slime Earrings","Slime Slippers","Slime T-Shirt","Snail Shell","Spear","Spear Attack Scroll: Intermediate","Splash Choco Boy","Splash Choco Girl","Squishy Liquid","Staff Magic Attack Scroll: Intermediate","Steel Fingerless Gloves","Steel Igor","Steel Shield","Stiff Feather","Stirge Wing","Sword","Toga","Topaz Ore","Topwear DEF Scroll: Lesser","Tourist T","Tree Branch","Triangular Zamadar","Unagi","Warrior Potion","Weighted Earrings","White Bunny","White Gomushin","White Hooded Vest","White Jeans","White Label Ring","White Rabbit","Wizard Staff","Wooden Buckler","Wooden Club","Wooden Mallet","Wooden Staff","Work Gloves","Yellow Bandana","Yellow Rainbow Sneaks","Yellow Spatula","Yellow Square"].concat(["Ink-and-Wash Thought Bubble Ring", "Ink-and-Wash Painting Name Tag Ring", "Ink-and-Wash Chat Ring", "Ink-and-Wash Label Ring", "Founder's Mystery Fashion Crate", "White Ribboned Sailor Dress", "Soft Chocolate Fondue Scepter", "Starlight Heart Scepter", "Arwen's Glass Shoe", "Selective 5-slot Coupon", "Kumbi Throwing Stars", "Mokbi Throwing Stars", "Wooden Top"]);
 
@@ -1597,9 +1597,36 @@
       var b = el("button", "cchip" + (k === "All" ? " all" : "")); b.type = "button"; b.setAttribute("aria-pressed", state.cat === k); b.title = nm + ": " + (cnt[k] || 0) + " items"; b.setAttribute("aria-label", nm + ", " + (cnt[k] || 0) + " items");
       if (k === "All") b.appendChild(el("span", null, "ALL")); else { var im = new Image(); im.alt = ""; im.src = IO + c[1] + "/icon"; b.appendChild(im); }
       b.appendChild(el("em", null, cnt[k] || 0));
-      b.addEventListener("click", function () { state.cat = k; renderView(); });
+      b.addEventListener("click", function () { state.cat = k; state.sub = ""; renderView(); });
       box.appendChild(b);
     });
+    renderSub(basel);
+  }
+  // Weapons and Equips: a row of types (Dagger, One-Handed Sword, Hat...) with counts, and the level range right
+  // beside them, so "a level 30 dagger" is two taps. The level boxes are the same ones as in Filters.
+  function inCat(i) { return (state.cat === "All" || i.cat === state.cat) && (!state.sub || subKind(i.item) === state.sub); }
+  function renderSub(basel) {
+    var box = $("subchips"); if (!box) return;
+    var on = state.cat === "Weapons" || state.cat === "Equips"; box.hidden = !on; box.textContent = "";
+    if (!on) { state.sub = ""; return; }
+    var cnt = {}; basel.forEach(function (i) { if (i.cat !== state.cat) return; var k = subKind(i.item) || "Other"; cnt[k] = (cnt[k] || 0) + 1; });
+    var keys = Object.keys(cnt).sort(function (a, b) { return a.localeCompare(b); });
+    if (state.sub && !cnt[state.sub]) keys.push(state.sub);
+    var mk = function (k, lab, n) {
+      var b = el("button", "schip"); b.type = "button"; b.setAttribute("aria-pressed", state.sub === k);
+      b.appendChild(document.createTextNode(lab)); b.appendChild(el("em", null, n || 0));
+      b.addEventListener("click", function () { state.sub = state.sub === k ? "" : k; renderView(); }); return b;
+    };
+    var tot = 0; keys.forEach(function (k) { tot += cnt[k] || 0; });
+    box.appendChild(mk("", state.cat === "Weapons" ? "All weapons" : "All equips", tot));
+    keys.forEach(function (k) { if (k !== "Other") box.appendChild(mk(k, k, cnt[k])); });
+    var lv = el("span", "slv"); lv.appendChild(el("b", null, "Level"));
+    [["lv-min", "from"], ["lv-max", "to"]].forEach(function (p, n) {
+      var inp = el("input"); inp.type = "number"; inp.min = 0; inp.max = 200; inp.placeholder = n ? "any" : "0"; inp.value = $(p[0]).value; inp.setAttribute("aria-label", "Level " + p[1]);
+      inp.addEventListener("change", function () { $(p[0]).value = inp.value; $(p[0]).dispatchEvent(new Event("input", { bubbles: true })); $(p[0]).dispatchEvent(new Event("change", { bubbles: true })); });
+      if (n) lv.appendChild(el("span", null, "to")); lv.appendChild(inp);
+    });
+    box.appendChild(lv);
   }
 
   var QHIT = {};
@@ -1676,7 +1703,7 @@
   function renderPrices() {
     if (D && D.list.length) { mark("rows"); if (!D.preview) mark("live"); }
     var basel = visible(); renderChips(basel);
-    var shown = basel.filter(function (i) { return (state.cat === "All" || i.cat === state.cat) && (!state.wonly || WATCH[i.item]); });
+    var shown = basel.filter(function (i) { return inCat(i) && (!state.wonly || WATCH[i.item]); });
     // equips show (and sort by) the price of their busiest grade once it has 3+ sales; the rest keep the typical
     shown.forEach(function (i) { if (!i.equip || D.preview) { i.ltop = null; return; } var L = ladderOf(i); i.ltop = L && L.top && L.top.basis === "sold" ? L.top : null; });
     $("wcount").textContent = Object.keys(WATCH).length;
@@ -2042,7 +2069,7 @@
   function renderDeals() {
     var basel = visible(); renderChips(basel);
     // a gap of a few mesos (arrows at 0.3 each) isn't a deal anyone would cross the market for
-    var list = basel.filter(function (i) { return (state.cat === "All" || i.cat === state.cat) && i.n >= MIN && i.deal >= 0.15 && (i.equip ? i.rd && i.rd.length : i.bestL && i.typ - i.best >= 100); })
+    var list = basel.filter(function (i) { return inCat(i) && i.n >= MIN && i.deal >= 0.15 && (i.equip ? i.rd && i.rd.length : i.bestL && i.typ - i.best >= 100); })
       .map(function (i) { if (i.equip) { var d = i.rd[0]; return { i: i, item: i.item, pct: d.off, u: d.p, typ: d.typ, gap: d.typ - d.p, s: d.s, t: d.t, l: d.l, roll: d }; } return { i: i, item: i.item, pct: i.deal, u: i.best, typ: i.typ, gap: i.typ - i.best, s: i.bestL.s, t: i.bestL.t }; });
     var k = state.dK, dir = state.dDir;
     list.sort(function (a, b) { var x = a[k], y = b[k]; if (typeof x === "string") return dir * x.localeCompare(y) || b.pct - a.pct; return dir * (x - y) || a.item.localeCompare(b.item); });
@@ -2077,7 +2104,7 @@
     var also = $("deal-also"); also.textContent = ""; also.hidden = true;
     if (boardQ().trim()) {
       var inDeals = {}; list.forEach(function (d) { inDeals[d.item] = 1; });
-      var rest = basel.filter(function (i) { return !inDeals[i.item] && (state.cat === "All" || i.cat === state.cat); }).slice(0, 6);
+      var rest = basel.filter(function (i) { return !inDeals[i.item] && inCat(i); }).slice(0, 6);
       if (rest.length) {
         also.appendChild(el("span", "dah", "Also matches, not under typical right now:"));
         rest.forEach(function (i) {
