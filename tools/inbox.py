@@ -85,6 +85,18 @@ def i_(v, lo, hi):
     return isinstance(v, int) and not isinstance(v, bool) and lo <= v <= hi
 
 
+def why_bad(r):
+    """Which required field failed, for the drop count: s, i, p or q, with the kind of bad value (no values kept)."""
+    if not isinstance(r, dict): return "not a row"
+    out = []
+    for k, ok in (("s", s_(r.get("s"), 24)), ("i", s_(r.get("i"), 64)), ("p", i_(r.get("p"), 1, 10**11)), ("q", i_(r.get("q", 1), 1, 32767))):
+        if ok: continue
+        v = r.get(k)
+        kind = "missing" if v is None else "empty" if v == "" else "long" if isinstance(v, str) else "float" if isinstance(v, float) else "zero" if v == 0 else "range" if isinstance(v, int) else type(v).__name__
+        out.append(k + " " + kind)
+    return ", ".join(out) or "?"
+
+
 def clean_row(r, now):
     if not isinstance(r, dict):
         return None
@@ -220,7 +232,7 @@ def merge(state, rows, block=()):
             for r in (d.get("rows") or [])[:MAX_ROWS_DOC]:
                 c = clean_row(r, now)
                 if not c:
-                    drop("bad row: " + h[:4]); continue
+                    drop("bad row: " + h[:4] + " (" + why_bad(r) + ")"); continue
                 if v in (2, 3) and i_(r.get("_o"), 0, 999):   # the watcher numbers identical listings in a shop
                     c["_o"] = r["_o"]
                 else:                                   # old whole-snapshot uploads: number repeats in order
