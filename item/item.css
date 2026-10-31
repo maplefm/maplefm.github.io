@@ -15,7 +15,7 @@ table{width:100%;border-collapse:collapse;margin-top:6px}td,th{padding:6px 8px;b
 h2{font-size:1.05rem;margin:22px 0 4px}.rel{display:flex;flex-wrap:wrap;gap:8px}.rel a{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 12px 4px 6px;text-decoration:none;font-weight:700;font-size:.88rem;color:var(--ink);display:inline-flex;align-items:center;gap:6px}.rel a img{width:22px;height:22px;object-fit:contain;image-rendering:pixelated}
 .foot{color:var(--muted);font-size:.82rem;margin-top:22px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
-td.n{text-align:right;white-space:nowrap;font-weight:800}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
+td.n{text-align:right;white-space:nowrap;font-weight:800}@media (min-width:600px){th{white-space:nowrap}}.navh{white-space:nowrap}td small{color:var(--muted)}.rc{margin:6px 0;font-size:.92rem}.src{font-size:.75rem}
 .craft{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:8px 12px;margin:8px 0}.craft table{margin:2px 0 0}.craft td{border-bottom:0;padding:3px 4px}
 .ch{margin:0;font-size:.95rem}.tag{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:1px 7px;vertical-align:1px}
 .gi{display:inline-block;width:24px;height:24px;vertical-align:middle;object-fit:contain;margin-right:4px}
@@ -42,3 +42,9 @@ h2{position:relative;padding-left:12px}h2::before{content:"";position:absolute;l
 .it img{width:28px;height:28px;object-fit:contain}.it .nm{font-weight:600;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}.it .pr{font-size:.95rem}.mv{font-size:.74rem;font-weight:800;text-align:right}.mv.up{color:var(--up)}.mv.down{color:var(--down)}
 .more{margin:8px 0 0;font:700 .85rem Inter,system-ui,sans-serif;border:1px solid var(--line2);background:var(--panel2);color:var(--accent);padding:6px 12px;border-radius:10px;cursor:pointer}
 .top .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top .nav a.sm{font-weight:700;text-decoration:none;font-size:.88rem}
+/* our name at the top of every item and quest card; lives here because item.css is rewritten from this string on every build */
+.pbrand{float:right;display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 10px;font-size:.78rem;font-weight:700;color:var(--muted);text-decoration:none;white-space:nowrap}
+.pbrand img{width:20px;height:20px;border-radius:5px}
+.pbrand b{color:var(--accent,#6a3df0);font-weight:800}
+@media (max-width:560px){.pbrand{float:none;display:flex;width:max-content;margin:0 0 10px}}
+@media (max-width:420px){td.n .chg{display:block;margin-top:2px}table td,table th{padding:6px 5px}}
