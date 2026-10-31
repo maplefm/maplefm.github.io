@@ -54,23 +54,36 @@ def meso(n):
 def full(n): return f"{float(n or 0):,.0f}"
 
 
+def lad_top(lad):
+    """The grade most copies sell at, from the summary's ladder: [name, basis, lo, hi, mid, sold, listed, top], or None."""
+    try:
+        for sv in lad or []:
+            for g in sv[1]:
+                if g[7] and g[1] == "sold": return g
+    except Exception: pass
+    return None
+
+
 def ladder_html(lad):
-    """An equip's price by grade (Clean, +1 ATT...), from the board's summary: the middle of each grade's last 7 days
-    of sales, or its asking prices when it has under 3 sales."""
+    """An equip's price by grade (Clean, +1 ATT...), from the board's summary, one table per stat buyers look for:
+    the middle of each grade's last 7 days of sales, or its asking prices when it has under 2 sales."""
     if not lad: return ""
-    trs = ""
-    for g in lad:
-        try: name, basis, lo, hi, mid, ns, na = g[:7]
+    out = ""
+    for sv in lad:
+        try: stat, grades = sv[0], sv[1]
         except Exception: continue
-        if basis in ("sold", "asking"): price = meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi))
-        elif basis == "few": price = meso(mid)
-        else: continue
-        note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed" if basis == "asking" else (f"{ns} sold" if ns else f"{na} listed")
-        trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
-    if not trs: return ""
-    return ('<h2>Price by grade</h2><p class="note">Clean has no scroll used; +1, +2 and up count what scrolls added. '
-            'Prices are the middle of the last 7 days of sales, or asking prices where there are under 3 sales.</p>'
-            f'<table><tr><th>Grade</th><th>Price</th><th>Based on</th></tr>{trs}</table>')
+        trs = ""
+        for g in grades:
+            try: name, basis, lo, hi, mid, ns, na = g[:7]
+            except Exception: continue
+            if basis in ("sold", "asking"): price = meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi))
+            else: continue
+            note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed"
+            trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
+        if trs: out += (f"<h3>{html.escape(str(stat))}</h3>" if len(lad) > 1 else "") + f"<table><tr><th>Grade</th><th>Price</th><th>Based on</th></tr>{trs}</table>"
+    if not out: return ""
+    return ('<h2>Price by grade</h2><p class="note">Clean has no scroll used; +1, +2 and up are the total over the item\'s base. '
+            'Prices are the middle of the last 7 days of sales, or asking prices where there are under 2 sales.</p>' + out)
 
 
 CONF = {"verified": ("Verified", "fresh sales caught by two or more trusted scanners"),
@@ -319,6 +332,10 @@ def main():
         name, s = r["item"], slug(r["item"])
         nm = shown(name); cat = CATS.get(r.get("cat"), r.get("cat") or "Item")
         rng = f"{meso(r['lo'])} to {meso(r['hi'])}" if r.get("hi", 0) > r.get("lo", 0) and meso(r["lo"]) != meso(r["hi"]) else meso(r["typ"])
+        # equips lead with the price of the grade most copies sell at (usually Clean), not one number blending clean
+        # and scrolled copies
+        top = lad_top(r.get("lad"))
+        if top: rng = f"{meso(top[2])} to {meso(top[3])}" if meso(top[2]) != meso(top[3]) else meso(top[4])
         mv = (r.get("mv") or [None])[0]
         chg = f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}% in 24h</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else ""
         conf = CONF.get(r.get("conf") or "", None)
@@ -352,7 +369,8 @@ def main():
         tw = re.match(r"^.*Scroll: (Lesser|Intermediate|Greater)$", name)
         if tw and name not in al: al = [name] + al
 
-        price_txt = f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")
+        price_txt = (f"{top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')} sells for {rng} mesos" if top else
+                     f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else ""))
         l3 = r.get("last3"); r1 = r.get("r1")
         more_txt = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
         if price_first or not fx:
@@ -366,7 +384,7 @@ def main():
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
             title = fit_title(f"{nm} price, drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
-<p class="big"><span id="rng">{rng}</span>{chg}<small>mesos</small></p>
+<p class="big"><span id="rng">{rng}</span>{chg}<small>mesos{(" · " + html.escape(top[0])) if top else ""}</small></p>
 <p class="note">Typical <span id="typ">{full(r['typ'])}</span> mesos, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
 <div class="grid"><div><span>Typical</span><b id="t2">{meso(r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b>{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>

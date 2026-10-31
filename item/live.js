@@ -14,7 +14,10 @@
     if (!s || !s.rows) return;
     var r = s.rows.filter(function (x) { return x && x.item === name; })[0];
     if (!r || !r.typ) return;
-    var rng = r.hi > r.lo && meso(r.lo) !== meso(r.hi) ? meso(r.lo) + " to " + meso(r.hi) : meso(r.typ);
+    var rng = r.hi > r.lo && meso(r.lo) !== meso(r.hi) ? meso(r.lo) + " to " + meso(r.hi) : meso(r.typ), top = null;
+    // equips: the busiest grade's range, the same one the page was built with
+    (r.lad || []).forEach(function (sv) { (sv[1] || []).forEach(function (g) { if (!top && g[7] && g[1] === "sold") top = g; }); });
+    if (top) rng = meso(top[2]) !== meso(top[3]) ? meso(top[2]) + " to " + meso(top[3]) : meso(top[4]);
     set("rng", rng); set("typ", full(r.typ)); set("t2", meso(r.typ)); set("sn", full(r.salesN)); set("ln", full(r.n));
     if (r.best) set("ba", meso(r.best));
     set("upd", "Live as of " + new Date(s.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + ".");
