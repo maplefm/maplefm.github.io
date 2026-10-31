@@ -453,7 +453,7 @@ def read_shop_checked(region):
             if not tm or not rm:
                 out["dropped"] += 1; continue
             qty, price, rprice = _num(tm.group(1)), _num(tm.group(2)), _num(rm.group(1))
-            if not qty or price is None or price != rprice:
+            if not qty or not price or price != rprice:
                 out["dropped"] += 1; continue
             # The bundle size must agree too: one engine reading "1 for" as "4 for" turns 133,333 into 33,333 each.
             rq = None

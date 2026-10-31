@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.5",
- "date": "2026-10-31T17:46:27+00:00",
- "notes": "Talks to Club FM at api.maplefm.gg",
- "sha256": "8369750c74348a2fa63813169c2af1a8c401816bd290bc3967e705bf72cb24c9",
- "size": 165443,
+ "version": "2026.10.31.6",
+ "date": "2026-10-31T20:19:17+00:00",
+ "notes": "Popups that name another item are never put on a row; a 0 price is never sent",
+ "sha256": "96867dda57ec09b39d828453e28f29ff49c63a5c578f65af914bdd7538a8d8e2",
+ "size": 166017,
  "history": [
+  {
+   "version": "2026.10.31.6",
+   "date": "2026-10-31",
+   "notes": "Popups that name another item are never put on a row; a 0 price is never sent"
+  },
   {
    "version": "2026.10.31.5",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.8",
    "date": "2026-10-26",
    "notes": "Shorter equip stats tips in the README."
-  },
-  {
-   "version": "2026.10.26.7",
-   "date": "2026-10-26",
-   "notes": "Equip stats read much more reliably: the watcher now reads only the item popup itself, so the chat box or players behind it no longer get in the way. Scrolled (orange) item names are read too."
   }
  ],
  "pip": [],
- "sig": "1594dba9c1ce04cdc662f612a0a0563701f8836e318e22f5c55800a2f8d54011d4d82d95dd2a68dc1c0c0180120bba07e18291d2323e585dc9b3bf07f75fa4313ce0e02d40767637ebdbaacec261a073ca2b176ac59d1c94aa49511d4f38ee926585483bded4307e88f41ff95fbb7e2e22e9c7ca92df796469730a98bdd989957e89cc4a0d6c91c29a36033d3fe65a52728f680ca871929312184d154780ca0ab8b5685b948e6439f1658753fcee1f3da09d3faac5b847d42099dab164d13f464834b2b33416237e04a19cc9ddb9ce6befbbe17743ea402d4f38f57269b859e543fc441de1bf32ef8e71483322cdd5a1d214e530e4bcfd16720518c0f7147e52"
+ "sig": "3a16d6cb10333a541483dbc02308dd6fef171859b382279ab63e4b4aeb0c10887359586dd2fe4dddffd6270b6296bb0920ba1eb30d1986d7a5206ff64b9c73a3d638399b29437667b5830ad2efb9ec5df0c042e12baaab226e13d342341466be3525a058f7e05fc43c741f1c65a6791eb553a48f2e9d4cbe8036a975c360681d131ea888cb3d773b3b1b16e3fb3cb81d054ef8a522206f6636f3e75613e3f5da09de239241c3694cba3302e2550606764d224d0997f9d9ae1faf2f1d9b117c2f84f90b65ce0d41189dd348635cf34fe8aebbc98a765950b8b15b45eb30dbab1ff9b2479f60666b7cc58d2aedac8ae863d574acb0ebdbd9e0061ecefc1ef43b3a"
 }
