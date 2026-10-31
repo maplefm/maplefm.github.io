@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.2",
- "date": "2026-10-31T04:04:08+00:00",
- "notes": "Fix: game windows smaller than 1920 x 1080 read shops again. The game only scales its picture past 1920 x 1080, so smaller windows are read as they are, like before.",
- "sha256": "cb4946345e234a524dfecda05252533035fcdada54ef24c59b34781bb1c67d2b",
- "size": 164566,
+ "version": "2026.10.31.3",
+ "date": "2026-10-31T04:39:12+00:00",
+ "notes": "Free Market room numbers read again where the game's small 7 and 1 looked like / and | (FM7 shops were landing as just FM). The time warning at the top of the window is gone.",
+ "sha256": "a6c54d32f99273729d80ce02417e2b025b5ffb80794260259d06008e8799bf9b",
+ "size": 164908,
  "history": [
+  {
+   "version": "2026.10.31.3",
+   "date": "2026-10-31",
+   "notes": "Free Market room numbers read again where the game's small 7 and 1 looked like / and | (FM7 shops were landing as just FM). The time warning at the top of the window is gone."
+  },
   {
    "version": "2026.10.31.2",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.5",
    "date": "2026-10-26",
    "notes": "Fixes the game window not being found on some PCs (an 'int too long to convert' error repeating in the window)."
-  },
-  {
-   "version": "2026.10.26.4",
-   "date": "2026-10-26",
-   "notes": "Clicked chat links: stats now attach to posts up to 15 minutes old, wait 10 minutes for a post read late, and the log says why when they can't (no price in the post, or stats the item can't have). Scan stats now count equip stats read."
   }
  ],
  "pip": [],
- "sig": "723e05ad0d75fcc09277487660eb3c78e8e9347a44b216a18929324287f8e3319824d14fe5afef7a9a64e466ca8ca6aaecd923d81b2de87cff6db5ff86a083fda4c87ce1006abef225fd33c9b11ab880bc0c042b3cf2da8dc5d2ce0efc19dcb7e36081ce2746cb478fae09f01ee3b6c188ef7237e0a1ad0f4a0988242db9b952cec5a1db0f35d155cbef44f8f0d6a64a76cb8a8ab5291fd76b5ac3c9559f327d711c6224753f9a0f5bc0d90116320acc5a2a7c30fe93ebbf37ed324550e6811c9bbbdb1a6acbb446e4403fe855156d55f521dd1785850228229e6da247375ff6a84f5ec6ee87b04615cbb5fb8f9a7bab32b764650e7a455ff86f61c9d64d1b80"
+ "sig": "826dd97d4e460584619d151984e3fcc9145aad63bda6a7b997fdeeb7f2927ddbfae0cfaa615bd887bb8f7a3107747baff8ee33b53ddb8fde5bd8ec4a5d55fb88aa6b67ec15b4eb9051ea1f329eb02da158ed5127872e8433259dc20d12b3199e892660e0c68c0a3de95256cd258552394ea873a17d014092bb69e966222c60b36a15690ec52a135a12e555959816a88754c03bd1b620074036f863f3985f51265a76d362e35267c0c1108469bfe3f4903c91ee66ed2a961f8417e7b7901076b2bc33a1cdb01cd342193eeffd02942b7ddb001e530c127dba543f4a6d55bae948a46b0aba507ac8ca0b4571adeb3dae8bccdff3d42fb429f76b34f8e9f991ba3f"
 }
