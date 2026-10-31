@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.1"
+VERSION = "2026.10.31.2"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -435,12 +435,18 @@ def place(cfg, game):
 # is mapped the same way. A 1920 x 1080 window is read as is, pixel for pixel.
 VIEW = {"k": (1.0, 1.0), "o": (0, 0), "s": (1920, 1080)}
 def view(cfg, game):
+    """The game draws its UI at 1920 x 1080 size up to that window size (a smaller window just shows less of the map,
+    at the same pixel size), and scales the whole picture up past it (2560 x 1440 is a third bigger). So a window up
+    to 1920 x 1080 is read as is, and a bigger one is scaled down until it fits, keeping its shape."""
     rw, rh = cfg.get("reference_size", [1920, 1080])
     w, h = game[2], game[3]
-    if (w, h) == (rw, rh) or not w or not h:
-        VIEW["k"] = (1.0, 1.0); VIEW["o"] = (game[0], game[1]); return list(game)
-    VIEW["k"] = (w / rw, h / rh); VIEW["o"] = (game[0], game[1]); VIEW["s"] = (w, h)
-    return [game[0], game[1], rw, rh]
+    k = max(1.0, min(w / rw, h / rh)) if w and h else 1.0
+    VIEW["o"] = (game[0], game[1]); VIEW["s"] = (w, h)
+    if k <= 1.0001:
+        VIEW["k"] = (1.0, 1.0); return list(game)
+    vw, vh = int(round(w / k)), int(round(h / k))
+    VIEW["k"] = (w / vw, h / vh)
+    return [game[0], game[1], vw, vh]
 
 def scaled():
     return VIEW["k"] != (1.0, 1.0)
@@ -1968,8 +1974,8 @@ def main():
                 else:
                     if announced is not True:
                         log("watching MapleStory,", game[2], "x", game[3]); announced = True
-                        if (game[2], game[3]) != tuple(cfg.get("reference_size", [1920, 1080])): log("reading it scaled to 1920 x 1080, the size every reader is measured on")
-                        if game[2] < 1600: log("Tip: a game window under 1600 wide draws text very small. A bigger window reads more reliably.")
+                        vg = view(cfg, game)
+                        if scaled(): log("the game draws everything bigger in a window this size: reading it scaled back to", vg[2], "x", vg[3])
                     if look(cfg, sct, view(cfg, game), t, L, jobs, store) == "channel":
                         time.sleep(0.25); continue
                 chores(cfg, t, L, store)

@@ -237,7 +237,6 @@ def step():
         g = locate_game(fw, fh)
         ST["game"] = g or (0, 0, fw, fh)
         ST["game_found"] = bool(g)
-        if fw < 1600: _log("Tip: this game window is " + str(fw) + " x " + str(fh) + ". Under 1600 wide the game draws text too small to read every popup; a bigger window reads best.")
     elif not ST.get("game_found") and t - ST["find_t"] > 5:
         ST["find_t"] = t
         g = locate_game(fw, fh)

@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.1",
- "date": "2026-10-31T03:35:47+00:00",
- "notes": "Reads the game at any window size: 4K, ultrawide and stretched windows now read shops, item popups, chat and the Change Channel window. Channel reads are stricter: a picture it can't be sure of is skipped, never guessed.",
- "sha256": "cf5413c9501fc07e9e419dae084fa44d8373218dc3cad62580b42483d8bbcd37",
- "size": 164460,
+ "version": "2026.10.31.2",
+ "date": "2026-10-31T04:04:08+00:00",
+ "notes": "Fix: game windows smaller than 1920 x 1080 read shops again. The game only scales its picture past 1920 x 1080, so smaller windows are read as they are, like before.",
+ "sha256": "cb4946345e234a524dfecda05252533035fcdada54ef24c59b34781bb1c67d2b",
+ "size": 164566,
  "history": [
+  {
+   "version": "2026.10.31.2",
+   "date": "2026-10-31",
+   "notes": "Fix: game windows smaller than 1920 x 1080 read shops again. The game only scales its picture past 1920 x 1080, so smaller windows are read as they are, like before."
+  },
   {
    "version": "2026.10.31.1",
    "date": "2026-10-30",
@@ -149,13 +154,8 @@
    "version": "2026.10.26.4",
    "date": "2026-10-26",
    "notes": "Clicked chat links: stats now attach to posts up to 15 minutes old, wait 10 minutes for a post read late, and the log says why when they can't (no price in the post, or stats the item can't have). Scan stats now count equip stats read."
-  },
-  {
-   "version": "2026.10.26.3",
-   "date": "2026-10-26",
-   "notes": "A config.json with a typo no longer stops the watcher: it's set aside as config-broken.json and fresh settings are used. Works with VPN and proxy apps that switch on a SOCKS system proxy."
   }
  ],
  "pip": [],
- "sig": "9eedd506add4ec2b27f2292069d013ee419d9a2b67466b86c566b5e2f560d0eaabed789ae86daa0b7e10ddf7ca1624c27118681f7c9122fd2af65e63adbb2861dfc6f2ba697c84f4113ed516e4be1624bba3537ae6617316775e9691c64ac54457fc26839d00ecb32ec44f93130d0959b856947ee9fa4547937b376d35062af6f2e1e7793be50462d81d6e4c7d6cac17b5189884823ecb204db6f6f678099f93efb384cbd75c8aafbb05a2401d91293783474d689c9aac9d0df1fe6fe4b14cd1d8f2ee6d734152eb982058f6816c9e3aceec78bbcd37fe1225c84c2306b29abe2d9aed80945831ed6bbb450e56f07773ef7b3c96f8fc7a67769e2e2f2780a3fe"
+ "sig": "723e05ad0d75fcc09277487660eb3c78e8e9347a44b216a18929324287f8e3319824d14fe5afef7a9a64e466ca8ca6aaecd923d81b2de87cff6db5ff86a083fda4c87ce1006abef225fd33c9b11ab880bc0c042b3cf2da8dc5d2ce0efc19dcb7e36081ce2746cb478fae09f01ee3b6c188ef7237e0a1ad0f4a0988242db9b952cec5a1db0f35d155cbef44f8f0d6a64a76cb8a8ab5291fd76b5ac3c9559f327d711c6224753f9a0f5bc0d90116320acc5a2a7c30fe93ebbf37ed324550e6811c9bbbdb1a6acbb446e4403fe855156d55f521dd1785850228229e6da247375ff6a84f5ec6ee87b04615cbb5fb8f9a7bab32b764650e7a455ff86f61c9d64d1b80"
 }
