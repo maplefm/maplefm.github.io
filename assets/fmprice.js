@@ -14,9 +14,9 @@
     var q = +e.dataset.fmq || 1; e.textContent = "";
     if (!(each > 0)) { e.appendChild(document.createTextNode("not seen on the FM yet")); e.classList.add("fpn"); return; }
     e.classList.remove("fpn");
-    e.appendChild(document.createTextNode("about ")); var b = document.createElement("b"); b.textContent = meso(each); e.appendChild(b);
+    e.appendChild(document.createTextNode("about ")); var b = document.createElement("b"); b.className = "mz"; b.textContent = meso(each); e.appendChild(b);
     e.appendChild(document.createTextNode(q > 1 ? " each on the FM, " : " on the FM"));
-    if (q > 1) { var t = document.createElement("b"); t.textContent = meso(each * q); e.appendChild(t); e.appendChild(document.createTextNode(" for all " + q.toLocaleString("en-US"))); }
+    if (q > 1) { var t = document.createElement("b"); t.className = "mz"; t.textContent = meso(each * q); e.appendChild(t); e.appendChild(document.createTextNode(" for all " + q.toLocaleString("en-US"))); }
   }
   window.fmPriceFill = fill;
   window.fmPriceMeso = meso;
@@ -29,7 +29,7 @@
       // a list's total ("Buy it all") follows the same prices
       document.querySelectorAll("[data-fmtot]").forEach(function (t) {
         var all = true, sum = 0; JSON.parse(t.dataset.fmtot).forEach(function (x) { if (P[x[0]]) sum += P[x[0]] * x[1]; else all = false; });
-        if (sum) { var b = t.querySelector("b"); if (b) b.textContent = (all ? "about " : "at least ") + meso(sum) + " mesos"; }
+        if (sum) { var b = t.querySelector("b"); if (b) { b.textContent = (all ? "about " : "at least "); var z = document.createElement("span"); z.className = "mz"; z.textContent = meso(sum); b.appendChild(z); } }
       });
       document.querySelectorAll(".fpnote").forEach(function (n) { n.textContent = "FM prices change with the market; these are today's, as of " + new Date(s.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + "."; });
     }).catch(function () {});

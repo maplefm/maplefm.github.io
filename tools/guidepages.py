@@ -93,7 +93,7 @@ def build(out, rows, ids, dbrow, kinds, guide, vendor, when, h):
         secs = ""
         for k in order:
             g = sorted(groups[k], key=lambda r: (level(r["item"]), shown(r["item"])))
-            trs = "".join(f'<tr><td>{ilink(r["item"])}</td><td class="n">{level(r["item"]) or ""}</td><td class="n">{meso(r["typ"])}</td><td class="n">{full(r.get("salesN") or 0)}</td></tr>' for r in g)
+            trs = "".join(f'<tr><td>{ilink(r["item"])}</td><td class="n">{level(r["item"]) or ""}</td><td class="n"><span class="mz">{meso(r["typ"])}</span></td><td class="n">{full(r.get("salesN") or 0)}</td></tr>' for r in g)
             jobs = f' <small>· {H(WEAPON_JOBS[k])}</small>' if k in WEAPON_JOBS else ""
             label = k if k in ("Overall", "Other weapons") or k.endswith("s") else k + "s"
             secs += f'<h2 id="{slug(k)}">{H(label)}{jobs}</h2><div class="tw"><table><tr><th>Item</th><th>Level</th><th>Typical</th><th>Sales seen</th></tr>{trs}</table></div>'
@@ -134,9 +134,9 @@ def build(out, rows, ids, dbrow, kinds, guide, vendor, when, h):
     ex = top[0] if top else None
     exs = ""
     if ex:
-        rng = f'{meso(ex["lo"])} to {meso(ex["hi"])}' if ex.get("hi", 0) > ex.get("lo", 0) else meso(ex["typ"])
-        exs = (f'<div class="ex"><b>Example, {when}:</b> {ilink(ex["item"])} has a typical of <b>{meso(ex["typ"])}</b>, '
-               f'a range of {rng}, from {full(ex.get("salesN") or 0)} watched sales. Listing well above {meso(ex.get("hi") or ex["typ"])} usually sits unsold.</div>')
+        rng = f'<span class="mz">{meso(ex["lo"])}</span> to <span class="mz">{meso(ex["hi"])}</span>' if ex.get("hi", 0) > ex.get("lo", 0) else meso(ex["typ"])
+        exs = (f'<div class="ex"><b>Example, {when}:</b> {ilink(ex["item"])} has a typical of <b><span class="mz">{meso(ex["typ"])}</span></b>, '
+               f'a range of {rng}, from {full(ex.get("salesN") or 0)} watched sales. Listing well above <span class="mz">{meso(ex.get("hi") or ex["typ"])}</span> usually sits unsold.</div>')
     gpage("price-an-item", f"""
 <p>Prices on Club FM come from real Free Market sales that players watched happen, not from what sellers hope to get.</p>
 <h2>Five steps</h2>
@@ -222,7 +222,7 @@ def build(out, rows, ids, dbrow, kinds, guide, vendor, when, h):
         for r in lst[:k]:
             ds = drops(r["item"])
             who = ", ".join(f'{mob(d[0])}' + (f' <small>Lv {d[1]}</small>' if d[1] else "") for d in ds[:2]) + (f' <small>+{len(ds) - 2} more</small>' if len(ds) > 2 else "")
-            trs += f'<tr><td>{ilink(r["item"])}</td><td class="n">{meso(r["typ"])}</td><td class="n">{full(r.get("salesN") or 0)}</td><td>{who}</td></tr>'
+            trs += f'<tr><td>{ilink(r["item"])}</td><td class="n"><span class="mz">{meso(r["typ"])}</span></td><td class="n">{full(r.get("salesN") or 0)}</td><td>{who}</td></tr>'
         return f'<div class="tw"><table><tr><th>Item</th><th>Typical</th><th>Sales seen</th><th>Known droppers</th></tr>{trs}</table></div>'
     etc = sorted([r for r in rows if r.get("cat") == "Etc" and r.get("kind") == "sale" and drops(r["item"]) and (r.get("salesN") or 0) >= 10], key=lambda r: -(r.get("vol") or 0))
     scr = sorted([r for r in rows if r.get("cat") == "Scrolls" and r.get("kind") == "sale" and drops(r["item"]) and (r.get("salesN") or 0) >= 10], key=lambda r: -(r.get("vol") or 0))
@@ -232,7 +232,7 @@ def build(out, rows, ids, dbrow, kinds, guide, vendor, when, h):
         if vp > 1 and r.get("kind") == "sale" and (r.get("salesN") or 0) >= 20 and r["typ"] >= vp * 5 and r.get("cat") in ("Etc", "Use", "Equips", "Weapons"):
             npc.append((r, vp))
     npc.sort(key=lambda x: -((x[0]["typ"] - x[1]) * min(x[0].get("salesN") or 0, 200)))
-    ntr = "".join(f'<tr><td>{ilink(r["item"])}</td><td class="n">{meso(vp)}</td><td class="n">{meso(r["typ"])}</td><td class="n">{full(r.get("salesN") or 0)}</td></tr>' for r, vp in npc[:12])
+    ntr = "".join(f'<tr><td>{ilink(r["item"])}</td><td class="n"><span class="mz">{meso(vp)}</span></td><td class="n"><span class="mz">{meso(r["typ"])}</span></td><td class="n">{full(r.get("salesN") or 0)}</td></tr>' for r, vp in npc[:12])
     gpage("make-mesos", f"""
 <p>What actually sells, from Free Market sales players watched. These tables rebuild every day.</p>
 <h2>Drops that sell</h2>
@@ -259,7 +259,7 @@ def build(out, rows, ids, dbrow, kinds, guide, vendor, when, h):
     for lo, hi, lab in BANDS:
         b = sorted([r for r in equips if lo <= level(r["item"]) <= hi and r.get("kind") == "sale" and (r.get("salesN") or 0) >= 5], key=lambda r: -(r.get("vol") or 0))[:12]
         if not b: continue
-        trs = "".join(f'<tr><td>{ilink(r["item"])}</td><td class="n">{level(r["item"])}</td><td><small>{H(clsname(mask(r["item"])))}</small></td><td class="n">{meso(r["typ"])}</td><td class="n">{full(r.get("salesN") or 0)}</td></tr>' for r in b)
+        trs = "".join(f'<tr><td>{ilink(r["item"])}</td><td class="n">{level(r["item"])}</td><td><small>{H(clsname(mask(r["item"])))}</small></td><td class="n"><span class="mz">{meso(r["typ"])}</span></td><td class="n">{full(r.get("salesN") or 0)}</td></tr>' for r in b)
         secs += f'<h2>{lab}</h2><div class="tw"><table><tr><th>Item</th><th>Level</th><th>Class</th><th>Typical</th><th>Sales seen</th></tr>{trs}</table></div>'
     gpage("what-sells-by-level", f"""
 <p>The equips and weapons with the most mesos changing hands in each level range, from watched Free Market sales. Prices are for the typical copy; good rolls sell for more. Open an item for its price by stat.</p>

@@ -61,7 +61,7 @@ def foot_html():
             'Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot-->')
 
 
-NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=4">'
+NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=5">'
 PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "shop.html": ("market", False), "map.html": ("training", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
          "report.html": ("", False), "streamers.html": ("", False), "how-it-works.html": ("", False), "shortcuts.html": ("", False),
          "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("", False), "scan/index.html": ("earn", False)}
@@ -77,5 +77,5 @@ if __name__ == "__main__":
         if "<!--foot-->" in s: s = re.sub(r"<!--foot-->.*?<!--/foot-->", lambda m: foot_html(), s, flags=re.S)
         else: s = s.replace("</body>", foot_html() + "</body>", 1)
         if "/assets/nav.css" not in s: s = s.replace("</head>", NAV_CSS + "</head>", 1)
-        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=4", s)
+        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=5", s)
         open(p, "w", encoding="utf-8").write(s); print("nav", f)

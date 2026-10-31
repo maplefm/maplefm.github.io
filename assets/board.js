@@ -44,10 +44,19 @@
     if (m < 1) return "just now"; if (m < 60) return m + "m ago";
     var h = Math.round(m / 60); if (h < 48) return h + "h ago"; return Math.round(h / 24) + "d ago";
   }
-  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  // M(n) / MF(n) mark a meso amount inside a sentence; el() and rich() draw each mark as the number plus the meso coin
+  function M(n) { return "\uE000" + short(n) + "\uE001"; }
+  function MF(n) { return "\uE000" + fmt(n) + "\uE001"; }
+  function rich(e, t) {
+    e.textContent = ""; String(t).split(/(\uE000[^\uE001]*\uE001)/).forEach(function (p) {
+      if (!p) return; if (p.charCodeAt(0) === 0xE000) { var z = document.createElement("span"); z.className = "mz"; z.textContent = p.slice(1, -1); e.appendChild(z); } else e.appendChild(document.createTextNode(p)); });
+    return e;
+  }
+  function plain(t) { return String(t).replace(/[\uE000\uE001]/g, ""); }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) { if (typeof txt === "string" && txt.indexOf("\uE000") >= 0) rich(e, txt); else e.textContent = txt; } return e; }
   function ssCrown() { var i = document.createElement("img"); i.src = "assets/superstar@4x.png"; i.alt = "Crown"; i.className = "ssi"; return i; }
   function coin() { return el("span", "coin"); }
-  function money(n, cls) { var s = el("span", "num" + (cls ? " " + cls : "")); s.appendChild(coin()); s.appendChild(document.createTextNode(short(n))); return s; }
+  function money(n, cls) { return el("span", "num mz" + (cls ? " " + cls : ""), short(n)); }
   function median(a) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
   function quant(a, q) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var i = (a.length - 1) * q, lo = Math.floor(i); return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); }
   // Older watcher versions saved half-read map names like "ee Market <1> p" for Free Market 1.
@@ -141,7 +150,7 @@
     if (!pts.length) return NXRATE;
     pts.sort(function (a, b) { return a[0] - b[0]; }); var tot = pts.reduce(function (t, x) { return t + x[1]; }, 0), run = 0, med = pts[0][0];
     for (var k = 0; k < pts.length; k++) { run += pts[k][1]; if (run >= tot / 2) { med = pts[k][0]; break; } }
-    NXRATE = med; var lab = $("nxlab"); if (lab) lab.textContent = "1,000 NX sells for about " + short(Math.round(med * 1000)) + " mesos, from " + pts.length + " Cash Shop items";
+    NXRATE = med; var lab = $("nxlab"); if (lab) rich(lab, "1,000 NX sells for about " + M(Math.round(med * 1000)) + ", from " + pts.length + " Cash Shop items");
     return med;
   }
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
@@ -1578,7 +1587,7 @@
     if (!ev.length) { run.appendChild(el("span", "tq", "No sales over 250K in the last 24 hours")); return; }
     ev.forEach(function (l) {
       var sp = el("span"); sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
-      sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", null, short(l.p)));
+      sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", "mz", short(l.p)));
       var rm = /^FM\d+$/.test(l.r || "") ? roomLabel(l.r) : "";
       sp.appendChild(document.createTextNode((rm ? " · " + (l.c && !l.ci ? "CH " + l.c + ", " : "") + rm : "") + " · " + ago(l.t)));
       run.appendChild(sp);
@@ -1736,9 +1745,9 @@
       var bc = el("td", "c col-src clubonly");
       // equips showing a grade price: the cheapest copy of that same grade, and how far under the grade it sits
       var LB = LT && (LT.okAsks || LT.asks).filter(function (x) { return x.st !== "gone" && x.st !== "sold"; })[0];
-      if (LB) { var lsp = el("span", "srcp"), loff = 1 - LB.u / LT.mid; if (loff >= 0.25) lsp.classList.add("deal"); lsp.appendChild(coin()); lsp.appendChild(document.createTextNode(short(LB.u))); if (loff >= 0.25) lsp.appendChild(el("small", null, "−" + Math.round(loff * 100) + "%")); lsp.title = LT.name + " · " + LB.s + (where(LB) ? ", " + where(LB) : "") + ", " + ago(LB.t); bc.appendChild(lsp); }
+      if (LB) { var lsp = el("span", "srcp"), loff = 1 - LB.u / LT.mid; if (loff >= 0.25) lsp.classList.add("deal"); lsp.appendChild(el("span", "mz", short(LB.u))); if (loff >= 0.25) lsp.appendChild(el("small", null, "−" + Math.round(loff * 100) + "%")); lsp.title = LT.name + " · " + LB.s + (where(LB) ? ", " + where(LB) : "") + ", " + ago(LB.t); bc.appendChild(lsp); }
       else if (LT) bc.appendChild(el("span", "srcp none", "No " + LT.name.toLowerCase().replace(/ (att|matt|str|dex|int|luk)\b/gi, function (z) { return z.toUpperCase(); }) + " up"));
-      else if (i.bestL) { var sp = el("span", "srcp" + (i.deal >= 0.25 ? " deal" : "")); sp.appendChild(coin()); sp.appendChild(document.createTextNode(short(i.best))); if (i.deal >= 0.25) sp.appendChild(el("small", null, "−" + Math.round(i.deal * 100) + "%")); sp.title = i.bestL.s + (where(i.bestL) ? ", " + where(i.bestL) : "") + ", " + ago(i.bestL.t); bc.appendChild(sp); }
+      else if (i.bestL) { var sp = el("span", "srcp" + (i.deal >= 0.25 ? " deal" : "")); sp.appendChild(el("span", "mz", short(i.best))); if (i.deal >= 0.25) sp.appendChild(el("small", null, "−" + Math.round(i.deal * 100) + "%")); sp.title = i.bestL.s + (where(i.bestL) ? ", " + where(i.bestL) : "") + ", " + ago(i.bestL.t); bc.appendChild(sp); }
       else bc.appendChild(el("span", "srcp none", "Not on sale now"));
       tr.appendChild(bc);
       var trc = el("td", "c col-trend"); if (i.daily.length >= 3) trc.appendChild(spark(i.daily)); else trc.appendChild(el("span", "tfd", "Too few days")); tr.appendChild(trc);
@@ -1815,7 +1824,7 @@
   function saveTrades() { saveLS("fm-trades", TRADES); syncPOS(); }
   syncPOS();
   function watched() { var w = {}; Object.keys(WATCH).forEach(function (k) { w[k] = 1; }); POS.forEach(function (p) { w[p.i] = 1; }); return Object.keys(w); }
-  function plSpan(v) { return el("span", "num pl " + (v >= 0 ? "up" : "down"), (v >= 0 ? "+" : "−") + short(Math.abs(v))); }
+  function plSpan(v) { return el("span", "num mz pl " + (v >= 0 ? "up" : "down"), (v >= 0 ? "+" : "−") + short(Math.abs(v))); }
   function renderPos() {
     fillNames();
     var lg = ledger(), days = +($("pf-period").value || 0), since = days ? (days === 1 ? new Date(new Date().setHours(0, 0, 0, 0)).getTime() : Date.now() - days * DAY) : 0;
@@ -1857,11 +1866,11 @@
     var sold = lg.closed.filter(function (c) { return c.matched && c.tr.t >= since; }), real = 0, wins = 0, best = null, worst = null, held = 0;
     sold.forEach(function (c) { real += c.pl; if (c.pl > 0) wins++; if (!best || c.pl > best.pl) best = c; if (!worst || c.pl < worst.pl) worst = c; held += c.held; });
     var sm = $("psum"); sm.textContent = "";
-    function card(lbl, val, sub, cls) { var d = el("div", "pcard" + (cls ? " " + cls : "")); d.appendChild(el("small", null, lbl)); var b = el("b"); if (typeof val === "number") b.appendChild(plSpan(val)); else b.textContent = val; d.appendChild(b); if (sub) d.appendChild(el("span", null, sub)); sm.appendChild(d); }
+    function card(lbl, val, sub, cls) { var d = el("div", "pcard" + (cls ? " " + cls : "")); d.appendChild(el("small", null, lbl)); var b = el("b"); if (typeof val === "number") b.appendChild(plSpan(val)); else rich(b, val); d.appendChild(b); if (sub) d.appendChild(el("span", null, sub)); sm.appendChild(d); }
     var pname = { 1: "today", 7: "7 days", 30: "30 days", 0: "all time" }[days];
     card("Profit, " + pname, real, sold.length ? sold.length + (sold.length === 1 ? " sale" : " sales") : "no sales yet", real >= 0 ? "up" : "down");
     card("Win rate", sold.length ? Math.round(wins / sold.length * 100) + "%" : "–", sold.length ? wins + " of " + sold.length + " sales made money" : "");
-    card("Holding", short(Math.round(inv)), lg.hold.length ? lg.hold.length + (lg.hold.length === 1 ? " item" : " items") + (worth ? " · worth " + short(Math.round(worth)) : "") : "nothing right now");
+    card("Holding", M(Math.round(inv)), lg.hold.length ? lg.hold.length + (lg.hold.length === 1 ? " item" : " items") + (worth ? " · worth " + M(Math.round(worth)) : "") : "nothing right now");
     card("If you sold today", unreal, "on what you're holding", unreal >= 0 ? "up" : "down");
     if (best && best.pl > 0) card("Best flip", best.pl, showName(best.tr.i));
     if (worst && worst.pl < 0) card("Worst", worst.pl, showName(worst.tr.i));
@@ -1888,7 +1897,7 @@
       tr.appendChild(rc); wb.appendChild(tr);
     });
     $("watch-empty").hidden = watched().length > 0;
-    $("count").textContent = TRADES.length ? (sold.length ? (real >= 0 ? "Up " : "Down ") + short(Math.abs(Math.round(real))) + " on " + sold.length + (sold.length === 1 ? " sale" : " sales") + ", " + pname : "No sales " + (days ? "in this period" : "logged yet")) + (lg.hold.length ? " · holding " + lg.hold.length : "") : "";
+    rich($("count"), TRADES.length ? (sold.length ? (real >= 0 ? "Up " : "Down ") + M(Math.abs(Math.round(real))) + " on " + sold.length + (sold.length === 1 ? " sale" : " sales") + ", " + pname : "No sales " + (days ? "in this period" : "logged yet")) + (lg.hold.length ? " · holding " + lg.hold.length : "") : "");
   }
   // ---- price alerts: a starred item listed at or under the price you set. A browser notification (when allowed)
   // and the page's alert sound, once per listing.
@@ -1941,9 +1950,9 @@
     var ul = $("walert-list"); ul.textContent = "";
     moved.slice(0, 8).forEach(function (i) {
       var li = el("span", "alert-row"); li.appendChild(el("span", "n", POS.some(function (p) { return p.i === i.item; }) ? "position" : "watching"));
-      li.appendChild(el("span", "it", i.item)); li.appendChild(el("span", "pr", fmt(i.typ))); var m = moveTag(i.mv[0], "1d"); m.className += " pc"; li.appendChild(m);
+      li.appendChild(el("span", "it", i.item)); li.appendChild(el("span", "pr mz", fmt(i.typ))); var m = moveTag(i.mv[0], "1d"); m.className += " pc"; li.appendChild(m);
       var p = POS.filter(function (x) { return x.i === i.item; })[0];
-      li.appendChild(el("span", "wh", p ? "you paid " + fmt(p.paid) + ", " + (i.typ >= p.paid ? "up " : "down ") + short(Math.abs(i.typ - p.paid)) + " each" : ""));
+      li.appendChild(el("span", "wh", p ? "you paid " + MF(p.paid) + ", " + (i.typ >= p.paid ? "up " : "down ") + M(Math.abs(i.typ - p.paid)) + " each" : ""));
       // clear this one: it stays hidden until it moves again on another day or turns the other way
       var x = el("span", "wx", "\u00d7"); x.setAttribute("role", "button"); x.tabIndex = 0; x.title = "Clear this alert"; x.setAttribute("aria-label", "Clear the alert for " + i.item);
       var clear = function (e) { e.stopPropagation(); e.preventDefault(); WHIDE[mkey(i)] = Date.now(); saveLS("fm-watch-hide", pruneHide()); renderWatchAlert(); };
@@ -1985,8 +1994,8 @@
     var patient = p75 || askMed || fair * 1.15;
     if (patient < fair) patient = fair;
     var why = [];
-    if (low) why.push("Cheapest up now " + short(low) + " from " + i.bestL.s);
-    if (su.length >= 3) why.push("sales usually " + short(p25) + " to " + short(p75)); else why.push(su.length ? "only " + su.length + " sale seen, priced from asking prices" : "no sales seen yet, priced from asking prices");
+    if (low) why.push("Cheapest up now " + M(low) + " from " + i.bestL.s);
+    if (su.length >= 3) why.push("sales usually " + short(p25) + " to " + M(p75)); else why.push(su.length ? "only " + su.length + " sale seen, priced from asking prices" : "no sales seen yet, priced from asking prices");
     if (under) why.push("that is below what it normally sells for, so the quick price stays at the low end of sales instead of matching it");
     var sellers = {}; (i.buy || []).forEach(function (x) { sellers[x.s] = 1; });
     var bids = i.bids.map(function (x) { return x.u; }).filter(function (v) { return !fair || v <= fair * 2.5; });
@@ -2039,21 +2048,21 @@
       tb.appendChild(tr);
       if (i) {
         var ad = advice(i), why = ad.why;
-        why += "; sell fast at " + FASTPCT + "% under typical " + short(i.typ) + (ad.low && ad.low < i.typ * (1 - FASTPCT / 100) ? " (someone is listed cheaper, at " + short(ad.low) + ")" : "");
-        why += "; patient price " + short(ad.patient) + (ad.bid ? "; a buyer offered " + short(ad.bid) + " in chat" : "");
-        var vpw = vendor(i.item); if (vpw) why += "; an NPC pays " + short(vpw) + (i.typ * (1 - FASTPCT / 100) < vpw ? ", so sell fast is held at the vendor price" : "");
+        why += "; sell fast at " + FASTPCT + "% under typical " + M(i.typ) + (ad.low && ad.low < i.typ * (1 - FASTPCT / 100) ? " (someone is listed cheaper, at " + M(ad.low) + ")" : "");
+        why += "; patient price " + M(ad.patient) + (ad.bid ? "; a buyer offered " + M(ad.bid) + " in chat" : "");
+        var vpw = vendor(i.item); if (vpw) why += "; an NPC pays " + M(vpw) + (i.typ * (1 - FASTPCT / 100) < vpw ? ", so sell fast is held at the vendor price" : "");
         if (s.g && s.g.x) {
           var ks = keyStat(i.item, s.g.x, s.g.xj), v = s.g.x[ks];
           if (ks && v != null) {
             var same = i.all.filter(function (x) { return x.x && x.x[ks] === v && !x.b; }).map(function (x) { return x.u; });
-            why += same.length ? "; this roll (" + ks + " " + v + ") has been seen " + same.length + "x around " + short(median(same)) : "; no other listing with this exact roll seen yet";
+            why += same.length ? "; this roll (" + ks + " " + v + ") has been seen " + same.length + "x around " + M(median(same)) : "; no other listing with this exact roll seen yet";
           }
         }
         var wr = el("tr", "whyrow"); var wd = el("td", "why", why); wd.colSpan = 8; wr.appendChild(wd); tb.appendChild(wr);
       }
     });
     $("sell-empty").hidden = rows.length > 0;
-    $("count").textContent = rows.length ? rows.length + " items, about " + short(total) + " mesos at sell fast prices" : "";
+    rich($("count"), rows.length ? rows.length + " items, about " + M(total) + " at sell fast prices" : "");
     $("sell-clear").disabled = !rows.length;
     if (SELL_NEW) { SELL_NEW = null; var ja = tb.querySelector("tr.justadded"); if (ja && ja.getBoundingClientRect().top < 0) ja.scrollIntoView({ block: "center", behavior: "smooth" }); }
     $("sell-help").textContent = "From the game: pick your watcher, then hover each inventory item for a second. They show up within minutes." + (junk ? " " + junk + (junk === 1 ? " hovered item" : " hovered items") + " didn't read cleanly; hover again." : "");
@@ -2847,21 +2856,21 @@
       h.appendChild(s1);
     }
     var s2 = el("div", "sec"); s2.appendChild(el("h5", null, "Free Market"));
-    var bp = el("div", "bigp"); bp.appendChild(coin()); bp.appendChild(document.createTextNode(fmt(i.typ))); bp.appendChild(el("small", null, i.kind === "sale" ? "typical" : "typical asking")); s2.appendChild(bp); var vph = vendor(i.item); if (vph) s2.appendChild(el("div", "cred", "Vendor price " + fmt(vph) + " each"));
+    var bp = el("div", "bigp"); bp.appendChild(el("span", "mz", fmt(i.typ))); bp.appendChild(el("small", null, i.kind === "sale" ? "typical" : "typical asking")); s2.appendChild(bp); var vph = vendor(i.item); if (vph) s2.appendChild(el("div", "cred", "Vendor price " + MF(vph) + " each"));
     var all = i.sales.concat(i.asks).map(function (x) { return x.u; }), mn = quant(all, .03), mxv = quant(all, .97);
     if (mxv > mn) {
       var P = function (v) { return Math.max(0, Math.min(100, (v - mn) / (mxv - mn) * 100)); };
       var rg = el("div", "rng"), band = el("i"); band.style.left = P(i.lo) + "%"; band.style.width = Math.max(2, P(i.hi) - P(i.lo)) + "%"; rg.appendChild(band);
       var tk = el("em"); tk.style.left = P(i.typ) + "%"; rg.appendChild(tk); s2.appendChild(rg);
-      var rl = el("div", "rl"); rl.appendChild(el("span", null, short(mn))); rl.appendChild(el("span", null, short(mxv))); s2.appendChild(rl);
+      var rl = el("div", "rl"); rl.appendChild(el("span", "mz", short(mn))); rl.appendChild(el("span", "mz", short(mxv))); s2.appendChild(rl);
     }
     var kv2 = el("div", "kv");
-    [["Sales seen", fmt(i.salesN)], ["Last 3 avg", i.last3 ? short(i.last3) : "–"], ["Last sold", i.lastSale ? ago(i.lastSale.t) : "never"], ["Asking now", i.bestL ? short(i.best) : "–"]].forEach(function (p) { kv2.appendChild(el("span", null, p[0])); kv2.appendChild(el("b", null, p[1])); });
+    [["Sales seen", fmt(i.salesN)], ["Last 3 avg", i.last3 ? M(i.last3) : "–"], ["Last sold", i.lastSale ? ago(i.lastSale.t) : "never"], ["Asking now", i.bestL ? M(i.best) : "–"]].forEach(function (p) { kv2.appendChild(el("span", null, p[0])); kv2.appendChild(el("b", null, p[1])); });
     s2.appendChild(kv2);
     var ups = {}; (i.buy || []).forEach(function (x) { if (x.st !== "gone") ups[x.s] = 1; }); var nu = Object.keys(ups).length;
     var lst = el("div", "stl"); lst.appendChild(el("span", null, "Listed")); lst.appendChild(el("span", "ok", nu ? nu + (nu === 1 ? " shop listing" : " shops listing") : "none up now")); s2.appendChild(lst);
     h.appendChild(s2);
-    if (b.NPC != null) { var s3 = el("div", "sec"); s3.appendChild(el("h5", null, "NPC")); var k3 = el("div", "kv"); k3.appendChild(el("span", null, "Sell-back")); k3.appendChild(el("b", null, fmt(b.NPC))); k3.appendChild(el("span")); k3.appendChild(el("b")); s3.appendChild(k3); h.appendChild(s3); }
+    if (b.NPC != null) { var s3 = el("div", "sec"); s3.appendChild(el("h5", null, "NPC")); var k3 = el("div", "kv"); k3.appendChild(el("span", null, "Sell-back")); k3.appendChild(el("b", "mz", fmt(b.NPC))); k3.appendChild(el("span")); k3.appendChild(el("b")); s3.appendChild(k3); h.appendChild(s3); }
     h.appendChild(el("div", "sec cred", idOf(name) ? "Item data: maplestory.io · prices: Club FM scans" : "Prices: Club FM scans"));
     h.hidden = false;
     var rc = hovRow.getBoundingClientRect(), hw = 272, hhgt = h.offsetHeight;
@@ -3068,7 +3077,7 @@
       var sub = k === "GRADE" ? "stat not named" : "scrolled" + (MAINCLS[k] && jobs !== 1 ? " · " + MAINCLS[k] : "");
       h.appendChild(el("span", null, sub));
       if (k === mine) h.appendChild(el("i", "you", "your class"));
-      h.appendChild(el("small", null, sc.n + " seen" + (cleanPrice ? " · clean " + short(cleanPrice.p) : "")));
+      h.appendChild(el("small", null, sc.n + " seen" + (cleanPrice ? " · clean " + M(cleanPrice.p) : "")));
       sec.appendChild(h);
       var row = el("div", "rrow"), opened = null;
       cells.sort(function (a, b) { return a[1].g - b[1].g || (a[1].su || 0) - (b[1].su || 0) || (a[1].up == null ? 99 : a[1].up) - (b[1].up == null ? 99 : b[1].up); }).forEach(function (e) {
@@ -3110,7 +3119,7 @@
       var us = el("div", "rsec unread"), uh = el("div", "rsh"); uh.appendChild(el("b", null, "Not hovered yet")); uh.appendChild(el("span", null, "likely scrolled or a top roll"));
       uh.appendChild(el("small", null, (ug.up.length + ug.sold.length + ug.old.length) + " seen")); us.appendChild(uh);
       var ps = unread.map(function (l) { return l.u; }), ur = el("div", "rrow"), uc = cell("?", "?", unread, "Stats unread", "", "Not hovered yet", "unk");
-      uc.el.querySelector(".num").replaceWith(el("span", "num rng2", short(Math.min.apply(null, ps)) + "–" + short(Math.max.apply(null, ps))));
+      uc.el.querySelector(".num").replaceWith(el("span", "num rng2", short(Math.min.apply(null, ps)) + "–" + M(Math.max.apply(null, ps))));
       ur.appendChild(uc.el); us.appendChild(ur); if (uc.open) us.appendChild(uc.open);
       us.firstChild.appendChild(infoTip("Rest the mouse on these in game and FM Watcher reads their stats, so they get priced by roll here."));
       box.appendChild(us);
@@ -3540,7 +3549,7 @@
     var nb = el("div", "nbar"); nb.setAttribute("aria-hidden", "true");
     nb.appendChild(iconBox(i.item)); var t = el("div", "nbt"); t.appendChild(el("b", null, showName(i.item)));
     var NL = i.equip && ladderOf(i), NT = NL && NL.top && NL.top.basis === "sold" ? NL.top : null;
-    t.appendChild(el("small", null, (NT ? NT.name.toLowerCase().replace(/ (att|matt)\b/g, function (z) { return z.toUpperCase(); }) + " " + short(NT.lo) + "–" + short(NT.hi) : "typical " + short(i.typ)) + (i.salesN ? " · " + fmt(i.salesN) + " sales" : ""))); nb.appendChild(t);
+    t.appendChild(el("small", null, (NT ? NT.name.toLowerCase().replace(/ (att|matt)\b/g, function (z) { return z.toUpperCase(); }) + " " + short(NT.lo) + "–" + M(NT.hi) : "typical " + M(i.typ)) + (i.salesN ? " · " + fmt(i.salesN) + " sales" : ""))); nb.appendChild(t);
     var nbr = el("span", "nbrand"); var nbi = el("img"); nbi.src = "/clubfm-icon-512.png"; nbi.alt = ""; nbr.appendChild(nbi); nbr.appendChild(document.createTextNode("maplefm.gg")); nb.appendChild(nbr);
     w.insertBefore(nb, w.querySelector(".meta"));
     nbIO = new IntersectionObserver(function (es) { var e = es[es.length - 1]; w.classList.toggle("named", !e.isIntersecting && e.boundingClientRect.top < e.rootBounds.top + 80); }, { root: $("side"), rootMargin: "-56px 0px 0px 0px" });
@@ -3582,7 +3591,7 @@
     if (!L.top) {
       var nt = el("p", "lgnone");
       nt.appendChild(el("b", null, grades.length ? "Too few read copies to price every grade yet. " : "No copies read yet, so no grades. "));
-      if (i.typ) { nt.appendChild(document.createTextNode("All sales, stats unread: ")); if (i.hi > i.lo && short(i.lo) !== short(i.hi)) { nt.appendChild(money(i.lo)); nt.appendChild(document.createTextNode(" to ")); nt.appendChild(money(i.hi)); } else nt.appendChild(money(i.typ)); nt.appendChild(document.createTextNode(" · " + fmt(i.salesN) + " sales.")); }
+      if (i.typ) { nt.appendChild(document.createTextNode("All sales, stats unread: ")); if (i.hi > i.lo && short(i.lo) !== short(i.hi)) { nt.appendChild(el("span", "num", short(i.lo))); nt.appendChild(document.createTextNode(" to ")); nt.appendChild(money(i.hi)); } else nt.appendChild(money(i.typ)); nt.appendChild(document.createTextNode(" · " + fmt(i.salesN) + " sales.")); }
       box.appendChild(nt);
       if (!grades.length) return box;
     }
@@ -3592,7 +3601,7 @@
       var b = el("button", "lg" + (g.id === sel ? " on" : "") + (g.basis === "none" ? " empty" : g.basis === "few" ? " lone" : "")); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", g.id === sel);
       b.appendChild(el("span", "lgn", g.name));
       var pr = el("span", "lgp");
-      if (g.basis === "sold" || g.basis === "asking" || (g.basis === "few" && g.lo)) { pr.appendChild(money(g.lo)); if (short(g.lo) !== short(g.hi)) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g.hi))); } }
+      if (g.basis === "sold" || g.basis === "asking" || (g.basis === "few" && g.lo)) { if (short(g.lo) !== short(g.hi)) { pr.appendChild(el("span", "num", short(g.lo))); pr.appendChild(el("span", "dash", "–")); pr.appendChild(money(g.hi)); } else pr.appendChild(money(g.lo)); }
       else pr.appendChild(el("span", "tfd", "not enough yet"));
       b.appendChild(pr);
       var ns = g.use ? g.use.length : 0;
@@ -3633,7 +3642,7 @@
       var row = el("div", "lgrades");
       sv[1].forEach(function (g) {
         var b = el("div", "lg" + (g[7] ? " on" : "") + (g[1] === "none" || (g[1] === "few" && !(g[2] > 0)) ? " empty" : g[1] === "few" ? " lone" : "")); b.appendChild(el("span", "lgn", g[0]));
-        var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking" || (g[1] === "few" && g[2] > 0)) { pr.appendChild(money(g[2])); if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "dash", "–")); pr.appendChild(document.createTextNode(short(g[3]))); } } else pr.appendChild(el("span", "tfd", "not enough yet"));
+        var pr = el("span", "lgp"); if (g[1] === "sold" || g[1] === "asking" || (g[1] === "few" && g[2] > 0)) { if (short(g[2]) !== short(g[3])) { pr.appendChild(el("span", "num", short(g[2]))); pr.appendChild(el("span", "dash", "–")); pr.appendChild(money(g[3])); } else pr.appendChild(money(g[2])); } else pr.appendChild(el("span", "tfd", "not enough yet"));
         b.appendChild(pr); b.appendChild(el("span", "lgc", g[1] === "sold" ? g[5] + " sold" : g[1] === "asking" ? "asking · " + g[6] + " listed" : g[1] === "few" && g[2] > 0 ? (g[5] ? "only 1 sold" : "asking · only 1 listed") : (g[5] + g[6]) + " seen"));
         row.appendChild(b);
       });
@@ -3653,8 +3662,8 @@
       pt.appendChild(el("p", null, (pi.cat || "") + (pi.salesN ? " · " + pi.salesN + " sales" : ""))); ph.appendChild(pt); ip.appendChild(ph);
       // signed out: the price, the range and the move are open to everyone; listings and deals are for members
       if (pi.lad && pi.lad.length) ip.appendChild(ladderStatic(pi.lad));
-      else ip.appendChild(el("p", "pvbig", short(pi.typ)));
-      if (pi.hi > pi.lo && short(pi.lo) !== short(pi.hi)) ip.appendChild(el("p", "note", "Typical price. Recent sales ran " + short(pi.lo) + " to " + short(pi.hi) + "."));
+      else ip.appendChild(el("p", "pvbig", M(pi.typ)));
+      if (pi.hi > pi.lo && short(pi.lo) !== short(pi.hi)) ip.appendChild(el("p", "note", "Typical price. Recent sales ran " + short(pi.lo) + " to " + M(pi.hi) + "."));
       var mv = pi.mv && pi.mv[0]; if (typeof mv === "number" && Math.abs(mv) >= 0.01) ip.appendChild(el("p", "note", (mv > 0 ? "Up " : "Down ") + Math.round(Math.abs(mv) * 100) + "% in the last 24 hours"));
       var gate = el("a", "gate"); gate.href = ACCT + "/login?back=home"; gate.appendChild(el("b", null, "Live listings for this item")); gate.appendChild(el("span", null, "Sellers, prices, rolls and recent sales. A Mega Deals perk.")); gate.appendChild(el("i", null, "Sign in with Discord")); ip.appendChild(gate);
       return;
@@ -3677,7 +3686,7 @@
     var ll = levelLine(i); if (ll) ht.appendChild(el("p", null, ll));
     if (i.equip) { var bt = baseText(i.item); if (bt) { var bl = el("p", "baseln"); bl.appendChild(el("b", null, "Base ")); bl.appendChild(document.createTextNode(bt.t)); bl.title = "The stats this item comes with, before any roll. From the item database" + (bt.from === "hovers" ? "; attack from hovers in the game where the data leaves it out (a ? means only one hover so far)" : "") + "."; ht.appendChild(bl); } }
     var vp = vendor(i.item), nxp = nxOf(i.item);
-    if (nxp) { var nl = el("p", "vend"); nl.title = "What this costs in the Cash Shop, and what a thousand NX comes to in mesos at this item's typical sale."; nl.appendChild(document.createTextNode("Cash Shop " + fmt(nxp) + " NX")); if (i.typ) { var per = i.typ / nxp, rate = nxRate(); nl.appendChild(document.createTextNode(" · " + short(Math.round(per * 1000)) + " mesos per 1,000 NX")); if (rate && Math.abs(per / rate - 1) >= 0.15) nl.appendChild(el("span", "tg " + (per > rate ? "ok" : "ask"), (per > rate ? "above" : "below") + " the board rate of " + short(Math.round(rate * 1000)))); } ht.appendChild(nl); }
+    if (nxp) { var nl = el("p", "vend"); nl.title = "What this costs in the Cash Shop, and what a thousand NX comes to in mesos at this item's typical sale."; nl.appendChild(document.createTextNode("Cash Shop " + fmt(nxp) + " NX")); if (i.typ) { var per = i.typ / nxp, rate = nxRate(); nl.appendChild(el("span", null, " · " + M(Math.round(per * 1000)) + " per 1,000 NX")); if (rate && Math.abs(per / rate - 1) >= 0.15) nl.appendChild(el("span", "tg " + (per > rate ? "ok" : "ask"), (per > rate ? "above" : "below") + " the board rate of " + M(Math.round(rate * 1000)))); } ht.appendChild(nl); }
     if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); else if (i.typ && vp >= 100) { var mult = i.typ / vp; vl.appendChild(el("span", "tg ok", mult >= 2 ? "FM pays " + (mult >= 10 ? Math.round(mult) : Math.round(mult * 10) / 10) + "× more" : "FM pays " + Math.round((mult - 1) * 100) + "% more")); vl.title += " The Free Market typical is " + fmt(i.typ) + ", so listing it beats the NPC."; } ht.appendChild(vl); }
     hd.appendChild(ht); ip.appendChild(hd);
     // equips: the price ladder replaces the one blended price, its 24h move and its sale boxes
@@ -3685,13 +3694,13 @@
     var LD = i.equip ? ladderOf(i) : null;
     if (LD) { ip.appendChild(ladderBox(i, LD)); nameBar(i); }
     var big = el("div", "big");
-    if (i.hi > i.lo) { big.appendChild(money(i.lo)); big.appendChild(el("span", "dash", "–")); var hiS = el("span", "num", short(i.hi)); big.appendChild(hiS); }
+    if (i.hi > i.lo) { big.appendChild(el("span", "num", short(i.lo))); big.appendChild(el("span", "dash", "–")); var hiS = money(i.hi); big.appendChild(hiS); }
     else big.appendChild(money(i.typ));
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
     if (!LD) { ip.appendChild(big); nameBar(i); }
     else if (LD.top) {
       // equips: the busiest grade's price up top beside the item, the same as the grade buttons show
-      var eb = el("div", "big"); eb.appendChild(money(LD.top.lo)); if (short(LD.top.lo) !== short(LD.top.hi)) { eb.appendChild(el("span", "dash", "–")); eb.appendChild(el("span", "num", short(LD.top.hi))); }
+      var eb = el("div", "big"); if (short(LD.top.lo) !== short(LD.top.hi)) { eb.appendChild(el("span", "num", short(LD.top.lo))); eb.appendChild(el("span", "dash", "–")); eb.appendChild(money(LD.top.hi)); } else eb.appendChild(money(LD.top.lo));
       ip.appendChild(eb);
       eb.appendChild(el("span", "tg roll etg", LD.top.name.toLowerCase()));      // which grade this price is for
     }
@@ -3700,7 +3709,7 @@
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
     // the typical price once: when the big number already is the typical, this line only says where it comes from
     var tnote = el("p", "tline"), oneNum = !(i.hi > i.lo);
-    if (!oneNum) { tnote.appendChild(el("span", null, "Typical ")); tnote.appendChild(el("b", null, short(i.typ))); }
+    if (!oneNum) { tnote.appendChild(el("span", null, "Typical ")); tnote.appendChild(el("b", "mz", short(i.typ))); }
     tnote.appendChild(el("span", "tsep", (oneNum ? "from " : " · ") + (SHORTWHY[i.basis] || "recent sales")));
     var cb1 = confBadge(i, false); if (cb1) tnote.appendChild(cb1);
     tnote.appendChild(infoTip(full));
@@ -3730,7 +3739,7 @@
     rows.slice(0, 40).forEach(function (x) {
       var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : state.list === "buy" && x.st === "old" ? " stale" : ""));
       var nb = el("b", null, x.s); li.appendChild(nb);
-      var p = el("div", "p"); p.appendChild(money(x.u)); if (x.n > 1 || x.q > 1) p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q + " for " + short(x.p) + " · each")); li.appendChild(p);
+      var p = el("div", "p"); p.appendChild(money(x.u)); if (x.n > 1 || x.q > 1) p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q + " for " + M(x.p) + " · each")); li.appendChild(p);
       var sm = el("small"); li.appendChild(sm);
       if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not (seen|read)/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
       else { var w = where(x); if (w) { sm.appendChild(el("b", "wh", w)); sm.appendChild(document.createTextNode(" · ")); } sm.appendChild(document.createTextNode(ago(x.t))); }
@@ -3908,7 +3917,7 @@
       box.appendChild(h);
       mine.slice(0, 5).forEach(function (l) {
         var r = el("a", "mkr"); r.href = "/market.html#l=" + l.id;
-        r.appendChild(el("b", null, short(l.price) + (l.qty > 1 ? " ea" : "")));
+        r.appendChild(el("b", null, M(l.price) + (l.qty > 1 ? " ea" : "")));
         r.appendChild(el("span", "mkw", [l.stats, l.qty > 1 ? "x" + l.qty : "", l.ign || l.seller.name, l.status === "pending" ? "buyer on it" : ""].filter(Boolean).join(" · ")));
         r.appendChild(el("span", "mkv", "View listing →")); box.appendChild(r);
       });
@@ -3942,7 +3951,7 @@
     var WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], ph = top(byH), bd = top(byD), ti = top(byI);
     var hr = function (h) { h = +h; return (h % 12 || 12) + (h < 12 ? "a" : "p"); };
     var kp = el("div", "kpis");
-    [[short(mes), "Mesos traded"], [fmt(units), "Units sold"], [short(mes / spanD), "Mesos / day"], [ph != null ? hr(ph) : "–", "Peak hour"], [bd != null ? WD[bd] : "–", "Busiest day"], [ti || "–", "Top item"]].forEach(function (x) { var d = el("div", "stat"); var b = el("b", null, x[0]); b.title = x[0]; d.appendChild(b); d.appendChild(el("small", null, x[1])); kp.appendChild(d); });
+    [[M(mes), "Mesos traded"], [fmt(units), "Units sold"], [M(mes / spanD), "Mesos / day"], [ph != null ? hr(ph) : "–", "Peak hour"], [bd != null ? WD[bd] : "–", "Busiest day"], [ti || "–", "Top item"]].forEach(function (x) { var d = el("div", "stat"); var b = el("b", null, x[0]); b.title = plain(x[0]); d.appendChild(b); d.appendChild(el("small", null, x[1])); kp.appendChild(d); });
     box.appendChild(kp);
     function bars(title, note, keys, vals, lab, peak) {
       var w = el("div", "bars"); var h = el("h4"); h.appendChild(document.createTextNode(title)); w.appendChild(h);
@@ -4083,10 +4092,10 @@
       var flip = ref && i.kind === "sale" ? (ref * (1 - FASTPCT / 100) - l.u) * q : 0;
       var off = ref ? 1 - l.u / ref : 0;
       var r = { l: l, typ: ref, off: off, profit: 0, why: "", check: false, roll: g };
-      if (npcGain >= 1000 && npcGain >= flip) { r.profit = npcGain; r.why = "NPC buys at " + short(vp); }
+      if (npcGain >= 1000 && npcGain >= flip) { r.profit = npcGain; r.why = "NPC buys at " + M(vp); }
       else if (i.typ && i.kind === "sale" && sold7 >= 3 && off >= 0.2 && flip >= MINPROF) {
         if (i.equip && g == null) r.lowFlip = i.bands ? (i.bands.lo * (1 - FASTPCT / 100) - l.u) * q : null;
-        r.profit = flip; r.why = Math.round(off * 100) + "% under " + short(ref) + (i.equip ? (g == null ? " if average roll" : g === 0 ? " for an average roll" : " for a " + (g > 0 ? "+" : "") + g + " roll") : ""); r.check = off > 0.85 || (l.chat && off > 0.7) || i.check;
+        r.profit = flip; r.why = Math.round(off * 100) + "% under " + M(ref) + (i.equip ? (g == null ? " if average roll" : g === 0 ? " for an average roll" : " for a " + (g > 0 ? "+" : "") + g + " roll") : ""); r.check = off > 0.85 || (l.chat && off > 0.7) || i.check;
         // the going rate, not a deal: 3 or more other sellers in the last day ask within 25% of this price
         var near = {}; i.asks.forEach(function (x) { if (x !== l && now - x.t <= DAY && !x.chat && Math.abs(Math.log(x.u / l.u)) < Math.log(1.25)) near[String(x.s).toLowerCase()] = 1; });
         delete near[String(l.s).toLowerCase()];
@@ -4107,18 +4116,18 @@
     $("alert").hidden = !hot.length;
     if (!hot.length) return;
     var good = hot.filter(function (r) { return !r.check; }).length; ALERTHOT = hot;
-    $("alert-count").textContent = good ? "💰 " + good + (good === 1 ? " flip" : " flips") + " ready · " + short(MINPROF) + "+ profit" : "👀 Too good to be true? Double check these";
+    rich($("alert-count"), good ? "💰 " + good + (good === 1 ? " flip" : " flips") + " ready · " + M(MINPROF) + "+ profit" : "👀 Too good to be true? Double check these");
     $("alert-count").title = "Listed in the last 10 minutes, biggest profit first. Profit assumes you relist " + FASTPCT + "% under typical.";
     var ul = $("alert-list"); ul.textContent = "";
     hot.slice(0, 8).forEach(function (r) {
       var l = r.l, li = el("span", "alert-row" + (r.check ? " chk" : "")); li.dataset.k = hot.indexOf(r);
-      var pc = el("span", "pc"); pc.appendChild(el("b", null, "+" + short(r.profit))); pc.appendChild(document.createTextNode(" " + r.why));
+      var pc = el("span", "pc"); pc.appendChild(el("b", "mz", "+" + short(r.profit))); pc.appendChild(el("span", null, " " + r.why));
       if (r.check) pc.appendChild(el("em", "chkt", r.note || "check: may be a misread"));
       else if (r.roll === null && r.lowFlip != null) {
-        pc.appendChild(el("em", "chkt roll", r.lowFlip > 0 ? "roll unknown · +" + short(r.lowFlip) + " even if low" : "roll unknown · hover it before buying"));
+        pc.appendChild(el("em", "chkt roll", r.lowFlip > 0 ? "roll unknown · +" + M(r.lowFlip) + " even if low" : "roll unknown · hover it before buying"));
       }
       var itx = el("span", "it", showName(l.i) + ((l.q || 1) > 1 ? " ×" + fmt(l.q) : "")); var sc = l.x ? statChip(l.i, l.x, l.xj) : null; if (sc) itx.appendChild(sc);
-      li.appendChild(el("span", "n", ago(l.t))); li.appendChild(itx); li.appendChild(el("span", "pr", fmt(l.u) + ((l.q || 1) > 1 ? " ea" : "")));
+      li.appendChild(el("span", "n", ago(l.t))); li.appendChild(itx); li.appendChild(el("span", "pr", MF(l.u) + ((l.q || 1) > 1 ? " ea" : "")));
       li.appendChild(pc);
       var whs = el("span", "wh", [l.s, where(l)].filter(Boolean).join(", "));
       if (l.stream) { whs.appendChild(document.createTextNode(" · ")); whs.appendChild(streamLink(l)); }
@@ -4307,7 +4316,7 @@
   function alertText(a) {
     var p = a.stats.map(function (s) { return (s.rel ? "+" + s.min + " " : s.min + "+ ") + (STATN2[s.k] || s.k); });
     if (a.clean) p.push("clean"); else if (a.used != null) p.push("at most " + a.used + (a.used === 1 ? " slot" : " slots") + " used");
-    return p.join(", ") + (a.max ? " · under " + short(a.max) : "");
+    return p.join(", ") + (a.max ? " · under " + M(a.max) : "");
   }
   function alertDlg(item) {
     var d = $("alertdlg"); if (!d) { d = document.createElement("dialog"); d.id = "alertdlg"; d.className = "alertdlg"; document.body.appendChild(d); }
@@ -4337,7 +4346,7 @@
       mine.forEach(function (a) {
         var r = el("div", "arow" + (a.on ? "" : " off"));
         var t = el("span"); if (!item) { var lk = el("a", null, showName(a.item)); lk.href = "#item=" + encodeURIComponent(a.item); lk.addEventListener("click", function () { d.close(); }); t.appendChild(lk); t.appendChild(document.createTextNode(" · ")); }
-        t.appendChild(document.createTextNode(alertText(a))); r.appendChild(t);
+        t.appendChild(el("span", null, alertText(a))); r.appendChild(t);
         var tg = el("button", "pbtn", a.on ? "Pause" : "Resume"); tg.type = "button";
         var del = el("button", "pbtn", "Delete"); del.type = "button";
         var redo = function (fn) { var nl = ALERTS.map(function (z) { return Object.assign({}, z); }); fn(nl); alertsSave(nl).then(function () { alertDlg(item); }, function (e) { alert0(body, e.message); }); };
@@ -4417,9 +4426,9 @@
   }
   function pfHint() {
     var n = $("pos-item").value.trim(), i = n && posItem(n), h = $("pf-hint"), bits = [];
-    if (i && i.typ) bits.push("Typical " + fmt(i.typ) + (i.lo && i.hi && i.hi > i.lo ? " (most sales " + short(i.lo) + " to " + short(i.hi) + ")" : ""));
-    if (PSIDE === "sell" && i) { var held = ledger().hold.filter(function (x) { return x.i === i.item; })[0]; bits.push(held ? "You hold " + held.q + " at " + short(Math.round(held.paid)) + " each" : "Not logged as bought, so this sale won't count toward profit"); }
-    h.textContent = bits.join(" · ");
+    if (i && i.typ) bits.push("Typical " + MF(i.typ) + (i.lo && i.hi && i.hi > i.lo ? " (most sales " + short(i.lo) + " to " + M(i.hi) + ")" : ""));
+    if (PSIDE === "sell" && i) { var held = ledger().hold.filter(function (x) { return x.i === i.item; })[0]; bits.push(held ? "You hold " + held.q + " at " + M(Math.round(held.paid)) + " each" : "Not logged as bought, so this sale won't count toward profit"); }
+    rich(h, bits.join(" · "));
   }
   $("pf-buy").addEventListener("click", function () { pform("buy"); });
   $("pf-sell").addEventListener("click", function () { pform("sell"); });
@@ -4755,6 +4764,14 @@
     var n = ""; try { n = decodeURIComponent(m[1]); } catch (e) { return; }
     if (D && D.byName && D.byName[n] && (n !== state.sel || !cardOpen())) pick(n, true);
   });
+  // the search hint is the longest version that fits the box, so a phone never shows it cut off mid-word
+  var PH = ["Try GFA 60, work gloves, white label ring...", "Try GFA 60, work gloves...", "Try GFA 60...", "Search items"];
+  function fitPh() {
+    var q = $("q"); if (!q || !q.clientWidth) return; var cs = getComputedStyle(q), cx = document.createElement("canvas").getContext("2d"); cx.font = cs.font;
+    var room = q.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
+    q.placeholder = PH.filter(function (t) { return cx.measureText(t).width <= room; })[0] || PH[PH.length - 1];
+  }
+  fitPh(); window.addEventListener("resize", fitPh); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitPh);
   // turning a tablet or resizing across the wide-screen line: the card switches between its two shapes
   var cardWide = window.innerWidth > 1180;
   window.addEventListener("resize", function () {
@@ -4857,7 +4874,7 @@
         if (nm.trim().toLowerCase() === low && (!price || Math.abs(num - price) <= Math.max(1, price * 0.002))) hit = li;
       });
       if (hit) { hit.classList.add("dealhit"); hit.scrollIntoView({ block: "center", behavior: "smooth" }); }
-      else { var ls = document.querySelector("#side .list"); var note = el("div", "li dealgone"); note.appendChild(el("small", null, seller + "'s listing" + (price ? " at " + fmt(price) : "") + " isn't up any more, or wasn't seen again. Here's everyone else selling it.")); ls.insertBefore(note, ls.firstChild); }
+      else { var ls = document.querySelector("#side .list"); var note = el("div", "li dealgone"); note.appendChild(el("small", null, seller + "'s listing" + (price ? " at " + MF(price) : "") + " isn't up any more, or wasn't seen again. Here's everyone else selling it.")); ls.insertBefore(note, ls.firstChild); }
     }, 250);
   }
   // "Log this sale in My positions" from a market listing: #positions&plog=s,price,qty,item opens the form filled in

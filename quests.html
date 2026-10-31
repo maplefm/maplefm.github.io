@@ -140,7 +140,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
 @media (max-width:480px){.tk{margin-left:6px;padding-left:7px}.tm{margin-left:0}.tn .src{margin-left:0!important}.me #acct{display:none}}
 .navh{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:1px 9px 1px 7px;border-radius:999px;background:var(--accent);color:#fff!important;font-size:.72rem;font-weight:800;text-decoration:none!important;white-space:nowrap;vertical-align:1px}
 .navh::before{content:"";width:0;height:0;border-left:7px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent}
-</style><link rel="stylesheet" href="/assets/nav.css?v=4"></head><body><main>
+</style><link rel="stylesheet" href="/assets/nav.css?v=5"></head><body><main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html" aria-current="page"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><nav class="playbar" aria-label="Quests"><a href="/quests.html" aria-current="page">Quest log</a><a href="/quests/">All quests</a><a href="/crafting/">Crafting</a></nav><script src="/assets/hscroll.js?v=2" defer></script><!--/nav-->
 <section class="hero">
   <div><h1>Quests</h1><p><b>What's open</b> at your level, <b>what to bring</b> down to the last ore, and <b>what it costs</b>.</p></div>
@@ -176,7 +176,11 @@ img.px{image-rendering:pixelated;object-fit:contain}
 (function () {
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/", ACCT = "https://api.maplefm.gg", IO = "https://maplestory.io/api/MCW/1/";
   var $ = function (id) { return document.getElementById(id); };
-  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) { if (typeof x === "string" && x.indexOf("\uE000") >= 0) rich(e, x); else e.textContent = x; } return e; }
+  // M(n) marks a meso amount in a sentence; el() and rich() draw it as the number plus the in-game meso coin (.mz in nav.css)
+  function rich(e, t) { e.textContent = ""; String(t).split(/(\uE000[^\uE001]*\uE001)/).forEach(function (p) { if (!p) return; if (p.charCodeAt(0) === 0xE000) { var z = document.createElement("span"); z.className = "mz"; z.textContent = p.slice(1, -1); e.appendChild(z); } else e.appendChild(document.createTextNode(p)); }); return e; }
+  function M(n) { return "\uE000" + meso(n) + "\uE001"; }
+  function MF(n) { return "\uE000" + (+n).toLocaleString("en-US") + "\uE001"; }
   var TIER = { Lesser: "100%", Intermediate: "60%", Greater: "10%" };
   function shown(n) { var m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(n); return m ? m[1] + " " + (TIER[m[2]] || m[2]) : n; }
   function slug(n) { return shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
@@ -367,7 +371,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
     if (sp.childNodes.length) t.appendChild(sp);
     h.appendChild(t);
     var r = el("span", "qr"); r.appendChild(el("b", null, q.exp ? q.exp.toLocaleString() + " EXP" : q.get.length ? "item reward" : ""));
-    var c = costOf(q); r.appendChild(el("small", null, !q.need.length ? "free" : c ? (priced(q) ? "~" : "from ") + meso(c) + " to buy" : "gather"));
+    var c = costOf(q); r.appendChild(el("small", null, !q.need.length ? "free" : c ? (priced(q) ? "~" : "from ") + M(c) + " to buy" : "gather"));
     r.appendChild(el("span", "chev", "▾")); h.appendChild(r);
     h.addEventListener("click", function () { if (OPEN[q.id] || FOCUS === q.id) { delete OPEN[q.id]; if (FOCUS === q.id) FOCUS = 0; } else OPEN[q.id] = 1; var n = card(q, win); d.parentNode.replaceChild(n, d); });
     d.appendChild(h);
@@ -384,12 +388,12 @@ img.px{image-rendering:pixelated;object-fit:contain}
     b.appendChild(acts);
     var notes = [];
     var where = PLAY.npc[q.g]; if (where && where.length) notes.push(["Start", q.g + " in " + where[0][0], "/map/" + where[0][1] + "/", where[0][0]]);
-    if (q.cost) notes.push(["Costs", meso(q.cost) + " mesos to accept"]);
+    if (q.cost) notes.push(["Costs", M(q.cost) + " to accept"]);
     if (q.prof) q.prof.forEach(function (p) { notes.push(["Needs", p[0] + " Lv " + p[1]]); });
     if (q.ended) notes.push(["Event ended", "this quest can't be started now"]);
     else if (q.from || q.to) notes.push(["Event", (q.from ? "from " + q.from.slice(0, 10) : "") + (q.to ? " until " + q.to.slice(0, 10) : "")]);
     if (q.unconfirmed && q.unconfirmed.length) notes.push(["Unconfirmed", "sources disagree on " + q.unconfirmed.join(", ")]);
-    notes.forEach(function (n) { var p = el("p", "pre"); p.appendChild(el("b", null, n[0] + ": ")); if (n[2]) { var a = el("a", null, n[1]); a.href = n[2]; p.appendChild(a); } else p.appendChild(document.createTextNode(n[1])); if (n[3]) { var nv = el("a", "navh", "Nav here"); nv.href = "/map.html#route=|" + encodeURIComponent(n[3]); nv.title = "The fastest way there from where you are"; p.appendChild(nv); } b.appendChild(p); });
+    notes.forEach(function (n) { var p = el("p", "pre"); p.appendChild(el("b", null, n[0] + ": ")); if (n[2]) { var a = el("a", null, n[1]); a.href = n[2]; p.appendChild(a); } else p.appendChild(el("span", null, n[1])); if (n[3]) { var nv = el("a", "navh", "Nav here"); nv.href = "/map.html#route=|" + encodeURIComponent(n[3]); nv.title = "The fastest way there from where you are"; p.appendChild(nv); } b.appendChild(p); });
     // the quest window's to-do list; the quest guide page has the map for each step with Nav here
     if (q.steps && q.steps.length && !q.need.length && !q.kill.length) {
       var sx = el("div", "sec"); sx.appendChild(el("h4", null, "Steps")); var ol = el("ol", "qsteps");
@@ -405,11 +409,11 @@ img.px{image-rendering:pixelated;object-fit:contain}
         var bx = el("div", "base"); bx.appendChild(el("b", null, "Everything to gather for this quest"));
         var bi = el("div", "bi"); Object.keys(acc.base).sort(function (a, c) { return acc.base[c] - acc.base[a]; }).forEach(function (n) { var s = el("span"); var i = itemImg(n); if (i) s.appendChild(i); s.appendChild(document.createTextNode(shown(n) + " ×" + acc.base[n].toLocaleString())); bi.appendChild(s); });
         bx.appendChild(bi);
-        var ex = []; if (acc.fee) ex.push(meso(acc.fee) + " mesos in crafting fees"); Object.keys(acc.cat).forEach(function (n) { ex.push("catalyst " + shown(n) + " ×" + acc.cat[n]); });
+        var ex = []; if (acc.fee) ex.push(M(acc.fee) + " in crafting fees"); Object.keys(acc.cat).forEach(function (n) { ex.push("catalyst " + shown(n) + " ×" + acc.cat[n]); });
         if (ex.length) bx.appendChild(el("div", null, ex.join(" · ")));
         b.appendChild(bx);
       }
-      var c = costOf(q); if (c) { var cp = el("p", "cost"); cp.appendChild(document.createTextNode("Buy it all on the Free Market: ")); cp.appendChild(el("b", null, (priced(q) ? "about " : "at least ") + meso(c) + " mesos")); if (!priced(q)) cp.appendChild(document.createTextNode(" (some items aren't traded yet)")); b.appendChild(cp); }
+      var c = costOf(q); if (c) { var cp = el("p", "cost"); cp.appendChild(document.createTextNode("Buy it all on the Free Market: ")); cp.appendChild(el("b", null, (priced(q) ? "about " : "at least ") + M(c))); if (!priced(q)) cp.appendChild(document.createTextNode(" (some items aren't traded yet)")); b.appendChild(cp); }
     }
     if (q.kill.length) {
       var s2 = el("div", "sec"); s2.appendChild(el("h4", null, "Hunt"));
@@ -424,7 +428,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
       });
       b.appendChild(s2);
     }
-    var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, "💰 " + q.meso.toLocaleString())); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
+    var rw = el("div", "rw"); if (q.exp) rw.appendChild(el("span", null, "✨ " + q.exp.toLocaleString() + " EXP")); if (q.meso) rw.appendChild(el("span", null, MF(q.meso))); if (q.fame) rw.appendChild(el("span", null, "⭐ " + q.fame + " fame"));
     function rwItem(x, note) { var a = el("a"); a.href = itemHref(x[0]); var s = el("span"); var i = itemImg(x[0]); if (i) s.appendChild(i); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); if (note) s.appendChild(el("small", null, " " + note)); a.appendChild(s); rw.appendChild(a); }
     q.get.forEach(function (x) { rwItem(x); }); (q.get2 || []).forEach(function (x) { rwItem(x, x[2]); });
     (q.skill || []).forEach(function (n) { rw.appendChild(el("span", null, "📘 " + n)); });
@@ -480,7 +484,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
     if (!keys.length) P.appendChild(el("p", "note", "Start a quest and its items add up here with Free Market costs."));
     keys.forEach(function (n) { var r = el("div", "row"); r.appendChild(itemIcon(n)); var q = qline("ql", n, need[n]); r.appendChild(q); if (PRICE[n]) tot += PRICE[n] * need[n]; P.appendChild(r); });
     if (keys.length) P.appendChild(el("p", "note", "FM prices change with the market; these are today's."));
-    if (tot) P.appendChild(el("p", "tot", "About " + meso(tot) + " mesos to buy it all."));
+    if (tot) P.appendChild(el("p", "tot", "About " + M(tot) + " to buy it all."));
   }
   // deep links: #q-1012 opens one quest (from item pages, quest pages and the board); #q=name or ?q=name searches
   function route(first) {
@@ -554,5 +558,5 @@ img.px{image-rendering:pixelated;object-fit:contain}
 })();
 </script>
 <script src="/assets/hit.js" defer></script>
-<script src="/assets/fmprice.js?v=1"></script>
+<script src="/assets/fmprice.js?v=2"></script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/items/class/">Items by class</a><a href="/guides/">Guides</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Quests and training</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body></html>
