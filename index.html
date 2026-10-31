@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.maplefm.gg" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/assets/board.min.css?v=a21854ac">
+<link rel="stylesheet" href="/assets/board.min.css?v=98553c26">
 <link rel="stylesheet" href="/assets/nav.css?v=4"></head>
 <body>
 <div class="clouds" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="cloud c4"></i></div>
@@ -44,7 +44,6 @@
         <button type="button" id="m-about">About this site</button>
         <button type="button" onclick="location.href='report.html'">Daily market close report</button>
         <button type="button" id="m-sources">Where prices come from</button>
-        <button type="button" id="m-check">Data check <em id="m-check-n"></em></button>
         <button type="button" id="m-contrib">Earn by scanning</button>
         <button type="button" id="m-short">Chat shortcuts</button>
         <button type="button" id="m-items">All item prices</button>
@@ -247,8 +246,9 @@
     </section>
 
     <aside class="window side" id="side" aria-labelledby="itemtitle">
-      <div class="wtitle"><button class="sheetback" id="sheetback" type="button" aria-label="Back to the price board">‹ Back</button><h2 id="itemtitle">Item Card</h2><span class="meta"><span id="wiki"></span><button class="x sheetx" id="sheetx" type="button" aria-label="Close item info">×</button></span></div>
+      <div class="wtitle"><button class="sheetback" id="sheetback" type="button" aria-label="Back to the price board">‹ Back</button><h2 id="itemtitle" class="cbrand"><img src="/clubfm-icon-512.png" alt="" width="26" height="26"><span>Club FM</span><em>maplefm.gg</em></h2><span class="meta"><span id="wiki"></span><button class="x sheetx" id="sheetx" type="button" aria-label="Close item info">×</button></span></div>
       <div class="ipwrap" id="ipwrap"><div class="ip" id="ip"><p class="note">Pick an item to see its price, recent sales and where to buy it.</p></div><div class="ip ipr" id="ipr" hidden></div></div>
+      <p class="icred" id="icred"></p>
     </aside>
   </div>
     <aside class="window board" id="board" aria-labelledby="btitle">
@@ -372,15 +372,6 @@
     <p class="note">Open to all: prices, Cheapest now, Where to buy, and Best deals 10 minutes late. Live deal alerts: Mega Deals holders. Sign in with Discord to earn and sync your watchlist.</p>
     <input type="password" id="club-key" autocomplete="off" placeholder="Club key">
     <div class="fbrow"><span class="note" id="club-msg"></span><button type="button" class="cta" id="club-go">Sign in</button></div>
-  </div>
-</dialog>
-<dialog id="datacheck" aria-labelledby="dc-t">
-  <div class="wtitle"><h2 id="dc-t">Data check</h2><button class="x" data-close aria-label="Close">×</button></div>
-  <div class="dbody">
-    <p>Each refresh checks every item for:</p>
-    <ul><li>tiers that look mixed up</li><li>watchers and streams disagreeing</li><li>a price that jumped or crashed in a week</li><li>everyone listing far under typical</li><li>bundles that don't match singles</li></ul>
-    <p>Items that fail show <b>⚠ Check</b> and their deals never ping.</p>
-    <div class="dclist" id="dclist"></div>
   </div>
 </dialog>
 

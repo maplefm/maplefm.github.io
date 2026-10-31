@@ -1345,7 +1345,6 @@ body.bigcard .hsph, body.sheet .hsph { display: block; }
   .side .wtitle::before { display: none; }
   .sheetback { all: unset; display: inline-flex; align-items: center; cursor: pointer; font-weight: 900; font-size: 1rem; color: var(--ink); padding: 6px 12px 6px 2px; margin-right: auto; border-radius: 10px; flex: none; }
   body.sheet .side .wtitle { flex-wrap: nowrap; }
-  body.sheet #itemtitle { display: none; }
   .sheetback:focus-visible { outline: 3px solid var(--orange); }
   .sheetx { display: none !important; }
 }
@@ -1578,3 +1577,23 @@ td:has(> .lgt) { white-space: nowrap; }
 /* the listing a Discord deal or sale post linked to */
 .li.dealhit { background: var(--gold-soft); box-shadow: inset 4px 0 0 var(--gold); animation: bhit 1.6s ease-out 2; }
 .li.dealgone small { color: var(--muted); font-style: italic; }
+
+/* card v3: buying on the left, worth on the right; our name on the card's title bar; letter icons gone from rows */
+.wtitle h2.cbrand { gap: 8px; font-size: 1.05rem; }
+.wtitle h2.cbrand::before { display: none; }
+.wtitle h2.cbrand img { width: 26px; height: 26px; border-radius: 7px; flex: 0 0 26px; }
+.wtitle h2.cbrand em { font-style: normal; font-weight: 800; font-size: .82rem; color: var(--accent); font-family: var(--body); }
+.nbar .nbrand { display: inline-flex; align-items: center; gap: 5px; }
+.nbar .nbrand img { width: 18px; height: 18px; border-radius: 5px; }
+.icred { margin: 0; padding: 14px 20px 18px; font-size: .7rem; font-weight: 700; color: var(--muted); text-align: center; }
+.icred:empty { display: none; }
+.icred a { color: inherit; }
+.li { grid-template-columns: minmax(0, 1fr) auto; }
+.li small, .li .stt { grid-column: 1; }
+.li .p { grid-column: 2; }
+.li .soldbtn { grid-column: 2; }
+.rl { grid-template-columns: minmax(0, 1fr) auto; }
+.xs.tot em { margin-left: 3px; }
+.tg.unread { background: transparent; color: var(--muted); border: 1px dashed var(--line2); font-weight: 700; }
+.xs.tot, .xs.tot.upx, .xs.tot.downx { color: var(--ink); gap: 0; }
+.xs.tot em.up { color: var(--up); } .xs.tot em.down { color: var(--down); }
