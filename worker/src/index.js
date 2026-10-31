@@ -730,10 +730,14 @@ async function snapPut(req, env) {
   const note = (r) => env.ACCOUNTS.put("snap:last", JSON.stringify(Object.assign({ at: Date.now() }, r))).catch(() => {});
   if (!want || got !== want) { await note({ error: "key" }); return json({ error: "no" }, 403); }
   const body = await req.text();
-  if (body.length < 1000 || body.length > 24e6) { await note({ error: "size", bytes: body.length }); return json({ error: "size" }, 400); }
+  // the board is kept gzipped (about a fifth of its size), so it has room to grow far past KV's 25 MiB value limit
+  if (body.length < 1000 || body.length > 95e6) { await note({ error: "size", bytes: body.length }); return json({ error: "size" }, 400); }
   let sj = null;
   try { sj = JSON.parse(body); if ((sj.v !== 2 && sj.v !== 3) || !sj.cols) throw 0; densify(sj); } catch (e) { await note({ error: "bad", bytes: body.length }); return json({ error: "bad" }, 400); }
-  await env.ACCOUNTS.put("snap:board", body);
+  const gz = await new Response(new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer();
+  if (gz.byteLength > 24e6) { await note({ error: "size", bytes: body.length, gz: gz.byteLength }); return json({ error: "size" }, 400); }
+  await env.ACCOUNTS.put("snap:board.gz", gz);
+  await env.ACCOUNTS.delete("snap:board").catch(() => {});
   // shops by owner for the shop pages, and "Seen in game" on market listings
   const shopsN = await snapShops(env, sj).catch((e) => "error " + (e && e.message || e));
   // stat alerts: new listings with read stats against members' alerts
@@ -741,11 +745,17 @@ async function snapPut(req, env) {
   await note({ ok: true, bytes: body.length, seen: shopsN });
   return json({ ok: true, bytes: body.length });
 }
+// the stored board as text: the gzipped copy, or a plain one from before it was kept gzipped
+export async function snapText(env) {
+  const gz = await env.ACCOUNTS.get("snap:board.gz", "arrayBuffer");
+  if (gz) return await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  return await env.ACCOUNTS.get("snap:board");
+}
 async function dataSnap(env) {
   const ck = new Request("https://archive.cache/snap?b=" + Math.floor(Date.now() / 30000));
   let hit = await caches.default.match(ck);
   if (!hit) {
-    const body = await env.ACCOUNTS.get("snap:board");
+    const body = await snapText(env);
     if (!body) return json({ error: "not ready" }, 404, { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" });
     hit = new Response(body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=30" } });
     await caches.default.put(ck, hit.clone()).catch(() => {});
@@ -1232,10 +1242,17 @@ async function discordPrice(env, q) {
   const kn = await knownItem(env, expandQuery(sr.q, ab));
   if (kn && (!hits.length || hits[0].item.toLowerCase() !== kn.toLowerCase())) return ({ type: 4, data: { content: "**" + shown(kn) + "**: no sales caught in the last few days, so no price yet. Star it on https://maplefm.gg to get told when one shows up.", flags: 64 } });
   if (!hits.length) return ({ type: 4, data: { content: "No listings for **" + q.slice(0, 60) + "** in the last few days. Try a shorter name, or check https://maplefm.gg", flags: 64 } });
-  const r = hits[0];
+  const r = hits[0], rawG = sr.g;
   const link = "https://maplefm.gg/?ref=discord#item=" + encodeURIComponent(r.item);
   const lines = [];
-  if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
+  // equips: the grades from the item card's price ladder in place of one typical that mixes clean and scrolled copies
+  const ladL = Array.isArray(r.lad) && Array.isArray(r.lad[0]) ? (r.lad[0][1] || []).filter((g) => g[1] === "sold" || g[1] === "asking") : [];
+  const ladRange = (g) => (meso(g[2]) === meso(g[3]) ? meso(g[2]) : meso(g[2]) + " to " + meso(g[3])) + (g[1] === "sold" ? "  from " + g[5] + " sales" : "  asking, " + g[6] + " listed");
+  if (ladL.length && !sr.roll) {
+    ladL.slice(0, 6).forEach((g) => lines.push((g[7] ? "**" : "") + g[0] + ": " + ladRange(g) + (g[7] ? "**" : "")));
+    if (r.lad.length > 1) lines.push("Also priced by " + r.lad.slice(1, 5).map((x) => x[0]).join(", ") + " on the [item's card](" + link + ")");
+  }
+  else if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
   if (r.best) lines.push("Cheapest ask now: " + meso(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
   // where to find it: the seller, channel and room of that cheapest listing, when they were read
   if (r.best && r.bestS && r.bestW) lines.push("Where: " + String(r.bestS).replace(/[*_`~|<>@]/g, "").slice(0, 20) + " · " + String(r.bestW).replace(/[*_`~|<>@]/g, "").slice(0, 40) + (r.bestT > 0 ? " · <t:" + Math.floor(r.bestT / 1000) + ":R>" : ""));
@@ -1244,7 +1261,9 @@ async function discordPrice(env, q) {
   const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
   else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
-  if (sr.roll && sr.g != null) {
+  const lgD = sr.roll ? ladderGrade(r, sr, rawG) : null;
+  if (lgD) { lines.unshift("**" + lgD.g[0] + ": " + ladRange(lgD.g) + "**"); }
+  else if (sr.roll && sr.g != null) {
     // the exact roll and scroll state: "work gloves clean 2 crit" is a clean pair with crit rate 1 above base
     await knownItem(env, "");
     const b0 = DBS[String(r.item).toLowerCase()] || {};
@@ -1260,7 +1279,7 @@ async function discordPrice(env, q) {
     else lines.push(rl + ": no sales caught at that roll lately.");
     if (!rq.sale && rq.near.length) lines.push("Closest rolls that sold: " + rq.near.map((x) => x.label + " **" + meso(x.p) + "** (" + x.n + " sales)").join(" · "));
     if (!rq.sale) lines.push("Every roll's price is on the [item's card](" + link + ")");
-  } else if (r.rk && r.equip) lines.push("Typical is for clean copies. Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
+  } else if (r.rk && r.equip && !ladL.length) lines.push("Typical is for clean copies. Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
   lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
   const more = hits.slice(1, 4).map((h) => shown(h.item)).join(", ");
   return ({ type: 4, data: { embeds: [{ title: shown(r.item), description: lines.join("\n"), url: link, color: 0x5b4bdb, footer: { text: (more ? "Also matched: " + more + " · " : "") + "Club FM, priced by watched sales · add /price: maplefm.gg/bot" } }] } });
@@ -1371,6 +1390,31 @@ function splitRoll0(q) {
 }
 // Words that only name an equip slot: "10 int earring" is the scroll, "emerald earrings 5 int" is a roll
 const SLOT_ONLY = /^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glove|cape|capes|shoes?|boots?|top|tops|topwear|bottom|bottoms|pants|overall|ova|ovr|shield|weapon|wep|claw|bow|crossbow|xbow|cbow|dagger|spear|polearm|pole|wand|staff|sword|axe|blunt|bw|ohs|ths|1h|2h|1hs|2hs|1ha|2ha|1hbw|2hbw|knuckle|gun|face|eye|accessory|ring|pendant|belt)$/i;
+// A typed roll on the item's price ladder (summary row lad), matched the way the board's search matches it:
+// "wg 4 att" is the +4 ATT grade, "wg 1 crit" the clean +1 crit rate grade, "clean wg" Clean, "steel avarice 28 att"
+// Clean 28 ATT. Grades without a price are passed over, so the exact-roll answer below still covers them.
+const LAD_STAT = { CRIT: ["crit rate", "crit damage"], CRITDMG: ["crit damage", "crit rate"] };
+function ladderGrade(r, sr, rawG) {
+  if (!r || !Array.isArray(r.lad)) return null;
+  const v = parseInt(rawG, 10), want = (LAD_STAT[sr.stat] || [sr.stat ? statLabel(sr.stat) : ""]).map((x) => String(x).toLowerCase());
+  const priced = (g) => g[1] === "sold" || g[1] === "asking";
+  for (const lab of want) {
+    for (const sv of r.lad) {
+      for (const g of sv[1] || []) {
+        const name = String(g[0]), lo = name.toLowerCase();
+        if (!priced(g)) continue;
+        if (sr.clean && !sr.stat && !v && name === "Clean") return { g };
+        let m = /^(clean|scrolled) (\d+) (m?att)( or more| or less)?$/.exec(lo);
+        if (m && lab && m[3] === lab.toLowerCase() && (!sr.clean || m[1] === "clean") && (+m[2] === v || (m[4] === " or more" && v >= +m[2]) || (m[4] === " or less" && v <= +m[2]))) return { g };
+        m = /^clean, \+(\d+) (.+)$/.exec(lo);
+        if (m && lab && m[2] === lab && +m[1] === v) return { g };
+        m = /^\+(\d+) (.+?)( or more)?$/.exec(lo);
+        if (m && lab && !sr.clean && m[2] === lab && (+m[1] === v || (m[3] && v >= +m[1]))) return { g };
+      }
+    }
+  }
+  return null;
+}
 async function priceLine(env, raw) {
   let q = String(raw || "");
   // the query arrives decoded already; decode again only when it still looks encoded ("work%20gloves")
@@ -1379,6 +1423,7 @@ async function priceLine(env, raw) {
   if (!q) return "Usage: !price item name, like !price work gloves or !price claw 60. Prices from real FM sales at maplefm.gg";
   const full = q, rows = await summaryRows(env), ab = await abbrMap();
   let sr = splitRoll(q), hits;
+  const rawG = sr.g;   // the number as typed: grades on the site read "+1 crit rate" and "Clean 28 ATT" the same way
   if (sr.roll) {
     hits = findRows(rows, sr.q, ab);
     const isEquip = (r) => r && (r.equip || /^(weapons|equips)$/i.test(r.cat || "")) && !/scroll/i.test(r.item);
@@ -1412,6 +1457,13 @@ async function priceLine(env, raw) {
   q = sr.q;
   if (!sr.roll) hits = findRows(rows, q, ab);
   if (hits.length && sr.roll) {
+    // the item card's price ladder first, read the way the site's search reads it, so chat and the card agree
+    const lg = ladderGrade(hits[0], sr, rawG);
+    if (lg) {
+      const slugG = shown(hits[0].item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      const g0 = lg.g, price = g0[1] === "sold" || g0[1] === "asking" ? (meso(g0[2]) === meso(g0[3]) ? meso(g0[2]) : meso(g0[2]) + " to " + meso(g0[3])) + (g0[1] === "sold" ? " from " + g0[5] + " sales" : " asking, " + g0[6] + " listed") : "not enough sales yet";
+      return (shown(hits[0].item) + " " + g0[0].replace(/^Clean, /, "clean ").replace(/^Clean$/, "clean").replace(/^Slots used, no gain$/, "no gain") + ": " + price + " · maplefm.gg/item/" + slugG).slice(0, 390);
+    }
     const r0 = hits[0], g = String(parseInt(sr.g, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     // the exact roll (every paid-for stat that moved) and scroll state; without a sale, the closest rolls that sold
     const rq = rollQuote(r0, sr), b00 = DBS[String(r0.item).toLowerCase()] || {};
@@ -2071,12 +2123,14 @@ const GH_JOBS = [
   { wf: "news.yml", hour: 18, inputs: { mode: "digest" } },
   { wf: "weekly.yml", hour: 18, dow: 0 },
   { wf: "weeklyrecap.yml", hour: 21, dow: 0 },
+  { wf: "watchdog.yml", every: 1 },     // GitHub runs its 15-minute cron only every 4 to 6 hours; this makes it hourly
+  { wf: "covmap.yml", every: 2 },       // the coverage map picture for #scanners
 ];
 async function ghSchedule(env, et, dow) {
   if (!env.GH_DISPATCH) return;
   for (const j of GH_JOBS) {
-    if (et.hour !== j.hour || (j.dow != null && j.dow !== dow)) continue;
-    const key = "ghsched:" + j.wf + ":" + et.day;
+    if (j.every ? et.hour % j.every !== 0 : et.hour !== j.hour || (j.dow != null && j.dow !== dow)) continue;
+    const key = "ghsched:" + j.wf + ":" + et.day + (j.every ? ":" + et.hour : "");
     if (await env.ACCOUNTS.get(key)) continue;
     const r = await fetch("https://api.github.com/repos/maplefm/maplefm.github.io/actions/workflows/" + j.wf + "/dispatches", {
       method: "POST", headers: { Authorization: "Bearer " + env.GH_DISPATCH, Accept: "application/vnd.github+json", "User-Agent": "clubfm-worker", "Content-Type": "application/json" },

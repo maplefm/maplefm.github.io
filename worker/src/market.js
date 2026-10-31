@@ -563,6 +563,11 @@ async function channelByName(env, name) {
   await env.ACCOUNTS.put(k, id || "-", { expirationTtl: id ? 7 * DAY : 3600 });
   return id;
 }
+// the middle price of the grade most copies sell at, from the summary row's price ladder (equips only)
+export function ladTop(r) {
+  for (const sv of (r && r.lad) || []) for (const g of sv[1] || []) if (g[7] && g[1] === "sold" && g[4] > 0) return g[4];
+  return 0;
+}
 export async function dealAlerts(env, ctx) {
   const cand = await all(env, "SELECT * FROM market_listings WHERE status = 'active' AND deal_sent IS NULL AND updated > ? LIMIT 30", now() - DAY);
   if (!cand.length) return 0;
@@ -570,9 +575,11 @@ export async function dealAlerts(env, ctx) {
   const deals = [];
   for (const l of cand) {
     const r = by[l.item];
-    const isDeal = r && r.typ && !l.stats && l.price <= r.typ * DEAL_CUT;
+    // equips go by their busiest grade (usually Clean), the price the item card shows, not one number mixing grades
+    const ref = r ? ladTop(r) || r.typ : 0;
+    const isDeal = r && ref && !l.stats && l.price <= ref * DEAL_CUT;
     await run(env, "UPDATE market_listings SET deal_sent = ? WHERE id = ?", isDeal ? 1 : 0, l.id);
-    if (isDeal) deals.push(Object.assign({}, l, { typ: r.typ, off: 1 - l.price / r.typ }));
+    if (isDeal) deals.push(Object.assign({}, l, { typ: ref, off: 1 - l.price / ref }));
   }
   if (!deals.length) return 0;
   const ch = await channelByName(env, env.MEGA_CHANNEL || "mega-deals");
