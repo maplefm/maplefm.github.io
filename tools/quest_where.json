@@ -1,0 +1,8 @@
+{
+ "_about": "Where a quest step happens, when the game's quest data doesn't say (event quests that send you to NPCs by a hint). Keyed by quest id, then the step text as the quest window shows it: [NPC, map]. Checked in game and against public guides. worldpages.py shows each with a Nav here button.",
+ "500011": {
+  "Find the child in the dark tunnel": ["Ronnie", "The Tree Tunnel At the Forest Up North"],
+  "Find the child on the open field": ["Anne", "The Hill East of Henesys"],
+  "Find the child up on the high ground": ["Estelle", "The Field South of Ellinia"]
+ }
+}

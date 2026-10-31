@@ -159,6 +159,9 @@ def build(world, guide, summary, notes, out):
     BSLUG = {n: slug(n) for n in MOB}
     QSLUG = quest_slugs(QS)
     QBYID = {q["id"]: q for q in QS}
+    MBYID = {m.get("id"): p for p, m in M.items() if m.get("id")}
+    try: QWHERE = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "quest_where.json"), encoding="utf-8"))
+    except Exception: QWHERE = {}
     def mlink(p): return f'<a href="/map/{MSLUG[p]}/">{E(p)}</a>' if p in M else E(p)
     # Nav here: the route finder from wherever you are (it remembers your last spot) to this map, shortest way first.
     # Next to every map a player has to go to: where a monster lives, where a quest starts or what it hunts.
@@ -376,7 +379,8 @@ def build(world, guide, summary, notes, out):
         return t
     for q in QS:
         s = QSLUG[q["id"]]
-        where_g = npc_at.get(q["g"], [])
+        # an event NPC is named for the event ("Malady (Halloween)") but stands on the maps under her plain name
+        where_g = npc_at.get(q["g"], []) or npc_at.get(re.sub(r"\s*\([^)]*\)\s*$", "", q["g"]), [])
         desc = (f"{q['n']}, a level {q['lv']} MapleStory Classic quest from {q['g']}" + (f" in {where_g[0]}" if where_g else "") + ": " +
                 (", ".join(f"{c} {i}" for i, c in q.get("need", [])[:3]) or ", ".join(f"hunt {c} {k}" for k, c, *_ in q.get("kill", [])[:2]) or "what to do") +
                 (f", rewards {fmt(q['exp'])} EXP" if q.get("exp") else "") + ".")
@@ -403,6 +407,18 @@ def build(world, guide, summary, notes, out):
         if q.get("pre"):
             pre = [QBYID[i] for i in q["pre"] if i in QBYID]
             if pre: b += "<h2>Finish first</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in pre) + "</ul>"
+        # the quest window's to-do list, with the map for each step when we know it
+        steps = q.get("steps") or []
+        qw = QWHERE.get(str(q["id"])) or {}
+        if steps and (qw or not (q.get("need") or q.get("kill"))):
+            def stepl(t):
+                t2 = re.sub(r"\{m:(\d+)\}", lambda mm: MBYID.get(int(mm.group(1)), "") , t)
+                hit = qw.get(t.strip()) or qw.get(t2.strip())
+                if hit and hit[1] in M:
+                    return f"<li>{E(t2)}: {E(hit[0])} in {mnav(hit[1])}</li>"
+                maps = [MBYID[int(x)] for x in re.findall(r"\{m:(\d+)\}", t) if int(x) in MBYID]
+                return f"<li>{E(t2)}" + (" " + " ".join(navbtn(x) for x in maps) if maps else "") + "</li>"
+            b += "<h2>Steps</h2><ol>" + "".join(stepl(t) for t in steps) + "</ol>"
         if q.get("kill"):
             b += "<h2>Hunt</h2><ul>" + "".join(
                 f"<li>" + (f'<img class="ms" src="{sprite_url(k[0])}" alt="" loading="lazy">' if sprite_url(k[0]) else "") + f"{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mnav(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
