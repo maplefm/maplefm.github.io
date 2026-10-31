@@ -22,7 +22,7 @@
   var base = []; try { base = JSON.parse($("scan-data").textContent); } catch (e) {}
   base.forEach(function (s) { s.who = "Maya"; });
   var live = {}, scans = base.slice(), D = null;
-  var BUYSORT = (function () { try { return JSON.parse(localStorage.getItem("fm-buy-sort") || '"price"'); } catch (e) { return "price"; } })();
+  var BUYSORT = "price";   // every card opens on Where to buy, cheapest first
   var state = { tab: "prices", cat: "All", sub: "", sortK: "vol", sortDir: -1, dK: "pct", dDir: -1, sel: null, chart: "time", list: "buy", actDays: 7 };
   // Names the watcher already knows, plus full Classic names that shop windows cut short.
   var KNOWN = ["Adamantium Ore","Amethyst Ore","Angel Halo","Angel Wand","Animal Fur Bundle","Aquamarine","Aquamarine Ore","Arrows for Bows","Arrows for Crossbows","Baby Angel Wings","Battle Axe","Beetle Long Sleeve","Beige Nitty","Beige Plain Robe","Beret","Black Bandana","Black Cat Beanie","Black Enamel Shoes","Black Kitty","Black Knucklevest Pants","Black Pig","Black Sneak Pants","Black Sunglasses","Blue Bucket Hat","Blue Cap","Blue Guise","Blue Hawkeye","Blue Headband","Blue Jewelry Boots","Blue Lappy Boots","Blue Mushroom Cap","Blue Pao","Blue Qi Pao","Blue Qi Pao Pants","Blue Snail Shell","Blue Training Shirt","Blue Watch","Blue Wizardry Hat","Blue Woodsman Boots","Bronze Aroa Boots","Bronze Helmet","Bronze Ingot","Bronze Koif","Bronze Ore","Brown Bamboo Hat","Brown Doloress Robe","Brown Hard Leather Boots","Brown Kitty","Brown Lamelle","Brown Puppy","Bubbling's Huge Bubble","Bunny Earmuffs","Bunny Ears","Butterfly Skirt","Cake","Cape STR Scroll: Lesser","Cat Hat","Cat Suit","Charm of the Undead","Cherub's Bow","Chocolate Chat Ring","Chocolate Label Ring","Claw Attack Scroll: Intermediate","Composite Bow","Crossbow Attack Scroll: Intermediate","Cutlus","Dagger Attack Scroll: Intermediate","Dark Master Sergeant","Diamond Ore","Dollish Pink","Double Axe","Eagle Crow","Earring DEX Scroll: Intermediate","Earring INT Scroll: Intermediate","Earring LUK Scroll: Intermediate","Earring STR Scroll: Intermediate","Emerald Ore","Emerald Staff","Evil Eye Tail","Firewood","Fish Spear","Fork on a Stick","Fragment of Magic","Fruit Knife","Garnet","Garnet Ore","Gloves Magic Attack Scroll: Greater","Gold Kitty Slippers","Gold Ore","Green Armine Skirt","Green Bamboo Hat","Green Bennis Chainmail","Green Feather Hat","Green Mushroom Cap","Green Woodsman Boots","Grey Able Armor","Hardwood Wand","Hat Accuracy Scroll: Greater","Hat Accuracy Scroll: Intermediate","Hat Accuracy Scroll: Lesser","Heart Sunglasses","Holy Water","Horny Mushroom Cap","Ink-and-Wash Chat Ring","Ink-and-Wash Label Ring","Iron Ball","Iron Dagger","Iron Ingot","Iron Ore","Jr. Necki Skin","Kitty Chat Ring","Leaf","Leaf Earrings","Leather","Lemon","Lemona","Lined Hip-Hop Pants","Long Sword","Mace","Magic Potion","Meba","Meshcap","Metal Axe","Metal Gear","Metal Wand","Mithril Ore","Mithril Pole Arm","Mushroom Spore","Mystery Face Coupon","Mystery Hair Coupon","Nakamaki","Octopus Leg","Opal Ore","Orange Baseball Jacket","Orange Hooded Shirt","Orange Mushroom Balloon","Orange Mushroom Cap","Orange Split Piece","Orange Toy Hammer","Orihalcon Ore","Overall Armor INT Scroll: Greater","Pan Lid","Patissier Hat","Patissier Uniform","Pet Equip Speed Scroll: Intermediate","Pet Equip Speed Scroll: Lesser","Pig & Mushroom Omok Set","Pig & Octopus Omok Set","Pig Illustrated","Pig's Head","Pig's Ribbon","Pink Allstar","Pink Bunny","Pink Bunny Sweater","Pole Arm","Polearm Attack Scroll: Intermediate","Processed Cloth","Processed Leather","Processed Wood","Pure Water","Purple Dorothy Dress","Rainbow Knit","Red Bandana","Red Check Rider","Red Hwarang Shirt","Red Loosecap","Red Ninja Sandals","Red Potion","Red Sailor Shirt","Red Sailor Skirt","Red Snail Shell","Red Thief Hood","Red Trainer Jacket","Red Trainer Pants","Reggae Hat","Ribboned Pig Headband","Ripped Jeans","Sailor Hat","Sailor Outfit","Sandblasted Jeans","Sap of Ancient Tree","Sapphire Ore","Screw","Selective 5-slot Coupon","Set of Match Cards","Shoes Jump Scroll: Greater","Shoes Speed Scroll: Intermediate","Signature Hair Coupon","Silver Ore","Slime & Octopus Omok Set","Slime & Pig Omok Set","Slime Bubble","Slime Earrings","Slime Slippers","Slime T-Shirt","Snail Shell","Spear","Spear Attack Scroll: Intermediate","Splash Choco Boy","Splash Choco Girl","Squishy Liquid","Staff Magic Attack Scroll: Intermediate","Steel Fingerless Gloves","Steel Igor","Steel Shield","Stiff Feather","Stirge Wing","Sword","Toga","Topaz Ore","Topwear DEF Scroll: Lesser","Tourist T","Tree Branch","Triangular Zamadar","Unagi","Warrior Potion","Weighted Earrings","White Bunny","White Gomushin","White Hooded Vest","White Jeans","White Label Ring","White Rabbit","Wizard Staff","Wooden Buckler","Wooden Club","Wooden Mallet","Wooden Staff","Work Gloves","Yellow Bandana","Yellow Rainbow Sneaks","Yellow Spatula","Yellow Square"].concat(["Ink-and-Wash Thought Bubble Ring", "Ink-and-Wash Painting Name Tag Ring", "Ink-and-Wash Chat Ring", "Ink-and-Wash Label Ring", "Founder's Mystery Fashion Crate", "White Ribboned Sailor Dress", "Soft Chocolate Fondue Scepter", "Starlight Heart Scepter", "Arwen's Glass Shoe", "Selective 5-slot Coupon", "Kumbi Throwing Stars", "Mokbi Throwing Stars", "Wooden Top"]);
@@ -85,7 +85,7 @@
     var li = ls && Array.prototype.filter.call(ls.querySelectorAll(".li[data-sv]"), function (x) { return x.dataset.sv === String(v); })[0];
     if (li) { li.scrollIntoView({ block: "center", behavior: "smooth" }); li.classList.add("hit"); setTimeout(function () { li.classList.remove("hit"); }, 1800); }
     // and say where the newest one with this roll was, whether or not it is in the list
-    var sec = $("ip").querySelector(".pbs"); if (!sec) return;
+    var sec = $("side").querySelector(".pbs"); if (!sec) return;
     var note = sec.querySelector(".jumpnote") || sec.appendChild(el("p", "jumpnote"));
     note.textContent = ""; note.appendChild(el("b", null, (ks === "SUCCESS" ? v + "%" : ks + " " + v) + ": "));
     note.appendChild(document.createTextNode((newest.so ? "sold by " : "asked by ") + newest.s + (where(newest) ? " · " + where(newest) : "") + " · " + ago(newest.t) + " · "));
@@ -100,7 +100,7 @@
     var ls = $("side").querySelector(".list");
     var li = ls && Array.prototype.filter.call(ls.querySelectorAll(".li[data-g]"), function (x) { return x.dataset.g === String(g); })[0];
     if (li) { li.scrollIntoView({ block: "center", behavior: "smooth" }); li.classList.add("hit"); setTimeout(function () { li.classList.remove("hit"); }, 1800); }
-    var sec = $("ip").querySelector(".rollbox"); if (!sec) return;
+    var sec = $("side").querySelector(".rollbox"); if (!sec) return;
     var note = sec.querySelector(".jumpnote") || sec.appendChild(el("p", "jumpnote"));
     var label = lab || (base != null ? ks + " " + (base + g) : (g === 0 ? "Average roll" : (g > 0 ? "+" : "") + g));
     note.textContent = ""; note.appendChild(el("b", null, label + ": "));
@@ -1691,7 +1691,6 @@
     if (i.tier) { var tt = el("span", "tg tier", tierLabel(i.tier)); tt.title = i.tier + (TIERLBL[i.tier] && i.tier !== "Chaos" ? ": " + TIERLBL[i.tier] + " success" : ""); t.appendChild(tt); }
     if (i.n < MIN) t.appendChild(el("span", "tg low", "Low data")); else if (i.kind === "ask") t.appendChild(el("span", "tg ask", "Ask"));
     var cb0 = i.n >= MIN ? confBadge(i) : null; if (cb0) t.appendChild(cb0);
-    if (i.check) { var ck = el("span", "tg chk", "⚠ Check"); ck.title = i.flags.join("\n"); t.appendChild(ck); }
     if (i.moved) { var mv = el("span", "tg ask", "Rising"); mv.title = "Recent sales are thin and today's asking prices are well above them, so typical follows today's asks"; t.appendChild(mv); }
     var vpr = vendor(i.item); if (vpr && i.typ && i.typ < vpr * 1.1) { var np = el("span", "tg deal", "NPC"); np.title = "An NPC shop pays " + short(vpr) + " each, as much as the Free Market does. Sell it to an NPC."; t.appendChild(np); }
     if (i.capped) { var cp = el("span", "tg ask", "Asks lower"); cp.title = i.cappedN + " sellers are asking less than recent sales (" + short(i.typSales) + "), so typical follows the third-cheapest ask"; t.appendChild(cp); }
@@ -2386,7 +2385,7 @@
   function statChip(name, x, xj) {
     if (!x) return null;
     if (x._tip && x.SUCCESS == null) {
-      var bl = bonusLabel(x), gg = rollOf(name, { x: x }), cs = el("span", "xs " + (gg > 0 ? "upx" : gg < 0 ? "downx" : "")); cs.textContent = bl;
+      var gg = rollOf(name, { x: x }), cs = totalsChip(name, x, gg);
       cs.title = "From the tooltip: " + Object.keys(x._tip).map(function (k) { return k + " " + x[k] + (x._tip[k] ? " (" + x[k + "_b"] + (x._tip[k] > 0 ? " +" : " ") + x._tip[k] + ")" : ""); }).join(", ");
       return slotTag(cs, name, x);
     }
@@ -2398,6 +2397,31 @@
     else return null;
     if (g != null && k !== "SUCCESS") s.appendChild(el("em", g > 0 ? "up" : g < 0 ? "down" : "", g === 0 ? "avg" : (g > 0 ? "+" : "") + g));
     return slotTag(s, name, x);
+  }
+  // a read copy's totals in plain text, so a glance is enough: weapons their attack, gloves attack then crit, other
+  // equips each main stat they have, then what buyers pay for on that slot. The gap from the item's base is coloured.
+  var TOTLAB = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", CRIT: "crit", CRITDMG: "crit dmg", ACC: "ACC", AVOID: "AVOID", SPEED: "speed", JUMP: "jump", HP: "HP", MP: "MP", WDEF: "WDEF", MDEF: "MDEF" };
+  function totalKeys(name, x) {
+    var wep = isWeapon(name), mag = /^(Wand|Staff)$/.test(subKind(name)), vs = valSet(name), ks = [];
+    var add = function (k) { if (ks.indexOf(k) < 0 && x[k] != null && (x[k] !== 0 || k === "ATT" || k === "MATT")) ks.push(k); };
+    if (wep) add(mag ? "MATT" : "ATT");
+    else if (x.ATT || vs.ATT) add("ATT");
+    if (!wep && (x.MATT || vs.MATT)) add("MATT");
+    MAINS.forEach(function (k) { if (x[k]) add(k); });
+    valueOrder(name).forEach(function (k) { if (k !== "MAIN" && k !== "WDEF" && k !== "MDEF" && (!wep || (k !== "ATT" && k !== "MATT"))) add(k); });
+    if (subKind(name) === "Shield") { add("WDEF"); }
+    return ks;
+  }
+  function totalsChip(name, x, gg) {
+    var cs = el("span", "xs tot " + (gg > 0 ? "upx" : gg < 0 ? "downx" : "")), b = fullBase(name).s, ks = totalKeys(name, x);
+    if (!ks.length) { cs.textContent = "average roll"; return cs; }
+    ks.forEach(function (k, n) {
+      if (n) cs.appendChild(document.createTextNode(" · "));
+      cs.appendChild(document.createTextNode(x[k] + " " + TOTLAB[k]));
+      var d = b[k] != null ? x[k] - b[k] : (x._tip && x._tip[k]) || 0;
+      if (d) cs.appendChild(el("em", d > 0 ? "up" : "down", (d > 0 ? "+" : "−") + Math.abs(d)));
+    });
+    return cs;
   }
   // "3/7 used" or "clean" from the hover's Remaining Enhancements against the item's base slots: scrolls taken,
   // passes and fails both, worked out only from what the player's own screen showed.
@@ -2860,7 +2884,7 @@
     PENDROLL = QROLL && Date.now() - QROLL.at < 60000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;   // a slow phone can take a while between typing and the card
     if (PENDROLL) window.__ladroll = { n: PENDROLL.n, k: PENDROLL.k, v: PENDROLL.v, at: Date.now() };   // the price ladder's own copy, kept until its card shows
     if (PENDROLL) STATOPEN = name;
-    state.sel = name; state.list = "buy"; hideHov();
+    state.sel = name; state.list = "buy"; BUYSORT = "price"; hideHov();
     // opening from the board adds a history step, so the browser's back button (or a phone's back gesture) closes
     // the card; a link straight to #item= gets a board step put under it for the same reason
     try {
@@ -2925,7 +2949,6 @@
     var hd = el("div", "rlh"); hd.appendChild(el("b", null, title)); hd.appendChild(el("span", null, (g.up.length ? g.up.length + " for sale now" : "none for sale now") + " · " + g.sold.length + " sold")); box.appendChild(hd);
     function row(l, kind) {
       var r = el("div", "rl " + kind); r.tabIndex = 0;
-      r.appendChild(avatar(l.s));
       var t = el("div", "rlt"); t.appendChild(el("b", null, l.s)); var c = statChip(i.item, l.x, l.xj); if (c) { var cw = el("span", "rlc"); cw.appendChild(c); t.appendChild(cw); }
       t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? "trade chat" : "")) + " · " + ago(l.t)));
       r.appendChild(t);
@@ -3379,9 +3402,12 @@
     renderItem0();
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
+    if (window.innerWidth <= 1180) { var pch = state.sel && D && D.byName && D.byName[state.sel] && !D.preview && bigChart(D.byName[state.sel]); if (pch) $("ip").appendChild(pch); }
     orderCard($("ip"));
+    foldLists($("ip"));
     foldStats($("ip"));
     splitCard();
+    credit();
   }
   // phones and tablets: Price by stat starts folded so Where to buy is a short scroll away; one tap opens it, and it
   // stays open for that item. A search for a roll ("wg 3 att") opens it on its own.
@@ -3393,7 +3419,6 @@
   function foldStats(ip) {
     var lad = ladItem();
     if (!ip || (window.innerWidth > 1180 && !lad)) return;
-    if (lad) foldLists(ip);
     ip.querySelectorAll(":scope > .rollbox, :scope > .pbs").forEach(function (box) {
       var h = box.querySelector(":scope > h4"); if (!h) return;
       var open = STATOPEN === state.sel || (lad && !!OPENS.stats);
@@ -3403,7 +3428,7 @@
       var go = function (e) {
         if (e.target.closest(".inf")) return; if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return; e.preventDefault();
         var now = !box.classList.contains("open"); STATOPEN = now ? state.sel : ""; if (lad) { OPENS.stats = now ? 1 : 0; saveLS("fm-open", OPENS); }
-        ip.querySelectorAll(":scope > .fold").forEach(function (b) { b.classList.toggle("open", now); var hh = b.querySelector(":scope > h4"); hh.setAttribute("aria-expanded", now); var fh = hh.querySelector(".fhint"); if (fh) fh.textContent = now ? "Hide" : lad && window.innerWidth > 1180 ? "Open" : "Tap to open"; });
+        document.querySelectorAll("#ip > .fold, #ipr > .fold").forEach(function (b) { b.classList.toggle("open", now); var hh = b.querySelector(":scope > h4"); hh.setAttribute("aria-expanded", now); var fh = hh.querySelector(".fhint"); if (fh) fh.textContent = now ? "Hide" : lad && window.innerWidth > 1180 ? "Open" : "Tap to open"; });
       };
       h.addEventListener("click", go); h.addEventListener("keydown", go);
     });
@@ -3411,7 +3436,7 @@
   // Where to buy and the full sales list behind one bar, open by default; closing it is remembered in this browser.
   // The list scrolls inside its own box, so the card never runs on past it
   function foldLists(ip) {
-    var i = D.byName[state.sel]; if (!i || ip.querySelector(":scope > .lfold")) return;
+    var i = D && D.byName && D.byName[state.sel]; if (!i || !ip.querySelector(":scope > .ltabs") || ip.querySelector(":scope > .lfold")) return;
     var open = OPENS.lists !== 0, n = ip.querySelector(":scope > .ltabs em"), b = el("button", "lfold"); b.type = "button";   // open unless this browser closed it
     b.appendChild(el("span", null, "Where to buy" + (n ? " (" + n.textContent + ")" : "") + " and all sales")); b.appendChild(el("span", "fhint", open ? "Hide" : "Open")); b.appendChild(el("span", "fchev"));
     b.setAttribute("aria-expanded", open);
@@ -3419,9 +3444,12 @@
     b.addEventListener("click", function () { OPENS.lists = open ? 0 : 1; saveLS("fm-open", OPENS); renderItem(); });
     var lt = ip.querySelector(":scope > .ltabs"); ip.insertBefore(b, lt || null);
   }
-  // the card's reading order: price first, then what to do, how to get it, prices by roll, listings, links.
+  // the card's reading order. Buying comes first: Where to buy and all sales, how to get it, the buttons. Then what it's
+  // worth: the header, the chart, price by grade and the rest. On wide screens buying is the left column and the
+  // worth side the right (splitCard); on phones it is one column, header, lists, chart and grades, then the rest.
   // Anything without a place stays right after the part it was added next to.
-  var CARDORDER = [["ih", 0], ["chkbox", 1], ["rollmiss", 2], ["gladder", 2.5], ["big", 3], ["tline", 4], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["lfold", 12.9], ["ltabs", 13], ["bsort", 14], ["list", 15], ["ifoot", 20]];
+  var CARDORDER = [["ih", 0], ["lfold", 0.2], ["ltabs", 0.3], ["bsort", 0.4], ["list", 0.5], ["bchartw", 0.6], ["rollmiss", 2], ["gladder", 2.5], ["big", 3], ["tline", 4], ["mvs", 5], ["stats", 6], ["smath", 7], ["panelbtns", 8], ["guide", 9], ["drops", 9.5], ["rollbox", 10], ["pbs", 11], ["bids", 12], ["ifoot", 20]];
+  var BUYSIDE = ["lfold", "ltabs", "bsort", "list", "guide", "drops", "panelbtns", "mkt"];
   function orderCard(ip) {
     if (!ip || !state.sel) return;
     var last = -1, kids = [].slice.call(ip.children).map(function (k, ix) {
@@ -3430,15 +3458,28 @@
     });
     kids.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).forEach(function (x) { ip.appendChild(x[2]); });
   }
-  // wide screens: the price, stats and guide on the left; a price chart and the listings on the right
+  // wide screens: buying on the left (Where to buy and all sales, Where to get it, the buttons); the header, chart,
+  // price by grade and everything else on the right, in the card's reading order
+  function isBuy(k) { return BUYSIDE.some(function (c) { return k.classList.contains(c); }); }
   function splitCard() {
     var r = $("ipr"), ip = $("ip"); if (!r || !ip || window.innerWidth <= 1180 || !state.sel) return;
     var i = D && D.byName && D.byName[state.sel];
-    var mv = ip.querySelectorAll(":scope > .lfold, :scope > .ltabs, :scope > .bsort, :scope > .list"); if (!mv.length) return;
-    r.classList.toggle("lclosed", ip.classList.contains("lclosed"));
-    var ch = i && bigChart(i); if (ch) r.appendChild(ch);
-    mv.forEach(function (n) { r.appendChild(n); });
+    var kids = [].slice.call(ip.children); if (!kids.some(isBuy)) return;
+    var ch = i && !D.preview && bigChart(i), at = 0;
+    kids.forEach(function (k) { if (isBuy(k)) return; r.appendChild(k); if (k.classList.contains("ih") && ch) { r.appendChild(ch); ch = null; } });
+    if (ch) r.insertBefore(ch, r.firstChild);
+    var order = ["lfold", "ltabs", "bsort", "list", "mkt", "guide", "drops", "panelbtns"];
+    [].slice.call(ip.children).map(function (k, ix) { var o = order.findIndex(function (c) { return k.classList.contains(c); }); return [o < 0 ? 99 : o, ix, k]; })
+      .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).forEach(function (x) { ip.appendChild(x[2]); });
     r.hidden = false;
+  }
+  // the maplestory.io credit sits at the very bottom of the card, out of the way; the card's top carries our name
+  function credit() {
+    var c = $("icred"); if (!c) return; c.textContent = "";
+    var n = state.sel, id = n && idOf(n) || (n && dbRow(n) && dbRow(n)[1]);
+    if (!n) return;
+    c.appendChild(document.createTextNode("Prices: Club FM scans"));
+    if (id) { c.appendChild(document.createTextNode(" · Item data from ")); var a = el("a", null, "maplestory.io"); a.href = IO + id; a.target = "_blank"; a.rel = "noopener"; c.appendChild(a); }
   }
   // the card's price chart: every sale and asking price we saw, with the daily typical price as a line
   function bigChart(i) {
@@ -3488,13 +3529,13 @@
     var w = $("side") && $("side").querySelector(".wtitle"); if (!w) return;
     if (nbIO) { nbIO.disconnect(); nbIO = null; }
     var old = w.querySelector(".nbar"); if (old) old.remove();
-    var hd = i && $("ip").querySelector(".big, .gladder");
+    var hd = i && $("side").querySelector(".ih");
     if (!hd || !window.IntersectionObserver) { w.classList.remove("named"); return; }
     var nb = el("div", "nbar"); nb.setAttribute("aria-hidden", "true");
     nb.appendChild(iconBox(i.item)); var t = el("div", "nbt"); t.appendChild(el("b", null, showName(i.item)));
     var NL = i.equip && ladderOf(i), NT = NL && NL.top && NL.top.basis === "sold" ? NL.top : null;
     t.appendChild(el("small", null, (NT ? NT.name.toLowerCase().replace(/ (att|matt)\b/g, function (z) { return z.toUpperCase(); }) + " " + short(NT.lo) + "–" + short(NT.hi) : "typical " + short(i.typ)) + (i.salesN ? " · " + fmt(i.salesN) + " sales" : ""))); nb.appendChild(t);
-    nb.appendChild(el("span", "nbrand", "maplefm.gg"));
+    var nbr = el("span", "nbrand"); var nbi = el("img"); nbi.src = "/clubfm-icon-512.png"; nbi.alt = ""; nbr.appendChild(nbi); nbr.appendChild(document.createTextNode("maplefm.gg")); nb.appendChild(nbr);
     w.insertBefore(nb, w.querySelector(".meta"));
     nbIO = new IntersectionObserver(function (es) { var e = es[es.length - 1]; w.classList.toggle("named", !e.isIntersecting && e.boundingClientRect.top < e.rootBounds.top + 80); }, { root: $("side"), rootMargin: "-56px 0px 0px 0px" });
     nbIO.observe(hd);
@@ -3628,11 +3669,9 @@
       var nv = vendor(nr[0]); if (nv) { var nvl = el("p", "vend"); nvl.appendChild(document.createTextNode("Vendor price ")); nvl.appendChild(money(nv)); nvl.appendChild(document.createTextNode(" each")); nt.appendChild(nvl); }
       nh.appendChild(nt); ip.appendChild(nh);
       ip.appendChild(el("p", "note nosale", "No sales yet. Try Last 30 days in Filters, or open a shop that sells it with FM Watcher running."));
-      if (nr[1]) { var na = el("a", null, "Item data: maplestory.io"); na.href = IO + nr[1]; na.target = "_blank"; na.rel = "noopener"; $("wiki").appendChild(na); }
       return;
     }
     if (!i) { ip.appendChild(el("p", "note", "Pick an item to see its price, recent sales and where to buy it.")); return; }
-    if (idOf(i.item)) { var a = el("a", null, "Item data: maplestory.io"); a.href = IO + idOf(i.item); a.target = "_blank"; a.rel = "noopener"; $("wiki").appendChild(a); }
     $("wiki").appendChild(shareBox(i));
     var hd = el("div", "ih"); hd.appendChild(iconBox(i.item)); var ht = el("div"); ht.appendChild(el("h3", null, showName(i.item)));
     ht.appendChild(el("p", null, fmt(i.asksN != null ? i.asksN : i.asks.length) + " listings · " + fmt(i.salesN) + " sales"));
@@ -3640,9 +3679,8 @@
     if (i.equip) { var bt = baseText(i.item); if (bt) { var bl = el("p", "baseln"); bl.appendChild(el("b", null, "Base ")); bl.appendChild(document.createTextNode(bt.t)); bl.title = "The stats this item comes with, before any roll. From the item database" + (bt.from === "hovers" ? "; attack from hovers in the game where the data leaves it out (a ? means only one hover so far)" : "") + "."; ht.appendChild(bl); } }
     var vp = vendor(i.item), nxp = nxOf(i.item);
     if (nxp) { var nl = el("p", "vend"); nl.title = "What this costs in the Cash Shop, and what a thousand NX comes to in mesos at this item's typical sale."; nl.appendChild(document.createTextNode("Cash Shop " + fmt(nxp) + " NX")); if (i.typ) { var per = i.typ / nxp, rate = nxRate(); nl.appendChild(document.createTextNode(" · " + short(Math.round(per * 1000)) + " mesos per 1,000 NX")); if (rate && Math.abs(per / rate - 1) >= 0.15) nl.appendChild(el("span", "tg " + (per > rate ? "ok" : "ask"), (per > rate ? "above" : "below") + " the board rate of " + short(Math.round(rate * 1000)))); } ht.appendChild(nl); }
-    var cb = null; if (i.check) { cb = el("div", "chkbox"); cb.appendChild(el("b", null, "⚠ Double check this price before you act on it")); var ul = el("ul"); i.flags.forEach(function (f) { ul.appendChild(el("li", null, f)); }); cb.appendChild(ul); }
     if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); else if (i.typ && vp >= 100) { var mult = i.typ / vp; vl.appendChild(el("span", "tg ok", mult >= 2 ? "FM pays " + (mult >= 10 ? Math.round(mult) : Math.round(mult * 10) / 10) + "× more" : "FM pays " + Math.round((mult - 1) * 100) + "% more")); vl.title += " The Free Market typical is " + fmt(i.typ) + ", so listing it beats the NPC."; } ht.appendChild(vl); }
-    hd.appendChild(ht); ip.appendChild(hd); if (cb) ip.appendChild(cb);
+    hd.appendChild(ht); ip.appendChild(hd);
     // equips: the price ladder replaces the one blended price, its 24h move and its sale boxes
     // every equip gets the price ladder, even before any grade has 2 copies (then it says so and gives the overall price)
     var LD = i.equip ? ladderOf(i) : null;
@@ -3670,20 +3708,19 @@
     var seenS = {}, buyRows = i.buy.filter(function (x) { if (x.st === "gone" || (x.st === "sold" && x.sold >= GONE.need)) return false; if (x.st === "sold" && !((MYSOLD[soldKey(x)] || 0) > x.t)) return false; if (seenS[x.s]) return false; seenS[x.s] = 1; return true; });
     var bb = el("button"); bb.type = "button"; bb.appendChild(document.createTextNode("Where to buy")); bb.appendChild(el("em", null, buyRows.length)); bb.setAttribute("aria-selected", state.list === "buy");
     var rb = el("button"); rb.type = "button"; rb.appendChild(document.createTextNode("Recent sales")); rb.setAttribute("aria-selected", state.list === "sales");
-    bb.addEventListener("click", function () { state.list = "buy"; renderItem(); }); rb.addEventListener("click", function () { state.list = "sales"; renderItem(); });
+    bb.addEventListener("click", function () { state.list = "buy"; BUYSORT = "price"; renderItem(); }); rb.addEventListener("click", function () { state.list = "sales"; renderItem(); });
     lt.appendChild(bb); lt.appendChild(rb); ip.appendChild(lt);
     if (state.list === "buy") {
       // sort the sellers by cheapest first or most recently seen first; the choice is remembered
       var bs = el("div", "seg bsort"); bs.appendChild(el("span", "bsl", "Sort"));
-      [["price", "Cheapest"], ["recent", "Most recent"]].forEach(function (x) { var b = el("button", null, x[1]); b.type = "button"; b.setAttribute("aria-pressed", BUYSORT === x[0]); b.addEventListener("click", function () { BUYSORT = x[0]; saveLS("fm-buy-sort", BUYSORT); renderItem(); }); bs.appendChild(b); });
+      [["price", "Cheapest"], ["recent", "Most recent"]].forEach(function (x) { var b = el("button", null, x[1]); b.type = "button"; b.setAttribute("aria-pressed", BUYSORT === x[0]); b.addEventListener("click", function () { BUYSORT = x[0]; renderItem(); }); bs.appendChild(b); });
       ip.appendChild(bs);
       if (BUYSORT === "recent") buyRows = buyRows.slice().sort(function (a, b) { return b.t - a.t || a.u - b.u; });
       buyRows = buyRows.map(function (x, k) { return [listRank(x), k, x]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (z) { return z[2]; });
     }
-    var ls = el("div", "list"), rows = state.list === "buy" ? buyRows : i.sales;
+    var ls = el("div", "list"), rows = state.list === "buy" ? buyRows : i.sales.slice().sort(function (a, b) { return b.t - a.t; });   // Recent sales: always newest first
     rows.slice(0, 40).forEach(function (x) {
       var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : state.list === "buy" && x.st === "old" ? " stale" : ""));
-      li.appendChild(avatar(x.s));
       var nb = el("b", null, x.s); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q > 1 ? x.q + " for " + short(x.p) : "each")); li.appendChild(p);
       var sm = el("small"); li.appendChild(sm);
@@ -3701,6 +3738,7 @@
       if (LD) { var gx = gradeOf(i, x); if (gx) nb.appendChild(gradeTag(LD, gx)); }
       if (x.x) { var chip = statChip(i.item, x.x, x.xj); if (chip) nb.appendChild(chip); li.classList.add("hasx"); var ksx = keyStat(i.item, x.x, x.xj); if (ksx && x.x[ksx] != null) li.dataset.sv = String(x.x[ksx]); }
       var rr = i.rolls && i.rolls.filter(function (r) { return r.l === x; })[0]; if (rr) li.dataset.g = String(rr.g);
+      else if (i.equip && !(x.x && x.x._tip) && !x.pricey && !(x.x && statChip(i.item, x.x, x.xj))) nb.appendChild(el("span", "tg unread", "stats not read"));
       else if (x.pricey) { var pt = el("span", "tg roll", "scrolled? hover it"); pt.title = "Far above the usual price for this item. Could be a good roll or a scroll job, or a spot holder. Hover it in game to read its stats."; nb.appendChild(pt); }
       ls.appendChild(li);
     });
@@ -4044,7 +4082,6 @@
         var near = {}; i.asks.forEach(function (x) { if (x !== l && now - x.t <= DAY && !x.chat && Math.abs(Math.log(x.u / l.u)) < Math.log(1.25)) near[String(x.s).toLowerCase()] = 1; });
         delete near[String(l.s).toLowerCase()];
         if (Object.keys(near).length >= 3) { r.check = true; r.note = "others ask the same"; }
-        if (i.check && !r.note) r.note = "price under review";
       } else return;
       hot.push(r);
     });
@@ -4190,7 +4227,7 @@
       else if (!D || scans.length || !D.preview) { mark("buildA"); D = build(); mark("buildB"); SIDX = null; DIRTY = false; lastBuild = Date.now(); if (D.list.length) setTimeout(saveSummary, 1500); }
     }
     nxRate(); renderCards(); renderAlert(); renderWatchAlert();
-    var nck = D.list.filter(function (i) { return i.check; }).length; $("m-check-n").textContent = nck ? nck : "";
+
     ["prices", "deals", "sell", "pos"].forEach(function (t) { $(t + "-view").hidden = state.tab !== t; $("tab-" + t).setAttribute("aria-selected", state.tab === t); });
     $("chips").parentNode.hidden = state.tab === "sell" || state.tab === "pos";
     if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else if (state.tab === "sell") renderSell(); else renderPos();
@@ -4761,17 +4798,6 @@
       }).catch(function () { $("fb-msg").textContent = "Couldn't send. Check your connection and try again."; }).then(function () { b.disabled = false; });
     });
   })();
-  $("m-check").addEventListener("click", function () {
-    closeMenus(); var box = $("dclist"); box.textContent = "";
-    var bad = D.list.filter(function (i) { return i.check; }).sort(function (a, b) { return b.vol - a.vol; });
-    if (!bad.length) box.appendChild(el("p", "note", "Everything passes right now."));
-    bad.forEach(function (i) {
-      var d = el("button", "dcrow"); d.type = "button"; d.appendChild(iconBox(i.item)); var t = el("span"); t.appendChild(el("b", null, showName(i.item)));
-      i.flags.forEach(function (f) { t.appendChild(el("small", null, f)); }); d.appendChild(t);
-      d.addEventListener("click", function () { $("datacheck").close(); pick(i.item); }); box.appendChild(d);
-    });
-    $("datacheck").showModal();
-  });
   $("m-contrib").addEventListener("click", function () { closeMenus(); location.href = "contribute.html"; });
   $("m-short").addEventListener("click", function () { closeMenus(); location.href = "shortcuts.html"; });
   $("m-bot").addEventListener("click", function () { closeMenus(); location.href = "bot/"; });
