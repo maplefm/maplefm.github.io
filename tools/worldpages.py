@@ -46,7 +46,12 @@ a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--pane
 .basebox span{display:inline-flex;align-items:center;margin:2px 10px 2px 0;font-weight:700}
 .ms{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:6px}
 .npcpic{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;background:var(--panel2);border-radius:10px}
-.nextbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.nextbar a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:9px 14px;border-radius:999px}.nextbar a.alt{background:var(--panel2);color:var(--accent);border:1px solid var(--line2)}"""
+.nextbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.nextbar a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;padding:9px 14px;border-radius:999px}.nextbar a.alt{background:var(--panel2);color:var(--accent);border:1px solid var(--line2)}
+/* Nav here: a real button to the route finder, next to every map a player has to get to */
+.navh{display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:3px 11px 3px 9px;border-radius:999px;background:var(--accent,#6a3df0);color:#fff!important;font-size:.78rem;font-weight:800;line-height:1.3;text-decoration:none!important;white-space:nowrap;vertical-align:1px;box-shadow:0 1px 3px rgba(40,20,90,.25)}
+.navh::before{content:"";width:0;height:0;border-left:7px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent}
+.navh:hover{filter:brightness(1.1)}
+.navh.big{font-size:.9rem;padding:6px 15px 6px 13px;margin:0 6px 0 0}"""
 
 JOBNAME = {0: "Beginner", 1: "Warrior", 2: "Magician", 3: "Bowman", 4: "Thief", 5: "Pirate"}
 CLASSES = ["Warrior", "Magician", "Bowman", "Thief"]
@@ -104,7 +109,7 @@ def page(title, desc, path, crumbs, body, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=9"><link rel="stylesheet" href="/item/world.css?v=4"><link rel="stylesheet" href="/assets/nav.css?v=6">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=9"><link rel="stylesheet" href="/item/world.css?v=5"><link rel="stylesheet" href="/assets/nav.css?v=6">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
@@ -414,7 +419,7 @@ def build(world, guide, summary, notes, out):
             ("EXP", fmt(q.get("exp"))), ("Mesos", fmt(q.get("meso"))), ("Fame", fmt(q.get("fame")))] if v not in ("0",)).replace(f"<span>Mesos</span><b>{fmt(q.get('meso'))}</b>", f'<span>Mesos</span><b class="mz">{fmt(q.get("meso"))}</b>') + "</div>"
         if where_g:
             npic = f'<img class="npcpic" src="{IO}/npc/{q["gid"]}/icon" alt="" loading="lazy">' if q.get("gid") is not None else ""
-            b += f"<p>{npic}{E(q['g'])} stands in {', '.join(mnav(p) for p in where_g[:4])}.</p>"
+            b += f"<p>{npic}{E(q['g'])} stands in {', '.join(mnav(p) for p in where_g[:4])}</p>"
             gm = next((M[p] for p in where_g if M[p].get("mm")), None)
             if gm:
                 np_ = next((n for n in gm.get("npcs") or [] if n[0] == q["g"]), None)
