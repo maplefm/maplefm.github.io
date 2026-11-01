@@ -241,11 +241,14 @@ def eq_line(row, kinds):
 
 
 def aliases(name, base):
-    """Trade chat shorthand for an item, like GFA 60 for Gloves Attack Scroll 60%."""
+    """The real nicknames players use for an item, like GFA 60 for Gloves Attack Scroll 60%. From data/nick.json, which
+    tools/abbr.py builds from hand-checked shorthand, trade chat and Google searches: never typos or made-up codes."""
     tier = re.search(r" (\d+)%$", shown(name))
-    out = [k for k, v in ABBR.items() if v in (name, base) and len(k) <= 12]
-    out = sorted(set(out), key=lambda k: (len(k), k))[:5]
-    return [(k.upper() if len(k) <= 4 else k) + (" " + tier.group(1) if tier else "") for k in out]
+    out = NICK.get(name) or NICK.get(base) or []
+    return [k + (" " + tier.group(1) if tier else "") for k in out[:3]]
+
+
+NICK = {}
 
 
 IDS = {}
@@ -330,6 +333,8 @@ def main():
         print(len(world_paths), "world pages")
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
     try: ABBR.update(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "abbr.json"))))
+    except Exception: pass
+    try: NICK.update(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "nick.json"))))
     except Exception: pass
     ids = {r[0]: r[1] for r in db}
     IDS.update(ids)

@@ -1,0 +1,288 @@
+{
+ "Beetle Long Sleeve": [
+  "beetle t"
+ ],
+ "Blue Potion": [
+  "blue pot"
+ ],
+ "Bottomwear DEF Scroll": [
+  "BDEF",
+  "bot DEF"
+ ],
+ "Bottomwear HP Scroll": [
+  "BHP",
+  "bot HP"
+ ],
+ "Bottomwear MP Scroll": [
+  "bot MP"
+ ],
+ "Bow Attack Scroll": [
+  "BFA",
+  "bow ATT"
+ ],
+ "Bronze Ingot": [
+  "bronze plate"
+ ],
+ "Bunny Earmuffs": [
+  "bunny muffs"
+ ],
+ "Cape Accuracy Scroll": [
+  "CACC"
+ ],
+ "Cape DEX Scroll": [
+  "CDEX"
+ ],
+ "Cape INT Scroll": [
+  "CINT"
+ ],
+ "Cape LUK Scroll": [
+  "CLUK"
+ ],
+ "Cape Magic Def. Scroll": [
+  "cape mdef"
+ ],
+ "Cape STR Scroll": [
+  "CSTR"
+ ],
+ "Cape Weapon Def. Scroll": [
+  "cape wdef"
+ ],
+ "Claw Attack Scroll": [
+  "CFA",
+  "claw ATT"
+ ],
+ "Crossbow Attack Scroll": [
+  "cbow ATT"
+ ],
+ "Dagger Attack Scroll": [
+  "dagger ATT"
+ ],
+ "Dexterity Potion": [
+  "DEX pot"
+ ],
+ "Earring Crit. Damage Scroll": [
+  "ECD",
+  "ECRIT"
+ ],
+ "Earring DEX Scroll": [
+  "EDEX",
+  "ear DEX"
+ ],
+ "Earring Evasion Scroll": [
+  "EEVA",
+  "eavoid",
+  "ear avoid"
+ ],
+ "Earring INT Scroll": [
+  "EINT",
+  "ear INT"
+ ],
+ "Earring LUK Scroll": [
+  "ELUK",
+  "ear LUK",
+  "earring luck"
+ ],
+ "Earring STR Scroll": [
+  "ESTR",
+  "ear STR"
+ ],
+ "Fragment of Magic": [
+  "magic frag"
+ ],
+ "Gloves Accuracy Scroll": [
+  "GACC",
+  "glove ACC",
+  "gloves ACC"
+ ],
+ "Gloves Attack Scroll": [
+  "GFA",
+  "GATT",
+  "glove ATT"
+ ],
+ "Gloves Crit. Rate Scroll": [
+  "GCR"
+ ],
+ "Gloves Magic Attack Scroll": [
+  "GFM",
+  "GMA",
+  "GFMA"
+ ],
+ "Gold Kitty Slippers": [
+  "kitty slip"
+ ],
+ "Hat Accuracy Scroll": [
+  "HACC",
+  "hat ACC",
+  "helm ACC"
+ ],
+ "Hat HP Scroll": [
+  "HHP",
+  "helm HP"
+ ],
+ "Hat MP Scroll": [
+  "HMP",
+  "helm MP"
+ ],
+ "Iron Ingot": [
+  "steel plate"
+ ],
+ "Kitty Chat Ring": [
+  "cat ring",
+  "kitty cat chat ring"
+ ],
+ "Korean Fan": [
+  "KFAN"
+ ],
+ "Magic Potion": [
+  "mana pot"
+ ],
+ "Mithril Pole Arm": [
+  "mith polearm"
+ ],
+ "Mystery Face Coupon": [
+  "face coup"
+ ],
+ "Mystery Hair Coupon": [
+  "hair coup",
+  "random hair coupon"
+ ],
+ "One-Handed Axe Attack Scroll": [
+  "1HA",
+  "OHA",
+  "1h axe"
+ ],
+ "One-Handed Blunt Weapon Attack Scroll": [
+  "1HBW",
+  "OHBW"
+ ],
+ "One-Handed Sword Attack Scroll": [
+  "1HS",
+  "OHS",
+  "1h sword"
+ ],
+ "Orange Potion": [
+  "orange pot"
+ ],
+ "Overall Armor DEF Scroll": [
+  "ODEF"
+ ],
+ "Overall Armor DEX Scroll": [
+  "ODEX",
+  "oa DEX"
+ ],
+ "Overall Armor INT Scroll": [
+  "OINT",
+  "oa INT"
+ ],
+ "Overall Armor LUK Scroll": [
+  "OLUK",
+  "oa LUK"
+ ],
+ "Overall Armor STR Scroll": [
+  "OSTR",
+  "oa STR"
+ ],
+ "Polearm Attack Scroll": [
+  "pa ATT",
+  "polearm ATT"
+ ],
+ "Power Elixir": [
+  "PE"
+ ],
+ "Pure Water": [
+  "purified water"
+ ],
+ "Red Potion": [
+  "red pot"
+ ],
+ "Selective 5-slot Coupon": [
+  "inv slot",
+  "slot expander",
+  "expansion slot"
+ ],
+ "Shield Accuracy Scroll": [
+  "shield ACC"
+ ],
+ "Shoes Evasion Scroll": [
+  "shoe eva",
+  "shoe avoid"
+ ],
+ "Shoes Jump Scroll": [
+  "SJ"
+ ],
+ "Shoes Speed Scroll": [
+  "SS",
+  "shoe spd"
+ ],
+ "Slime Slippers": [
+  "slime slip",
+  "slime shoes"
+ ],
+ "Sniper Potion": [
+  "sniper pot"
+ ],
+ "Spear Attack Scroll": [
+  "spear ATT"
+ ],
+ "Speed Potion": [
+  "speed pot",
+  "haste pot"
+ ],
+ "Staff Magic Attack Scroll": [
+  "SFM",
+  "staff ATT",
+  "staff MATK"
+ ],
+ "Steely Throwing Knives": [
+  "steelies"
+ ],
+ "Supreme Dexterity Potion": [
+  "supreme DEX"
+ ],
+ "Topwear DEF Scroll": [
+  "TDEF",
+  "top DEF"
+ ],
+ "Topwear HP Scroll": [
+  "THP",
+  "top HP"
+ ],
+ "Topwear MP Scroll": [
+  "top MP"
+ ],
+ "Two-handed Axe Attack Scroll": [
+  "2HA",
+  "THA",
+  "2h axe"
+ ],
+ "Two-handed Blunt Weapon Attack Scroll": [
+  "2HBW",
+  "THBW"
+ ],
+ "Two-handed Sword Attack Scroll": [
+  "2HS",
+  "THS",
+  "2h sword"
+ ],
+ "Wand Magic Attack Scroll": [
+  "WFM",
+  "wand ATT",
+  "wand MATK"
+ ],
+ "Warrior Potion": [
+  "warrior pot"
+ ],
+ "White Label Ring": [
+  "WLR"
+ ],
+ "White Potion": [
+  "white pot"
+ ],
+ "Work Gloves": [
+  "WG"
+ ],
+ "Zakum Helmet": [
+  "ZHELM",
+  "zak helm"
+ ]
+}
