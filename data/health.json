@@ -1,5 +1,5 @@
 {
- "at": 1793534392565,
+ "at": 1793537876142,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -121,20 +121,20 @@
    "behind": 0
   },
   "laclac": {
-   "rows24": 9396,
-   "room24": 9187,
-   "ch24": 9323,
-   "rows7": 87772,
-   "room7": 37853,
+   "rows24": 10568,
+   "room24": 10474,
+   "ch24": 10495,
+   "rows7": 90884,
+   "room7": 40965,
    "late7": 709,
-   "chat24": 20,
-   "last": 1793472742,
-   "ver": "2026.10.31.6",
-   "lag_median_min": 3.1,
-   "room_rate24": 0.978,
-   "room_rate7": 0.431,
+   "chat24": 25,
+   "last": 1793537743,
+   "ver": "2026.10.31.9",
+   "lag_median_min": 3.2,
+   "room_rate24": 0.991,
+   "room_rate7": 0.451,
    "late_share7": 0.008,
-   "behind": 3
+   "behind": 0
   },
   "DivineFeces": {
    "rows24": 0,
@@ -143,7 +143,7 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 34,
+   "chat24": 29,
    "last": 1793513232,
    "ver": "2026.10.31.9",
    "lag_median_min": null,
@@ -259,13 +259,12 @@
    "incomplete upload": 602
   },
   "2026-11-01": {
-   "bad row: 3a3a (p zero)": 7440,
-   "incomplete upload": 372
+   "bad row: 3a3a (p zero)": 8040,
+   "incomplete upload": 403
   }
  },
  "rejects": {},
  "flags": [
-  "laclac: watcher 2026.10.31.6, 3 releases behind",
   "Maya: watcher 2026.10.31.6, 3 releases behind"
  ]
 }
