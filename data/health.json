@@ -1,5 +1,5 @@
 {
- "at": 1793506706431,
+ "at": 1793509900872,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,20 +105,20 @@
    "behind": null
   },
   "Zik": {
-   "rows24": 13318,
-   "room24": 13085,
-   "ch24": 13318,
-   "rows7": 112024,
-   "room7": 35010,
+   "rows24": 13476,
+   "room24": 12928,
+   "ch24": 13274,
+   "rows7": 113643,
+   "room7": 36264,
    "late7": 1714,
-   "chat24": 176,
-   "last": 1793445135,
-   "ver": "2026.10.31.4",
-   "lag_median_min": 2.1,
-   "room_rate24": 0.983,
-   "room_rate7": 0.313,
+   "chat24": 170,
+   "last": 1793509860,
+   "ver": "2026.10.31.9",
+   "lag_median_min": 2.0,
+   "room_rate24": 0.959,
+   "room_rate7": 0.319,
    "late_share7": 0.015,
-   "behind": 5
+   "behind": 0
   },
   "laclac": {
    "rows24": 9396,
@@ -207,7 +207,7 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 1,
+   "chat24": 0,
    "last": 1793422946,
    "ver": "2026.10.31.4",
    "lag_median_min": null,
@@ -243,13 +243,12 @@
    "incomplete upload": 602
   },
   "2026-11-01": {
-   "bad row: 3a3a (p zero)": 2880,
-   "incomplete upload": 144
+   "bad row: 3a3a (p zero)": 3480,
+   "incomplete upload": 174
   }
  },
  "rejects": {},
  "flags": [
-  "Zik: watcher 2026.10.31.4, 5 releases behind",
   "laclac: watcher 2026.10.31.6, 3 releases behind",
   "Maya: watcher 2026.10.31.6, 3 releases behind"
  ]
