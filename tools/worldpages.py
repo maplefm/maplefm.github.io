@@ -109,13 +109,13 @@ def page(title, desc, path, crumbs, body, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=9"><link rel="stylesheet" href="/item/world.css?v=5"><link rel="stylesheet" href="/assets/nav.css?v=6">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=10"><link rel="stylesheet" href="/item/world.css?v=5"><link rel="stylesheet" href="/assets/nav.css?v=7">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
 {f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{itempages.BRAND}{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
-</main>{FOOT()}<script src="/assets/hit.js" defer></script>{'<script src="/assets/fmprice.js?v=2" defer></script>' if 'data-fmi=' in body else ''}</body></html>"""
+</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script>{'<script src="/assets/fmprice.js?v=2" defer></script>' if 'data-fmi=' in body else ''}</body></html>"""
 
 
 def write(out, path, text):
