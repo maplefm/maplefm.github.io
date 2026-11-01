@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.7"
+VERSION = "2026.10.31.8"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -1378,6 +1378,21 @@ def send_inbox(cfg, docs, state={"sent": {}, "full": 0}):
     state["started"] = True
     return True
 
+def needs_stats(item):
+    """An equip with upgrade slots has stats to read off its popup; ores, potions, scrolls and NX cosmetics don't."""
+    f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(item)).strip().lower())
+    return bool(f and not f[2] and len(f) > 3 and (f[3] or {}).get("SLOTS"))
+
+
+def countable(key, o):
+    """A listing counts toward the counters (and what helpers are paid on) only when it's fully read: a real item,
+    and for an equip, its stats read off the popup. A listing that is still missing its stats counts once they're read."""
+    try: item = json.loads(key)[2]
+    except Exception: return False
+    if not o.get("known", True) or "cut off" in str(item): return False
+    return bool(o.get("x")) or not needs_stats(item)
+
+
 def scan_stats(store, now=None):
     """New listings, shops and sales caught, for the last hour and for today, plus the pace per active hour.
     Active time is minutes in which a shop was actually read, so AFK and travel don't count against you."""
@@ -1385,7 +1400,8 @@ def scan_stats(store, now=None):
     with store.lock:
         shop = list(store.d.get("shop", {}).items()); mins = dict(store.d.get("mins", {}))
     def window(t0):
-        rows = [(k, o) for k, o in shop if o.get("first", 0) >= t0]
+        # a listing counts in the window it became fully read: when first seen, or for an equip when its stats were read
+        rows = [(k, o) for k, o in shop if countable(k, o) and max(o.get("first", 0), (o.get("xat") or 0) if needs_stats(json.loads(k)[2]) else 0) >= t0]
         sellers = {json.loads(k)[1] for k, o in rows}
         sales = sum(o.get("ns", 0) + o.get("sb", 0) for k, o in rows)
         active = sum(1 for m in mins if int(m) * 60 >= t0)
@@ -1409,7 +1425,9 @@ def day_history(store):
         try: day, seller = json.loads(k)[0], json.loads(k)[1]
         except Exception: continue
         d = days.setdefault(day, {"items": 0, "stats": 0, "shops": set(), "sales": 0})
-        d["items"] += 1; d["shops"].add(seller); d["sales"] += o.get("ns", 0) + o.get("sb", 0)
+        d["shops"].add(seller); d["sales"] += o.get("ns", 0) + o.get("sb", 0)
+        if not countable(k, o): continue                # an equip whose stats weren't read isn't counted
+        d["items"] += 1
         if o.get("x"): d["stats"] += 1
     rows = {}
     try:
@@ -1420,12 +1438,14 @@ def day_history(store):
     for day, d in days.items():
         old = rows.get(day) or {}
         # data for a day only grows while it's kept; never let a partly cleared day shrink what was saved
-        if int(old.get("Items scanned") or 0) > d["items"]: continue
+        # (rows saved before Oct 31 counted equips with no stats read; those are recounted, never kept)
+        if old and day < "2026-10-31" : continue        # days before the rule changed stay as they were saved
+        if old.get("Counted") == "fully read" and int(old.get("Items scanned") or 0) > d["items"]: continue
         rows[day] = {"Date": day, "Items scanned": d["items"], "With stats read": d["stats"], "Total scans": d["items"] + d["stats"],
-                     "Shops": len(d["shops"]), "Sales caught": d["sales"]}
+                     "Shops": len(d["shops"]), "Sales caught": d["sales"], "Counted": "fully read"}
     try:
         with open(HISTORY_FILE, "w", newline="", encoding="utf-8-sig") as f:
-            w = csv.DictWriter(f, fieldnames=["Date", "Items scanned", "With stats read", "Total scans", "Shops", "Sales caught"])
+            w = csv.DictWriter(f, fieldnames=["Date", "Items scanned", "With stats read", "Total scans", "Shops", "Sales caught", "Counted"])
             w.writeheader()
             for day in sorted(rows): w.writerow({k: rows[day].get(k, "") for k in w.fieldnames})
     except OSError:
