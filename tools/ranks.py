@@ -69,6 +69,26 @@ def main():
             m = led["who"].setdefault(links[tag], {})
             for day, v in led["who"].pop(k).items():
                 m[day] = [max(a, b) for a, b in zip(m.get(day, [0, 0, 0]), v)]
+    # "Name-tag" rows: a scanner id that published under a name another scanner had first. Its days belong to whoever
+    # that scanner id is now (its current name in the inbox), and the same days logged under the bare name during the
+    # clash are the same scans, so they come off the bare name (Yint showed Zik's PC's first day twice, as Yint and as
+    # Yint-3a3a, plus Yint-85ee for Yint's own days)
+    try: ids = json.load(open(os.path.join(data_dir, "inbox_state.json"), encoding="utf-8")).get("ids") or {}
+    except Exception: ids = {}
+    owner = {h[:4]: (links.get(h[:4]) or v.get("nm") or "") for h, v in ids.items()}
+    for k in list(led.get("who", {})):
+        base, _, tag = k.rpartition("-")
+        if not base or tag not in owner or not owner[tag]: continue
+        to = owner[tag]
+        days = led["who"].pop(k)
+        b = led["who"].get(base) or {}
+        if to.lower() != base.lower():
+            for day, v in days.items():
+                if b.get(day) == v: del b[day]
+            if base in led["who"] and not led["who"][base]: del led["who"][base]
+        m = led["who"].setdefault(to, {})
+        for day, v in days.items():
+            m[day] = [max(x, y) for x, y in zip(m.get(day, [0, 0, 0]), v)]
     for who, days in tally(data_dir).items():
         w = led["who"].setdefault(who, {})
         for day, c in days.items():
