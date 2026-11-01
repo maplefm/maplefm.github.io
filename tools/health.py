@@ -34,6 +34,49 @@ def rejects():
         return {}
 
 
+def double_scans(state, now, links_path="/tmp/links.json"):
+    """One person running two scanners at once (FM Watcher and the browser, or two PCs) gets paid twice on anything
+    counted per scanner. Two signs, last 24 hours:
+    1. two scanner ids of the same person (linked to one Discord account, or using one name) reading shops in the
+       same 10 minutes, on 3 or more separate 10-minute spans;
+    2. any two scanners reading the same sellers on the same channel within 10 minutes, 5 or more times (different
+       people never did in a week of data: they spread over channels)."""
+    links = load(links_path, {}) if os.path.exists(links_path) else {}
+    links = {str(k)[:4]: str(v) for k, v in (links or {}).items() if isinstance(v, str) and not str(k).startswith("stream:")}
+    since = now - 86400
+    spans, seen, names = {}, {}, {}
+    for h, me in (state.get("ids") or {}).items():
+        tag = h[:4]; nm = me.get("nm") or tag
+        names[tag] = nm
+        person = (links.get(tag) or nm).lower()
+        for key, doc in (me.get("docs") or {}).items():
+            if not key.endswith("|watcher-shop"): continue
+            for r in (doc.get("rows") or {}).values():
+                t = r.get("t") or 0
+                if t < since: continue
+                spans.setdefault(person, {}).setdefault(tag, set()).add(int(t // 600))
+                if r.get("c"): seen.setdefault((str(r.get("s", "")).lower(), r["c"]), []).append((t, tag))
+    out = []
+    for person, by in spans.items():
+        tags = sorted(by)
+        for i in range(len(tags)):
+            for j in range(i + 1, len(tags)):
+                both = by[tags[i]] & by[tags[j]]
+                if len(both) >= 3:
+                    out.append(f"{names[tags[i]]}: two scanners ({tags[i]} and {tags[j]}) read shops at the same time in {len(both)} ten-minute spans today. One person running two scanners at once counts twice on anything counted per scanner.")
+    pair = {}
+    for (seller, ch), hits in seen.items():
+        hits.sort()
+        for i, (t, a) in enumerate(hits):
+            for t2, b in hits[i + 1:]:
+                if t2 - t > 600: break
+                if a != b: k = tuple(sorted((a, b))); pair.setdefault(k, set()).add((seller, ch))
+    for (a, b), shops in pair.items():
+        if len(shops) >= 5 and (links.get(a) or names.get(a, a)).lower() != (links.get(b) or names.get(b, b)).lower():
+            out.append(f"{names.get(a, a)} ({a}) and {names.get(b, b)} ({b}) read the same {len(shops)} shops on the same channels within minutes today. That looks like one person on two scanners: check before paying either.")
+    return out
+
+
 def main():
     data, out = sys.argv[1], sys.argv[2]
     cur = (load(sys.argv[3], {}) if len(sys.argv) > 3 else {}) or {}
@@ -61,6 +104,7 @@ def main():
                 s["rows24"] += 1; s["room24"] += placed; s["ch24"] += bool(r.get("c"))
                 if 0 <= lag < 86400: s["lag"].append(lag)
     flags = []
+    flags += double_scans(state, now)
     for who, s in S.items():
         lag = sorted(s.pop("lag"))
         s["lag_median_min"] = round(lag[len(lag) // 2] / 60, 1) if lag else None
