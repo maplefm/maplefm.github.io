@@ -2686,6 +2686,17 @@
         if (su === 0) put("WC|" + v, a, "Clean " + v + " " + ladName(wk), v); else put("WS|" + v, a, "Scrolled " + v + " " + ladName(wk), 1000 + v);
         return;
       }
+      // every stat the scrolls raised counts, not only the ones buyers usually pay for: a Pan Lid with 7 passed
+      // accuracy scrolls is +7 ACC, never "no gain". The popup's own base ("Accuracy +7 (0 +7)") is exact when read;
+      // without it, a stat the item has none of and a scroll for this slot can add is all scroll gain.
+      if (su > 0) {
+        mv = Object.assign({}, mv);
+        Object.keys(l.x).forEach(function (k) {
+          if (/^_|_b$/.test(k) || k === "SLOTS" || k === "UP" || k === "SUCCESS" || typeof l.x[k] !== "number" || mv[k] > 0) return;
+          var b0 = l.x[k + "_b"], gain = typeof b0 === "number" ? l.x[k] - b0 : (!(base[k] > 0) && scrollable && scrollable[k] ? l.x[k] : 0);
+          if (gain > 0) mv[k] = gain;
+        });
+      }
       var up = Object.keys(mv).filter(function (k) { return mv[k] > 0; });
       if (su === 0) {
         // clean: plain, or a natural roll above base on a stat buyers pay for (crit on gloves and earrings first)

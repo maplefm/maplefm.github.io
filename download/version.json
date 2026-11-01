@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.6",
- "date": "2026-10-31T20:19:17+00:00",
- "notes": "Popups that name another item are never put on a row; a 0 price is never sent",
- "sha256": "96867dda57ec09b39d828453e28f29ff49c63a5c578f65af914bdd7538a8d8e2",
- "size": 166017,
+ "version": "2026.10.31.7",
+ "date": "2026-11-01T02:17:03+00:00",
+ "notes": "Seller names read right in game windows bigger than 1920 x 1080",
+ "sha256": "fa8e941e38493817f2615434093dc81063cbeb99cf36551f4ff1f821d499383c",
+ "size": 166972,
  "history": [
+  {
+   "version": "2026.10.31.7",
+   "date": "2026-10-31",
+   "notes": "Seller names read right in game windows bigger than 1920 x 1080"
+  },
   {
    "version": "2026.10.31.6",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.1",
    "date": "2026-10-26",
    "notes": "Faster equip stats: the two reading passes run side by side and a hover no longer re-reads the whole shop, so the read chime comes about twice as fast"
-  },
-  {
-   "version": "2026.10.26.8",
-   "date": "2026-10-26",
-   "notes": "Shorter equip stats tips in the README."
   }
  ],
  "pip": [],
- "sig": "3a16d6cb10333a541483dbc02308dd6fef171859b382279ab63e4b4aeb0c10887359586dd2fe4dddffd6270b6296bb0920ba1eb30d1986d7a5206ff64b9c73a3d638399b29437667b5830ad2efb9ec5df0c042e12baaab226e13d342341466be3525a058f7e05fc43c741f1c65a6791eb553a48f2e9d4cbe8036a975c360681d131ea888cb3d773b3b1b16e3fb3cb81d054ef8a522206f6636f3e75613e3f5da09de239241c3694cba3302e2550606764d224d0997f9d9ae1faf2f1d9b117c2f84f90b65ce0d41189dd348635cf34fe8aebbc98a765950b8b15b45eb30dbab1ff9b2479f60666b7cc58d2aedac8ae863d574acb0ebdbd9e0061ecefc1ef43b3a"
+ "sig": "71c5a82e3df96e086c1910cc2f039cd4920b2896d68e1a50e88286897bd350d14901406037d0ad29753f44ecfc45ea6aaa05e38fd87cc5e4e2c348a8dc2ca7417c765d8581a3456672d6a9d837604eee870b3d22a59f09fa374491dd7eaa3088e7f85ece4913b2d345470d573b2a773ffb1c3c1a010d68964bf0c27b50df2cd4f8c93a8baa00036db151b53e0c1a8434c7d79cdfc1ccd932c40c47759f979182f0817073a904046aed64e9646dfb498c2d4740e2ab08aff0749c34739685d324a5e247ac975114a22774e9e61ff5284eada21a7d0088ed71574a71478d8cb2228f96c3c1baf727bd48996791c0a9851e33dac6006e16354e7e44de73bfa960eb"
 }

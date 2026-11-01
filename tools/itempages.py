@@ -251,6 +251,11 @@ IDS = {}
 
 
 QSLUG, BSLUG, MSLUG, MOBID = {}, {}, {}, {}
+NPC_AT = {}   # where each NPC stands, from the map data: the same place the quest page names
+
+
+def giver_at(g):
+    return NPC_AT.get(g) or NPC_AT.get(re.sub(r"\s*\([^)]*\)\s*$", "", g or "")) or []
 
 
 def qlink(qn, qid):
@@ -270,7 +275,7 @@ def guide_html(name, g, page_of):
     out = ""
     if g.get("q"):
         tot = sum(q[2] for q in g["q"])
-        rows = "".join(f"<tr><td><b>{qlink(q[0], q[7] if len(q) > 7 else None)}</b><br><small>{html.escape(' · '.join(x for x in [('from ' + q[3]) if q[3] else '', q[4], f'Lv {q[1]}+' if q[1] else '', 'repeatable' if q[5] else ''] if x))}</small></td><td class=n>×{q[2]:,}</td></tr>" for q in g["q"])
+        rows = "".join(f"<tr><td><b>{qlink(q[0], q[7] if len(q) > 7 else None)}</b><br><small>{html.escape(' · '.join(x for x in [('from ' + q[3] + (' in ' + giver_at(q[3])[0] if giver_at(q[3]) else '')) if q[3] else '', '' if q[3] and giver_at(q[3]) else q[4], f'Lv {q[1]}+' if q[1] else '', 'repeatable' if q[5] else ''] if x))}</small></td><td class=n>×{q[2]:,}</td></tr>" for q in g["q"])
         out += f'<h2>Quests that need {html.escape(shown(name))}</h2><p class="note">{len(g["q"])} quest{"s" if len(g["q"]) != 1 else ""}{f", {tot:,} in all" if len(g["q"]) > 1 else ""}. Tap one to open it in the <a href="/quests.html">Quest Log</a>.</p><table>{rows}</table>'
     get = ""
     for c in g.get("c") or []:
@@ -319,6 +324,8 @@ def main():
         WBUILT[0] = str(wj.get("built") or "")
         QSLUG.update(qs); BSLUG.update(bs); MSLUG.update(ms)
         MOBID.update({n: m["id"] for n, m in (wj.get("mobs") or {}).items() if m.get("id")})
+        for p_, m_ in (wj.get("maps") or {}).items():
+            for n_ in m_.get("npcs") or []: NPC_AT.setdefault(n_[0], []).append(p_)
         print(len(world_paths), "world pages")
     db = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "itemdb.json")))["items"]
     try: ABBR.update(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "abbr.json"))))
@@ -386,13 +393,19 @@ def main():
         if price_first or not fx:
             desc = (f"{nm} {price_txt} in MapleStory Classic.{more_txt} {r.get('salesN') or 0:,} Free Market sales seen, "
                     f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
-            title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} price", "Cash Shop · MapleStory Classic", "Club FM")
+            # the price itself in the title: a search for a price shows the answer, and the result that has it gets the click
+            pt = f"{nm} price: {meso(top[4] if top else r['typ'])}" if (top or r.get('typ')) else f"{nm} price"
+            title = fit_title(pt, "MapleStory Classic", "Club FM") if not nx else fit_title(pt, "Cash Shop · MapleStory Classic", "Club FM")
+            if "MapleStory Classic" not in title: title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM")
             if tw and not nx:
-                tt = fit_title(f"{nm} ({tw.group(1)}) price", "MapleStory Classic", "Club FM", cap=66)
+                tt = fit_title(f"{nm} ({tw.group(1)}) price: {meso(top[4] if top else r['typ'])}", "MapleStory Classic", "Club FM", cap=66)
                 if "MapleStory Classic" in tt: title = tt
         else:
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
-            title = fit_title(f"{nm} price, drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
+            pt = f"{nm} price: {meso(r['typ'])}" if r.get('typ') else f"{nm} price"
+            title = fit_title(pt + ", drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
+            if "MapleStory Classic" not in title: title = fit_title(pt, "MapleStory Classic", "Club FM")
+            if "MapleStory Classic" not in title: title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM")
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng" class="mz">{rng}</span>{chg}{f"<small>{html.escape(top[0])}</small>" if top else ""}</p>
 <p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"} <span id="typ" class="mz">{full(top[4] if top else r['typ'])}</span>, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
