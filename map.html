@@ -581,14 +581,16 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var m = MAPS[A], out = [], L = ME.lv || 1;
     m.portals.forEach(function (p, i) {
       if (!MAPS[p[0]] || p[0] === A) return; if (p[5] && L < p[5]) return;
+      if (p[1] === "transport") return;      // a ship, not a portal: the boats list has it with its captain and fare
       out.push({ to: p[0], kind: "walk", portal: i, t: travel(pos, [p[2], p[3]]) + LOAD, mesos: 0, arrive: arrival(p[0], A) });
     });
     if (TOWNS[A]) W.cabs.forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 8 + travel(pos, centre(m)) * 0.5, mesos: L >= 20 ? c[3] : c[2], arrive: centre(MAPS[c[1]]), what: "Regular Cab" }); });
     (W.vip || []).forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 8, mesos: c[2], arrive: centre(MAPS[c[1]]), what: "VIP Cab" }); });
-    (W.boats || []).forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 10, mesos: c[2] || 0, unknown: c[2] == null, arrive: centre(MAPS[c[1]]), what: c[3] }); });
+    (W.boats || []).forEach(function (c) { if (c[0] === A && MAPS[c[1]]) out.push({ to: c[1], kind: "cab", t: 10, mesos: c[2] || 0, unknown: c[2] == null, arrive: centre(MAPS[c[1]]), what: c[3], boat: 1 }); });
     var sc = W.scrolls || {};
     if (sc.nearest && m.ret && m.ret !== A && MAPS[m.ret] && m.type !== "Town") out.push({ to: m.ret, kind: "scroll", t: 4, mesos: sc.nearest.price, arrive: centre(MAPS[m.ret]), what: sc.nearest.item });
-    Object.keys(sc).forEach(function (t) { if (t !== "nearest" && t !== A && MAPS[t]) out.push({ to: t, kind: "scroll", t: 4, mesos: sc[t].price, arrive: centre(MAPS[t]), what: sc[t].item }); });
+    // a scroll to a Victoria Island town only works on Victoria Island: from Maple Island you take the ship
+    if (m.region !== "Maple Island") Object.keys(sc).forEach(function (t) { if (t !== "nearest" && t !== A && MAPS[t]) out.push({ to: t, kind: "scroll", t: 4, mesos: sc[t].price, arrive: centre(MAPS[t]), what: sc[t].item }); });
     return out;
   }
   function route(from, to, mode) {
@@ -620,6 +622,13 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     try { history.replaceState(null, "", "#route=" + encodeURIComponent(a) + "|" + encodeURIComponent(b)); } catch (e) {}
     if (a === b) { box.appendChild(el("div", "card note", "You're already there.")); return; }
     ROUTES = { fast: route(a, b, "fast"), value: route(a, b, "value"), free: route(a, b, "free") };
+    // a map entered through an NPC, a quest or a jump quest: the way to the map it starts from, and say so
+    var nb = MAPS[b].near;
+    if (/^1st Accompaniment/.test(b) && MAPS["Kerning City"]) nb = "Kerning City";   // the party quest: Lakelis in Kerning City lets you in
+    if (!ROUTES.fast && !ROUTES.free && nb && nb !== b && MAPS[nb] && nb !== a && MAPS[b].region !== "Maple Island") {
+      var R2 = { fast: route(a, nb, "fast"), value: route(a, nb, "value"), free: route(a, nb, "free") };
+      if (R2.fast || R2.free) { ROUTES = R2; box.appendChild(el("div", "card note", MAPS[b].name + " has no walking way in: it's entered through an NPC, a quest or a jump quest from " + MAPS[nb].name + ". Here's the way to " + MAPS[nb].name + ".")); b = nb; }
+    }
     if (!ROUTES.fast && !ROUTES.free) {
       var why = MAPS[b].region === "Maple Island" ? "Maple Island is only for new characters: once you sail to Victoria Island you can't go back." :
         MAPS[a].region === "Maple Island" ? "From Maple Island, take the ship at Southperry to Lith Harbor first, then route from there." :
@@ -638,7 +647,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     var same = ROUTES.fast && ROUTES.free && ROUTES.fast.mesos === 0; if (same) box.appendChild(el("p", "note", "Walking is already the fastest way here: no fare saves time."));
     var steps = el("div", "steps");
     r.steps.forEach(function (s, i) {
-      var m = MAPS[s.from], d = el("div", "step" + (s.e.kind !== "walk" ? " k-" + s.e.kind : ""));   // not plain "scroll": that class means a sideways scroller site-wide d.appendChild(el("div", "n", String(i + 1)));
+      var m = MAPS[s.from], d = el("div", "step" + (s.e.kind !== "walk" ? " k-" + s.e.kind : ""));   // not plain "scroll": that class means a sideways scroller site-wide
+      d.appendChild(el("div", "n", String(i + 1)));
       var body = el("div"), h = el("h4");
       if (s.e.kind === "walk") {
         var p = m.portals[s.e.portal], dir = p[2] > s.pos[0] + 60 ? "right" : p[2] < s.pos[0] - 60 ? "left" : "", up = p[3] < s.pos[1] - 80 ? "up" : p[3] > s.pos[1] + 80 ? "down" : "";
@@ -651,7 +661,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       } else {
         h.textContent = (s.e.kind === "cab" ? s.e.what + ": " : "Use a ") + (s.e.kind === "scroll" ? s.e.what + " → " : m.name + " → ") + MAPS[s.e.to].name;
         body.appendChild(h);
-        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to " + (/Cab$/.test(s.e.what) ? "the " : "") + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + (s.e.mesos ? MF(s.e.mesos) : s.e.unknown ? "Fare not confirmed yet" : "Free") + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." : "Use it anywhere: " + MF(s.e.mesos) + " from a potion shop. Buy it before you set out."));
+        body.appendChild(el("div", "note", s.e.kind === "cab" ? "Talk to " + (/Cab$/.test(s.e.what) ? "the " : "") + s.e.what + " in " + m.name + " and pick " + MAPS[s.e.to].name + ". " + (s.e.mesos ? MF(s.e.mesos) : s.e.unknown ? "Fare not confirmed yet" : "Free") + (W.cabs.length && ME.lv < 20 && s.e.what === "Regular Cab" ? " (under level 20 price)" : "") + "." + (s.e.boat && m.region === "Maple Island" ? " One way: you can't sail back to Maple Island." : "") : "Use it anywhere: " + MF(s.e.mesos) + " from a potion shop. Buy it before you set out."));
       }
       d.appendChild(body); steps.appendChild(d);
     });
