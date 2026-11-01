@@ -89,3 +89,12 @@
 
 /* the menu is one scrolling row from the first paint, not two rows until the script runs */
 .sitenav .sn-links::-webkit-scrollbar{display:none}
+
+/* your path through the guide pages (assets/trail.js): back to where you started in one tap */
+.trail{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 12px;padding:8px 10px;border-radius:14px;background:var(--card,var(--panel,#fff));border:1px solid var(--line,#e6ddf6);font:600 .85rem Inter,system-ui,sans-serif;color:var(--muted,#6c6188)}
+.trail .tr-start{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;background:var(--accent,#6d3fd1);color:#fff;text-decoration:none;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trail .tr-start:hover{filter:brightness(1.1)}
+.trail .tr-path{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;min-width:0}
+.trail .tr-path a{color:var(--accent,#6d3fd1);text-decoration:none;font-weight:700;white-space:nowrap}.trail .tr-path a:hover{text-decoration:underline}
+.trail .tr-path b{color:var(--ink,#22183d);white-space:nowrap}
+.trail .tr-path i{font-style:normal;opacity:.6}
