@@ -392,8 +392,10 @@ def main():
         l3 = r.get("last3"); r1 = r.get("r1")
         more_txt = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
         if price_first or not fx:
-            desc = (f"{nm} {price_txt} in MapleStory Classic.{more_txt} {r.get('salesN') or 0:,} Free Market sales seen, "
-                    f"{'from sales players watched happen' if r.get('kind') == 'sale' else 'from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
+            # the price answers the search; what's only on the page (prices by grade, the daily chart) is the reason to click
+            hook = "See prices by grade and the daily chart." if top else "See the daily price chart."
+            desc = (f"{nm} {price_txt} in MapleStory Classic.{more_txt} {hook} {r.get('salesN') or 0:,} Free Market sales seen"
+                    f"{'' if r.get('kind') == 'sale' else ', from asking prices'}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
             # the price itself in the title: a search for a price shows the answer, and the result that has it gets the click
             pt = f"{nm} price: {meso(top[4] if top else r['typ'])}" if (top or r.get('typ')) else f"{nm} price"
             title = fit_title(pt, "MapleStory Classic", "Club FM") if not nx else fit_title(pt, "Cash Shop · MapleStory Classic", "Club FM")
@@ -518,8 +520,19 @@ def main():
     # lastmod only moves when a page's content does: item prices daily, world pages when the game data changed
     wbuilt = (WBUILT[0] or today)[:10]
     world = {SITE + p for p in world_paths}
+    # an item page changes when a new day of prices lands for it: give Google that day, not today, so lastmod stays
+    # trustworthy and Google spends its crawls on the pages that really moved
+    imod = {}
+    for s, _, r in made:
+        d = ""
+        try:
+            dl = (r or {}).get("daily") or []
+            if isinstance(dl, str): dl = json.loads(dl)
+            if dl: d = datetime.datetime.fromtimestamp(max(x[0] for x in dl) / 1000, datetime.timezone.utc).date().isoformat()
+        except Exception: d = ""
+        imod[f"{SITE}/item/{s}/"] = min(d, today) if d else wbuilt
     open(os.path.join(out, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-                                                    "".join(f"<url><loc>{u}</loc><lastmod>{wbuilt if u in world else today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
+                                                    "".join(f"<url><loc>{u}</loc><lastmod>{wbuilt if u in world else imod.get(u, today)}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     # the home page is a script-built board; give search engines plain links to the most traded items
     top = sorted(rows, key=lambda r: -(r.get("vol") or 0))[:40]
     links = "".join(f'<a href="/item/{slug(x["item"])}/"><img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="" width="18" height="18" loading="lazy">{html.escape(shown(x["item"]))}</a>' for x in top)
