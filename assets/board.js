@@ -279,7 +279,7 @@
   // items the game data names alike but the shop window tells apart by colour: name -> {item id: colour}
   var COLOURS = { "Buddy Overall Jeans": { 1057090: "Blue", 1057096: "Red" } };
   function loadDB() {
-    fetch("data/abbr.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; SIDX = null; } }).catch(function () {});
+    fetch("data/abbr.json?v=2").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; SIDX = null; } }).catch(function () {});
     // the weekly refreshed list lives with the price data; the copy next to the page is the fallback
     return fetch(LIVE + "data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       .then(function (j) { return j && j.items ? j : fetch("data/itemdb.json?v=mcw4").then(function (r) { return r.ok ? r.json() : null; }); }).then(function (j) {

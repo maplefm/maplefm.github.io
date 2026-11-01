@@ -43,7 +43,8 @@ main{min-height:100vh}
 <h2>Scroll rates</h2>
 <p>Add the rate to any scroll shortcut: <b>GFA 60</b>, <b>gfa 10%</b>, <b>earring dex 100</b>.</p>
 <div class="rates"><span>100% = Lesser</span><span>60% = Intermediate</span><span>10% = Greater</span><span>Chaos</span></div>
-<h2>Every shortcut</h2>
+<h2>Common shortcuts</h2>
+<p>The search also takes most other ways people write an item, misspellings included.</p>
 <input class="q" id="q" type="search" placeholder="Filter: type a shortcut or an item name" data-ph="Filter: type a shortcut or an item name|Filter shortcuts or items|Filter" autocomplete="off" aria-label="Filter shortcuts">
 <p class="n" id="count"></p>
 <div class="list" id="list"></div>
@@ -55,8 +56,9 @@ main{min-height:100vh}
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var groups = {}, order = [];
-  fetch("data/abbr.json").then(function (r) { return r.json(); }).then(function (a) {
-    Object.keys(a).forEach(function (k) { var v = a[k]; if (!groups[v]) { groups[v] = []; order.push(v); } groups[v].push(k); });
+  // the real nicknames only (data/nick.json); the search's full list of spellings stays out of the page
+  fetch("data/nick.json?v=1").then(function (r) { return r.json(); }).then(function (a) {
+    Object.keys(a).forEach(function (v) { groups[v] = a[v].slice(); order.push(v); });
     order.sort(function (x, y) { return x.localeCompare(y); });
     render("");
   });
@@ -65,7 +67,7 @@ main{min-height:100vh}
     var list = $("list"), n = 0; list.textContent = "";
     order.forEach(function (item) {
       var keys = groups[item].slice().sort(function (x, y) { return x.length - y.length || x.localeCompare(y); });
-      if (q && item.toLowerCase().indexOf(q) < 0 && !keys.some(function (k) { return k.indexOf(q) > -1; })) return;
+      if (q && item.toLowerCase().indexOf(q) < 0 && !keys.some(function (k) { return k.toLowerCase().indexOf(q) > -1; })) return;
       n++;
       var box = document.createElement("div"); box.className = "it";
       var a = document.createElement("a"); a.href = "index.html#item=" + encodeURIComponent(item); a.textContent = item; box.appendChild(a);
