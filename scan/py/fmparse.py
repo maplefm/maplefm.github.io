@@ -408,6 +408,41 @@ def read_shop_fast(region):
         return None
     return resolve_tiers(region, {"title": "", "seller": seller, "rows": rows, "dropped": 0, "fast": True})
 
+_IGN = re.compile(r"[A-Za-z0-9]{3,13}")
+_IGN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+def read_seller_plate(plate, hint=None):
+    """The seller's name off the navy name plate, by consensus over several text reads of the white letters. Used
+    only when the exact pixel reader can't read it (a game window bigger than 1920 x 1080 has no exact font).
+    Stops once three reads agree; otherwise keeps the read closest to all the others (a sparkle over a letter or two
+    sways single reads: "SavageBlover", "SavageBlower", "Savageblower" give SavageBlower)."""
+    try:
+        import numpy as np
+        a = np.asarray(plate.convert("RGB")).astype(int)
+        r, g, b = a[..., 0], a[..., 1], a[..., 2]
+        navy = (b > r + 25) & (b < 170) & (r < 90)
+        ys, xs = np.where(navy)
+        if len(xs) < 50: return None
+        x0, x1, y0, y1 = xs.min() + 2, xs.max() - 1, ys.min() + 2, ys.max() - 1
+        if x1 - x0 < 20 or y1 - y0 < 8: return None
+        lum = ((r + g + b) / 3.0)[y0:y1, x0:x1].astype("uint8")
+        reads, votes = [], {}
+        for sc, th in ((4, 110), (6, 110), (8, 110), (4, 125), (6, 100), (8, 100), (4, 140), (6, 125), (8, 125), (4, 100), (6, 140), (8, 140)):
+            big = Image.fromarray(lum).resize((lum.shape[1] * sc, lum.shape[0] * sc), Image.LANCZOS)
+            m = ImageOps.expand(Image.fromarray(((np.asarray(big) <= th) * 255).astype("uint8")), border=16, fill=255)
+            t = re.sub(r"[^A-Za-z0-9]", "", "".join(l["text"] for l in ocr_lines(m, scale=1, psm=7, allow=_IGN_CHARS)))
+            if not _IGN.fullmatch(t): continue
+            reads.append(t); votes[t] = votes.get(t, 0) + 1
+            # the whole-shop reader's spelling, seen again on the plate alone, is right ("iNoxy" over a cut "iNox")
+            if hint and t.lower() == hint.lower(): return hint
+            if votes[t] >= 3 and not (hint and _IGN.fullmatch(hint) and hint.lower().startswith(t.lower())): return t
+        if len(reads) < 4: return None
+        def d(x, y): return 1 - difflib.SequenceMatcher(None, x, y).ratio()
+        best = min(set(reads), key=lambda t: (sum(d(t, u) for u in reads), -votes[t]))
+        return best if votes[best] >= 2 else None
+    except Exception:
+        return None
+
+
 def read_shop_checked(region):
     """Read the shop. Straight off the pixels when every row is certain; otherwise with two independent text readers,
     keeping a row only when its price is certain (exact pixel read, or both readers agree)."""
@@ -430,6 +465,11 @@ def read_shop_checked(region):
     if gs and len(gs) >= 2:
         # exact, except capital I and small l look the same: take the text reader's I/l where it agrees otherwise
         seller = seller if _fold(seller) == _fold(gs) else gs
+    else:
+        # a scaled game has no exact pixel font: read the name plate alone, white letters only, several ways, and
+        # keep the spelling most of them agree on ("xToxa" was read as "8x01x" from the whole-shop text)
+        ps = read_seller_plate(region.crop(S["seller"]), seller)
+        if ps: seller = ps
     out = {"title": title, "seller": seller, "rows": [], "dropped": 0}
     for i in range(2, len(spans)):
         tt = [l["text"] for l in tl[i]]; rt = [l["text"] for l in rl[i]]

@@ -396,7 +396,8 @@ def build(world, guide, summary, notes, out):
         # an event NPC is named for the event ("Malady (Halloween)") but stands on the maps under her plain name
         where_g = npc_at.get(q["g"], []) or npc_at.get(re.sub(r"\s*\([^)]*\)\s*$", "", q["g"]), [])
         desc = (f"{q['n']}, a level {q['lv']} MapleStory Classic quest from {q['g']}" + (f" in {where_g[0]}" if where_g else "") + ": " +
-                (", ".join(f"{c} {i}" for i, c in q.get("need", [])[:3]) or ", ".join(f"hunt {c} {k}" for k, c, *_ in q.get("kill", [])[:2]) or "what to do") +
+                # every item it needs, so a search for any one of them finds the quest
+                (", ".join(f"{c} {i}" for i, c in q.get("need", [])) or ", ".join(f"hunt {c} {k}" for k, c, *_ in q.get("kill", [])[:2]) or "what to do") +
                 (f", rewards {fmt(q['exp'])} EXP" if q.get("exp") else "") + ".")
         b = f'<h1>{E(q["n"])}</h1><p class="sub">MapleStory Classic quest · Level {q["lv"]}+ · {E(q.get("a") or "")}{" · Repeatable" if q.get("rep") else ""}</p>'
         extra = []

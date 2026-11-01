@@ -14,7 +14,7 @@ def prep(im, lo, hi, scale=4):
     m = m.point(lambda v: 0 if v <= lo else 255 if v >= hi else int((v - lo) * k))
     return m.resize((m.width * scale, m.height * scale), Image.BICUBIC)
 
-def ocr_lines(img, scale=4, psm=6):
+def ocr_lines(img, scale=4, psm=6, allow=None):
     """Run tesseract, return [{'text','x','y','w','h'}] in source-pixel units (pre-upscale)."""
     fd, path = tempfile.mkstemp(suffix=".png"); os.close(fd)
     try:
@@ -22,7 +22,7 @@ def ocr_lines(img, scale=4, psm=6):
         # one thread per tesseract: several readers run side by side, and tesseract's own threading only
         # fights them for the CPU
         env = dict(os.environ); env.setdefault("OMP_THREAD_LIMIT", "1")
-        out = subprocess.run([TESS, path, "-", "--psm", str(psm), "tsv"], capture_output=True, text=True, encoding="utf-8", errors="replace",
+        out = subprocess.run([TESS, path, "-", "--psm", str(psm)] + (["-c", "tessedit_char_whitelist=" + allow] if allow else []) + ["tsv"], capture_output=True, text=True, encoding="utf-8", errors="replace",
                              env=env, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)).stdout
     finally:
         try: os.remove(path)

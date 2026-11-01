@@ -45,8 +45,9 @@ self.sync_req = function (method, url, body, headers) {
 
 // ---------------------------------------------------------------- Tesseract for fmparse's text reader
 const HEAD = "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n";
-self.tess_tsv = function (png, psm) {
+self.tess_tsv = function (png, psm, allow) {
   api.SetVariable("tessedit_pageseg_mode", String(psm));
+  api.SetVariable("tessedit_char_whitelist", allow ? String(allow) : "");   // the seller plate reads letters and digits only
   TM.FS.writeFile("/input", png.toJs ? png.toJs() : png);
   api.SetImageFile(1, 0);
   const t = api.GetTSVText(0); api.Clear();
@@ -71,9 +72,9 @@ import sys, io, csv; sys.path.insert(0, '/w')
 import ocrlib
 from js import tess_tsv, sync_req
 from pyodide.ffi import to_js
-def ocr_lines(img, scale=4, psm=6):
+def ocr_lines(img, scale=4, psm=6, allow=None):
     b = io.BytesIO(); img.save(b, format='PNG')
-    out = tess_tsv(to_js(b.getvalue()), psm)
+    out = tess_tsv(to_js(b.getvalue()), psm, allow or "")
     groups = {}
     for r in csv.DictReader(io.StringIO(out), delimiter="\\t", quoting=csv.QUOTE_NONE):
         t = (r.get("text") or "").strip()
