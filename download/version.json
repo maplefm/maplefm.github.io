@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.8",
- "date": "2026-11-01T02:27:28+00:00",
- "notes": "Listing counts only count fully read listings; shops at other window sizes are kept on this PC to teach the reader that size",
- "sha256": "1edf6300fbebf299757518be09db4b98e11ba905cf6e5a2444341fdd09503d8a",
- "size": 167721,
+ "version": "2026.10.31.9",
+ "date": "2026-11-01T02:46:35+00:00",
+ "notes": "Reads shops exactly at 3840 x 2160: new letter shapes (Ky, zyz, tty) and a stray mark after an item name is ignored",
+ "sha256": "86a049cf7c3be64be0af891f40d044e03b22d497b16526f5bb29ac57884de8c1",
+ "size": 167978,
  "history": [
+  {
+   "version": "2026.10.31.9",
+   "date": "2026-10-31",
+   "notes": "Reads shops exactly at 3840 x 2160: new letter shapes (Ky, zyz, tty) and a stray mark after an item name is ignored"
+  },
   {
    "version": "2026.10.31.8",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.4",
    "date": "2026-10-27",
    "notes": "Reads the upgrades-left line far more often, even over a bright chat background. Expensive equips (500K and up) send a picture of their popup so the site can show it."
-  },
-  {
-   "version": "2026.10.27.3",
-   "date": "2026-10-27",
-   "notes": "Shop rooms always read as a Free Market room: a minimap title read in another font keeps its room number."
   }
  ],
  "pip": [],
- "sig": "1d507f652eb75fab7bc4ee6d898c45957a225e845cc64b8f047c0be5323fbcfb6e88b2e0b358e9eeaf39c624374beeebf0b4550a5ac5429bd6c06457e58430d4f2e62b686ccf7259ccce7139f9a1536f7540fa502fe293004c7b3ea9a76c15964bae82bfecd4b2c1627fa8c7f6fcb10cd02083ab07de77a99d179468c7b669d6c61ecd170d9f6b7e47f45455846678f1d68e88491ec05a358617fee58c2c903dd125a26cc2e5f0179baf7d94ffbac0197deb9ab69e8728d917bf80e96393c08061e651bd047c283394c242aa67ea0bb00c5fa592d935c1ae03f39a00023de9841bf9b6e78ed7adc140c13362750de434f33313b14015b4b821519b50bfcbc957"
+ "sig": "8dd2397abcc593db24b6fe79ba122110b2a1afd4b717d0df50fb07ba7580ffd8f7d9c1f262ae386d6685c4fc4a6b5cf0e885ab67fa9004216b4ad5b199547bb1efff5bdd0506519edfdc9d40678fc24902bb13673404a48b30d7d38bbed9c6653002196646a20dfac25be0184009f4f9226d30f135ae06ce303d3af7b67b56fde9e422275f1babc1399ae27eadf2b010abcad533d533fc045fb795ae2f519829407ea38f697d98db07721312a981f6d66de9e65305b81fd5e5e4fce0634b280e43bc2b4354ef312500d46f2bf4c279681eb33506ea9e379f6bf34457166bd96821c91a9d5d8f4e1325791ebcd5f081741c31425aa741fb8da47220450cebdacc"
 }
