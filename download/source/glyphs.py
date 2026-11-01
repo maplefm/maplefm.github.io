@@ -136,7 +136,17 @@ def read_name(tile):
         if m is None: return None
         ls = lines_of(m)
         if len(ls) < 2: return None
-        return decode(glyphs_of(m, *ls[0]), _names())
+        gl = glyphs_of(m, *ls[0]); t = _names()
+        s = decode(gl, t)
+        if s is not None: return s
+        # a stray mark after the name, set apart by a gap (the pointer's tip resting at the row's end): the name
+        # without it, only when every letter before the gap is known. The caller still requires a real item name.
+        for i in range(len(gl) - 1, 0, -1):
+            if gl[i][0] - gl[i - 1][1] >= 4:
+                if all(t.get(g[2]) is not None for g in gl[:i]) and any(t.get(g[2]) is None for g in gl[i:]) and len(gl) - i <= 2:
+                    return decode(gl[:i], t)
+                break
+        return None
     except Exception:
         return None
 
