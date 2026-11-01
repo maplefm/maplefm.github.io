@@ -699,7 +699,10 @@ def grab(sct, game, box):
         shot = sct.grab({"left": ox + rl, "top": oy + rt, "width": rr - rl, "height": rb - rt})
         im = Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
     # Lanczos read best of the filters tried, at every size from 1440 to 5120 wide
-    return im.resize((max(1, r - l), max(1, b - t)), Image.LANCZOS, box=(fl - rl, ft - rt, min(fr, rr) - rl, min(fb, rb) - rt))
+    out = im.resize((max(1, r - l), max(1, b - t)), Image.LANCZOS, box=(fl - rl, ft - rt, min(fr, rr) - rl, min(fb, rb) - rt))
+    # the game's own pixels at this window size ride along, so the letter shapes at this size can be learned (sizes/)
+    out.info["native"] = (im, [fl - rl, ft - rt, min(fr, rr) - rl, min(fb, rb) - rt], [kx, ky], [sw, sh])
+    return out
 
 def quick_hash(img, size):
     small = img.convert("L").resize(size).point(lambda v: v >> 4)
@@ -1661,10 +1664,28 @@ def review_save(cfg, kind, img, reading):
         try: os.remove(os.path.join(d, f))
         except OSError: pass
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")[:-3]
+    nat = img.info.get("native") if kind == "shop" else None
     img.save(os.path.join(d, f"{stamp}-{kind}.png"))
+    if nat: size_save(stamp, nat, reading)
     # pictures riding along with a reading (the hovered popup) are saved as the .png, not in the .json
     with open(os.path.join(d, f"{stamp}-{kind}.json"), "w", encoding="utf-8") as fh:
         json.dump(reading, fh, indent=1, default=lambda o: None)
+
+def size_save(stamp, nat, reading, keep=600):
+    """A shop exactly as the game drew it at a window size other than 1920 x 1080 (sizes/), with what was read off it.
+    These teach the reader the letter shapes at that size. Kept on this PC only, never uploaded."""
+    try:
+        im, box, k, win = nat
+        d = os.path.join(HERE, "sizes"); os.makedirs(d, exist_ok=True)
+        files = sorted(os.listdir(d))
+        for f in files[:max(0, len(files) - keep * 2)]:
+            try: os.remove(os.path.join(d, f))
+            except OSError: pass
+        im.save(os.path.join(d, f"{stamp}-shop.png"))
+        with open(os.path.join(d, f"{stamp}-shop.json"), "w", encoding="utf-8") as fh:
+            json.dump({"box": box, "k": k, "window": win, "read": reading}, fh, indent=1, default=lambda o: None)
+    except Exception:
+        pass
 
 def frame_save(cfg, kind, img, info, keep=80):
     """Whole game pictures for testing the readers at every window size (frames/, kept apart from review/ so the
