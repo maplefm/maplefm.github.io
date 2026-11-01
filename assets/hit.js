@@ -1,5 +1,13 @@
 // Visit counter: the page, the site you came from and the partner tag. No cookies, no IP stored (see How it works).
 (function () {
+  // automated browsers (crawlers that run pages, test tools) say so in navigator.webdriver; pages nobody is looking at
+  // (rendered in the background) wait until they're actually on screen, and only count after a second there
+  if (navigator.webdriver) return;
+  var go = function () { setTimeout(send, 1000); };
+  if (document.visibilityState === "visible") go();
+  else document.addEventListener("visibilitychange", function once() { if (document.visibilityState === "visible") { document.removeEventListener("visibilitychange", once); go(); } });
+  function send() {
+  if (document.visibilityState !== "visible") return;
   try {
     var ref = "";
     try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
@@ -12,4 +20,5 @@
     if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" }));
     else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
   } catch (e) {}
+  }
 })();
