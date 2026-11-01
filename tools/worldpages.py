@@ -51,7 +51,8 @@ a.lv{font-size:.72rem;font-weight:800;text-decoration:none;background:var(--pane
 .navh{display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:3px 11px 3px 9px;border-radius:999px;background:var(--accent,#6a3df0);color:#fff!important;font-size:.78rem;font-weight:800;line-height:1.3;text-decoration:none!important;white-space:nowrap;vertical-align:1px;box-shadow:0 1px 3px rgba(40,20,90,.25)}
 .navh::before{content:"";width:0;height:0;border-left:7px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent}
 .navh:hover{filter:brightness(1.1)}
-.navh.big{font-size:.9rem;padding:6px 15px 6px 13px;margin:0 6px 0 0}"""
+.navh.big{font-size:.9rem;padding:6px 15px 6px 13px;margin:0 6px 0 0}
+td .navh{font-size:.7rem;padding:2px 8px 2px 6px;margin-left:2px;box-shadow:none}"""
 
 JOBNAME = {0: "Beginner", 1: "Warrior", 2: "Magician", 3: "Bowman", 4: "Thief", 5: "Pirate"}
 CLASSES = ["Warrior", "Magician", "Bowman", "Thief"]
@@ -109,7 +110,7 @@ def page(title, desc, path, crumbs, body, og=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=10"><link rel="stylesheet" href="/item/world.css?v=5"><link rel="stylesheet" href="/assets/nav.css?v=7">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=10"><link rel="stylesheet" href="/item/world.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=7">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
