@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.7",
- "date": "2026-11-01T02:17:03+00:00",
- "notes": "Seller names read right in game windows bigger than 1920 x 1080",
- "sha256": "fa8e941e38493817f2615434093dc81063cbeb99cf36551f4ff1f821d499383c",
- "size": 166972,
+ "version": "2026.10.31.8",
+ "date": "2026-11-01T02:26:30+00:00",
+ "notes": "Listing counts only count fully read listings: an equip counts once its stats are read",
+ "sha256": "a604fff8a35b735754a4cf6ead5b3da8c836d0649d21dcde829ae89e41738bdb",
+ "size": 167408,
  "history": [
+  {
+   "version": "2026.10.31.8",
+   "date": "2026-10-31",
+   "notes": "Listing counts only count fully read listings: an equip counts once its stats are read"
+  },
   {
    "version": "2026.10.31.7",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.3",
    "date": "2026-10-27",
    "notes": "Shop rooms always read as a Free Market room: a minimap title read in another font keeps its room number."
-  },
-  {
-   "version": "2026.10.27.1",
-   "date": "2026-10-26",
-   "notes": "Faster equip stats: the two reading passes run side by side and a hover no longer re-reads the whole shop, so the read chime comes about twice as fast"
   }
  ],
  "pip": [],
- "sig": "71c5a82e3df96e086c1910cc2f039cd4920b2896d68e1a50e88286897bd350d14901406037d0ad29753f44ecfc45ea6aaa05e38fd87cc5e4e2c348a8dc2ca7417c765d8581a3456672d6a9d837604eee870b3d22a59f09fa374491dd7eaa3088e7f85ece4913b2d345470d573b2a773ffb1c3c1a010d68964bf0c27b50df2cd4f8c93a8baa00036db151b53e0c1a8434c7d79cdfc1ccd932c40c47759f979182f0817073a904046aed64e9646dfb498c2d4740e2ab08aff0749c34739685d324a5e247ac975114a22774e9e61ff5284eada21a7d0088ed71574a71478d8cb2228f96c3c1baf727bd48996791c0a9851e33dac6006e16354e7e44de73bfa960eb"
+ "sig": "a57e0fb4dd7fe3ad30bac64ed3cc0bf29e49fd8b43e682e9e03f548caa4cfc2a4873e25c584d3619f00352f9db7955c504e36460f4cb27e2dc3484249874fd5dddddfad1ed31ec9e678afe74c56a7e031397b8bede5a8e38b083c9641097883ac01e3f91b3a303087579966d5ed0e24513202ac56ac665a4c12cb92c1d7a9960377e6dce6355b7197487bcd7392039d37e565b03f5afc898c4e29add7e94f59bfbf369025e0987aae8a42b5eed3d526e22ba8a8644ecd278ec1d2aef46046f93e547482988625082ec66ed4a7b38eef9faa436add2ba8a11f9cb3569094f5504e47293a7358a608f24ad1ecc325caa296bbed53ee3197ebdb97ed2d83b717e09"
 }
