@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.10.31.9"
+VERSION = "2026.11.2.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -524,7 +524,7 @@ def send_tip_image(img):
 
 # A popup or room title the readers couldn't make sense of goes to Club FM as a small picture, so the readers can be
 # fixed from what scanners actually see (no review folder to send). Only while publishing is on; a few a day.
-MISS_CAP = {"tip": 20, "room": 5, "bar": 5}
+MISS_CAP = {"tip": 20, "room": 5, "bar": 5, "row": 5}
 MISS = {"day": "", "n": {}, "at": {}}
 def send_miss(cfg, img, kind, info=""):
     try:
@@ -1724,7 +1724,9 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
         # the popup covers part of the list, so a hover over the same seller's shop read in the last minute
         # reuses that read too (the name plate above the list isn't covered)
         ph = (extra or {}).get("ph")
-        if extra and extra.get("tip") is not None and last and (last[0] == sh and time.time() - last[1] < 120 or (ph and len(last) > 3 and last[3] == ph and time.time() - last[1] < 60)):
+        # only when the rows that can still be read are the same ones: a scrolled list is the same seller's shop
+        # showing other items, and reusing the old read there lost every row below and mismatched the popup
+        if extra and extra.get("tip") is not None and last and (last[0] == sh and time.time() - last[1] < 120 or (ph and len(last) > 3 and last[3] == ph and time.time() - last[1] < 60 and fmparse.same_rows(img, last[2].get("rows")))):
             import copy; res = copy.deepcopy(last[2])
         else:
             res = fmparse.read_shop_checked(img)
@@ -1781,6 +1783,13 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
                 try: learn_new(res, extra["tip"])
                 except Exception as e: log("new item error:", e)
             if res["rows"]:
+                # arrows that read as "1 for": one shop row as a picture (icon, name and price only, no seller), a few a
+                # day, to tell a single arrow from a bundle the game shows another way
+                try:
+                    for r in res["rows"]:
+                        if re.search(r"Arrows for", r.get("i") or "") and r.get("q") == 1 and isinstance(r.get("y"), int):
+                            S = fmparse.SHOP; send_miss(cfg, img.crop((S["x0"] - 34, r["y"], S["x1"], r["y"] + 38)), "row", f"{r['i']} | {r['q']} for {r['p']}"); break
+                except Exception: pass
                 store.add_shop(res)
                 if res["tip"]:
                     store.last_ok = False

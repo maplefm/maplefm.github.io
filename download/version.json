@@ -1,10 +1,15 @@
 {
- "version": "2026.10.31.9",
- "date": "2026-11-01T02:46:35+00:00",
- "notes": "Reads shops exactly at 3840 x 2160: new letter shapes (Ky, zyz, tty) and a stray mark after an item name is ignored",
- "sha256": "86a049cf7c3be64be0af891f40d044e03b22d497b16526f5bb29ac57884de8c1",
- "size": 167978,
+ "version": "2026.11.2.1",
+ "date": "2026-11-02T12:12:21+00:00",
+ "notes": "Exact reading at every window size, not just 1920 and 3840. Seller names with touching letters read right. Hovering after you scroll a shop now matches the right item. Unsure rows are left out instead of guessed.",
+ "sha256": "d0c21253e8461038f5a308e059ae0dd8804573de6b23f85de7796fef81d87b84",
+ "size": 170136,
  "history": [
+  {
+   "version": "2026.11.2.1",
+   "date": "2026-11-02",
+   "notes": "Exact reading at every window size, not just 1920 and 3840. Seller names with touching letters read right. Hovering after you scroll a shop now matches the right item. Unsure rows are left out instead of guessed."
+  },
   {
    "version": "2026.10.31.9",
    "date": "2026-10-31",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.5",
    "date": "2026-10-27",
    "notes": "Fixes the reader error that stopped shops from being saved while you hover an item with screenshot saving on."
-  },
-  {
-   "version": "2026.10.27.4",
-   "date": "2026-10-27",
-   "notes": "Reads the upgrades-left line far more often, even over a bright chat background. Expensive equips (500K and up) send a picture of their popup so the site can show it."
   }
  ],
  "pip": [],
- "sig": "8dd2397abcc593db24b6fe79ba122110b2a1afd4b717d0df50fb07ba7580ffd8f7d9c1f262ae386d6685c4fc4a6b5cf0e885ab67fa9004216b4ad5b199547bb1efff5bdd0506519edfdc9d40678fc24902bb13673404a48b30d7d38bbed9c6653002196646a20dfac25be0184009f4f9226d30f135ae06ce303d3af7b67b56fde9e422275f1babc1399ae27eadf2b010abcad533d533fc045fb795ae2f519829407ea38f697d98db07721312a981f6d66de9e65305b81fd5e5e4fce0634b280e43bc2b4354ef312500d46f2bf4c279681eb33506ea9e379f6bf34457166bd96821c91a9d5d8f4e1325791ebcd5f081741c31425aa741fb8da47220450cebdacc"
+ "sig": "a3baaacb2f1b6b55b52278dd66c897fa0db77080a18afba624564e900a7fece3ed58dae44773cba461da8bd45fb83edb3a9900abafae62c2c5fc482b7f8bbae09569f3650bdb1970795c1a944e8c3d692357252c04af57e271f8b00e07e75f045afbdfe466a56def35cc9d3cdd19ba92d09064fdeefe9481bd8d961720b3d1303fd29aecd225fdad72cc0fd62d5c59cb9d688e221893f019cdef6c6a903bf1646cc382129d54da0f3f8d2d9e8b7b2d2726a061a40666e23ab33254e5bfa58c810b93a93e6655f24cf8c0428362616fe99b0cdcf784e74643aa02f49a79669360c19420690b66830df55502913031fa2cad8a62441647913db72205032d2ba56b"
 }

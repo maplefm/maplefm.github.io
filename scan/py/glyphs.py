@@ -67,7 +67,69 @@ def glyphs_of(m, y0, y1):
     # heights are measured from the line's baseline (where most letters end), so a line found a pixel higher or
     # lower reads the same, and so does a word with no tall letters
     bots = [r[2] for r in runs]; ref = max(set(bots), key=lambda b: (bots.count(b), -b))
+    _LAST[0] = (band, ref)
     return [(x0, x1, "%d:%d:" % (bot - ref, x1 - x0) + "".join("1" if v else "0" for v in g.ravel())) for x0, x1, bot, g in runs]
+
+_LAST = [None]       # the band and baseline of the line glyphs_of cut last, for splitting letters that touch
+_TPL = {}
+
+def _templates(table):
+    """Each single letter in a table as (char, pixels, bottom offset), widest first."""
+    k = id(table)
+    if k not in _TPL:
+        out = []
+        for key, ch in table.items():
+            if not isinstance(ch, str) or len(ch) != 1: continue
+            try:
+                d, w, bits = key.split(":", 2); d, w = int(d), int(w)
+            except ValueError:
+                continue
+            if not w or len(bits) % w: continue
+            g = np.array([c == "1" for c in bits], dtype=bool).reshape(-1, w)
+            out.append((ch, g, d))
+        out.sort(key=lambda t: -t[1].shape[1])
+        _TPL[k] = out
+    return _TPL[k]
+
+def split_touching(x0, x1, table):
+    """Two or three letters drawn so close they touch ("yw" in Reyw, "wt" in Arrowth, "zy" in Snipzy) come out of
+    glyphs_of as one shape no table has. Find the known letters that, laid side by side (a letter may share a column
+    with the next), cover exactly those pixels and nothing else. The spelling with the fewest letters wins; if two
+    spellings tie, it is None."""
+    if _LAST[0] is None: return None
+    band, ref = _LAST[0]
+    R = band[:, x0:x1]
+    H, W = R.shape
+    if W > 24: return None
+    T = _templates(table)
+    found = set()
+    def place(x, cov, s, depth):
+        if len(found) > 20 or depth > 3: return
+        if x >= W:
+            if (cov == R).all(): found.add(s)
+            return
+        if not R[:, x].any() and x > 0:
+            place(x + 1, cov, s, depth); return
+        for ch, g, d in T:
+            h, w = g.shape
+            if x + w > W: continue
+            bot = ref + d; top = bot - h + 1
+            if top < 0 or bot >= H: continue
+            win = R[top:bot + 1, x:x + w]
+            if not g[:, 0].any() or (g & ~win).any(): continue
+            c2 = cov.copy(); c2[top:bot + 1, x:x + w] |= g
+            # nothing left uncovered behind this letter: every ink pixel left of its end is explained
+            if (R[:, :x + w - 1] & ~c2[:, :x + w - 1]).any(): continue
+            for nx in (x + w - 1, x + w):
+                if nx >= W or R[:, nx].any() and depth < 3:
+                    place(nx, c2, s + ch, depth + 1)
+                if nx >= W: break
+    place(0, np.zeros_like(R), "", 0)
+    # "w" also fits as two "v" sharing a column: the fewest letters that fit is the reading, if only one does
+    if not found or len(found) > 20: return None
+    n = min(len(x) for x in found); best = [x for x in found if len(x) == n]
+    if len(best) != 1 or n < 2: return None
+    return best[0]
 
 def text_of(gl):
     """Letters to text, with a space wherever the gap is wider than the font's letter spacing."""
@@ -123,6 +185,7 @@ def decode(gl, table):
     s = ""
     for i, g in enumerate(gl):
         t = table.get(g[2])
+        if t is None: t = split_touching(g[0], g[1], table)
         if t is None: return None
         if i and g[0] - gl[i - 1][1] >= 4: s += " "
         s += t

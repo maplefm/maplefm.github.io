@@ -389,6 +389,27 @@ def _shop_rows(region):
         if has: ys.append((y, grey))
     return ys
 
+def same_rows(region, rows):
+    """True when every shop row that can be read exactly right now shows the same item and price as rows (an earlier
+    read of this shop) at the same height, and at least one could be checked. A popup covers some rows; the player
+    may also have scrolled the list, and then the same seller's shop shows other items."""
+    v = exact_view(region)
+    if v is not None: region = v
+    S = SHOP; base = lambda n: re.sub(r"(: \w+| \(tier cut off\))$", "", n or "")
+    old = {r.get("y"): r for r in rows or []}
+    seen = 0
+    for y, grey in _shop_rows(region):
+        tile = region.crop((S["x0"], y, S["x1"], y + 38))
+        gp = glyphs.read_price(tile)
+        if not gp: continue
+        name, known = glyph_item(glyphs.read_name(tile))
+        if not known: continue
+        o = old.get(y)
+        if not o or base(o.get("i")) != base(name) or o.get("p") != gp[1] or o.get("q") != gp[0]: return False
+        seen += 1
+    if len(_shop_rows(region)) != len(old): return False
+    return seen > 0
+
 def read_shop_fast(region):
     """The whole shop read straight off the pixels: every price, name and the seller in the game's own font, scroll
     tiers from their icons. Returns None when anything on it isn't certain, and the text readers take over."""
@@ -443,10 +464,25 @@ def read_seller_plate(plate, hint=None):
         return None
 
 
+def exact_view(region):
+    """At a window bigger than 1920 x 1080 the game scales its 1920 picture up. Taking one screen pixel from the middle
+    of each scaled-up game pixel gives the game's own pixels back, so the exact letter reader works at that size too.
+    (The smooth copy grab() makes is kept for the text readers.) None at 1920 x 1080 or without the screen pixels."""
+    try:
+        nat = region.info.get("native")
+        if not nat: return None
+        im, box, k, _ = nat
+        if abs(k[0] - 1) < 0.01 and abs(k[1] - 1) < 0.01: return None
+        return im.resize(region.size, Image.NEAREST, box=tuple(box))
+    except Exception:
+        return None
+
+
 def read_shop_checked(region):
     """Read the shop. Straight off the pixels when every row is certain; otherwise with two independent text readers,
     keeping a row only when its price is certain (exact pixel read, or both readers agree)."""
-    fast = read_shop_fast(region)
+    alt = exact_view(region)
+    fast = read_shop_fast(region) or (alt is not None and read_shop_fast(alt)) or None
     STATS["shops"] += 1
     if fast:
         STATS["fast"] += 1
@@ -462,9 +498,15 @@ def read_shop_checked(region):
     title = " ".join(l["text"] for l in tl[0]).strip() or " ".join(l["text"] for l in rl[0]).strip()
     seller = re.sub(r"[^A-Za-z0-9]", "", "".join(l["text"] for l in rl[1])) or re.sub(r"[^A-Za-z0-9]", "", "".join(l["text"] for l in tl[1]))
     gs = glyphs.read_seller(region.crop(S["seller"]))
+    if not gs and alt is not None: gs = glyphs.read_seller(alt.crop(S["seller"]))
     if gs and len(gs) >= 2:
         # exact, except capital I and small l look the same: take the text reader's I/l where it agrees otherwise
-        seller = seller if _fold(seller) == _fold(gs) else gs
+        # letter by letter, so only I or l comes from the text reader; its other letters can be the wrong case
+        # ("Agentmillion" for AgentMillion)
+        if len(seller) == len(gs) and _fold(seller) == _fold(gs):
+            seller = "".join(t if g in "Il" and t in "Il" else g for g, t in zip(gs, seller))
+        else:
+            seller = gs
     else:
         # a scaled game has no exact pixel font: read the name plate alone, white letters only, several ways, and
         # keep the spelling most of them agree on ("xToxa" was read as "8x01x" from the whole-shop text)
@@ -485,6 +527,7 @@ def read_shop_checked(region):
         # The price line drawn in the game's pixel font, read letter by letter against the learned letter shapes:
         # exact or nothing. When it reads, it decides the price and bundle size; the text readers only give the name.
         gp = glyphs.read_price(region.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38)))
+        if not gp and alt is not None: gp = glyphs.read_price(alt.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38)))
         if gp:
             qty, price = gp
             if not tm:
@@ -505,6 +548,7 @@ def read_shop_checked(region):
             elif rq != qty:
                 out["dropped"] += 1; continue
         gname, gk = glyph_item(glyphs.read_name(region.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38))))
+        if not gk and alt is not None: gname, gk = glyph_item(glyphs.read_name(alt.crop((S["x0"], meta[i][2], S["x1"], meta[i][2] + 38))))
         name, known = (gname, True) if gk else clean_item(tname)
         if not known and tname:
             # a stray letter or two read off the pointer or the row's edge after the name ("Star Earrings re"):
@@ -513,6 +557,11 @@ def read_shop_checked(region):
             if t2 != tname.strip():
                 n3, k3 = clean_item(t2)
                 if k3: name, known = n3, True
+        if known and not gk:
+            # not read exactly: when the second reader names a different real item, neither can be trusted
+            rn2, rk2 = clean_item(re.split(r"\d+\s*[ft1l]?[o0]?r?\s*\d", rjoin)[0])
+            if rk2 and re.sub(r"(: \w+| \(tier cut off\))$", "", rn2) != re.sub(r"(: \w+| \(tier cut off\))$", "", name):
+                out["dropped"] += 1; continue
         if not known:
             rname = re.split(r"\d+\s*[ft1l]?[o0]?r?\s*\d", rjoin)[0]
             n2, k2 = clean_item(rname)
@@ -521,7 +570,7 @@ def read_shop_checked(region):
             elif not name or not n2 or difflib.SequenceMatcher(None, norm(name), norm(n2)).ratio() < 0.8:
                 out["dropped"] += 1; continue
         out["rows"].append({"i": name, "p": price, "q": qty, "so": bool(meta[i][1]), "known": known, "y": meta[i][2]})
-    return resolve_tiers(region, out)
+    return resolve_tiers(alt if alt is not None else region, out)
 
 # ---------------------------------------------------------------- chat
 
