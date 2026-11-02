@@ -126,11 +126,18 @@
   function placed(l) { return !l.chat && !!l.c && !l.ci && /^FM\d+$/.test(l.r || ""); }
   // Where to buy order: full location first, then channel only, then nothing read; chat posts last
   function listRank(l) { return l.chat ? 3 : placed(l) ? 0 : l.c && !l.ci ? 1 : 2; }
+  // a stream seller the reader couldn't confirm: never shown as a name (a misread name sends buyers to the wrong
+  // player); the broadcast link lets them read it off the video themselves
+  function sname(l) { return l.stream && l.ns ? "name not read" : l.s; }
+  function sellerEl(l, tag, cls) {
+    if (!(l.stream && l.ns)) return el(tag || "b", cls || null, l.s);
+    var w = el("span", "unk"); w.appendChild(document.createTextNode("name not read · ")); var a = streamLink(l); a.textContent = "see it on " + a.textContent; w.appendChild(a); return w;
+  }
   function buyWhere(l) {
     if (l.chat) return "whisper them, posted in chat" + (l.ns ? " (name may be misread: check it in chat)" : "");
     var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" || isMap(l.r) ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
-    var warn = l.ns ? " (seller name may be misread on the stream)" : "";
+    var warn = "";
     if (!ch && !room) return "location not read" + warn;
     return [ch || "channel not read", room || "room not read"].join(", ") + warn;
   }
@@ -3059,7 +3066,7 @@
     var hd = el("div", "rlh"); hd.appendChild(el("b", null, title)); hd.appendChild(el("span", null, (g.up.length ? g.up.length + " for sale now" : "none for sale now") + " · " + g.sold.length + " sold")); box.appendChild(hd);
     function row(l, kind) {
       var r = el("div", "rl " + kind); r.tabIndex = 0;
-      var t = el("div", "rlt"); t.appendChild(el("b", null, l.s)); var c = statChip(i.item, l.x, l.xj); if (c) { var cw = el("span", "rlc"); cw.appendChild(c); t.appendChild(cw); }
+      var t = el("div", "rlt"); t.appendChild(sellerEl(l)); var c = statChip(i.item, l.x, l.xj); if (c) { var cw = el("span", "rlc"); cw.appendChild(c); t.appendChild(cw); }
       t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? "trade chat" : "")) + " · " + ago(l.t)));
       r.appendChild(t);
       var p = el("div", "rlp"); p.appendChild(money(l.u)); p.appendChild(el("small", null, kind === "up" ? (l.st === "up" ? "likely still up" : "may be gone") : kind === "sold" ? "sold" : "seen, gone now")); r.appendChild(p);
@@ -3247,7 +3254,7 @@
     im.onload = function () { var gi = GTIP_ON && TIPL.get(GTIP_ON); if (gi) gtipMove(gtipMove.x || 0, gtipMove.y || 0); };
     im.src = "https://api.maplefm.gg/tipimg/" + xi + ".png"; wrap.appendChild(im);
     var f = el("div", "gt-foot");
-    var pl = el("div"); pl.appendChild(el("b", null, l.s)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
+    var pl = el("div"); pl.appendChild(sellerEl(l)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
     var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t)));
     f.appendChild(el("div", "gt-dim", "The popup exactly as FM Watcher saw it in game"));
     wrap.appendChild(f);
@@ -3295,7 +3302,7 @@
     if (!any && slots == null) box.appendChild(el("div", "gt-l gt-dim", "No stats"));
     if (l && l.s) {
       var f = el("div", "gt-foot");
-      var pl = el("div"); pl.appendChild(el("b", null, l.s)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
+      var pl = el("div"); pl.appendChild(sellerEl(l)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
       var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
       var spl = read ? scrollSplit(name, l) : null;
       if (spl && spl.ok && spl.su > 0) {
@@ -3711,7 +3718,7 @@
     var det = el("div", "lgsel");   // no sentence over the lists: the grade's button already says its price and count
     function line(l, sold) {
       var li = el("div", "lgl" + ((g.odd && g.odd.indexOf(l) >= 0) || (g.oddA && g.oddA.indexOf(l) >= 0) ? " odd" : "")); li.appendChild(money(l.u));
-      li.appendChild(el("span", "lgw", l.s));
+      li.appendChild(sellerEl(l, "span", "lgw"));
       var chip = statChip(i.item, l.x, l.xj); if (chip) li.appendChild(chip);
       var lsm = el("small"); if (!sold) { lsm.appendChild(el("b", "wh", buyWhere(l))); lsm.appendChild(document.createTextNode(" · ")); } lsm.appendChild(document.createTextNode(ago(l.t))); li.appendChild(lsm);
       tipAttach(li, l, i.item);
@@ -3834,7 +3841,7 @@
     var ls = el("div", "list"), rows = state.list === "buy" ? buyRows : i.sales.slice().sort(function (a, b) { return b.t - a.t; });   // Recent sales: always newest first
     rows.slice(0, 40).forEach(function (x) {
       var li = el("div", "li" + (state.list === "buy" && (x.st === "gone" || x.st === "sold") ? " gone" : state.list === "buy" && x.st === "old" ? " stale" : ""));
-      var nb = el("b", null, x.s); li.appendChild(nb);
+      var nb = sellerEl(x); li.appendChild(nb);
       var p = el("div", "p"); p.appendChild(money(x.u)); if (x.n > 1 || x.q > 1) p.appendChild(el("small", null, x.n > 1 ? "set of " + fmt(x.n) : x.q + " for " + M(x.p) + " · each")); li.appendChild(p);
       var sm = el("small"); li.appendChild(sm);
       if (state.list === "buy") { buyWhere(x).split(", ").forEach(function (part, k) { if (k) sm.appendChild(document.createTextNode(", ")); sm.appendChild(/not (seen|read)/.test(part) ? el("span", "unk", part) : el("b", "wh", part)); }); sm.appendChild(document.createTextNode(" · " + ago(x.t))); }
@@ -4917,7 +4924,7 @@
     s.forEach(function (l) {
       var b = el("button"); b.type = "button"; b.appendChild(iconBox(l.i)); var bn = el("b", null, l.i); b.appendChild(bn);
       var di = l.x && D.byName[l.i], dg = di && di.equip && gradeOf(di, l); if (dg) bn.appendChild(gradeTag(ladderOf(di), dg));
-      b.appendChild(el("small", null, l.s + (where(l) ? " · " + where(l) : "") + " · " + ago(l.t))); b.appendChild(money(l.p));
+      b.appendChild(el("small", null, sname(l) + (where(l) ? " · " + where(l) : "") + " · " + ago(l.t))); b.appendChild(money(l.p));
       tipAttach(b, l, l.i);
       b.addEventListener("click", function () { $("drawer").classList.remove("open"); pick(l.i); }); box.appendChild(b);
     });
