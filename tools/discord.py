@@ -70,10 +70,19 @@ def post(kind, content=None, embeds=None):
     return False
 
 import re as _re
+_MAPN = None
+def _mapnames():
+    """Maps outside the Free Market as the game spells them (data/mapnames.json): shops go up there too."""
+    global _MAPN
+    if _MAPN is None:
+        try: _MAPN = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "mapnames.json"), encoding="utf-8")))
+        except Exception: _MAPN = set()
+    return _MAPN
+
 def spot(r):
     """Where a listing was: "FM7 ch5". A room the watcher couldn't read cleanly is left out rather than shown as junk."""
     room = str(r.get("r") or "").strip()
-    room = room if re.fullmatch(r"FM\d{1,2}", room) else ""
+    room = room if re.fullmatch(r"FM\d{1,2}", room) or room in _mapnames() else ""
     ch = f"ch{int(r['c'])}" if str(r.get("c") or "").isdigit() else ""
     return (room + " " + ch).strip() or "Free Market"
 

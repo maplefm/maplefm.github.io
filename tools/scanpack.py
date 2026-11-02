@@ -6,7 +6,7 @@ watcher: same fmparse.py, glyph tables, exact popup reader and item list. Run af
 import zipfile, json, os, hashlib, shutil, sys
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 OUT = os.path.join(ROOT, "scan", "py")
-FILES = ["fmparse.py", "glyphs.py", "ocrlib.py", "tipexact.py", "items.json", "glyphs.json", "names.json", "chat_names.json",
+FILES = ["fmparse.py", "glyphs.py", "ocrlib.py", "tipexact.py", "items.json", "glyphs.json", "names.json", "maps.json", "chat_names.json",
          "tiers.png", "statfit.json", "tipglyphs.json", "watcher.py", "boards.py", "reference.json"]
 os.makedirs(OUT, exist_ok=True)
 SRC = sys.argv[sys.argv.index("--src") + 1] if "--src" in sys.argv else None

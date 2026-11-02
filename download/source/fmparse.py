@@ -880,37 +880,109 @@ def _room_digits(t):
     return re.sub(r"<\s*([0-9/|lIi!OoDSsBZzgqAT]{1,2})\s*>", lambda m: "<" + m.group(1).translate(_ROOMLIKE) + ">", t)
 
 
+_MAPS = None
+def _maps():
+    global _MAPS
+    if _MAPS is None:
+        try: _MAPS = json.load(open(os.path.join(HERE, "maps.json"), encoding="utf-8"))
+        except Exception: _MAPS = []
+    return _MAPS
+
+def match_map(text):
+    """A map name as the game spells it, from a read of the minimap title ("Henesys Huntinq Ground l" is Henesys
+    Hunting Ground I), or "" when no map is clearly the one: a shop is never placed on a guessed map."""
+    # I, l, 1 and | look alike in the title font (roman numerals: Ground I, II, III): compared as one letter
+    fold = lambda x: re.sub(r"[^a-z0-9]", "", x.lower().replace("|", "i").replace("l", "i").replace("1", "i"))
+    t = fold(text or "")
+    if len(t) < 4: return ""
+    scored = []
+    for n in _maps():
+        k = fold(n)
+        if k == t: return n
+        scored.append((difflib.SequenceMatcher(None, t, k).ratio(), n))
+    scored.sort(reverse=True)
+    if not scored or scored[0][0] < 0.9:
+        # the first letter or two cut off at the left edge of the capture ("linia" for Ellinia)
+        tail = [n for n in _maps() if fold(n).endswith(t) and len(t) >= 5 and len(t) >= 0.6 * len(fold(n))]
+        return tail[0] if len(tail) == 1 else ""
+    close = [n for r, n in scored if r >= scored[0][0] - 0.04]
+    if len(close) == 1: return close[0]
+    # Ground I, II and III read nearly alike: the same name before the number, then the number has to be exact
+    num = lambda n: (re.match(r"^(.*?)\s+([IV]+)$", n) or [None, n, ""])
+    bases = {fold(num(n)[1]) for n in close}
+    words = re.split(r"\s+", (text or "").strip())
+    tail = fold(words[-1]) if len(words) > 1 else ""
+    if len(bases) == 1 and re.fullmatch(r"[iv]+", tail or "-"):
+        hit = [n for n in close if fold(num(n)[2]) == tail]
+        if len(hit) == 1: return hit[0]
+    return ""
+
+
+def _room_panel(img):
+    """The minimap's title panel inside the capture, wherever it sits (a moved minimap, the map icon at its left, a
+    dialog dimming it), brightened back to its normal blue-grey. None when there's no panel in the picture."""
+    try:
+        import numpy as np
+        a = np.asarray(img).astype(float)
+        r, g, b = a[..., 0], a[..., 1], a[..., 2]
+        m = (b > 45) & (np.abs(r / np.maximum(b, 1) - 0.75) < 0.07) & (np.abs(g / np.maximum(b, 1) - 0.917) < 0.05)
+        cols = m.mean(axis=0) > 0.25
+        best, x = (0, 0), 0
+        while x < len(cols):
+            if cols[x]:
+                x0, gap = x, 0
+                while x < len(cols) and gap <= 3:
+                    gap = 0 if cols[x] else gap + 1; x += 1
+                x1 = x - gap
+                if x1 - x0 > best[1] - best[0]: best = (x0, x1)
+            x += 1
+        x0, x1 = best
+        if x1 - x0 < 40: return None
+        lvl = float(np.median(b[:, x0:x1][m[:, x0:x1]]))
+        k = 204.0 / max(40.0, lvl)
+        out = np.clip(a[:, x0:x1 + 1] * k, 0, 255).astype("uint8")
+        return Image.fromarray(out)
+    except Exception:
+        return None
+
 def read_room(img):
     """The minimap title is white text: area on line one, map on line two.
-    Returns 'FM3' for Free Market rooms, the map name elsewhere, or '' if unreadable."""
-    img = _title_bar(img.convert("RGB"))
-    m = min_channel(img)
-    lo, hi = 150, 225
-    k = 255.0 / (hi - lo)
-    g = m.point(lambda v: 255 if v <= lo else 0 if v >= hi else int(255 - (v - lo) * k))
-    g = g.resize((g.width * 4, g.height * 4), Image.BICUBIC)
-    lines = [re.sub(r"[^A-Za-z0-9<>' -]", "", _room_digits(l["text"])).strip() for l in ocr_lines(g, 4, 6)]
-    lines = [l for l in lines if len(l) >= 3]
-    if not lines:
-        return ""
-    text = " ".join(lines)
+    Returns 'FM3' for Free Market rooms, the map's name elsewhere (only a map the game has, spelled its way),
+    'FM' for a Free Market room whose number didn't read, or '' if unreadable."""
+    img = img.convert("RGB")
+    pics = [p for p in (_room_panel(img), _title_bar(img)) if p is not None]
     fm = re.compile(r"(fr)?e\s*e?\s*mark", re.I)       # "ee Market" when the F and r are cut off
-    if fm.search(text) and re.search(r"entr", lines[-1], re.I):
-        return "FM Entrance"
-    if fm.search(text):
-        last = _room_digits(lines[-1])
-        nums = re.findall(r"<\s*(\d{1,2})\s*>?", last) or re.findall(r"(\d{1,2})\s*>?\s*\S?\s*$", last)
-        return "FM" + str(int(nums[0])) if nums and 1 <= int(nums[0]) <= 40 else "FM"
-    name = lines[-1]
-    return name if re.search(r"[A-Za-z]{4}", name) and len(name) <= 44 else ""
+    in_fm = False
+    for pic in pics:
+        m = min_channel(pic)
+        for lo, hi in ((150, 225), (120, 200), (170, 235)):
+            k = 255.0 / (hi - lo)
+            g = m.point(lambda v: 255 if v <= lo else 0 if v >= hi else int(255 - (v - lo) * k))
+            g = g.resize((g.width * 4, g.height * 4), Image.BICUBIC)
+            lines = [re.sub(r"[^A-Za-z0-9<>' |-]", "", _room_digits(l["text"])).strip() for l in ocr_lines(g, 4, 6)]
+            lines = [l for l in lines if len(l) >= 3]
+            if not lines: continue
+            text = " ".join(lines)
+            if fm.search(text):
+                in_fm = True
+                if re.search(r"entr", text, re.I): return "FM Entrance"
+                nums = re.findall(r"<\s*(\d{1,2})\s*>", _room_digits(text)) or re.findall(r"<\s*(\d{1,2})", _room_digits(text))
+                if len(set(nums)) == 1 and 1 <= int(nums[0]) <= 40: return "FM" + str(int(nums[0]))
+                continue
+            # outside the Free Market (shops go up in hunting maps too)
+            for l in sorted(lines, key=len, reverse=True):
+                mp = match_map(re.sub(r"\s*\|?\s*$", "", l) if not re.search(r"\s[|lI1]{1,3}$", l) else l)
+                if mp: return mp
+    return "FM" if in_fm else ""
 
 
-def read_room_bar(img):
+def read_room_bar(img, trim=True):
     """The minimap minimized to its title bar: one line, "Hidden Street : Free Market <9>", dark text on a light bar at
     the very top left of the game window. Only a room number written between < and > counts (a misread digit
-    elsewhere is never a room), and "Entrance" for the Free Market Entrance. Returns 'FM9', 'FM Entrance' or ''."""
+    elsewhere is never a room), and "Entrance" for the Free Market Entrance. Outside the Free Market, the map's name
+    when the game has a map spelled that way. Returns 'FM9', 'FM Entrance', a map name or ''."""
     try:
-        img = _title_bar(img.convert("RGB"))
+        img = _title_bar(img.convert("RGB")) if trim else img.convert("RGB")
         m = min_channel(img)
         best = ""
         for lo, hi in ((90, 170), (120, 200)):
@@ -920,6 +992,9 @@ def read_room_bar(img):
             for l in ocr_lines(g, 4, 6):
                 t = re.sub(r"[^A-Za-z0-9<>:' -]", "", _room_digits(l["text"]))
                 if not re.search(r"(fr)?e\s*e?\s*mark", t, re.I):
+                    # "Victoria Road : Henesys Hunting Ground I": the map after the colon, if the game has it
+                    mp = match_map(re.split(r"\s*:\s*", l["text"], 1)[-1]) if ":" in l["text"] else ""
+                    if mp and not best: best = mp
                     continue
                 if re.search(r"entr", t, re.I):
                     return "FM Entrance"
