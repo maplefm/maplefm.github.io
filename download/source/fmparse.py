@@ -1358,11 +1358,11 @@ def _tip_box(img):
 
 _LABELS = [
     ("ATT", r"[wvy]{1,2}eapon\s*att\w*"), ("MATT", r"(?:m|hi|rn)agic\s*att\w*"), ("WDEF", r"[wvy]{1,2}eapon\s*de[ft]\w*\.?"), ("MDEF", r"(?:m|hi|rn)agic\s*de[ft]\w*\.?"),
-    ("HP", r"max\s*hp"), ("MP", r"max\s*mp"), ("ACC", r"accura\w*"), ("AVOID", r"evasion|avoid\w*"),
+    ("HP", r"[mw]l?ax\s*hp"), ("MP", r"[mw]l?ax\s*mp"), ("ACC", r"accura\w*"), ("AVOID", r"evasion|avoid\w*"),
     ("SPEED", r"speed"), ("JUMP", r"jump"), ("STR", r"\bstr"), ("DEX", r"\bdex"), ("INT", r"\bint"), ("LUK", r"\bluk"),
     ("SLOTS", r"remaining\s*enhanc\w*|upgrades?\s*avail\w*"), ("SUCCESS", r"success\s*rate"),
     # crit lines: Emerald Earrings carry Critical Damage, Work Gloves Critical Rate ("Critical Darnage" is a common misread)
-    ("CRITDMG", r"cri\w*\.?\s*da[mrn]\w*"), ("CRIT", r"cri\w*\.?\s*ra[tl]\w*"),
+    ("CRITDMG", r"cri\w*\.?\s*da[mrn]\w*"), ("CRIT", r"cri\w*\.?\s*[rp]a[tl]\w*"),
 ]
 _VAL = r"\s*(?:[.:;]+\s*[+#*]?|[+#*])\s*(\d{1,4})\s*%?(?:\s*[\(\[{]\s*(\d{1,4})(?:\s*([+\-~]?)\s*(\d{1,3}))?)?"
 _LINE_RE = [(k, re.compile(r"(?<![a-z])(?<!req )(?<!req)(?:" + rx + r")" + _VAL, re.I)) for k, rx in _LABELS]
@@ -1446,20 +1446,23 @@ def _tip_panel(img):
 TIP_CFG = {"crop": True, "lo": 140, "hi": 215, "scale": 3, "below_type": True, "plusfix": True}
 TIP_PASSES = [(100, 170), (140, 215)]
 
-def read_tooltip(img, need_stats=True):
+def read_tooltip(img, need_stats=True, item=None):
     """Returns {'name', 'stats', 'lines', 'job'} for the item tooltip, or None.
     Crops to the tooltip's own panel, so whatever is behind it (the chat box, other players, the shop list) is
     left out, then reads it at two contrast levels and merges: a line one level misses or misreads, the other
     usually gets. On saved tooltips this took exact reads from 42 of 65 to 61 of 65, and it runs faster."""
     box = _tip_panel(img) if TIP_CFG["crop"] else None
     full = img
+    # a game window bigger than 1920 x 1080: the game's own pixels, which the exact letter reader can read
+    nat = exact_view(img)
     if box: img = img.crop(box)
+    eimg = nat.crop(box) if (nat is not None and box) else (nat if nat is not None else img)
     # The exact reader first: when every stat line of the popup reads exactly, those are the stats, so one pass of
     # the text reader (for the title and its "(+N)") is all that's left. Saves a whole pass on most popups.
     passes = TIP_PASSES; exact0 = {}
     try:
         import tipexact
-        ex0 = tipexact.read_tip(img)
+        ex0 = tipexact.read_tip(eimg)
         exact0 = dict(ex0["stats"]) if ex0 else {}
         for l in (ex0["lines"] if ex0 else []):
             if l.get("bad") == "after" and l.get("stat") and isinstance(l.get("v"), int): exact0[l["stat"]] = l["v"]
@@ -1478,6 +1481,25 @@ def read_tooltip(img, need_stats=True):
     if reads is None:
         reads = [r for r in (_read_tip_once(img, need_stats=False, lo=lo, hi=hi) for lo, hi in passes) if r]
     if not reads: return None
+    # Look again, the way a person squints at a line they're unsure of: when the passes disagree on a number, or
+    # the item should have a stat no pass found (its base stats, from statfit.json), read at three more contrasts.
+    def _unsettled(rs):
+        vs = {}
+        for r in rs:
+            for k, v in r["stats"].items():
+                if not k.endswith(("_b", "_c")): vs.setdefault(k, set()).add(v)
+        if any(len(x) > 1 for x in vs.values()): return True
+        nm = item or next((r.get("name") for r in rs if r.get("name")), "")
+        want = _fit_base(nm)
+        return bool(want) and any(k not in vs for k in want)
+    if len(passes) > 1 and _unsettled(reads):
+        more = [(120, 190), (80, 150), (160, 230)]
+        try:
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(len(more)) as ex:
+                reads += [r for r in ex.map(lambda p: _read_tip_once(img, need_stats=False, lo=p[0], hi=p[1]), more) if r]
+        except RuntimeError:
+            reads += [r for r in (_read_tip_once(img, need_stats=False, lo=lo, hi=hi) for lo, hi in more) if r]
     base = max(reads, key=lambda r: len(r["stats"]))
     # a plus sign read as a 4 on a line with no bracket ("Critical Rate: +41"): rates and small stats never get that high
     for r in reads:
@@ -1495,7 +1517,16 @@ def read_tooltip(img, need_stats=True):
         b = next((r["stats"].get(k + "_b") for r in reads if r["stats"].get(k + "_b") is not None), None)
         # a read whose total matches its own bracket ("+8 (0 +8)") wins; otherwise most reads agree, and on a tie
         # the value that fits the base in brackets ("+7 (6 +1)")
-        if k not in sure and len(c) > 1 and len(set(c.values())) == 1 and k not in (exact0 or {}):
+        # the game puts brackets on any stat that differs from the item's base, so a line no pass saw a bracket on
+        # is the base value; when that value is one of the readings, it is the reading
+        bv = _fit_vals(item or next((r.get("name") for r in reads if r.get("name")), "")).get(k)
+        if bv is not None and bv in c and len(c) > 1 and b is None and k not in sure and k not in (exact0 or {}):
+            stats[k] = bv; continue
+        top2 = sorted(c.values(), reverse=True)[:2]
+        # passes that disagree settle by a clear majority only when the item is known (its base stats are a check);
+        # an unknown item's line can be a neighbour's number read onto it, so any disagreement leaves the stat out
+        known_item = bool(_fit_vals(item or next((r.get("name") for r in reads if r.get("name")), "")))
+        if k not in sure and len(c) > 1 and (not known_item or (len(top2) > 1 and top2[0] < 2 * top2[1])) and k not in (exact0 or {}):
             continue                          # the passes disagree and nothing settles it: better missing than wrong
         stats[k] = sure[k] if k in sure else max(c.items(), key=lambda x: (x[1], -abs(x[0] - b) if b is not None else 0))[0]
         if b is not None and abs(stats[k] - b) <= 10: stats[k + "_b"] = b
@@ -1505,7 +1536,7 @@ def read_tooltip(img, need_stats=True):
     exact = None
     try:
         import tipexact
-        exact = tipexact.read_tip(img)
+        exact = tipexact.read_tip(eimg)
     except Exception:
         exact = None
     if exact:
@@ -1634,6 +1665,26 @@ def _tip_passed(img):
         n = int(d)
         return n if 1 <= n <= 20 else None
     return None
+
+_FITB = None
+def _fit_base(name):
+    """The stats an item always shows (its base lines), from statfit.json, or ()."""
+    global _FITB
+    if _FITB is None:
+        try:
+            d = json.load(open(os.path.join(HERE, "statfit.json"), encoding="utf-8"))
+            _FITB = {k.lower(): v for k, v in d.items()}
+        except Exception: _FITB = {}
+    f = _FITB.get(re.sub(r"\s*\(.*$", "", str(name or "")).strip().lower())
+    if not f or (len(f) > 2 and f[2]): return ()
+    vals = f[3] if len(f) > 3 and isinstance(f[3], dict) else {}
+    return tuple(k for k in f[1] if k != "SLOTS" and vals.get(k, 1))
+
+def _fit_vals(name):
+    """An item's base stat values from statfit.json ({"INT": 1, ...}), or {}."""
+    _fit_base("")
+    f = _FITB.get(re.sub(r"\s*\(.*$", "", str(name or "")).strip().lower())
+    return f[3] if f and len(f) > 3 and isinstance(f[3], dict) and not f[2] else {}
 
 def _read_tip_once(img, need_stats=True, lo=140, hi=215):
     C = TIP_CFG
