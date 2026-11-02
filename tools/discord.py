@@ -553,16 +553,29 @@ def job_deals(data_dir, summary_path, state_path):
         k = f"{day}|{str(who).lower()}"
         return str(who).lower() in trust and pinged.get(k, 0) < PING_CAP
     # everyone asking for each item in the last day: a price 3+ other sellers also ask is the going rate, not a deal
-    asks, docs = {}, []
+    asks, docs, chats = {}, [], []
     for who, d in scan_docs(data_dir):
         src = str(d.get("src", ""))
-        if "chat" in src or not src.startswith("watcher"): continue
+        if not src.startswith("watcher"): continue
+        if "chat" in src: chats.append((who, d)); continue
         docs.append((who, d))
         for r in d["rows"]:
             if r.get("so") or r.get("k") == "b" or now - int(r.get("t") or 0) > 86400: continue
             asks.setdefault(str(r.get("i")), {})[str(r.get("s")).lower()] = int(r.get("p") or 0)
+    # trade chat sell posts count too: the seller's name is all anyone needs to whisper. Only when the name is sure:
+    # the same seller has a shop we read exactly, or two scanners read the post with the same spelling
+    sellers = {str(r.get("s")).lower() for _, d in docs for r in d["rows"] if r.get("s")}
+    seenby = {}
+    for who, d in chats:
+        for r in d["rows"]:
+            if r.get("k") == "b": continue
+            seenby.setdefault((str(r.get("s")), str(r.get("i")), int(r.get("p") or 0)), set()).add(str(who).lower())
+    chat_docs = []
+    for who, d in chats:
+        rows2 = [dict(r, chat=1) for r in d["rows"] if r.get("k") != "b" and not r.get("ns") and (str(r.get("s")).lower() in sellers or len(seenby.get((str(r.get("s")), str(r.get("i")), int(r.get("p") or 0)), ())) >= 2)]
+        if rows2: chat_docs.append((who, dict(d, rows=rows2)))
     hot = []
-    for who, d in docs:
+    for who, d in docs + chat_docs:
         for r in d["rows"]:
             t = int(r.get("t") or 0)
             if r.get("so") or r.get("k") == "b" or r.get("spot") or now - t > DEAL_WIN or "cut off" in str(r.get("i") or ""): continue
@@ -624,8 +637,11 @@ def job_deals(data_dir, summary_path, state_path):
         roll = f" · **{plain(r['roll'], 40)}**, typical for this grade from {r['rolln']} sales" if r.get("roll") else ""
         line = (f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" listed at **{meso(int(r['p']))}** {coin()}" + (" each" if q > 1 else "")
                 + f"\n**+{meso(int(flip))}** {coin()} to flip · {int(round(off * 100))}% under typical {mz(int(it['typ']))}{roll}")
-        emb = {"title": "Mega deal", "description": line, "color": GREEN,
-               "fields": [{"name": "Seller", "value": plain(r.get("s"), 24), "inline": True},
+        if r.get("chat"):
+            where = ("Trade chat, CH " + str(int(r["c"]))) if str(r.get("c") or "").isdigit() else "Trade chat"
+            line += "\nPosted in trade chat: whisper the seller in game."
+        emb = {"title": "Mega deal" + (" in trade chat" if r.get("chat") else ""), "description": line, "color": GREEN,
+               "fields": [{"name": "Seller", "value": ("`" + plain(r.get("s"), 24) + "`") if r.get("chat") else plain(r.get("s"), 24), "inline": True},
                           {"name": "Spot", "value": where.strip() or "?", "inline": True},
                           {"name": "Caught by", "value": plain(who, 24), "inline": True}],
                "url": f"{SITE}/?q=" + urllib.request.quote(str(r.get("i") or "")[:64]) + "&s=" + urllib.request.quote(str(r.get("s") or "")[:24]) + f"&p={int(r['p'])}",

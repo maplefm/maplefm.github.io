@@ -1,10 +1,15 @@
 {
- "version": "2026.11.2.2",
- "date": "2026-11-02T12:54:02+00:00",
- "notes": "Shops outside the Free Market now show the map they're on (Perion Street Corner, Henesys Hunting Ground I), and the Free Market room reads even when the minimap is moved, dimmed or cut off at the edge.",
- "sha256": "f43e1a06c2f05396e783442a79280d9103d865adcba7b8e56cc5d323758d768a",
- "size": 173318,
+ "version": "2026.11.2.3",
+ "date": "2026-11-02T14:34:44+00:00",
+ "notes": "Trade chat: megaphone posts in yellow and teal now read, sell posts reach Club FM within seconds, seller names are double checked and marked when unsure, and stats written in the post (8 DEX, +2 crit) come with it.",
+ "sha256": "6300df39e7c39df95172f700fe2e91b5cbc9bb51a5c97a194f88c0d892dbde54",
+ "size": 177895,
  "history": [
+  {
+   "version": "2026.11.2.3",
+   "date": "2026-11-02",
+   "notes": "Trade chat: megaphone posts in yellow and teal now read, sell posts reach Club FM within seconds, seller names are double checked and marked when unsure, and stats written in the post (8 DEX, +2 crit) come with it."
+  },
   {
    "version": "2026.11.2.2",
    "date": "2026-11-02",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.7",
    "date": "2026-10-27",
    "notes": "Names cut off by the shop's width are matched to the right item, and misread names are never saved as new items (any already saved are cleared). Reports how many shops it reads straight off the pixels."
-  },
-  {
-   "version": "2026.10.27.6",
-   "date": "2026-10-27",
-   "notes": "Much more accurate and much lighter on your PC. Prices, item names and seller names are now read straight off the game's own pixel font, and scroll tiers from their icons (Chaos included, and on sold rows). Most shops no longer need the text readers at all, which uses about 20 times less CPU."
   }
  ],
  "pip": [],
- "sig": "58be76351afb3c66c8c168ea4d30ad75cc4749c25240ee4d264099cb11f7bb114cf26d089debda55bad42681168718b79972675ad02417fffbc2fccf8082cab57265efa098543b0691538d458c49652f383aadc7902ea4fd30fb1cdb8c698026ecda5918827cb3c15d8bf4828c1f1ac06003df616aa0bd0d005207875239537ae57eb90a5aa9afe66e26ebb121ac340a27a9b417b0e3dc232677b64e7e7000ae7f85f4439ecd39a82de9d99ff3fbf287531e5edf63ad8d1397222130c28c6bd362a503ee8dd53c9aa71e0a1f2297f6d5eacb722a9aba060368aedbf7f1ae208fc08aadaebab5d03b44e01b773ae181c3fef0e76d2a7905116fb55446c6e3d728"
+ "sig": "0e445d5e0de842977d35bfd54beb248fac5be64b79365d1d51b747f11d3849ee54b59fda373ab7058958c0695c333f220888ccbc5927d77666c8b78e7dc4b2f05c67c4a825cba56d0943408bbc4959d1248de1eca8a17495e76e377b4d7817de4889890ca9bdd20c1cac6c45d592b01c78ade3ddfda6189723b48feeb92a27209368ff1b6f53b3ccf0cc508414d2046a4dd84a15f461d0d010149ec51729a18fa8353767dd7ca660510000348fb0da09e77d292fc110c85b4102e12513be42c1acd2f4ab2642e9769df3304ab102d0734997fac90f16743c496edfaecfcc5a5e4b6adb51dab0eacb2d1b04c2f3fd01b411c08fbf49d213a6b8e5df57ad260742"
 }
