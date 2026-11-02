@@ -598,7 +598,7 @@ def extend_aliases(names):
         _ALIAS = sorted(set(_ALIAS + add), key=lambda t: -len(t[0]))
     return len(add)
 
-_SIDE = re.compile(r"(?<![A-Za-z])(S\s?[>»<]|B\s?[>»<-]|WTS|WTB|Sell(?:ing|in)?\b|Buy(?:ing)?\b|T\s?[>»]|WTT|L\s?[>»]|LF\s?[>»]?)", re.I)
+_SIDE = re.compile(r"(?<![A-Za-z])(S\s?[>»<]|\$\s?[>»]|\$ell(?:ing)?\b|B\s?[>»<-]|WTS|WTB|Sell(?:ing|in)?\b|Buy(?:ing)?\b|T\s?[>»]|WTT|L\s?[>»]|LF\s?[>»]?)", re.I)
 _CPRICE = re.compile(
     r"(?<![A-Za-z0-9.+\-])(\d{1,3}(?:[.,]\d{1,3})?)\s?([kK]|[mM](?:il)?)(?![A-Za-z])(?:\d)?"      # 26k 1.5k 1m 3k5
     r"|(?<![A-Za-z0-9.+\-])(\d{2,3}(?:,\d{3})+|\d{3,6})(?=\s*(?:mesos?|ea\b|each|/e))"            # 250 each, 800mesos
@@ -758,7 +758,7 @@ def parse_chat_message_x(msg):
     marks.append((len(msg), len(msg), ""))
     for k in range(len(marks) - 1):
         tok = re.sub(r"\s", "", marks[k][2]).upper()
-        side = "S" if tok[0] == "S" or tok == "WTS" else "B" if tok[0] == "B" or tok == "WTB" else None
+        side = "S" if tok[0] in "S$" or tok == "WTS" else "B" if tok[0] == "B" or tok == "WTB" else None
         if not side:
             continue
         clause = msg[marks[k][1]:marks[k + 1][0]]
@@ -773,7 +773,7 @@ def parse_chat_message_x(msg):
             if lk:
                 lt = lk[-1].group(1).strip()
                 kn = _known_name(lt) if re.search(r"Scroll: (Lesser|Intermediate|Greater|Chaos)$", lt) else None
-                li = [(0, 0, kn)] if kn else [(0, 0, it[2]) for it in _find_items(lt)][:1]
+                li = [(-1, -1, kn)] if kn else [(-1, -1, it[2]) for it in _find_items(lt)][:1]
                 items = li
         # "polearm atk 60%": the scroll, not the Pole Arm it's named after
         scrolls = [it for it in items if "Scroll" in it[2]]
@@ -781,22 +781,25 @@ def parse_chat_message_x(msg):
         prices = [(m.start(), m.end(), _price_val(m)) for m in _CPRICE.finditer(clause)]
         if not items or not prices:
             continue
-        used_until = 0
+        used_until = 0; n_before = len(out)
         for pi, (ps, pe, val) in enumerate(prices):
             if val < 10 or val > 50_000_000:
                 continue
             before = clause[max(0, ps - 14):ps]
             if before.endswith("(") and ")" not in clause[pe:pe + 2]:
                 continue      # "(265k": a quantity in brackets that lost its ")" ran into the price, so it can't be trusted
-            if _BAD_CTX.search(before) or re.search(r"(?:^|[^+\-\d])\d[.,]?\s$", before):
+            aw = re.search(r"(?:\ba\s?/?\s?[wf]|\bautowin|\bauto\s?win|\bbin|\binstant(?:\s?buy)?)\s*:?\s*$", before, re.I)
+            if (_BAD_CTX.search(before) and not aw) or re.search(r"(?:^|[^+\-\d])\d[.,]?\s$", before):
                 continue      # "c/o 5k" is a bid, and "1 6k" or "1. 20m" is a decimal point the reader split
             if re.match(r"\s*(?:for all|total|for (?:the )?(?:lot|bundle|everything)|for \d+\b)", clause[pe:pe + 18], re.I):
                 continue      # "275k for all": a price for several, not for one
             if re.match(r"\s*(?:\(?\s*c\s?/\s?o\b|co\b|current offer|b\s?/\s?o\b|bo\b|offer)", clause[pe:pe + 16], re.I):
                 continue      # "200k c/o" is the best bid so far, not the asking price
             each = bool(re.match(r"\s*(?:mesos?\s*)?(?:each|ea\b|/e)", clause[pe:pe + 14], re.I))
-            prev_end = prices[pi - 1][1] if pi else 0
+            prev_end = prices[pi - 1][1] if pi else -1
             cand = [it for it in items if prev_end <= it[0] < ps]
+            # the item named in the link before the mark: one listing, at the first price that stands
+            if not cand and items and items[0][0] == -1 and not any(o[1] == items[0][2] for o in out[n_before:]): cand = items[:1]
             if not cand and pi == 0 and ps <= 4:
                 # "[10k] fork on a stick": price first
                 nxt = [it for it in items if pe <= it[0] <= pe + 6]
@@ -806,8 +809,11 @@ def parse_chat_message_x(msg):
             # "NX decos for your aurora stamps": the item they want, not the one they sell
             if re.search(r"\bfor\s+(?:your|ur|ya)\s*$", clause[max(0, cand[-1][0] - 12):cand[-1][0]], re.I):
                 continue
-            between = clause[cand[-1][1]:ps]
-            lead = clause[max(0, cand[-1][0] - 12):cand[-1][0]]
+            between = clause[max(0, cand[-1][1]):ps]
+            lead = clause[max(0, cand[-1][0] - 12):max(0, cand[-1][0])]
+            # "60% Dagger Attack Scroll: Intermediate 170k": the rest of the item's own name isn't other text
+            if re.sub(r"[^a-z ]", "", between.lower()).split() and all(w in cand[-1][2].lower() for w in re.sub(r"[^a-z ]", "", between.lower()).split()):
+                between = ""
             statty = len(between) <= 40 and chat_roll(between) and not re.search(r"\b(?:trade|for|or)\b", between, re.I)
             if (len(between) > 22 and not statty) or re.search(r"\b(?:lv|lvl|level|trade|for)\b|\bor\b", between, re.I) or re.search(r"\b(?:lv|lvl|level|m)\s?\d+\s*$", lead, re.I):
                 continue
@@ -815,7 +821,7 @@ def parse_chat_message_x(msg):
             for it in chosen:
                 x = None
                 if "Scroll" not in it[2] and len(chosen) == 1:
-                    x = chat_roll(clause[max(prev_end, it[0] - 12):pe])
+                    x = chat_roll(clause[:ps]) if it[0] == -1 else chat_roll(clause[max(0, prev_end, it[0] - 12):pe])
                 out.append((side, it[2], val, x))
     return out
 
@@ -1450,10 +1456,13 @@ def read_tooltip(img, need_stats=True):
     if box: img = img.crop(box)
     # The exact reader first: when every stat line of the popup reads exactly, those are the stats, so one pass of
     # the text reader (for the title and its "(+N)") is all that's left. Saves a whole pass on most popups.
-    passes = TIP_PASSES
+    passes = TIP_PASSES; exact0 = {}
     try:
         import tipexact
         ex0 = tipexact.read_tip(img)
+        exact0 = dict(ex0["stats"]) if ex0 else {}
+        for l in (ex0["lines"] if ex0 else []):
+            if l.get("bad") == "after" and l.get("stat") and isinstance(l.get("v"), int): exact0[l["stat"]] = l["v"]
         if ex0 and not ex0["bad"] and any(l.get("stat") for l in ex0["lines"]): passes = TIP_PASSES[:1]
     except Exception:
         pass
@@ -1470,16 +1479,25 @@ def read_tooltip(img, need_stats=True):
         reads = [r for r in (_read_tip_once(img, need_stats=False, lo=lo, hi=hi) for lo, hi in passes) if r]
     if not reads: return None
     base = max(reads, key=lambda r: len(r["stats"]))
-    votes = {}
+    # a plus sign read as a 4 on a line with no bracket ("Critical Rate: +41"): rates and small stats never get that high
+    for r in reads:
+        for k, cap in (("CRIT", 30), ("CRITDMG", 30), ("SPEED", 40), ("JUMP", 30)):
+            v = r["stats"].get(k)
+            if v is not None and v > cap and str(v)[0] == "4" and len(str(v)) >= 2 and 0 < int(str(v)[1:]) <= cap: r["stats"][k] = int(str(v)[1:])
+    votes, sure = {}, {}
     for r in reads:
         for k, v in r["stats"].items():
-            if k.endswith("_b"): continue
+            if k.endswith("_b") or k.endswith("_c"): continue
             votes.setdefault(k, {}); votes[k][v] = votes[k].get(v, 0) + 1
+            if r["stats"].get(k + "_c"): sure[k] = v
     stats = {}
     for k, c in votes.items():
         b = next((r["stats"].get(k + "_b") for r in reads if r["stats"].get(k + "_b") is not None), None)
-        # most reads agree; on a tie, the value that fits the base in brackets ("+7 (6 +1)")
-        stats[k] = max(c.items(), key=lambda x: (x[1], -abs(x[0] - b) if b is not None else 0))[0]
+        # a read whose total matches its own bracket ("+8 (0 +8)") wins; otherwise most reads agree, and on a tie
+        # the value that fits the base in brackets ("+7 (6 +1)")
+        if k not in sure and len(c) > 1 and len(set(c.values())) == 1 and k not in (exact0 or {}):
+            continue                          # the passes disagree and nothing settles it: better missing than wrong
+        stats[k] = sure[k] if k in sure else max(c.items(), key=lambda x: (x[1], -abs(x[0] - b) if b is not None else 0))[0]
         if b is not None and abs(stats[k] - b) <= 10: stats[k + "_b"] = b
     # The exact reader (tipexact.py): every stat line read pixel for pixel in the game's own font. Where it reads a
     # line, its value replaces the text reader's. When it reads every line of the popup, its stats are the stats:
@@ -1490,6 +1508,18 @@ def read_tooltip(img, need_stats=True):
         exact = tipexact.read_tip(img)
     except Exception:
         exact = None
+    if exact:
+        # a line whose label and number read exactly but whatever follows didn't ("Magic Attack: +8 (0" then a
+        # smudge): the number is still exact
+        for l in exact["lines"]:
+            if l.get("bad") == "after" and l.get("stat") and isinstance(l.get("v"), int):
+                stats[l["stat"]] = l["v"]
+        es = exact["stats"] or {}
+        # a stat one text pass saw on the line the exact reader read as its twin, same number ("MaxMP: +5" read
+        # as MaxHP once): HP and MP, attack and magic attack, weapon and magic defence
+        for a, z in (("HP", "MP"), ("MP", "HP"), ("ATT", "MATT"), ("MATT", "ATT"), ("WDEF", "MDEF"), ("MDEF", "WDEF")):
+            if a in stats and a not in es and z in es and es[z] == stats[a] and sum(votes.get(a, {}).values()) < len(reads) and not any(a in r["stats"] and z in r["stats"] for r in reads):
+                stats.pop(a, None); stats.pop(a + "_b", None)
     if exact and exact["stats"]:
         es = exact["stats"]
         for k in [k for k in es if not k.endswith("_b")]:
@@ -1624,6 +1654,7 @@ def _read_tip_once(img, need_stats=True, lo=140, hi=215):
     stats, statx, staty = {}, [], []
     for l in found_stats:
         t = l["text"].replace("：", ":")
+        t = re.sub(r"(:\s*)4\+(\d{2,3})", r"\1+\2", t)     # the plus sign read twice, as "4+": "Magic Def.:4+25"
         for k, rx in _LINE_RE:
             mm = rx.search(t)
             if mm and k in ("STR", "DEX", "INT", "LUK") and re.search(r"re\S?\s*$", t[max(0, mm.start() - 5):mm.start()], re.I):
@@ -1636,6 +1667,8 @@ def _read_tip_once(img, need_stats=True, lo=140, hi=215):
                     sv = str(v)
                     if abs(v - base) > 10 and sv[0] == "4" and len(sv) >= 2 and abs(int(sv[1:]) - base) <= 10:
                         stats[k] = int(sv[1:])
+                if mm.group(2) and mm.group(4) and k != "SLOTS" and stats[k] in (int(mm.group(2)) + int(mm.group(4)), int(mm.group(2)) - int(mm.group(4))):
+                    stats[k + "_c"] = 1               # "+8 (0 +8)": the total and the bracket agree, so the total is right
                 if mm.group(2):
                     # the number in brackets is the base; the sign is often too small to read, so work it out
                     base = int(mm.group(2)); diff = stats[k] - base
