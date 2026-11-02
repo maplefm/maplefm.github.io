@@ -39,19 +39,29 @@ def main():
     try: idx = json.load(open(ip, encoding="utf-8"))
     except Exception: idx = {"after": 0, "items": []}
     items = json.loads(get("/inbox/miss?after=" + str(idx.get("after", 0)))).get("items", [])
+    # Chat name samples made this list long enough that fetching it one picture at a time ran past the pump's time
+    # limit, and the index (saved only at the end) never moved: pictures stopped arriving on Nov 2. Now 8 at once,
+    # oldest first, at most 160 a run, and the index is saved every 20.
+    items = sorted(items, key=lambda it: int(it["t"]))[:160]
     nm = names(); got = 0
-    for it in items:
-        t = int(it["t"]); day = datetime.datetime.utcfromtimestamp(t / 1000).strftime("%Y-%m-%d")
-        who = "".join(c for c in str(nm.get(it.get("hid"), it.get("hid", "")[:6])) if c.isalnum() or c in "-_") or "x"
-        name = f"{day}/{who}-{it.get('kind')}-{datetime.datetime.utcfromtimestamp(t / 1000).strftime('%H%M%S')}.png"
-        try:
-            png = get("/inbox/miss/" + urllib.parse.quote(it["key"], safe=""))
-        except Exception as e:
-            print("misspull", it["key"], e); continue
-        os.makedirs(os.path.join(root, day), exist_ok=True)
-        open(os.path.join(root, name), "wb").write(png)
-        idx["items"].append({"file": name, "who": who, "kind": it.get("kind"), "info": it.get("info", ""), "ver": it.get("ver", ""), "t": t})
-        idx["after"] = max(idx.get("after", 0), t); got += 1
+
+    def fetch(it):
+        try: return it, get("/inbox/miss/" + urllib.parse.quote(it["key"], safe=""))
+        except Exception as e: return it, e
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(8) as ex:
+        for it, png in ex.map(fetch, items):
+            t = int(it["t"])
+            if isinstance(png, Exception):
+                print("misspull", it["key"], png); idx["after"] = max(idx.get("after", 0), t); continue
+            day = datetime.datetime.utcfromtimestamp(t / 1000).strftime("%Y-%m-%d")
+            who = "".join(c for c in str(nm.get(it.get("hid"), it.get("hid", "")[:6])) if c.isalnum() or c in "-_") or "x"
+            name = f"{day}/{who}-{it.get('kind')}-{datetime.datetime.utcfromtimestamp(t / 1000).strftime('%H%M%S')}{t % 1000:03d}.png"    # name samples come several a second
+            os.makedirs(os.path.join(root, day), exist_ok=True)
+            open(os.path.join(root, name), "wb").write(png)
+            idx["items"].append({"file": name, "who": who, "kind": it.get("kind"), "info": it.get("info", ""), "ver": it.get("ver", ""), "t": t})
+            idx["after"] = max(idx.get("after", 0), t); got += 1
+            if got % 20 == 0: json.dump(idx, open(ip, "w", encoding="utf-8"), indent=0)
     # 14 days kept
     cut = (datetime.datetime.utcnow() - datetime.timedelta(days=14)).strftime("%Y-%m-%d")
     for d in os.listdir(root):
