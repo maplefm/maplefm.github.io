@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.2.3"
+VERSION = "2026.11.2.4"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -524,8 +524,29 @@ def send_tip_image(img):
 
 # A popup or room title the readers couldn't make sense of goes to Club FM as a small picture, so the readers can be
 # fixed from what scanners actually see (no review folder to send). Only while publishing is on; a few a day.
-MISS_CAP = {"tip": 20, "room": 5, "bar": 5, "row": 5}
+MISS_CAP = {"tip": 20, "room": 5, "bar": 5, "row": 5, "name": 80}
 MISS = {"day": "", "n": {}, "at": {}}
+NAME_SENT = set()
+def name_sample(cfg, player, votes):
+    """A chat sender's name as the game drew it (its letters only, black on white, no message), with what the
+    text readers made of it: Club FM learns the chat font's letter shapes from these, so names can be read
+    exactly. Each name shape goes once."""
+    try:
+        if votes.get("_exact") or votes.get("_mask") is None: return
+        import numpy as np
+        key = hashlib.sha256("|".join(votes.get("_keys") or []).encode()).hexdigest()[:16]
+        if key in NAME_SENT: return
+        day = datetime.date.today().isoformat()
+        if MISS.get("day") == day and (MISS["n"].get("name", 0) >= MISS_CAP["name"] or time.time() - MISS["at"].get("name", 0) < 20): return
+        if not cfg.get("publish"): return
+        NAME_SENT.add(key)
+        m = votes["_mask"]
+        pic = Image.fromarray(np.where(m, 0, 255).astype("uint8"))
+        vv = {k: v for k, v in votes.items() if not k.startswith("_")}
+        send_miss(cfg, pic, "name", json.dumps({"line": player, "votes": vv}, separators=(",", ":"))[:290])
+    except Exception:
+        pass
+
 def send_miss(cfg, img, kind, info=""):
     try:
         if not cfg.get("publish") or img is None: return
@@ -1536,6 +1557,22 @@ def check_update(state={"told": None}):
             log("and copy your config.json into the new folder. After that it updates on its own.")
         log("=" * 64)
 
+def fetch_chatglyphs(state={"etag": None}):
+    """The chat font's letter shapes Club FM has learned so far (data, not code): names in trade chat are read
+    letter by letter once their letters are in it. Checked with the update check; kept only if it looks right."""
+    try:
+        req = urllib.request.Request(SITE + "/data/chatglyphs.json?t=" + str(int(time.time() // 900)), headers={"User-Agent": "fm-watcher"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            t = json.load(r)
+        if not isinstance(t, dict) or len(t) > 20000: return
+        ok = {k: v for k, v in t.items() if isinstance(k, str) and isinstance(v, str) and re.fullmatch(r"-?\d+:\d+:[01]+", k) and re.fullmatch(r"[A-Za-z0-9]|Il", v)}
+        if not ok or ok == fmparse._chatglyphs(): return
+        json.dump(ok, open(os.path.join(HERE, "chatglyphs.json"), "w", encoding="utf-8"))
+        fmparse._CG = ok
+        log(f"chat names: {len(ok)} letter shapes known")
+    except Exception:
+        pass
+
 check_update.last = 0
 check_update.restart = False
 
@@ -1867,6 +1904,7 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
             store.add_chat_mentions(player, msg)
             rows = fmparse.parse_chat_message_x(msg)
             if not rows: continue
+            name_sample(cfg, player, votes)
             # the sender's name has to be sure: a wrong name sends buyers to the wrong person. A post whose name
             # isn't sure yet goes up marked so ("ns"), and the same post read again may settle it
             name = fmparse.sure_name(player, votes, known)
@@ -1995,7 +2033,7 @@ def chores(cfg, t, L, store):
     if store.dirty and t - L.last_save > 30:
         store.dirty = False; store.save(); L.last_save = t
     if t - check_update.last > 900:
-        check_update.last = t; spawn(check_update)
+        check_update.last = t; spawn(check_update); spawn(fetch_chatglyphs)
     if check_update.restart:
         store.save()
         log("Restarting to update...")

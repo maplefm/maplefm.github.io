@@ -892,6 +892,94 @@ def chat_name_votes(region, norm, y0, y1):
 
 _NAME_CACHE = {}
 
+# ---------------------------------------------------------------- chat names, letter by letter
+# The text reader mixes up rn and m, vv and w, 0 and O in the chat font. The exact way: a name's letters as the game
+# drew them, at the screen's own pixels (no scaling), looked up in a table of letter shapes learned from names read
+# many times (chatglyphs.json). A name is exact only when every letter is in the table.
+_CG = None
+def _chatglyphs():
+    global _CG
+    if _CG is None:
+        try: _CG = json.load(open(os.path.join(HERE, "chatglyphs.json"), encoding="utf-8"))
+        except Exception: _CG = {}
+    return _CG
+
+def chat_name_mask(region, y0, y1):
+    """The sender's name in one chat line as ink (True) on its own background, at the screen's own pixels when the
+    game window is scaled. Returns (mask, scale) or (None, 1)."""
+    import numpy as np
+    nat = region.info.get("native"); k = 1.0; ox = oy = 0.0
+    if nat:
+        im, box, kk, _ = nat; k = float(kk[0])
+        if abs(k - 1) > 0.01:
+            src = np.asarray(im.convert("RGB")).astype(np.int16); ox, oy = box[0], box[1]
+        else:
+            src = np.asarray(region.convert("RGB")).astype(np.int16); k = 1.0
+    else:
+        src = np.asarray(region.convert("RGB")).astype(np.int16)
+    H = src.shape[0]
+    top, bot = max(0, int(round(oy + (y0 - 4) * k))), min(H, int(round(oy + (y1 + 5) * k)))
+    band = src[top:bot]
+    if band.size == 0: return None, k
+    r, g, b = band[..., 0], band[..., 1], band[..., 2]
+    red = (r > 170) & (g < 90) & (b < 90)
+    cnt = red.sum(0); lim = int(ox + 260 * k); cnt[lim:] = 0; cnt[:int(ox)] = 0
+    xs = np.nonzero(cnt >= 1)[0]
+    if len(xs) < 4: return None, k
+    x = int(xs[0]); wh = band.min(axis=2) > 225
+    while x > int(ox) and wh[:, x - 1].mean() > 0.25: x -= 1
+    x0, end = int(ox + 3 * k), x - int(2 * k)
+    if end - x0 < 10 * k: return None, k
+    mid = int(round(oy + (y0 + y1) / 2 * k)) - top
+    mid = min(max(mid, 0), band.shape[0] - 1)
+    bg = np.median(band[mid, x0:end], axis=0)
+    rowbg = np.median(band[:, x0:end], axis=1)
+    rows = np.abs(rowbg - bg).sum(axis=1) < 40
+    a0 = a1 = mid
+    while a0 > 0 and rows[a0 - 1]: a0 -= 1
+    while a1 < len(rows) - 1 and rows[a1 + 1]: a1 += 1
+    sub = band[a0:a1 + 1, x0:end]
+    m = np.abs(sub - bg).sum(axis=2) > 150
+    while m.shape[1] > 4 and m[:, 0].mean() > 0.7: m = m[:, 1:]
+    return m, k
+
+def chat_name_keys(mask):
+    """The name's letters as table keys, left to right ("bottom offset:width:pixels"), like the shop reader's."""
+    import numpy as np
+    cols = mask.any(axis=0); out = []; x = 0; W = len(cols)
+    while x < W:
+        if not cols[x]: x += 1; continue
+        x0 = x
+        while x < W and cols[x]: x += 1
+        g = mask[:, x0:x]; ys = np.nonzero(g.any(1))[0]
+        out.append((x0, x, int(ys[-1]), g[ys[0]:ys[-1] + 1]))
+    if not out: return []
+    bots = [o[2] for o in out]; ref = max(set(bots), key=lambda v: (bots.count(v), -v))
+    return ["%d:%d:" % (b - ref, x1 - x0) + "".join("1" if v else "0" for v in g.ravel()) for x0, x1, b, g in out]
+
+def chat_name_exact(keys, table=None):
+    """The name, when every letter shape is one the table knows; else None. Capital I and small l are drawn the
+    same ("Il" in the table): among capitals or digits it is I, among small letters l, first before a small letter
+    I (names start with a capital far more often)."""
+    t = table if table is not None else _chatglyphs()
+    if not keys or not t: return None
+    cs = []
+    for k in keys:
+        c = t.get(k)
+        if c is None: return None
+        cs.append(c)
+    out = []
+    for i, c in enumerate(cs):
+        if c != "Il": out.append(c); continue
+        a = cs[i - 1] if i else ""; b = cs[i + 1] if i + 1 < len(cs) else ""
+        up = lambda x: x != "Il" and (x.isupper() or x.isdigit())
+        if (not a or up(a)) and (not b or up(b) or (not a and b.islower())): out.append("I")
+        elif (a and a.islower()) or (b and b.islower()): out.append("l")
+        else: return None
+    s = "".join(out)
+    return s if re.fullmatch(r"[A-Za-z0-9]{3,13}", s) else None
+
+
 def read_chat_lines(region, scale=4):
     """Trade chat lines: [(player, message, name votes)]. Name votes are filled in for posts with a buy or sell mark
     only (they take longer), so the caller can tell a sure name from a guess."""
@@ -913,7 +1001,16 @@ def read_chat_lines(region, scale=4):
         if p.lower().startswith("notice"): continue
         votes = {}
         if _SIDE.search(t):
-            try: votes = chat_name_votes(region, norm, *yy)
+            try:
+                m, k = chat_name_mask(region, *yy)
+                keys = chat_name_keys(m) if m is not None else []
+                ex = chat_name_exact(keys)
+                if ex:
+                    votes = {ex: 99, "_exact": 1}          # read letter by letter: certain
+                else:
+                    votes = chat_name_votes(region, norm, *yy)
+                    if keys: votes["_keys"] = keys        # for learning the letters (sent with name samples)
+                    if m is not None: votes["_mask"] = m
             except Exception: votes = {}
         out.append((p, t, votes))
     return out
@@ -924,6 +1021,8 @@ def sure_name(line_name, votes, known=()):
     between. None when unsure."""
     # a shop name seen before, spelled exactly so, read the same way on the line and on its own: that person.
     # Never a near spelling of a known name: "Newton" and "Newt0n" are two players
+    if votes.get("_exact"): return next(k for k in votes if not k.startswith("_"))
+    votes = {k: v for k, v in votes.items() if not k.startswith("_")}
     if line_name and line_name in set(known) and votes.get(line_name, 0) >= 2: return line_name
     if not votes: return None
     best = max(votes, key=lambda k: votes[k])
@@ -935,7 +1034,7 @@ def sure_name(line_name, votes, known=()):
 def maybe_name(line_name, votes):
     """For a post whose name isn't sure: the line's own reading, only when the name read alone saw it too (so it is
     the sender's name and not a scrap of the message). It goes up marked unsure. None: the post isn't sent."""
-    return line_name if line_name and votes.get(line_name) else None
+    return line_name if line_name and not line_name.startswith("_") and votes.get(line_name) else None
 
 
 def _badge_channel(region, y0, y1):

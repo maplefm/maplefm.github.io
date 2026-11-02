@@ -1,10 +1,15 @@
 {
- "version": "2026.11.2.3",
- "date": "2026-11-02T14:34:44+00:00",
- "notes": "Trade chat: megaphone posts in yellow and teal now read, sell posts reach Club FM within seconds, seller names are double checked and marked when unsure, and stats written in the post (8 DEX, +2 crit) come with it.",
- "sha256": "6300df39e7c39df95172f700fe2e91b5cbc9bb51a5c97a194f88c0d892dbde54",
- "size": 177895,
+ "version": "2026.11.2.4",
+ "date": "2026-11-02T16:55:28+00:00",
+ "notes": "Trade chat names: the watcher now learns the chat font letter by letter, so seller names get read exactly as more of the font is learned. Until a name can be read that way it stays marked unsure.",
+ "sha256": "04ee94b344b72f10e97809ab1d9f34c1f4ee99da57fa673cff87d8f557dbcfa0",
+ "size": 179953,
  "history": [
+  {
+   "version": "2026.11.2.4",
+   "date": "2026-11-02",
+   "notes": "Trade chat names: the watcher now learns the chat font letter by letter, so seller names get read exactly as more of the font is learned. Until a name can be read that way it stays marked unsure."
+  },
   {
    "version": "2026.11.2.3",
    "date": "2026-11-02",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.8",
    "date": "2026-10-27",
    "notes": "49 new items the game added (Lakelis Statue, King Slime Balloon, Hero's set and more); the item list now refreshes from the site daily"
-  },
-  {
-   "version": "2026.10.27.7",
-   "date": "2026-10-27",
-   "notes": "Names cut off by the shop's width are matched to the right item, and misread names are never saved as new items (any already saved are cleared). Reports how many shops it reads straight off the pixels."
   }
  ],
  "pip": [],
- "sig": "0e445d5e0de842977d35bfd54beb248fac5be64b79365d1d51b747f11d3849ee54b59fda373ab7058958c0695c333f220888ccbc5927d77666c8b78e7dc4b2f05c67c4a825cba56d0943408bbc4959d1248de1eca8a17495e76e377b4d7817de4889890ca9bdd20c1cac6c45d592b01c78ade3ddfda6189723b48feeb92a27209368ff1b6f53b3ccf0cc508414d2046a4dd84a15f461d0d010149ec51729a18fa8353767dd7ca660510000348fb0da09e77d292fc110c85b4102e12513be42c1acd2f4ab2642e9769df3304ab102d0734997fac90f16743c496edfaecfcc5a5e4b6adb51dab0eacb2d1b04c2f3fd01b411c08fbf49d213a6b8e5df57ad260742"
+ "sig": "c5cd6a3303ef15cfbb7587a1cd7f487ccdfbd634feb399707494e924537e3827faff88356d7ba44f73f85556e8809307df41136dbeef33273bd45973ba8968b0b25bd282ecf3e640e22f607c6ec8f6fe5485e29ba3deffce55792498af31039ba6da0e8a45c888384fa0343430eb109947fd1c353a0c43e56d66038861d6f9b46088ea745668e5599913c46401c3572856c1e09fe6fae7f0ce67f2776354b49d7318f66e13e389b22d4c09369650acd9a53c9f433941e7ec27300f8669fe36f4d326d89d8353c6850b0a599c66361a9e53d664df6ed498af4e0e8b184753117abef9bb0d74c6be60fea151392ce72f099f955c597981216234dac9d356e483cc"
 }
