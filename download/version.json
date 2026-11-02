@@ -1,10 +1,15 @@
 {
- "version": "2026.11.2.6",
- "date": "2026-11-02T20:30:32+00:00",
- "notes": "Item popups: a stat the two reads disagree on is left out instead of guessed, plus signs read as 4 fixed, MaxMP no longer also read as MaxHP. Trade chat: item megaphones with only a price after S>, autowin prices after c/o, $> as sell, full scroll names",
- "sha256": "98c71ba4a1ab0526214561a959227cb749f04daf89dda22c15ee34979b868fc4",
- "size": 181031,
+ "version": "2026.11.2.7",
+ "date": "2026-11-02T21:25:03+00:00",
+ "notes": "Item popups: read from the game's own pixels at any window size, look again at more contrasts when unsure, use the hovered item's base stats, and keep a stat one read missed. 213 of 216 test popups exact, 0 wrong.",
+ "sha256": "ccae54731635d23170c67d3c0096d5fb6ee59d9a551fb700e9d52792daa5f2cd",
+ "size": 182220,
  "history": [
+  {
+   "version": "2026.11.2.7",
+   "date": "2026-11-02",
+   "notes": "Item popups: read from the game's own pixels at any window size, look again at more contrasts when unsure, use the hovered item's base stats, and keep a stat one read missed. 213 of 216 test popups exact, 0 wrong."
+  },
   {
    "version": "2026.11.2.6",
    "date": "2026-11-02",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.11",
    "date": "2026-10-27",
    "notes": "Reads Critical Rate and Critical Damage lines, so crit rolls on gloves and earrings price right"
-  },
-  {
-   "version": "2026.10.27.10",
-   "date": "2026-10-27",
-   "notes": "Hovering a cut-off scroll no longer swaps in a garbled popup title; names saved that way are repaired"
   }
  ],
  "pip": [],
- "sig": "1f73eb36e873b58323713f2ebef2f5d43f22c360cf944e85e1cb556a455f60a3d9e315f08b999227a7492a01e797d19e4228ca944af61d14cf21a5fb83607ef03cc885f0c362f3290ad3ada47477b03ead9047640d9ab8a6419b311c73a25b30c5025370553b3dd4582b4491157a3d9bde905670b8fc8110922322fe292d623fd01d53582288d48b3212f26271ff503be961c9c6916a6db28f2a65e808278e6639b8bf2c491ef87d18a8d6beb67c2b2fa7b40d4f3f3384944e7ef7449e291ff4c24ad86203fe14b768d26d26783925289ad739389400b3d7dbc6e42f9edd3a4c97e555cc179a3a0e59bc5a834ac0a54418fb86febfb72b0f0b806332048b054f"
+ "sig": "417ffa4947a80c9c32bbf49797729a4f3a4685120debc8c1e72a8b414f905c0c58525409c412267e67faab7e860f01314f7498ce99a4310cbf068bf3198ff7ce655aef61dc99fb77e6c6f89f2bc2040444d88979087b306f552e62f6ecd02a9bcec56c08da368c8ed0a387d4a5a7efbe24e001358b40bb1ebaea763b74b60feabf99534ba83931fe5a70797e3cc31ee75e21c33607035764a90e877400a7a9350c9c6edd468e68a9b97fadff244d7117bc71b08cdab85030c2cdb036a96579f2ac14200d37b9550228218ce7f74a885c35bce71894e306bfc99723a12dc17bce4ab1d79e669ffab3dc7fef96e6d997a77935e004de6ecf5db4b0762da44f29d3"
 }

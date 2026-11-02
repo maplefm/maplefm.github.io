@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.2.6"
+VERSION = "2026.11.2.7"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -946,7 +946,13 @@ class Store:
                 for rd in reads:
                     for k, v in rd.items():
                         vote.setdefault(k, {}); vote[k][v] = vote[k].get(v, 0) + 1
-                o["x"] = {k: max(c, key=lambda v: (c[v], v)) for k, c in vote.items() if sum(c.values()) * 2 > len(reads)}
+                # a stat one read missed isn't a stat the others misread: a line read once and never contradicted
+                # stands (stats_fit already dropped any the item can't carry). Readings that disagree need a clear
+                # majority, twice the next value, or the stat waits for another read.
+                def settled(c):
+                    top = sorted(c.values(), reverse=True)
+                    return len(top) == 1 or top[0] >= 2 * top[1]
+                o["x"] = {k: max(c, key=lambda v: (c[v], v)) for k, c in vote.items() if settled(c)}
             if o["x"] and not o.get("xat"): o["xat"] = time.time(); self.fresh = True   # first time this listing's stats were read
             if not o.get("xt") or len(tip["lines"]) >= len(o.get("xt", [])): o["xt"] = tip["lines"]
             if tip.get("job"): o["xj"] = tip["job"]
@@ -1793,7 +1799,12 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
             res["tip"] = None; res["hovering"] = extra.get("tip") is not None
             if extra.get("tip") is not None:
                 try:
-                    tip = fmparse.read_tooltip(extra["tip"])
+                    # the hovered row's item, so the popup reader knows what stats this item can have
+                    try:
+                        yy = int(round(fmparse.SHOP["row0"] + fmparse.SHOP["pitch"] * extra["row"]))
+                        hint = next((r["i"] for r in res["rows"] if r.get("y") == yy and r.get("known")), None)
+                    except Exception: hint = None
+                    tip = fmparse.read_tooltip(extra["tip"], item=hint)
                     if extra.get("hid"): hv("read" if tip else "unread")
                     if tip:
                         tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
