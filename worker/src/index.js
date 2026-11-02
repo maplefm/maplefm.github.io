@@ -618,7 +618,7 @@ async function tipImgPut(req, env) {
 async function missPut(req, env) {
   const ip = req.headers.get("CF-Connecting-IP") || "", hid = req.headers.get("X-Watcher") || "", kind = req.headers.get("X-Kind") || "";
   if (overLimit("mi:" + ip, 60, 600)) return json({ error: "slow down" }, 429);
-  if (!/^[0-9a-f]{16}$/.test(hid) || !/^(tip|room|bar)$/.test(kind)) return json({ error: "no" }, 403);
+  if (!/^[0-9a-f]{16}$/.test(hid) || !/^(tip|room|bar|row)$/.test(kind)) return json({ error: "no" }, 403);
   const buf = new Uint8Array(await req.arrayBuffer());
   if (buf.length < 200 || buf.length > 300000) return json({ error: "size" }, 413);
   const png = [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => buf[i] === v);
@@ -686,7 +686,7 @@ async function missList(req, env, url) {
 async function missGet(req, env, p) {
   if (!(await pullOK(req, env))) return json({ error: "no" }, 403);
   const key = decodeURIComponent(p.slice("/inbox/miss/".length));
-  if (!/^miss:\d+:[0-9a-f]{16}:(tip|room|bar)$/.test(key)) return json({ error: "no" }, 400);
+  if (!/^miss:\d+:[0-9a-f]{16}:(tip|room|bar|row)$/.test(key)) return json({ error: "no" }, 400);
   const v = await env.ACCOUNTS.get(key, "arrayBuffer");
   return v ? new Response(v, { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } }) : json({ error: "gone" }, 404);
 }
