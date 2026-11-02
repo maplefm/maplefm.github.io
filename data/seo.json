@@ -1,16 +1,7 @@
 {
  "day": "2026-11-02",
- "pages": 2213,
- "ms": 107,
- "issues": {
-  "slow (over 3s)": 4
- },
- "examples": {
-  "slow (over 3s)": [
-   "https://maplefm.gg/item/baby-angel-wings/",
-   "https://maplefm.gg/item/blue-shark/",
-   "https://maplefm.gg/item/blue-pilfer/",
-   "https://maplefm.gg/item/pink-flowered-earrings/"
-  ]
- }
+ "pages": 2219,
+ "ms": 50,
+ "issues": {},
+ "examples": {}
 }
