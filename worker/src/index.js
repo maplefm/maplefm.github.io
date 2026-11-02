@@ -789,6 +789,51 @@ function holdDeals(arr, typ) {
   return arr;
 }
 
+// One archive file (a JSON array of upload docs) a doc at a time, straight off the network: inbox.json is past 45 MB and
+// reading it whole (text, parse, stringify, marks) ran the Worker out of memory, which cut the full bundle off
+// mid-file and left every board with only its first 30 hours. fn gets each doc's text and returns what to write.
+async function eachDoc(resp, fn) {
+  const rd = resp.body.pipeThrough(new TextDecoderStream()).getReader();
+  let depth = 0, inStr = false, esc = false, carry = "";
+  for (;;) {
+    const { done, value } = await rd.read(); if (done) break;
+    const s = value; let st = carry ? 0 : -1;
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      if (inStr) { if (esc) esc = false; else if (c === 92) esc = true; else if (c === 34) inStr = false; continue; }
+      if (c === 34) inStr = true;
+      else if (c === 123 || c === 91) { depth++; if (depth === 2 && c === 123) st = i; }
+      else if (c === 125 || c === 93) {
+        depth--;
+        if (depth === 1 && c === 125 && st >= 0) { await fn(carry + s.slice(st, i + 1)); carry = ""; st = -1; }
+      }
+    }
+    if (st >= 0) carry += s.slice(st);
+  }
+}
+const AT_RE = /"at":"([^"]+)"/;
+function docAt(t) { const m = AT_RE.exec(t.length > 300 ? t.slice(0, 300) : t); return m ? Date.parse(m[1]) : NaN; }
+// a full file to the writer, doc by doc: the deal hold on docs from the last 20 minutes, then the marks
+async function pipeFile(resp, w, enc, hp, mk) {
+  const recent = Date.now() - 20 * 6e4;
+  let out = "[", first = true;
+  await eachDoc(resp, async (t) => {
+    if (hp) { const a = docAt(t); if (!(a <= recent)) { try { const d = JSON.parse(t); holdDeals([d], hp); t = JSON.stringify(d); } catch (e) {} } }
+    out += (first ? "" : ",") + (mk === null ? t : markTimes(t, mk)); first = false;
+    if (out.length > 1 << 16) { await w.write(enc.encode(out)); out = ""; }
+  });
+  await w.write(enc.encode(out + "]"));
+}
+// the docs newer than ak (an upload's at, or an inbox day copy's u), as an array
+async function docsAfter(resp, ak) {
+  const keep = [];
+  await eachDoc(resp, async (t) => {
+    const a = docAt(t);
+    if (a > ak || /"u":\d/.test(t)) { try { const d = JSON.parse(t); if (Date.parse(d.at) > ak || (d.u || 0) * 1000 > ak) keep.push(d); } catch (e) {} }
+  });
+  return keep;
+}
+
 async function dataLive(req, env) {
   // Open to everyone: the board shows every listing without signing in. Discord sign-in is for contributing and
   // earning. Bulk pulling is still held back per address (and per account when signed in), and every copy carries
@@ -816,8 +861,8 @@ async function dataLive(req, env) {
       let out = "{", first = true;
       for (let i = 0; i < MEMBER_FILES.length; i++) {
         if (!parts[i]) continue;
-        let arr; try { arr = JSON.parse(await parts[i].text()); } catch (e) { continue; }
-        out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + JSON.stringify(Array.isArray(arr) ? arr.filter((d) => d && (Date.parse(d.at) > ak || (d.u || 0) * 1000 > ak)) : []); first = false;
+        let arr; try { arr = await docsAfter(parts[i], ak); } catch (e) { continue; }
+        out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + JSON.stringify(arr); first = false;
       }
       body = out + "}";
       if (ref) await caches.default.put(ck, new Response(body, { headers: { "Cache-Control": "public, max-age=900" } })).catch(() => {});
@@ -836,13 +881,8 @@ async function dataLive(req, env) {
     for (let i = 0; i < MEMBER_FILES.length; i++) {
       if (!parts[i]) continue;
       await w.write(enc.encode((first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":")); first = false;
-      if (hp) {   // everyone but deal holders: fresh deals stay out for their first 10 minutes
-        let t = await parts[i].text();
-        try { const arr = JSON.parse(t); holdDeals(arr, hp); t = JSON.stringify(arr); } catch (e) {}
-        await w.write(enc.encode(mk === null ? t : markTimes(t, mk)));
-      }
-      else if (mk === null) { const rd = parts[i].body.getReader(); for (;;) { const { done, value } = await rd.read(); if (done) break; await w.write(value); } }
-      else await w.write(enc.encode(markTimes(await parts[i].text(), mk)));
+      // everyone but deal holders: fresh deals stay out for their first 10 minutes (hp)
+      try { await pipeFile(parts[i], w, enc, hp, mk); } catch (e) { await w.write(enc.encode("]")); }
     }
     // the fast lane: new rows the pump hasn't folded in yet
     const fd = (await fastDocs(env)).docs; if (hp) holdDeals(fd, hp);
