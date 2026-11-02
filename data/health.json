@@ -1,5 +1,5 @@
 {
- "at": 1793584173761,
+ "at": 1793586624987,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -169,16 +169,16 @@
    "behind": 12
   },
   "Maya": {
-   "rows24": 416,
-   "room24": 416,
-   "ch24": 416,
+   "rows24": 91,
+   "room24": 91,
+   "ch24": 91,
    "rows7": 573,
    "room7": 573,
    "late7": 0,
-   "chat24": 20,
+   "chat24": 12,
    "last": 1793501171,
    "ver": "2026.10.31.6",
-   "lag_median_min": 1.8,
+   "lag_median_min": 1.0,
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
@@ -279,12 +279,10 @@
    "incomplete upload": 635
   },
   "2026-11-02": {
-   "bad row: 3a3a (p zero)": 1120,
-   "incomplete upload": 56
+   "bad row: 3a3a (p zero)": 1480,
+   "incomplete upload": 74
   }
  },
  "rejects": {},
- "flags": [
-  "Maya: watcher 2026.10.31.6, 3 releases behind"
- ]
+ "flags": []
 }
