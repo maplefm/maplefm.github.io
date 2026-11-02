@@ -10,6 +10,8 @@ const fs = require("fs"), path = require("path");
   const ctx = await b.newContext({ viewport: { width: 900, height: 1200 }, deviceScaleFactor: 2, acceptDownloads: true, colorScheme: "light" });
   const p = await ctx.newPage();
   // the Export PDF button shows for admins; here it is shown by answering its admin check
+  // the page asks /me first and only signed-in visitors go on to the admin check, so answer both
+  await p.route("https://api.maplefm.gg/me", (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"signedIn":true}' }));
   await p.route("https://api.maplefm.gg/admin/reddit", (r) => r.fulfill({ status: 200, contentType: "application/json", body: "{}" }));
   await p.goto(url, { waitUntil: "networkidle" });
   await p.waitForSelector("#pdf:not([hidden])", { timeout: 30000 });
