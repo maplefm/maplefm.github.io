@@ -1,10 +1,15 @@
 {
- "version": "2026.11.2.5",
- "date": "2026-11-02T17:15:09+00:00",
- "notes": "Trade chat names with a capital I or small l show the everyday spelling instead of being held back.",
- "sha256": "64b5c80804a527a3c505636fe4c573714f2537bb72c04d8e4689cc998259ee98",
- "size": 179999,
+ "version": "2026.11.2.6",
+ "date": "2026-11-02T20:30:32+00:00",
+ "notes": "Item popups: a stat the two reads disagree on is left out instead of guessed, plus signs read as 4 fixed, MaxMP no longer also read as MaxHP. Trade chat: item megaphones with only a price after S>, autowin prices after c/o, $> as sell, full scroll names",
+ "sha256": "98c71ba4a1ab0526214561a959227cb749f04daf89dda22c15ee34979b868fc4",
+ "size": 181031,
  "history": [
+  {
+   "version": "2026.11.2.6",
+   "date": "2026-11-02",
+   "notes": "Item popups: a stat the two reads disagree on is left out instead of guessed, plus signs read as 4 fixed, MaxMP no longer also read as MaxHP. Trade chat: item megaphones with only a price after S>, autowin prices after c/o, $> as sell, full scroll names"
+  },
   {
    "version": "2026.11.2.5",
    "date": "2026-11-02",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.10",
    "date": "2026-10-27",
    "notes": "Hovering a cut-off scroll no longer swaps in a garbled popup title; names saved that way are repaired"
-  },
-  {
-   "version": "2026.10.27.9",
-   "date": "2026-10-27",
-   "notes": "stats.bat keeps every day: items scanned, items with stats read, total scans, saved in scan_history.csv"
   }
  ],
  "pip": [],
- "sig": "3b05260f618908d75f2d593fd10175551819d20528d6c4b59ec6cc205f1684873b5148953e880e297a531a7ba369098ac5185dca52c1cf41b4afc549785c2226bebd98ea12e769e307abd29fc3d63a6255d9f3d64604e0c37f896c90fe2b2b2d6917980ffdf1bdc9f08ab9661ea4b77b2da18262b92c4fc88f376088e4759ccb1a0a6014068bfd439c994cdc22a7fac9408354410bc800f699eedcebde9c95f8ca77203a79e99a822c48f7f2afa27e65d6f16619af839c52a0070c192646d05eb664a6a38bd5879b320a94c61e6e11817927dd83550936bbce3d9647490bfbf1da3a446afc0596e164202e976e9465031d779c2d21827a1c313e8dfeccec088b"
+ "sig": "1f73eb36e873b58323713f2ebef2f5d43f22c360cf944e85e1cb556a455f60a3d9e315f08b999227a7492a01e797d19e4228ca944af61d14cf21a5fb83607ef03cc885f0c362f3290ad3ada47477b03ead9047640d9ab8a6419b311c73a25b30c5025370553b3dd4582b4491157a3d9bde905670b8fc8110922322fe292d623fd01d53582288d48b3212f26271ff503be961c9c6916a6db28f2a65e808278e6639b8bf2c491ef87d18a8d6beb67c2b2fa7b40d4f3f3384944e7ef7449e291ff4c24ad86203fe14b768d26d26783925289ad739389400b3d7dbc6e42f9edd3a4c97e555cc179a3a0e59bc5a834ac0a54418fb86febfb72b0f0b806332048b054f"
 }
