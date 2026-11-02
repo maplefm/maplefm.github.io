@@ -1,5 +1,5 @@
 """Learn the chat font's letter shapes from name samples watchers send (kind "name" in the archive's miss folder).
-  python3 tools_chatglyphs.py ARCHIVE_DATA_DIR [out=chatglyphs.json]
+  python3 tools/chatglyphs.py ARCHIVE_DATA_DIR [out=data/chatglyphs.json]
 Each sample is a sender's name as the game drew it plus what the text readers made of it. Samples with the same
 letter shapes are the same name: their readings are pooled, and a group whose leading spelling is clear and has as
 many letters as shapes teaches each shape its letter. A shape goes in the table only when 2+ different names agree
@@ -8,6 +8,7 @@ import json, os, sys, collections
 import numpy as np
 from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scan", "py"))   # fmparse, as shipped
 import fmparse
 
 def main():
