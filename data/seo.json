@@ -1,14 +1,16 @@
 {
- "day": "2026-10-27",
- "pages": 2081,
- "ms": 52,
+ "day": "2026-11-02",
+ "pages": 2213,
+ "ms": 107,
  "issues": {
-  "long titles": 2
+  "slow (over 3s)": 4
  },
  "examples": {
-  "long titles": [
-   "https://maplefm.gg/training/",
-   "https://maplefm.gg/maps/"
+  "slow (over 3s)": [
+   "https://maplefm.gg/item/baby-angel-wings/",
+   "https://maplefm.gg/item/blue-shark/",
+   "https://maplefm.gg/item/blue-pilfer/",
+   "https://maplefm.gg/item/pink-flowered-earrings/"
   ]
  }
 }
