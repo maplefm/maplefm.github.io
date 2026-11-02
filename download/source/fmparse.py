@@ -959,8 +959,7 @@ def chat_name_keys(mask):
 
 def chat_name_exact(keys, table=None):
     """The name, when every letter shape is one the table knows; else None. Capital I and small l are drawn the
-    same ("Il" in the table): among capitals or digits it is I, among small letters l, first before a small letter
-    I (names start with a capital far more often)."""
+    same ("Il" in the table)."""
     t = table if table is not None else _chatglyphs()
     if not keys or not t: return None
     cs = []
@@ -968,14 +967,16 @@ def chat_name_exact(keys, table=None):
         c = t.get(k)
         if c is None: return None
         cs.append(c)
+    # players know I and l get swapped and try both when they whisper, so the common-sense spelling is shown and
+    # the name still counts as read: first letter I, after a capital or digit I unless a small letter follows
+    # (Alex), otherwise l
     out = []
     for i, c in enumerate(cs):
         if c != "Il": out.append(c); continue
-        a = cs[i - 1] if i else ""; b = cs[i + 1] if i + 1 < len(cs) else ""
-        up = lambda x: x != "Il" and (x.isupper() or x.isdigit())
-        if (not a or up(a)) and (not b or up(b) or (not a and b.islower())): out.append("I")
-        elif (a and a.islower()) or (b and b.islower()): out.append("l")
-        else: return None
+        a = out[-1] if out else ""; b = cs[i + 1] if i + 1 < len(cs) else ""
+        if not a: out.append("I")
+        elif (a.isupper() or a.isdigit()) and not (b and b != "Il" and b.islower()): out.append("I")
+        else: out.append("l")
     s = "".join(out)
     return s if re.fullmatch(r"[A-Za-z0-9]{3,13}", s) else None
 
@@ -1028,7 +1029,8 @@ def sure_name(line_name, votes, known=()):
     best = max(votes, key=lambda k: votes[k])
     # letters the reader mixes up are never guessed between: rn and m, vv and w, cl and d, ff and tt, a 0 or O or
     # capital I in the middle of small letters ("NewtOn" was Newt0n)
-    if best == line_name and votes[best] >= 3 and not re.search(r"rn|ru|vv|cl|ff|tt|[a-z][O0I]|[O0][a-z]", best): return best
+    # (I and l swapped is fine: players try both when they whisper)
+    if best == line_name and votes[best] >= 3 and not re.search(r"rn|ru|vv|cl|ff|tt|[a-z][O0]|[O0][a-z]", best): return best
     return None
 
 def maybe_name(line_name, votes):
