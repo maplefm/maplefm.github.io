@@ -62,8 +62,11 @@
   // Older watcher versions saved half-read map names like "ee Market <1> p" for Free Market 1.
   var frCache = {};
   function fixRoom(r) { if (!r) return r; var c = frCache[r]; if (c === undefined) c = frCache[r] = fixRoom0(r); return c; }
+  // maps outside the Free Market, as the game spells them: shops go up in hunting maps and towns too
+  var MAPSET = {};
+  function isMap(r) { return !!(r && MAPSET[r]); }
   function fixRoom0(r) {
-    if (!r || /^FM(\d{1,2}| Entrance)?$/.test(r) || r === "chat") return r;
+    if (!r || /^FM(\d{1,2}| Entrance)?$/.test(r) || r === "chat" || isMap(r)) return r;
     // shops only open in Free Market rooms: a title read as something else ("Khe 2 tated") keeps its room number
     if (!/(fr)?e\s*e?\s*mark|m[ae]rk[ae]t|mar?k[ae]t/i.test(r)) { var lone = String(r).match(/(^|\D)(\d{1,2})(?!\d)/g) || []; return lone.length === 1 && +lone[0].replace(/\D/g, "") >= 1 && +lone[0].replace(/\D/g, "") <= 40 ? "FM" + (+lone[0].replace(/\D/g, "")) : "FM"; }
     if (/entr/i.test(r)) return "FM Entrance";
@@ -125,7 +128,7 @@
   function listRank(l) { return l.chat ? 3 : placed(l) ? 0 : l.c && !l.ci ? 1 : 2; }
   function buyWhere(l) {
     if (l.chat) return "whisper them, posted in chat";
-    var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
+    var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" || isMap(l.r) ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
     if (!ch && !room) return "location not read";
     return [ch || "channel not read", room || "room not read"].join(", ");
@@ -280,6 +283,7 @@
   var COLOURS = { "Buddy Overall Jeans": { 1057090: "Blue", 1057096: "Red" } };
   function loadDB() {
     fetch("data/abbr.json?v=2").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; SIDX = null; } }).catch(function () {});
+    fetch("data/mapnames.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.length) { j.forEach(function (n) { MAPSET[n] = 1; }); frCache = {}; DIRTY = true; if (D && !ENGINE) render(); } }).catch(function () {});
     // the weekly refreshed list lives with the price data; the copy next to the page is the fallback
     return fetch(LIVE + "data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       .then(function (j) { return j && j.items ? j : fetch("data/itemdb.json?v=mcw4").then(function (r) { return r.ok ? r.json() : null; }); }).then(function (j) {
@@ -769,7 +773,7 @@
     });
     function mk(r, s, name, cn, qty, cat0, t, chat, by, stream, so) {
         var room = fixRoom(r.r) || (chat ? "chat" : "");
-        if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room) && !/^[A-Z][A-Za-z'.:-]+( [A-Za-z0-9'.:<>-]+){0,5}$/.test(room)) room = "";   // streams: FM rooms and cleanly read map names
+        if (stream && room && !/^FM(\d{1,2}| Entrance)?$/.test(room) && !isMap(room)) room = "";   // streams: FM rooms and real map names
         // Stars, bullets and Wooden Tops show how many are in the set, but the price is for the whole set.
         var set = cat0 === "Stars";
         var sp0 = splitTier(name); if ((sp0.t || cn.tl) && !tieredBase(sp0.b)) { name = sp0.b; cn = { n: cn.n, tl: false }; }   // a tier pinned on a scroll that has none
@@ -1652,7 +1656,7 @@
     ev.forEach(function (l) {
       var sp = el("span"); sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
       sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", "mz", short(l.p)));
-      var rm = /^FM\d+$/.test(l.r || "") ? roomLabel(l.r) : "";
+      var rm = /^FM\d+$/.test(l.r || "") || isMap(l.r) ? roomLabel(l.r) : "";
       sp.appendChild(document.createTextNode((rm ? " · " + (l.c && !l.ci ? "CH " + l.c + ", " : "") + rm : "") + " · " + ago(l.t)));
       run.appendChild(sp);
     });

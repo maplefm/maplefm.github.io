@@ -1,10 +1,15 @@
 {
- "version": "2026.11.2.1",
- "date": "2026-11-02T12:12:21+00:00",
- "notes": "Exact reading at every window size, not just 1920 and 3840. Seller names with touching letters read right. Hovering after you scroll a shop now matches the right item. Unsure rows are left out instead of guessed.",
- "sha256": "d0c21253e8461038f5a308e059ae0dd8804573de6b23f85de7796fef81d87b84",
- "size": 170136,
+ "version": "2026.11.2.2",
+ "date": "2026-11-02T12:54:02+00:00",
+ "notes": "Shops outside the Free Market now show the map they're on (Perion Street Corner, Henesys Hunting Ground I), and the Free Market room reads even when the minimap is moved, dimmed or cut off at the edge.",
+ "sha256": "f43e1a06c2f05396e783442a79280d9103d865adcba7b8e56cc5d323758d768a",
+ "size": 173318,
  "history": [
+  {
+   "version": "2026.11.2.2",
+   "date": "2026-11-02",
+   "notes": "Shops outside the Free Market now show the map they're on (Perion Street Corner, Henesys Hunting Ground I), and the Free Market room reads even when the minimap is moved, dimmed or cut off at the edge."
+  },
   {
    "version": "2026.11.2.1",
    "date": "2026-11-02",
@@ -149,13 +154,8 @@
    "version": "2026.10.27.6",
    "date": "2026-10-27",
    "notes": "Much more accurate and much lighter on your PC. Prices, item names and seller names are now read straight off the game's own pixel font, and scroll tiers from their icons (Chaos included, and on sold rows). Most shops no longer need the text readers at all, which uses about 20 times less CPU."
-  },
-  {
-   "version": "2026.10.27.5",
-   "date": "2026-10-27",
-   "notes": "Fixes the reader error that stopped shops from being saved while you hover an item with screenshot saving on."
   }
  ],
  "pip": [],
- "sig": "a3baaacb2f1b6b55b52278dd66c897fa0db77080a18afba624564e900a7fece3ed58dae44773cba461da8bd45fb83edb3a9900abafae62c2c5fc482b7f8bbae09569f3650bdb1970795c1a944e8c3d692357252c04af57e271f8b00e07e75f045afbdfe466a56def35cc9d3cdd19ba92d09064fdeefe9481bd8d961720b3d1303fd29aecd225fdad72cc0fd62d5c59cb9d688e221893f019cdef6c6a903bf1646cc382129d54da0f3f8d2d9e8b7b2d2726a061a40666e23ab33254e5bfa58c810b93a93e6655f24cf8c0428362616fe99b0cdcf784e74643aa02f49a79669360c19420690b66830df55502913031fa2cad8a62441647913db72205032d2ba56b"
+ "sig": "58be76351afb3c66c8c168ea4d30ad75cc4749c25240ee4d264099cb11f7bb114cf26d089debda55bad42681168718b79972675ad02417fffbc2fccf8082cab57265efa098543b0691538d458c49652f383aadc7902ea4fd30fb1cdb8c698026ecda5918827cb3c15d8bf4828c1f1ac06003df616aa0bd0d005207875239537ae57eb90a5aa9afe66e26ebb121ac340a27a9b417b0e3dc232677b64e7e7000ae7f85f4439ecd39a82de9d99ff3fbf287531e5edf63ad8d1397222130c28c6bd362a503ee8dd53c9aa71e0a1f2297f6d5eacb722a9aba060368aedbf7f1ae208fc08aadaebab5d03b44e01b773ae181c3fef0e76d2a7905116fb55446c6e3d728"
 }

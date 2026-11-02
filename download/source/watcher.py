@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.2.1"
+VERSION = "2026.11.2.2"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -560,13 +560,11 @@ def send_miss(cfg, img, kind, info=""):
         pass
 
 def shop_room(r):
-    """Shops only open in Free Market rooms, so a shop's room is always one. When the minimap title reads as
-    something else ("Khe 2 tated": another font, size or window layout), the room number in it is kept and the
-    rest is dropped: FM2. No number at all: just FM, never a made-up map name."""
+    """Where the shop is: a Free Market room (FM7), the Entrance, or a map outside the Free Market spelled the way the
+    game spells it (players open shops in hunting maps too). The readers only return those, so anything else is a
+    half-read title and is dropped rather than guessed."""
     if not r or r.startswith("FM"): return r
-    n = re.findall(r"(?<!\d)(\d{1,2})(?!\d)", r)
-    n = [int(x) for x in n if 1 <= int(x) <= 40]
-    return "FM" + str(n[0]) if len(n) == 1 else "FM"
+    return r if r in fmparse._maps() else ""
 
 # Hover telemetry: counts only, no pictures, sent with the day's shop post as "hv" so Club FM can tell an equip that
 # was never hovered from one hovered too briefly, one whose popup never showed (pointer off the icon), and one whose
@@ -1743,11 +1741,11 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
             except Exception: res["room"] = ""
             res["room"] = shop_room(res["room"])
             # minimap minimized: the room is in the one-line title bar at the top left instead
-            if not re.match(r"^FM\d", res["room"]) and extra.get("bar") is not None:
+            if not (re.match(r"^FM\d", res["room"]) or res["room"] in fmparse._maps()) and extra.get("bar") is not None:
                 try:
                     bh = quick_hash(extra["bar"], (60, 5))
                     if bh != getattr(worker, "bar_hash", None): worker.bar_hash, worker.bar_text = bh, fmparse.read_room_bar(extra["bar"])
-                    if re.match(r"^FM\d", worker.bar_text or ""): res["room"] = worker.bar_text
+                    if re.match(r"^FM\d", worker.bar_text or "") or (worker.bar_text or "") in fmparse._maps(): res["room"] = worker.bar_text
                 except Exception: pass
             res["tip"] = None; res["hovering"] = extra.get("tip") is not None
             if extra.get("tip") is not None:
@@ -1773,7 +1771,7 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
             res["ch"] = extra["ch"] if "ch" in extra else current_channel(cfg)
             review_save(cfg, kind, img, res)
             # a shop whose room couldn't be read: the minimap title (and the title bar) as pictures
-            if extra.get("room") is not None and not re.match(r"^FM\d", res["room"] or "") and res.get("rows"):
+            if extra.get("room") is not None and not (re.match(r"^FM\d", res["room"] or "") or (res["room"] or "") in fmparse._maps()) and res.get("rows"):
                 send_miss(cfg, extra["room"], "room", f"read '{res['room']}'")
                 if extra.get("bar") is not None: send_miss(cfg, extra["bar"], "bar", f"read '{getattr(worker, 'bar_text', '')}'")
             if extra.get("room") is not None and res["room"] != getattr(worker, "last_room", None):
