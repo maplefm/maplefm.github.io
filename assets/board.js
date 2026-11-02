@@ -127,7 +127,7 @@
   // Where to buy order: full location first, then channel only, then nothing read; chat posts last
   function listRank(l) { return l.chat ? 3 : placed(l) ? 0 : l.c && !l.ci ? 1 : 2; }
   function buyWhere(l) {
-    if (l.chat) return "whisper them, posted in chat";
+    if (l.chat) return "whisper them, posted in chat" + (l.ns ? " (name may be misread: check it in chat)" : "");
     var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" || isMap(l.r) ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
     if (!ch && !room) return "location not read";
@@ -778,7 +778,7 @@
         var set = cat0 === "Stars";
         var sp0 = splitTier(name); if ((sp0.t || cn.tl) && !tieredBase(sp0.b)) { name = sp0.b; cn = { n: cn.n, tl: false }; }   // a tier pinned on a scroll that has none
         if (/^scroll$/i.test(name)) name = "Scroll\u2026";                                                                  // just "Scroll": the real name was cut off
-        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "" };
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, ns: !!(chat && r.ns), who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "" };
         return l;
     }
     // A shop seen without a channel (the scanner never opened Change Channel) inherits the channel another
@@ -954,7 +954,9 @@
         // shop windows misread one letter now and then ("Muckwuck" for "Muckywuck"): same item and price within half an hour
         var shopTwin = Math.abs(g[x].t - g[y].t) <= 30 * 6e4 && short_.length >= 5 && lev(a, b, 1) <= 1;
         if (!edge && !chatTwin && !shopTwin) continue;
-        var keep = nameN[a] !== nameN[b] ? (nameN[a] > nameN[b] ? a : b) : (a.length <= b.length ? a : b), drop = keep === a ? b : a;
+        // a name read sure beats one that wasn't, then the spelling seen most
+        var sa = !g[x].ns, sb = !g[y].ns;
+        var keep = sa !== sb ? (sa ? a : b) : nameN[a] !== nameN[b] ? (nameN[a] > nameN[b] ? a : b) : (a.length <= b.length ? a : b), drop = keep === a ? b : a;
         if (!alias[keep]) alias[drop] = keep;
       }
     });

@@ -40,6 +40,7 @@ function clean(r) {
   if (r.k === "b") return null;                         // buy posts aren't listings
   const o = { s: r.s, i: r.i, p: r.p, q: r.q || 1, t: r.t };
   if (r.so) o.so = true;
+  if (r.ns === 1) o.ns = 1;
   if (I(r._o, 0, 100)) o._o = r._o;
   if (S(r.r, 40)) o.r = r.r;
   if (I(r.c, 1, 40)) o.c = r.c;
@@ -60,14 +61,16 @@ export async function fastPut(env, msg, blocked) {
     if (!Array.isArray(docs)) return 0;
     const now = Math.floor(Date.now() / 1000), rows = [];
     for (const d of docs) {
-      if (!d || d.src !== "watcher-shop" || !Array.isArray(d.rows)) continue;
-      for (const r of d.rows) { const c = clean(r); if (c && now - c.t <= KEEP_S && c.t <= now + 120) rows.push(c); }
+      // shop rows, and trade chat sell posts: a seller's name is enough to whisper, so those can't wait for the pump
+      if (!d || (d.src !== "watcher-shop" && d.src !== "watcher-chat") || !Array.isArray(d.rows)) continue;
+      const chat = d.src === "watcher-chat";
+      for (const r of d.rows) { const c = clean(r); if (c && now - c.t <= KEEP_S && c.t <= now + 120) { if (chat) c.chat = 1; rows.push(c); } }
     }
     if (!rows.length) return 0;
     await ensure(env);
     const nm = String(m.nm || m.ign || "").replace(/[^A-Za-z0-9 _.\-]/g, "").slice(0, 16);
     const st = env.INBOX_DB.prepare("INSERT OR REPLACE INTO fast (h, k, posted, row, nm) VALUES (?, ?, ?, ?, ?)");
-    const batch = rows.slice(0, 400).map((r) => st.bind(h, JSON.stringify([r.s, r.i, r.p, r.q, r._o || 0]), Date.now(), JSON.stringify(r), nm));
+    const batch = rows.slice(0, 400).map((r) => st.bind(h, JSON.stringify(r.chat ? ["c", r.s, r.i, r.p] : [r.s, r.i, r.p, r.q, r._o || 0]), Date.now(), JSON.stringify(r), nm));
     batch.push(env.INBOX_DB.prepare("DELETE FROM fast WHERE posted < ?").bind(Date.now() - 2 * SHOW_S * 1000));
     await env.INBOX_DB.batch(batch);
     return rows.length;
@@ -97,12 +100,13 @@ export async function fastDocs(env) {
     const by = {}, day = new Date(nowMs - 4 * 3600e3).toISOString().slice(0, 10);
     let ver = 0;
     for (const x of r.results || []) {
-      const d = by[x.h] || (by[x.h] = { at: "", src: "watcher-shop", who: x.nm || "Guest-" + x.h.slice(0, 4), inbox: "fast-" + x.h.slice(0, 4), day, fast: 1, rows: [], _m: 0 });
+      let row; try { row = JSON.parse(x.row); } catch (e) { continue; }
+      const chat = !!row.chat, key = x.h + (chat ? "c" : "");
+      const d = by[key] || (by[key] = { at: "", src: chat ? "watcher-chat" : "watcher-shop", who: x.nm || "Guest-" + x.h.slice(0, 4), inbox: "fast-" + x.h.slice(0, 4) + (chat ? "c" : ""), day, fast: 1, rows: [], _m: 0 });
       d._m = Math.max(d._m, x.posted); ver = Math.max(ver, x.posted);
       if (x.posted <= cut) continue;
-      let row; try { row = JSON.parse(x.row); } catch (e) { continue; }
       if (nowMs / 1000 - row.t > KEEP_S) continue;
-      d.rows.push(row);
+      delete row.chat; d.rows.push(row);
     }
     const docs = Object.values(by).map((d) => { d.at = new Date(d._m).toISOString(); d.u = Math.floor(d._m / 1000); delete d._m; return d; });
     return { docs, ver: ver > cut ? ver : 0 };

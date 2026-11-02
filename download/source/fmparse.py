@@ -617,6 +617,16 @@ _SCROLL_BASES = [
     ("Two-handed Sword Attack Scroll", ["2hsword", "2h sword", "2hs", "two handed sword", "two hand sword", "2 hand sword"]),
 ]
 _TIER = {"10": "Greater", "60": "Intermediate", "100": "Lesser"}
+# the shorthand players write for scrolls ("GFMA 60%", "EINT 60", "cape dex 10%"), from the site's shortcut list
+try:
+    _sc = json.load(open(os.path.join(HERE, "chat_names.json"), encoding="utf-8")).get("scroll_codes", {})
+    _byb = {}
+    for _k, _b in _sc.items(): _byb.setdefault(_b, []).append(_k)
+    _have = {b for b, _ in _SCROLL_BASES}
+    _SCROLL_BASES = [(b, ks + [k for k in _byb.get(b, []) if k not in ks]) for b, ks in _SCROLL_BASES] + \
+                    [(b, ks) for b, ks in _byb.items() if b not in _have]
+except (OSError, ValueError):
+    pass
 
 def _price_val(m):
     if m.group(1):
@@ -677,6 +687,8 @@ def _find_items(text):
                     p = km.start()
                     if p > 0 and win[p - 1].isalpha():
                         continue
+                    if len(kw) <= 5 and win[p + len(kw):p + len(kw) + 1].isalpha():
+                        continue          # a short code is a word of its own: "gfa" isn't the start of "gfaith"
                     pa = win_a + p; dist = m.start() - (pa + len(kw)) if pa < m.start() else pa - m.end()
                     if best is None or dist < best[0]:
                         best = (dist, pa, len(kw), base)
@@ -685,6 +697,10 @@ def _find_items(text):
             found.append((min(pa, m.start()), max(m.end(), pa + kl), f"{base}: {tier}"))
     found.sort()
     return found
+
+# "EINT 60", "gfa 10": a scroll word with a bare rate right after it is that rate, as if written "60%"
+_SKW = sorted({k for _, ks in _SCROLL_BASES for k in ks if len(k) >= 3}, key=len, reverse=True)
+_BARE_RATE = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(k) for k in _SKW) + r")\s?(100|60|10)(?![\d.,%]|\s?[kKmM]\b|\s?mil)", re.I)
 
 _BAD_CTX = re.compile(r"\bc\s?/\s?o\b|\bco\b|current offer|\bb/o\b|\bbo\b", re.I)
 
@@ -697,6 +713,13 @@ _GRADE = re.compile(r"\(\s*([+-])\s?(\d{1,2})\s*\)()()"
                     r"|()()(?:(?<=^)|(?<=[\s>/]))([+])\s?(\d{1,2})(?![\d%kKmM.,])"          # "+2 pan lid", "S>+2 wand"
                     r"|()()(?<=[A-Za-z])([+-])(\d{1,2})(?![\d%kKmM.,])")                    # "pan lid+2", "wand-3"
 _STATV = re.compile(r"(?<![\d.])(\d{2,3})\s?(m\.?\s?att|matt|magic\s?att(?:ack)?|m\s?atk|w?att(?:ack)?|w?atk)\b|\b(m\.?\s?att|matt|magic\s?att(?:ack)?|w?att|w?atk)\s?:?\s?(\d{2,3})(?![\d%])", re.I)
+
+_STATO_KEY = {"str": "STR", "dex": "DEX", "int": "INT", "luk": "LUK", "luck": "LUK", "acc": "ACC", "accuracy": "ACC",
+              "avoid": "AVOID", "avo": "AVOID", "speed": "SPEED", "spd": "SPEED", "jump": "JUMP", "crit dmg": "CRITDMG",
+              "crit damage": "CRITDMG", "cdmg": "CRITDMG", "cd": "CRITDMG", "crit": "CRIT", "cri": "CRIT", "cr": "CRIT",
+              "crit rate": "CRIT", "wdef": "WDEF", "w def": "WDEF", "mdef": "MDEF", "m def": "MDEF", "hp": "HP", "mp": "MP"}
+_STATO_W = r"(crit\s?dmg|crit\s?damage|crit\s?rate|cdmg|crit|cri|cr|cd|str|dex|int|luck|luk|accuracy|acc|avoid|avo|speed|spd|jump|w\s?def|m\s?def|hp|mp)"
+_STATO = re.compile(r"(?<![\d.%])\+?(\d{1,3})\s?" + _STATO_W + r"\b(?!\s?%)|\b" + _STATO_W + r"\s?:?\s?\+?(\d{1,3})(?![\d%])", re.I)
 
 def chat_roll(text):
     """The roll people write next to an equip: "(+3)", "-3", "55 att", "att65", "56 Magic Attack".
@@ -715,6 +738,12 @@ def chat_roll(text):
         v, k = (m.group(1), m.group(2)) if m.group(1) else (m.group(4), m.group(3))
         k = "MATT" if re.match(r"m|magic", k, re.I) else "ATT"
         if 5 <= int(v) <= 200: x[k] = int(v)
+    # the other stats written out: "8 DEX 2 CRIT DMG", "+8luk +2cd", "dex 5", "15 acc"
+    for mm in _STATO.finditer(t):
+        v, w = (mm.group(1), mm.group(2)) if mm.group(1) else (mm.group(4), mm.group(3))
+        k = _STATO_KEY.get(re.sub(r"\s+", " ", w.lower()))
+        if k and k not in x and 1 <= int(v) <= (300 if k in ("HP", "MP") else 60): x[k] = int(v)
+    if "g" in x and re.search(r"\+\s?" + str(abs(x["g"])) + r"\s?" + _STATO_W, t, re.I): del x["g"]   # "+8luk" is 8 LUK, not a grade
     if re.search(r"\bclean\b", t, re.I): x["clean"] = 1
     # a bare "+7" next to a weapon with its attack written out is the upgrade count, not a grade
     if "g" in x and g and not g.group(1) and not av and ("ATT" in x or "MATT" in x): del x["g"]
@@ -735,7 +764,17 @@ def parse_chat_message_x(msg):
         clause = msg[marks[k][1]:marks[k + 1][0]]
         # "(2)" or "x2" is how many they have, never part of the price: "60% (2) 65k ea" is 65k each
         clause = re.sub(r"\(\s*\d{1,3}\s*\)|\b[xX]\s?\d{1,2}\b(?=\s*[-:/]?\s*\d)", "  ", clause)
+        clause = _BARE_RATE.sub(lambda m: m.group(1) + " " + m.group(2) + "%", clause)
         items = _find_items(clause)
+        if not items:
+            # "[Dagger Attack Scroll: Intermediate] S> 140k": an item megaphone names the item in a link just before
+            # the sell or buy mark, and the clause after it has only the price
+            lk = [m for m in re.finditer(r"\[([^\[\]]{3,64})\]", msg) if m.end() <= marks[k][0] and not re.search(r"[A-Za-z0-9]", msg[m.end():marks[k][0]])]
+            if lk:
+                lt = lk[-1].group(1).strip()
+                kn = _known_name(lt) if re.search(r"Scroll: (Lesser|Intermediate|Greater|Chaos)$", lt) else None
+                li = [(0, 0, kn)] if kn else [(0, 0, it[2]) for it in _find_items(lt)][:1]
+                items = li
         # "polearm atk 60%": the scroll, not the Pole Arm it's named after
         scrolls = [it for it in items if "Scroll" in it[2]]
         items = [it for it in items if "Scroll" in it[2] or not any(it[0] < sc[1] and sc[0] < it[1] for sc in scrolls)]
@@ -749,8 +788,12 @@ def parse_chat_message_x(msg):
             before = clause[max(0, ps - 14):ps]
             if before.endswith("(") and ")" not in clause[pe:pe + 2]:
                 continue      # "(265k": a quantity in brackets that lost its ")" ran into the price, so it can't be trusted
-            if _BAD_CTX.search(before) or re.search(r"(?:^|[^+\-\d])\d\s$", before):
-                continue      # "c/o 5k" is a bid, and "1 6k" is a decimal point the reader lost
+            if _BAD_CTX.search(before) or re.search(r"(?:^|[^+\-\d])\d[.,]?\s$", before):
+                continue      # "c/o 5k" is a bid, and "1 6k" or "1. 20m" is a decimal point the reader split
+            if re.match(r"\s*(?:for all|total|for (?:the )?(?:lot|bundle|everything)|for \d+\b)", clause[pe:pe + 18], re.I):
+                continue      # "275k for all": a price for several, not for one
+            if re.match(r"\s*(?:\(?\s*c\s?/\s?o\b|co\b|current offer|b\s?/\s?o\b|bo\b|offer)", clause[pe:pe + 16], re.I):
+                continue      # "200k c/o" is the best bid so far, not the asking price
             each = bool(re.match(r"\s*(?:mesos?\s*)?(?:each|ea\b|/e)", clause[pe:pe + 14], re.I))
             prev_end = prices[pi - 1][1] if pi else 0
             cand = [it for it in items if prev_end <= it[0] < ps]
@@ -796,6 +839,104 @@ def read_chat(region, scale=4):
         rest = rest[c.end():] if c else rest
         msgs.append([player, rest.strip()])
     return [(p, t) for p, t in msgs if not p.lower().startswith("notice")]
+
+def chat_norm(region):
+    """Black letters on white, whatever each chat line's background (plain, megaphone yellow, item megaphone teal,
+    pink, dark red): a row's background is its median colour and ink is what stands out from it. The game picture
+    above the chat box isn't one colour across a row, so it is blanked."""
+    import numpy as np
+    a = np.asarray(region.convert("RGB")).astype(np.int16)
+    bg = np.median(a, axis=1).astype(np.int16)
+    d = np.abs(a - bg[:, None, :]).sum(axis=2)
+    flat = (d < 45).mean(axis=1) > 0.55
+    H = len(flat); keep = np.zeros(H, bool)
+    for y in range(H):
+        keep[y] = flat[max(0, y - 9):min(H, y + 10)].mean() > 0.6
+    out = np.where(d > 150, 0, 255).astype(np.uint8)
+    out[~keep] = 255
+    return Image.fromarray(out)
+
+_ALNUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+def chat_name_votes(region, norm, y0, y1):
+    """The sender's name read on its own: the stretch left of the channel badge, 4 ways. Returns {spelling: votes}."""
+    import numpy as np
+    a = np.asarray(region.convert("RGB")).astype(np.int16)
+    top, bot = max(0, int(round(y0))), min(a.shape[0], int(round(y1)) + 1)
+    band = a[top:bot]
+    if band.size == 0: return {}
+    r, g, b = band[..., 0], band[..., 1], band[..., 2]
+    red = (r > 170) & (g < 90) & (b < 90)
+    cnt = red.sum(axis=0); cnt[260:] = 0
+    xs = np.nonzero(cnt >= 1)[0]
+    if len(xs) < 4: return {}
+    x = int(xs[0]); wh = band.min(axis=2) > 225
+    while x > 0 and wh[:, x - 1].mean() > 0.25: x -= 1
+    end = x - 2
+    if end < 12: return {}
+    n = np.asarray(norm)
+    crop = n[max(0, top - 1):bot + 1, 3:end].copy()
+    while crop.shape[1] > 5 and (crop[:, 0] == 0).mean() > 0.6: crop = crop[:, 1:]
+    # the same line is seen again and again as chat scrolls: its name read once is kept
+    import hashlib
+    ck = hashlib.md5(crop.tobytes() + bytes(str(crop.shape), "ascii")).hexdigest()
+    if ck in _NAME_CACHE: return dict(_NAME_CACHE[ck])
+    img = Image.fromarray(crop); votes = {}
+    for sc in (4, 6):
+        for flt in (Image.LANCZOS, Image.BICUBIC):
+            big = ImageOps.expand(img.resize((img.width * sc, img.height * sc), flt), border=24, fill=255)
+            t = re.sub(r"[^A-Za-z0-9]", "", "".join(l["text"] for l in ocr_lines(big, scale=1, psm=7, allow=_ALNUM)))
+            if 3 <= len(t) <= 13: votes[t] = votes.get(t, 0) + 1
+    if len(_NAME_CACHE) > 3000: _NAME_CACHE.clear()
+    _NAME_CACHE[ck] = dict(votes)
+    return votes
+
+_NAME_CACHE = {}
+
+def read_chat_lines(region, scale=4):
+    """Trade chat lines: [(player, message, name votes)]. Name votes are filled in for posts with a buy or sell mark
+    only (they take longer), so the caller can tell a sure name from a guess."""
+    norm = chat_norm(region)
+    img = norm.resize((norm.width * scale, norm.height * scale), Image.BICUBIC)
+    msgs = []
+    for l in ocr_lines(img, scale=scale):
+        t = l["text"].strip()
+        if l["x"] > 14 and msgs:                      # wrapped continuation line is indented
+            msgs[-1][1] += " " + t; continue
+        m2 = re.match(r"^\W*([A-Za-z0-9]{3,14})\b(.*)$", t)
+        if not m2: continue
+        player, rest = m2.group(1), m2.group(2)
+        c = re.search(r"[:;]", rest[:16])
+        rest = rest[c.end():] if c else rest
+        msgs.append([player, rest.strip(), (l["y"], l["y"] + l["h"])])
+    out = []
+    for p, t, yy in msgs:
+        if p.lower().startswith("notice"): continue
+        votes = {}
+        if _SIDE.search(t):
+            try: votes = chat_name_votes(region, norm, *yy)
+            except Exception: votes = {}
+        out.append((p, t, votes))
+    return out
+
+def sure_name(line_name, votes, known=()):
+    """The sender's name only when it's sure: the name read alone agrees with the line (3+ of 4 ways), or it is a
+    shop name seen before, spelled exactly so. Letters the reader mixes up (rn and m, vv and w) are never guessed
+    between. None when unsure."""
+    # a shop name seen before, spelled exactly so, read the same way on the line and on its own: that person.
+    # Never a near spelling of a known name: "Newton" and "Newt0n" are two players
+    if line_name and line_name in set(known) and votes.get(line_name, 0) >= 2: return line_name
+    if not votes: return None
+    best = max(votes, key=lambda k: votes[k])
+    # letters the reader mixes up are never guessed between: rn and m, vv and w, cl and d, ff and tt, a 0 or O or
+    # capital I in the middle of small letters ("NewtOn" was Newt0n)
+    if best == line_name and votes[best] >= 3 and not re.search(r"rn|ru|vv|cl|ff|tt|[a-z][O0I]|[O0][a-z]", best): return best
+    return None
+
+def maybe_name(line_name, votes):
+    """For a post whose name isn't sure: the line's own reading, only when the name read alone saw it too (so it is
+    the sender's name and not a scrap of the message). It goes up marked unsure. None: the post isn't sent."""
+    return line_name if line_name and votes.get(line_name) else None
+
 
 def _badge_channel(region, y0, y1):
     """Megaphone lines carry a small white badge with the sender's channel in red, like CH16."""

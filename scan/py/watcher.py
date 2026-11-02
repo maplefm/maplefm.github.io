@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.2.2"
+VERSION = "2026.11.2.3"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -1028,16 +1028,21 @@ class Store:
             icons[r["i"]] = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
             self.dirty = True
 
-    def add_chat(self, player, side, item, price, x=None):
+    def add_chat(self, player, side, item, price, x=None, unsure=False):
         now = time.time(); day = datetime.date.today().isoformat()
         item, price = chat_price(item, price)
         with self.lock:
             key = json.dumps([day, player.lower(), side, item, price])
             o = self.d["chat"].setdefault(key, {"reads": 0, "first": now, "last_read": 0})
-            if now - o["last_read"] >= 8:      # one read per capture
+            if now - o["last_read"] >= 4:      # one read per capture
                 o["reads"] += 1; o["last_read"] = now
             o["last"] = now
             if x: o["x"] = x                    # the roll written in the message, like (+3) or 55 att
+            if unsure: o["ns"] = 1
+            elif o.get("ns"): del o["ns"]       # read sure once: the name stands
+            # a sell post is a deal someone wants to whisper now: send it as soon as it has been read twice
+            if side == "S" and o["reads"] >= 2 and not o.get("sent"):
+                o["sent"] = 1; self.fresh = True; self.chat_fresh = True; self.hot = True
             self.dirty = True
 
     def add_chat_mentions(self, player, msg):
@@ -1171,6 +1176,7 @@ class Store:
                 doc["last"] = max(doc["last"], o["last"])
                 row = {"s": player, "i": item, "p": price, "q": 1, "t": int(o.get("last_read") or o["first"])}
                 if side == "B": row["k"] = "b"
+                if o.get("ns"): row["ns"] = 1               # the sender's name wasn't sure
                 if o.get("x"): row["x"] = dict(o["x"], _img=o["xi"]) if o.get("xi") else o["x"]
                 if o.get("xt"): row["xt"] = o["xt"]
                 if o.get("xj"): row["xj"] = o["xj"]
@@ -1853,12 +1859,22 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
             log(f"board {len(posts)} chalkboard posts: " + ", ".join(f"{p[0]} {p[2]} {p[3]:,}" for p in posts[:4]) + (" ..." if len(posts) > 4 else ""))
     else:
         hover_wanted()
-        msgs = fmparse.read_chat(img)
+        lines = fmparse.read_chat_lines(img)
+        msgs = [[p, m] for p, m, _ in lines]
         found = []
-        for player, msg in msgs:
+        known = list(store.d.get("sellers", {}).keys())
+        for player, msg, votes in lines:
             store.add_chat_mentions(player, msg)
-            for side, item, price, x in fmparse.parse_chat_message_x(msg):
-                store.add_chat(player, side, item, price, x); found.append([player, side, item, price] + ([x] if x else []))
+            rows = fmparse.parse_chat_message_x(msg)
+            if not rows: continue
+            # the sender's name has to be sure: a wrong name sends buyers to the wrong person. A post whose name
+            # isn't sure yet goes up marked so ("ns"), and the same post read again may settle it
+            name = fmparse.sure_name(player, votes, known)
+            shown = name or fmparse.maybe_name(player, votes)
+            if not shown: continue                  # no name we can stand behind, even marked unsure
+            for side, item, price, x in rows:
+                store.add_chat(shown, side, item, price, x, unsure=not name)
+                found.append([shown, side, item, price] + ([x] if x else []) + ([] if name else ["name unsure"]))
         review_save(cfg, kind, img, {"messages": msgs, "rows": found})
         if found:
             log(f"chat  {len(found)} priced messages")
@@ -1956,11 +1972,18 @@ def look(cfg, sct, game, t, L, jobs, store):
         L.last_board = t
         jobs.put(("board", grab(sct, game, [0, 0, game[2], game[3]]), {"room": grab(sct, game, cfg["room_region"]), "bar": grab(sct, game, cfg.get("room_bar_region", [0, 0, 360, 30]))}))
     elif t - L.last_chat >= cfg["chat_every_seconds"]:
-        L.last_chat = t
-        chat = grab(sct, game, chat_box)
-        h = quick_hash(chat, (80, 48))
-        if h != L.last_chat_hash and not jobs.full():
-            L.last_chat_hash = h; jobs.put(("chat", chat, None))
+        look_chat(cfg, sct, game, chat_box, t, L, jobs)
+    # trade chat keeps moving while a shop is open, and that's when scanners are busiest: read it then too, a little
+    # less often and only when the readers aren't behind on shops
+    if fmparse.looks_like_shop(shop) and t - L.last_chat >= cfg["chat_every_seconds"] * 1.5 and jobs.qsize() < 2:
+        look_chat(cfg, sct, game, chat_box, t, L, jobs)
+
+def look_chat(cfg, sct, game, chat_box, t, L, jobs):
+    L.last_chat = t
+    chat = grab(sct, game, chat_box)
+    h = quick_hash(chat, (80, 48))
+    if h != L.last_chat_hash and not jobs.full():
+        L.last_chat_hash = h; jobs.put(("chat", chat, None))
 
 def chores(cfg, t, L, store):
     """Hourly stats, saving, updates and sending what was read."""
@@ -1980,9 +2003,9 @@ def chores(cfg, t, L, store):
     if cfg["publish"] and not has_token(cfg):
         # new listings go up within half a minute, so deals reach the site fast; the rest every 10 minutes
         due = t - L.last_pub > max(5, cfg.get("inbox_every_minutes", 10)) * 60
-        quick = store.fresh and t - L.last_pub >= cfg.get("fast_send_seconds", 30)
+        quick = store.fresh and t - L.last_pub >= (6 if getattr(store, "chat_fresh", False) else cfg.get("fast_send_seconds", 30))
         if (due or quick) and not (getattr(main, "sender", None) and main.sender.is_alive()):
-            L.last_pub = t; store.hot = False; store.fresh = False
+            L.last_pub = t; store.hot = False; store.fresh = False; store.chat_fresh = False
             main.sender = threading.Thread(target=send_inbox, args=(cfg, store.published_docs()), daemon=True)
             try: main.sender.start()
             except RuntimeError: main.sender = None; send_inbox(cfg, store.published_docs())   # no threads (the browser): send now
