@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-28",
+ "updated": "2026-11-02",
  "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io) or the MapleStory Classic Wiki. Map stats on the page come from the same data and update daily.",
  "brackets": [
   {
@@ -128,7 +128,8 @@
    "lo": 40,
    "hi": 50,
    "tips": [
-    "Line 2 (Area 3) is six maps from Kerning City: carry potions."
+    "Line 2 (Area 3) is six maps from Kerning City: carry potions.",
+    "The 29 October patch lowered the HP of Copper Drakes (2,379), Torties (2,226), Clangs (2,657) and Drakes (2,950)."
    ],
    "picks": [
     {
@@ -230,8 +231,18 @@
  "upcoming": [
   {
    "name": "Forgotten Hollow",
-   "date": "2026-11-30",
-   "note": "Nexon says it opens in November; no exact date yet. New monsters in the game files include Glowshrooms, Raffles and Golden Stirges."
+   "date": "2026-11-18",
+   "note": "Nexon set the opening for November 18: a new area for levels 39 to 59. New monsters in the game files include Glowshrooms, Raffles and Golden Stirges."
+  },
+  {
+   "name": "Moon Bunny party quest",
+   "date": "2026-11-18",
+   "note": "A Thanksgiving party quest that arrives with Forgotten Hollow, open from level 11."
+  },
+  {
+   "name": "Forgotten Hollow party quest",
+   "date": "2026-12-09",
+   "note": "Arrives with guilds on December 9."
   }
  ]
 }
