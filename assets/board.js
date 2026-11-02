@@ -1112,10 +1112,20 @@
         var hasSlH = !!(dbBase(it.item) || {}).SLOTS, offL = [], plainL = [];
         it.rolls.forEach(function (r) { var su = slotsUsed(it.item, r.l); if (!r.combo && r.k !== "TOTAL" && (!hasSlH || su === 0)) plainL.push(r.l); else if (r.combo || (su || 0) > 0) offL.push(r.l); });
         var plainS = plainL.filter(function (x) { return x.so && !x.pricey && now - x.t <= 14 * DAY; }).sort(function (a, b) { return b.t - a.t; }).slice(0, 10);
-        it.typOff = 0;
+        it.typOff = 0; it.unreadTyp = false;
+        // an equip that rolls stats is priced from copies whose stats were read (hovered in game): a sale nobody
+        // hovered could be a 10 ATT pair or a clean one, and a handful of those skews the price either way
+        var bb = dbBase(it.item) || {}, rollable = it.cat === "Weapons" || Object.keys(bb).some(function (k) { return k !== "SLOTS" && !/^REQ/.test(k) && bb[k]; }) ||
+          it.all.some(function (x) { return x.x && Object.keys(x.x).some(function (k) { return /^(ATT|MATT|STR|DEX|INT|LUK|WDEF|MDEF|ACC|AVOID|HP|MP|SPEED|JUMP)$/.test(k) && x.x[k] > 0; }); });
+        var hovS = it.sales.filter(function (x) { return x.x && !x.pricey && !x.b && now - x.t <= 14 * DAY && offL.indexOf(x) < 0; }).slice(0, 10);
         if (plainS.length >= 3) {
           var pu = plainS.map(function (x) { return x.u; });
           it.typ = median(pu); it.lo = quant(pu, .25); it.hi = quant(pu, .75); it.typN = pu.length; it.typSet = plainS; it.basis = "clean"; it.moved = false;
+        } else if (rollable && hovS.length >= 3) {
+          var hu = hovS.map(function (x) { return x.u; });
+          it.typ = median(hu); it.lo = quant(hu, .25); it.hi = quant(hu, .75); it.typN = hu.length; it.typSet = hovS; it.basis = "hovered"; it.moved = false;
+        } else if (rollable && it.typSet && it.typSet.some(function (x) { return !x.x; })) {
+          it.unreadTyp = true; it.conf = "lead";      // rests on sales nobody hovered: shown as rough, never a deal
         } else if (it.kind === "sale" && offL.length && it.typSet) {
           var keep = it.typSet.filter(function (x) { return offL.indexOf(x) < 0; });
           if (keep.length >= 3 && keep.length < it.typSet.length) {
@@ -1264,7 +1274,8 @@
       // 5. bundles that don't agree with singles (a misread quantity)
       var single = recent.filter(function (x) { return (x.q || 1) === 1; }).map(function (x) { return x.u; }), multi = recent.filter(function (x) { return (x.q || 1) > 1; });
       if (single.length >= 3 && multi.length) { var ms = median(single), bad = multi.filter(function (x) { return x.u > ms * 4 || x.u < ms / 4; }).length; if (bad >= 2) i.flags.push(bad + " bundle listings price out very differently from singles, so a quantity may be misread"); }
-      i.check = i.flags.length > 0;
+      if (i.unreadTyp) i.flags.push("Rough price: the sales behind it weren't hovered, so their stats aren't known");
+      i.check = i.flags.filter(function (f) { return !/^Rough price/.test(f); }).length > 0;
     });
   }
 
@@ -3789,7 +3800,7 @@
       ip.appendChild(eb);
       eb.appendChild(el("span", "tg roll etg", LD.top.name.toLowerCase()));      // which grade this price is for
     }
-    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used" }[i.basis] || "recent sales";
+    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used", "hovered": "the last " + i.typN + " sales whose stats were read in game, scrolled and odd rolls left out" }[i.basis] || "recent sales";
     var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
     // the typical price once: when the big number already is the typical, this line only says where it comes from
@@ -4166,6 +4177,7 @@
       var q = l.q || 1, vp = vendor(l.i), npcGain = vp > l.u ? (vp - l.u) * q : 0;
       var sold7 = i.sales.filter(function (x) { return now - x.t <= WEEK; }).length;
       var ref = i.typ, g = i.equip ? rollOf(l.i, l) : null;
+      if (i.equip && !l.x) return;          // an equip nobody hovered could be any roll: never a deal
       if (i.equip && g != null) {
         // a hovered equip is judged only against sales of the same roll with the same slots used, the same rule as
         // Mega Deals: a +1 crit Work Gloves with 4 of 5 slots left took a failed scroll and is worth far less than a
@@ -4180,7 +4192,7 @@
       if (npcGain >= 1000 && npcGain >= flip) { r.profit = npcGain; r.why = "NPC buys at " + M(vp); }
       else if (i.typ && i.kind === "sale" && sold7 >= 3 && off >= 0.2 && flip >= MINPROF) {
         if (i.equip && g == null) r.lowFlip = i.bands ? (i.bands.lo * (1 - FASTPCT / 100) - l.u) * q : null;
-        r.profit = flip; r.why = Math.round(off * 100) + "% under " + M(ref) + (i.equip ? (g == null ? " if average roll" : g === 0 ? " for an average roll" : " for a " + (g > 0 ? "+" : "") + g + " roll") : ""); r.check = off > 0.85 || (l.chat && off > 0.7) || i.check;
+        r.profit = flip; r.why = Math.round(off * 100) + "% under " + M(ref) + (i.equip ? (g == null ? " if average roll" : g === 0 ? " for an average roll" : " for a " + (g > 0 ? "+" : "") + g + " roll") : ""); r.check = off > 0.85 || (l.chat && off > 0.7) || i.check || (i.equip && g == null && i.unreadTyp);
         // the going rate, not a deal: 3 or more other sellers in the last day ask within 25% of this price
         var near = {}; i.asks.forEach(function (x) { if (x !== l && now - x.t <= DAY && !x.chat && Math.abs(Math.log(x.u / l.u)) < Math.log(1.25)) near[String(x.s).toLowerCase()] = 1; });
         delete near[String(l.s).toLowerCase()];
