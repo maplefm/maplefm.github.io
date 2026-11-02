@@ -1422,17 +1422,18 @@
   function Lstat() {
     if (!D || !D.L) return null;
     var now = Date.now(), c = D._lst; if (c && now - c.at < 60e3) return c;
-    var live = {}, shops = {}, spots = {}, sc = {}, st = {}, by = {}, lastT = 0, L = D.L;
+    var live = {}, liveSt = {}, shops = {}, spots = {}, sc = {}, st = {}, by = {}, lastT = 0, L = D.L;
     for (var k = 0; k < L.length; k++) {
       var l = L[k], age = now - l.t; if (l.t > lastT) lastT = l.t;
       if (!l.chat && !l.stream && l.who && age < 15 * 6e4) live[String(l.who).toLowerCase()] = 1;
+      // a stream reading shops right now counts as a scanner too (its rows reach the board a few minutes late)
+      if (l.stream && l.who && age < 20 * 6e4) liveSt[String(l.who).toLowerCase()] = 1;
       if (!l.chat && age <= DAY) { if (l.s) shops[String(l.s).toLowerCase() + "|" + (l.c || 0)] = 1; if (l.r && l.c && /^FM\d+$/.test(l.r)) spots[l.r + "|" + l.c] = 1; if (l.who) (l.stream ? st : sc)[String(l.who).toLowerCase()] = 1; }
       if (l.stream && age <= 7 * DAY) { var w = by[l.who] || (by[l.who] = { name: l.who, rows: 0, sales: 0, last: 0, shops: {} }); w.rows++; if (l.so && !l.b) w.sales++; if (l.t > w.last) w.last = l.t; if (l.s) w.shops[l.s] = 1; }
     }
     var n = Object.keys(shops).length;
-    return (D._lst = { at: now, lastT: lastT, live: Object.keys(live).length, streams: by, cov: n ? { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length } : null });
+    return (D._lst = { at: now, lastT: lastT, live: Object.keys(live).length, liveSt: Object.keys(liveSt).length, streams: by, cov: n ? { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length } : null });
   }
-  // players whose watcher sent shop rows in the last 15 minutes (streams and chat don't count)
   // Scanners uploading in the last 15 minutes, FM Watcher and the browser scanner alike, counted by the server
   // (/public/scanners, one per person); the board's own rows are the fallback when the server can't be reached.
   var LIVE_N = -1, LIVE_AT = 0;
@@ -1444,7 +1445,8 @@
     }).catch(function () {});
   }
   setInterval(function () { if (!document.hidden) loadLive(); }, 90e3);
-  function liveScanners() { loadLive(); var s = Lstat(), b = s ? s.live : 0; return Math.max(LIVE_N, b); }
+  // scanners now: players (the server's count, or the board's own) plus streams reading shops
+  function liveScanners() { loadLive(); var s = Lstat(), b = s ? s.live : 0; return Math.max(LIVE_N, b) + (s ? s.liveSt : 0); }
   function coverage24() { var s = Lstat(); return s ? s.cov : null; }
   // Streamers whose broadcasts fed the board this week, credited by name with a link to their channel
   function renderStreams() {
