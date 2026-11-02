@@ -1,5 +1,5 @@
 {
- "at": 1793644565476,
+ "at": 1793647001519,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -44,16 +44,16 @@
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
-   "rows7": 527,
-   "room7": 469,
+   "rows7": 489,
+   "room7": 431,
    "late7": 23,
    "chat24": 0,
    "last": 1793210457,
    "ver": "2026.10.28.1",
    "lag_median_min": null,
    "room_rate24": null,
-   "room_rate7": 0.89,
-   "late_share7": 0.044,
+   "room_rate7": 0.881,
+   "late_share7": 0.047,
    "behind": 24
   },
   "Faif": {
@@ -121,18 +121,18 @@
    "behind": 5
   },
   "laclac": {
-   "rows24": 372,
-   "room24": 372,
-   "ch24": 372,
-   "rows7": 94212,
-   "room7": 52057,
-   "late7": 1957,
+   "rows24": 0,
+   "room24": 0,
+   "ch24": 0,
+   "rows7": 91924,
+   "room7": 50095,
+   "late7": 1943,
    "chat24": 0,
    "last": 1793558571,
    "ver": "2026.10.31.9",
-   "lag_median_min": 132.2,
-   "room_rate24": 1.0,
-   "room_rate7": 0.553,
+   "lag_median_min": null,
+   "room_rate24": null,
+   "room_rate7": 0.545,
    "late_share7": 0.021,
    "behind": 5
   },
@@ -295,15 +295,13 @@
    "incomplete upload": 635
   },
   "2026-11-02": {
-   "bad row: 3a3a (p zero)": 11000,
-   "incomplete upload": 551
+   "bad row: 3a3a (p zero)": 11360,
+   "incomplete upload": 569
   }
  },
  "rejects": {},
  "flags": [
   "Zik: watcher 2026.10.31.9, 5 releases behind",
-  "laclac: 2.1% of rows reached us over an hour late this week",
-  "laclac: watcher 2026.10.31.9, 5 releases behind",
   "Weltschmerz: watcher 2026.11.2.3, 2 releases behind"
  ]
 }
