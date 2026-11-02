@@ -614,18 +614,19 @@ async function tipImgPut(req, env) {
 }
 // Readings the watcher couldn't make (an item popup it couldn't read, a room title it couldn't place), sent as small
 // pictures so the readers can be fixed without asking scanners for their review folders. Never public: only the
-// pump (INBOX_PULL_KEY) lists and fetches them, into the private archive. 40 a day per watcher, kept 14 days.
+// pump (INBOX_PULL_KEY) lists and fetches them, into the private archive. 140 a day per watcher (most are chat name
+// samples, letters only, for learning the chat font), kept 14 days.
 async function missPut(req, env) {
   const ip = req.headers.get("CF-Connecting-IP") || "", hid = req.headers.get("X-Watcher") || "", kind = req.headers.get("X-Kind") || "";
   if (overLimit("mi:" + ip, 60, 600)) return json({ error: "slow down" }, 429);
-  if (!/^[0-9a-f]{16}$/.test(hid) || !/^(tip|room|bar|row)$/.test(kind)) return json({ error: "no" }, 403);
+  if (!/^[0-9a-f]{16}$/.test(hid) || !/^(tip|room|bar|row|name)$/.test(kind)) return json({ error: "no" }, 403);
   const buf = new Uint8Array(await req.arrayBuffer());
   if (buf.length < 200 || buf.length > 300000) return json({ error: "size" }, 413);
   const png = [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => buf[i] === v);
   const dv = new DataView(buf.buffer), w = png ? dv.getUint32(16) : 0, h = png ? dv.getUint32(20) : 0;
   if (!png || w < 20 || w > 1000 || h < 8 || h > 1000) return json({ error: "not a picture" }, 400);
   const day = new Date().toISOString().slice(0, 10), ck = "misscnt:" + day + ":" + hid, n = Number(await env.ACCOUNTS.get(ck) || 0);
-  if (n >= 40) return json({ ok: true, full: true });
+  if (n >= 140) return json({ ok: true, full: true });
   await env.ACCOUNTS.put(ck, String(n + 1), { expirationTtl: 2 * DAY });
   const info = String(req.headers.get("X-Info") || "").replace(/[^\x20-\x7e]/g, "").slice(0, 300), t = Date.now();
   await env.ACCOUNTS.put("miss:" + t + ":" + hid + ":" + kind, buf, { expirationTtl: 14 * DAY, metadata: { w, h, t, hid, kind, info, ver: String(req.headers.get("User-Agent") || "").slice(0, 40) } });
@@ -686,7 +687,7 @@ async function missList(req, env, url) {
 async function missGet(req, env, p) {
   if (!(await pullOK(req, env))) return json({ error: "no" }, 403);
   const key = decodeURIComponent(p.slice("/inbox/miss/".length));
-  if (!/^miss:\d+:[0-9a-f]{16}:(tip|room|bar|row)$/.test(key)) return json({ error: "no" }, 400);
+  if (!/^miss:\d+:[0-9a-f]{16}:(tip|room|bar|row|name)$/.test(key)) return json({ error: "no" }, 400);
   const v = await env.ACCOUNTS.get(key, "arrayBuffer");
   return v ? new Response(v, { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } }) : json({ error: "gone" }, 404);
 }
