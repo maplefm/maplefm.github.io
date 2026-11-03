@@ -18,6 +18,8 @@ checked, "partial" is set and the exit code is 0 (the watchdog notices if the jo
 Standard library only.
 """
 import sys, os, json, time, re, html, hashlib, argparse, urllib.request, urllib.parse, urllib.error, datetime
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gamepatch
 
 IO = "https://maplestory.io/api/MCW/1"
 WIKI = "https://mapleclassic.wiki/api.php"
@@ -289,6 +291,7 @@ def main():
     for mid, rows in sorted(by_id.items()):
         g = get(f"{IO}/mob/{mid}")
         meta = (g or {}).get("meta") if isinstance(g, dict) else None
+        if meta: meta = gamepatch.mob(mid, dict(meta))   # a patch newer than the maplestory.io files
         w = wm_by_id.get(mid)
         url = f"{IO}/mob/{mid}"
         if meta:

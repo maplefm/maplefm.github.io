@@ -1,0 +1,230 @@
+{
+ "about": "Game changes newer than the maplestory.io game files (MCW/1). Each change applies only while the game files still hold the old value ('from'), so once maplestory.io catches up it stops doing anything and can be deleted. Used by tools/world.py, tools/skilldata.py and tools/factcheck.py (tools/gamepatch.py).",
+ "patches": [
+  {
+   "version": "1.1.0",
+   "date": "2026-10-29",
+   "source": "https://www.nexon.com/maplestory/news/maintenance/47298/completed-scheduled-maintenance-october-29-2026",
+   "wiki": "https://mapleclassic.wiki/index.php?title=Update:29_October_2026_Scheduled_Maintenance",
+   "mobs": {
+    "40": {
+     "maxHP": [
+      2595,
+      2379
+     ],
+     "name": "Copper Drake"
+    },
+    "41": {
+     "maxHP": [
+      2671,
+      2226
+     ],
+     "name": "Tortie"
+    },
+    "44": {
+     "maxHP": [
+      2899,
+      2657
+     ],
+     "name": "Clang"
+    },
+    "45": {
+     "maxHP": [
+      3218,
+      2950
+     ],
+     "name": "Drake"
+    }
+   },
+   "skills": {
+    "3001000": {
+     "name": "Focus",
+     "acc": [
+      [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16,
+       17,
+       18,
+       19,
+       20
+      ],
+      [
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16,
+       17,
+       18,
+       19,
+       20,
+       21,
+       22,
+       23,
+       25
+      ]
+     ]
+    },
+    "2101004": {
+     "name": "Poison Breath",
+     "m": [
+      [
+       50,
+       51,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65,
+       66,
+       67,
+       68,
+       69,
+       70,
+       71,
+       72,
+       73,
+       74,
+       75,
+       76,
+       77,
+       78,
+       80
+      ],
+      [
+       60,
+       61,
+       62,
+       63,
+       64,
+       65,
+       66,
+       67,
+       68,
+       69,
+       70,
+       71,
+       72,
+       73,
+       74,
+       75,
+       76,
+       77,
+       78,
+       79,
+       80,
+       81,
+       82,
+       83,
+       84,
+       85,
+       86,
+       87,
+       88,
+       90
+      ]
+     ]
+    },
+    "2201004": {
+     "name": "Thunder Bolt",
+     "m": [
+      [
+       40,
+       41,
+       42,
+       43,
+       44,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65,
+       66,
+       67,
+       68,
+       70
+      ],
+      [
+       50,
+       51,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65,
+       66,
+       67,
+       68,
+       69,
+       70,
+       71,
+       72,
+       73,
+       74,
+       75,
+       76,
+       77,
+       78,
+       80
+      ]
+     ]
+    }
+   }
+  }
+ ]
+}
