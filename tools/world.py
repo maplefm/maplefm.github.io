@@ -13,6 +13,8 @@ writes OUT_DIR/world.json and OUT_DIR/minimap/<map id>.png. The previous file is
 ("new since ..."), and its changes are printed for the workflow to post.
 """
 import sys, os, json, re, time, html, base64, urllib.request, urllib.parse, datetime
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gamepatch   # game changes newer than the maplestory.io files
 
 WIKI = "https://mapleclassic.wiki/api.php"
 RAW = "https://mapleclassic.wiki/index.php?title=Module:Observed_facts&action=raw"
@@ -90,7 +92,7 @@ io_mobs = {}   # by game id: names repeat (a job test or party quest copy shares
 for m in get(IO + "/mob") or []:
     if isinstance(m, dict) and m.get("id") and m["id"] < 9000000:
         d = get(f"{IO}/mob/{m['id']}")
-        if d and d.get("meta"): io_mobs[d["id"]] = dict(d["meta"], id=d["id"])
+        if d and d.get("meta"): io_mobs[d["id"]] = gamepatch.mob(d["id"], dict(d["meta"], id=d["id"]))
         time.sleep(0.1)
 
 

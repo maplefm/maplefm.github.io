@@ -6,7 +6,9 @@
 Keeps only what the damage math needs: every attack skill's damage %, hits, targets and mastery by level, and the
 passives and buffs that change damage, accuracy, crits or attack speed. Values are per skill level (index 0 = level 1).
 """
-import json, sys, time, urllib.request
+import json, os, sys, time, urllib.request
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gamepatch
 
 IO = "https://maplestory.io/api/MCW/1"
 JOBS = [100, 110, 120, 130, 200, 210, 220, 230, 300, 310, 320, 400, 410, 420]
@@ -103,6 +105,7 @@ def main(path, itemdb=None):
             if "m" in h["lv"]: p["lv"]["m"] = h["lv"]["m"]
             if "t" in h["lv"]: p["lv"]["t"] = h["lv"]["t"]
             if h.get("el") and not p.get("el"): p["el"] = h["el"]
+    for sid, rec in skills.items(): gamepatch.skill(sid, rec["lv"])   # patches newer than the maplestory.io files (tools/gamepatch.json)
     out = {"source": "MapleStory Classic World game data via maplestory.io (MCW/1)", "built": time.strftime("%Y-%m-%d"),
            "skills": {str(k): v for k, v in sorted(skills.items())}, "weapons": weapons(itemdb), "ammo": ammo()}
     with open(path, "w", encoding="utf-8") as f: json.dump(out, f, separators=(",", ":"))

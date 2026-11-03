@@ -748,7 +748,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     fetch("/assets/training-notes.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
     fetch(LIVE + "data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
     fetch("/data/mobs.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
-    fetch("/assets/classic-skills.json?v=1").then(function (r) { return r.json(); })
+    fetch("/assets/classic-skills.json?v=2").then(function (r) { return r.json(); })
   ]).then(function (res) {
     MOBX = res[3] || {};
     window.__CDATA = res[4]; ENG = CD.Engine(res[4]);
