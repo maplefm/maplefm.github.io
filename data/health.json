@@ -1,5 +1,5 @@
 {
- "at": 1793719353212,
+ "at": 1793723245056,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -121,18 +121,18 @@
    "behind": 7
   },
   "laclac": {
-   "rows24": 4295,
-   "room24": 2711,
-   "ch24": 2711,
-   "rows7": 85658,
-   "room7": 49845,
-   "late7": 1629,
+   "rows24": 6261,
+   "room24": 4677,
+   "ch24": 4677,
+   "rows7": 83899,
+   "room7": 51798,
+   "late7": 1594,
    "chat24": 4,
-   "last": 1793719200,
+   "last": 1793722518,
    "ver": "2026.11.2.7",
    "lag_median_min": 3.7,
-   "room_rate24": 0.631,
-   "room_rate7": 0.582,
+   "room_rate24": 0.747,
+   "room_rate7": 0.617,
    "late_share7": 0.019,
    "behind": 0
   },
@@ -287,7 +287,7 @@
    "rows7": 439,
    "room7": 397,
    "late7": 0,
-   "chat24": 55,
+   "chat24": 18,
    "last": 1793689677,
    "ver": "2026.11.2.7",
    "lag_median_min": 1.8,
@@ -331,12 +331,12 @@
    "incomplete upload": 725
   },
   "2026-11-03": {
-   "bad row: 3a3a (p zero)": 9680,
-   "incomplete upload": 550
+   "bad row: 3a3a (p zero)": 10280,
+   "incomplete upload": 610
   }
  },
  "rejects": {},
  "flags": [
-  "laclac: 63% of shops placed in a room in the last 24 hours (4295 shop rows)"
+  "laclac: 75% of shops placed in a room in the last 24 hours (6261 shop rows)"
  ]
 }
