@@ -1,5 +1,5 @@
 {
- "at": 1793667311397,
+ "at": 1793670386786,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -265,20 +265,20 @@
    "behind": 7
   },
   "Weltschmerz": {
-   "rows24": 360,
-   "room24": 318,
-   "ch24": 360,
-   "rows7": 360,
-   "room7": 318,
+   "rows24": 403,
+   "room24": 361,
+   "ch24": 403,
+   "rows7": 403,
+   "room7": 361,
    "late7": 0,
-   "chat24": 200,
-   "last": 1793636548,
-   "ver": "2026.11.2.3",
+   "chat24": 218,
+   "last": 1793669308,
+   "ver": "2026.11.2.7",
    "lag_median_min": 2.3,
-   "room_rate24": 0.883,
-   "room_rate7": 0.883,
+   "room_rate24": 0.896,
+   "room_rate7": 0.896,
    "late_share7": 0.0,
-   "behind": 4
+   "behind": 0
   }
  },
  "drops": {
@@ -299,13 +299,12 @@
    "incomplete upload": 725
   },
   "2026-11-03": {
-   "bad row: 3a3a (p zero)": 600,
-   "incomplete upload": 30
+   "bad row: 3a3a (p zero)": 1200,
+   "incomplete upload": 60
   }
  },
  "rejects": {},
  "flags": [
-  "Zik: watcher 2026.10.31.9, 7 releases behind",
-  "Weltschmerz: watcher 2026.11.2.3, 4 releases behind"
+  "Zik: watcher 2026.10.31.9, 7 releases behind"
  ]
 }
