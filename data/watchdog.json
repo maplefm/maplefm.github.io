@@ -1,7 +1,8 @@
 {
- "at": 1793675635,
+ "at": 1793678195,
  "ok": false,
  "failing": [
+  "Board on a phone",
   "Scanner health"
  ],
  "checks": [
@@ -9,182 +10,182 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 239,
+   "ms": 173,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 115,
+   "ms": 246,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 252,
+   "ms": 84,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 174,
+   "ms": 50,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 171,
+   "ms": 45,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 146,
+   "ms": 59,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 87,
+   "ms": 50,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 321,
+   "ms": 53,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 115,
+   "ms": 50,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 253,
+   "ms": 37,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 113,
+   "ms": 37,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 160,
+   "ms": 39,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 80,
+   "ms": 46,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 189,
+   "ms": 63,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 98,
+   "ms": 33,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 265,
+   "ms": 88,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 155,
+   "ms": 42,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: clean 1,499 to 1,999 (43 sold) · clean +1 crit rate 120K to 140K (18 sold) · ",
-   "ms": 253,
+   "detail": "Work Gloves: clean 1,499 to 1,999 (43 sold) · clean +1 crit rate 120K to 140K (17 sold) · ",
+   "ms": 238,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded 4 min ago",
-   "ms": 126,
+   "detail": "uploaded 1 min ago",
+   "ms": 34,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "48 open listings, #selling synced 3 min ago",
-   "ms": 218,
+   "detail": "48 open listings, #selling synced 1 min ago",
+   "ms": 650,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
    "detail": "15 visits, 0 crashed",
-   "ms": 230,
+   "ms": 273,
    "fix": null
   },
   {
    "name": "Board on a phone",
-   "ok": true,
-   "detail": "loads, card and search work (33s, 75 MB, 0.0 MB listings, 0 full pulls)",
+   "ok": false,
+   "detail": "script error: /classicrank.com/api/v1/characters?names=Zik%2Claclac%2CMaya%2CYint%2CFoxamt%2CPoetTreeTV%2CThatHennyy%2CMaaateen%2C4DDD (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (32s, 89 MB, 0.0 MB listings, 0 full pulls)",
+   "detail": "loads, card and search work (33s, 75 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated -1 min ago",
-   "ms": 144,
+   "detail": "updated 1 min ago",
+   "ms": 80,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1569 items",
-   "ms": 88,
+   "detail": "1568 items",
+   "ms": 38,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": false,
    "detail": "Zik: watcher 2026.10.31.9, 7 releases behind",
-   "ms": 113,
+   "ms": 56,
    "fix": null
   },
   {
@@ -373,7 +374,15 @@
     "Scanner health"
    ],
    "repairs": []
+  },
+  {
+   "at": 1793678195,
+   "failing": [
+    "Board on a phone",
+    "Scanner health"
+   ],
+   "repairs": []
   }
  ],
- "beat": 1793675635
+ "beat": 1793678195
 }
