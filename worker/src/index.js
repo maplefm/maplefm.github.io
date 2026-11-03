@@ -1524,7 +1524,7 @@ async function priceLine(env, raw) {
     if (lg) {
       const slugG = shown(hits[0].item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       const g0 = lg.g, price = g0[1] === "sold" || g0[1] === "asking" ? (meso(g0[2]) === meso(g0[3]) ? meso(g0[2]) : meso(g0[2]) + " to " + meso(g0[3])) + (g0[1] === "sold" ? " from " + g0[5] + " sales" : " asking, " + g0[6] + " listed") : "not enough sales yet";
-      return (shown(hits[0].item) + " " + g0[0].replace(/^Clean, /, "clean ").replace(/^Clean$/, "clean").replace(/^Slots used, no gain$/, "no gain") + ": " + price + " · maplefm.gg/item/" + slugG + "/#card").slice(0, 390);
+      return (shown(hits[0].item) + " " + g0[0].replace(/^Clean, /, "clean ").replace(/^Clean$/, "clean").replace(/^Slots used, no gain$/, "no gain") + ": " + price + " · maplefm.gg/c/" + slugG).slice(0, 390);
     }
     const r0 = hits[0], g = String(parseInt(sr.g, 10)), slug0 = shown(r0.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     // the exact roll (every paid-for stat that moved) and scroll state; without a sale, the closest rolls that sold
@@ -1535,14 +1535,14 @@ async function priceLine(env, raw) {
       if (rq.sale) b1.push("typical " + meso(rq.sale.p) + " from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : ""));
       if (rq.ask) b1.push((rq.sale ? "· " : "") + "cheapest up now " + meso(rq.ask.pr));
       if (!rq.sale && rq.near.length) b1.push("· no sales of this exact roll yet, closest: " + rq.near.map((x) => x.label + " " + meso(x.p)).join(", "));
-      b1.push("· maplefm.gg/item/" + slug0 + "/#card");
+      b1.push("· maplefm.gg/c/" + slug0);
       return b1.join(" ").slice(0, 390);
     }
     if (rq.near.length) return (head + " no sales of this exact roll yet. Closest that sold: " + rq.near.map((x) => x.label + " " + meso(x.p) + " (" + x.n + " sales)").join(", ") + ". Every roll: maplefm.gg/item/" + slug0).slice(0, 390);
     const b0 = [shown(r0.item) + " " + sr.roll + ": no sales caught at that roll lately."];
     if (r0.rk && sr.stat && sr.stat !== r0.rk && /DEF$/.test(sr.stat)) b0.push("Defense isn't what this sells by: rolls go by " + statLabel(r0.rk) + ".");
     if (r0.typ) b0.push("Clean ones typical " + meso(r0.typ) + ".");
-    b0.push("Every roll's price: maplefm.gg/item/" + slug0 + "/#card");
+    b0.push("Every roll's price: maplefm.gg/c/" + slug0);
     return b0.join(" ").slice(0, 390);
   }
   // a real item nobody has sold lately ("ilbi", "zakum helm"): say so, instead of answering with a different item
@@ -1560,13 +1560,13 @@ async function priceLine(env, raw) {
   if (lad.length) {
     const slugL = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     const parts = lad.slice(0, 4).map((g) => g[0].replace(/^Clean, /, "clean ").replace(/^Clean$/, "clean").replace(/^Slots used, no gain$/, "no gain") + " " + (meso(g[2]) === meso(g[3]) ? meso(g[2]) : meso(g[2]) + " to " + meso(g[3])) + (g[1] === "sold" ? " (" + g[5] + " sold)" : " (asking)"));
-    return (shown(r.item) + ": " + parts.join(" · ") + (r.lad.length > 1 ? " · by " + r.lad.slice(1, 4).map((x) => x[0]).join(", ") + " too" : "") + " · maplefm.gg/item/" + slugL + "/#card").slice(0, 390);
+    return (shown(r.item) + ": " + parts.join(" · ") + (r.lad.length > 1 ? " · by " + r.lad.slice(1, 4).map((x) => x[0]).join(", ") + " too" : "") + " · maplefm.gg/c/" + slugL).slice(0, 390);
   }
   if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? " from " + (r.salesN || 0) + " sales" : " from asks"));
   if (r.best) bits.push("· cheapest now " + meso(r.best) + (r.bestS && r.bestW ? " (" + String(r.bestS).replace(/[^A-Za-z0-9]/g, "").slice(0, 20) + ", " + String(r.bestW).replace(/[^A-Za-z0-9 ,()]/g, "").slice(0, 40) + ")" : ""));
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
   const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  bits.push("· maplefm.gg/item/" + slug + "/#card");
+  bits.push("· maplefm.gg/c/" + slug);
   return bits.join(" ").slice(0, 390);
 }
 
@@ -1823,7 +1823,7 @@ function itemUrl(name, priced) {
   const m = /^(.*Scroll): (Lesser|Intermediate|Greater|Chaos|Superior)$/.exec(String(name));
   const shown = m ? m[1] + " " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%", Chaos: "Chaos", Superior: "Superior" })[m[2]] : String(name);
   const slug = shown.toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  return priced && slug ? "https://maplefm.gg/item/" + slug + "/#card" : "https://maplefm.gg/#item=" + encodeURIComponent(name);
+  return priced && slug ? "https://maplefm.gg/c/" + slug : "https://maplefm.gg/#item=" + encodeURIComponent(name);
 }
 async function redditReply(env, p) {
   const LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/";
@@ -2321,7 +2321,7 @@ async function watchDigest(env, onlyId) {
         const a = d.length >= 2 ? d[d.length - 1][1] : 0, b = d.length >= 2 ? d[d.length - 2][1] : 0;
         const ch = a && b ? Math.round((a - b) / b * 100) : null;
         const under = watch[n] && watch[n].under ? " · your alert under " + meso(watch[n].under) : "";
-        return "**[" + shown(n) + "](https://maplefm.gg/item/" + slug + "/?ref=digest#card)** " + meso(r.typ) + (ch == null || ch === 0 ? "" : " (" + (ch > 0 ? "▲ " : "▼ ") + Math.abs(ch) + "% vs the day before)") + under;
+        return "**[" + shown(n) + "](https://maplefm.gg/c/" + slug + "?ref=digest)** " + meso(r.typ) + (ch == null || ch === 0 ? "" : " (" + (ch > 0 ? "▲ " : "▼ ") + Math.abs(ch) + "% vs the day before)") + under;
       });
       const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
       if (!c || !c.id) continue;
