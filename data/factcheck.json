@@ -1,12 +1,73 @@
 {
- "at": 1793242586,
+ "at": 1793736939,
  "checked": {
   "quests": 343,
   "monsters": 83,
   "maps_game": 303,
   "maps": 303
  },
- "diff": [],
+ "diff": [
+  {
+   "kind": "monster",
+   "id": 40,
+   "field": "hp",
+   "ours": 2595,
+   "source": {
+    "game": 2595,
+    "wiki": 2379
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/mob/40",
+    "https://mapleclassic.wiki/index.php?title=Copper_Drake"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "monster",
+   "id": 41,
+   "field": "hp",
+   "ours": 2671,
+   "source": {
+    "game": 2671,
+    "wiki": 2226
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/mob/41",
+    "https://mapleclassic.wiki/index.php?title=Tortie"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "monster",
+   "id": 44,
+   "field": "hp",
+   "ours": 2899,
+   "source": {
+    "game": 2899,
+    "wiki": 2657
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/mob/44",
+    "https://mapleclassic.wiki/index.php?title=Clang"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "monster",
+   "id": 45,
+   "field": "hp",
+   "ours": 3218,
+   "source": {
+    "game": 3218,
+    "wiki": 2950
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/mob/45",
+    "https://mapleclassic.wiki/index.php?title=Drake"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  }
+ ],
  "new": [],
  "unconfirmed": [
   {
@@ -186,7 +247,7 @@
  ],
  "partial": false,
  "failed": [],
- "seconds": 195,
+ "seconds": 199,
  "sources": [
   "maplestory.io MCW game data",
   "MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0)"
