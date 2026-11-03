@@ -86,8 +86,7 @@ def ladder_html(lad):
             trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
         if trs: out += (f"<h3>{html.escape(str(stat))}</h3>" if len(lad) > 1 else "") + f"<table><tr><th>Grade</th><th>Price</th><th>Based on</th></tr>{trs}</table>"
     if not out: return ""
-    return ('<h2>Price by grade</h2><p class="note">Clean has no scroll used; +1, +2 and up are the total over the item\'s base. '
-            'Prices are the middle of the last 7 days of sales, or asking prices where there are under 2 sales.</p>' + out)
+    return '<h2>Price by grade</h2><p class="note"><a href="/how-it-works.html#grades">How grades are priced</a></p>' + out
 
 
 CONF = {"verified": ("Verified", "fresh sales caught by two or more trusted scanners"),
@@ -103,6 +102,8 @@ a{color:var(--accent)} .top{display:flex;justify-content:space-between;align-ite
 .card{background:var(--panel);border:3px solid var(--wood);border-radius:16px;padding:20px 22px}
 .hd{display:flex;gap:14px;align-items:center}.hd img{width:56px;height:56px;image-rendering:auto;background:var(--panel2);border-radius:12px;padding:6px;object-fit:contain}
 h1{margin:0;font-size:1.6rem;line-height:1.15}.sub{color:var(--muted);font-weight:700;font-size:.9rem;margin:2px 0 0}
+.sum{margin:12px 0 0;padding-left:20px;font-size:.95rem}.sum li{margin:4px 0}
+.faq{margin:22px 0 0;border:1px solid var(--line2);border-radius:12px;padding:10px 14px;background:var(--panel2)}.faq summary{cursor:pointer;font-weight:800}.faq h3{font-size:1rem;margin:12px 0 2px}.faq p{margin:0}
 .big{font-size:2.2rem;font-weight:900;margin:16px 0 0}.big small{font-size:.95rem;color:var(--muted);font-weight:700;margin-left:8px}
 .chg{display:inline-block;font-size:.85rem;font-weight:800;padding:2px 10px;border-radius:999px;margin-left:8px;vertical-align:middle}.chg.up{color:var(--up);background:rgba(18,137,95,.12)}.chg.down{color:var(--down);background:rgba(208,64,47,.12)}
 .note{color:var(--muted);font-size:.9rem;margin:6px 0 0}
@@ -177,15 +178,16 @@ def noicon(text):
     if not _NOICON: return text
     return re.sub(r'<img ([^>]*?)src="https://maplefm\.gg/i/(\d+)\.png"[^>]*>', lambda m: '<span class="gi"></span>' if m.group(2) in _NOICON else m.group(0), text)
 
-def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None):
-    return noicon(page0(title, desc, canon, body, ld, og, active, crumbs))
+def page(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None, robots=None):
+    return noicon(page0(title, desc, canon, body, ld, og, active, crumbs, robots))
 
-def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None):
+def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=None, robots=None):
     t, d = html.escape(title), html.escape(desc)
+    if robots: ld = f'<meta name="robots" content="{robots}">' + (ld or "")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=10"><link rel="stylesheet" href="/assets/nav.css?v=7">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/assets/nav.css?v=7">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body.replace('<div class="card">', '<div class="card">' + BRAND, 1)}
 </main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script></body></html>"""
@@ -308,6 +310,107 @@ def guide_html(name, g, page_of):
     return out
 
 
+# a page's date moves only when what it says changes: the build writes these placeholders, and stamp() keeps the old
+# date when the page reads the same apart from its date (an unchanged page told Google it changed every day)
+D_ISO, D_TXT = "%%DATE_ISO%%", "%%DATE_TXT%%"
+
+
+def stamp(path, text, today):
+    d = today
+    try:
+        old = open(path, encoding="utf-8").read()
+        m = re.search(r'<meta name="fm-date" content="(\d{4}-\d{2}-\d{2})">', old)
+        if m:
+            od = m.group(1)
+            was = old.replace(od, D_ISO).replace(datetime.date.fromisoformat(od).strftime("%B %-d, %Y"), D_TXT)
+            if was == text: d = od
+    except Exception: pass
+    return d, text.replace(D_ISO, d).replace(D_TXT, datetime.date.fromisoformat(d).strftime("%B %-d, %Y"))
+
+
+def card_jump(name):
+    """Links people share end in #card: the page sends the visitor straight to the item's live card on the board.
+    Discord and search engines never see the part after #, so they still read this page's own title, price and picture."""
+    return "<script>if(location.hash===\"#card\")location.replace(\"/#item=\"+encodeURIComponent(" + json.dumps(name).replace("<", "\\u003c") + "))</script>"
+
+
+def drop_line(g):
+    """Where to get it, in one line: the best drop players have measured, else the lowest-level monster that drops it."""
+    ds = [d for d in (g or {}).get("d") or [] if d and d[0] and not (len(d) > 5 and d[5])]
+    if not ds: return ""
+    rated = [d for d in ds if isinstance(d[2], (int, float)) and d[2] > 0]
+    if rated:
+        b = max(rated, key=lambda d: d[2])
+        return f"Best measured drop: {shown(b[0])}" + (f" (Lv {b[1]})" if b[1] else "") + f", {b[2]:g}% in players' counts."
+    lo = min(ds, key=lambda d: d[1] or 999)
+    more = len({d[0] for d in ds}) - 1
+    return f"Drops from {shown(lo[0])}" + (f" (Lv {lo[1]})" if lo[1] else "") + (f" and {more} more monster{'s' if more != 1 else ''}." if more else ".")
+
+
+def gname(n):
+    return str(n).replace(" att", " ATT").replace(" matt", " MATT")
+
+
+def summary_lines(r, top, vp, daily, g):
+    """Three short lines that only this item's page can say, all from its own numbers; nothing is said that the
+    numbers on the page don't show."""
+    out = []
+    typ = top[4] if top else r.get("typ") or 0
+    if top:
+        rng = meso(top[2]) if meso(top[2]) == meso(top[3]) else f"{meso(top[2])} to {meso(top[3])}"
+        l1 = f"{gname(top[0])} copies sell for {rng}"
+    else:
+        rng = meso(r["typ"]) if not (r.get("hi", 0) > r.get("lo", 0) and meso(r["lo"]) != meso(r["hi"])) else f"{meso(r['lo'])} to {meso(r['hi'])}"
+        l1 = f"Sells for {rng}" if r.get("kind") == "sale" else f"Asking prices run {rng}"
+    if vp and typ:
+        x = typ / vp
+        l1 += (f", about {x:.0f} times the {meso(vp)} an NPC pays" if x >= 3 else f", about {x:.1f} times the {meso(vp)} an NPC pays" if x >= 1.25
+               else f", close to the {meso(vp)} an NPC pays" if x >= 0.95 else "")
+    out.append(l1 + ".")
+    # equips: the roll that sells best above the busiest grade
+    best = None
+    if top and top[4]:
+        for sv in r.get("lad") or []:
+            for gg in sv[1]:
+                try:
+                    if gg[1] == "sold" and gg[5] >= 3 and gg[4] > top[4] * 1.5 and gg[0] != top[0] and (not best or gg[4] > best[4]): best = gg
+                except Exception: pass
+    if best:
+        rr = meso(best[2]) if meso(best[2]) == meso(best[3]) else f"{meso(best[2])} to {meso(best[3])}"
+        out.append(f"{gname(best[0])} copies sell for {rr}, about {best[4] / top[4]:.0f} times {gname(top[0]).lower()}, from {best[5]} sales.")
+    elif len(daily) >= 4 and min(d[1] for d in daily) * 0.9 <= typ <= max(d[1] for d in daily) * 1.1:
+        # only when the day table agrees with the typical above it; otherwise the two lines would read as a contradiction
+        # the first three days against the last three (middle of each), so one odd day can't make a trend; a move
+        # over 60% on day middles that include asking prices is more likely one odd listing than the market, so it's left out
+        md = lambda v: sorted(v)[len(v) // 2]
+        a, b = md([d[1] for d in daily[:3]]), md([d[1] for d in daily[-3:]]); lo, hi = min(d[1] for d in daily), max(d[1] for d in daily)
+        if a and abs(b / a - 1) < 0.05 and hi <= lo * 1.3: out.append(f"Steady over the last {len(daily)} days, between {meso(lo)} and {meso(hi)}.")
+        elif a and abs(b / a - 1) <= 0.6: out.append(f"{'Up' if b > a else 'Down'} about {abs(round((b / a - 1) * 100))}% over the last {len(daily)} days.")
+    dl = drop_line(g)
+    if dl: out.append(dl)
+    elif r.get("salesN"): out.append(f"{full(r['salesN'])} sales seen so far.")
+    return out[:3]
+
+
+def questions(nm, r, top, vp, g, rng):
+    """Short answers to what people search, folded shut so the page stays clean."""
+    qa = []
+    typ = top[4] if top else r.get("typ") or 0
+    qa.append((f"How much is {nm} worth?", f"{(gname(top[0]) + ' copies sell for ') if top else 'It sells for '}{rng} mesos on the Free Market." + (f" An NPC pays {meso(vp)}." if vp else "")))
+    ds = [d for d in (g or {}).get("d") or [] if d and d[0]]
+    if ds:
+        names = []
+        for d in sorted(ds, key=lambda d: -(d[2] or 0)):
+            if shown(d[0]) not in names: names.append(shown(d[0]))
+        qa.append((f"Where does {nm} drop?", f"From {', '.join(names[:3])}" + (f" and {len(names) - 3} more" if len(names) > 3 else "") + ". The full list with levels and maps is above."))
+    if (g or {}).get("c"):
+        c = g["c"][0]
+        qa.append((f"How do you make {nm}?", f"{c[0]} Lv {c[1]}: " + ", ".join(f"{x[1]} {shown(x[0])}" for x in c[2]) + "."))
+    q = {x[0] for x in (g or {}).get("q") or []}
+    if q: qa.append((f"Which quests need {nm}?", ", ".join(sorted(q)[:4]) + (f" and {len(q) - 4} more" if len(q) > 4 else "") + "."))
+    return '<details class="faq"><summary>Questions</summary>' + "".join(f"<h3>{html.escape(a)}</h3><p>{html.escape(b)}</p>" for a, b in qa) + "</details>"
+
+
 def main():
     global NX
     try: NX = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "nx_prices.json")))["prices"]
@@ -338,6 +441,12 @@ def main():
     except Exception: pass
     ids = {r[0]: r[1] for r in db}
     IDS.update(ids)
+    # pages with no Free Market price only stay in Google when people found them there (Search Console, 28 days);
+    # the rest stay on the site for visitors but are kept out of search, so Google judges the site by its real pages
+    try: SEO_KEEP = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "seo_keep.json")))["unpriced"])
+    except Exception: SEO_KEEP = set()
+    today = datetime.date.today().isoformat()
+    pdate = {}
     vendor = {r[0]: r[6] for r in db if len(r) > 6}
     dbrow = {}
     for r in db: dbrow.setdefault(r[0], r)
@@ -364,7 +473,10 @@ def main():
         conf = CONF.get(r.get("conf") or "", None)
         basis = "from sales players watched happen" if r.get("kind") == "sale" else "from asking prices; few sales seen yet"
         icon = f"https://maplefm.gg/i/{ids[name]}.png"
-        daily = [d for d in (r.get("daily") or []) if d and d[1]][-7:]
+        # equips: the busiest grade's own daily middle (dailyC); the all-copies daily mixes clean and scrolled copies,
+        # so one +8 sale made Work Gloves read 22K for a day. No grade daily yet: no day table rather than a wrong one
+        if r.get("equip"): daily = [d for d in (r.get("dailyC") or []) if d and d[1]][-7:]
+        else: daily = [d for d in (r.get("daily") or []) if d and d[1]][-7:]
         dtab = ""
         if daily:
             dtop = max(d[1] for d in daily) or 1
@@ -414,18 +526,21 @@ def main():
             title = fit_title(pt + ", drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
             if "MapleStory Classic" not in title: title = fit_title(pt, "MapleStory Classic", "Club FM")
             if "MapleStory Classic" not in title: title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM")
+        lines = summary_lines(r, top, vp, daily, GUIDE.get(name))
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng" class="mz">{rng}</span>{chg}{f"<small>{html.escape(top[0])}</small>" if top else ""}</p>
-<p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"} <span id="typ" class="mz">{full(top[4] if top else r['typ'])}</span>, {basis}.{f' {conf[0]}: {conf[1]}.' if conf else ''}</p>
+<p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"} <span id="typ" class="mz">{full(top[4] if top else r['typ'])}</span>{'' if r.get('kind') == 'sale' else ', from asking prices'}{f' · <span title="{html.escape(conf[1])}">{conf[0]}</span>' if conf else ''} · <a href="/how-it-works.html#grades">how prices work</a></p>
+<ul class="sum">{"".join(f"<li>{html.escape(x)}</li>" for x in lines)}</ul>
+<p class="ctaw"><a class="cta" href="/#item={urllib.parse.quote(name)}">Open live card <span>→</span></a></p>
 <div class="grid"><div><span>{"Typical, " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"}</span><b id="t2" class="mz">{meso(top[4] if top else r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba" class="mz">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b class="mz">{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {ladder_html(r.get('lad'))}
 {f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
 {equip_html(dbrow.get(name), KINDS)}
-<p class="ctaw"><a class="cta" href="/#item={html.escape(name)}">Where to buy now <span>→</span></a></p>
 {guide_html(name, GUIDE.get(name), page_of)}
+{questions(nm, r, top, vp, GUIDE.get(name), rng)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
-<p class="note" id="upd">Updated {when}.</p></div>
+<p class="note" id="upd">Updated {D_TXT}.</p></div>
 <script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js?v=2" defer></script>"""
         ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Club FM", "item": SITE + "/"},
@@ -433,12 +548,14 @@ def main():
             {"@type": "ListItem", "position": 3, "name": nm, "item": f"{SITE}/item/{s}/"}]}) + "</script>"
         # the share card doubles as the page's picture for search results
         ld += '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": f"{nm} price", "url": f"{SITE}/item/{s}/",
-            "description": desc, "dateModified": datetime.date.today().isoformat(), **({"alternateName": al} if al else {}), "isPartOf": {"@type": "WebSite", "name": "Club FM", "url": SITE + "/"},
+            "description": desc, "dateModified": D_ISO, **({"alternateName": al} if al else {}), "isPartOf": {"@type": "WebSite", "name": "Club FM", "url": SITE + "/"},
             "primaryImageOfPage": {"@type": "ImageObject", "url": OG + s + ".png", "width": 1200, "height": 630}, "image": [OG + s + ".png", icon]}) + "</script>"
-        ld += f'<meta name="thumbnail" content="{OG}{s}.png">'
+        ld += f'<meta name="thumbnail" content="{OG}{s}.png"><meta name="fm-date" content="{D_ISO}">' + card_jump(name)
 
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(title, desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png", crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
+        pp = os.path.join(d, "index.html")
+        pdate[s], txt = stamp(pp, page(title, desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png", crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]), today)
+        open(pp, "w", encoding="utf-8").write(txt)
         made.append((s, nm, r))
     for name in extra:
         s = slug(name); nm = shown(name); g = GUIDE[name]
@@ -446,11 +563,14 @@ def main():
         qn = len(g.get("q") or [])
         desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
-<p class="note">No Free Market sales seen yet. <a href="/#item={html.escape(name)}">Check the board</a> for listings.</p>
+<p class="note">No Free Market sales seen yet.</p>
+<p class="ctaw"><a class="cta" href="/#item={urllib.parse.quote(name)}">Open live card <span>→</span></a></p>
 {equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, f"{SITE}/item/{s}/", body, crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]))
+        pp = os.path.join(d, "index.html")
+        pdate[s], txt = stamp(pp, page(fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, f"{SITE}/item/{s}/", body, f'<meta name="fm-date" content="{D_ISO}">' + card_jump(name), crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")], robots=None if s in SEO_KEEP else "noindex,follow"), today)
+        open(pp, "w", encoding="utf-8").write(txt)
         made.append((s, nm, None))
     # the index: a searchable list, every item by category, biggest markets first; plain links so search engines read it
     secs = ""
@@ -520,22 +640,14 @@ def main():
             try: os.rmdir(os.path.join(root, s))
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
-    today = datetime.date.today().isoformat()
-    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html", f"{SITE}/scan/"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [SITE + p for p in guide_paths] + [f"{SITE}/item/{s}/" for s, _, _ in made] + [SITE + p for p in world_paths]
+    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html", f"{SITE}/scan/"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [SITE + p for p in guide_paths] + [f"{SITE}/item/{s}/" for s, _, r in made if r is not None or s in SEO_KEEP] + [SITE + p for p in world_paths]
     # lastmod only moves when a page's content does: item prices daily, world pages when the game data changed
     wbuilt = (WBUILT[0] or today)[:10]
     world = {SITE + p for p in world_paths}
     # an item page changes when a new day of prices lands for it: give Google that day, not today, so lastmod stays
     # trustworthy and Google spends its crawls on the pages that really moved
-    imod = {}
-    for s, _, r in made:
-        d = ""
-        try:
-            dl = (r or {}).get("daily") or []
-            if isinstance(dl, str): dl = json.loads(dl)
-            if dl: d = datetime.datetime.fromtimestamp(max(x[0] for x in dl) / 1000, datetime.timezone.utc).date().isoformat()
-        except Exception: d = ""
-        imod[f"{SITE}/item/{s}/"] = min(d, today) if d else wbuilt
+    # the date each page last really changed (stamp), the same one the page itself shows
+    imod = {f"{SITE}/item/{s}/": pdate.get(s, today) for s, _, _ in made}
     open(os.path.join(out, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
                                                     "".join(f"<url><loc>{u}</loc><lastmod>{wbuilt if u in world else imod.get(u, today)}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     # the home page is a script-built board; give search engines plain links to the most traded items
