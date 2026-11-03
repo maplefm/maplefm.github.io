@@ -5145,6 +5145,9 @@
       // full history follows a few seconds later and fills in the weekly numbers
       var first = !BUNDLE && !bundleFull;
       if (first) { delta = true; since = Date.now() - 30 * 36e5; }
+      // phones and small-memory devices never take the full history (tens of megabytes once unpacked: iPhone Safari
+      // closed the page). They keep the last 30 hours and top it up; the weekly numbers come from the board snapshot.
+      else if (LITE && BUNDLE) { delta = true; since = Math.max(bundleNewest() - 15 * 6e4, Date.now() - 30 * 36e5); }
       mark("liveReq");
       return fetch(ACCT + "/data/live" + (delta ? "?after=" + since : ""), { credentials: "include", cache: "no-cache" }).then(function (r) {
         if (r.status === 401 || r.status === 403) { MEMBER = false; gateText(r.status === 403); $("gate").hidden = false; return null; }
@@ -5177,6 +5180,7 @@
     });
   }
   var bundleFull = 0, bundleTried = false, saveT = null;
+  var LITE = (function () { try { return /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); } catch (e) { return false; } })();
   function idb(mode, fn) {
     return new Promise(function (ok) {
       try {
@@ -5189,12 +5193,16 @@
   }
   function bundleCached() {
     if (bundleTried) return Promise.resolve(); bundleTried = true;
+    // phones never reuse a saved history: a full one saved before this fix is tens of megabytes, and only reading it
+    // was enough for iPhone Safari to close the page. Deleted unread.
+    if (LITE) { idb("readwrite", function (st) { return st.delete("bundle"); }); return Promise.resolve(); }
     return Promise.race([idb("readonly", function (st) { return st.get("bundle"); }), new Promise(function (ok) { setTimeout(ok, 1500); })]).then(function (c) {
       if (c && c.b && c.full && Date.now() - c.full < 6 * 36e5 && !BUNDLE) { BUNDLE = c.b; bundleFull = c.full; }
     });
   }
   function bundleSave() {
     clearTimeout(saveT);
+    if (LITE) return;                     // phones keep the last 30 hours in memory only
     saveT = setTimeout(function () { var b = BUNDLE, f = bundleFull; if (b) idb("readwrite", function (st) { return st.put({ b: b, full: f, at: Date.now() }, "bundle"); }); }, 3000);
   }
   function bundleNewest() {
