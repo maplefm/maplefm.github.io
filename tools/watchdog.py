@@ -134,12 +134,18 @@ if PW:
         ctx = b.new_context(**pw.devices["iPhone 13"]) if phone else b.new_context(viewport={"width": 1440, "height": 900})
         pg = ctx.new_page(); errs = []; live = [0]; full = [0]
         pg.on("pageerror", lambda e: errs.append(str(e)[:120]))
+        pulls = [0]
+        def sent(rq):
+            # the board's listings come from the server-built board (/data/snap) when it is fresh, else /data/live
+            if "/data/snap" in rq.url and "snap-status" not in rq.url: pulls[0] += 1
+            if "/data/live" in rq.url and "live.sig" not in rq.url:
+                pulls[0] += 1
+                if "after=" not in rq.url: full[0] += 1
         def done(rq):
             try:
-                if "/data/live" in rq.url and "live.sig" not in rq.url:
-                    live[0] += (rq.sizes() or {}).get("responseBodySize", 0)
-                    if "after=" not in rq.url: full[0] += 1
+                if "/data/live" in rq.url and "live.sig" not in rq.url: live[0] += (rq.sizes() or {}).get("responseBodySize", 0)
             except Exception: pass
+        pg.on("request", sent)
         pg.on("requestfinished", done)
         t0 = time.time(); bad = []
         try:
@@ -156,8 +162,9 @@ if PW:
         b.close()
         if errs: bad.append("script error: " + errs[0])
         if phone and full[0]: bad.append("phone pulled the full listing history")
+        if not pulls[0]: bad.append("the board never asked for listings")    # a check that saw nothing is not a pass
         if heap > (350 if phone else 900): bad.append(f"memory {heap} MB")
-        return bad, f"{time.time() - t0:.0f}s, {heap} MB, {live[0] / 1e6:.1f} MB listings, {full[0]} full pulls"
+        return bad, f"{time.time() - t0:.0f}s, {heap} MB, {pulls[0]} listing pulls, {live[0] / 1e6:.1f} MB, {full[0]} full"
     try:
         with sync_playwright() as pw:
             for nm, phone in (("Board on a phone", True), ("Board on a desktop", False)):
