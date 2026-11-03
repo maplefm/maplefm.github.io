@@ -2,12 +2,17 @@
 (function () {
   // automated browsers (crawlers that run pages, test tools) say so in navigator.webdriver; pages nobody is looking at
   // (rendered in the background) wait until they're actually on screen, and only count after a second there
+  // Google search loads its top results ahead of the click (prerendering): such a page is counted when the person
+  // actually opens it. Chrome signals that with "prerenderingchange", not always "visibilitychange"; waiting on the
+  // second alone dropped most Google visits from Nov 1.
   if (navigator.webdriver) return;
-  var go = function () { setTimeout(send, 1000); };
-  if (document.visibilityState === "visible") go();
-  else document.addEventListener("visibilitychange", function once() { if (document.visibilityState === "visible") { document.removeEventListener("visibilitychange", once); go(); } });
+  var ready = function () { return document.visibilityState === "visible" && !document.prerendering; };
+  var started = false, go = function () { if (started) return; started = true; setTimeout(send, 1000); };
+  var on = function () { if (ready()) { document.removeEventListener("visibilitychange", on); document.removeEventListener("prerenderingchange", on); go(); } };
+  if (ready()) go();
+  else { document.addEventListener("visibilitychange", on); document.addEventListener("prerenderingchange", on); }
   function send() {
-  if (document.visibilityState !== "visible") return;
+  if (!ready()) { started = false; on(); if (!started) { document.addEventListener("visibilitychange", on); document.addEventListener("prerenderingchange", on); } return; }
   try {
     var ref = "";
     try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
