@@ -19,7 +19,9 @@ jobs:
           ref: live
       - name: Browser for the board checks
         run: |
-          pip install -q playwright==1.56.0 && python3 -m playwright install --with-deps chromium webkit > /dev/null 2>&1 || echo "no browser"
+          pip install -q playwright==1.56.0
+          python3 -m playwright install webkit 2>&1 | tail -2 || true
+          sudo -E env "PATH=$PATH" python3 -m playwright install-deps webkit 2>&1 | tail -2 || true
       - name: Check and repair
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
