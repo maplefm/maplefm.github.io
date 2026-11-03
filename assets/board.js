@@ -224,7 +224,7 @@
     var o = { v: 3, at: now, T: T, n: n, cols: cols, words: words, kinds: kinds, D: out };
     return asObj ? o : JSON.stringify(o);
   }
-  window.fmSnap = function () { return snapEncode(false); }; window.fmD = function () { return D; }; window.fmSnapDec = function (j) { return snapDecode(j); };
+  window.fmSnap = function () { return snapEncode(false); }; window.fmD = function () { return D; }; window.fmSnapDec = function (j) { return snapDecode(j); }; window.fmSnapGet = function () { return snapGet(); };
   // Decoding a board makes a hundred thousand listing objects. It runs in slices with a breath between them
   // (snapDecodeAsync), so the page keeps scrolling and clicking while a new board comes in; snapDecode runs it in one go.
   var BOOLK = /^(so|b|chat|stream|tl|scaled|pricey|spot|ci)$/;
@@ -279,15 +279,64 @@
       (function step() {
         var end = performance.now() + 12, r;
         try { do { r = g.next(); } while (!r.done && performance.now() < end); } catch (e) { ok(null); return; }
-        if (r.done) ok(r.value); else setTimeout(step, 0);
+        if (r.done) warmLadders(r.value).then(ok); else setTimeout(step, 0);
       })();
+    });
+  }
+  // The price list shows each equip at its busiest grade (ladderOf), and working that out for every equip in one go
+  // held the page for 0.6 s on a desktop and 3 s on a phone each time a board came in. The ladders are worked out
+  // here instead, in slices like the decode, so the first render finds them ready.
+  function warmLadders(d) {
+    return new Promise(function (ok) {
+      if (!d || !d.list || d.preview || ENGINE) { ok(d); return; }
+      var eq = d.list.filter(function (i) { return i && i.equip; }), at = 0;
+      (function step() {
+        var end = performance.now() + 12;
+        try { while (at < eq.length && performance.now() < end) ladderOf(eq[at++], d); } catch (e) { ok(d); return; }
+        if (at >= eq.length) setTimeout(function () { try { Lstat(d); } catch (e) {} ok(d); }, 0); else setTimeout(step, 0);
+      })();
+    });
+  }
+  // The snapshot is 20+ MB of JSON. snapfetch.js reads it in a background worker and hands it over in pieces, put back
+  // together here a slice at a time, so the page never stops for the whole read. Without workers: the plain read.
+  var SNAP_URL = "https://api.maplefm.gg/data/snap";
+  function snapPlain() { return fetch(SNAP_URL, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+  function snapGet() {
+    var w; try { w = new Worker("/snapfetch.js?v=1"); } catch (e) { return snapPlain(); }
+    return new Promise(function (ok) {
+      var done = false, fin = function (j) { if (done) return; done = true; try { w.terminate(); } catch (e) {} ok(j); };
+      w.onerror = function () { if (!done) { done = true; try { w.terminate(); } catch (e) {} snapPlain().then(ok); } };
+      w.onmessage = function (e) {
+        var m = e.data; try { w.terminate(); } catch (x) {}   // its copy is no longer needed: free it before rebuilding
+        if (!m || m.none || !m.head) { fin(null); return; }
+        var j = m.head, jobs = [];
+        j.cols = {}; j.D = {};
+        var many = function (arr, put) { var out = []; arr.forEach(function (t) { jobs.push(function () { var a = JSON.parse(t); for (var i = 0; i < a.length; i++) out.push(a[i]); }); }); jobs.push(function () { put(out); }); };
+        Object.keys(m.cols).forEach(function (k) {
+          var c = m.cols[k];
+          if (c.d) j.cols[k] = c.d;
+          else if (c.dt) many(c.dt, function (a) { j.cols[k] = a; });
+          else {
+            var sp = j.cols[k] = { g: c.gt ? null : c.g, v: c.vt ? null : c.v };
+            if (c.gt) many(c.g, function (a) { sp.g = a; });
+            if (c.vt) many(c.v, function (a) { sp.v = a; });
+          }
+        });
+        Object.keys(m.D).forEach(function (k) { jobs.push(function () { j.D[k] = JSON.parse(m.D[k]); }); });
+        if (m.list) many(m.list, function (a) { j.D.list = a; });
+        var at = 0;
+        (function step() {
+          var end = performance.now() + 10;
+          try { while (at < jobs.length && performance.now() < end) jobs[at++](); } catch (e) { fin(null); return; }
+          if (at >= jobs.length) fin(j); else setTimeout(step, 0);
+        })();
+      };
+      w.postMessage({ url: SNAP_URL });
     });
   }
   var SNAP_P = null;
   if (ENGINE) SNAP_P = Promise.resolve(null);
-  else try {
-    SNAP_P = fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
-  } catch (e) { SNAP_P = Promise.resolve(null); }
+  else try { SNAP_P = snapGet(); } catch (e) { SNAP_P = Promise.resolve(null); }
   function mark(k) { if (!T0[k]) T0[k] = Math.round(performance.now()); }
   // items the game data names alike but the shop window tells apart by colour: name -> {item id: colour}
   var COLOURS = { "Buddy Overall Jeans": { 1057090: "Blue", 1057096: "Red" } };
@@ -1440,10 +1489,11 @@
   }).catch(function () {});
   // One walk over every listing per board (redone after a minute, since "live" and "today" move with the clock),
   // shared by the cards, the streamer strip and the live pill, instead of one walk each on every redraw.
-  function Lstat() {
-    if (!D || !D.L) return null;
-    var now = Date.now(), c = D._lst; if (c && now - c.at < 60e3) return c;
-    var live = {}, liveSt = {}, shops = {}, spots = {}, sc = {}, st = {}, by = {}, lastT = 0, L = D.L;
+  function Lstat(dd) {
+    var DD = dd || D;
+    if (!DD || !DD.L) return null;
+    var now = Date.now(), c = DD._lst; if (c && now - c.at < 60e3) return c;
+    var live = {}, liveSt = {}, shops = {}, spots = {}, sc = {}, st = {}, by = {}, lastT = 0, L = DD.L;
     for (var k = 0; k < L.length; k++) {
       var l = L[k], age = now - l.t; if (l.t > lastT) lastT = l.t;
       if (!l.chat && !l.stream && l.who && age < 15 * 6e4) live[String(l.who).toLowerCase()] = 1;
@@ -1453,7 +1503,7 @@
       if (l.stream && age <= 7 * DAY) { var w = by[l.who] || (by[l.who] = { name: l.who, rows: 0, sales: 0, last: 0, shops: {} }); w.rows++; if (l.so && !l.b) w.sales++; if (l.t > w.last) w.last = l.t; if (l.s) w.shops[l.s] = 1; }
     }
     var n = Object.keys(shops).length;
-    return (D._lst = { at: now, lastT: lastT, live: Object.keys(live).length, liveSt: Object.keys(liveSt).length, streams: by, cov: n ? { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length } : null });
+    return (DD._lst = { at: now, lastT: lastT, live: Object.keys(live).length, liveSt: Object.keys(liveSt).length, streams: by, cov: n ? { shops: n, spots: Object.keys(spots).length, scanners: Object.keys(sc).length, streams: Object.keys(st).length } : null });
   }
   // Scanners uploading in the last 15 minutes, FM Watcher and the browser scanner alike, counted by the server
   // (/public/scanners, one per person); the board's own rows are the fallback when the server can't be reached.
@@ -1853,7 +1903,9 @@
     });
     var tb = $("rows"); tb.textContent = "";
     if (priceIO) priceIO.disconnect();
-    var upto = Math.max(PAGE, keepRows);
+    // a fresh draw puts up the first screenful at once; the next rows follow as their own step (the "Loading more" row
+    // is already in view), so a new board coming in never holds the page while 80 rows with charts are built
+    var upto = keepRows ? Math.max(PAGE, keepRows) : FIRSTPAGE;
     function row(i) {
       var tr = el("tr"); if (i.n < MIN) tr.className = "thin"; if (state.sel === i.item) tr.classList.add("sel");
       tr.tabIndex = 0; tr.dataset.item = i.item;
@@ -2716,9 +2768,9 @@
   var LADMIN = 2, LADSEL = {}, LADSTAT = {};
   var CRITK = { CRIT: 1, CRITDMG: 1 };
   function ladName(k) { return k === "TOTAL" ? "stats" : k === "CRIT" ? "crit rate" : k === "CRITDMG" ? "crit damage" : STATABBR[k] || k; }
-  function ladderOf(i) {
+  function ladderOf(i, dd) {
     if (!i || !i.equip) return null;
-    var stamp = (i.buy || []).length + "|" + i.sales.length + "|" + (D && D.L ? D.L.length : 0);
+    var DD = dd || D, stamp = (i.buy || []).length + "|" + i.sales.length + "|" + (DD && DD.L ? DD.L.length : 0);
     if (i._lad && i._lad.at === stamp) return i._lad;
     var n = i.item, wep = isWeapon(n), wk = wep ? keyStat(n, null) : null, base = fullBase(n).s;
     // a copy counts only when its popup was read well: the roll checks pass, its slots were read, and its stats fit
@@ -4314,7 +4366,7 @@
   }
 
   // ---------- render
-  var DIRTY = true, lastBuild = 0, PAGE = 80, keepRows = 0;
+  var DIRTY = true, lastBuild = 0, PAGE = 80, FIRSTPAGE = 30, keepRows = 0;
   // The table from the last visit is kept in this browser, so it shows the moment the page opens; the live
   // prices take over as soon as they arrive, and rows move to their new places.
   var SUMK = ["item", "baseName", "cat", "tier", "n", "kind", "check", "flags", "typ", "lo", "hi", "mv", "best", "deal", "daily", "salesN", "vol", "equip", "move", "basis", "typWho", "conf", "last3"];
@@ -5383,8 +5435,8 @@
     fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) {
       if (st && st.at && st.at === SNAP_SEEN) return null;
       if (st && st.at) SNAP_SEEN = st.at;
-      return fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" });
-    }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
+      return snapGet();
+    }).then(function (j) {
       if (!j || !D || !D.snap || j.at <= D.snapAt || hasRaw()) return;
       return snapDecodeAsync(j).then(function (d) {
       if (!d || !D || !D.snap || D.engine || DEALS_ON || hasRaw()) return;
