@@ -1544,12 +1544,17 @@
       localStorage.setItem("fm-boot", JSON.stringify({ t: Date.now(), done: false }));
     } catch (e) {}
     setTimeout(function () { ev("#boot:" + dev); }, 3000);
-    function jserr(m) { try { ev("#jserr:" + dev + ":" + String(m || "").replace(/[^\w .:-]/g, "").slice(0, 70)); } catch (e) {} }
+    // the message plus where it happened (file:line:column), so one report is enough to find the line
+    function jserr(m, at) { try { var w = String(at || "").match(/([\w.-]+\.(?:js|html)[^\s)]*?:\d+:\d+)/); ev("#jserr:" + dev + ":" + String(m || "").replace(/[^\w .:-]/g, "").slice(0, w ? 44 : 70) + (w ? " at " + w[1].replace(/\?[^:]*/, "") : "")); } catch (e) {} }
     // leaving the page on purpose is not a crash (a page the browser kills never gets this event)
     window.addEventListener("pagehide", function () { try { var b = JSON.parse(localStorage.getItem("fm-boot") || "null"); if (b && !b.done) localStorage.setItem("fm-boot", JSON.stringify({ t: b.t, done: true, left: true })); } catch (e) {} });
     // only errors from our own scripts: a browser extension's error on the page isn't ours to fix
-    window.addEventListener("error", function (e) { if (e && e.message && (!e.filename || /maplefm\.gg|localhost/.test(e.filename))) jserr(e.message); });
-    window.addEventListener("unhandledrejection", function (e) { jserr(e && e.reason && (e.reason.message || e.reason)); });
+    window.addEventListener("error", function (e) { if (e && e.message && (!e.filename || /maplefm\.gg|localhost/.test(e.filename))) jserr(e.message, e.filename ? e.filename + ":" + e.lineno + ":" + e.colno : ""); });
+    window.addEventListener("unhandledrejection", function (e) {
+      var r = e && e.reason, st = r && r.stack ? String(r.stack) : "";
+      if (st && !/maplefm\.gg|localhost/.test(st)) return;      // a rejection raised in an extension's code
+      jserr(r && (r.message || r), (st.match(/(?:maplefm\.gg|localhost[:\d]*)\/[^\s)]*:\d+:\d+/) || [""])[0]);
+    });
   })();
   function bootDone() {
     if (BOOT_DONE || ENGINE) return; BOOT_DONE = true;
