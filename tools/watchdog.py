@@ -7,7 +7,7 @@ Repairs it can make on its own:
 2. The live pump gets restarted when the price data has gone stale and no pump is running.
 3. Item pages get rebuilt when an item page or the sitemap is missing.
 Anything else is reported for the daily check-up to fix by hand."""
-import calendar, json, os, sys, time, urllib.request, urllib.error
+import calendar, json, os, re, sys, time, urllib.request, urllib.error
 
 REPO = os.environ.get("GITHUB_REPOSITORY", "maplefm/maplefm.github.io")
 TOKEN = os.environ.get("GITHUB_TOKEN", "")
@@ -133,7 +133,13 @@ if PW:
         except Exception: b = chrome()
         ctx = b.new_context(**pw.devices["iPhone 13"]) if phone else b.new_context(viewport={"width": 1440, "height": 900})
         pg = ctx.new_page(); errs = []; live = [0]; full = [0]
-        pg.on("pageerror", lambda e: errs.append(str(e)[:120]))
+        # a failed load from another site (the character pictures from classicrank.com) is caught by the board and
+        # only costs a picture, so it isn't a board error; anything from our own pages still is
+        def perr(e):
+            m = str(e)
+            if re.search(r"https?:/+|/[a-z0-9.-]+\.[a-z]{2,}/", m) and not re.search(r"maplefm\.gg|localhost", m): return
+            errs.append(m[:120])
+        pg.on("pageerror", perr)
         pulls = [0]
         def sent(rq):
             # the board's listings come from the server-built board (/data/snap) when it is fresh, else /data/live
