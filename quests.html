@@ -31,7 +31,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
 .bar{height:6px;background:rgba(255,255,255,.22);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:#ffd34d;border-radius:99px}
 @media (max-width:760px){.hero{grid-template-columns:1fr}}
 /* tabs and filters: one row each, nothing to scroll past */
-.tabs{display:flex;gap:6px;margin:12px 0 8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.tabs::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:6px;margin:12px 0 8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;min-height:35px;box-sizing:border-box}.tabs::-webkit-scrollbar{display:none}
 .tabs button{flex:0 0 auto;font:700 .88rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center;white-space:nowrap}
 .tabs button em{font-style:normal;color:var(--muted);font-size:.78rem}
 .tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tabs button[aria-pressed="true"] em{color:rgba(255,255,255,.85)}
