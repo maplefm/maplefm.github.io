@@ -2,6 +2,8 @@
   "use strict";
   // ENGINE: this file is running inside fmengine.js, the background worker that builds the board for club members
   var ENGINE = !!(typeof self !== "undefined" && self.FM_ENGINE && typeof importScripts === "function");
+  // phones and small-memory devices: never the full listing history (see bundlePoll)
+  var LITE = (function () { try { return /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); } catch (e) { return false; } })();
   var MYSRC = !ENGINE && document.currentScript ? document.currentScript.src : "";
   // Club members' own shops are left out of prices. Stored as fingerprints, not names.
   var OWNH = { "a4959daa": 1, "bd22ad91": 1, "6d3b4a44": 1, "5b5738ce": 1, "7528a716": 1 }, OWNC = {};
@@ -1528,7 +1530,32 @@
   }
   // ---------- front door: trust strip, quick picks and the deal next to the search
   var HOOK_T = null, HOOK_K = 0;
+  // Crash watch. A phone browser that runs out of memory closes the page without any error the page could send, so
+  // each visit marks itself started (localStorage) and marks itself done once the board shows prices. A visit that
+  // finds an unfinished mark from the last 10 minutes was a crash: it says so (#crash:phone or #crash:desktop),
+  // and the watchdog alerts the admins within 15 minutes when crashes show up. Script errors go up as #jserr.
+  var BOOT_DONE = false;
+  (function () {
+    if (ENGINE) return;
+    var dev = LITE ? "phone" : "desktop";
+    try {
+      var prev = JSON.parse(localStorage.getItem("fm-boot") || "null");
+      if (prev && !prev.done && Date.now() - prev.t < 10 * 6e4) setTimeout(function () { ev("#crash:" + dev); }, 2000);
+      localStorage.setItem("fm-boot", JSON.stringify({ t: Date.now(), done: false }));
+    } catch (e) {}
+    setTimeout(function () { ev("#boot:" + dev); }, 3000);
+    function jserr(m) { try { ev("#jserr:" + dev + ":" + String(m || "").replace(/[^\w .:-]/g, "").slice(0, 70)); } catch (e) {} }
+    // leaving the page on purpose is not a crash (a page the browser kills never gets this event)
+    window.addEventListener("pagehide", function () { try { var b = JSON.parse(localStorage.getItem("fm-boot") || "null"); if (b && !b.done) localStorage.setItem("fm-boot", JSON.stringify({ t: b.t, done: true, left: true })); } catch (e) {} });
+    window.addEventListener("error", function (e) { if (e && e.message) jserr(e.message); });
+    window.addEventListener("unhandledrejection", function (e) { jserr(e && e.reason && (e.reason.message || e.reason)); });
+  })();
+  function bootDone() {
+    if (BOOT_DONE || ENGINE) return; BOOT_DONE = true;
+    try { localStorage.setItem("fm-boot", JSON.stringify({ t: Date.now(), done: true })); } catch (e) {}
+  }
   function renderCards() {
+    if (D && !D.preview) bootDone();
     renderStreams();
     var c = $("cards"); c.textContent = "";
     var k = D.preview && D.kpi;
@@ -5180,7 +5207,6 @@
     });
   }
   var bundleFull = 0, bundleTried = false, saveT = null;
-  var LITE = (function () { try { return /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); } catch (e) { return false; } })();
   function idb(mode, fn) {
     return new Promise(function (ok) {
       try {

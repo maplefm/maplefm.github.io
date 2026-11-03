@@ -12,11 +12,14 @@ concurrency: watchdog
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
         with:
           ref: live
+      - name: Browser for the board checks
+        run: |
+          pip install -q playwright==1.48.0 && python3 -m playwright install --with-deps chromium webkit > /dev/null 2>&1 || echo "no browser, board checks skipped"
       - name: Check and repair
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
