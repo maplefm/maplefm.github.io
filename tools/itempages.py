@@ -6,7 +6,7 @@ Reads the board's own summary (data/summary.json on the live branch) and the ite
 OUT_DIR/item/<slug>/index.html for each item with enough data, an index at OUT_DIR/items/index.html, and
 OUT_DIR/sitemap.xml. Pages are plain HTML with the numbers in them, no script needed to read the price.
 """
-import urllib.parse, json, os, re, sys, html, datetime
+import urllib.parse, json, os, re, sys, html, datetime, hashlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from nav import nav_html as NAV, foot_html as FOOT
 
@@ -334,6 +334,28 @@ def card_jump(name):
     return "<script>if(location.hash===\"#card\")location.replace(\"/#item=\"+encodeURIComponent(" + json.dumps(name).replace("<", "\\u003c") + "))</script>"
 
 
+def og_url(s, r):
+    """The share picture's address carries a version from the same numbers ogimages.py redraws it on, so Discord,
+    which keeps a picture by its address for weeks, fetches the new one when the price moves (it showed a GFA 60
+    at 1,065,000 when the page said 1.5M)."""
+    mv = (r.get("mv") or [None])[0]
+    key = f"{full(r['typ'])}|{round(mv * 100) if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else 0}|{r.get('salesN') or 0}"
+    return OG + s + ".png?v=" + hashlib.md5(key.encode()).hexdigest()[:8]
+
+
+def short_page(s, name, title, desc, img):
+    """maplefm.gg/c/<slug>: the link people share. Discord reads its title, price and picture; a person is sent
+    straight to the item's live card on the board. Kept out of search (the item page is the one Google lists)."""
+    t, d = html.escape(title), html.escape(desc)
+    card = "/#item=" + urllib.parse.quote(name)
+    og = f'<meta property="og:image" content="{img}"><meta name="twitter:card" content="summary_large_image">' if img else ""
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{t}</title><meta name="description" content="{d}"><meta name="robots" content="noindex,follow"><link rel="canonical" href="{SITE}/item/{s}/">
+<meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{SITE}/c/{s}"><meta property="og:type" content="website">{og}
+<meta name="theme-color" content="#6d3fd1"><script>location.replace("/"+location.search+{json.dumps(card[1:])})</script></head>
+<body><p><a href="{html.escape(card)}">Open {html.escape(shown(name))} on Club FM</a></p></body></html>"""
+
+
 def drop_line(g):
     """Where to get it, in one line: the best drop players have measured, else the lowest-level monster that drops it."""
     ds = [d for d in (g or {}).get("d") or [] if d and d[0] and not (len(d) > 5 and d[5])]
@@ -549,13 +571,15 @@ def main():
         # the share card doubles as the page's picture for search results
         ld += '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": f"{nm} price", "url": f"{SITE}/item/{s}/",
             "description": desc, "dateModified": D_ISO, **({"alternateName": al} if al else {}), "isPartOf": {"@type": "WebSite", "name": "Club FM", "url": SITE + "/"},
-            "primaryImageOfPage": {"@type": "ImageObject", "url": OG + s + ".png", "width": 1200, "height": 630}, "image": [OG + s + ".png", icon]}) + "</script>"
+            "primaryImageOfPage": {"@type": "ImageObject", "url": og_url(s, r), "width": 1200, "height": 630}, "image": [og_url(s, r), icon]}) + "</script>"
         ld += f'<meta name="thumbnail" content="{OG}{s}.png"><meta name="fm-date" content="{D_ISO}">' + card_jump(name)
 
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         pp = os.path.join(d, "index.html")
-        pdate[s], txt = stamp(pp, page(title, desc, f"{SITE}/item/{s}/", body, ld, OG + s + ".png", crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]), today)
+        pdate[s], txt = stamp(pp, page(title, desc, f"{SITE}/item/{s}/", body, ld, og_url(s, r), crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")]), today)
         open(pp, "w", encoding="utf-8").write(txt)
+        os.makedirs(os.path.join(out, "c", s), exist_ok=True)
+        open(os.path.join(out, "c", s, "index.html"), "w", encoding="utf-8").write(short_page(s, name, title, desc, og_url(s, r)))
         made.append((s, nm, r))
     for name in extra:
         s = slug(name); nm = shown(name); g = GUIDE[name]
@@ -569,6 +593,8 @@ def main():
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         pp = os.path.join(d, "index.html")
+        os.makedirs(os.path.join(out, "c", s), exist_ok=True)
+        open(os.path.join(out, "c", s, "index.html"), "w", encoding="utf-8").write(short_page(s, name, fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, ""))
         pdate[s], txt = stamp(pp, page(fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, f"{SITE}/item/{s}/", body, f'<meta name="fm-date" content="{D_ISO}">' + card_jump(name), crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")], robots=None if s in SEO_KEEP else "noindex,follow"), today)
         open(pp, "w", encoding="utf-8").write(txt)
         made.append((s, nm, None))
@@ -638,6 +664,13 @@ def main():
             p = os.path.join(root, s, "index.html")
             if os.path.exists(p): os.remove(p)
             try: os.rmdir(os.path.join(root, s))
+            except OSError: pass
+    croot = os.path.join(out, "c")
+    for s in os.listdir(croot) if os.path.isdir(croot) else []:
+        if s not in keep and os.path.isdir(os.path.join(croot, s)):
+            p = os.path.join(croot, s, "index.html")
+            if os.path.exists(p): os.remove(p)
+            try: os.rmdir(os.path.join(croot, s))
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
     urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html", f"{SITE}/scan/"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [SITE + p for p in guide_paths] + [f"{SITE}/item/{s}/" for s, _, r in made if r is not None or s in SEO_KEEP] + [SITE + p for p in world_paths]
