@@ -28,6 +28,8 @@ jobs:
       - name: Browser for the board snapshot
         run: pip install -q playwright==1.56.0
       - name: Loop
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config --global user.name maplefm
           git config --global user.email maplefm@users.noreply.github.com
@@ -37,7 +39,7 @@ jobs:
           # stores each 5-minute change as a small difference. The public branch only gets the price-only files.
           git clone -q -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
           end=$(( $(date +%s) + 330*60 ))
-          n=0; lastsig=""
+          n=0; lastsig=""; lastwd=0; lastcov=$(date +%s)
           while [ $(date +%s) -lt $end ]; do
             cd /tmp/arch
             git fetch -q origin live && git reset -q --hard origin/live
@@ -85,6 +87,11 @@ jobs:
               for i in 1 2 3 4 5; do git pull --rebase -q origin live && git push -q origin HEAD:live && break; sleep 7; done
             fi
             n=$(( n + 1 ))
+            # GitHub runs the watchdog's 15-minute cron only every few hours and the Worker's dispatch needs a token
+            # it doesn't have, so the pump (always running) starts the watchdog hourly and the coverage map every 2 hours
+            now=$(date +%s)
+            if [ $(( now - lastwd )) -ge 3600 ]; then gh workflow run watchdog.yml --ref main -R "$GITHUB_REPOSITORY" && lastwd=$now || true; fi
+            if [ $(( now - lastcov )) -ge 7200 ]; then gh workflow run covmap.yml --ref main -R "$GITHUB_REPOSITORY" && lastcov=$now || true; fi
             # between passes: every 15 seconds, deals from the Worker's fast lane go to #mega-deals right away
             for q in 1 2 3 4 5 6; do
               sleep 15
