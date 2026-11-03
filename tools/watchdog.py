@@ -125,8 +125,12 @@ if not PW:
 if PW:
     def browse(pw, phone):
         # the phone is Safari's own engine (WebKit), the one that crashed on Nov 2; the desktop is Chrome's
-        try: b = pw.webkit.launch() if phone else pw.chromium.launch(args=["--enable-precise-memory-info"])
-        except Exception: b = pw.chromium.launch(args=["--enable-precise-memory-info"])
+        # desktop: the runner's own Chrome, the same one the pump's snapshot uses
+        def chrome():
+            try: return pw.chromium.launch(channel="chrome", args=["--enable-precise-memory-info"])
+            except Exception: return pw.chromium.launch(args=["--enable-precise-memory-info"])
+        try: b = pw.webkit.launch() if phone else chrome()
+        except Exception: b = chrome()
         ctx = b.new_context(**pw.devices["iPhone 13"]) if phone else b.new_context(viewport={"width": 1440, "height": 900})
         pg = ctx.new_page(); errs = []; live = [0]; full = [0]
         pg.on("pageerror", lambda e: errs.append(str(e)[:120]))
