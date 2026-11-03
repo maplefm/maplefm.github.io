@@ -1,5 +1,5 @@
 {
- "at": 1793742666975,
+ "at": 1793746082832,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -152,7 +152,7 @@
    "late_share7": null,
    "behind": 0
   },
-  "Guest-595e": {
+  "Moch1": {
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
@@ -168,7 +168,7 @@
    "late_share7": 0.0,
    "behind": 19
   },
-  "Maya-977b": {
+  "Maya": {
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
@@ -280,35 +280,19 @@
    "late_share7": 0.0,
    "behind": 0
   },
-  "Weltschmerz-f415": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 61,
-   "room7": 61,
-   "late7": 0,
-   "chat24": 0,
-   "last": 1793609106,
-   "ver": "2026.10.31.9",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": 1.0,
-   "late_share7": 0.0,
-   "behind": 7
-  },
   "Weltschmerz": {
    "rows24": 79,
    "room24": 79,
    "ch24": 79,
-   "rows7": 378,
-   "room7": 336,
+   "rows7": 439,
+   "room7": 397,
    "late7": 0,
    "chat24": 18,
    "last": 1793689677,
    "ver": "2026.11.2.7",
    "lag_median_min": 1.8,
    "room_rate24": 1.0,
-   "room_rate7": 0.889,
+   "room_rate7": 0.904,
    "late_share7": 0.0,
    "behind": 0
   },
@@ -347,8 +331,8 @@
    "incomplete upload": 725
   },
   "2026-11-03": {
-   "bad row: 3a3a (p zero)": 13400,
-   "incomplete upload": 922
+   "bad row: 3a3a (p zero)": 14000,
+   "incomplete upload": 982
   }
  },
  "rejects": {},
