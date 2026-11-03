@@ -17,6 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - name: Board ships the minified, hash-stamped files
+        # a debug switch (board.js?dbg=1) sat on the live board for four days in Oct and Nov: bigger download, no cache stamp
+        run: |
+          grep -q 'src="/assets/board.min.js?v=[0-9a-f]\{8\}"' index.html || { echo "index.html must load /assets/board.min.js?v=<hash>; run tools/bust.py"; exit 1; }
       - name: Page builders compile and run
         # a broken builder stopped the daily item, quest and map pages for two days in October; catch it before merge
         run: |
