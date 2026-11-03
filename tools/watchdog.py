@@ -129,8 +129,9 @@ if PW:
         def chrome():
             try: return pw.chromium.launch(channel="chrome", args=["--enable-precise-memory-info"])
             except Exception: return pw.chromium.launch(args=["--enable-precise-memory-info"])
+        # a phone check that falls back to Chrome hasn't tested Safari's engine, so it fails instead of passing
         try: b = pw.webkit.launch() if phone else chrome()
-        except Exception: b = chrome()
+        except Exception as e: return ["WebKit didn't start: " + str(e).split("\n")[0][:80]], "not run"
         ctx = b.new_context(**pw.devices["iPhone 13"]) if phone else b.new_context(viewport={"width": 1440, "height": 900})
         pg = ctx.new_page(); errs = []; live = [0]; full = [0]
         pg.on("pageerror", lambda e: errs.append(str(e)[:120]))
