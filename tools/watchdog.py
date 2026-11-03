@@ -120,6 +120,8 @@ try:
     PW = True
 except Exception:
     PW = False
+if not PW:
+    check("Board in a browser", False, "the browser checks couldn't start (Playwright missing on the runner)")
 if PW:
     def browse(pw, phone):
         # the phone is Safari's own engine (WebKit), the one that crashed on Nov 2; the desktop is Chrome's
