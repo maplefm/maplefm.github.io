@@ -20,6 +20,10 @@ Standard library only.
 import sys, os, json, time, re, html, hashlib, argparse, urllib.request, urllib.parse, urllib.error, datetime
 
 IO = "https://maplestory.io/api/MCW/1"
+IO_VERSION = (1, 0, 0)   # the game files maplestory.io serves under MCW/1; a wiki row on a later patch is the authority
+def wiki_newer(w):
+    try: return tuple(int(x) for x in str((w or {}).get("game_version") or "").split(".")) > IO_VERSION
+    except ValueError: return False
 WIKI = "https://mapleclassic.wiki/api.php"
 UA = {"User-Agent": "maplefm.gg weekly fact check (+https://maplefm.gg)"}
 START = time.time()
@@ -147,7 +151,7 @@ def main():
     wqe = cargo("quest_enemies", ["quest_id", "monster_id", "quantity"])
     witems = cargo("items", ["id", "name_en"])
     wmons = cargo("monsters", ["_pageName=page", "id", "name_en", "level", "hp", "exp", "accuracy", "avoidability", "physical_defense", "magic_defense",
-                               "element_weak", "element_resist", "variant", "released"])
+                               "element_weak", "element_resist", "variant", "released", "game_version"])
     wmaps = cargo("maps", ["_pageName=page", "id", "name_en"])
     wspawn = cargo("monster_spawns", ["monster_id", "map_id", "spawn_count", "variant"])
     wport = cargo("portals", ["_pageName=src", "to_map"])
@@ -307,11 +311,17 @@ def main():
             continue
         wsrc = {"lv": num(w.get("level")), "hp": num(w.get("hp")), "exp": num(w.get("exp")), "acc": num(w.get("accuracy")), "eva": num(w.get("avoidability")),
                 "wdef": num(w.get("physical_defense")), "mdef": num(w.get("magic_defense"))} if w else {}
+        # a wiki row brought to a later patch than the game files maplestory.io serves: the wiki is the authority for
+        # its numbers, and the older game file value is listed under unconfirmed
+        gsrc, wnew = (src if meta else {}), bool(meta and w and wiki_newer(w))
+        if wnew: src = {f: (wsrc.get(f) if wsrc.get(f) is not None else v) for f, v in gsrc.items()}
         for nm, m in rows:
             n_m += 1
             for f, v in src.items():
-                if v is not None and m.get(f) != v: D("monster", mid, f, m.get(f), v, url, nm)
-                elif meta and wsrc.get(f) is not None and wsrc[f] != v:
+                if v is not None and m.get(f) != v: D("monster", mid, f, m.get(f), v, wiki_url(w["page"]) if wnew else url, nm)
+                elif wnew and gsrc.get(f) is not None and gsrc[f] != v:
+                    disagree("monster", mid, f, m.get(f), {"game": gsrc[f], "wiki": v, "wiki_patch": w.get("game_version")}, [url, wiki_url(w["page"])], carried=True)
+                elif meta and not wnew and wsrc.get(f) is not None and wsrc[f] != v:
                     disagree("monster", mid, f, m.get(f), {"game": v, "wiki": wsrc[f]}, [url, wiki_url(w["page"])])
             # elements: the wiki's names; the game's codes (L3 weak to lightning, F2 resists fire) as a second opinion
             for f, col, gv in (("weak", "element_weak", gweak if meta else None), ("resist", "element_resist", gres if meta else None)):

@@ -17,6 +17,12 @@ import sys, os, json, re, time, html, base64, urllib.request, urllib.parse, date
 WIKI = "https://mapleclassic.wiki/api.php"
 RAW = "https://mapleclassic.wiki/index.php?title=Module:Observed_facts&action=raw"
 IO = "https://maplestory.io/api/MCW/1"
+# the game files maplestory.io serves under MCW/1. A wiki row brought to a later patch (its game_version) is newer
+# than they are, so its numbers come first for that monster (Oct 29 2026, v1.1.0 lowered four monsters' HP).
+IO_VERSION = (1, 0, 0)
+def wiki_newer(w):
+    try: return tuple(int(x) for x in str(w.get("game_version") or "").split(".")) > IO_VERSION
+    except ValueError: return False
 UA = {"User-Agent": "maplefm.gg world builder (+https://maplefm.gg)"}
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/world"
 PREV = sys.argv[2] if len(sys.argv) > 2 else os.path.join(OUT, "world.json")
@@ -66,7 +72,7 @@ except Exception: pass
 maps = cargo("maps", ["_pageName=page", "id", "name_en", "region", "map_type", "recommended_level_min", "recommended_level_max", "nearest_town", "return_map", "game_version", "image", "origin_x", "origin_y", "render_width", "render_height"])
 portals = cargo("portals", ["_pageName=src", "to_map", "portal_name", "direction", "portal_type", "requires_level", "x", "y"])
 spawns = cargo("monster_spawns", ["monster_id", "map_id", "spawn_count", "respawn_seconds", "variant"])
-mons = cargo("monsters", ["_pageName=page", "id", "name_en", "level", "hp", "mp", "exp", "weapon_attack", "magic_attack", "physical_defense", "magic_defense", "accuracy", "avoidability", "knockback", "element_weak", "element_resist", "boss", "undead", "variant", "variant_label"])
+mons = cargo("monsters", ["_pageName=page", "id", "name_en", "level", "hp", "mp", "exp", "weapon_attack", "magic_attack", "physical_defense", "magic_defense", "accuracy", "avoidability", "knockback", "element_weak", "element_resist", "boss", "undead", "variant", "variant_label", "game_version"])
 # mesos a kill, measured by the wiki's editors (kills counted, mesos seen): the item "Meso" in monster_drops
 meso_rows = cargo("monster_drops", ["monster_id", "drop_rate", "min_quantity", "max_quantity", "sample_kills"], 'item_id="Meso"') or []
 npcs = cargo("npcs", ["_pageName=page", "id", "name_en", "role", "map"])
@@ -125,12 +131,13 @@ for w in mons:
         key = f"{nm} ({w.get('variant_label') or w['variant']})"
         var_key[(nm, w["variant"])] = key
     if key in mob: continue
+    pick = (lambda gv, wv: first(wv, gv)) if wiki_newer(w) else first   # a wiki row on a later patch: its numbers first
     mob[key] = {
-        "id": wid, "lv": first(g.get("level"), val(w.get("level"))), "hp": first(g.get("maxHP"), val(w.get("hp"))),
-        "exp": first(g.get("exp"), val(w.get("exp"))), "atk": first(g.get("physicalDamage"), val(w.get("weapon_attack"))),
-        "matk": first(g.get("magicDamage"), val(w.get("magic_attack"))), "acc": first(g.get("accuracy"), val(w.get("accuracy"))),
-        "eva": first(g.get("evasion"), val(w.get("avoidability"))), "wdef": first(g.get("physicalDefense"), val(w.get("physical_defense"))),
-        "mdef": first(g.get("magicDefense"), val(w.get("magic_defense"))), "kb": first(g.get("minimumPushDamage"), val(w.get("knockback"))),
+        "id": wid, "lv": pick(g.get("level"), val(w.get("level"))), "hp": pick(g.get("maxHP"), val(w.get("hp"))),
+        "exp": pick(g.get("exp"), val(w.get("exp"))), "atk": pick(g.get("physicalDamage"), val(w.get("weapon_attack"))),
+        "matk": pick(g.get("magicDamage"), val(w.get("magic_attack"))), "acc": pick(g.get("accuracy"), val(w.get("accuracy"))),
+        "eva": pick(g.get("evasion"), val(w.get("avoidability"))), "wdef": pick(g.get("physicalDefense"), val(w.get("physical_defense"))),
+        "mdef": pick(g.get("magicDefense"), val(w.get("magic_defense"))), "kb": pick(g.get("minimumPushDamage"), val(w.get("knockback"))),
         "weak": elem(w, "element_weak"), "resist": elem(w, "element_resist"),
         # the game files' element code: a letter (F fire, I ice, L lightning, S poison, H holy) then 1 immune, 2 resists, 3 weak
         "elem": str(g.get("elementalAttributes") or ""),
