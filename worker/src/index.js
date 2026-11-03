@@ -373,8 +373,9 @@ async function publicLinks(env) {
   let cursor;
   do {
     const page = await env.ACCOUNTS.list({ prefix: "acct:", cursor });
-    for (const k of page.keys) {
-      const a = await env.ACCOUNTS.get(k.name, "json");
+    // every account at once: one by one took 1 to 8 seconds with 100 accounts
+    const accts = await Promise.all(page.keys.map((k) => env.ACCOUNTS.get(k.name, "json").catch(() => null)));
+    for (const a of accts) {
       if (!a || !a.ign) continue;
       // the owner's and site names can't be claimed by typing them in: only an admin account links under them
       if (["maya", "streams", "guest", "clubfm"].includes(a.ign.toLowerCase()) && !isAdmin(a, env)) continue;

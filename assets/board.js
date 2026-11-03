@@ -1547,7 +1547,8 @@
     function jserr(m) { try { ev("#jserr:" + dev + ":" + String(m || "").replace(/[^\w .:-]/g, "").slice(0, 70)); } catch (e) {} }
     // leaving the page on purpose is not a crash (a page the browser kills never gets this event)
     window.addEventListener("pagehide", function () { try { var b = JSON.parse(localStorage.getItem("fm-boot") || "null"); if (b && !b.done) localStorage.setItem("fm-boot", JSON.stringify({ t: b.t, done: true, left: true })); } catch (e) {} });
-    window.addEventListener("error", function (e) { if (e && e.message) jserr(e.message); });
+    // only errors from our own scripts: a browser extension's error on the page isn't ours to fix
+    window.addEventListener("error", function (e) { if (e && e.message && (!e.filename || /maplefm\.gg|localhost/.test(e.filename))) jserr(e.message); });
     window.addEventListener("unhandledrejection", function (e) { jserr(e && e.reason && (e.reason.message || e.reason)); });
   })();
   function bootDone() {
