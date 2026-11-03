@@ -1,5 +1,5 @@
 {
- "at": 1793673381762,
+ "at": 1793676704134,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,18 +105,18 @@
    "behind": null
   },
   "Zik": {
-   "rows24": 27010,
-   "room24": 26431,
-   "ch24": 26859,
-   "rows7": 144141,
+   "rows24": 25511,
+   "room24": 25083,
+   "ch24": 25511,
+   "rows7": 142873,
    "room7": 77785,
-   "late7": 1538,
-   "chat24": 238,
+   "late7": 1525,
+   "chat24": 228,
    "last": 1793620449,
    "ver": "2026.10.31.9",
    "lag_median_min": 2.4,
-   "room_rate24": 0.979,
-   "room_rate7": 0.54,
+   "room_rate24": 0.983,
+   "room_rate7": 0.544,
    "late_share7": 0.011,
    "behind": 7
   },
@@ -264,6 +264,22 @@
    "late_share7": null,
    "behind": 7
   },
+  "theBeyonder": {
+   "rows24": 49,
+   "room24": 12,
+   "ch24": 12,
+   "rows7": 49,
+   "room7": 12,
+   "late7": 0,
+   "chat24": 1,
+   "last": 1793675450,
+   "ver": "2026.11.2.7",
+   "lag_median_min": 3.2,
+   "room_rate24": 0.245,
+   "room_rate7": 0.245,
+   "late_share7": 0.0,
+   "behind": 0
+  },
   "Weltschmerz": {
    "rows24": 403,
    "room24": 361,
@@ -299,8 +315,8 @@
    "incomplete upload": 725
   },
   "2026-11-03": {
-   "bad row: 3a3a (p zero)": 1800,
-   "incomplete upload": 90
+   "bad row: 3a3a (p zero)": 2400,
+   "incomplete upload": 120
   }
  },
  "rejects": {},
