@@ -20,6 +20,18 @@ def ctype(f):
 WORKER = "https://api.maplefm.gg/"
 CORS = {"Access-Control-Allow-Origin": "https://maplefm.test", "Access-Control-Allow-Credentials": "true"}
 
+# The board's windows reach back 7 days for listings and 14 days for sales and hovered rolls. Rows older than that
+# change nothing on the server-built board, and the whole archive (530,000 rows on Nov 2) ran the headless browser out
+# of memory: the snapshot and the public prices stopped updating for 7 hours. Older rows are left out here only.
+CUT_ASK, CUT_SALE = time.time() - 7 * 86400, time.time() - 15 * 86400
+
+def trim(docs):
+    out = []
+    for d in docs if isinstance(docs, list) else []:
+        rows = [r for r in (d.get("rows") or []) if (r.get("t") or 0) > CUT_ASK or ((r.get("so") or r.get("x")) and (r.get("t") or 0) > CUT_SALE)]
+        if rows or not d.get("rows"): out.append(dict(d, rows=rows))
+    return out
+
 def answer(route, req):
     url = req.url.split("?")[0]
     if url.startswith(WORKER):
@@ -29,7 +41,7 @@ def answer(route, req):
             for f in ("watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", "streams.json", "streams-vods.json", "inbox.json"):
                 p = os.path.join(LIVE, "data", f)
                 if os.path.isfile(p):
-                    try: out["data/" + f] = json.load(open(p, encoding="utf-8"))
+                    try: out["data/" + f] = trim(json.load(open(p, encoding="utf-8")))
                     except Exception: pass
             return route.fulfill(status=200, content_type="application/json", headers=CORS, body=json.dumps(out))
         return route.abort()

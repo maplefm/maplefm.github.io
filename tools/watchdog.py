@@ -101,6 +101,65 @@ try:
 except Exception:
     check("Player market", False, f"no answer (status {st})", ms)
 
+# 2d. Real visitors: crashes (a phone browser closing the page) and script errors reported by the board itself in the
+# last 15 minutes. Two different visitors crashing, or three hitting the same script error, is an outage.
+st, body, ms = get("https://api.maplefm.gg/public/beacons?m=15")
+try:
+    bj = json.loads(body); cr = bj.get("crash") or {}; bo = bj.get("boot") or {}; ers = bj.get("errs") or []
+    ncr = sum(cr.values()); top = ers[0] if ers else None
+    ok = ncr < 2 and not (top and top.get("u", 0) >= 3)
+    det = f"{sum(bo.values())} visits, {ncr} crashed" + (f" ({', '.join(f'{v} {k}' for k, v in cr.items())})" if ncr else "") + (f"; script error on {top['u']} {top['dev']}: {top['msg']}" if top and top.get("u", 0) >= 3 else "")
+    check("Visitors' browsers", ok, det, ms)
+except Exception:
+    check("Visitors' browsers", True, f"no beacon counts (status {st})", ms)
+
+# 2e. The board in a real browser, as an iPhone and as a desktop: it loads, an item card opens, search answers, no
+# script errors, and the phone stays small (the Nov 2 crash: phones pulled the whole listing history)
+try:
+    from playwright.sync_api import sync_playwright
+    PW = True
+except Exception:
+    PW = False
+if PW:
+    def browse(pw, phone):
+        # the phone is Safari's own engine (WebKit), the one that crashed on Nov 2; the desktop is Chrome's
+        try: b = pw.webkit.launch() if phone else pw.chromium.launch(args=["--enable-precise-memory-info"])
+        except Exception: b = pw.chromium.launch(args=["--enable-precise-memory-info"])
+        ctx = b.new_context(**pw.devices["iPhone 13"]) if phone else b.new_context(viewport={"width": 1440, "height": 900})
+        pg = ctx.new_page(); errs = []; live = [0]; full = [0]
+        pg.on("pageerror", lambda e: errs.append(str(e)[:120]))
+        def done(rq):
+            try:
+                if "/data/live" in rq.url and "live.sig" not in rq.url:
+                    live[0] += (rq.sizes() or {}).get("responseBodySize", 0)
+                    if "after=" not in rq.url: full[0] += 1
+            except Exception: pass
+        pg.on("requestfinished", done)
+        t0 = time.time(); bad = []
+        try:
+            pg.goto(SITE + "/#item=Work%20Gloves", wait_until="domcontentloaded", timeout=45000)
+            pg.wait_for_function("() => document.body.innerText.indexOf('Work Gloves') > -1 && !!document.querySelector('#rows tr, .li')", timeout=60000)
+            pg.wait_for_timeout(30000)          # the live listings and the full history (desktop) arrive after the first paint
+            if not phone:
+                pg.keyboard.press("Escape")
+            pg.fill("#q", "ilbi"); pg.wait_for_timeout(1500)
+            if "Ilbi" not in pg.inner_text("body"): bad.append("search found nothing for ilbi")
+            heap = pg.evaluate("() => performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1e6) : 0")
+        except Exception as e:
+            bad.append("didn't load: " + str(e).split("\n")[0][:90]); heap = 0
+        b.close()
+        if errs: bad.append("script error: " + errs[0])
+        if phone and full[0]: bad.append("phone pulled the full listing history")
+        if heap > (350 if phone else 900): bad.append(f"memory {heap} MB")
+        return bad, f"{time.time() - t0:.0f}s, {heap} MB, {live[0] / 1e6:.1f} MB listings, {full[0]} full pulls"
+    try:
+        with sync_playwright() as pw:
+            for nm, phone in (("Board on a phone", True), ("Board on a desktop", False)):
+                bad, info = browse(pw, phone)
+                check(nm, not bad, ("; ".join(bad) + " (" + info + ")") if bad else "loads, card and search work (" + info + ")")
+    except Exception as e:
+        check("Board in a browser", False, "browser check didn't run: " + str(e)[:100])
+
 # 3. Fresh prices: the live pump signs the data every few minutes
 st, body, ms = get("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/live.sig?t=" + str(int(NOW)))
 age = None

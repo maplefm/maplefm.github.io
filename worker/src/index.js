@@ -123,6 +123,7 @@ async function route(req, env, url) {
   if (p === "/public/supporters") return publicSupporters(env);
   if (p === "/public/stats") return publicStats(env);
   if (p === "/public/scanners") return publicScanners(env);
+  if (p === "/public/beacons") return publicBeacons(env, url);
   if (p === "/public/popular") return publicPopular(env);
   if (p === "/gone" && req.method === "POST") return gonePost(req, env);
   if (p === "/public/gone") return goneList(env);
@@ -570,6 +571,22 @@ async function scannerSeen(env, m, blocked, via) {
       env.INBOX_DB.prepare("INSERT OR IGNORE INTO scanhr (k, via, hr) VALUES (?, ?, ?)").bind(k, via || "w", Math.floor(Date.now() / 3600e3)),
     ]);
   } catch (e) {}
+}
+// Board health from real visitors, for the watchdog: how many visits started, crashed (a phone browser closing the
+// page) and hit a script error in the last few minutes, by phone and desktop. Counts and short error texts only.
+async function publicBeacons(env, url) {
+  const mins = Math.max(5, Math.min(180, Number(url.searchParams.get("m")) || 15)), since = Date.now() - mins * 6e4, out = { m: mins, boot: {}, crash: {}, jserr: {}, errs: [] };
+  try {
+    await hitsTable(env);
+    const r = await env.INBOX_DB.prepare("SELECT p, COUNT(*) AS n, COUNT(DISTINCT v) AS u FROM hits WHERE t > ? AND (p LIKE '#boot:%' OR p LIKE '#crash:%' OR p LIKE '#jserr:%') GROUP BY p").bind(since).all();
+    for (const x of r.results || []) {
+      const [k, dev, ...rest] = String(x.p).slice(1).split(":");
+      if (k === "jserr") { out.jserr[dev] = (out.jserr[dev] || 0) + x.u; out.errs.push({ dev, msg: rest.join(":").slice(0, 70), n: x.n, u: x.u }); }
+      else if (out[k]) out[k][dev] = (out[k][dev] || 0) + x.u;
+    }
+  } catch (e) { out.error = String(e).slice(0, 80); }
+  out.errs.sort((a, b) => b.u - a.u); out.errs = out.errs.slice(0, 10);
+  return json(out, 200, { "Cache-Control": "no-store" });
 }
 let liveCache = null;
 async function publicScanners(env) {
