@@ -178,6 +178,8 @@
   // over as an object, never as text, so nothing is parsed twice
   function snapEncode(full, asObj) {
     if (!D || D.preview || D.snap) return null;
+    // every equip's grades go out with the board, so browsers never have to work them out (see ladLater)
+    D.list.forEach(function (i) { if (i.equip) { var L = ladderOf(i); i.ltop = L && L.top && L.top.basis === "sold" ? L.top : null; } });
     var isL = new Set(D.L), idx = new Map(), n = 0, cols = {}, words = {}, wix = {}, now = Date.now(), T = D.latest || now;
     function put(k, v) {
       if ((full ? ENG_DROP : SNAP_DROP)[k] || v === undefined || v === null || v === false || v === "") return;
@@ -269,7 +271,7 @@
       if (tk === "list" && Array.isArray(D0.list)) { for (var li = 0; li < D0.list.length; li++) { D0.list[li] = dec(D0.list[li]); if (li % 150 === 149) yield; } }
       else { D0[tk] = dec(D0[tk]); yield; }
     }
-    var d = D0; d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; if (Array.isArray(i.rolls)) i.rolls = i.rolls.filter(function (r) { return r && r.l; }); }); d.snap = true; d.snapAt = j.at;
+    var d = D0; d.L = L; d.byName = {}; d.list.forEach(function (i) { d.byName[i.item] = i; if (Array.isArray(i.rolls)) i.rolls = i.rolls.filter(function (r) { return r && r.l; }); if (i._lad && typeof i._lad === "object" && Array.isArray(i.sales)) i._lad.at = (i.buy || []).length + "|" + i.sales.length + "|snap"; }); d.snap = true; d.snapAt = j.at;
     return d;
   }
   function snapDecode(j) { var g = snapDecodeGen(j), r; do { r = g.next(); } while (!r.done); return r.value; }
@@ -283,10 +285,76 @@
       })();
     });
   }
+  // The server's board is about 24 MB of JSON. Parsing it on the page froze desktops for over half a second and phones
+  // for seconds, so a small helper worker downloads and parses it, then hands it over in pieces: number columns as
+  // typed arrays (moved, not copied) and the rest in small batches, each unpacked as its own short task.
+  function snapWorkerMain() {
+    self.onmessage = function (e) {
+      var url = e.data;
+      fetch(url, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.cols || !j.D) { postMessage({ end: 1, none: 1 }); return; }
+        var isNum = function (a) { if (!Array.isArray(a)) return false; for (var i = 0; i < a.length; i++) if (typeof a[i] !== "number") return false; return true; };
+        var parts = function (tag, k, a, size, extra) {
+          for (var o = 0; o < a.length; o += size) postMessage(Object.assign({ tag: tag, k: k, o: o, a: a.slice(o, o + size), len: a.length }, extra || {}));
+          if (!a.length) postMessage(Object.assign({ tag: tag, k: k, o: 0, a: [], len: 0 }, extra || {}));
+        };
+        postMessage({ head: { v: j.v, at: j.at, T: j.T, n: j.n, words: j.words, kinds: j.kinds, cols: Object.keys(j.cols), D: Object.keys(j.D) } });
+        Object.keys(j.cols).forEach(function (k) {
+          var c = j.cols[k];
+          if (c && c.g) {
+            var g = isNum(c.g) ? new Float64Array(c.g) : null, v = isNum(c.v) ? new Float64Array(c.v) : null, tr = [];
+            if (g) tr.push(g.buffer); if (v) tr.push(v.buffer);
+            postMessage({ tag: "sp", k: k, g: g || c.g, v: v, len: c.v.length }, tr);
+            if (!v) parts("spv", k, c.v, 2000);
+          } else if (isNum(c)) { var t = new Float64Array(c); postMessage({ tag: "col", k: k, t: t }, [t.buffer]); }
+          else parts("colp", k, c, 2000);
+        });
+        Object.keys(j.D).forEach(function (k) {
+          var v = j.D[k];
+          if (Array.isArray(v) && v.length > 40) parts("D", k, v, k === "list" ? 30 : 3000);
+          else postMessage({ tag: "Dv", k: k, v: v });
+        });
+        postMessage({ end: 1 });
+      }).catch(function () { postMessage({ end: 1, none: 1 }); });
+    };
+  }
+  function snapFetchPlain(url) { return fetch(url, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+  var SNAPW_URL = null, SNAPW_BROKEN = false;
+  function snapFetch(url) {
+    if (SNAPW_BROKEN || !window.Worker || !window.Blob || !window.URL || !URL.createObjectURL) return snapFetchPlain(url);
+    var w;
+    try {
+      if (!SNAPW_URL) SNAPW_URL = URL.createObjectURL(new Blob(["(" + snapWorkerMain.toString() + ")();"], { type: "text/javascript" }));
+      w = new Worker(SNAPW_URL);
+    } catch (e) { SNAPW_BROKEN = true; return snapFetchPlain(url); }
+    return new Promise(function (ok) {
+      var j = null, done = false;
+      function fin(v, fallback) {
+        if (done) return; done = true; try { w.terminate(); } catch (e) {}
+        if (fallback) { SNAPW_BROKEN = true; snapFetchPlain(url).then(ok); } else ok(v);
+      }
+      function into(arr, m) { if (!arr.length && m.len) arr.length = m.len; for (var i = 0; i < m.a.length; i++) arr[m.o + i] = m.a[i]; }
+      w.onerror = function (e) { if (e && e.preventDefault) e.preventDefault(); fin(null, true); };
+      w.onmessage = function (e) {
+        var m = e.data || {};
+        try {
+          if (m.head) { var h = m.head; j = { v: h.v, at: h.at, T: h.T, n: h.n, words: h.words, kinds: h.kinds, cols: {}, D: {} }; return; }
+          if (m.end) { fin(m.none ? null : j); return; }
+          if (m.tag === "col") j.cols[m.k] = m.t;
+          else if (m.tag === "colp") into(j.cols[m.k] || (j.cols[m.k] = []), m);
+          else if (m.tag === "sp") j.cols[m.k] = { g: m.g, v: m.v || new Array(m.len) };
+          else if (m.tag === "spv") into(j.cols[m.k].v, m);
+          else if (m.tag === "D") into(j.D[m.k] || (j.D[m.k] = []), m);
+          else if (m.tag === "Dv") j.D[m.k] = m.v;
+        } catch (err) { fin(null, true); }
+      };
+      w.postMessage(url);
+    });
+  }
   var SNAP_P = null;
   if (ENGINE) SNAP_P = Promise.resolve(null);
   else try {
-    SNAP_P = fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    SNAP_P = snapFetch("https://api.maplefm.gg/data/snap");
   } catch (e) { SNAP_P = Promise.resolve(null); }
   function mark(k) { if (!T0[k]) T0[k] = Math.round(performance.now()); }
   // items the game data names alike but the shop window tells apart by colour: name -> {item id: colour}
@@ -1442,7 +1510,8 @@
   // shared by the cards, the streamer strip and the live pill, instead of one walk each on every redraw.
   function Lstat() {
     if (!D || !D.L) return null;
-    var now = Date.now(), c = D._lst; if (c && now - c.at < 60e3) return c;
+    // the server's board brings its own walk; it stands for a few minutes (the server rebuilds every 4 or so)
+    var now = Date.now(), c = D._lst; if (c && c.at && now - c.at < (D.snap && D.snapAt && c.at <= D.snapAt + 1e3 ? 6 * 6e4 : 60e3)) return c;
     var live = {}, liveSt = {}, shops = {}, spots = {}, sc = {}, st = {}, by = {}, lastT = 0, L = D.L;
     for (var k = 0; k < L.length; k++) {
       var l = L[k], age = now - l.t; if (l.t > lastT) lastT = l.t;
@@ -1840,7 +1909,13 @@
     var basel = visible(); renderChips(basel);
     var shown = basel.filter(function (i) { return inCat(i) && (!state.wonly || WATCH[i.item]); });
     // equips show (and sort by) the price of their busiest grade once it has 3+ sales; the rest keep the typical
-    shown.forEach(function (i) { if (!i.equip || D.preview) { i.ltop = null; return; } var L = ladderOf(i); i.ltop = L && L.top && L.top.basis === "sold" ? L.top : null; });
+    // Working out every equip's grades at once froze the page for most of a second after the board arrived, so a grade
+    // not worked out yet for this board is done in short slices after this render (ladLater), then the list redraws.
+    shown.forEach(function (i) {
+      if (!i.equip || D.preview) { i.ltop = null; return; }
+      var L = i._lad && i._lad.at === ladStamp(i) ? i._lad : (ladLater(i), i._lad || null);
+      i.ltop = L && L.top && L.top.basis === "sold" ? L.top : null;
+    });
     $("wcount").textContent = Object.keys(WATCH).length;
     var k = state.sortK, dir = state.sortDir;
     var hasQ = boardQ().trim() !== "";
@@ -2716,9 +2791,30 @@
   var LADMIN = 2, LADSEL = {}, LADSTAT = {};
   var CRITK = { CRIT: 1, CRITDMG: 1 };
   function ladName(k) { return k === "TOTAL" ? "stats" : k === "CRIT" ? "crit rate" : k === "CRITDMG" ? "crit damage" : STATABBR[k] || k; }
+  // the server's board carries each equip's grades worked out from every listing; they stand until the item changes
+  function ladStamp(i) { var b = (i.buy || []).length + "|" + i.sales.length; return i._lad && i._lad.at === b + "|snap" ? b + "|snap" : b + "|" + (D && D.L ? D.L.length : 0); }
+  var LADQ = [], LADQS = new Set(), LADQ_T = null;
+  function ladLater(i) {
+    if (LADQS.has(i)) return; LADQS.add(i); LADQ.push(i);
+    if (!LADQ_T) LADQ_T = setTimeout(ladRun, 0);
+  }
+  function ladRun() {
+    var end = performance.now() + 12, moved = false;
+    while (LADQ.length && performance.now() < end) {
+      var i = LADQ.shift(); LADQS.delete(i);
+      if (!D || !D.byName || D.byName[i.item] !== i) continue;   // a newer board replaced this item
+      var was = i.ltop, L = ladderOf(i), top = L && L.top && L.top.basis === "sold" ? L.top : null;
+      i.ltop = top; if ((was && was.mid) !== (top && top.mid) || !was !== !top) moved = true;
+    }
+    if (LADQ.length) { LADQ_T = setTimeout(ladRun, 0); if (moved) LADQ_MOVED = true; return; }
+    LADQ_T = null;
+    if ((moved || LADQ_MOVED) && D && !ENGINE) { LADQ_MOVED = false; keepRows = $("rows").childElementCount; render(); keepRows = 0; }
+    LADQ_MOVED = false;
+  }
+  var LADQ_MOVED = false;
   function ladderOf(i) {
     if (!i || !i.equip) return null;
-    var stamp = (i.buy || []).length + "|" + i.sales.length + "|" + (D && D.L ? D.L.length : 0);
+    var stamp = ladStamp(i);
     if (i._lad && i._lad.at === stamp) return i._lad;
     var n = i.item, wep = isWeapon(n), wk = wep ? keyStat(n, null) : null, base = fullBase(n).s;
     // a copy counts only when its popup was read well: the roll checks pass, its slots were read, and its stats fit
@@ -5379,12 +5475,12 @@
   // a newer copy of the server's board replaces this one, unless this browser has moved on to the raw listings
   function snapRefresh() {
     if (!SNAP_OK || hasRaw() || DEALS_ON || document.hidden) return;
-    // a 1 KB check first: the board itself (3 MB) only downloads when the server has a newer one
+    // a 1 KB check first: the board itself (about 3 MB sent, 24 MB unpacked) only downloads when the server has a newer one
     fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) {
       if (st && st.at && st.at === SNAP_SEEN) return null;
       if (st && st.at) SNAP_SEEN = st.at;
-      return fetch("https://api.maplefm.gg/data/snap", { cache: "no-cache" });
-    }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) {
+      return snapFetch("https://api.maplefm.gg/data/snap");
+    }).then(function (j) {
       if (!j || !D || !D.snap || j.at <= D.snapAt || hasRaw()) return;
       return snapDecodeAsync(j).then(function (d) {
       if (!d || !D || !D.snap || D.engine || DEALS_ON || hasRaw()) return;
