@@ -1,5 +1,5 @@
 {
- "at": 1793752612127,
+ "at": 1793756236529,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -281,16 +281,16 @@
    "behind": 0
   },
   "Weltschmerz": {
-   "rows24": 79,
-   "room24": 79,
-   "ch24": 79,
+   "rows24": 37,
+   "room24": 37,
+   "ch24": 37,
    "rows7": 439,
    "room7": 397,
    "late7": 0,
-   "chat24": 18,
+   "chat24": 0,
    "last": 1793689677,
    "ver": "2026.11.2.7",
-   "lag_median_min": 1.8,
+   "lag_median_min": 1.1,
    "room_rate24": 1.0,
    "room_rate7": 0.904,
    "late_share7": 0.0,
@@ -335,8 +335,8 @@
    "incomplete upload": 1042
   },
   "2026-11-04": {
-   "bad row: 3a3a (p zero)": 400,
-   "incomplete upload": 40
+   "bad row: 3a3a (p zero)": 1000,
+   "incomplete upload": 100
   }
  },
  "rejects": {},
