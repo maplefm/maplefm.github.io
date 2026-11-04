@@ -18,10 +18,18 @@ jobs:
         with:
           ref: live
       - name: Browser for the board checks
+        # apt on the runner sometimes hangs for the whole job (Nov 4: two runs cancelled at 14 min,
+        # no status written). Cap it so the other checks always run and report.
+        timeout-minutes: 6
+        continue-on-error: true
         run: |
           pip install -q playwright==1.56.0
-          python3 -m playwright install webkit 2>&1 | tail -2 || true
-          sudo -E env "PATH=$PATH" python3 -m playwright install-deps webkit 2>&1 | tail -2 || true
+          set -o pipefail
+          for i in 1 2; do
+            timeout 150 sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit 2>&1 | tail -2 && break
+            echo "install-deps timed out or failed (try $i)"
+          done
+          timeout 120 python3 -m playwright install webkit 2>&1 | tail -2 || true
       - name: Check and repair
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
