@@ -225,9 +225,10 @@ if TOKEN:
     check("Scheduled jobs", not bad, "all passing" if not bad else "failed: " + ", ".join(sorted({r["name"] for r in bad})))
 
     # 4b. Every scheduled job, one by one: still failing (until its next success, not just for 3 hours) or stopped
-    # running. Hours = the longest a healthy job goes between successful runs.
-    EVERY = {"covmap.yml": 8, "icons.yml": 8, "itemdb.yml": 28, "itemguide.yml": 28, "itempages.yml": 28, "world.yml": 28,
-             "maintenance.yml": 8, "news.yml": 28, "report.yml": 28, "seo.yml": 8 * 24 + 4, "weekly.yml": 8 * 24 + 4,
+    # running. Hours = the longest a healthy job goes between successful runs. GitHub throttles the frequent crons
+    # (maintenance every 30 min, icons hourly, covmap every 2h) to one run every 4 to 11 hours, so those get 12.
+    EVERY = {"covmap.yml": 12, "icons.yml": 12, "itemdb.yml": 28, "itemguide.yml": 28, "itempages.yml": 28, "world.yml": 28,
+             "maintenance.yml": 12, "news.yml": 28, "report.yml": 28, "seo.yml": 8 * 24 + 4, "weekly.yml": 8 * 24 + 4,
              "weeklyrecap.yml": 8 * 24 + 4, "speedwatch.yml": 28, "factcheck.yml": 8 * 24 + 4}
     late, failing_now = [], []
     for wf, hrs in EVERY.items():
