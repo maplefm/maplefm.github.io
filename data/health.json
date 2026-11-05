@@ -1,5 +1,5 @@
 {
- "at": 1793875471669,
+ "at": 1793879458885,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -108,32 +108,32 @@
    "rows24": 10476,
    "room24": 10476,
    "ch24": 10476,
-   "rows7": 72514,
-   "room7": 67915,
+   "rows7": 71583,
+   "room7": 67893,
    "late7": 1572,
    "chat24": 11,
    "last": 1793823024,
    "ver": "2026.11.2.7",
    "lag_median_min": 4.1,
    "room_rate24": 1.0,
-   "room_rate7": 0.937,
+   "room_rate7": 0.948,
    "late_share7": 0.022,
    "behind": 0
   },
   "Zik": {
-   "rows24": 19365,
-   "room24": 19353,
-   "ch24": 19359,
-   "rows7": 122254,
-   "room7": 118898,
-   "late7": 587,
-   "chat24": 264,
-   "last": 1793875380,
+   "rows24": 21672,
+   "room24": 21651,
+   "ch24": 21666,
+   "rows7": 125315,
+   "room7": 122783,
+   "late7": 0,
+   "chat24": 279,
+   "last": 1793879297,
    "ver": "2026.11.2.7",
    "lag_median_min": 2.5,
    "room_rate24": 0.999,
-   "room_rate7": 0.973,
-   "late_share7": 0.005,
+   "room_rate7": 0.98,
+   "late_share7": 0.0,
    "behind": 0
   },
   "DivineFeces": {
@@ -339,8 +339,8 @@
    "incomplete upload": 1575
   },
   "2026-11-05": {
-   "bad row: 3a3a (p zero)": 6160,
-   "incomplete upload": 771
+   "bad row: 3a3a (p zero)": 6760,
+   "incomplete upload": 846
   }
  },
  "rejects": {},
