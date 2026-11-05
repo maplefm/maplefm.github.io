@@ -1,5 +1,5 @@
 {
- "at": 1793866136,
+ "at": 1793890637,
  "ok": false,
  "failing": [
   "Scanner health"
@@ -9,160 +9,160 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 178,
+   "ms": 212,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 60,
+   "ms": 147,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 39,
+   "ms": 201,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 163,
+   "ms": 306,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 56,
+   "ms": 141,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 78,
+   "ms": 204,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 40,
+   "ms": 258,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 104,
+   "ms": 99,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 38,
+   "ms": 162,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 49,
+   "ms": 143,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 44,
+   "ms": 102,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 56,
+   "ms": 154,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 62,
+   "ms": 114,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 53,
+   "ms": 290,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 49,
+   "ms": 189,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 62,
+   "ms": 209,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 51,
+   "ms": 117,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: clean 1,499 to 1,999 (28 sold) · clean +1 crit rate 116K to 140K (14 sold) · ",
-   "ms": 344,
+   "detail": "Work Gloves: clean 1,499 to 1,999 (26 sold) · clean +1 crit rate 113K to 140K (15 sold) · ",
+   "ms": 573,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded 1 min ago",
-   "ms": 70,
+   "detail": "uploaded 2 min ago",
+   "ms": 61,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "61 open listings, #selling synced 3 min ago",
-   "ms": 632,
+   "detail": "69 open listings, #selling synced 2 min ago",
+   "ms": 371,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "6 visits, 0 crashed",
-   "ms": 206,
+   "detail": "11 visits, 0 crashed",
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Board on a phone",
    "ok": true,
-   "detail": "loads, card and search work (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (34s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (33s, 68 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (34s, 68 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -170,21 +170,21 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 62,
+   "ms": 299,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1590 items",
-   "ms": 79,
+   "detail": "1603 items",
+   "ms": 129,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": false,
-   "detail": "laclac: 2.2% of rows reached us over an hour late this week",
-   "ms": 73,
+   "detail": "laclac: 2.1% of rows reached us over an hour late this week",
+   "ms": 140,
    "fix": null
   },
   {
@@ -455,5 +455,5 @@
    "repairs": []
   }
  ],
- "beat": 1793866136
+ "beat": 1793890637
 }
