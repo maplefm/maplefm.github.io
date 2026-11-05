@@ -47,7 +47,7 @@ def cargo(table, fields, where=None):
         j = get(WIKI + "?" + urllib.parse.urlencode(q))
         rows = (j or {}).get("cargoquery")
         if rows is None:
-            print("cargo error", table, json.dumps(j)[:200]); return None
+            print("cargo error", table, json.dumps(j)[:200]); sys.exit(f"wiki table {table} unavailable; the last world data is kept")
         out += [{k.replace(" ", "_"): (html.unescape(v) if isinstance(v, str) else v) for k, v in r["title"].items()} for r in rows]
         if len(rows) < 500: break
         off += 500; time.sleep(0.4)
