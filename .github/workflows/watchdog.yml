@@ -22,14 +22,19 @@ jobs:
         # no status written). Cap it so the other checks always run and report.
         timeout-minutes: 6
         continue-on-error: true
+        # Nov 5 22:00 UTC: apt hung the whole step; "| tail" kept waiting on apt's children, so the
+        # timeouts never ended it and WebKit itself was never downloaded. Download WebKit first (no apt),
+        # log to a file instead of a pipe, and kill hard so every attempt fits inside the 6 minutes.
         run: |
           pip install -q playwright==1.56.0
-          set -o pipefail
+          timeout -k 10 90 python3 -m playwright install webkit > /tmp/pw-install.log 2>&1 || echo "webkit download failed or timed out"
+          tail -2 /tmp/pw-install.log
           for i in 1 2; do
-            timeout 150 sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit 2>&1 | tail -2 && break
-            echo "install-deps timed out or failed (try $i)"
+            if timeout -k 10 100 sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit > /tmp/pw-deps.log 2>&1; then
+              tail -2 /tmp/pw-deps.log; break
+            fi
+            tail -2 /tmp/pw-deps.log; echo "install-deps timed out or failed (try $i)"
           done
-          timeout 120 python3 -m playwright install webkit 2>&1 | tail -2 || true
       - name: Check and repair
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
