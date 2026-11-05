@@ -11,7 +11,8 @@ API = "https://mapleclassic.wiki/api.php"
 
 
 def login(ua):
-    user, pw = os.environ.get("WIKI_BOT_USER", ""), os.environ.get("WIKI_BOT_PASS", "")
+    # a space or line break pasted along with the secret makes the wiki say the password is wrong
+    user, pw = os.environ.get("WIKI_BOT_USER", "").strip(), os.environ.get("WIKI_BOT_PASS", "").strip()
     if not user or not pw:
         print("wiki: no bot login set (WIKI_BOT_USER, WIKI_BOT_PASS); reading as a visitor"); return False
     op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
@@ -22,6 +23,8 @@ def login(ua):
     r = json.load(op.open(API, data=body, timeout=40)).get("login") or {}
     if r.get("result") != "Success":
         # never print the password or the token, only what the wiki said
-        raise SystemExit("wiki login refused: " + str(r.get("reason") or r.get("result"))[:200])
+        # what the user name looked like (never the password): a bot login is Name@botname
+        shape = ("has @" if "@" in user else "no @, so not a bot login") + f", {len(user)} characters; password {len(pw)} characters"
+        raise SystemExit("wiki login refused: " + str(r.get("reason") or r.get("result"))[:200] + " (user name " + shape + ")")
     print("wiki: signed in as", r.get("lgusername"))
     return True
