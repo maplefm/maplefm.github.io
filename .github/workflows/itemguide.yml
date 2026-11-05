@@ -13,6 +13,8 @@ permissions:
   contents: write
   actions: write
 env:
+  WIKI_BOT_USER: ${{ secrets.WIKI_BOT_USER }}
+  WIKI_BOT_PASS: ${{ secrets.WIKI_BOT_PASS }}
   DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
 jobs:
   build:
@@ -27,7 +29,7 @@ jobs:
           mkdir -p /tmp/live/data
           python3 tools/itemguide.py /tmp/itemguide.json /tmp/live/data/itemdb.json
           # never replace a good guide with an empty one when a source is down
-          python3 -c "import json,sys; d=json.load(open('/tmp/itemguide.json')); sys.exit(0 if d['n'] >= 200 else 1)"
+          python3 tools/datacheck.py itemguide /tmp/itemguide.json /tmp/live/data/itemguide.json
           cp /tmp/itemguide.json /tmp/live/data/itemguide.json
           cd /tmp/live
           grep -q '^!data/itemguide.json$' .gitignore || echo '!data/itemguide.json' >> .gitignore
