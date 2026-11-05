@@ -117,6 +117,7 @@ JOBBITS = [(1, "Beginner"), (2, "Warrior"), (4, "Magician"), (8, "Bowman"), (16,
 
 
 def main():
+    import wikiapi; wikiapi.login(UA["User-Agent"])     # the wiki's Cargo tables need a signed-in account (Nov 5)
     ap = argparse.ArgumentParser()
     ap.add_argument("itemguide"); ap.add_argument("world"); ap.add_argument("out")
     ap.add_argument("--known", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "factcheck_known.json"))

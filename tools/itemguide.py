@@ -126,6 +126,7 @@ def iso(t):
 
 
 def main():
+    import wikiapi; wikiapi.login(UA["User-Agent"])     # the wiki's Cargo tables need a signed-in account (Nov 5)
     out_path = sys.argv[1]
     names = {}
     if len(sys.argv) > 2 and os.path.exists(sys.argv[2]):

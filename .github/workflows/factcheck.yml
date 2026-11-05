@@ -9,6 +9,9 @@ on:
 concurrency: factcheck
 permissions:
   contents: write
+env:
+  WIKI_BOT_USER: ${{ secrets.WIKI_BOT_USER }}
+  WIKI_BOT_PASS: ${{ secrets.WIKI_BOT_PASS }}
 jobs:
   check:
     runs-on: ubuntu-latest

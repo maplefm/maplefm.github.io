@@ -65,6 +65,8 @@ try: prev = json.load(open(PREV, encoding="utf-8"))
 except Exception: pass
 
 # ------------------------------------------------------------------ the wiki
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wikiapi; wikiapi.login(UA["User-Agent"])     # the wiki's Cargo tables need a signed-in account (Nov 5)
 maps = cargo("maps", ["_pageName=page", "id", "name_en", "region", "map_type", "recommended_level_min", "recommended_level_max", "nearest_town", "return_map", "game_version", "image", "origin_x", "origin_y", "render_width", "render_height"])
 portals = cargo("portals", ["_pageName=src", "to_map", "portal_name", "direction", "portal_type", "requires_level", "x", "y"])
 spawns = cargo("monster_spawns", ["monster_id", "map_id", "spawn_count", "respawn_seconds", "variant"])

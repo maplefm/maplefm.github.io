@@ -11,6 +11,8 @@ permissions:
   contents: write
   actions: write
 env:
+  WIKI_BOT_USER: ${{ secrets.WIKI_BOT_USER }}
+  WIKI_BOT_PASS: ${{ secrets.WIKI_BOT_PASS }}
   DISCORD_HOOKS: ${{ secrets.DISCORD_HOOKS }}
 jobs:
   build:
@@ -36,6 +38,7 @@ jobs:
           if len(new.get("maps", {})) < 0.8 * len(old.get("maps", {})) or len(new.get("maps", {})) < 100:
               sys.exit("map pull looks short (%d maps, had %d); keeping the old data" % (len(new.get("maps", {})), len(old.get("maps", {}))))
           PY
+          python3 tools/datacheck.py world /tmp/w/world.json /tmp/live/data/world.json
           cp /tmp/w/world.json /tmp/live/data/world.json
           cp /tmp/w/minimap/*.png /tmp/live/data/minimap/ 2>/dev/null || true
           cp /tmp/w/sprite/*.gif /tmp/live/data/sprite/ 2>/dev/null || true
