@@ -43,7 +43,9 @@ def cargo(table, fields):
         j = get(WIKI + "?" + q)
         rows = (j or {}).get("cargoquery")
         if rows is None:
-            print("cargo error", table, json.dumps(j)[:200]); break
+            # a table that didn't answer must stop the build: on Nov 5 the wiki started refusing anonymous Cargo
+            # queries and a build that carried on wrote a guide with no shops and 461 fewer items over the good one
+            print("cargo error", table, json.dumps(j)[:200]); sys.exit(f"wiki table {table} unavailable; the last item guide is kept")
         out += [{k.replace(" ", "_"): (html.unescape(v) if isinstance(v, str) else v) for k, v in r["title"].items()} for r in rows]
         if len(rows) < 500: break
         off += 500; time.sleep(0.5)
