@@ -1,168 +1,169 @@
 {
- "at": 1793899231,
+ "at": 1793902908,
  "ok": false,
  "failing": [
-  "Scanner health"
+  "Scanner health",
+  "Scheduled jobs"
  ],
  "checks": [
   {
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 275,
+   "ms": 254,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 177,
+   "ms": 178,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 159,
+   "ms": 200,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 114,
+   "ms": 182,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 423,
+   "ms": 212,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 228,
+   "ms": 157,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 451,
+   "ms": 174,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 117,
+   "ms": 108,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 115,
+   "ms": 124,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 292,
+   "ms": 127,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 361,
+   "ms": 209,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 180,
+   "ms": 209,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 120,
+   "ms": 180,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 170,
+   "ms": 202,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 177,
+   "ms": 131,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 229,
+   "ms": 175,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 221,
+   "ms": 138,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: clean 1,499 to 1,999 (26 sold) · clean +1 crit rate 113K to 140K (15 sold) · ",
-   "ms": 417,
+   "detail": "Work Gloves: clean 1,499 to 1,999 (25 sold) · clean +1 crit rate 113K to 140K (15 sold) · ",
+   "ms": 373,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
    "detail": "uploaded 1 min ago",
-   "ms": 144,
+   "ms": 93,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "70 open listings, #selling synced -0 min ago",
-   "ms": 1151,
+   "detail": "65 open listings, #selling synced 1 min ago",
+   "ms": 790,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "8 visits, 0 crashed",
-   "ms": 511,
+   "detail": "16 visits, 0 crashed",
+   "ms": 338,
    "fix": null
   },
   {
    "name": "Board on a phone",
    "ok": true,
-   "detail": "loads, card and search work (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (37s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (32s, 67 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (33s, 66 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -170,27 +171,27 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 134,
+   "ms": 150,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1604 items",
-   "ms": 64,
+   "detail": "1603 items",
+   "ms": 232,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": false,
    "detail": "laclac: 2.1% of rows reached us over an hour late this week",
-   "ms": 175,
+   "ms": 163,
    "fix": null
   },
   {
    "name": "Scheduled jobs",
-   "ok": true,
-   "detail": "all passing",
+   "ok": false,
+   "detail": "failed: Maps and training data",
    "ms": null,
    "fix": null
   },
@@ -209,7 +210,12 @@
    "fix": null
   }
  ],
- "repairs": [],
+ "repairs": [
+  {
+   "what": "re-ran failed job: Maps and training data",
+   "ok": true
+  }
+ ],
  "history": [
   {
    "at": 1792949788,
@@ -465,7 +471,20 @@
     "Scanner health"
    ],
    "repairs": []
+  },
+  {
+   "at": 1793902908,
+   "failing": [
+    "Scanner health",
+    "Scheduled jobs"
+   ],
+   "repairs": [
+    {
+     "what": "re-ran failed job: Maps and training data",
+     "ok": true
+    }
+   ]
   }
  ],
- "beat": 1793899231
+ "beat": 1793902908
 }
