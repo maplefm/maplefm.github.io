@@ -1,5 +1,5 @@
 {
- "at": 1793895254208,
+ "at": 1793898632029,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,19 +105,19 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 10671,
-   "room24": 10665,
-   "ch24": 10665,
-   "rows7": 77442,
-   "room7": 74336,
+   "rows24": 9818,
+   "room24": 9812,
+   "ch24": 9812,
+   "rows7": 76533,
+   "room7": 73657,
    "late7": 1572,
-   "chat24": 8,
-   "last": 1793894830,
+   "chat24": 7,
+   "last": 1793898477,
    "ver": "2026.11.2.7",
-   "lag_median_min": 4.0,
+   "lag_median_min": 3.7,
    "room_rate24": 0.999,
-   "room_rate7": 0.96,
-   "late_share7": 0.02,
+   "room_rate7": 0.962,
+   "late_share7": 0.021,
    "behind": 0
   },
   "Zik": {
@@ -339,10 +339,12 @@
    "incomplete upload": 1575
   },
   "2026-11-05": {
-   "bad row: 3a3a (p zero)": 9040,
-   "incomplete upload": 1131
+   "bad row: 3a3a (p zero)": 9640,
+   "incomplete upload": 1206
   }
  },
  "rejects": {},
- "flags": []
+ "flags": [
+  "laclac: 2.1% of rows reached us over an hour late this week"
+ ]
 }
