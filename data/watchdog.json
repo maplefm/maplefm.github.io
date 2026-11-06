@@ -1,8 +1,7 @@
 {
- "at": 1794002162,
+ "at": 1794003700,
  "ok": false,
  "failing": [
-  "Board on a phone",
   "Scanner health"
  ],
  "checks": [
@@ -10,175 +9,175 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 290,
+   "ms": 192,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 173,
+   "ms": 244,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 186,
+   "ms": 102,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 201,
+   "ms": 200,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 119,
+   "ms": 111,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 132,
+   "ms": 163,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 128,
+   "ms": 188,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 116,
+   "ms": 109,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 129,
+   "ms": 172,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 117,
+   "ms": 121,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 273,
+   "ms": 163,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 119,
+   "ms": 177,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 118,
+   "ms": 112,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 203,
+   "ms": 119,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 115,
+   "ms": 109,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 132,
+   "ms": 118,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 112,
+   "ms": 186,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
    "detail": "Work Gloves: clean 1,500 to 1,999 (19 sold) · clean +1 crit rate 116K to 144K (14 sold) · ",
-   "ms": 789,
+   "ms": 376,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded -0 min ago",
-   "ms": 217,
+   "detail": "uploaded 2 min ago",
+   "ms": 140,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "59 open listings, #selling synced 0 min ago",
-   "ms": 362,
+   "detail": "59 open listings, #selling synced 1 min ago",
+   "ms": 738,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "10 visits, 0 crashed",
-   "ms": 165,
+   "detail": "7 visits, 0 crashed",
+   "ms": 848,
    "fix": null
   },
   {
    "name": "Board on a phone",
-   "ok": false,
-   "detail": "WebKit didn't start: BrowserType.launch:  (not run)",
+   "ok": true,
+   "detail": "loads, card and search work (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (33s, 66 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (33s, 63 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated -0 min ago",
-   "ms": 88,
+   "detail": "updated 1 min ago",
+   "ms": 93,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1600 items",
-   "ms": 194,
+   "detail": "1601 items",
+   "ms": 109,
    "fix": null
   },
   {
@@ -614,7 +613,14 @@
     "Scanner health"
    ],
    "repairs": []
+  },
+  {
+   "at": 1794003700,
+   "failing": [
+    "Scanner health"
+   ],
+   "repairs": []
   }
  ],
- "beat": 1794002162
+ "beat": 1794003700
 }
