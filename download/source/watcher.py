@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.2.7"
+VERSION = "2026.11.6.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -590,7 +590,7 @@ def shop_room(r):
 # Hover telemetry: counts only, no pictures, sent with the day's shop post as "hv" so Club FM can tell an equip that
 # was never hovered from one hovered too briefly, one whose popup never showed (pointer off the icon), and one whose
 # popup was read but couldn't be matched. Nothing here changes what gets read.
-HV_KEYS = ("rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got")
+HV_KEYS = ("rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got", "nostats", "cut")
 HV = {"day": "", "c": {}}
 HV_GOT = set()
 HV_LOCK = threading.Lock()
@@ -607,6 +607,22 @@ def hv(k, n=1):
         HV["c"][k] = HV["c"].get(k, 0) + n
 def hv_hid(st={"n": 0}):
     st["n"] += 1; return st["n"]
+
+def popup_cut(img):
+    """The popup runs off the bottom of the game window: its panel reaches the bottom edge of a grab that the window's
+    edge cut short (a full grab is 860 pixels tall). Its stat lines are off screen, so nothing can read them."""
+    try:
+        if img.height >= 858: return False
+        box = fmparse._tip_panel(img)
+        return bool(box) and box[3] >= img.height - 2
+    except Exception: return False
+
+def cut_note(st={"t": 0}):
+    """Tell the scanner, at most every 30 minutes, why the bottom rows' stats aren't coming in."""
+    if time.time() - st["t"] < 1800: return
+    st["t"] = time.time()
+    log("hover: the popup for this row runs past the bottom of your game window, so its stats can't be read. "
+        "Drag the shop window higher, or make the game window taller, so the whole popup fits.")
 
 def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots": 0, "fired": 0, "check": 0}):
     """While the pointer rests on a shop row, say when to read the item's tooltip. The loop runs ten times a second
@@ -1805,7 +1821,15 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
                         hint = next((r["i"] for r in res["rows"] if r.get("y") == yy and r.get("known")), None)
                     except Exception: hint = None
                     tip = fmparse.read_tooltip(extra["tip"], item=hint)
-                    if extra.get("hid"): hv("read" if tip else "unread")
+                    # a popup that runs off the bottom of the game window has its lower stat lines off screen: a read
+                    # of the top half looks like a whole one with stats missing (Blue Sauna Robe cut at 70% read as
+                    # STR, DEX, INT, LUK, HP 10 with no MP, W.DEF or slots), so it's dropped, never sent
+                    cut = popup_cut(extra["tip"])
+                    if cut: tip = None
+                    # a popup with nothing to read (a cash item, a potion, a throwing star) isn't a miss: counting
+                    # those as unread made half of all hovers look like reader failures (Nov 6: 106 of 235 misses)
+                    if extra.get("hid"): hv("read" if tip else "cut" if cut else "nostats" if fmparse.stat_item(hint) is False else "unread")
+                    if cut: cut_note()
                     if tip:
                         tip["row"] = extra["row"]; res["tip"] = tip; res["tipimg"] = extra["tip"]
                         review_save(cfg, "tip", extra["tip"], tip)
@@ -1813,7 +1837,8 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
                         if not tip["stats"].get("_ex") and extra.get("hid"):
                             rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
                             send_miss(cfg, extra["tip"], "tip", f"not exact | row {extra.get('row')} | {rn}")
-                    if not tip and extra.get("hid"):
+                    # only a popup with stats on it that the reader missed is worth a picture (20 a day)
+                    if not tip and extra.get("hid") and not cut and fmparse.stat_item(hint) is not False:
                         rws = res.get("rows") or []; rn = rws[extra["row"]]["i"] if isinstance(extra.get("row"), int) and 0 <= extra["row"] < len(rws) else ""
                         send_miss(cfg, extra["tip"], "tip", f"row {extra.get('row')} | {rn}")
                     if not tip and extra.get("hover"):

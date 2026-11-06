@@ -1975,6 +1975,15 @@ except (OSError, ValueError):
     _FIT = {}
 _FIT_LOW = {k.lower(): v for k, v in _FIT.items()}
 
+def stat_item(name):
+    """Whether an item's popup has stats to read: True for an equip with base stats or slots, False for a cash item
+    or anything statfit doesn't list (use, etc and setup items, throwing stars), None when the name is unknown.
+    The watcher counts a popup it couldn't read only when there was something to read on it."""
+    if not name: return None
+    f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(name)).strip().lower())
+    if not f: return False
+    return not f[2] and bool(f[1] or (len(f) > 3 and f[3]))
+
 def exact_fits(name, stats):
     """An exactly read popup, checked against the item (statfit.json): every base stat is there, a value without a
     bracket is exactly the base (the game brackets any stat that differs from it), no stat the item can't have, and

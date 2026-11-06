@@ -13,7 +13,7 @@ GID = "19216923"
 CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET}/export?format=csv&gid={GID}"
 CREW = {"maya", "jack", "matt", "jimmy", "streams", "guest"}
 KEEP_DAYS = 14
-HV_KEYS = {"rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got"}
+HV_KEYS = {"rest", "brief", "panel", "nopanel", "busy", "shots", "read", "unread", "matched", "nomatch", "got", "nostats", "cut"}
 MAX_ROWS_DOC = 40000          # a full-time scanner reads over 20,000 shop rows a day (Zik, laclac); leave room
 MAX_ROWS_ID = 200000         # per scanner across the kept days; at 80,000 a full-time scanner lost its oldest days within 4 days
 # names for watchers whose config.json has none, keyed by the hashed id (hid), never the id itself
