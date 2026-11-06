@@ -140,7 +140,7 @@ def main():
 
     # ---- wiki tables
     wq = cargo("quests", ["_pageName=page", "id", "name_en", "required_level", "complete_level", "giver", "turn_in", "region", "area", "repeatable", "profession", "profession_level",
-                          "meso_cost", "exp_reward", "meso_reward", "fame_reward", "available_until"])
+                          "meso_cost", "exp_reward", "meso_reward", "fame_reward", "available_until", "arc"])
     wqi = cargo("quest_required_items", ["quest_id", "item_id", "quantity"])
     wqr = cargo("quest_rewards", ["quest_id", "item_id", "quantity", "reward_type", "choice_group", "job", "gender", "chance"])
     wqe = cargo("quest_enemies", ["quest_id", "monster_id", "quantity"])
@@ -267,6 +267,8 @@ def main():
                     get_.append([item_name(int(iid)), int(c)])
             rec0 = {
                 "id": d["id"], "n": nm0, "lv": lv,
+                # the quest line the game's quest log lists it under ("The Old Tree" for Stump Research): what players search for
+                **({"arc": str(w0.get("arc")).strip()} if str(w0.get("arc") or "").strip() and str(w0.get("arc")).strip() != nm0 else {}),
                 "g": giver, "gid": gid0, "a": str(w0.get("area") or d.get("areaName") or w0.get("region") or "").strip(),
                 "rep": 1 if (str(w0.get("repeatable") or "0") == "1" or st0.get("dayByDay") or st0.get("repeatInterval")) else 0,
                 "jobs": st0.get("jobs") or [],
@@ -355,6 +357,7 @@ def main():
              "a": w.get("area") or w.get("region") or "", "rep": 1 if str(w.get("repeatable") or "0") == "1" else 0, "jobs": [], "pre": [],
              "need": [[wname(r.get("item_id")), int(num(r.get("quantity")))] for r in wrows(wqi, w) if int(num(r.get("quantity"))) > 0],
              "kill": [], "exp": int(num(w.get("exp_reward"))), "meso": int(num(w.get("meso_reward"))), "fame": int(num(w.get("fame_reward"))), "get": [], "end": None, "wiki": 1}
+        if str(w.get("arc") or "").strip() and str(w.get("arc")).strip() != nm: q["arc"] = str(w["arc"]).strip()
         if npc_town.get(str(q["g"]).lower()): q["town"] = npc_town[str(q["g"]).lower()]
         allq.append(q); page_qid[nm] = q["id"]; page_qid[str(w.get("page") or nm).strip()] = q["id"]
         for iname, cnt in q["need"]:

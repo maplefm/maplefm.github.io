@@ -360,7 +360,8 @@ img.px{image-rendering:pixelated;object-fit:contain}
     var d = el("div", "q" + (st ? " " + st : "") + (open ? " open" : "") + (win ? " win" : "") + (FOCUS === q.id ? " focus" : "")); d.id = (win ? "w-" : "q-") + q.id;
     var h = el("button", "qrow"); h.type = "button"; h.setAttribute("aria-expanded", open ? "true" : "false");
     var npc = el("span", "npc"); npc.appendChild(npcImg(q)); h.appendChild(npc);
-    var t = el("span", "qt"); t.appendChild(el("b", null, qname(q)));
+    // the game's quest log shows the quest line ("The Old Tree") with the step name under it
+    var t = el("span", "qt"); t.appendChild(el("b", null, q.arc ? q.arc + ": " + qname(q) : qname(q)));
     t.appendChild(el("small", null, [q.lv ? "Lv " + q.lv + (q.lv2 ? " to turn in Lv " + q.lv2 : "") : "", q.g, q.town || (q.a !== "Victoria Island" ? q.a : "")].filter(Boolean).join(" · ")));
     var sp = el("span", "strip");
     if (st) sp.appendChild(el("span", "st" + (st === "done" ? " done" : ""), st === "done" ? "Done ✓" : "Started"));
@@ -547,7 +548,7 @@ img.px{image-rendering:pixelated;object-fit:contain}
     }
     addCustoms();
     // what search looks through: names, givers, towns, items, and every material inside a crafted item
-    Q.forEach(function (q) { var acc = newAcc(); q.need.forEach(function (x) { plan(x[0], x[1], {}, acc); }); q._s = (q.n + " " + qname(q) + " " + q.g + " " + q.a + " " + (q.town || "") + " " + q.need.map(function (x) { return x[0] + " " + shown(x[0]); }).join(" ") + " " + Object.keys(acc.base).join(" ") + " " + q.kill.map(function (x) { return x[0]; }).join(" ") + " " + q.get.map(function (x) { return x[0]; }).join(" ")).toLowerCase(); });
+    Q.forEach(function (q) { var acc = newAcc(); q.need.forEach(function (x) { plan(x[0], x[1], {}, acc); }); q._s = (q.n + " " + qname(q) + " " + (q.arc || "") + " " + q.g + " " + q.a + " " + (q.town || "") + " " + q.need.map(function (x) { return x[0] + " " + shown(x[0]); }).join(" ") + " " + Object.keys(acc.base).join(" ") + " " + q.kill.map(function (x) { return x[0]; }).join(" ") + " " + q.get.map(function (x) { return x[0]; }).join(" ")).toLowerCase(); });
     accountLine();
     if (LOG.level) $("lv").value = LOG.level;
     if (LOG.fam) $("cls").value = LOG.fam;
