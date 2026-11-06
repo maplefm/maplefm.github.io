@@ -457,8 +457,10 @@ img.px{image-rendering:pixelated;object-fit:contain}
     $("ptxt").textContent = lv ? doneIn + " of " + inRange.length + " quests up to level " + lv + " done." : "Set your level to see what's open.";
     var list = Q.filter(function (q) {
       var b = buckets[q.id];
-      if (TAB === "open" && b !== "open" && b !== "locked") return false;
-      if (TAB !== "open" && TAB !== "all" && b !== TAB) return false;
+      // a search looks through every quest, not just the open tab: a quest the log thinks isn't open yet
+      // (its first step not marked done) must still turn up when someone types its name
+      if (!s && TAB === "open" && b !== "open" && b !== "locked") return false;
+      if (!s && TAB !== "open" && TAB !== "all" && b !== TAB) return false;
       if (rg && q.a !== rg) return false;
       if (s && q._s.indexOf(s) < 0) return false;
       return true;
