@@ -397,15 +397,19 @@ def build(world, guide, summary, notes, out):
         if sum(1 for x in same if x["g"] == q["g"]) > 1: t = f'{q["n"]} ({q["g"]}, Lv {q["lv"]})'
         if sum(1 for x in same if x["g"] == q["g"] and x["lv"] == q["lv"]) > 1: t = f'{q["n"]} ({q["g"]}, #{q["id"]})'
         return t
+
+    def qtitle(q, _qt=qtitle):
+        # lead with the quest line the game's quest log shows, so a search for "The Old Tree" finds Stump Research
+        return (q["arc"] + ": " if q.get("arc") else "") + _qt(q)
     for q in QS:
         s = QSLUG[q["id"]]
         # an event NPC is named for the event ("Malady (Halloween)") but stands on the maps under her plain name
         where_g = npc_at.get(q["g"], []) or npc_at.get(re.sub(r"\s*\([^)]*\)\s*$", "", q["g"]), [])
-        desc = (f"{q['n']}, a level {q['lv']} MapleStory Classic quest from {q['g']}" + (f" in {where_g[0]}" if where_g else "") + ": " +
+        desc = ((f"{q['arc']}: " if q.get("arc") else "") + f"{q['n']}, a level {q['lv']} MapleStory Classic quest from {q['g']}" + (f" in {where_g[0]}" if where_g else "") + ": " +
                 # every item it needs, so a search for any one of them finds the quest
                 (", ".join(f"{c} {i}" for i, c in q.get("need", [])) or ", ".join(f"hunt {c} {k}" for k, c, *_ in q.get("kill", [])[:2]) or "what to do") +
                 (f", rewards {fmt(q['exp'])} EXP" if q.get("exp") else "") + ".")
-        b = f'<h1>{E(q["n"])}</h1><p class="sub">MapleStory Classic quest · Level {q["lv"]}+ · {E(q.get("a") or "")}{" · Repeatable" if q.get("rep") else ""}</p>'
+        b = f'<h1>{E(q["n"])}</h1><p class="sub">{("In the game's quest log as " + E(q["arc"]) + " · ") if q.get("arc") else ""}MapleStory Classic quest · Level {q["lv"]}+ · {E(q.get("a") or "")}{" · Repeatable" if q.get("rep") else ""}</p>'
         extra = []
         if q.get("lv2"): extra.append(f"Turn it in at level {q['lv2']}.")
         if q.get("cost"): extra.append(f"Costs {mzf(q['cost'])} to accept.")
