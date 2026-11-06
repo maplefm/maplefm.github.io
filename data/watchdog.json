@@ -1,7 +1,8 @@
 {
- "at": 1793994442,
+ "at": 1794002162,
  "ok": false,
  "failing": [
+  "Board on a phone",
   "Scanner health"
  ],
  "checks": [
@@ -9,182 +10,182 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 186,
+   "ms": 290,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 209,
+   "ms": 173,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 102,
+   "ms": 186,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 169,
+   "ms": 201,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 185,
+   "ms": 119,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 102,
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 221,
+   "ms": 128,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 211,
+   "ms": 116,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 182,
+   "ms": 129,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 99,
+   "ms": 117,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 140,
+   "ms": 273,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 169,
+   "ms": 119,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 169,
+   "ms": 118,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 217,
+   "ms": 203,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 106,
+   "ms": 115,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 107,
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 95,
+   "ms": 112,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
-   "detail": "Work Gloves: clean 1,500 to 1,999 (20 sold) · clean +1 crit rate 116K to 144K (14 sold) · ",
-   "ms": 138,
+   "detail": "Work Gloves: clean 1,500 to 1,999 (19 sold) · clean +1 crit rate 116K to 144K (14 sold) · ",
+   "ms": 789,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded 3 min ago",
-   "ms": 104,
+   "detail": "uploaded -0 min ago",
+   "ms": 217,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "61 open listings, #selling synced 2 min ago",
-   "ms": 830,
+   "detail": "59 open listings, #selling synced 0 min ago",
+   "ms": 362,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "8 visits, 0 crashed",
-   "ms": 1401,
+   "detail": "10 visits, 0 crashed",
+   "ms": 165,
    "fix": null
   },
   {
    "name": "Board on a phone",
-   "ok": true,
-   "detail": "loads, card and search work (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "ok": false,
+   "detail": "WebKit didn't start: BrowserType.launch:  (not run)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (33s, 64 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (33s, 66 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated 2 min ago",
-   "ms": 91,
+   "detail": "updated -0 min ago",
+   "ms": 88,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1602 items",
-   "ms": 317,
+   "detail": "1600 items",
+   "ms": 194,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": false,
-   "detail": "laclac: 80% of shops placed in a room in the last 24 hours (7061 shop rows)",
-   "ms": 148,
+   "detail": "laclac: 80% of shops placed in a room in the last 24 hours (7061 shop rows); laclac: 2.1% of rows reached us over an hour late this week",
+   "ms": 124,
    "fix": null
   },
   {
@@ -605,7 +606,15 @@
     "Scanner health"
    ],
    "repairs": []
+  },
+  {
+   "at": 1794002162,
+   "failing": [
+    "Board on a phone",
+    "Scanner health"
+   ],
+   "repairs": []
   }
  ],
- "beat": 1793994442
+ "beat": 1794002162
 }
