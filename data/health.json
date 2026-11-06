@@ -1,5 +1,5 @@
 {
- "at": 1793931264734,
+ "at": 1793932616706,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -324,8 +324,8 @@
    "incomplete upload": 1746
   },
   "2026-11-06": {
-   "bad row: 3a3a (p zero)": 1560,
-   "incomplete upload": 195
+   "bad row: 3a3a (p zero)": 1680,
+   "incomplete upload": 210
   }
  },
  "rejects": {},
