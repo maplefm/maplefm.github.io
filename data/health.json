@@ -1,5 +1,5 @@
 {
- "at": 1793994218674,
+ "at": 1793997482952,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -92,16 +92,16 @@
    "rows24": 7061,
    "room24": 5637,
    "ch24": 5637,
-   "rows7": 67107,
-   "room7": 63726,
+   "rows7": 64920,
+   "room7": 61539,
    "late7": 1375,
    "chat24": 15,
    "last": 1793963774,
    "ver": "2026.11.2.7",
    "lag_median_min": 4.2,
    "room_rate24": 0.798,
-   "room_rate7": 0.95,
-   "late_share7": 0.02,
+   "room_rate7": 0.948,
+   "late_share7": 0.021,
    "behind": 1
   },
   "DivineFeces": {
@@ -156,8 +156,8 @@
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
-   "rows7": 573,
-   "room7": 573,
+   "rows7": 416,
+   "room7": 416,
    "late7": 0,
    "chat24": 0,
    "last": 1793501171,
@@ -324,12 +324,13 @@
    "incomplete upload": 1746
   },
   "2026-11-06": {
-   "bad row: 3a3a (p zero)": 11040,
-   "incomplete upload": 1381
+   "bad row: 3a3a (p zero)": 11640,
+   "incomplete upload": 1456
   }
  },
  "rejects": {},
  "flags": [
-  "laclac: 80% of shops placed in a room in the last 24 hours (7061 shop rows)"
+  "laclac: 80% of shops placed in a room in the last 24 hours (7061 shop rows)",
+  "laclac: 2.1% of rows reached us over an hour late this week"
  ]
 }
