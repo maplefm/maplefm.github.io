@@ -1,5 +1,5 @@
 {
- "at": 1793967793650,
+ "at": 1793971401938,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -26,17 +26,17 @@
   },
   "4DDDD": {
    "rows24": 1955,
-   "room24": 365,
+   "room24": 1931,
    "ch24": 1943,
    "rows7": 1955,
-   "room7": 365,
+   "room7": 1931,
    "late7": 0,
    "chat24": 0,
    "last": 1793966074,
    "ver": "2026.11.2.7",
    "lag_median_min": 2.3,
-   "room_rate24": 0.187,
-   "room_rate7": 0.187,
+   "room_rate24": 0.988,
+   "room_rate7": 0.988,
    "late_share7": 0.0,
    "behind": 0
   },
@@ -89,17 +89,17 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 17849,
-   "room24": 16419,
-   "ch24": 16419,
+   "rows24": 17186,
+   "room24": 15762,
+   "ch24": 15762,
    "rows7": 74993,
    "room7": 71606,
    "late7": 1375,
-   "chat24": 27,
+   "chat24": 25,
    "last": 1793963774,
    "ver": "2026.11.2.7",
    "lag_median_min": 3.8,
-   "room_rate24": 0.92,
+   "room_rate24": 0.917,
    "room_rate7": 0.955,
    "late_share7": 0.018,
    "behind": 0
@@ -111,7 +111,7 @@
    "rows7": 110000,
    "room7": 107984,
    "late7": 0,
-   "chat24": 1,
+   "chat24": 0,
    "last": 1793881396,
    "ver": "2026.11.2.7",
    "lag_median_min": null,
@@ -324,12 +324,10 @@
    "incomplete upload": 1746
   },
   "2026-11-06": {
-   "bad row: 3a3a (p zero)": 7080,
-   "incomplete upload": 886
+   "bad row: 3a3a (p zero)": 7680,
+   "incomplete upload": 961
   }
  },
  "rejects": {},
- "flags": [
-  "4DDDD: 19% of shops placed in a room in the last 24 hours (1955 shop rows)"
- ]
+ "flags": []
 }
