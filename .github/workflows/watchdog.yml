@@ -20,20 +20,27 @@ jobs:
       - name: Browser for the board checks
         # apt on the runner sometimes hangs for the whole job (Nov 4: two runs cancelled at 14 min,
         # no status written). Cap it so the other checks always run and report.
-        timeout-minutes: 6
+        timeout-minutes: 8
         continue-on-error: true
         # Nov 5 22:00 UTC: apt hung the whole step; "| tail" kept waiting on apt's children, so the
         # timeouts never ended it and WebKit itself was never downloaded. Download WebKit first (no apt),
-        # log to a file instead of a pipe, and kill hard so every attempt fits inside the 6 minutes.
+        # log to a file instead of a pipe, and kill hard so every attempt fits inside the step.
+        # Nov 6: the Azure mirror crawls on the font packages, so 100s cut try 1 mid-download and the
+        # killed apt left its lock behind, failing try 2 at once (exit 100). Give try 1 longer, make apt
+        # retry stalled downloads, and clear the dead apt and its lock before try 2.
         run: |
           pip install -q playwright==1.56.0
           timeout -k 10 90 python3 -m playwright install webkit > /tmp/pw-install.log 2>&1 || echo "webkit download failed or timed out"
           tail -2 /tmp/pw-install.log
-          for i in 1 2; do
-            if timeout -k 10 100 sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit > /tmp/pw-deps.log 2>&1; then
+          printf 'Acquire::Retries "3";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-watchdog > /dev/null
+          for t in 220 140; do
+            if timeout -k 10 $t sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit > /tmp/pw-deps.log 2>&1; then
               tail -2 /tmp/pw-deps.log; break
             fi
-            tail -2 /tmp/pw-deps.log; echo "install-deps timed out or failed (try $i)"
+            tail -2 /tmp/pw-deps.log; echo "install-deps timed out or failed (after ${t}s cap)"
+            sudo pkill -9 -x 'apt|apt-get|dpkg|http|https' || true
+            sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock /var/lib/apt/lists/lock
+            sudo dpkg --configure -a > /dev/null 2>&1 || true
           done
       - name: Check and repair
         env:
