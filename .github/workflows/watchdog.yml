@@ -28,20 +28,36 @@ jobs:
         # Nov 6: the Azure mirror crawls on the font packages, so 100s cut try 1 mid-download and the
         # killed apt left its lock behind, failing try 2 at once (exit 100). Give try 1 longer, make apt
         # retry stalled downloads, and clear the dead apt and its lock before try 2.
+        # Nov 6 evening: both tries still ran out on the font packages (ipafont, freefont, unifont,
+        # several MB each from a crawling mirror). WebKit launches without them, so install only the
+        # libraries first and keep the full install-deps as a fallback.
         run: |
           pip install -q playwright==1.56.0
           timeout -k 10 90 python3 -m playwright install webkit > /tmp/pw-install.log 2>&1 || echo "webkit download failed or timed out"
           tail -2 /tmp/pw-install.log
           printf 'Acquire::Retries "3";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-watchdog > /dev/null
-          for t in 220 140; do
-            if timeout -k 10 $t sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit > /tmp/pw-deps.log 2>&1; then
-              tail -2 /tmp/pw-deps.log; break
-            fi
-            tail -2 /tmp/pw-deps.log; echo "install-deps timed out or failed (after ${t}s cap)"
+          clear_apt() {
             sudo pkill -9 -x 'apt|apt-get|dpkg|http|https' || true
             sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock /var/lib/apt/lists/lock
             sudo dpkg --configure -a > /dev/null 2>&1 || true
-          done
+          }
+          pkgs=$(sudo -E env "PATH=$PATH" python3 -m playwright install-deps --dry-run webkit 2>/dev/null \
+            | grep -o 'no-install-recommends[^"]*' | head -1 | cut -d' ' -f2- | tr ' ' '\n' \
+            | grep -vE '^(x?fonts-|ttf-)' | grep -E '^[a-z0-9][a-z0-9.+:-]*$' | tr '\n' ' ')
+          echo "libraries without fonts: $(echo $pkgs | wc -w)"
+          ok=
+          if [ -n "$pkgs" ] && timeout -k 10 240 sudo env DEBIAN_FRONTEND=noninteractive sh -c "apt-get update -q && apt-get install -y -q --no-install-recommends $pkgs" > /tmp/pw-deps.log 2>&1; then
+            ok=1; tail -1 /tmp/pw-deps.log
+          else
+            tail -2 /tmp/pw-deps.log; echo "library install failed or timed out (240s cap)"; clear_apt
+          fi
+          if [ -z "$ok" ]; then
+            if timeout -k 10 200 sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit > /tmp/pw-deps.log 2>&1; then
+              tail -2 /tmp/pw-deps.log
+            else
+              tail -2 /tmp/pw-deps.log; echo "install-deps timed out or failed (200s cap)"; clear_apt
+            fi
+          fi
       - name: Check and repair
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
