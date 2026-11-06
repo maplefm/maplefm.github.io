@@ -17,6 +17,13 @@ BARS = {"room": 0.80,        # healthy scanners place 91 to 100% of shops in a r
         "behind": 2,         # releases behind the current watcher
         "min_rows": 300}     # only judge a scanner with this many shop rows in the last 24 hours
 FM = re.compile(r"^FM\d+$")
+# Shops also go up outside the Free Market (on Nov 6 a scanner read about 240 shops in Kerning City Construction Site on
+# four channels). The watcher only sends a map name the game has, so a known map is a working room read, not a miss.
+try: MAPS = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scan", "py", "maps.json"), encoding="utf-8")))
+except Exception: MAPS = set()
+def placed_room(r):
+    r = str(r or "")
+    return bool(FM.match(r)) or r == "FM Entrance" or r in MAPS
 
 
 def load(p, d):
@@ -96,7 +103,7 @@ def main():
             if d.get("src") == "watcher-chat":
                 if t >= day: s["chat24"] += 1
                 continue
-            placed = bool(FM.match(str(r.get("r") or ""))) and bool(r.get("c"))
+            placed = placed_room(r.get("r")) and bool(r.get("c"))
             s["rows7"] += 1; s["room7"] += placed
             lag = (r.get("fs") or t) - t
             if lag > 3600: s["late7"] += 1
