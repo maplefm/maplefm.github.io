@@ -1,5 +1,5 @@
 {
- "at": 1794006821441,
+ "at": 1794009981177,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -298,11 +298,6 @@
   }
  },
  "drops": {
-  "2026-10-31": {
-   "bad row: 3a3a": 10803,
-   "bad row: 3a3a (p zero)": 2440,
-   "incomplete upload": 602
-  },
   "2026-11-01": {
    "bad row: 3a3a (p zero)": 12680,
    "incomplete upload": 635
@@ -324,8 +319,12 @@
    "incomplete upload": 1746
   },
   "2026-11-06": {
-   "bad row: 3a3a (p zero)": 13440,
-   "incomplete upload": 1681
+   "bad row: 3a3a (p zero)": 13960,
+   "incomplete upload": 1746
+  },
+  "2026-11-07": {
+   "bad row: 3a3a (p zero)": 80,
+   "incomplete upload": 10
   }
  },
  "rejects": {},
