@@ -1,5 +1,5 @@
 {
- "at": 1794045188791,
+ "at": 1794048579516,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -89,9 +89,9 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 784,
-   "room24": 784,
-   "ch24": 784,
+   "rows24": 85,
+   "room24": 85,
+   "ch24": 85,
    "rows7": 64015,
    "room7": 60634,
    "late7": 1375,
@@ -121,14 +121,14 @@
    "behind": 0
   },
   "Zik": {
-   "rows24": 12139,
-   "room24": 12130,
-   "ch24": 12133,
-   "rows7": 110280,
-   "room7": 108769,
+   "rows24": 14717,
+   "room24": 14708,
+   "ch24": 14711,
+   "rows7": 109908,
+   "room7": 108397,
    "late7": 0,
    "chat24": 225,
-   "last": 1794045120,
+   "last": 1794048507,
    "ver": "2026.11.6.2",
    "lag_median_min": 2.2,
    "room_rate24": 0.999,
@@ -323,13 +323,10 @@
    "incomplete upload": 1746
   },
   "2026-11-07": {
-   "bad row: 3a3a (p zero)": 6440,
-   "incomplete upload": 806
+   "bad row: 3a3a (p zero)": 7040,
+   "incomplete upload": 881
   }
  },
  "rejects": {},
- "flags": [
-  "laclac: 2.1% of rows reached us over an hour late this week",
-  "laclac: watcher 2026.11.2.7, 2 releases behind"
- ]
+ "flags": []
 }
