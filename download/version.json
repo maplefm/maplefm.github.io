@@ -1,10 +1,15 @@
 {
- "version": "2026.11.6.1",
- "date": "2026-11-06T17:01:52+00:00",
- "notes": "A popup that runs past the bottom of the game window is no longer read: its lower stat lines are off screen, and the top half read as if it were the whole item. The watcher tells you once every 30 minutes to move the shop window up. Hovers over cash items, potions and stars are no longer counted as missed reads.",
- "sha256": "c36870f578539fe502701991ebdaa0e8b07108888851d96cf55a5c62671ffbcf",
- "size": 182999,
+ "version": "2026.11.6.2",
+ "date": "2026-11-07T04:51:13+00:00",
+ "notes": "An equip popup read without its upgrades line is dropped: the bottom of the popup was hidden under the chat box or past the window, and stats above it could be missing too. The watcher tells you once every 30 minutes to move the shop window up or shrink the chat box.",
+ "sha256": "357db5741551ec108e8e8272edf85e066b7a627c44ea22c9069bd524193e1bc3",
+ "size": 183138,
  "history": [
+  {
+   "version": "2026.11.6.2",
+   "date": "2026-11-07",
+   "notes": "An equip popup read without its upgrades line is dropped: the bottom of the popup was hidden under the chat box or past the window, and stats above it could be missing too. The watcher tells you once every 30 minutes to move the shop window up or shrink the chat box."
+  },
   {
    "version": "2026.11.6.1",
    "date": "2026-11-06",
@@ -157,5 +162,5 @@
   }
  ],
  "pip": [],
- "sig": "5af4cf92bc388e7ddf792c9981bc84b6694aa72d195dac31b3f0f52da34c223edd5dbdb18a7fbeb6fc7b1b9591172c7b1572cc530fe3489a1d48d8a1ad8d660351eaeb4818e4400dfbb14bebe12f9eca57d3de563a20b19fa5f79818081a3e72855ab7b3776c7702c60e01835966f14f97b39d39cc07e27b7de75175f498b28a44ebbc8ea5f38f6a6512949cc270d3de64e81f292f3e61cc653ae2fecdfa09a6704b3c224314ac93d702f504dee1743ac1d968de94ed7fe813583be9c365c702e72d19cc5edec0ff3b9ed6b69a45c360b5786dc443330dedbefdd2a4688319c74e666731c258ba5787c07043daabf4728f52a2ae3921e0dc8701834c9f937c94"
+ "sig": "22f40ad07301b515dc934c8b51a301e01c6d1cf70b4e5ba53927cedbf8b54cb0094481cbca79aba138e66f66b066a70f17dead4df0c51992b3f3a4c9fd3dabeeb506114c9e4c9fb0f7dcd77d0719dccdaf5f6b9b4bafcbed6a49ca4d89cfd9e8fefc906b53f20aa3ad0790d3087cf6c1d7848da3efa916126207ec1f3b141493e7682e3fb7ee44d5eb04378e7f140aebe24b4ff757a42c4e4576ded57fe8861de4fee24be969fd012c9a236a718f487abd6d367163ef6445c0bb9e5825d6412167a71e6480e022820ecb3f050d23ece0c0530001f736fec94b6ee9880bc527997b49cea98fcb5d82eaf5a493b792d3ab21e048321020888ebbf01b9d9f442183"
 }

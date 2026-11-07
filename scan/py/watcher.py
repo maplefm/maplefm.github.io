@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.6.1"
+VERSION = "2026.11.6.2"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -621,8 +621,9 @@ def cut_note(st={"t": 0}):
     """Tell the scanner, at most every 30 minutes, why the bottom rows' stats aren't coming in."""
     if time.time() - st["t"] < 1800: return
     st["t"] = time.time()
-    log("hover: the popup for this row runs past the bottom of your game window, so its stats can't be read. "
-        "Drag the shop window higher, or make the game window taller, so the whole popup fits.")
+    log("hover: the bottom of this item's popup is hidden (under the chat box or past the bottom of the game window), "
+        "so its stats can't be read. Drag the shop window higher, shrink the chat box, or make the game window taller "
+        "so the whole popup fits.")
 
 def tip_ready(game, shop_box, t, sct=None, st={"row": None, "since": 0, "shots": 0, "fired": 0, "check": 0}):
     """While the pointer rests on a shop row, say when to read the item's tooltip. The loop runs ten times a second
@@ -1825,6 +1826,10 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
                     # of the top half looks like a whole one with stats missing (Blue Sauna Robe cut at 70% read as
                     # STR, DEX, INT, LUK, HP 10 with no MP, W.DEF or slots), so it's dropped, never sent
                     cut = popup_cut(extra["tip"])
+                    # the same when the popup's bottom is hidden inside the window, under the chat box or the status
+                    # bar: an equip read without the upgrades line its popup always ends with was only partly seen
+                    # (Nov 6: Dankke on the last two rows of a shop, its popup running under the chat box)
+                    if tip and not fmparse.popup_whole(tip.get("name"), tip.get("stats")): cut = True
                     if cut: tip = None
                     # a popup with nothing to read (a cash item, a potion, a throwing star) isn't a miss: counting
                     # those as unread made half of all hovers look like reader failures (Nov 6: 106 of 235 misses)
