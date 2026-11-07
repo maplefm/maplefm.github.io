@@ -1984,6 +1984,14 @@ def stat_item(name):
     if not f: return False
     return not f[2] and bool(f[1] or (len(f) > 3 and f[3]))
 
+def popup_whole(name, stats):
+    """False when an equip whose popup always ends with its upgrades line was read without that line: the bottom of
+    the popup was hidden, under the chat box or the status bar or past the window's edge, and the stat lines above it
+    may be missing too. True otherwise (complete, or an item without an upgrades line)."""
+    f = _FIT_LOW.get(re.sub(r"\s*\(.*$", "", str(name or "")).strip().lower())
+    if not f or f[2] or "SLOTS" not in (f[3] if len(f) > 3 else {}): return True
+    return "SLOTS" in (stats or {})
+
 def exact_fits(name, stats):
     """An exactly read popup, checked against the item (statfit.json): every base stat is there, a value without a
     bracket is exactly the base (the game brackets any stat that differs from it), no stat the item can't have, and
