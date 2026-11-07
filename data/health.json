@@ -1,5 +1,5 @@
 {
- "at": 1794048579516,
+ "at": 1794051987157,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -25,17 +25,17 @@
    "behind": null
   },
   "4DDDD": {
-   "rows24": 1955,
-   "room24": 1931,
-   "ch24": 1943,
+   "rows24": 32,
+   "room24": 32,
+   "ch24": 32,
    "rows7": 1955,
    "room7": 1931,
    "late7": 0,
    "chat24": 0,
    "last": 1793966074,
    "ver": "2026.11.6.1",
-   "lag_median_min": 2.3,
-   "room_rate24": 0.988,
+   "lag_median_min": 2.8,
+   "room_rate24": 1.0,
    "room_rate7": 0.988,
    "late_share7": 0.0,
    "behind": 1
@@ -89,17 +89,17 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 85,
-   "room24": 85,
-   "ch24": 85,
+   "rows24": 0,
+   "room24": 0,
+   "ch24": 0,
    "rows7": 64015,
    "room7": 60634,
    "late7": 1375,
-   "chat24": 4,
+   "chat24": 0,
    "last": 1793963774,
    "ver": "2026.11.2.7",
-   "lag_median_min": 4.2,
-   "room_rate24": 1.0,
+   "lag_median_min": null,
+   "room_rate24": null,
    "room_rate7": 0.947,
    "late_share7": 0.021,
    "behind": 2
@@ -121,14 +121,14 @@
    "behind": 0
   },
   "Zik": {
-   "rows24": 14717,
-   "room24": 14708,
-   "ch24": 14711,
-   "rows7": 109908,
-   "room7": 108397,
+   "rows24": 17685,
+   "room24": 17676,
+   "ch24": 17679,
+   "rows7": 111609,
+   "room7": 110098,
    "late7": 0,
-   "chat24": 225,
-   "last": 1794048507,
+   "chat24": 226,
+   "last": 1794051909,
    "ver": "2026.11.6.2",
    "lag_median_min": 2.2,
    "room_rate24": 0.999,
@@ -323,8 +323,8 @@
    "incomplete upload": 1746
   },
   "2026-11-07": {
-   "bad row: 3a3a (p zero)": 7040,
-   "incomplete upload": 881
+   "bad row: 3a3a (p zero)": 7640,
+   "incomplete upload": 956
   }
  },
  "rejects": {},
