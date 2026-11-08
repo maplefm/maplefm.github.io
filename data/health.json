@@ -1,5 +1,5 @@
 {
- "at": 1794166764949,
+ "at": 1794170483310,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -89,9 +89,9 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 4704,
-   "room24": 3542,
-   "ch24": 3542,
+   "rows24": 3378,
+   "room24": 2216,
+   "ch24": 2216,
    "rows7": 56479,
    "room7": 52303,
    "late7": 0,
@@ -99,7 +99,7 @@
    "last": 1794157265,
    "ver": "2026.11.6.2",
    "lag_median_min": 4.2,
-   "room_rate24": 0.753,
+   "room_rate24": 0.656,
    "room_rate7": 0.926,
    "late_share7": 0.0,
    "behind": 0
@@ -339,12 +339,12 @@
    "incomplete upload": 1791
   },
   "2026-11-08": {
-   "bad row: 3a3a (p zero)": 10480,
-   "incomplete upload": 1311
+   "bad row: 3a3a (p zero)": 11080,
+   "incomplete upload": 1386
   }
  },
  "rejects": {},
  "flags": [
-  "laclac: 75% of shops placed in a room in the last 24 hours (4704 shop rows)"
+  "laclac: 66% of shops placed in a room in the last 24 hours (3378 shop rows)"
  ]
 }
