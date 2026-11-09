@@ -481,6 +481,17 @@ def main():
     made = []
     page_of = {r["item"]: slug(r["item"]) for r in rows}
     extra = [n for n, g in GUIDE.items() if n not in page_of and n in ids and (g.get("q") or g.get("c") or g.get("d") or g.get("g") or g.get("u"))]
+    # an item page, once published, stays: people share its link and Google has it. When an item drops out of the
+    # priced list it gets a quiet page with no price (a stale price is worse than none), kept out of search
+    EVER_P = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "item_pages_ever.json")
+    try: EVER = set(json.load(open(EVER_P))["slugs"])
+    except Exception: EVER = set()
+    if os.path.isdir(os.path.join(out, "item")):
+        EVER |= {d for d in os.listdir(os.path.join(out, "item")) if os.path.exists(os.path.join(out, "item", d, "index.html"))}
+    by_slug = {}
+    for n in ids: by_slug.setdefault(slug(n), n)
+    quiet = {by_slug[sl] for sl in EVER if sl in by_slug and by_slug[sl] not in page_of and by_slug[sl] not in extra}
+    extra = extra + sorted(quiet)
     for n in extra: page_of[n] = slug(n)
     for r in rows:
         name, s = r["item"], slug(r["item"])
@@ -582,20 +593,24 @@ def main():
         open(os.path.join(out, "c", s, "index.html"), "w", encoding="utf-8").write(short_page(s, name, title, desc, og_url(s, r)))
         made.append((s, nm, r))
     for name in extra:
-        s = slug(name); nm = shown(name); g = GUIDE[name]
+        s = slug(name); nm = shown(name); g = GUIDE.get(name) or {}
         icon = f"https://maplefm.gg/i/{ids[name]}.png"
         qn = len(g.get("q") or [])
         desc = f"{nm} in MapleStory Classic: " + (f"needed for {qn} quest{'s' if qn != 1 else ''}, " if qn else "") + "where it drops, how to craft it and who sells it."
-        body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic · quests, drops and crafting</p></div></div>
-<p class="note">No Free Market sales seen yet.</p>
+        ptitle = fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM")
+        if name in quiet and not g:
+            desc = f"{nm} in MapleStory Classic: not enough recent Free Market sales for a price. Open the live card for current listings."
+            ptitle = fit_title(nm, "MapleStory Classic", "Club FM")
+        body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)}</h1><p class="sub">MapleStory Classic{" · quests, drops and crafting" if g else ""}</p></div></div>
+<p class="note">Not enough recent Free Market sales for a price right now.</p>
 <p class="ctaw"><a class="cta" href="/#item={urllib.parse.quote(name)}">Open live card <span>→</span></a></p>
 {equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, g, page_of)}</div>"""
         d = os.path.join(out, "item", s); os.makedirs(d, exist_ok=True)
         pp = os.path.join(d, "index.html")
         os.makedirs(os.path.join(out, "c", s), exist_ok=True)
-        open(os.path.join(out, "c", s, "index.html"), "w", encoding="utf-8").write(short_page(s, name, fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, ""))
-        pdate[s], txt = stamp(pp, page(fit_title(f"{nm} quests, drops & crafting", "MapleStory Classic", "Club FM"), desc, f"{SITE}/item/{s}/", body, f'<meta name="fm-date" content="{D_ISO}">' + card_jump(name), crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")], robots=None if s in SEO_KEEP else "noindex,follow"), today)
+        open(os.path.join(out, "c", s, "index.html"), "w", encoding="utf-8").write(short_page(s, name, ptitle, desc, ""))
+        pdate[s], txt = stamp(pp, page(ptitle, desc, f"{SITE}/item/{s}/", body, f'<meta name="fm-date" content="{D_ISO}">' + card_jump(name), crumbs=[("Prices", "/"), ("All items", "/items/"), (nm, "")], robots=None if s in SEO_KEEP else "noindex,follow"), today)
         open(pp, "w", encoding="utf-8").write(txt)
         made.append((s, nm, None))
     # the index: a searchable list, every item by category, biggest markets first; plain links so search engines read it
@@ -665,6 +680,8 @@ def main():
             if os.path.exists(p): os.remove(p)
             try: os.rmdir(os.path.join(root, s))
             except OSError: pass
+    json.dump({"note": "every item page slug that has ever been published; these pages are never removed, so links and Google never hit a 404",
+               "slugs": sorted(EVER | keep)}, open(EVER_P, "w"), indent=0)
     croot = os.path.join(out, "c")
     for s in os.listdir(croot) if os.path.isdir(croot) else []:
         if s not in keep and os.path.isdir(os.path.join(croot, s)):
