@@ -1,5 +1,5 @@
 {
- "at": 1794236911733,
+ "at": 1794242435755,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -89,18 +89,18 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 2300,
-   "room24": 2300,
-   "ch24": 2300,
-   "rows7": 57178,
-   "room7": 53002,
+   "rows24": 3044,
+   "room24": 3044,
+   "ch24": 3044,
+   "rows7": 59063,
+   "room7": 54887,
    "late7": 0,
-   "chat24": 7,
-   "last": 1794236352,
+   "chat24": 11,
+   "last": 1794242236,
    "ver": "2026.11.6.2",
-   "lag_median_min": 3.9,
+   "lag_median_min": 4.4,
    "room_rate24": 1.0,
-   "room_rate7": 0.927,
+   "room_rate7": 0.929,
    "late_share7": 0.0,
    "behind": 0
   },
@@ -327,6 +327,22 @@
    "room_rate7": 0.8,
    "late_share7": 0.0,
    "behind": 0
+  },
+  "PockyStick": {
+   "rows24": 0,
+   "room24": 0,
+   "ch24": 0,
+   "rows7": 0,
+   "room7": 0,
+   "late7": 0,
+   "chat24": 4,
+   "last": 1794240374,
+   "ver": "2026.11.6.2",
+   "lag_median_min": null,
+   "room_rate24": null,
+   "room_rate7": null,
+   "late_share7": null,
+   "behind": 0
   }
  },
  "drops": {
@@ -355,8 +371,8 @@
    "incomplete upload": 1616
   },
   "2026-11-09": {
-   "bad row: 3a3a (p zero)": 8760,
-   "incomplete upload": 1096
+   "bad row: 3a3a (p zero)": 9360,
+   "incomplete upload": 1171
   }
  },
  "rejects": {},
