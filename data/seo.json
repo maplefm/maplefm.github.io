@@ -1,7 +1,17 @@
 {
- "day": "2026-11-02",
- "pages": 2219,
- "ms": 50,
- "issues": {},
- "examples": {}
+ "day": "2026-11-09",
+ "pages": 2039,
+ "ms": 52,
+ "issues": {
+  "long titles": 28
+ },
+ "examples": {
+  "long titles": [
+   "https://maplefm.gg/quest/deep-forest-of-patience-johns-pink-flower-basket/",
+   "https://maplefm.gg/quest/deep-forest-of-patience-johns-last-present/",
+   "https://maplefm.gg/quest/a-rainbow-snail-shell-that-makes-wishes-come-true/",
+   "https://maplefm.gg/quest/first-material-delivery-for-building-a-new-house/",
+   "https://maplefm.gg/quest/second-material-delivery-for-building-a-new-house/"
+  ]
+ }
 }
