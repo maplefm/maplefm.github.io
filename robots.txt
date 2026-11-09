@@ -1,3 +1,19 @@
 User-agent: *
 Allow: /
+# account and API paths that live on api.maplefm.gg; crawlers find them in the board's scripts and try them here
+Disallow: /edit$
+Disallow: /release$
+Disallow: /confirm$
+Disallow: /withdraw$
+Disallow: /iconRaw$
+Disallow: /renew$
+Disallow: /offer$
+Disallow: /me$
+Disallow: /me/
+Disallow: /logout$
+Disallow: /login
+Disallow: /data/sig$
+Disallow: /render/
+Disallow: /public/
+Disallow: /gone$
 Sitemap: https://maplefm.gg/sitemap.xml
