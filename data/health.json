@@ -1,5 +1,5 @@
 {
- "at": 1794280131833,
+ "at": 1794284022184,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,16 +105,16 @@
    "behind": 12
   },
   "Zik": {
-   "rows24": 18549,
-   "room24": 18549,
-   "ch24": 18549,
-   "rows7": 105388,
-   "room7": 105318,
+   "rows24": 19592,
+   "room24": 19592,
+   "ch24": 19592,
+   "rows7": 107126,
+   "room7": 107056,
    "late7": 4,
    "chat24": 4,
-   "last": 1794226990,
+   "last": 1794283925,
    "ver": "2026.11.6.2",
-   "lag_median_min": 2.4,
+   "lag_median_min": 2.5,
    "room_rate24": 1.0,
    "room_rate7": 0.999,
    "late_share7": 0.0,
@@ -204,16 +204,16 @@
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
-   "rows7": 24,
-   "room7": 12,
+   "rows7": 0,
+   "room7": 0,
    "late7": 0,
    "chat24": 0,
-   "last": 1793675450,
+   "last": 0,
    "ver": "2026.11.2.7",
    "lag_median_min": null,
    "room_rate24": null,
-   "room_rate7": 0.5,
-   "late_share7": 0.0,
+   "room_rate7": null,
+   "late_share7": null,
    "behind": 2
   },
   "Weltschmerz": {
@@ -323,8 +323,8 @@
    "incomplete upload": 1661
   },
   "2026-11-10": {
-   "bad row: 3a3a (p zero)": 2040,
-   "incomplete upload": 255
+   "bad row: 3a3a (p zero)": 2560,
+   "incomplete upload": 321
   }
  },
  "rejects": {},
