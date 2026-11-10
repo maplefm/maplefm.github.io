@@ -39,7 +39,7 @@ jobs:
           # stores each 5-minute change as a small difference. The public branch only gets the price-only files.
           git clone -q -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
           end=$(( $(date +%s) + 330*60 ))
-          n=0; lastsig=""; lastwd=0; lastcov=$(date +%s)
+          n=0; lastsig=""; lastwd=0; lastjob=0; lastcov=$(date +%s)
           while [ $(date +%s) -lt $end ]; do
             cd /tmp/arch
             git fetch -q origin live && git reset -q --hard origin/live
@@ -92,6 +92,8 @@ jobs:
             now=$(date +%s)
             if [ $(( now - lastwd )) -ge 3600 ]; then gh workflow run watchdog.yml --ref main -R "$GITHUB_REPOSITORY" && lastwd=$now || true; fi
             if [ $(( now - lastcov )) -ge 7200 ]; then gh workflow run covmap.yml --ref main -R "$GITHUB_REPOSITORY" && lastcov=$now || true; fi
+            # the market close just after midnight Eastern and the Monday search check, on time (tools/jobstart.py)
+            if [ $(( now - lastjob )) -ge 600 ]; then python3 /tmp/main/tools/jobstart.py "$GITHUB_REPOSITORY" || true; lastjob=$now; fi
             # between passes: every 15 seconds, deals from the Worker's fast lane go to #mega-deals right away
             for q in 1 2 3 4 5 6; do
               sleep 15

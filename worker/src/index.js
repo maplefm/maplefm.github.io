@@ -2178,6 +2178,8 @@ async function partnerMarket(env) {
 // GitHub's own schedule runs hours late, so the Worker starts the jobs people see at the Eastern hour they belong
 // to (workflow_dispatch, token GH_DISPATCH: a fine-grained token with Actions write on maplefm.github.io only).
 // GitHub's crons stay as a fallback; every job skips work it already did that day.
+// Not running: the Worker has no GH_DISPATCH secret, so ghSchedule returns at once. The pump starts the market close
+// and the Monday search check instead (tools/jobstart.py), and the watchdog and coverage map itself.
 const GH_JOBS = [
   { wf: "report.yml", hour: 0 },        // the market close, right after midnight Eastern (GitHub's own cron runs hours late)
   { wf: "itempages.yml", hour: 6 },
