@@ -1,5 +1,5 @@
 {
- "at": 1794266542586,
+ "at": 1794269976069,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -8,7 +8,7 @@
  },
  "current": "2026.11.6.2",
  "scanners": {
-  "Faif": {
+  "Mystica": {
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
@@ -17,23 +17,7 @@
    "late7": 0,
    "chat24": 0,
    "last": 0,
-   "ver": "2026.10.26.4",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
-   "behind": null
-  },
-  "yinisera": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.10.24.7",
+   "ver": "2026.10.23.3",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
@@ -56,7 +40,7 @@
    "late_share7": 0.0,
    "behind": 1
   },
-  "acter": {
+  "DivineFeces": {
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
@@ -65,28 +49,12 @@
    "late7": 0,
    "chat24": 0,
    "last": 0,
-   "ver": "2026.10.26.4",
+   "ver": "2026.11.6.2",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": null
-  },
-  "Mystica": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.10.23.3",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
-   "behind": null
+   "behind": 0
   },
   "laclac": {
    "rows24": 5527,
@@ -102,22 +70,6 @@
    "room_rate24": 1.0,
    "room_rate7": 0.933,
    "late_share7": 0.0,
-   "behind": 0
-  },
-  "DivineFeces": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.11.6.2",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
    "behind": 0
   },
   "Moch1": {
@@ -346,10 +298,6 @@
   }
  },
  "drops": {
-  "2026-11-03": {
-   "bad row: 3a3a (p zero)": 14600,
-   "incomplete upload": 1042
-  },
   "2026-11-04": {
    "bad row: 3a3a (p zero)": 14040,
    "incomplete upload": 1575
@@ -371,8 +319,12 @@
    "incomplete upload": 1616
   },
   "2026-11-09": {
-   "bad row: 3a3a (p zero)": 12920,
-   "incomplete upload": 1616
+   "bad row: 3a3a (p zero)": 13280,
+   "incomplete upload": 1661
+  },
+  "2026-11-10": {
+   "bad row: 3a3a (p zero)": 240,
+   "incomplete upload": 30
   }
  },
  "rejects": {},
