@@ -1,5 +1,5 @@
 {
- "at": 1794311964253,
+ "at": 1794315489148,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -57,9 +57,9 @@
    "behind": 0
   },
   "laclac": {
-   "rows24": 5527,
-   "room24": 5527,
-   "ch24": 5527,
+   "rows24": 5084,
+   "room24": 5084,
+   "ch24": 5084,
    "rows7": 62006,
    "room7": 57830,
    "late7": 0,
@@ -105,9 +105,9 @@
    "behind": 12
   },
   "Zik": {
-   "rows24": 14727,
-   "room24": 14727,
-   "ch24": 14727,
+   "rows24": 13613,
+   "room24": 13613,
+   "ch24": 13613,
    "rows7": 119001,
    "room7": 118931,
    "late7": 4,
@@ -323,8 +323,8 @@
    "incomplete upload": 1661
   },
   "2026-11-10": {
-   "bad row: 3a3a (p zero)": 7120,
-   "incomplete upload": 892
+   "bad row: 3a3a (p zero)": 7720,
+   "incomplete upload": 967
   }
  },
  "rejects": {},
