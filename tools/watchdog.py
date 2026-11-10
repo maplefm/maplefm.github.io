@@ -227,9 +227,10 @@ if TOKEN:
     # 4b. Every scheduled job, one by one: still failing (until its next success, not just for 3 hours) or stopped
     # running. Hours = the longest a healthy job goes between successful runs. GitHub throttles the frequent crons
     # (maintenance every 30 min, icons hourly, covmap every 2h) to one run every 4 to 11 hours, so those get 12.
-    EVERY = {"covmap.yml": 12, "icons.yml": 12, "itemdb.yml": 28, "itemguide.yml": 28, "itempages.yml": 28, "world.yml": 28,
-             "maintenance.yml": 12, "news.yml": 28, "report.yml": 28, "seo.yml": 8 * 24 + 4, "weekly.yml": 8 * 24 + 4,
-             "weeklyrecap.yml": 8 * 24 + 4, "speedwatch.yml": 28, "factcheck.yml": 8 * 24 + 4}
+    # Daily crons start up to 9 hours late (Speed watch: 14:23 cron, ran 19:02 then 23:37 the next day = 28.5 h), so 34.
+    EVERY = {"covmap.yml": 12, "icons.yml": 12, "itemdb.yml": 34, "itemguide.yml": 34, "itempages.yml": 34, "world.yml": 34,
+             "maintenance.yml": 12, "news.yml": 34, "report.yml": 34, "seo.yml": 8 * 24 + 4, "weekly.yml": 8 * 24 + 4,
+             "weeklyrecap.yml": 8 * 24 + 4, "speedwatch.yml": 34, "factcheck.yml": 8 * 24 + 4}
     late, failing_now = [], []
     for wf, hrs in EVERY.items():
         s2, rr = gh(f"/actions/workflows/{wf}/runs?per_page=8&exclude_pull_requests=true")
@@ -241,7 +242,8 @@ if TOKEN:
             failing_now.append(done[0]["name"])
         ok_runs = [r for r in done if r.get("conclusion") == "success"]
         last = calendar.timegm(time.strptime(ok_runs[0]["updated_at"], "%Y-%m-%dT%H:%M:%SZ")) if ok_runs else 0
-        if NOW - last > hrs * 3600:
+        busy = any(r.get("status") in ("queued", "in_progress", "waiting", "pending") for r in rr)
+        if NOW - last > hrs * 3600 and not busy:    # a run underway is on schedule, not late
             late.append(f"{(rr[0]['name'] if rr else wf)} (last success {'never' if not last else str(int((NOW - last) / 3600)) + 'h ago'})")
     check("Jobs still failing", not failing_now, "none" if not failing_now else ", ".join(sorted(set(failing_now))))
     check("Jobs on schedule", not late, "all ran on time" if not late else "late: " + "; ".join(late))
