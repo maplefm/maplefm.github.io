@@ -1954,11 +1954,24 @@ async function logSignin(env, id) {
   const t = Date.now();
   await env.INBOX_DB.prepare("INSERT INTO signin (id, day, t) VALUES (?, ?, ?) ON CONFLICT (id, day) DO UPDATE SET t = excluded.t").bind(String(id), etParts(t).day, t).run();
 }
+// not Akamai, Cloudflare or Fastly: iCloud Private Relay and WARP send real people through those
+const HOSTING = /amazon|aws|google cloud|google llc|microsoft|azure|digitalocean|hetzner|ovh|linode|vultr|choopa|oracle|alibaba|tencent|huawei cloud|contabo|scaleway|leaseweb|m247|datacamp|cdn77|hostinger|ionos|hostroyale|psychz|quadranet|colocrossing|zenlayer|g-core|gcore|servers\.com|data ?center|hosting|server/i;
+const SKIPS = {};
+function skipCount(env) {
+  const day = new Date().toISOString().slice(0, 10); SKIPS[day] = (SKIPS[day] || 0) + 1;
+  if (SKIPS[day] % 25 !== 1) return;          // write every 25th, so a burst can't flood KV
+  env.ACCOUNTS.get("hit:skip:" + day).then((v) => env.ACCOUNTS.put("hit:skip:" + day, String(Math.max(Number(v) || 0, 0) + 25), { expirationTtl: 40 * 86400 })).catch(() => {});
+}
 async function hit(req, env) {
   const ok = new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*" } });
   const ua = req.headers.get("User-Agent") || "", ip = req.headers.get("CF-Connecting-IP") || "";
   if (/bot|crawl|spider|slurp|headless|preview|lighthouse|playwright|python|curl/i.test(ua) || !ua) return ok;
   if (overLimit("hit:" + ip, 60, 60)) return ok;
+  // visits from cloud servers are automated browsers, not players: on Nov 11 at 04:22 UTC about 1,200 single-page
+  // "visitors" arrived inside one minute from as many addresses, each on a different page, with a normal Chrome name.
+  // Only the network's name is looked at (never stored); skipped visits are counted per day in KV hit:skip:<day>.
+  const org = String((req.cf && req.cf.asOrganization) || "");
+  if (HOSTING.test(org)) { skipCount(env); return ok; }
   let b = {}; try { b = JSON.parse(await req.text()); } catch (e) { return ok; }
   let page = String(b.p || "/").slice(0, 120), ref = String(b.r || "").toLowerCase().replace(/^www\./, "").slice(0, 80), tag = String(b.q || "").replace(/[^\w-]/g, "").slice(0, 24);
   if (/(^|\.)maplefm\.gg$/.test(ref)) ref = "";
