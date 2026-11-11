@@ -1,5 +1,5 @@
 {
- "at": 1794361308888,
+ "at": 1794364807184,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -279,6 +279,22 @@
    "room_rate7": null,
    "late_share7": null,
    "behind": 0
+  },
+  "Guest-c334": {
+   "rows24": 0,
+   "room24": 0,
+   "ch24": 0,
+   "rows7": 0,
+   "room7": 0,
+   "late7": 0,
+   "chat24": 1,
+   "last": 1794361340,
+   "ver": "2026.11.6.2",
+   "lag_median_min": null,
+   "room_rate24": null,
+   "room_rate7": null,
+   "late_share7": null,
+   "behind": 0
   }
  },
  "drops": {
@@ -307,8 +323,8 @@
    "incomplete upload": 1657
   },
   "2026-11-11": {
-   "bad row: 3a3a (p zero)": 1080,
-   "incomplete upload": 135
+   "bad row: 3a3a (p zero)": 1680,
+   "incomplete upload": 210
   }
  },
  "rejects": {},
