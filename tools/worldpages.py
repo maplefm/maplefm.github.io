@@ -99,7 +99,7 @@ def quest_slugs(quests):
 OG = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/og/"
 
 
-def page(title, desc, path, crumbs, body, og=None):
+def page(title, desc, path, crumbs, body, og=None, robots=None):
     canon = SITE + path
     ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": i + 1, "name": n, "item": SITE + u} for i, (n, u) in enumerate([("Club FM", "/")] + crumbs)]}
@@ -108,7 +108,7 @@ def page(title, desc, path, crumbs, body, og=None):
     trail = ([root] if crumbs and crumbs[0][0] != root[0] else []) + crumbs
     nav = ' <i>›</i> '.join([f'<a href="{u}">{E(n)}</a>' for n, u in trail[:-1]] + ([f'<span aria-current="page">{E(trail[-1][0])}</span>'] if trail else []))
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{E(title)}</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="{canon}">
+<title>{E(title)}</title><meta name="description" content="{E(desc)}">{f'<meta name="robots" content="{robots}">' if robots else ""}<link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/item/world.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=7">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
@@ -191,7 +191,10 @@ def build(world, guide, summary, notes, out):
     def qlink(q): return f'<a href="/quest/{QSLUG[q["id"]]}/">{E(q["n"])}</a>'
     def sprite_url(n): return f"{LIVE}data/sprite/{MOB[n]['id']}.gif" if n in MOB and MOB[n].get("id") else ""
     built = world.get("built") or datetime.date.today().isoformat()
-    paths = []
+    paths, quiet = [], []   # quiet: pages built for visitors but kept out of search and the sitemap
+    try: QKEEP = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "seo_keep.json"))).get("quests") or [])
+    except Exception: QKEEP = None
+    if QKEEP is None: QKEEP = {s for s in QSLUG.values()}   # no list: keep every page in search, as before
     BOARD_CTA = ('<div class="cta"><b>What does it sell for right now?</b> Every Free Market listing seen today, with channel and room. '
                  '<a href="/">Open the price board</a></div>')
 
@@ -318,11 +321,21 @@ def build(world, guide, summary, notes, out):
         if timers(m): intro.append(f"Slow respawns: {timers(m)}.")
         if intro: b += f'<p>{" ".join(intro)}</p>'
         b += minimap(m)
+        # portals that read the same (same place, same kind, same spot in words) are one line with a count, so a map
+        # with four hidden portals to one room doesn't list the same sentence four times
+        def pgroup(xs):
+            out, idx = [], {}
+            for x in xs:
+                k = (x[0], x[1], where(m, x[2], x[3]), x[5])
+                if k in idx: out[idx[k]][1] += 1
+                else: idx[k] = len(out); out.append([x, 1, k[2]])
+            return out
         if hid:
-            b += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: stand on the purple spot ({where(m, x[2], x[3]) or "see the minimap"}) and press up.{f" Needs level {x[5]}." if x[5] else ""}</div>' for x in hid)
-        if m["portals"]:
+            b += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: stand on the purple spot ({w or "see the minimap"}) and press up.{f" There are {c} spots like this." if c > 1 else ""}{f" Needs level {x[5]}." if x[5] else ""} {navbtn(x[0])}</div>' for x, c, w in pgroup(hid))
+        walk = [x for x in m["portals"] if x[1] != "hidden"]
+        if walk:
             b += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th><th></th></tr>" + "".join(
-                f'<tr><td>{mlink(x[0])}</td><td>{"Hidden portal" if x[1] == "hidden" else "Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{where(m, x[2], x[3])}</small></td><td>{navbtn(x[0])}</td></tr>' for x in m["portals"]) + "</table>"
+                f'<tr><td>{mlink(x[0])}{f" <small>×{c}</small>" if c > 1 else ""}</td><td>{"Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{w}</small></td><td>{navbtn(x[0])}</td></tr>' for x, c, w in pgroup(walk)) + "</table>"
         if mobs_sorted:
             b += "<h2>Monsters</h2><p class=\"note\">×N is the number of spawn points.</p><div class=\"mobs\">" + "".join(mobcard(n, f" ×{c}") for n, c in mobs_sorted if n in MOB) + "</div>"
             dr = []
@@ -464,10 +477,12 @@ def build(world, guide, summary, notes, out):
             tot = sum(PRICE[i] * c for i, c in q["need"] if i in PRICE)
             if tot: b += f'<p data-fmtot="{E(json.dumps(q["need"]))}">Buy it all on the Free Market: <b>{"about" if all(i in PRICE for i, _ in q["need"]) else "at least"} <span class="mz">{meso(tot)}</span></b>.</p>'
         if q.get("get") or q.get("get2") or q.get("skill") or q.get("exp") or q.get("meso"):
-            b += ("<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)}</li>" for i, c in q.get("get") or [])
-                  + "".join(f"<li>{ilink(x[0], x[1])} <small>· {E(x[2])}</small></li>" for x in q.get("get2") or [])
+            b += ("<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)} {fp(i, c) if i in PRICE else ''}</li>" for i, c in q.get("get") or [])
+                  + "".join(f"<li>{ilink(x[0], x[1])} <small>· {E(x[2])}</small> {fp(x[0], x[1]) if x[0] in PRICE else ''}</li>" for x in q.get("get2") or [])
                   + "".join(f"<li>Skill: {E(n)}</li>" for n in q.get("skill") or [])
                   + ("<li>" + fmt(q["exp"]) + " EXP</li>" if q.get("exp") else "") + ("<li>" + mzf(q["meso"]) + "</li>" if q.get("meso") else "") + "</ul>")
+        rv = sum(PRICE[i] * c for i, c in q.get("get") or [] if i in PRICE)
+        if rv: b += f'<p data-fmtot="{E(json.dumps(q.get("get") or []))}">The item rewards sell for <b>{"about" if all(i in PRICE for i, _ in q.get("get") or []) else "at least"} <span class="mz">{meso(rv)}</span></b> on the Free Market today.</p>'
         nx = nextq.get(q["id"], [])
         if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
         br = next((x for x in (notes or {}).get("brackets") or [] if x["lo"] <= max(q["lv"], 1) < x["hi"]), None)
@@ -477,7 +492,11 @@ def build(world, guide, summary, notes, out):
         b += f'<p class="note">Updated {built}.</p>'
         b += BOARD_CTA
         crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
-        write(out, f"quest/{s}", page(itempages.fit_title(qtitle(q), "MapleStory Classic quest guide", "Club FM"), desc, f"/quest/{s}/", crumbs, b)); paths.append(f"/quest/{s}/")
+        # a quest that is only talking (nothing to bring, hunt or win) stays out of search unless people found it there
+        thin = not (q.get("need") or q.get("kill") or q.get("get") or q.get("get2")) and s not in QKEEP
+        write(out, f"quest/{s}", page(itempages.fit_title(qtitle(q), "MapleStory Classic quest guide", "Club FM"), desc, f"/quest/{s}/", crumbs, b, robots="noindex,follow" if thin else None))
+        if not thin: paths.append(f"/quest/{s}/")
+        else: quiet.append(f"/quest/{s}/")
 
     # ---------------------------------------------------------- training guides
     # Rankings come from the damage engine (assets/classic-dmg.js through tools/trainrank.cjs), the same one map.html
@@ -633,7 +652,7 @@ def build(world, guide, summary, notes, out):
 
     open(os.path.join(out, "item", "world.css"), "w").write(CSS + "\n")
     # pages for things that left the data go away, so nothing stale sits in search
-    keep = {x.strip("/") for x in paths}
+    keep = {x.strip("/") for x in paths + quiet}
     for root in ("map", "monster", "quest", "training"):
         rd = os.path.join(out, root)
         if not os.path.isdir(rd): continue
