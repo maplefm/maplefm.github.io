@@ -1,5 +1,5 @@
 {
- "checked": "2026-11-05T18:40:27.681105Z",
+ "checked": "2026-11-11T17:24:59.377769Z",
  "source": "Nexon news, Classic World maintenance",
  "notices": [
   {
@@ -41,16 +41,6 @@
    "down": "All MapleStory Classic World game servers.",
    "posted": "2026-10-22T12:00:22Z",
    "url": "https://www.nexon.com/maplestory/news/maintenance/47098"
-  },
-  {
-   "id": 46800,
-   "title": "Scheduled Grand Launch - October 21, 2026",
-   "status": "completed",
-   "start": "2026-10-21T13:00:00Z",
-   "end": "2026-10-21T18:00:00Z",
-   "down": "All MapleStory Classic World game servers.",
-   "posted": "2026-10-21T10:59:23Z",
-   "url": "https://www.nexon.com/maplestory/news/maintenance/46800"
   }
  ]
 }
