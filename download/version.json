@@ -1,10 +1,15 @@
 {
- "version": "2026.11.6.2",
- "date": "2026-11-07T04:51:13+00:00",
- "notes": "An equip popup read without its upgrades line is dropped: the bottom of the popup was hidden under the chat box or past the window, and stats above it could be missing too. The watcher tells you once every 30 minutes to move the shop window up or shrink the chat box.",
- "sha256": "357db5741551ec108e8e8272edf85e066b7a627c44ea22c9069bd524193e1bc3",
- "size": 183138,
+ "version": "2026.11.11.1",
+ "date": "2026-11-11T13:26:37+00:00",
+ "notes": "Once an hour, under your scan stats, the watcher shows your Club FM credits: this week's total, what you've earned and how far you are from unlocking pay. New scanners see it an hour after they start.",
+ "sha256": "42dfdcf6cae46d43751e961620637d620fd022bc13790546054bd7a894d3adf4",
+ "size": 184032,
  "history": [
+  {
+   "version": "2026.11.11.1",
+   "date": "2026-11-11",
+   "notes": "Once an hour, under your scan stats, the watcher shows your Club FM credits: this week's total, what you've earned and how far you are from unlocking pay. New scanners see it an hour after they start."
+  },
   {
    "version": "2026.11.6.2",
    "date": "2026-11-07",
@@ -162,5 +167,5 @@
   }
  ],
  "pip": [],
- "sig": "22f40ad07301b515dc934c8b51a301e01c6d1cf70b4e5ba53927cedbf8b54cb0094481cbca79aba138e66f66b066a70f17dead4df0c51992b3f3a4c9fd3dabeeb506114c9e4c9fb0f7dcd77d0719dccdaf5f6b9b4bafcbed6a49ca4d89cfd9e8fefc906b53f20aa3ad0790d3087cf6c1d7848da3efa916126207ec1f3b141493e7682e3fb7ee44d5eb04378e7f140aebe24b4ff757a42c4e4576ded57fe8861de4fee24be969fd012c9a236a718f487abd6d367163ef6445c0bb9e5825d6412167a71e6480e022820ecb3f050d23ece0c0530001f736fec94b6ee9880bc527997b49cea98fcb5d82eaf5a493b792d3ab21e048321020888ebbf01b9d9f442183"
+ "sig": "549aabb0781548e92531e5c1fc67504c52698b646e686f164efa61dffbdc1cd3a61a50ba4305ae1cc4d70ab5ea7bd2d38dca7b7258051a7afdb7db177ceeb5f11323eda094b0ca7f5f96a0e4a521f8f8a55f08ce4cbfa645d5dd09ba1fa62aeed9e52e0db1484abc8f6be98aba496078a0d636838464fada0e870881aeccfb94734be0904aa4e11e82b21a5ce7825b9698144d4d9090b0570e1f5de7ac7a704a5947c2835e1601a157f99ef9cdc2a1c0ce7f90f94e5aac4678d1781afe1e19282e2cf2308d657be057da01e8addde56ed38ff337df08aee0ad35ead19b1bc25255639500726361a7dd8eedebd086f803680c776940609819d744b17533c0641a"
 }
