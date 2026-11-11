@@ -27,7 +27,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/webkit-debs
-          key: webkit-debs-noble-pw1.56.0-${{ steps.month.outputs.month }}
+          # Never an exact hit: the prefix restores the newest saved set, so updated libraries reach it the same day.
+          key: webkit-debs-noble-pw1.56.0-${{ steps.month.outputs.month }}-${{ github.run_id }}
           restore-keys: webkit-debs-noble-pw1.56.0-
       - name: Browser for the board checks
         id: browser
@@ -81,16 +82,24 @@ jobs:
               tail -2 /tmp/pw-deps.log; echo "install-deps timed out or failed (200s cap)"; clear_apt
             fi
           fi
+          # save again only when apt fetched something the cache did not have (Nov 11: a gstreamer update
+          # left the cache a version behind, and the month's key could not be overwritten)
           if [ -n "$ok" ] && ls /var/cache/apt/archives/*.deb > /dev/null 2>&1; then
-            mkdir -p ~/webkit-debs && cp /var/cache/apt/archives/*.deb ~/webkit-debs/ && echo "debs=1" >> "$GITHUB_OUTPUT"
+            mkdir -p ~/webkit-debs
+            fresh=0
+            for f in /var/cache/apt/archives/*.deb; do
+              [ -e ~/webkit-debs/"$(basename "$f")" ] || { cp "$f" ~/webkit-debs/; fresh=$((fresh+1)); }
+            done
+            echo "new libraries for the cache: $fresh"
+            if [ "$fresh" -gt 0 ]; then echo "debs=1" >> "$GITHUB_OUTPUT"; fi
           fi
       - name: Save WebKit's libraries to cache
-        if: steps.browser.outputs.debs == '1' && steps.debcache.outputs.cache-hit != 'true'
+        if: steps.browser.outputs.debs == '1'
         continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: ~/webkit-debs
-          key: webkit-debs-noble-pw1.56.0-${{ steps.month.outputs.month }}
+          key: webkit-debs-noble-pw1.56.0-${{ steps.month.outputs.month }}-${{ github.run_id }}
       - name: Check and repair
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
