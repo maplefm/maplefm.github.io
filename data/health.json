@@ -1,12 +1,12 @@
 {
- "at": 1794401534284,
+ "at": 1794404864624,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.11.6.2",
+ "current": "2026.11.11.1",
  "scanners": {
   "4DDDD": {
    "rows24": 0,
@@ -22,7 +22,7 @@
    "room_rate24": null,
    "room_rate7": 0.988,
    "late_share7": 0.0,
-   "behind": 1
+   "behind": 2
   },
   "DivineFeces": {
    "rows24": 0,
@@ -38,23 +38,23 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   },
   "laclac": {
-   "rows24": 19791,
-   "room24": 19791,
-   "ch24": 19791,
-   "rows7": 69862,
-   "room7": 67270,
+   "rows24": 20621,
+   "room24": 20621,
+   "ch24": 20621,
+   "rows7": 69719,
+   "room7": 67127,
    "late7": 0,
-   "chat24": 37,
-   "last": 1794401080,
+   "chat24": 36,
+   "last": 1794404397,
    "ver": "2026.11.6.2",
    "lag_median_min": 4.3,
    "room_rate24": 1.0,
    "room_rate7": 0.963,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": 1
   },
   "Moch1": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 21
+   "behind": 22
   },
   "Maya": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 12
+   "behind": 13
   },
   "Zik": {
    "rows24": 0,
@@ -102,7 +102,7 @@
    "room_rate24": null,
    "room_rate7": 0.999,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": 1
   },
   "click": {
    "rows24": 0,
@@ -118,7 +118,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 18
+   "behind": 19
   },
   "smurp": {
    "rows24": 0,
@@ -134,7 +134,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 14
+   "behind": 15
   },
   "LocalBucket": {
    "rows24": 0,
@@ -150,7 +150,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 14
+   "behind": 15
   },
   "sunny": {
    "rows24": 0,
@@ -166,7 +166,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 9
+   "behind": 10
   },
   "FITA": {
    "rows24": 0,
@@ -182,7 +182,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 9
+   "behind": 10
   },
   "theBeyonder": {
    "rows24": 0,
@@ -198,7 +198,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 2
+   "behind": 3
   },
   "Weltschmerz": {
    "rows24": 0,
@@ -214,7 +214,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 2
+   "behind": 3
   },
   "PikaDexLess": {
    "rows24": 0,
@@ -230,7 +230,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 2
+   "behind": 3
   },
   "Mesoniac": {
    "rows24": 0,
@@ -246,7 +246,7 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": 1
   },
   "CamelToaster": {
    "rows24": 0,
@@ -262,7 +262,7 @@
    "room_rate24": null,
    "room_rate7": 0.905,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": 1
   },
   "PockyStick": {
    "rows24": 0,
@@ -278,7 +278,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   },
   "Guest-c334": {
    "rows24": 0,
@@ -294,7 +294,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 0
+   "behind": 1
   }
  },
  "drops": {
@@ -323,8 +323,8 @@
    "incomplete upload": 1657
   },
   "2026-11-11": {
-   "bad row: 3a3a (p zero)": 7400,
-   "incomplete upload": 925
+   "bad row: 3a3a (p zero)": 8000,
+   "incomplete upload": 1000
   }
  },
  "rejects": {},
