@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.6.2"
+VERSION = "2026.11.11.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -2064,12 +2064,46 @@ def look_chat(cfg, sct, game, chat_box, t, L, jobs):
     if h != L.last_chat_hash and not jobs.full():
         L.last_chat_hash = h; jobs.put(("chat", chat, None))
 
+START_T = time.time()
+CREDITS_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/credits.json"
+def earn_note(cfg, first_hour=False):
+    """Once an hour, under the scan stats: what this watcher has earned on Club FM, read from the public credits file
+    the site builds (data only, never code). A first-time scanner sees it after the first hour, so the payoff shows
+    the same day instead of a week later. Nothing is shown if the file can't be read."""
+    try:
+        req = urllib.request.Request(CREDITS_URL + "?t=" + str(int(time.time() // 300)), headers={"User-Agent": "fm-watcher"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            c = json.load(r)
+    except Exception:
+        return
+    nm, tag = str(cfg.get("name") or "").strip().lower(), anon_id()[:4]
+    def mine(r): return (nm and nm in [str(w).lower() for w in r.get("watchers") or []]) or r.get("tag") == tag
+    week = next((w for w in c.get("weeks") or [] if w.get("current")), None) or ((c.get("weeks") or [None])[0])
+    row = next((r for r in (week or {}).get("rows") or [] if mine(r)), None)
+    bal = next((b for b in c.get("balances") or [] if (nm and str(b.get("name", "")).lower() == nm) or b.get("tag") == tag), None)
+    unlock = int(((week or {}).get("math") or {}).get("unlock_verified") or 500)
+    if not row and not bal:
+        if first_hour: log("Club FM credits: yours show up here once the site has counted your first scans, usually within the hour.")
+        return
+    bits = []
+    if row: bits.append(f"{row.get('credits', 0):,.0f} credits this week" + (f", ${row['pays']:.2f} so far" if row.get("pays") else ""))
+    if bal:
+        if bal.get("unlocked"): bits.append(f"${bal.get('owed', 0):.2f} owed to you")
+        else: bits.append(f"{max(0, unlock - int(bal.get('bar') or 0)):,} more credits to unlock pay ({int(bal.get('bar') or 0):,} of {unlock:,})")
+    log(("First hour done. " if first_hour else "") + "Club FM credits: " + " · ".join(bits) + ". Details at " + SITE + "/earn")
 def chores(cfg, t, L, store):
     """Hourly stats, saving, updates and sending what was read."""
     if int(t // 3600) != getattr(main, "stats_hour", None):
         if getattr(main, "stats_hour", None) is not None:
             try: log("scan stats, " + stats_text(scan_stats(store))); day_history(store)
             except Exception as e: log("stats error:", e)
+            if cfg.get("earn_note", True): spawn(earn_note, cfg)
+    # a new scanner (no earlier day in scan_history.csv) hears what they earned an hour after starting, not at midnight
+    if not getattr(main, "first_note", False) and t - START_T >= 3600 and cfg.get("earn_note", True):
+        main.first_note = True
+        try: days = sum(1 for _ in open(HISTORY_FILE, encoding="utf-8")) - 1
+        except Exception: days = 0
+        if days <= 1: spawn(earn_note, cfg, True)
         main.stats_hour = int(t // 3600)
     if store.dirty and t - L.last_save > 30:
         store.dirty = False; store.save(); L.last_save = t
