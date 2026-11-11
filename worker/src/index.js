@@ -2322,7 +2322,10 @@ async function watchDigest(env, onlyId) {
       const id = k.name.slice(9);
       if (onlyId && id !== onlyId) continue;
       const st = await env.ACCOUNTS.get(k.name, "json"), s = (st && st.settings) || {};
-      if (s["fm-digest"] !== "true") continue;
+      // "true" is the daily DM; "\"week\"" is the weekly one, sent on Mondays with the change over the week
+      const weekly = s["fm-digest"] === '"week"';
+      if (s["fm-digest"] !== "true" && !weekly) continue;
+      if (weekly && !onlyId && new Date(day + "T12:00:00Z").getUTCDay() !== 1) continue;
       let watch = {}; try { watch = JSON.parse(s["fm-watch"] || "{}") || {}; } catch (e) {}
       const names = Object.keys(watch); if (!names.length) continue;
       people++;
@@ -2332,15 +2335,20 @@ async function watchDigest(env, onlyId) {
         const r = by[n.toLowerCase()];
         const slug = shown(n).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
         if (!r || !r.typ) return "**" + shown(n) + "**: no recent sales";
-        const d = Array.isArray(r.daily) ? r.daily.filter((x) => Array.isArray(x) && x[1] > 0) : [];
-        const a = d.length >= 2 ? d[d.length - 1][1] : 0, b = d.length >= 2 ? d[d.length - 2][1] : 0;
+        // equips move with their busiest grade's own daily middle (dailyC), the line their typical price comes from;
+        // the all-copies daily mixes clean and scrolled copies and can point the other way
+        const dd = r.equip && Array.isArray(r.dailyC) && r.dailyC.length ? r.dailyC : r.daily;
+        const d = Array.isArray(dd) ? dd.filter((x) => Array.isArray(x) && x[1] > 0) : [];
+        // weekly: the newest day against the day a week before it (within a day either way), never just 7 entries back
+        const last = d.length ? d[d.length - 1] : null, wk = last && weekly ? d.find((x) => Math.abs(last[0] - 7 * 864e5 - x[0]) <= 864e5) : null;
+        const a = weekly ? (wk ? last[1] : 0) : d.length >= 2 ? d[d.length - 1][1] : 0, b = weekly ? (wk ? wk[1] : 0) : d.length >= 2 ? d[d.length - 2][1] : 0;
         const ch = a && b ? Math.round((a - b) / b * 100) : null;
         const under = watch[n] && watch[n].under ? " · your alert under " + meso(watch[n].under) : "";
-        return "**[" + shown(n) + "](https://maplefm.gg/c/" + slug + "?ref=digest)** " + meso(r.typ) + (ch == null || ch === 0 ? "" : " (" + (ch > 0 ? "▲ " : "▼ ") + Math.abs(ch) + "% vs the day before)") + under;
+        return "**[" + shown(n) + "](https://maplefm.gg/c/" + slug + "?ref=digest)** " + meso(r.typ) + (ch == null || ch === 0 ? "" : " (" + (ch > 0 ? "▲ " : "▼ ") + Math.abs(ch) + (weekly ? "% over the week)" : "% vs the day before)")) + under;
       });
       const c = await (await fetch((env.DISCORD_API || DISCORD) + "/users/@me/channels", { method: "POST", headers: H, body: JSON.stringify({ recipient_id: id }) })).json().catch(() => null);
       if (!c || !c.id) continue;
-      const r = await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [{ title: "Your watchlist today", url: "https://maplefm.gg/?ref=digest", color: 0x6d3fd1, description: lines.join("\n").slice(0, 4000) + (names.length > 15 ? "\n…and " + (names.length - 15) + " more on the board" : ""), footer: { text: "Typical sale price on maplefm.gg right now. Turn this off with Daily DM next to Watchlist on the board." } }], allowed_mentions: { parse: [] } }) });
+      const r = await fetch((env.DISCORD_API || DISCORD) + "/channels/" + c.id + "/messages", { method: "POST", headers: H, body: JSON.stringify({ embeds: [{ title: weekly ? "Your watchlist this week" : "Your watchlist today", url: "https://maplefm.gg/?ref=digest", color: 0x6d3fd1, description: lines.join("\n").slice(0, 4000) + (names.length > 15 ? "\n…and " + (names.length - 15) + " more on the board" : ""), footer: { text: "Typical sale price on maplefm.gg right now. Change it with the DM button next to Watchlist on the board." } }], allowed_mentions: { parse: [] } }) });
       if (r.ok) { sent++; await env.ACCOUNTS.put(key, "1", { expirationTtl: 3 * DAY }); }
     }
     cursor = page.list_complete ? null : page.cursor;
