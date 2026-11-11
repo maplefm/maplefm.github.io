@@ -62,10 +62,17 @@ jobs:
             sudo cp ~/webkit-debs/*.deb /var/cache/apt/archives/ && echo "cached libraries: $(ls ~/webkit-debs/*.deb | wc -l) files"
           fi
           ok=
-          if [ -n "$pkgs" ] && timeout -k 10 240 sudo env DEBIAN_FRONTEND=noninteractive sh -c "apt-get update -q && apt-get install -y -q --no-install-recommends $pkgs" > /tmp/pw-deps.log 2>&1; then
-            ok=1; tail -1 /tmp/pw-deps.log
-          else
-            tail -2 /tmp/pw-deps.log; echo "library install failed or timed out (240s cap)"; clear_apt
+          # the cached libraries install straight from their files, no apt-get update: on Nov 11 the Azure mirror hung
+          # in update and fetched newer versions, so the cache never got used and the phone check couldn't run
+          if ls ~/webkit-debs/*.deb > /dev/null 2>&1 && timeout -k 10 180 sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-download --no-install-recommends ~/webkit-debs/*.deb > /tmp/pw-deps.log 2>&1; then
+            ok=1; echo "installed from the cache"; tail -1 /tmp/pw-deps.log
+          fi
+          if [ -z "$ok" ]; then
+            if [ -n "$pkgs" ] && timeout -k 10 240 sudo env DEBIAN_FRONTEND=noninteractive sh -c "apt-get update -q && apt-get install -y -q --no-install-recommends $pkgs" > /tmp/pw-deps.log 2>&1; then
+              ok=1; tail -1 /tmp/pw-deps.log
+            else
+              tail -2 /tmp/pw-deps.log; echo "library install failed or timed out (240s cap)"; clear_apt
+            fi
           fi
           if [ -z "$ok" ]; then
             if timeout -k 10 200 sudo -E env "PATH=$PATH" DEBIAN_FRONTEND=noninteractive python3 -m playwright install-deps webkit > /tmp/pw-deps.log 2>&1; then
