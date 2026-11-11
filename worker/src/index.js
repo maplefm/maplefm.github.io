@@ -2035,7 +2035,13 @@ function pageLabel(p) {
 async function trafficStats(env, from, to) {
   await hitsTable(env);
   const q = (sql, ...a) => env.INBOX_DB.prepare(sql).bind(...a).all().then((r) => r.results || []);
-  const web = "p NOT LIKE '!%' AND p NOT LIKE '#%'";
+  // crawler minutes: over 25 first-time visitors in one minute, nearly each on a different page. The busiest real
+  // minute Oct 20 to Nov 11 had 11; the crawler minutes (Oct 30 02:44, Nov 1 02:22, Nov 11 04:22 UTC) had 32 to 956
+  // one page each. A crowd from one shared link lands on the same page, so it stays counted. Those minutes are left
+  // out of every web count below and reported as burst.
+  const bm = await q(`SELECT CAST(t / 60000 AS INTEGER) mi, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND p NOT LIKE '!%' AND p NOT LIKE '#%' AND ret = 0 GROUP BY mi HAVING n > 25 AND COUNT(DISTINCT p) * 10 >= n * 8`, from, to).catch(() => []);
+  const burst = bm.reduce((s, r) => s + r.n, 0);
+  const web = "p NOT LIKE '!%' AND p NOT LIKE '#%'" + (bm.length ? " AND CAST(t / 60000 AS INTEGER) NOT IN (" + bm.map((r) => Number(r.mi)).join(",") + ")" : "");
   const [tot] = await q(`SELECT COUNT(*) n, COUNT(DISTINCT v) u FROM hits WHERE t >= ? AND t < ? AND ${web}`, from, to);
   const pages = await q(`SELECT p, COUNT(*) n FROM hits WHERE t >= ? AND t < ? AND ${web} GROUP BY p ORDER BY n DESC LIMIT 40`, from, to);
   const refs = await q(`SELECT r, COUNT(DISTINCT v) n FROM hits WHERE t >= ? AND t < ? AND ${web} AND r != '' GROUP BY r ORDER BY n DESC LIMIT 6`, from, to);
@@ -2054,7 +2060,7 @@ async function trafficStats(env, from, to) {
   } catch (e) {}
   const by = {}; pages.forEach((r) => { const k = pageLabel(r.p).startsWith("Item: ") ? "Item pages" : pageLabel(r.p); by[k] = (by[k] || 0) + r.n; });
   const items = pages.filter((r) => /^\/item\//.test(r.p)).slice(0, 3).map((r) => pageLabel(r.p).slice(6) + " " + r.n);
-  return { scan, returning: (rt && rt.back) || 0, retKnown: (rt && rt.known) || 0, signedIn: (si && si.n) || 0, views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
+  return { burst, scan, returning: (rt && rt.back) || 0, retKnown: (rt && rt.known) || 0, signedIn: (si && si.n) || 0, views: (tot && tot.n) || 0, visitors: (tot && tot.u) || 0, pages: Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 6), items, refs, tags, price, opens, finds: (ev && ev.f) || 0, picks: (ev && ev.k) || 0 };
 }
 function totalsLine(t) { const pc = t.price.reduce((s, r) => s + r.n, 0); return "**" + t.visitors + "** visitors · **" + t.returning + "** returning · **" + t.signedIn + "** signed in · **" + t.views + "** views · **" + pc + "** !price" + (t.scan ? " · **" + t.scan.n + "** scanners (" + t.scan.w + " FM Watcher, " + t.scan.b + " browser)" : ""); }
 function trafficEmbed(st, prev, title, from, to, extra) {
@@ -2080,7 +2086,7 @@ function trafficEmbed(st, prev, title, from, to, extra) {
   if (st.refs.length) f.push({ name: "Came from", value: st.refs.map((x) => x.r + " · " + x.n).join("\n"), inline: true });
   if (st.tags.length) f.push({ name: "Partner links", value: st.tags.map((x) => x.q + " · " + x.n).join("\n"), inline: true });
   (extra || []).forEach((x) => f.push({ name: x[0], value: totalsLine(x[1]), inline: false }));
-  return { title, color: 0x6d3fd1, fields: f, description: "<t:" + Math.floor(from / 1000) + ":t> to <t:" + Math.floor(to / 1000) + ":t>", footer: { text: "Visitors are counted once a day each. No cookies, no IPs kept." } };
+  return { title, color: 0x6d3fd1, fields: f, description: "<t:" + Math.floor(from / 1000) + ":t> to <t:" + Math.floor(to / 1000) + ":t>", footer: { text: "Visitors are counted once a day each. No cookies, no IPs kept." + (st.burst ? " Left out: " + st.burst + " one-minute crawler visits." : "") } };
 }
 // Visitors in a total are counted once per day each (the id changes daily), so "all time" visitors are visitor-days.
 // accounts made with Discord sign-in, all time (a KV listing, kept for an hour)
