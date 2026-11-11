@@ -1,5 +1,5 @@
 {
- "at": 1794404864624,
+ "at": 1794409341177,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -41,20 +41,20 @@
    "behind": 1
   },
   "laclac": {
-   "rows24": 20621,
-   "room24": 20621,
-   "ch24": 20621,
-   "rows7": 69719,
-   "room7": 67127,
+   "rows24": 18352,
+   "room24": 18352,
+   "ch24": 18352,
+   "rows7": 69426,
+   "room7": 66834,
    "late7": 0,
-   "chat24": 36,
-   "last": 1794404397,
-   "ver": "2026.11.6.2",
+   "chat24": 40,
+   "last": 1794408866,
+   "ver": "2026.11.11.1",
    "lag_median_min": 4.3,
    "room_rate24": 1.0,
    "room_rate7": 0.963,
    "late_share7": 0.0,
-   "behind": 1
+   "behind": 0
   },
   "Moch1": {
    "rows24": 0,
@@ -323,8 +323,8 @@
    "incomplete upload": 1657
   },
   "2026-11-11": {
-   "bad row: 3a3a (p zero)": 8000,
-   "incomplete upload": 1000
+   "bad row: 3a3a (p zero)": 8560,
+   "incomplete upload": 1070
   }
  },
  "rejects": {},
