@@ -4041,20 +4041,50 @@
   }
 
   // ---------- activity panel
-  // one small card about earning: after a third search or on a second visit, once, and never again after it's closed
-  var NUDGE = { s: 0, v: 0, off: 0 };
-  try { NUDGE = Object.assign(NUDGE, JSON.parse(localStorage.getItem("fm-nudge") || "{}")); if (!sessionStorage.getItem("fm-visit")) { sessionStorage.setItem("fm-visit", "1"); NUDGE.v++; localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } } catch (e) {}
+  // small tips that tell people what the site can do, as they use it: one card at a time, at most one new tip per
+  // visit, each tip shown until it is closed or used and then never again. Never a pop-up over the board.
+  var NUDGE = { s: 0, v: 0, off: 0, o: 0, done: {} };
+  try { NUDGE = Object.assign(NUDGE, JSON.parse(localStorage.getItem("fm-nudge") || "{}")); NUDGE.done = NUDGE.done || {}; if (NUDGE.off) NUDGE.done.earn = 1;
+    if (!sessionStorage.getItem("fm-visit")) { sessionStorage.setItem("fm-visit", "1"); NUDGE.v++; localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } } catch (e) {}
+  var TIP_REF = (function () { try { return document.referrer || ""; } catch (e) { return ""; } })();
+  function tipSave() { try { localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } catch (e) {} }
+  function tipHit(id, what) { try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: "#tip:" + id + ":" + what, r: "", q: "" })], { type: "text/plain" })); } catch (e) {} }
+  function tipWatchN() { var n = 0; for (var k in WATCH) n++; return n; }
+  var TIPS = [
+    { id: "stream", when: function () { return /twitch\.tv|streamlabs|kick\.com|youtube\.com/i.test(TIP_REF) || NUDGE.v >= 4; },
+      b: "Stream MapleStory?", t: "Add !price to your chat. Viewers type an item and get its FM price in seconds.", go: "Set up !price", href: "/streamers.html" },
+    { id: "watch", when: function () { return NUDGE.o >= 3 && !tipWatchN() && state.sel; },
+      b: "Keep an eye on a price", t: "Watch an item and the board marks it when the price moves.",
+      arg: function () { return state.sel; }, go: function (n) { return "Watch " + n; }, act: function (n) { if (!n) return; WATCH[n] = { t: Date.now() }; saveLS("fm-watch", WATCH); try { renderView(); } catch (e) {} } },
+    { id: "dm", when: function () { return tipWatchN() > 0 && !loadLS("fm-digest", false) && NUDGE.v >= 2; },
+      b: "Your watchlist, in Discord", t: "A free DM once a day with your watched items' prices.", go: function () { return ME_ACCT ? "Turn on Daily DM" : "Sign in with Discord"; },
+      act: function () { if (!ME_ACCT) { location.href = ACCT + "/login?back=home"; return; } saveLS("fm-digest", true); try { digestBtn(); } catch (e) {} tipHit("dm", "on"); } },
+    { id: "earn", when: function () { return (NUDGE.s >= 3 || NUDGE.v >= 2) && !(ME_ACCT && ME_ACCT.watchers && ME_ACCT.watchers.length); },
+      b: "Get paid for the shops you already browse", t: "Up to $50 a week, paid on PayPal. Free, never touches your game.", go: "Earn by scanning", href: "contribute.html" },
+    { id: "discord", when: function () { return NUDGE.v >= 3 && !ME_ACCT; },
+      b: "Club FM on Discord", t: "Price of the day, the market close and big sales as they happen.", go: "Join the Discord", href: "https://discord.gg/cXnVBTUUPk" }
+  ];
   function earnNudge(searched) {
-    if (searched) { NUDGE.s++; try { localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } catch (e) {} }
-    if (NUDGE.off || $("nudge") || (NUDGE.s < 3 && NUDGE.v < 2)) return;
-    if (ME_ACCT && ME_ACCT.watchers && ME_ACCT.watchers.length) return;   // already scanning
+    if (searched) { NUDGE.s++; NUDGE.o++; tipSave(); setTimeout(function () { earnNudge(0); }, 1500); return; }
+    if ($("nudge")) return;
+    var cur = null; try { cur = sessionStorage.getItem("fm-tip"); } catch (e) {}
+    var tip = null;
+    for (var k = 0; k < TIPS.length; k++) {
+      var T = TIPS[k]; if (NUDGE.done[T.id]) continue;
+      if (cur && cur !== T.id) continue;          // one tip per visit: keep showing the one already picked
+      try { if (T.when()) { tip = T; break; } } catch (e) {}
+    }
+    if (!tip) return;
+    if (!cur) { try { sessionStorage.setItem("fm-tip", tip.id); } catch (e) {} tipHit(tip.id, "show"); }
+    var done = function (what) { NUDGE.done[tip.id] = 1; if (tip.id === "earn") NUDGE.off = 1; tipSave(); tipHit(tip.id, what); c.remove(); };
     var c = el("div", "nudge"); c.id = "nudge"; c.setAttribute("role", "note");
     var x = el("button", "nx", "×"); x.type = "button"; x.setAttribute("aria-label", "Close");
-    x.addEventListener("click", function () { NUDGE.off = 1; try { localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } catch (e) {} c.remove(); });
-    var t = el("div"); t.appendChild(el("b", null, "Get paid for the shops you already browse"));
-    t.appendChild(el("span", null, "Up to $50 a week, paid on PayPal. Free, Windows, never touches your game."));
-    var a = el("a", "ngo", "Earn by scanning"); a.href = "contribute.html";
-    a.addEventListener("click", function () { NUDGE.off = 1; try { localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } catch (e) {} });
+    x.addEventListener("click", function () { done("close"); });
+    var t = el("div"); t.appendChild(el("b", null, tip.b)); t.appendChild(el("span", null, tip.t));
+    var arg = tip.arg ? tip.arg() : null, label = typeof tip.go === "function" ? tip.go(arg) : tip.go;
+    var a = el(tip.href ? "a" : "button", "ngo", label);
+    if (tip.href) { a.href = tip.href; if (/^https?:/.test(tip.href)) { a.target = "_blank"; a.rel = "noopener"; } a.addEventListener("click", function () { done("go"); }); }
+    else { a.type = "button"; a.addEventListener("click", function () { done("go"); tip.act(arg); }); }
     c.appendChild(t); c.appendChild(a); c.appendChild(x); document.body.appendChild(c);
   }
   setTimeout(function () { earnNudge(0); }, 8000);
