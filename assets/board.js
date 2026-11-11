@@ -4658,15 +4658,16 @@
   function digestBtn() {
     var b = $("wdm"); if (!b) return;
     var ab = $("walerts"); if (ab) ab.hidden = !state.wonly;
-    b.hidden = !state.wonly; var on = !!loadLS("fm-digest", false) && !!ME_ACCT;
-    b.setAttribute("aria-pressed", on); b.textContent = on ? "📬 Daily DM on" : "📬 Daily DM";
-    b.title = !ME_ACCT ? "Sign in with Discord to get your watchlist by DM once a day" : on ? "On: your watchlist arrives by Discord DM at 10 AM Eastern. Click to turn off." : "Once a day at 10 AM Eastern, a Discord DM with your watched items' prices and how they moved";
+    // off → daily → weekly (Mondays) → off; fm-digest is true for daily, "week" for weekly
+    b.hidden = !state.wonly; var v = ME_ACCT ? loadLS("fm-digest", false) : false, on = !!v;
+    b.setAttribute("aria-pressed", on); b.textContent = v === "week" ? "📬 Weekly DM on" : on ? "📬 Daily DM on" : "📬 Daily DM";
+    b.title = !ME_ACCT ? "Sign in with Discord to get your watchlist by DM" : v === "week" ? "On: your watchlist and its week's moves arrive by Discord DM Mondays at 10 AM Eastern. Click to turn off." : on ? "On: your watchlist arrives by Discord DM daily at 10 AM Eastern. Click for weekly instead." : "A Discord DM with your watched items' prices and how they moved: daily, or click again for weekly";
   }
   if ($("walerts")) $("walerts").addEventListener("click", function () { alertDlg(null); });
   $("wdm").addEventListener("click", function () {
     if (!ME_ACCT) { location.href = ACCT + "/login?back=home"; return; }
-    var on = !loadLS("fm-digest", false); saveLS("fm-digest", on); digestBtn();
-    try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: on ? "#digest:on" : "#digest:off", r: "", q: "" })], { type: "text/plain" })); } catch (e) {}
+    var cur = loadLS("fm-digest", false), next = cur === "week" ? false : cur ? "week" : true; saveLS("fm-digest", next); digestBtn();
+    try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: next === "week" ? "#digest:week" : next ? "#digest:on" : "#digest:off", r: "", q: "" })], { type: "text/plain" })); } catch (e) {}
   });
   function renderView() { if (!D) return render(); if (state.tab === "prices") renderPrices(); else if (state.tab === "deals") renderDeals(); else render(); }
   var PRESETS = [[0, 10], [10, 20], [20, 30], [30, 40], [40, 50], [50, 70]];
