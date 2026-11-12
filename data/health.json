@@ -1,5 +1,5 @@
 {
- "at": 1794441386971,
+ "at": 1794445252406,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -297,27 +297,23 @@
    "behind": 1
   },
   "Guest-bcea": {
-   "rows24": 6,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 6,
-   "room7": 0,
+   "rows24": 32,
+   "room24": 21,
+   "ch24": 21,
+   "rows7": 32,
+   "room7": 21,
    "late7": 0,
-   "chat24": 0,
-   "last": 1794441250,
+   "chat24": 2,
+   "last": 1794441659,
    "ver": "2026.11.11.1",
-   "lag_median_min": 0.8,
-   "room_rate24": 0.0,
-   "room_rate7": 0.0,
+   "lag_median_min": 3.3,
+   "room_rate24": 0.656,
+   "room_rate7": 0.656,
    "late_share7": 0.0,
    "behind": 0
   }
  },
  "drops": {
-  "2026-11-05": {
-   "bad row: 3a3a (p zero)": 13960,
-   "incomplete upload": 1746
-  },
   "2026-11-06": {
    "bad row: 3a3a (p zero)": 13960,
    "incomplete upload": 1746
@@ -341,6 +337,10 @@
   "2026-11-11": {
    "bad row: 3a3a (p zero)": 11480,
    "incomplete upload": 1435
+  },
+  "2026-11-12": {
+   "bad row: 3a3a (p zero)": 600,
+   "incomplete upload": 75
   }
  },
  "rejects": {},
