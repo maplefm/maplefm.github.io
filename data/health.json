@@ -1,5 +1,5 @@
 {
- "at": 1794445252406,
+ "at": 1794448958992,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -287,7 +287,7 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 1,
+   "chat24": 0,
    "last": 1794361340,
    "ver": "2026.11.6.2",
    "lag_median_min": null,
@@ -339,8 +339,8 @@
    "incomplete upload": 1435
   },
   "2026-11-12": {
-   "bad row: 3a3a (p zero)": 600,
-   "incomplete upload": 75
+   "bad row: 3a3a (p zero)": 1200,
+   "incomplete upload": 150
   }
  },
  "rejects": {},
