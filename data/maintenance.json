@@ -1,5 +1,5 @@
 {
- "checked": "2026-11-11T17:24:59.377769Z",
+ "checked": "2026-11-12T15:55:27.254289Z",
  "source": "Nexon news, Classic World maintenance",
  "notices": [
   {
@@ -31,16 +31,6 @@
    "down": "All MapleStory Classic World game servers.",
    "posted": "2026-10-29T08:00:47Z",
    "url": "https://www.nexon.com/maplestory/news/maintenance/47298"
-  },
-  {
-   "id": 47098,
-   "title": "Unscheduled Maintenance - October 22, 2026",
-   "status": "completed",
-   "start": "2026-10-22T20:00:00Z",
-   "end": "2026-10-22T22:00:00Z",
-   "down": "All MapleStory Classic World game servers.",
-   "posted": "2026-10-22T12:00:22Z",
-   "url": "https://www.nexon.com/maplestory/news/maintenance/47098"
   }
  ]
 }
