@@ -62,6 +62,16 @@ def snap_scroll_base(base):
     return base
 
 TOWNS = ["Ellinia", "Henesys", "Kerning City", "Perion", "Lith Harbor", "Sleepywood", "Nautilus", "Orbis", "El Nath", "Ludibrium"]
+_RP = [0, []]
+def _return_places():
+    """every place a 'Return Scroll to ...' goes: the towns above plus whatever the item list names"""
+    if _RP[0] != len(ITEMS):
+        seen = list(TOWNS)
+        for n in ITEMS:
+            mm = re.match(r"^Return Scroll to (.+)$", n)
+            if mm and mm.group(1) not in seen: seen.append(mm.group(1))
+        _RP[0], _RP[1] = len(ITEMS), seen
+    return _RP[1]
 
 def scroll_name(raw):
     """Shop list scroll names get cut off. Return the canonical name or None if not a scroll."""
@@ -78,11 +88,14 @@ def scroll_name(raw):
     if base.lower() != "return scroll":
         base = snap_scroll_base(base)
     if base.lower() == "return scroll" or re.match(r"\s*to\b", m.group(2), re.I):
-        # town scrolls are separate items, not tiers
+        # town scrolls are separate items, not tiers. The places come from the item list too, so a new one
+        # ("Return Scroll to Forgotten Hollow") is known the day the item list has it.
+        if base.lower() == "return scroll" and re.match(r"\s*[-~]\s*n", m.group(2), re.I):
+            return "Return Scroll - Nearest Town"
         dest = re.sub(r"^\s*to\b", "", m.group(2), flags=re.I)
         dest = re.sub(r"[^A-Za-z ]", "", dest).strip().lower()
         if len(dest) >= 3:
-            hits = [t for t in TOWNS if t.lower().startswith(dest)]
+            hits = [t for t in _return_places() if t.lower().startswith(dest)]
             if len(hits) == 1:
                 return f"{base} to {hits[0]}"
         return f"{base} (name cut off)"

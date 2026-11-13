@@ -1,10 +1,15 @@
 {
- "version": "2026.11.11.1",
- "date": "2026-11-11T13:26:37+00:00",
- "notes": "Once an hour, under your scan stats, the watcher shows your Club FM credits: this week's total, what you've earned and how far you are from unlocking pay. New scanners see it an hour after they start.",
- "sha256": "42dfdcf6cae46d43751e961620637d620fd022bc13790546054bd7a894d3adf4",
- "size": 184032,
+ "version": "2026.11.13.1",
+ "date": "2026-11-13T20:43:24+00:00",
+ "notes": "Shops selling Return Scroll - Nearest Town, Return Scroll to My Home and the new Return Scroll to Forgotten Hollow now read with the full item name instead of a cut-off one.",
+ "sha256": "286cfc3a25376deb4db79dc159a57a7eb6b91245715e7bfe0fd34817fad13c75",
+ "size": 184263,
  "history": [
+  {
+   "version": "2026.11.13.1",
+   "date": "2026-11-13",
+   "notes": "Shops selling Return Scroll - Nearest Town, Return Scroll to My Home and the new Return Scroll to Forgotten Hollow now read with the full item name instead of a cut-off one."
+  },
   {
    "version": "2026.11.11.1",
    "date": "2026-11-11",
@@ -167,5 +172,5 @@
   }
  ],
  "pip": [],
- "sig": "549aabb0781548e92531e5c1fc67504c52698b646e686f164efa61dffbdc1cd3a61a50ba4305ae1cc4d70ab5ea7bd2d38dca7b7258051a7afdb7db177ceeb5f11323eda094b0ca7f5f96a0e4a521f8f8a55f08ce4cbfa645d5dd09ba1fa62aeed9e52e0db1484abc8f6be98aba496078a0d636838464fada0e870881aeccfb94734be0904aa4e11e82b21a5ce7825b9698144d4d9090b0570e1f5de7ac7a704a5947c2835e1601a157f99ef9cdc2a1c0ce7f90f94e5aac4678d1781afe1e19282e2cf2308d657be057da01e8addde56ed38ff337df08aee0ad35ead19b1bc25255639500726361a7dd8eedebd086f803680c776940609819d744b17533c0641a"
+ "sig": "60aa94b9c76b8e8f5eec33938e5ea7f1a6e5040ec3537916b02dcbcf8dcb8afcc9c582622c0a2394a6c0b9395e9480caf881c0c90628ec76dbc2a04807a9d0ddf6b3da167e61d1cd123a8c1a25fa69bc23123d641ea60f7f0564d432ba2069608baf961fcdd0dc761a179f93e4f82318caeb8be92ef2bdbd838b5c49f286e7922e701c40f9818ec7b585003078580b0ac370cdffcc638e39955d396d3d30e7023dd22623350296b717146fe1408deefd7a35488c9bdc75b7876340c0cb8cb0332adc355eda34123c125dd2bf32507981324ea8aa7f36cc89e92cc5a8aaad0376ea69d260482bfe96d29a3da5a9e3315136388cddf101a924e214eb9e1d3b1c1e"
 }
