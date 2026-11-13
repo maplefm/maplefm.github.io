@@ -10,7 +10,8 @@ import json, os, sys, time, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gamepatch
 
-IO = "https://maplestory.io/api/MCW/1"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
+IO = mcwver.base()   # the newest Classic World game data on maplestory.io (MCW/1 until a new set appears)
 JOBS = [100, 110, 120, 130, 200, 210, 220, 230, 300, 310, 320, 400, 410, 420]
 FIELDS = {"damage": "d", "mad": "m", "attackCount": "h", "mobCount": "t", "bulletCount": "b", "mastery": "ms",
           "accX": "acc", "evaX": "eva", "crtX": "cr", "crdX": "cd", "indiePad": "pad", "indieMad": "mad",

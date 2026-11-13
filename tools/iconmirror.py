@@ -8,6 +8,8 @@ items maplestory.io has no icon for are listed in i/missing.json and asked for a
 The item guide adds quest items and monster drops the price list doesn't carry.
 """
 import json, os, sys, time, urllib.request, urllib.error, concurrent.futures as cf
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
+IO = mcwver.base()
 
 DB, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
@@ -30,7 +32,7 @@ def get(i):
     for kind in ("icon", "iconRaw"):
         for t in range(3):
             try:
-                r = urllib.request.urlopen(urllib.request.Request(f"https://maplestory.io/api/MCW/1/item/{i}/{kind}", headers={"User-Agent": "maplefm.gg icon copy"}), timeout=20)
+                r = urllib.request.urlopen(urllib.request.Request(f"{IO}/item/{i}/{kind}", headers={"User-Agent": "maplefm.gg icon copy"}), timeout=20)
                 b = r.read()
                 if b[:4] == b"\x89PNG":
                     open(p, "wb").write(b); miss.pop(str(i), None); return "new"

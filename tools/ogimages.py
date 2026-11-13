@@ -10,6 +10,7 @@ import json, os, sys, io, urllib.request, time
 from PIL import Image, ImageDraw, ImageFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import itempages
+import mcwver
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 F = lambda w, s: ImageFont.truetype(os.path.join(HERE, "fonts", "Inter-ExtraBold.otf" if w == "b" else "Inter-SemiBold.otf"), s)
@@ -48,7 +49,7 @@ def icon(iid, cache):
     p = os.path.join(cache, f"{iid}.png")
     if not os.path.exists(p):
         try:
-            raw = urllib.request.urlopen(urllib.request.Request(f"https://maplestory.io/api/MCW/1/item/{iid}/icon", headers={"User-Agent": "maplefm.gg share images"}), timeout=30).read()
+            raw = urllib.request.urlopen(urllib.request.Request(f"{mcwver.base()}/item/{iid}/icon", headers={"User-Agent": "maplefm.gg share images"}), timeout=30).read()
             Image.open(io.BytesIO(raw)); open(p, "wb").write(raw); time.sleep(0.05)
         except Exception:
             return None

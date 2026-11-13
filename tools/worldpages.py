@@ -14,7 +14,8 @@ import itempages
 
 SITE = "https://maplefm.gg"
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/"
-IO = "https://maplestory.io/api/MCW/1"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
+IO = mcwver.base()   # the newest Classic World game data on maplestory.io (MCW/1 until a new set appears)
 E = html.escape
 
 CSS = """.wn{display:flex;gap:10px;flex-wrap:wrap;font-weight:700;font-size:.9rem}
