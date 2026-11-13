@@ -19,7 +19,8 @@ Run daily by .github/workflows/itemguide.yml, so new quests show up the day eith
 """
 import sys, os, json, time, re, html, datetime, urllib.request, urllib.parse
 
-IO = "https://maplestory.io/api/MCW/1"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
+IO = mcwver.base()   # the newest Classic World game data on maplestory.io (MCW/1 until a new set appears)
 WIKI = "https://mapleclassic.wiki/api.php"
 UA = {"User-Agent": "ClubFM-itemguide/1.0 (https://maplefm.gg; daily, polite)"}
 

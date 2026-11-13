@@ -8,10 +8,11 @@ vendor price and uses it to spot "spot holder" listings, like a Mushroom Spore p
 4 bowman, 8 thief, 16 pirate, 0 anyone. Kind is an index into "kinds" (overall category: sub category).
 The price site uses it for icons, classes, levels and to tidy up names read off the screen.
 """
-import json, sys, urllib.request, urllib.error
+import json, os, sys, urllib.request, urllib.error
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
 from concurrent.futures import ThreadPoolExecutor
 
-URL = "https://maplestory.io/api/MCW/1/item"   # MapleStory Classic World: Classic names, ids and icons
+URL = mcwver.base() + "/item"   # MapleStory Classic World: Classic names, ids and icons (newest data set)
 JOBS = {"Warrior": 1, "Magician": 2, "Bowman": 4, "Thief": 8, "Pirate": 16}
 
 req = urllib.request.Request(URL, headers={"User-Agent": "maplefm-itemdb"})

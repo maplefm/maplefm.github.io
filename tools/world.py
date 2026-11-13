@@ -18,7 +18,8 @@ import gamepatch   # game changes newer than the maplestory.io files
 
 WIKI = "https://mapleclassic.wiki/api.php"
 RAW = "https://mapleclassic.wiki/index.php?title=Module:Observed_facts&action=raw"
-IO = "https://maplestory.io/api/MCW/1"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
+IO = mcwver.base()   # the newest Classic World game data on maplestory.io (MCW/1 until a new set appears)
 UA = {"User-Agent": "maplefm.gg world builder (+https://maplefm.gg)"}
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/world"
 PREV = sys.argv[2] if len(sys.argv) > 2 else os.path.join(OUT, "world.json")
