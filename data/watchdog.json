@@ -1,5 +1,5 @@
 {
- "at": 1794533536,
+ "at": 1794556785,
  "ok": true,
  "failing": [],
  "checks": [
@@ -7,182 +7,182 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 188,
+   "ms": 79,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 77,
+   "ms": 57,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 62,
+   "ms": 34,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 66,
+   "ms": 71,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 59,
+   "ms": 51,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 83,
+   "ms": 178,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 90,
+   "ms": 48,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 64,
+   "ms": 44,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 66,
+   "ms": 36,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 59,
+   "ms": 48,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 76,
+   "ms": 60,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 52,
+   "ms": 56,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 53,
+   "ms": 45,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 70,
+   "ms": 177,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 77,
+   "ms": 53,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 274,
+   "ms": 50,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 62,
+   "ms": 41,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
    "detail": "Work Gloves: clean 1,499 to 1,999 (13 sold) · clean +1 crit rate 285K to 539K (4 sold) · +",
-   "ms": 584,
+   "ms": 267,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
    "detail": "uploaded 1 min ago",
-   "ms": 108,
+   "ms": 37,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "80 open listings, #selling synced 2 min ago",
-   "ms": 632,
+   "detail": "87 open listings, #selling synced 4 min ago",
+   "ms": 577,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "5 visits, 0 crashed",
-   "ms": 314,
+   "detail": "4 visits, 0 crashed",
+   "ms": 64,
    "fix": null
   },
   {
    "name": "Board on a phone",
    "ok": true,
-   "detail": "loads, card and search work (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (34s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (32s, 42 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (33s, 42 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Fresh prices",
    "ok": true,
-   "detail": "updated 0 min ago",
-   "ms": 83,
+   "detail": "updated 1 min ago",
+   "ms": 65,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1430 items",
-   "ms": 55,
+   "detail": "1435 items",
+   "ms": 69,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": true,
    "detail": "all scanners within the bars",
-   "ms": 98,
+   "ms": 66,
    "fix": null
   },
   {
@@ -671,5 +671,5 @@
    "repairs": []
   }
  ],
- "beat": 1794533536
+ "beat": 1794556785
 }
