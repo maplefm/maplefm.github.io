@@ -1,5 +1,5 @@
 {
- "at": 1794599036677,
+ "at": 1794602042069,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -319,8 +319,8 @@
    "rows7": 0,
    "room7": 0,
    "late7": 0,
-   "chat24": 14,
-   "last": 1794597677,
+   "chat24": 16,
+   "last": 1794601283,
    "ver": "2026.11.11.1",
    "lag_median_min": null,
    "room_rate24": null,
@@ -355,8 +355,8 @@
    "incomplete upload": 1811
   },
   "2026-11-13": {
-   "bad row: 3a3a (p zero)": 13480,
-   "incomplete upload": 1687
+   "bad row: 3a3a (p zero)": 14080,
+   "incomplete upload": 1762
   }
  },
  "rejects": {},
