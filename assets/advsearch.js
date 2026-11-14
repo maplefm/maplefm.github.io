@@ -122,7 +122,7 @@
     if (multi) nm.appendChild(B.el("span", "ax-it", B.showName(i.item)));
     nm.appendChild(statChips(i, l, want));
     var mt = m && m.meta.get(l) || {};
-    var wh = B.el("span", "ax-wh"), seller = l.ns || mt.nameOdd ? "seller unread" : l.s;
+    var wh = B.el("span", "ax-wh"), seller = l.ns || l.nu || mt.nameOdd ? "seller name not read clearly" : l.s;
     wh.textContent = seller + " · " + B.where(l) + " · " + B.ago(l.t);
     nm.appendChild(wh); li.appendChild(nm);
     var pr = B.el("span", "ax-pr"); pr.appendChild(B.money(l.u));
