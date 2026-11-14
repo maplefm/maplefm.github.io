@@ -75,8 +75,11 @@
     return f;
   }
   // the items the search covers: one named item, or every item of a type (the panel's type, or a type word typed)
+  // the quick first board (from the browser's last visit or the server's price summary) has prices but no listings yet
+  function ready() { var D = B.D(); return !!(D && D.list && !D.preview && D.list.some(function (i) { return i.buy && i.buy.length; })); }
+  var WAIT_T = null;
   function itemsFor(f) {
-    var D = B.D(); if (!D || !D.list) return { list: [], why: "loading" };
+    var D = B.D(); if (!ready()) { clearTimeout(WAIT_T); WAIT_T = setTimeout(function () { run(); }, 1500); return { list: [], why: "loading" }; }
     var named = null;
     if (f.rest) {
       var hits = B.searchItems(f.rest, 3);
