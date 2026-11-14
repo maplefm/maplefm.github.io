@@ -5636,7 +5636,7 @@
   // shell shows at once and the data lands in one pass instead of three.
   // ---------- stat search results and the Advanced filters: assets/advsearch.js, fetched the first time a search asks for
   // a stat or Advanced is opened, so the board's first load never carries it
-  var ADVV = "341e22c5", ADV_P = null;
+  var ADVV = "b6e6261e", ADV_P = null;
   function advLoad() {
     if (window.FMADV) return Promise.resolve(window.FMADV);
     if (ADV_P) return ADV_P;
