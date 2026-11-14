@@ -5,6 +5,13 @@ It writes assets/board.min.css and assets/board.min.js with esbuild (npx); witho
 import hashlib, os, re, subprocess, shutil
 R = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 A = os.path.join(R, "assets")
+# the stat search loads on demand from board.js: stamp its hash there first, so a change reaches browsers at once
+_adv = os.path.join(A, "advsearch.js")
+if os.path.exists(_adv):
+    _h = hashlib.md5(open(_adv, "rb").read()).hexdigest()[:8]
+    _bp = os.path.join(A, "board.js"); _bs = open(_bp, encoding="utf-8").read()
+    _bs2 = re.sub(r'var ADVV = "[^"]*"', 'var ADVV = "' + _h + '"', _bs, count=1)
+    if _bs2 != _bs: open(_bp, "w", encoding="utf-8").write(_bs2)
 for src, dst, loader in (("board.js", "board.min.js", "js"), ("board.css", "board.min.css", "css")):
     s, d = os.path.join(A, src), os.path.join(A, dst)
     try:
