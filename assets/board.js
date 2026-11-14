@@ -130,8 +130,9 @@
   function listRank(l) { return l.chat ? 3 : placed(l) ? 0 : l.c && !l.ci ? 1 : 2; }
   // a stream seller the reader couldn't confirm: never shown as a name (a misread name sends buyers to the wrong
   // player); the broadcast link lets them read it off the video themselves
-  function sname(l) { return l.stream && l.ns ? "name not read" : l.s; }
+  function sname(l) { return (l.stream && l.ns) || l.nu ? "name not read" : l.s; }
   function sellerEl(l, tag, cls) {
+    if (l.nu && !l.stream) { var u = el("span", "unk", "seller name not read clearly"); u.title = "This shop was read under two different names. Check the name at the shop."; return u; }
     if (!(l.stream && l.ns)) return el(tag || "b", cls || null, l.s);
     var w = el("span", "unk"); w.appendChild(document.createTextNode("name not read · ")); var a = streamLink(l); a.textContent = "see it on " + a.textContent; w.appendChild(a); return w;
   }
@@ -1256,6 +1257,13 @@
       // Where to buy lists every shop listing; ones without a room read sit below full locations (listRank). Cheapest
       // now is the cheapest shop listing seen in the last 24 hours that nobody has seen gone or sold since.
       it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON; });
+      // one shop spot, one price, the same stats, two seller names inside two hours ("Unread", "UnReaden"): one of the
+      // readings is wrong, so neither name is shown as fact (a wrong name sends buyers to the wrong player)
+      var spotN = {};
+      // only equips with stats read: two sellers in one room can ask the same price for a scroll, but not for an equip with
+      // the same stats and slots
+      it.buy.forEach(function (x) { if (x.chat || !placed(x) || !x.x || x.x.SLOTS == null) return; var k = x.c + "|" + x.r + "|" + x.u + "|" + (x.x ? JSON.stringify(x.x) : "") + "|" + Math.floor(x.t / 72e5); (spotN[k] || (spotN[k] = [])).push(x); });
+      Object.keys(spotN).forEach(function (k) { var g = spotN[k], names = {}; g.forEach(function (x) { names[String(x.s).toLowerCase()] = 1; }); if (Object.keys(names).length > 1) g.forEach(function (x) { x.nu = true; }); });
       // a listing priced at a small slice of the typical is almost always a misread (a quantity read as the price, a
       // stream frame caught mid-change): it stays in Where to buy, but never becomes Cheapest now
       var floorU = it.typ > 0 ? it.typ * (it.equip ? 0.08 : 0.15) : 0;
@@ -2788,7 +2796,7 @@
   // no gain, then +1, +2... on the item's key stat (the stat its scrolled copies most often gained), at most 5 grades.
   // Only hovers that pass the roll checks count (rollKeyOk, slots read). A grade with 3+ sales in the board's window
   // shows the middle of its sales; otherwise its asking prices, labeled as asking.
-  var LADMIN = 2, LADSEL = {}, LADSTAT = {};
+  var LADMIN = 2, LADSEL = {}, LADSTAT = {}, LADHEAD = {};   // LADHEAD: the grade a search or a picked copy opened the card on
   var CRITK = { CRIT: 1, CRITDMG: 1 };
   function ladName(k) { return k === "TOTAL" ? "stats" : k === "CRIT" ? "crit rate" : k === "CRITDMG" ? "crit damage" : STATABBR[k] || k; }
   // the server's board carries each equip's grades worked out from every listing; they stand until the item changes
@@ -3248,6 +3256,7 @@
     // the roll typed with the item ("wg 4 att") can be cleared by a board refresh between typing and opening: read it
     // again from the search box when that search still names this item
     var fromCopy = PICK_COPY; PICK_COPY = false;   // a copy picked in the stat search sets its own grade
+    delete LADHEAD[name];
     if (fromCopy) QROLL = null;
     else if (!QROLL && $("q") && $("q").value) { searchItems.inner = true; try { var rq0 = searchItems($("q").value, 1); if (!rq0.length || rq0[0].n !== name) QROLL = null; } finally { searchItems.inner = false; } }
     PENDROLL = QROLL && Date.now() - QROLL.at < 60000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;   // a slow phone can take a while between typing and the card
@@ -3938,7 +3947,7 @@
         var m = L.wep ? /^W[CS]\|(\d+)/.exec(g.id) : g.id.indexOf("S|" + pk + "|") === 0 ? [0, g.id.split("|")[2]] : g.id.indexOf("C|") === 0 && g.id.indexOf(pk + "+") > 0 ? [0, (new RegExp(pk + "\\+(\\d+)").exec(g.id) || [])[1]] : null;
         if (!m || m[1] == null) return false; var v = parseInt(m[1], 10);
         if (v === pv || (/\+$/.test(g.id) && pv >= v) || (/-$/.test(g.id) && pv <= v)) { want = g; vk = s0; return true; } return false; }); });
-      if (want) { LADSEL[i.item + "|" + vk] = want.id; LADSTAT[i.item] = vk; }
+      if (want) { LADSEL[i.item + "|" + vk] = want.id; LADSTAT[i.item] = vk; LADHEAD[i.item] = want.id; } else delete LADHEAD[i.item];
     }
     if (L.stats.length > 1) {
       var sp = el("div", "lstats"); sp.appendChild(el("span", "lsl", "Stat"));
@@ -4058,10 +4067,13 @@
     if (i.mv[0] != null) { var r = Math.round(i.mv[0] * 100); big.appendChild(el("span", "chg " + (r > 0 ? "up" : r < 0 ? "down" : "flat"), (r > 0 ? "↗ " : r < 0 ? "↘ " : "") + Math.abs(r) + "% in 24h")); }
     if (!LD) { ip.appendChild(big); nameBar(i); }
     else if (LD.top) {
-      // equips: the busiest grade's price up top beside the item, the same as the grade buttons show
-      var eb = el("div", "big"); if (short(LD.top.lo) !== short(LD.top.hi)) { eb.appendChild(el("span", "num", short(LD.top.lo))); eb.appendChild(el("span", "dash", "–")); eb.appendChild(money(LD.top.hi)); } else eb.appendChild(money(LD.top.lo));
+      // equips: the busiest grade's price up top beside the item, the same as the grade buttons show; a card opened from
+      // a stat search or a picked copy shows the grade that was asked for instead, so the top price matches the copy
+      var HG = LD.top, hid = LADHEAD[i.item];
+      if (hid) LD.stats.some(function (s0) { return LD.views[s0].some(function (g) { if (g.id === hid && (g.basis === "sold" || g.basis === "asking") && g.lo) { HG = g; return true; } return false; }); });
+      var eb = el("div", "big"); if (short(HG.lo) !== short(HG.hi)) { eb.appendChild(el("span", "num", short(HG.lo))); eb.appendChild(el("span", "dash", "–")); eb.appendChild(money(HG.hi)); } else eb.appendChild(money(HG.lo));
       ip.appendChild(eb);
-      eb.appendChild(el("span", "tg roll etg", LD.top.name.toLowerCase()));      // which grade this price is for
+      eb.appendChild(el("span", "tg roll etg", HG.name.toLowerCase()));      // which grade this price is for
     }
     var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used", "hovered": "the last " + i.typN + " sales whose stats were read in game, scrolled and odd rolls left out" }[i.basis] || "recent sales";
     var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
@@ -5636,7 +5648,7 @@
   // shell shows at once and the data lands in one pass instead of three.
   // ---------- stat search results and the Advanced filters: assets/advsearch.js, fetched the first time a search asks for
   // a stat or Advanced is opened, so the board's first load never carries it
-  var ADVV = "b6e6261e", ADV_P = null;
+  var ADVV = "a3fddf14", ADV_P = null;
   function advLoad() {
     if (window.FMADV) return Promise.resolve(window.FMADV);
     if (ADV_P) return ADV_P;

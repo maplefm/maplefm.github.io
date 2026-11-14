@@ -1954,10 +1954,10 @@ async function hitsTable(env) {
   await env.INBOX_DB.prepare("CREATE INDEX IF NOT EXISTS signin_t ON signin (t)").run();
   HITS_READY = true;
 }
-async function logHit(env, page, ref, tag, who, ret) {
+async function logHit(env, page, ref, tag, who, ret, anon) {
   if (!env.INBOX_DB) return;
   await hitsTable(env);
-  const day = new Date().toISOString().slice(0, 10), v = (await hmac(env.SESSION_SECRET || "x", "v|" + day + "|" + who)).slice(0, 12);
+  const day = new Date().toISOString().slice(0, 10), v = anon ? "" : (await hmac(env.SESSION_SECRET || "x", "v|" + day + "|" + who)).slice(0, 12);
   await env.INBOX_DB.prepare("INSERT INTO hits (t, p, r, q, v, ret) VALUES (?, ?, ?, ?, ?, ?)").bind(Date.now(), page, ref, tag, v, ret == null ? null : ret ? 1 : 0).run();
 }
 async function logSignin(env, id) {
@@ -1987,7 +1987,9 @@ async function hit(req, env) {
   let b = {}; try { b = JSON.parse(await req.text()); } catch (e) { return ok; }
   let page = String(b.p || "/").slice(0, 120), ref = String(b.r || "").toLowerCase().replace(/^www\./, "").slice(0, 80), tag = String(b.q || "").replace(/[^\w-]/g, "").slice(0, 24);
   if (/(^|\.)maplefm\.gg$/.test(ref)) ref = "";
-  await logHit(env, page, ref, tag, ip, b.ret === 1 ? 1 : b.ret === 0 ? 0 : null);
+  // a typed search ("#find:...") is kept as text for search demand, but never tied to a visitor: no daily visitor code
+  const anon = /^#find:/.test(page);
+  await logHit(env, page, ref, tag, anon ? "" : ip, b.ret === 1 ? 1 : b.ret === 0 ? 0 : null, anon);
   return ok;
 }
 // Sold buttons: players mark a listing in Where to buy as sold. One vote per person per listing (a scrambled
