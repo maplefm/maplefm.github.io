@@ -363,6 +363,6 @@
       TYPED = q; run();
       setTimeout(function () { var b = $("sres"); if (b && !b.hidden) b.scrollIntoView({ block: "start", behavior: "smooth" }); }, 400);
     },
-    _parse: parse, _render: render, _b: function () { return B; }
+    _parse: parse, _render: render
   };
 })();
