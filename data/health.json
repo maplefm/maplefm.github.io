@@ -1,5 +1,5 @@
 {
- "at": 1794624773176,
+ "at": 1794629039136,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,20 +105,20 @@
    "behind": 11
   },
   "Zik": {
-   "rows24": 15741,
-   "room24": 15738,
-   "ch24": 15741,
-   "rows7": 93216,
-   "room7": 93213,
+   "rows24": 13803,
+   "room24": 13800,
+   "ch24": 13803,
+   "rows7": 94639,
+   "room7": 94636,
    "late7": 4,
    "chat24": 12,
-   "last": 1794571298,
-   "ver": "2026.11.11.1",
+   "last": 1794628923,
+   "ver": "2026.11.13.1",
    "lag_median_min": 2.1,
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
-   "behind": 1
+   "behind": 0
   },
   "FITA": {
    "rows24": 0,
@@ -324,7 +324,7 @@
   },
   "2026-11-14": {
    "bad row: 3a3a (p zero)": 40,
-   "incomplete upload": 245
+   "incomplete upload": 320
   }
  },
  "rejects": {},
