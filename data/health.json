@@ -1,5 +1,5 @@
 {
- "at": 1794655773790,
+ "at": 1794658694528,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,16 +105,16 @@
    "behind": 11
   },
   "Zik": {
-   "rows24": 4513,
-   "room24": 4513,
-   "ch24": 4513,
-   "rows7": 84212,
-   "room7": 84209,
+   "rows24": 2551,
+   "room24": 2551,
+   "ch24": 2551,
+   "rows7": 81359,
+   "room7": 81356,
    "late7": 4,
-   "chat24": 3,
+   "chat24": 2,
    "last": 1794631067,
    "ver": "2026.11.13.1",
-   "lag_median_min": 2.1,
+   "lag_median_min": 2.2,
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
@@ -204,16 +204,16 @@
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
-   "rows7": 39,
+   "rows7": 0,
    "room7": 0,
    "late7": 0,
    "chat24": 0,
-   "last": 1794052602,
+   "last": 0,
    "ver": "2026.11.6.2",
    "lag_median_min": null,
    "room_rate24": null,
-   "room_rate7": 0.0,
-   "late_share7": 0.0,
+   "room_rate7": null,
+   "late_share7": null,
    "behind": 2
   },
   "CamelToaster": {
@@ -324,7 +324,7 @@
   },
   "2026-11-14": {
    "bad row: 3a3a (p zero)": 40,
-   "incomplete upload": 980
+   "incomplete upload": 1055
   }
  },
  "rejects": {},
