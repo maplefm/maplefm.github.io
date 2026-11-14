@@ -2821,12 +2821,7 @@
     // what the game allows (a drop moves a stat at most 5 off base; scrolls add only what their slots could)
     // An item whose base has no stat buyers pay for (defense earrings, plain hats) has no roll to key on: a copy with its
     // slots read and its stats fitting the game still counts, as Clean or as slots used with no gain.
-    var ok = function (l) {
-      if (!l.x || l.chat || slotsUsed(n, l) == null) return false;
-      var sp = scrollSplit(n, l); if (sp && sp.ok === false) return false;
-      if (wep) return l.x[wk] != null && base[wk] > 0 && rollKeyOk(n, l) && !!rollPick(n, l);
-      return (rollKeyOk(n, l) && !!rollPick(n, l)) || !!sp;
-    };
+    var ok = function (l) { return copyOk(n, l, wep, wk, base); };
     var pickOf = function (l) { return (rollKeyOk(n, l) && rollPick(n, l)) || { g: 0, k: "", mv: {}, combo: "" }; };
     var seenA = {}, asks = (i.buy || []).filter(function (x) { if (x.st === "gone" || x.st === "sold" || !ok(x)) return false; var k = x.s + "|" + x.u + "|" + x.x.SLOTS + "|" + (pickOf(x).combo || "") + "|" + (wep ? x.x[wk] : ""); if (seenA[k]) return false; seenA[k] = 1; return true; });
     var sold = i.sales.filter(ok), all = sold.map(function (l) { return [l, 1]; }).concat(asks.map(function (l) { return [l, 0]; }));
@@ -2938,6 +2933,131 @@
     var x = l && l.x; if (!x || x.SLOTS == null) return null;
     var b = fullBase(name).s.SLOTS; if (!b || x.SLOTS > b) return null;
     return b - x.SLOTS;
+  }
+  // a copy whose popup was read well enough to price on: the roll checks pass, its slots were read, and its stats fit
+  // what the game allows. The price ladder and the stat search both trust only these.
+  function copyOk(n, l, wep, wk, base) {
+    if (!l || !l.x || l.chat || slotsUsed(n, l) == null) return false;
+    if (wep == null) { wep = isWeapon(n); wk = wep ? keyStat(n, null) : null; base = fullBase(n).s; }
+    var sp = scrollSplit(n, l); if (sp && sp.ok === false) return false;
+    if (wep) return l.x[wk] != null && base[wk] > 0 && rollKeyOk(n, l) && !!rollPick(n, l);
+    return (rollKeyOk(n, l) && !!rollPick(n, l)) || !!sp;
+  }
+
+  // ---------------------------------------------------------------- stat search
+  // "work gloves 8 att", "8 att wg", "wg 2 crit", "clean wg", "bathrobe 3 str", "wg 8+ att 2 crit": every number is the
+  // total the item shows, never a gain over a clean copy. "crit" is whichever crit line the item has (crit rate on
+  // gloves, crit damage on earrings). "8+ att" or "at least 8 att" means 8 or more. Returns the rest of the words for
+  // the item search, or null when the query asks for no stat.
+  var SQ_WORD = "(crit damage|crit dmg|cdmg|crit rate|crit|magic attack|magic att|weapon attack|attack|attk|att|watk|atk|w\\.?att|matt|matk|m\\.?att|str|dex|int|luk|w\\.?def|wdef|m\\.?def|mdef|acc|accuracy|avoid|avoidability|speed|jump|hp|mp)";
+  function sqKey(w) {
+    w = String(w).toLowerCase();
+    return /^(crit ?d|cdmg)/.test(w) ? "CRITDMG" : /^crit/.test(w) ? "CRIT" : /^(magic|matt|matk|m\.?att)/.test(w) ? "MATT" : /^(att|attk|attack|weapon|watk|atk|w\.?att)/.test(w) ? "ATT" :
+      /def/.test(w) ? (/^m/.test(w) ? "MDEF" : "WDEF") : /^acc/.test(w) ? "ACC" : /^avoid/.test(w) ? "AVOID" : w.toUpperCase();
+  }
+  function statQuery(q) {
+    var ql = " " + String(q || "").toLowerCase().replace(/\s+/g, " ") + " ", f = { stats: [], clean: false, slots: null };
+    if (/scroll|%/.test(ql)) return null;   // "glove att 60%" is a scroll, not a roll
+    var re1 = new RegExp("\\s(?:at least |min )?\\+?(\\d{1,3})(\\+|\\s?or more)?\\s*" + SQ_WORD + "(?=\\s)"), re2 = new RegExp("\\s" + SQ_WORD + "\\s*\\+?(\\d{1,3})(\\+|\\s?or more)?(?=\\s)"), m, guard = 0;
+    while (guard++ < 6) {
+      if ((m = re1.exec(ql))) { f.stats.push({ k: sqKey(m[3]), v: +m[1], ge: !!m[2] || /at least|min /.test(m[0]) }); ql = ql.replace(m[0], " "); continue; }
+      if ((m = re2.exec(ql))) { f.stats.push({ k: sqKey(m[1]), v: +m[2], ge: !!m[3] }); ql = ql.replace(m[0], " "); continue; }
+      break;
+    }
+    m = /\s(clean|unscrolled|stock)(?=\s)/.exec(ql); if (m) { f.clean = true; ql = ql.replace(m[0], " "); }
+    m = /\s(\d)\s*(?:slots?|\/\s*\d+)(?:\s*left)?(?=\s)/.exec(ql); if (m) { f.slots = +m[1]; ql = ql.replace(m[0], " "); }
+    f.rest = ql.replace(/\s+/g, " ").trim();
+    // a bare slot word ("luk 5 earring", "gloves 10 att") is a scroll search, the same as !price reads it
+    if (/^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glove|cape|capes|shoes?|boots?|top|tops|topwear|bottom|bottoms|pants|overall|ova|ovr|shield|weapon|wep|claw|bow|crossbow|xbow|cbow|dagger|spear|polearm|pole|wand|staff|sword|axe|blunt|bw|ohs|ths|1h|2h|1hs|2hs|1ha|2ha|1hbw|2hbw|knuckle|gun|face|eye|accessory|ring|pendant|belt)$/.test(f.rest) && !/\+\d/.test(q)) return null;
+    // a number with no item left ("8 att") is not a stat search; an absurd number is a typo, not a roll
+    f.stats = f.stats.filter(function (s0) { return s0.v >= 0 && s0.v <= (/^(HP|MP)$/.test(s0.k) ? 400 : 60); });
+    if (!f.rest || (!f.stats.length && !f.clean && f.slots == null)) return null;
+    return f;
+  }
+  // the crit line an item actually has: "crit" on earrings is crit damage, on gloves crit rate
+  function critLine(n, k) {
+    if (k !== "CRIT" && k !== "CRITDMG") return k;
+    var b = fullBase(n).s; if (b[k]) return k; var o = k === "CRIT" ? "CRITDMG" : "CRIT"; return b[o] ? o : k;
+  }
+  // the total a copy shows for a stat: the number read off its popup; a stat the item has no line for and the copy
+  // shows none of is 0; a stat the item normally has but the read missed is unknown (null), never guessed
+  function statTotal(n, l, k) {
+    var x = l && l.x; if (!x) return null;
+    if (typeof x[k] === "number") return x[k];
+    var b = fullBase(n).s; return b[k] > 0 ? null : 0;
+  }
+  // which copies of an item fit a stat search. f: { stats: [{k, v, ge}], clean, slots, older, lo, hi }.
+  // Only copies read well enough to price (copyOk) take part; prices 4 times off their grade's middle (a troll ask or a
+  // misread price) are set aside, the same way the price ladder sets them aside.
+  var SQ_DAY = 864e5;
+  function statMatch(i, f) {
+    var n = i.item, now = Date.now(), wep = isWeapon(n), wk = wep ? keyStat(n, null) : null, base = fullBase(n).s;
+    var want = (f.stats || []).map(function (s0) { return { k: critLine(n, s0.k), v: s0.v, ge: s0.ge }; });
+    var L = ladderOf(i), out = { item: i, want: want, exact: [], near: [], odd: 0, unsure: 0, sold: null, est: null, meta: new Map() };
+    // one copy is often sent many times (several scanners, an hourly re-send): one row per shop, price and stats
+    var keyOf = function (l) { var x = l.x || {}; return String(l.s).toLowerCase() + "|" + l.u + "|" + x.SLOTS + "|" + BSTATS.map(function (k) { return typeof x[k] === "number" ? x[k] : ""; }).join(","); };
+    // the grade each copy sits in on the price ladder, found by the copy's shop, price and stats (the ladder keeps one of
+    // each repeat, not always the same object)
+    var gmap = {};
+    if (L) L.stats.forEach(function (s0) { L.views[s0].forEach(function (g) { g.asks.concat(g.sold).forEach(function (l) { var k0 = keyOf(l); if (!gmap[k0]) gmap[k0] = g; }); }); });
+    function grade(l) { return gmap[keyOf(l)] || null; }
+    function usual(l) { var g = grade(l); return g && (g.basis === "sold" || g.basis === "asking") && g.mid ? g : null; }
+    function fits(l, loose) {
+      if (f.clean && slotsUsed(n, l) !== 0) return false;
+      if (f.slots != null && !(l.x.SLOTS >= f.slots)) return false;
+      if (!loose) for (var j = 0; j < want.length; j++) { var t = statTotal(n, l, want[j].k); if (t == null || (want[j].ge ? t < want[j].v : t !== want[j].v)) return false; }
+      return true;
+    }
+    var live = (i.buy || []).filter(function (l) { return l.st !== "gone" && l.st !== "sold" && !l.chat && (f.older || now - l.t <= SQ_DAY) && (!f.lo || l.u >= f.lo) && (!f.hi || l.u <= f.hi); });
+    var good = [], seen = {}, spot = {};
+    live.slice().sort(function (a, b) { return b.t - a.t; }).forEach(function (l) {
+      var k0 = keyOf(l); if (seen[k0]) { seen[k0].n++; return; }
+      // the same copy at the same shop spot read under two names ("Unread", "UnReaden"): one row, and the name isn't
+      // trusted, since one of the readings is wrong
+      var sk = placed(l) ? l.c + "|" + l.r + "|" + k0.slice(k0.indexOf("|") + 1) : "";
+      if (sk && spot[sk]) { spot[sk].n++; spot[sk].nameOdd = true; return; }
+      var m0 = { n: 1, g: grade(l) }; seen[k0] = m0; if (sk) spot[sk] = m0;
+      if (!copyOk(n, l, wep, wk, base)) { out.unsure++; return; }
+      var g = usual(l); if (g && (l.u > g.mid * 4 || l.u < g.mid / 4)) { out.odd++; return; }
+      out.meta.set(l, m0); good.push(l);
+    });
+    out.exact = good.filter(function (l) { return fits(l, false); }).sort(function (a, b) { return a.u - b.u || b.t - a.t; });
+    // the last sale of that exact roll, from the sales the board holds
+    out.sold = (i.sales || []).filter(function (l) { return copyOk(n, l, wep, wk, base) && fits(l, false); }).sort(function (a, b) { return b.t - a.t; })[0] || null;
+    if (!out.exact.length && want.length) {
+      // closest: the nearest total below and above on the first stat asked for, cheapest at each, the other asks kept
+      var k0 = want[0].k, v0 = want[0].v, others = want.slice(1);
+      var pool = good.filter(function (l) { if (!fits(l, true)) return false; var t = statTotal(n, l, k0); if (t == null) return false;
+        return others.every(function (w) { var t2 = statTotal(n, l, w.k); return t2 != null && (w.ge ? t2 >= w.v : t2 === w.v); }); });
+      var below = null, above = null;
+      pool.forEach(function (l) { var t = statTotal(n, l, k0);
+        if (t < v0 && (!below || t > below.t || (t === below.t && l.u < below.l.u))) below = { t: t, l: l };
+        if (t > v0 && (!above || t < above.t || (t === above.t && l.u < above.l.u))) above = { t: t, l: l }; });
+      out.near = [below, above].filter(Boolean).map(function (x) { return { k: k0, t: x.t, l: x.l }; });
+    }
+    // the price ladder's grade for the roll asked for, when it has a price: shown only as an estimate
+    if (L && want.length === 1) {
+      var w0 = want[0], gid = null, bv = base[w0.k] || 0;
+      if (wep && w0.k === wk) gid = (f.clean ? "WC|" : "WS|") + w0.v;
+      else if (w0.v === bv) gid = f.clean ? "C|" : null;
+      else if (w0.v > bv) gid = f.clean ? "C|" + w0.k + "+" + (w0.v - bv) : "S|" + w0.k + "|" + (w0.v - bv);
+      if (gid) L.stats.some(function (s0) { return L.views[s0].some(function (g) { if (g.id === gid && (g.basis === "sold" || g.basis === "asking")) { out.est = g; return true; } return false; }); });
+    } else if (L && !want.length && f.clean) {
+      L.stats.some(function (s0) { return L.views[s0].some(function (g) { if (g.id === "C|" && (g.basis === "sold" || g.basis === "asking")) { out.est = g; return true; } return false; }); });
+    }
+    return out;
+  }
+  // "+12%" against the usual price for that copy's own grade (its roll), or the item's typical when it has no grade
+  function vsUsual(i, l, g) {
+    if (g === undefined) g = ladderOf(i) ? gradeOf(i, l) : null;
+    var ref = g && (g.basis === "sold" || g.basis === "asking") && g.mid ? g.mid : !i.equip && i.typ ? i.typ : 0;
+    return ref ? Math.round((l.u / ref - 1) * 100) : null;
+  }
+  // a copy's stats as short words: totals only, in the order buyers read them
+  function statWords(n, l, keys) {
+    var x = l.x || {}, b = fullBase(n).s, ks = (keys || []).slice();
+    ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "CRIT", "CRITDMG", "ACC", "AVOID", "SPEED", "JUMP", "HP", "MP"].forEach(function (k) { if (ks.indexOf(k) < 0 && typeof x[k] === "number" && (x[k] !== 0 || b[k])) ks.push(k); });
+    return ks.filter(function (k) { return typeof x[k] === "number" || !(b[k] > 0); }).slice(0, 4).map(function (k) { var t = statTotal(n, l, k); return { k: k, t: t, d: t - (b[k] || 0) }; });
   }
   // which stat a roll's +/- number is about, for the label on Price by roll: one stat when only one moved off base,
   // "Total stats" when several did and the number is their sum, "" when only a chat grade like (-3) is known
@@ -3121,12 +3241,15 @@
   window.addEventListener("scroll", hideHov, { passive: true });
 
   // ---------- item panel
+  var PICK_COPY = false;
   function pick(name, nav) {
     earnNudge(1);
     var was = cardOpen(), h = "#item=" + encodeURIComponent(name) + (state.tab === "deals" ? "&deals" : "");
     // the roll typed with the item ("wg 4 att") can be cleared by a board refresh between typing and opening: read it
     // again from the search box when that search still names this item
-    if (!QROLL && $("q") && $("q").value) { searchItems.inner = true; try { var rq0 = searchItems($("q").value, 1); if (!rq0.length || rq0[0].n !== name) QROLL = null; } finally { searchItems.inner = false; } }
+    var fromCopy = PICK_COPY; PICK_COPY = false;   // a copy picked in the stat search sets its own grade
+    if (fromCopy) QROLL = null;
+    else if (!QROLL && $("q") && $("q").value) { searchItems.inner = true; try { var rq0 = searchItems($("q").value, 1); if (!rq0.length || rq0[0].n !== name) QROLL = null; } finally { searchItems.inner = false; } }
     PENDROLL = QROLL && Date.now() - QROLL.at < 60000 ? { n: name, k: QROLL.k, v: QROLL.v } : null; QROLL = null;   // a slow phone can take a while between typing and the card
     if (PENDROLL) window.__ladroll = { n: PENDROLL.n, k: PENDROLL.k, v: PENDROLL.v, at: Date.now() };   // the price ladder's own copy, kept until its card shows
     if (PENDROLL) STATOPEN = name;
@@ -3803,8 +3926,12 @@
     var LR = window.__ladroll;   // set by pick(), which sits in another part of this file
     if (LR && LR.n === i.item && Date.now() - LR.at < 60000) {
       var pk = LR.k, pv = +LR.v, want = null; window.__ladroll = null;
+      // a grade picked from the stat search's results (the grade that copy sits in) is taken as it is
+      if (LR.gid) { L.stats.some(function (s0) { return L.views[s0].some(function (g) { if (g.id === LR.gid) { want = g; vk = s0; return true; } return false; }); }); pk = null; }
       // "1 crit" means whichever crit line the item has (crit rate on gloves, crit damage on earrings)
       if (/^CRIT/.test(pk)) { var hasK = function (k0) { return L.stats.some(function (s0) { return L.views[s0].some(function (g) { return g.id.indexOf(k0 + "+") > 0 || g.id.indexOf("S|" + k0 + "|") === 0; }); }); }; if (!hasK(pk) && hasK(pk === "CRIT" ? "CRITDMG" : "CRIT")) pk = pk === "CRIT" ? "CRITDMG" : "CRIT"; }
+      // the number typed is the total the item shows ("2 crit wg" is a 1 crit rate pair with +1), never the gain
+      if (pk && pk !== "CLEAN" && !L.wep) { var bk = fullBase(i.item).s[pk] || 0; if (bk && pv >= bk) { pv -= bk; if (pv === 0) pk = "CLEAN"; } }
       if (pk === "CLEAN") { var cg = (L.views[vk] || []).filter(function (g) { return g.id === "C|" || /^WC\|/.test(g.id); }).sort(function (a, b) { return (b.use ? b.use.length : 0) - (a.use ? a.use.length : 0); })[0]; if (cg) { LADSEL[i.item + "|" + vk] = cg.id; } pk = null; }
       if (L.views[pk] && !L.wep) vk = pk;
       if (pk) L.stats.some(function (s0) { return L.views[s0].some(function (g) {
@@ -4768,7 +4895,7 @@
     function kindLabel(kq) { var pl = /s$/i.test(kq.k) ? kq.k : kq.k + "s"; return kq.hi == null ? "All " + pl.toLowerCase() : pl + ", level " + kq.lo + " to " + kq.hi; }
     function mark() { box.querySelectorAll(".so").forEach(function (o, k) { o.setAttribute("aria-selected", k === at ? "true" : "false"); if (k === at) { var t0 = o.offsetTop, t1 = t0 + o.offsetHeight; if (t0 < box.scrollTop) box.scrollTop = t0; else if (t1 > box.scrollTop + box.clientHeight) box.scrollTop = t1 - box.clientHeight; } }); }
     function show() {
-      var v = q.value.trim(); if (!v || !D) { close(); return; }
+      var v = q.value.trim(); advTyped(v); if (!v || !D) { close(); return; }
       hits = searchItems(v, 5); box.textContent = ""; at = -1;
       var kq = kindQuery(v); if (kq) { hits = hits.filter(function (r) { return r.score >= 450; }).slice(0, 4); hits.unshift({ kind: kq, n: "" }); }
       if (!hits.length) { box.appendChild(el("div", "sh", "No item matches \u201c" + v + "\u201d")); }
@@ -5132,8 +5259,18 @@
   // the menu's search on every other page lands here as /?q=...: fill the search and open the best match
   (function qParam() {
     var q = "", sel = "", pr = 0, sold = false;
-    try { var sp = new URLSearchParams(location.search); q = sp.get("q") || ""; sel = sp.get("s") || ""; pr = +sp.get("p") || 0; sold = sp.get("k") === "sold"; } catch (e) {}
-    q = q.trim().slice(0, 80); if (!q) return;
+    var adv = "";
+    try { var sp = new URLSearchParams(location.search); q = sp.get("q") || ""; sel = sp.get("s") || ""; pr = +sp.get("p") || 0; sold = sp.get("k") === "sold"; adv = sp.get("a") || ""; } catch (e) {}
+    q = q.trim().slice(0, 80);
+    // a search link is never a page of its own for search engines
+    if (q || adv) { try { var rb = document.createElement("meta"); rb.name = "robots"; rb.content = "noindex,follow"; document.head.appendChild(rb); } catch (e) {} }
+    // a stat search ("work gloves 8 att") or an Advanced search link opens its results, not one item's card
+    if (adv || (q && statQuery(q))) {
+      var box0 = document.getElementById("q"); if (box0) box0.value = q;
+      var tries0 = 0, t0 = setInterval(function () { if (++tries0 > 120) return clearInterval(t0); if (!D || !D.list || !D.list.length) return; clearInterval(t0); advLoad().then(function (A) { if (A) A.fromUrl(q, adv); }); }, 250);
+      return;
+    }
+    if (!q) return;
     try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
     var tries = 0, t = setInterval(function () {
       if (++tries > 120) return clearInterval(t);
@@ -5497,6 +5634,40 @@
   updateBar();
   // The item list makes every name tidy, so the first real build waits for it (it is small and quick); the page
   // shell shows at once and the data lands in one pass instead of three.
+  // ---------- stat search results and the Advanced filters: assets/advsearch.js, fetched the first time a search asks for
+  // a stat or Advanced is opened, so the board's first load never carries it
+  var ADVV = "341e22c5", ADV_P = null;
+  function advLoad() {
+    if (window.FMADV) return Promise.resolve(window.FMADV);
+    if (ADV_P) return ADV_P;
+    ADV_P = new Promise(function (ok) {
+      var sc = document.createElement("script"); sc.src = "/assets/advsearch.js?v=" + ADVV; sc.async = true;
+      sc.onload = function () { ok(window.FMADV ? (window.FMADV.init(FMS), window.FMADV) : null); };
+      sc.onerror = function () { ADV_P = null; ok(null); };
+      document.head.appendChild(sc);
+    });
+    return ADV_P;
+  }
+  (function () { var b = $("advbtn"); if (b) b.addEventListener("click", function () { b.disabled = true; advLoad().then(function (A) { b.disabled = false; if (A) A.toggle(); }); }); })();
+  function advTyped(v) {
+    if (window.FMADV) { window.FMADV.typed(v); return; }
+    if (v && statQuery(v)) advLoad().then(function (A) { if (A) A.typed($("q").value.trim()); });
+  }
+  // what the results panel needs from the board, read live (the board object is replaced every refresh)
+  var FMS = {
+    D: function () { return D; }, statQuery: statQuery, searchItems: searchItems, statMatch: statMatch, statTotal: statTotal, statWords: statWords,
+    vsUsual: vsUsual, critLine: critLine, fullBase: fullBase, subKind: subKind, isWeapon: isWeapon, slotsUsed: slotsUsed, dbRow: dbRow,
+    kindOf: function (n) { var r = dbRow(n); return r && DBK[r[5]] || ""; }, allKinds: function () { return DBK.slice(); },
+    scrollable: function (sub) { var o = {}; (SCROLLS[sub] || []).forEach(function (ln) { ln[1].forEach(function (g) { Object.keys(g[1] || {}).forEach(function (k) { if (g[1][k] > 0) o[k] = 1; }); }); }); return o; },
+    statName: function (k) { return STATABBR[k] || k; }, iconBox: iconBox, money: money, short: short, ago: ago, el: el, showName: showName,
+    where: buyWhere, sellerEl: sellerEl, ev: ev, ladderOf: ladderOf, gradeOf: gradeOf,
+    openCopy: function (name, l, g) {
+      var i = D && D.byName[name]; if (g === undefined) g = i && l ? gradeOf(i, l) : null;
+      QROLL = null; window.__ladroll = g ? { n: name, k: "", v: 0, gid: g.id, at: Date.now() } : null;
+      PICK_COPY = true; pick(name); jumpToCard();
+    },
+    openItem: function (name) { QROLL = null; window.__ladroll = null; PICK_COPY = true; pick(name); jumpToCard(); }
+  };
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
   if (ENGINE) { engineMain(); return; }
   mark("start"); render(); try { if (MAINT) renderMaint(); } catch (e) {} mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;

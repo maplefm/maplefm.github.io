@@ -1323,6 +1323,13 @@ async function discordPrice(env, q) {
   const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
   if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
   else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
+  // "2 crit" on a 1 crit pair is the total: the grade is +1 (the same reading as !price and the site's search)
+  if (sr.roll && sr.g != null && /^CRIT/.test(sr.stat || "") && !sr.plus) {
+    await knownItem(env, "");
+    const bc = DBS[String(r.item).toLowerCase()] || {};
+    if (!bc[sr.stat] && bc[sr.stat === "CRIT" ? "CRITDMG" : "CRIT"]) sr.stat = sr.stat === "CRIT" ? "CRITDMG" : "CRIT";
+    const v0 = parseInt(sr.g, 10), b0c = bc[sr.stat] || 0; if (b0c && v0 >= b0c) { sr.g = String(v0 - b0c); sr.plus = true; }
+  }
   const lgD = sr.roll ? ladderGrade(r, sr, rawG) : null;
   if (lgD) { lines.unshift("**" + lgD.g[0] + ": " + ladRange(lgD.g) + "**"); }
   else if (sr.roll && sr.g != null) {
@@ -1417,7 +1424,9 @@ function rollQuote(r, sr) {
   let near = [];
   if (!sale) {
     const want = stat ? { [stat]: g } : mv0, dist = (mv) => { const ks = new Set([...Object.keys(mv), ...Object.keys(want)]); let d = 0; for (const k of ks) d += Math.abs((mv[k] || 0) - (want[k] || 0)); return d; };
-    near = rollEntries(r).filter((x) => (clean ? x.su === 0 : true) && (!stat || Object.keys(x.mv).length === 0 || x.mv[stat] != null))
+    const pool = rollEntries(r).filter((x) => (clean ? x.su === 0 : true) && (!stat || Object.keys(x.mv).length === 0 || x.mv[stat] != null));
+    const withStat = stat ? pool.filter((x) => x.mv[stat] != null) : [];
+    near = (withStat.length ? withStat : pool)
       .sort((x, y) => dist(x.mv) - dist(y.mv) || (x.su > 0) - (y.su > 0) || y.n - x.n).slice(0, 2)
       .map((x) => ({ label: (x.su === 0 ? "clean, " : "") + movesLabel(x.mv, x.su) + (x.su > 0 ? " (" + slotsTxt(x.su) + ")" : ""), p: x.p, n: x.n }));
   }
@@ -1458,20 +1467,23 @@ const SLOT_ONLY = /^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glo
 const LAD_STAT = { CRIT: ["crit rate", "crit damage"], CRITDMG: ["crit damage", "crit rate"] };
 function ladderGrade(r, sr, rawG) {
   if (!r || !Array.isArray(r.lad)) return null;
-  const v = parseInt(rawG, 10), want = (LAD_STAT[sr.stat] || [sr.stat ? statLabel(sr.stat) : ""]).map((x) => String(x).toLowerCase());
+  // weapons are graded by the total ("Clean 28 ATT"); every other grade by the gain over base ("Clean, +1 crit rate"),
+  // which is sr.g once a total like "2 crit" on a 1 crit pair has been turned into +1
+  const v = parseInt(rawG, 10), gv = parseInt(sr.g, 10), want = (LAD_STAT[sr.stat] || [sr.stat ? statLabel(sr.stat) : ""]).map((x) => String(x).toLowerCase());
   const priced = (g) => g[1] === "sold" || g[1] === "asking";
   for (const lab of want) {
     for (const sv of r.lad) {
       for (const g of sv[1] || []) {
         const name = String(g[0]), lo = name.toLowerCase();
         if (!priced(g)) continue;
-        if (sr.clean && !sr.stat && !v && name === "Clean") return { g };
+        // "clean wg", and a total that is just the item's base ("1 crit wg", "emerald earrings 2 crit"): the Clean grade
+        if (name === "Clean" && ((sr.clean && !sr.stat && !v) || (sr.stat && v > 0 && gv === 0))) return { g };
         let m = /^(clean|scrolled) (\d+) (m?att)( or more| or less)?$/.exec(lo);
         if (m && lab && m[3] === lab.toLowerCase() && (!sr.clean || m[1] === "clean") && (+m[2] === v || (m[4] === " or more" && v >= +m[2]) || (m[4] === " or less" && v <= +m[2]))) return { g };
         m = /^clean, \+(\d+) (.+)$/.exec(lo);
-        if (m && lab && m[2] === lab && +m[1] === v) return { g };
+        if (m && lab && m[2] === lab && +m[1] === gv) return { g };
         m = /^\+(\d+) (.+?)( or more)?$/.exec(lo);
-        if (m && lab && !sr.clean && m[2] === lab && (+m[1] === v || (m[3] && v >= +m[1]))) return { g };
+        if (m && lab && !sr.clean && m[2] === lab && (+m[1] === gv || (m[3] && gv >= +m[1]))) return { g };
       }
     }
   }

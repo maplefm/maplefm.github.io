@@ -1621,3 +1621,13 @@ table.fit1 .col-vol, table.fit2 .col-trend, table.fit3 .col-src, table.fit4 .col
 .sugg .so.kind .sp { font-weight: 700; color: var(--accent); white-space: nowrap; }
 /* small phones: the scrolled card bar keeps the item name and price whole; maplefm.gg shrinks to its logo */
 @media (max-width: 480px) { .nbar .nbrand { font-size: 0; gap: 0; } }
+
+/* Search by stats: the button under the search box (the panel and results load with assets/advsearch.js) */
+.advrow { display: flex; justify-content: flex-end; margin: 6px 2px 0; }
+.advbtn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line2); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 4px 12px 4px 9px; font: 700 .78rem var(--body); cursor: pointer; }
+.advbtn svg { width: 14px; height: 14px; color: var(--accent, var(--orange)); }
+.advbtn[aria-expanded="true"] { background: var(--accent-soft, var(--sel)); border-color: var(--accent, var(--orange)); }
+.advbtn:disabled { opacity: .6; }
+.advbox[hidden], .sres[hidden] { display: none; }
+/* an open item card takes the search box with it: the stat search panel and its results wait behind the card */
+body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, body.bigcard .advbox, body.bigcard .sres { display: none !important; }

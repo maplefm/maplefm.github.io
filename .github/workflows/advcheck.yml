@@ -1,0 +1,29 @@
+name: Search by stats branch check (temporary)
+on:
+  push:
+    branches: [adv-search]
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore WebKit's libraries from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/webkit-debs
+          key: webkit-debs-noble-pw1.56.0-none
+          restore-keys: webkit-debs-noble-pw1.56.0-
+      - name: Browsers
+        timeout-minutes: 10
+        run: |
+          pip install -q playwright==1.56.0
+          python3 -m playwright install webkit chromium > /tmp/pw.log 2>&1; tail -2 /tmp/pw.log
+          if ls ~/webkit-debs/*.deb > /dev/null 2>&1; then sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-download --no-install-recommends ~/webkit-debs/*.deb > /tmp/deps.log 2>&1 && echo "from cache" || { tail -3 /tmp/deps.log; sudo -E env "PATH=$PATH" python3 -m playwright install-deps webkit chromium > /tmp/deps2.log 2>&1; tail -2 /tmp/deps2.log; }
+          else sudo -E env "PATH=$PATH" python3 -m playwright install-deps webkit chromium > /tmp/deps2.log 2>&1; tail -2 /tmp/deps2.log; fi
+      - run: python3 tools/advcheck.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: advshots
+          path: /tmp/advshots
