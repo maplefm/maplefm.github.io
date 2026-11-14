@@ -1242,7 +1242,8 @@ function findRows(rows, q, abbr) {
     const raw = String(r.item || "").toLowerCase(), n = shown(r.item).toLowerCase(), words = (n + " " + raw).split(/[^a-z0-9%]+/);
     if (tierQ && !raw.endsWith(": " + tierQ[1])) return 9;
     if (n === q || raw === q) return 0; if (n.startsWith(q) || raw.startsWith(q)) return 1; if (n.includes(q) || raw.includes(q)) return 2;
-    const hit = (w) => words.some((x) => x.startsWith(w) || (x.length >= 3 && w.startsWith(x)));
+    // a typed word may run past the name's word ("steelies" for Steely), but only by a few letters: "bathrobe" is not "Bat"
+    const hit = (w) => words.some((x) => x.startsWith(w) || (x.length >= 3 && x.length >= w.length - 3 && w.startsWith(x)));
     if (qw.every((w) => n.includes(w) || raw.includes(w))) return 3;
     // each query word is the start of some word in the name, so "gloves magical" finds "Gloves Magic Attack Scroll"
     if (qw.every(hit)) return 4;
@@ -1412,7 +1413,7 @@ function rollQuote(r, sr) {
   const same = (mv) => {
     const ks = Object.keys(mv).filter((k) => mv[k]);
     if (!g) return ks.length === 0;
-    if (stat) return ks.length === 1 && mv[stat] === g;
+    if (stat) return ks.length === 1 && (sr.ge ? mv[stat] >= g : mv[stat] === g);
     return ks.length >= 1 && ks.some((k) => mv[k] === g) && (!r.rk || mv[r.rk] === g || ks.length === 1);
   };
   const okSu = (su) => !clean || su === 0;
@@ -1430,7 +1431,7 @@ function rollQuote(r, sr) {
       .sort((x, y) => dist(x.mv) - dist(y.mv) || (x.su > 0) - (y.su > 0) || y.n - x.n).slice(0, 2)
       .map((x) => ({ label: (x.su === 0 ? "clean, " : "") + movesLabel(x.mv, x.su) + (x.su > 0 ? " (" + slotsTxt(x.su) + ")" : ""), p: x.p, n: x.n }));
   }
-  return { label, sale, ask, near };
+  return { label: sr.ge ? label + " or more" : label, sale, ask, near };
 }
 const ROLL_WORD = "(crit ?damage|crit ?dmg|crit ?rate|cdmg|crit|magic ?attack|m\\.? ?att(?:ack)?|matt|matk|w\\.? ?att(?:ack)?|watk|watt|attack|attk|atk|att|str|strength|dex|dexterity|int|intelligence|intel|luk|luck|acc|accuracy|avoid|avoidability|speed|spd|jump|jmp|hp|mp|w\\.?def|m\\.?def|wdef|mdef|def)";
 // "7 att wg", "wg 7 attack", "bandana +3 str", "luk 5 earring" (with +), "clean wg", "7a wg": the roll comes off the
@@ -1447,8 +1448,9 @@ function splitRoll(q0) {
 function splitRoll0(q) {
   const lab = (w) => { for (const [re, l] of ROLL_STATS) if (re.test(String(w).trim())) return l; return ""; };
   const tidy = (m) => q.replace(m, " ").replace(/\s+/g, " ").trim();
-  let m = new RegExp("(^|\\s)\\+?(\\d{1,2})\\s*" + ROLL_WORD + "(?=\\s|$)", "i").exec(q);
-  if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[2] + " " + statLabel(lab(m[3])), g: m[2], stat: lab(m[3]), plus: /\+/.test(m[0]) } : { q, roll: "" }; }
+  // "5+ att" or "5 or more att": that total or higher, the same as the site's search
+  let m = new RegExp("(^|\\s)\\+?(\\d{1,2})(\\+|\\s?or more)?\\s*" + ROLL_WORD + "(?=\\s|$)", "i").exec(q);
+  if (m) { const rest = tidy(m[0]); const ge = !!m[3]; return rest ? { q: rest, roll: m[2] + (ge ? "+" : "") + " " + statLabel(lab(m[4])), g: m[2], stat: lab(m[4]), plus: /^\s*\+/.test(m[0].replace(/^\s+/, " ")) && !ge, ge } : { q, roll: "" }; }
   m = new RegExp("(^|\\s)" + ROLL_WORD + "\\s*\\+(\\d{1,2})(?=\\s|$)", "i").exec(q);
   if (m) { const rest = tidy(m[0]); return rest ? { q: rest, roll: m[3] + " " + statLabel(lab(m[2])), g: m[3], stat: lab(m[2]), plus: true } : { q, roll: "" }; }
   m = /(^|\s)(\d{1,2})a(?=\s|$)/i.exec(q);                       // "7a wg"
@@ -1466,7 +1468,7 @@ const SLOT_ONLY = /^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glo
 // Clean 28 ATT. Grades without a price are passed over, so the exact-roll answer below still covers them.
 const LAD_STAT = { CRIT: ["crit rate", "crit damage"], CRITDMG: ["crit damage", "crit rate"] };
 function ladderGrade(r, sr, rawG) {
-  if (!r || !Array.isArray(r.lad)) return null;
+  if (!r || !Array.isArray(r.lad) || sr.ge) return null;   // "or more" spans grades: the roll quote below answers it
   // weapons are graded by the total ("Clean 28 ATT"); every other grade by the gain over base ("Clean, +1 crit rate"),
   // which is sr.g once a total like "2 crit" on a 1 crit pair has been turned into +1
   const v = parseInt(rawG, 10), gv = parseInt(sr.g, 10), want = (LAD_STAT[sr.stat] || [sr.stat ? statLabel(sr.stat) : ""]).map((x) => String(x).toLowerCase());
