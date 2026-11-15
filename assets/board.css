@@ -1634,3 +1634,6 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 /* the big-sale line under the hero stats always has its own row with room for its text, so the stats row never
    changes height when the counts or the sale shown change (it shifted the whole board about 28px, layout shift 0.28) */
 .strip .hook, .strip button.st.hook { flex: 0 0 100%; justify-content: flex-start; min-height: 24px; }
+
+/* keyboard focus shows on the strip links and the watchlist button too */
+.strip button.st:focus-visible, .strip a.st:focus-visible, .wbtn:focus-visible, button.star:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
