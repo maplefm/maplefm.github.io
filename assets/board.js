@@ -1264,6 +1264,19 @@
       // the same stats and slots
       it.buy.forEach(function (x) { if (x.chat || !placed(x) || !x.x || x.x.SLOTS == null) return; var k = x.c + "|" + x.r + "|" + x.u + "|" + (x.x ? JSON.stringify(x.x) : "") + "|" + Math.floor(x.t / 72e5); (spotN[k] || (spotN[k] = [])).push(x); });
       Object.keys(spotN).forEach(function (k) { var g = spotN[k], names = {}; g.forEach(function (x) { names[String(x.s).toLowerCase()] = 1; }); if (Object.keys(names).length > 1) g.forEach(function (x) { x.nu = true; }); });
+      // any item: one shop spot and price inside two hours under two look-alike names ("Asebi" and "Asobi", "Tamar" and
+      // "Itamarr") is one shop read two ways. Two real sellers with look-alike names, same room, same item and price,
+      // inside two hours almost never happens; a wrong name happens about once in 20 listings
+      var spotL = {};
+      it.buy.forEach(function (x) { if (x.chat || x.nu || !placed(x)) return; var k = x.c + "|" + x.r + "|" + x.u + "|" + Math.floor(x.t / 72e5); (spotL[k] || (spotL[k] = [])).push(x); });
+      Object.keys(spotL).forEach(function (k) {
+        var g = spotL[k]; if (g.length < 2) return;
+        for (var a = 0; a < g.length; a++) for (var b = a + 1; b < g.length; b++) {
+          var A = String(g[a].s || "").toLowerCase(), Bn = String(g[b].s || "").toLowerCase();
+          if (A === Bn || Math.min(A.length, Bn.length) < 3) continue;
+          if (lev(A, Bn, 3) <= 3 || ocrKey(A) === ocrKey(Bn)) g[a].nu = g[b].nu = true;
+        }
+      });
       // a listing priced at a small slice of the typical is almost always a misread (a quantity read as the price, a
       // stream frame caught mid-change): it stays in Where to buy, but never becomes Cheapest now
       var floorU = it.typ > 0 ? it.typ * (it.equip ? 0.08 : 0.15) : 0;
