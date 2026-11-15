@@ -1229,7 +1229,8 @@ const meso = (n) => n > 0 && n < 10 && Math.round(n) !== n ? n.toFixed(2).replac
 
 function findRows(rows, q, abbr) {
   q = expandQuery(String(q || "").replace(/[^\p{L}\p{N}\s%:'+.&-]/gu, " "), abbr || {});   // emoji and symbols out
-  if (q.replace(/[^a-z0-9]/g, "").length < 2 || FILLER.has(q)) return [];   // "a", "the": no item
+  // "a", "the", or two letters no shortcut knows ("ab"): no item, rather than a guess
+  if (q.replace(/[^a-z0-9]/g, "").length < 3 || FILLER.has(q)) return [];
   const qw = q.split(/[\s:]+/).filter((w) => w && !FILLER.has(w));
   const tierQ = /scroll: (lesser|intermediate|greater)$/.exec(q);
   // a typo or two in a word ("wrok", "lable", "crusadr")
@@ -1241,10 +1242,13 @@ function findRows(rows, q, abbr) {
   const score = (r) => {
     const raw = String(r.item || "").toLowerCase(), n = shown(r.item).toLowerCase(), words = (n + " " + raw).split(/[^a-z0-9%]+/);
     if (tierQ && !raw.endsWith(": " + tierQ[1])) return 9;
-    if (n === q || raw === q) return 0; if (n.startsWith(q) || raw.startsWith(q)) return 1; if (n.includes(q) || raw.includes(q)) return 2;
+    if (n === q || raw === q) return 0; if (n.startsWith(q) || raw.startsWith(q)) return 1;
+    // inside the name only from the start of a word: "ab" is not Sabre, "ed 60" is not Shoes Speed, "sb" is not Crossbow
+    if ((" " + n).includes(" " + q) || (" " + raw).includes(" " + q)) return 2;
     // a typed word may run past the name's word ("steelies" for Steely), but only by a few letters: "bathrobe" is not "Bat"
     const hit = (w) => words.some((x) => x.startsWith(w) || (x.length >= 3 && x.length >= w.length - 3 && w.startsWith(x)));
-    if (qw.every((w) => n.includes(w) || raw.includes(w))) return 3;
+    // a one- or two-letter word must start a word in the name: "el" is not inside "shield"
+    if (qw.every((w) => w.length < 3 ? words.some((x) => x.startsWith(w)) : n.includes(w) || raw.includes(w))) return 3;
     // each query word is the start of some word in the name, so "gloves magical" finds "Gloves Magic Attack Scroll"
     if (qw.every(hit)) return 4;
     // a typo or an extra word: most of the words still land
