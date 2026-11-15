@@ -46,7 +46,9 @@ def top_roll(r):
     return best
 
 def public_summary(j):
-    pub = dict(j); pub["rows"] = [dict({k: r[k] for k in KEEP if k in r}, **({"r1": top_roll(r)} if top_roll(r) else {})) for r in (j.get("rows") or []) if isinstance(r, dict)]
+    pub = dict(j); pub["rows"] = [dict({k: r[k] for k in KEEP if k in r}, **({"r1": top_roll(r)} if top_roll(r) else {})) for r in (j.get("rows") or []) if isinstance(r, dict)
+                  # a name cut off on screen ("Blue Polka-Dot Pajam…") is a misread, never an item: the site hides it, so does the public copy
+                  and not str(r.get("item") or "").rstrip().endswith(("…", "..."))]
     pub["public"] = True
     return pub
 
