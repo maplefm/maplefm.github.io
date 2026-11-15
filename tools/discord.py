@@ -17,7 +17,7 @@ With the secret missing every job exits quietly, so the data workflows never fai
 
 STATE.json is kept on the live branch so nothing is posted twice.
 """
-import sys, os, json, math, glob, datetime, subprocess, urllib.request, time, re
+import sys, os, json, math, glob, datetime, subprocess, urllib.request, time, re, hashlib
 
 try:
     from zoneinfo import ZoneInfo
@@ -380,7 +380,16 @@ def job_coverage(data_dir, state_path):
 QUIET = re.compile(r"\b(earn|pay|payout|payouts|paid|credit|credits|budget|rate|paypal|money|fund|price floor|cap)\b", re.I)
 # behind-the-scenes work stays out of the public updates: the Reddit watch, Ko-fi and supporter thank-yous, outreach,
 # owner alerts and DMs, scheduled jobs and the Worker
-PRIVATE = re.compile(r"\b(reddit|ko-?fi|supporters?|tiers?|outreach|whispers?|dms?|owner|admins?|alerts?|scheduled|schedule|cron|dispatch|worker|watchdog|stat check|stats? report|partner|the club|kingdavid|adam|weaver|api access|speed watch|fact check|smoke)\b", re.I)
+_PRIVATE_WORDS = re.compile(r"\b(reddit|ko-?fi|supporters?|tiers?|outreach|whispers?|dms?|owner|admins?|alerts?|scheduled|schedule|cron|dispatch|worker|watchdog|stat check|stats? report|partner|the club|api access|speed watch|fact check|smoke)\b", re.I)
+
+# people's names stay out too; they are kept here only as hashes so the public repo never spells them
+_PRIVATE_NAMES = {'a1840631abf6', '3f7a4e57eaa3', '0e484982a843'}
+class _Private:
+    def search(self, s):
+        s = str(s or "")
+        if _PRIVATE_WORDS.search(s): return True
+        return any(hashlib.sha256(("clubfm:" + w.lower()).encode()).hexdigest()[:12] in _PRIVATE_NAMES for w in re.findall(r"[A-Za-z]+", s))
+PRIVATE = _Private()
 
 def plain_change(subj):
     """A commit title as a visitor would read it: no file names, code words or brackets, one short line."""

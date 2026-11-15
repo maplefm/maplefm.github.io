@@ -4,9 +4,15 @@
 <script>
 (function () {
   var p = location.pathname, n = p.toLowerCase();
+  // folders with no page of their own: GitHub sends /map to /map/, so dropping the slash would loop forever
+  var HUB = { "/map/": "/maps/", "/monster/": "/monsters/", "/quest/": "/quests/", "/c/": "/", "/download/": "/contribute.html", "/i/": "/", "/icons/": "/", "/data/": "/", "/assets/": "/", "/tools/": "/", "/worker/": "/" };
+  if (HUB[n]) { location.replace(HUB[n]); return; }
   if ((n.match(/\//g) || []).length === 2 && /\/$/.test(n)) n = n.replace(/\/+$/, "");
   n = n.replace(/(%20|[.,!?;:)\]'"])+$/, "").replace(/\.htm$/, ".html");
-  if (n !== p) location.replace(n + location.search + location.hash);
+  if (n === p) return;
+  // never send the same address twice in a row: a second try means it bounces back here
+  try { var k = "fm-404", was = JSON.parse(sessionStorage.getItem(k) || "null"); if (was && was.n === n && Date.now() - was.t < 10000) return; sessionStorage.setItem(k, JSON.stringify({ n: n, t: Date.now() })); } catch (e) { return; }
+  location.replace(n + location.search + location.hash);
 })();
 </script>
 <style>
