@@ -8,7 +8,7 @@
     if (n >= 1e4) return f(n / 1e3, n >= 99.95e3 ? 0 : 1) + "K";
     return n >= 10 ? Math.round(n).toLocaleString("en-US") : f(n, 2);
   }
-  function full(n) { return Math.round(n || 0).toLocaleString("en-US"); }
+  function full(n) { return n > 0 && n < 10 && Math.round(n) !== n ? meso(n) : Math.round(n || 0).toLocaleString("en-US"); }
   function set(id, v) { var e = document.getElementById(id); if (e && v) e.textContent = v; }
   fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
     if (!s || !s.rows) return;

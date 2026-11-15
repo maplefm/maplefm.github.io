@@ -1225,7 +1225,7 @@ async function summaryRows(env) {
 // scrolls are shown by success rate, as on the board: Lesser 100%, Intermediate 60%, Greater 10%
 const shown = (name) => String(name || "").replace(/ Scroll: (Lesser|Intermediate|Greater)$/, (m, t) => " Scroll " + ({ Lesser: "100%", Intermediate: "60%", Greater: "10%" })[t]);
 // exact under 10K (1,888 not 2K), then 12.5K, 790K, 1.15M, 1.2B
-const meso = (n) => n > 0 && n < 1 ? n.toFixed(2) : n >= 999.5e6 ? (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B" : n >= 999.5e3 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "M" : n >= 99.95e3 ? Math.round(n / 1e3) + "K" : n >= 9999.5 ? (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K" : Math.round(n).toLocaleString("en-US");
+const meso = (n) => n > 0 && n < 10 && Math.round(n) !== n ? n.toFixed(2).replace(/0+$/, "").replace(/\.$/, "") : n >= 999.5e6 ? (n / 1e9).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "B" : n >= 999.5e3 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "") + "M" : n >= 99.95e3 ? Math.round(n / 1e3) + "K" : n >= 9999.5 ? (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K" : Math.round(n).toLocaleString("en-US");
 
 function findRows(rows, q, abbr) {
   q = expandQuery(String(q || "").replace(/[^\p{L}\p{N}\s%:'+.&-]/gu, " "), abbr || {});   // emoji and symbols out
