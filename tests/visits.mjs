@@ -1,4 +1,4 @@
-const W = (await import("./index.js")).default;
+const W = (await import((process.argv[2] || ".") + "/index.js")).default;
 const kv = new Map(); const KV = { get: async (k) => kv.get(k) ?? null, put: async (k, v) => kv.set(k, v), delete: async () => {}, list: async () => ({ keys: [] }) };
 let inserts = [];
 const DB = { prepare: (sql) => ({ bind: (...a) => ({ run: async () => { if (/INSERT INTO hits/.test(sql)) inserts.push(a); return {}; }, all: async () => ({ results: [] }), first: async () => null }), run: async () => ({}), all: async () => ({ results: [] }), first: async () => null }) };
