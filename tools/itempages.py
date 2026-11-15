@@ -415,7 +415,10 @@ def summary_lines(r, top, vp, daily, g):
         md = lambda v: sorted(v)[len(v) // 2]
         a, b = md([d[1] for d in daily[:3]]), md([d[1] for d in daily[-3:]]); lo, hi = min(d[1] for d in daily), max(d[1] for d in daily)
         if a and abs(b / a - 1) < 0.05 and hi <= lo * 1.3: out.append(f"Steady over the last {len(daily)} days, between {meso(lo)} and {meso(hi)}.")
-        elif a and abs(b / a - 1) <= 0.6: out.append(f"{'Up' if b > a else 'Down'} about {abs(round((b / a - 1) * 100))}% over the last {len(daily)} days.")
+        elif a and abs(b / a - 1) <= 0.6:
+            pct = abs(round((b / a - 1) * 100))
+            # a swing that ends where it started is no change: never "Down about 0%"
+            out.append(f"{'Up' if b > a else 'Down'} about {pct}% over the last {len(daily)} days." if pct else f"About level with {len(daily)} days ago, after moving between {meso(lo)} and {meso(hi)}.")
     dl = drop_line(g)
     if dl: out.append(dl)
     elif r.get("salesN"): out.append(f"{full(r['salesN'])} sales seen so far.")
