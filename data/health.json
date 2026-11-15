@@ -1,5 +1,5 @@
 {
- "at": 1794768699269,
+ "at": 1794772080781,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -57,16 +57,16 @@
    "behind": 3
   },
   "laclac": {
-   "rows24": 6264,
-   "room24": 6264,
-   "ch24": 6264,
+   "rows24": 4842,
+   "room24": 4842,
+   "ch24": 4842,
    "rows7": 78986,
    "room7": 77293,
    "late7": 13,
-   "chat24": 5,
-   "last": 1794768214,
+   "chat24": 3,
+   "last": 1794769205,
    "ver": "2026.11.14.1",
-   "lag_median_min": 4.2,
+   "lag_median_min": 4.3,
    "room_rate24": 1.0,
    "room_rate7": 0.979,
    "late_share7": 0.0,
@@ -275,7 +275,7 @@
    "incomplete upload": 1966
   },
   "2026-11-15": {
-   "incomplete upload": 1087
+   "incomplete upload": 1132
   }
  },
  "rejects": {
