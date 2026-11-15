@@ -1,6 +1,6 @@
 name: Weekly recap files
 # Sunday about 9 PM Eastern: the Week tab of the market report saved as a PDF and a PNG (tools/weeklypdf.cjs) into
-# data/weekly/ on the live branch. At 10 PM the Worker DMs both to the admins with a Reddit title, ready to post.
+# data/weekly/ on the live branch. (The 10 PM Reddit title DM to the admins is off since Nov 15 2026.)
 on:
   schedule:
     - cron: "3 1 * * 1"
