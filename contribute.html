@@ -111,6 +111,8 @@ code, kbd { font-family: ui-monospace, Consolas, monospace; background: var(--pa
 .ladder li.you { outline: 3px solid var(--gold); }
 .banner { border: 2px solid var(--gold); background: linear-gradient(135deg, rgba(217,165,32,.14), var(--panel2)); border-radius: 12px; padding: 10px 14px; font-weight: 700; margin: 0 0 12px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 0 0 14px; }
+/* the five numbers arrive a moment after the page: keep their room so the page below never jumps */
+#kpis:empty { min-height: 505px; } @media (min-width: 600px) { #kpis:empty { min-height: 326px; } } @media (min-width: 820px) { #kpis:empty { min-height: 208px; } }
 .kpi { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; }
 .kpi small { display: block; color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .kpi b { font-family: var(--display); font-size: 1.3rem; font-weight: 700; white-space: nowrap; }
@@ -155,6 +157,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
 .wallcard small { color: var(--muted); font-weight: 700; font-size: .72rem; }
 .earngrid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, 1fr); gap: 16px; align-items: start; margin-top: 2px; }
 .earnrank { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+#top:empty { min-height: 1070px; }   /* the ranking arrives a moment later; about 17 rows today */
 @media (max-width: 900px) { .earngrid { grid-template-columns: 1fr; } }
 .topl { display: grid; gap: 6px; } .topl .er { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; padding: 7px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--panel); }
 .topl .er.me { outline: 2px solid var(--gold); }
@@ -181,6 +184,8 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
 .kofitab .kx { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border: 0; border-radius: 50%; background: rgba(255,255,255,.28); color: #fff; font: 700 .85rem/20px var(--body, system-ui); cursor: pointer; padding: 0; }
 .kofitab .kx:hover { background: rgba(255,255,255,.5); }
 .kofitab[hidden] { display: none !important; }
+/* one menu row from 1000 px, as the finished page always is: a font arriving late used to wrap it for a moment */
+@media (min-width:1000px){.sitenav{flex-wrap:nowrap}}
 </style>
 <link rel="stylesheet" href="/assets/nav.css?v=6"><style>.sitenav .sn-brand{color:#fff3c4}.sitenav .sn-brand b{color:var(--gold-hi)}.sitenav.sn-pin{--bg:var(--bg1);--line:rgba(255,255,255,.12)}</style></head>
 <body>
