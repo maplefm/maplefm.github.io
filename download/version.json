@@ -1,10 +1,15 @@
 {
- "version": "2026.11.13.1",
- "date": "2026-11-13T20:43:24+00:00",
- "notes": "Shops selling Return Scroll - Nearest Town, Return Scroll to My Home and the new Return Scroll to Forgotten Hollow now read with the full item name instead of a cut-off one.",
- "sha256": "286cfc3a25376deb4db79dc159a57a7eb6b91245715e7bfe0fd34817fad13c75",
- "size": 184263,
+ "version": "2026.11.14.1",
+ "date": "2026-11-15T00:20:24+00:00",
+ "notes": "Trade chat: \"Composite Bow 60 att\" is the bow with 60 attack, not a 60% bow scroll; \"wg\", \"wlr\" and \"pe\" are read; a one-word item inside a longer name (\"Red Beret\", \"Cupid's Crossbow\") is no longer read as the short item; \"4 str above average\" is a roll grade, not 4 STR.",
+ "sha256": "43a626c44d8b4519af306081905ba9a4dc1223800d1670fbf03138305f1ce55b",
+ "size": 185062,
  "history": [
+  {
+   "version": "2026.11.14.1",
+   "date": "2026-11-15",
+   "notes": "Trade chat: \"Composite Bow 60 att\" is the bow with 60 attack, not a 60% bow scroll; \"wg\", \"wlr\" and \"pe\" are read; a one-word item inside a longer name (\"Red Beret\", \"Cupid's Crossbow\") is no longer read as the short item; \"4 str above average\" is a roll grade, not 4 STR."
+  },
   {
    "version": "2026.11.13.1",
    "date": "2026-11-13",
@@ -172,5 +177,5 @@
   }
  ],
  "pip": [],
- "sig": "60aa94b9c76b8e8f5eec33938e5ea7f1a6e5040ec3537916b02dcbcf8dcb8afcc9c582622c0a2394a6c0b9395e9480caf881c0c90628ec76dbc2a04807a9d0ddf6b3da167e61d1cd123a8c1a25fa69bc23123d641ea60f7f0564d432ba2069608baf961fcdd0dc761a179f93e4f82318caeb8be92ef2bdbd838b5c49f286e7922e701c40f9818ec7b585003078580b0ac370cdffcc638e39955d396d3d30e7023dd22623350296b717146fe1408deefd7a35488c9bdc75b7876340c0cb8cb0332adc355eda34123c125dd2bf32507981324ea8aa7f36cc89e92cc5a8aaad0376ea69d260482bfe96d29a3da5a9e3315136388cddf101a924e214eb9e1d3b1c1e"
+ "sig": "6c5cefaf4615907e05c25a4bafeea92d36e86dc2c44562a961a24a9e382c4a8628482ff71523ee2781b59633814001a9ecb93538b0948b46ca2c53b73d8fc7d1948de478faceba1016e8170121b28d78ab642404251bff54d7af6865f2011374ddb45d2861397d33a5251479701e59afbe39d1026117e2b1b482f47a32c73f34e9b4d6b76acb7448f79366c749ea6843e536ea04c157b705fa1d0cec8cca1917843507582937b74bd94fd973246c9afd6f49475cda2eac18373819d86515a9c80d4b90791184c73c8dcd92cc8d7733874c79ca76e64b5434e64a8fdc9f57248b6b44f83f4cec20dbe269e5705555c2ffeee7939f1815d20c514dce09caafe9ed"
 }

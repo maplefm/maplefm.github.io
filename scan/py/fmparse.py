@@ -653,6 +653,25 @@ def _price_val(m):
     s = m.group(3) or m.group(4)
     return int(s.replace(",", ""))
 
+_SHORT = {"wg": "Work Gloves", "wlr": "White Label Ring", "pe": "Power Elixir"}
+# one-word items that end longer names ("Crossbow" in "Cupid's Crossbow", "Spear" in "Fish Spear"): with another word
+# right before them in chat, the player named a different item we may not know, so the short one is not taken
+_TAILS = None
+def _tails():
+    global _TAILS
+    if _TAILS is None:
+        allnames = set(ITEMS) | set(_ITEM_NORM.values())
+        one = {n for n in allnames if " " not in n.strip() and len(n) >= 4}
+        ends = {n.rsplit(" ", 1)[-1] for n in allnames if " " in n}
+        _TAILS = {n for n in one if n in ends}
+    return _TAILS
+_LEAD_WORD = re.compile(r"^(?:s|b|t|l|lf|wts|wtb|wtt|selling|buying|sell|buy|sale|my|\d[\d.,]*[km]?|x\d+|\d+x|\d+pc|\d+pcs)$", re.I)
+def _lead_ok(before):
+    """the word right before a match: nothing, a side marker or a count leaves a one-word item standing"""
+    t = before.rstrip()
+    if not t or t[-1] in ">»<]|/;,:(&+": return True
+    return bool(_LEAD_WORD.match(t.split()[-1]))
+
 def _find_items(text):
     """Return [(start, end, canonical)] for known items mentioned in a stretch of chat text."""
     low = text.lower()
@@ -675,9 +694,17 @@ def _find_items(text):
             # whole words only
             if (a > 0 and low[a - 1].isalnum()) or (b < len(low) and low[b].isalpha() and not low[b:b + 1] == "s"):
                 continue
+            # "cupid's crossbow": a one-word item with a name word before it is some longer item, not this one
+            if canon in _tails() and not _lead_ok(low[max(0, a - 24):a]):
+                continue
             for q in range(j, j + len(key)):
                 taken[q] = True
             found.append((a, b, canon))
+    # the short names trade chat uses most ("10 att wg", "wlr 800k", "pe 3k"): whole words only, from the site's nicknames
+    for sm in re.finditer(r"(?<![a-z0-9])(wg|wlr|pe)s?(?![a-z0-9])", low):
+        a, b = sm.start(), sm.end()
+        if any(not (b <= fa or a >= fb) for fa, fb, _ in found): continue
+        found.append((a, b, _SHORT[sm.group(1)]))
     # scrolls: a percent plus a known scroll type
     # The scroll a percent belongs to is the one named closest to it, in the same stretch of the message:
     # the window stops at an item link [..], a price, a separator or the next side marker, so a linked
@@ -713,7 +740,8 @@ def _find_items(text):
 
 # "EINT 60", "gfa 10": a scroll word with a bare rate right after it is that rate, as if written "60%"
 _SKW = sorted({k for _, ks in _SCROLL_BASES for k in ks if len(k) >= 3}, key=len, reverse=True)
-_BARE_RATE = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(k) for k in _SKW) + r")\s?(100|60|10)(?![\d.,%]|\s?[kKmM]\b|\s?mil)", re.I)
+# ...but not when a stat follows the number: "Composite Bow 60 att" is a 60 attack bow, not a 60% bow scroll
+_BARE_RATE = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(k) for k in _SKW) + r")\s?(100|60|10)(?![\d.,%]|\s?[kKmM]\b|\s?mil|\s?(?:w?att(?:ack)?|w?atk|m\.?\s?att|matt|magic|str|dex|int|luk|acc|avoid|speed|jump|crit|wdef|mdef|def|hp|mp)\b)", re.I)
 
 _BAD_CTX = re.compile(r"\bc\s?/\s?o\b|\bco\b|current offer|\bb/o\b|\bbo\b", re.I)
 
@@ -743,6 +771,8 @@ def chat_roll(text):
     av = re.search(r"(\d{1,2})\s?(?:[a-z]{2,5}\s?)?(above|over|below|under)\s?(?:the\s)?av(?:g|e|erage)\b", t, re.I)
     if av and int(av.group(1)) <= 15:
         x["g"] = int(av.group(1)) * (1 if av.group(2).lower() in ("above", "over") else -1)
+        # "4 str above average" is how far the roll is off average, never a total of 4 STR
+        t = t[:av.start()] + " " + t[av.end():]
     elif g:
         gs = [v for v in g.groups() if v]; sign, n = gs[0], gs[1]
         if int(n) <= 15: x["g"] = int(n) * (1 if sign == "+" else -1)
