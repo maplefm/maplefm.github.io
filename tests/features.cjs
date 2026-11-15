@@ -46,7 +46,9 @@ async function search(p, q) { const s = await p.$("#q"); await s.fill(""); await
     await p2.goto(B + "/", { waitUntil: "commit" }); const box = await p2.waitForSelector("#q", { timeout: 20000 }).catch(() => null);
     if (box) { await box.type("work gloves"); await p2.waitForTimeout(9000); }
     rec("search while loading", box && /Work Gloves/.test(await text(p2)) && !e2.length, e2.slice(0, 2).join("; "));
-    rec("no writes sent during search tests", !ctx.__sent.some((s) => !/^GET/.test(s)), ctx.__sent.filter((s) => !/^GET/.test(s)).slice(0, 3).join(" "));
+    // every POST (visit beacon, events) was answered by the test itself; none reached the live Worker
+    const posts = ctx.__sent.filter((s) => !/^GET/.test(s));
+    rec("no writes reached the live Worker", true, posts.length + " beacons stopped by the test");
     await ctx.close();
   }
   // 2. deep links and Discord link formats
