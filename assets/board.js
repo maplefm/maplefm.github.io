@@ -1687,7 +1687,8 @@
   var EV_SEEN = {};
   function ev(p) {
     try {
-      if (EV_SEEN[p]) return; EV_SEEN[p] = 1;
+      // automated browsers (test tools, crawlers that run pages) say so; their clicks and searches are not demand
+      if (navigator.webdriver || EV_SEEN[p]) return; EV_SEEN[p] = 1;
       var d = JSON.stringify({ p: String(p).slice(0, 120), r: "", q: "" }), u = "https://api.maplefm.gg/hit";
       if (navigator.sendBeacon) navigator.sendBeacon(u, new Blob([d], { type: "text/plain" })); else fetch(u, { method: "POST", body: d, keepalive: true, mode: "no-cors" });
     } catch (e) {}
@@ -4187,7 +4188,7 @@
     if (!sessionStorage.getItem("fm-visit")) { sessionStorage.setItem("fm-visit", "1"); NUDGE.v++; localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } } catch (e) {}
   var TIP_REF = (function () { try { return document.referrer || ""; } catch (e) { return ""; } })();
   function tipSave() { try { localStorage.setItem("fm-nudge", JSON.stringify(NUDGE)); } catch (e) {} }
-  function tipHit(id, what) { try { navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: "#tip:" + id + ":" + what, r: "", q: "" })], { type: "text/plain" })); } catch (e) {} }
+  function tipHit(id, what) { try { if (navigator.webdriver) return; navigator.sendBeacon("https://api.maplefm.gg/hit", new Blob([JSON.stringify({ p: "#tip:" + id + ":" + what, r: "", q: "" })], { type: "text/plain" })); } catch (e) {} }
   function tipWatchN() { var n = 0; for (var k in WATCH) n++; return n; }
   var TIPS = [
     { id: "stream", when: function () { return /twitch\.tv|streamlabs|kick\.com|youtube\.com/i.test(TIP_REF) || NUDGE.v >= 4; },
