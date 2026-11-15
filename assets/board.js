@@ -2980,7 +2980,8 @@
     // a bare slot word ("luk 5 earring", "gloves 10 att") is a scroll search, the same as !price reads it
     if (/^(the |a |an )?(earrings?|ear|hat|helm|helmet|cap|gloves?|glove|cape|capes|shoes?|boots?|top|tops|topwear|bottom|bottoms|pants|overall|ova|ovr|shield|weapon|wep|claw|bow|crossbow|xbow|cbow|dagger|spear|polearm|pole|wand|staff|sword|axe|blunt|bw|ohs|ths|1h|2h|1hs|2hs|1ha|2ha|1hbw|2hbw|knuckle|gun|face|eye|accessory|ring|pendant|belt)$/.test(f.rest) && !/\+\d/.test(q)) return null;
     // a number with no item left ("8 att") is not a stat search; an absurd number is a typo, not a roll
-    f.stats = f.stats.filter(function (s0) { return s0.v >= 0 && s0.v <= (/^(HP|MP)$/.test(s0.k) ? 400 : 60); });
+    // weapon attack and overall defense run past 60 (Doombringer 93 ATT, Red Calaf 68 W.DEF)
+    f.stats = f.stats.filter(function (s0) { return s0.v >= 0 && s0.v <= (/^(HP|MP)$/.test(s0.k) ? 400 : /^(ATT|MATT|WDEF|MDEF)$/.test(s0.k) ? 250 : 60); });
     if (!f.rest || (!f.stats.length && !f.clean && f.slots == null)) return null;
     return f;
   }
