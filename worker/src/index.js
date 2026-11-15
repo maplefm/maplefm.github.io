@@ -1348,8 +1348,8 @@ async function discordPrice(env, q) {
     if ((sr.stat === "ATT" || sr.stat === "MATT") && b0[sr.stat]) { const v = parseInt(sr.g, 10); if (v >= 15 && v >= b0[sr.stat] - 15) sr.g = String(v - b0[sr.stat]); }
     const rq = rollQuote(r, sr), rl = rq.label.charAt(0).toUpperCase() + rq.label.slice(1);
     if (/^CRIT/.test(sr.stat || "") && !b0.CRIT && !b0.CRITDMG) lines.push(shown(r.item) + " has no crit line of its own, so crit on one only comes from scrolls.");
-    if (rq.sale) lines.push("**" + rl + ": " + meso(rq.sale.p) + "**" + C + " from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : "") + (rq.ask ? " · cheapest up now " + mz(rq.ask.pr) : ""));
-    else if (rq.ask) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + mz(rq.ask.pr));
+    if (rq.sale) lines.push("**" + rl + ": " + meso(rq.sale.p) + "**" + C + " from " + rq.sale.n + " sales" + (rq.saleRoll || "") + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : "") + (rq.ask ? " · cheapest up now " + mz(rq.ask.pr) + (rq.askRoll || "") : ""));
+    else if (rq.ask) lines.push("**" + rl + "**: no sales caught yet · cheapest up now " + mz(rq.ask.pr) + (rq.askRoll || ""));
     else lines.push(rl + ": no sales caught at that roll lately.");
     if (!rq.sale && rq.near.length) lines.push("Closest rolls that sold: " + rq.near.map((x) => x.label + " **" + meso(x.p) + "**" + C + " (" + x.n + " sales)").join(" · "));
     if (!rq.sale) lines.push("Every roll's price is on the [item's card](" + link + ")");
@@ -1435,7 +1435,10 @@ function rollQuote(r, sr) {
       .sort((x, y) => dist(x.mv) - dist(y.mv) || (x.su > 0) - (y.su > 0) || y.n - x.n).slice(0, 2)
       .map((x) => ({ label: (x.su === 0 ? "clean, " : "") + movesLabel(x.mv, x.su) + (x.su > 0 ? " (" + slotsTxt(x.su) + ")" : ""), p: x.p, n: x.n }));
   }
-  return { label: sr.ge ? label + " or more" : label, sale, ask, near };
+  // "5+ att" names what was asked; the copy found may be +6, so its own roll goes on the price line (rollOf)
+  const geLabel = (clean ? "clean, " : "") + (stat ? movesLabel({ [stat]: g }) : "+" + g);
+  const rollOf = (x) => x && sr.ge && movesLabel(x.mv) !== movesLabel({ [stat]: g }) ? " (" + movesLabel(x.mv) + ")" : "";
+  return { label: sr.ge ? geLabel + " or more" : label, sale, ask, near, saleRoll: rollOf(sale), askRoll: rollOf(ask) };
 }
 const ROLL_WORD = "(crit ?damage|crit ?dmg|crit ?rate|cdmg|crit|magic ?attack|m\\.? ?att(?:ack)?|matt|matk|w\\.? ?att(?:ack)?|watk|watt|attack|attk|atk|att|str|strength|dex|dexterity|int|intelligence|intel|luk|luck|acc|accuracy|avoid|avoidability|speed|spd|jump|jmp|hp|mp|w\\.?def|m\\.?def|wdef|mdef|def)";
 // "7 att wg", "wg 7 attack", "bandana +3 str", "luk 5 earring" (with +), "clean wg", "7a wg": the roll comes off the
@@ -1550,8 +1553,8 @@ async function priceLine(env, raw) {
     const head = shown(r0.item) + " " + rq.label + ":" + (/^CRIT/.test(sr.stat || "") && !b00.CRIT && !b00.CRITDMG ? " (it has no crit line of its own, so crit only comes from scrolls)" : "");
     if (rq.sale || rq.ask) {
       const b1 = [head];
-      if (rq.sale) b1.push("typical " + meso(rq.sale.p) + " from " + rq.sale.n + " sales" + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : ""));
-      if (rq.ask) b1.push((rq.sale ? "· " : "") + "cheapest up now " + meso(rq.ask.pr));
+      if (rq.sale) b1.push("typical " + meso(rq.sale.p) + " from " + rq.sale.n + " sales" + (rq.saleRoll || "") + (rq.sale.su > 0 ? " (" + slotsTxt(rq.sale.su) + ")" : ""));
+      if (rq.ask) b1.push((rq.sale ? "· " : "") + "cheapest up now " + meso(rq.ask.pr) + (rq.askRoll || ""));
       if (!rq.sale && rq.near.length) b1.push("· no sales of this exact roll yet, closest: " + rq.near.map((x) => x.label + " " + meso(x.p)).join(", "));
       b1.push("· maplefm.gg/c/" + slug0);
       return b1.join(" ").slice(0, 390);
