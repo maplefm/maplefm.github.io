@@ -1,5 +1,5 @@
 {
- "at": 1794734082,
+ "at": 1794759099,
  "ok": true,
  "failing": [],
  "checks": [
@@ -7,147 +7,147 @@
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 205,
+   "ms": 181,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 173,
+   "ms": 123,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 129,
+   "ms": 116,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 132,
+   "ms": 196,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 135,
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 291,
+   "ms": 120,
    "fix": null
   },
   {
    "name": "Player market",
-   "ok": true,
-   "detail": "loads",
-   "ms": 211,
-   "fix": null
-  },
-  {
-   "name": "Shops",
-   "ok": true,
-   "detail": "loads",
-   "ms": 173,
-   "fix": null
-  },
-  {
-   "name": "Training guide",
-   "ok": true,
-   "detail": "loads",
-   "ms": 230,
-   "fix": null
-  },
-  {
-   "name": "Quest page",
    "ok": true,
    "detail": "loads",
    "ms": 152,
    "fix": null
   },
   {
+   "name": "Shops",
+   "ok": true,
+   "detail": "loads",
+   "ms": 124,
+   "fix": null
+  },
+  {
+   "name": "Training guide",
+   "ok": true,
+   "detail": "loads",
+   "ms": 105,
+   "fix": null
+  },
+  {
+   "name": "Quest page",
+   "ok": true,
+   "detail": "loads",
+   "ms": 111,
+   "fix": null
+  },
+  {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 120,
+   "ms": 114,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 131,
+   "ms": 117,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 127,
+   "ms": 120,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 363,
+   "ms": 173,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 187,
+   "ms": 114,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 120,
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 188,
+   "ms": 113,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
    "detail": "Work Gloves: clean 1,274 to 1,999 (8 sold) · clean +1 crit rate 500K to 519K (5 sold) · +1",
-   "ms": 303,
+   "ms": 648,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
    "detail": "uploaded 1 min ago",
-   "ms": 100,
+   "ms": 407,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "68 open listings, #selling synced 4 min ago",
-   "ms": 816,
+   "detail": "74 open listings, #selling synced 1 min ago",
+   "ms": 794,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "6 visits, 0 crashed",
-   "ms": 116,
+   "detail": "4 visits, 0 crashed",
+   "ms": 101,
    "fix": null
   },
   {
@@ -160,7 +160,7 @@
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (33s, 43 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (33s, 40 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -168,21 +168,21 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 68,
+   "ms": 126,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1399 items",
-   "ms": 132,
+   "detail": "1395 items",
+   "ms": 137,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": true,
    "detail": "all scanners within the bars",
-   "ms": 147,
+   "ms": 124,
    "fix": null
   },
   {
@@ -675,5 +675,5 @@
    "repairs": []
   }
  ],
- "beat": 1794734082
+ "beat": 1794759099
 }
