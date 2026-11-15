@@ -31,7 +31,7 @@ const MEGA_AT = 50000;   // sales caught that earn the Mega Deals role, the same
 export default {
   async scheduled(ev, env, ctx) {
     // Reddit watch runs on its own trigger so it gets its own budget of outside requests
-    if (ev.cron === REDDIT_CRON) { ctx.waitUntil(redditWatch(env).catch((e) => env.ACCOUNTS.put("reddit:err", String(e && e.stack || e).slice(0, 500)))); return; }
+    if (ev.cron === REDDIT_CRON) { if (!REDDIT_ON) return; ctx.waitUntil(redditWatch(env).catch((e) => env.ACCOUNTS.put("reddit:err", String(e && e.stack || e).slice(0, 500)))); return; }
     // every 5 minutes: watchlist DMs; on the hourly run: the role sync too
     ctx.waitUntil(notifyWatchers(env));
     ctx.waitUntil(watchdogAlert(env).catch(() => {}));
@@ -1726,6 +1726,9 @@ async function refStats(env, url) {
 // Every 5 minutes: new posts on the Classic subreddits that talk prices or the Free Market get DMed to the admins,
 // so Maya can answer while the post is fresh. Reads Reddit's public feeds only; nothing is posted or voted.
 const REDDIT_CRON = "2-59/5 * * * *";
+// Off since Nov 15 2026: Adam asked for no more Reddit DMs. The watch, the PC push and the Sunday recap draft all stop.
+// Set true to bring them back.
+const REDDIT_ON = false;
 const REDDIT_SUBS = ["MSClassicWorld", "MapleStoryClassic"];
 // What counts as a price or Free Market post. One loose word ("scroll", "shop", "worth", "pc", "deal") used to be enough,
 // which flagged build questions, cash shop chatter and "is it worth it" posts. Now a post needs one clear market signal
@@ -1805,6 +1808,7 @@ async function redditFeed(sub) {
 async function redditPush(req, env) {
   const k = req.headers.get("X-Push-Key") || "";
   if (!env.REDDIT_PUSH_KEY || k !== env.REDDIT_PUSH_KEY) return json({ error: "no" }, 403);
+  if (!REDDIT_ON) return json({ ok: true, new: 0, off: true });   // the PC reader keeps working, nothing is sent
   const body = await req.json().catch(() => null);
   const posts = body && Array.isArray(body.posts) ? body.posts.slice(0, 60) : [];
   const st = (await env.ACCOUNTS.get("reddit:state", "json")) || { seen: [] };
@@ -2158,7 +2162,7 @@ async function trafficPost(env) {
   if (et.hour === 4) await env.INBOX_DB.prepare("DELETE FROM hits WHERE t < ?").bind(nowMs - 120 * 864e5).run();
   const dow = new Date(top - 4 * 3600e3).getUTCDay();   // 0 Sunday, Eastern near enough at these hours
   if (dow === 1 && et.hour === 9) await weeklyTraffic(env, top).catch((e) => env.ACCOUNTS.put("weekly:err", String(e && e.stack || e).slice(0, 500)));
-  if (dow === 0 && et.hour === 22) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
+  if (REDDIT_ON && dow === 0 && et.hour === 22) await redditDraft(env).catch((e) => env.ACCOUNTS.put("rdraft:err", String(e && e.stack || e).slice(0, 500)));
   await kofiWeekDraft(env).catch((e) => env.ACCOUNTS.put("kofiweek:err", String(e && e.stack || e).slice(0, 500)));
   await ghSchedule(env, et, dow).catch((e) => env.ACCOUNTS.put("ghsched:err", String(e && e.stack || e).slice(0, 500)));
   await partnerMarket(env).catch((e) => env.ACCOUNTS.put("partnermkt:err", String(e && e.stack || e).slice(0, 500)));
