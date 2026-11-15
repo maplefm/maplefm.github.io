@@ -1786,7 +1786,8 @@
       .sort(function (a, b) { return b.t - a.t; }).filter(function (l) { var k = l.s + "|" + l.i + "|" + l.p; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 20);
     var sig = ev.map(function (l) { return l.s + l.i + l.p + l.t; }).join("|") + "|" + Math.floor(now / 6e4);
     if (run.dataset.sig === sig) return; run.dataset.sig = sig; run.textContent = "";
-    if (!ev.length) { run.appendChild(el("span", "tq", "No sales over 250K in the last 24 hours")); return; }
+    // no sales at all means the sales didn't load (the Worker or the network is down), not a quiet market
+    if (!ev.length) { run.appendChild(el("span", "tq", (D.sales || []).length ? "No sales over 250K in the last 24 hours" : "Recent sales didn't load. Try again in a minute.")); return; }
     ev.forEach(function (l) {
       var sp = el("span"); sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
       sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", "mz", short(l.p)));
