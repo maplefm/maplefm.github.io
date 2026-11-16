@@ -23,7 +23,9 @@ const log = []; const ok = (n, c, note) => log.push((c ? "ok   " : "FAIL ") + n 
   if (hd) {
     ok("mover is a sure price", await p.evaluate((n) => window.fmFirm(n), hd.item), hd.item);
     const id = (/\/i\/(\d+)\.png|item\/(\d+)\/icon/.exec(hd.icon || "") || []).slice(1).filter(Boolean)[0];
-    ok("mover icon is that item", !hd.icon || (DBID[hd.item.toLowerCase()] || []).includes(+id), hd.item + " icon " + hd.icon);
+    // a known item shows its own game icon, never a crop from a shop window (a crop filed under a misread name showed a
+    // scroll on the Two-Handed Sword)
+    ok("mover icon is that item", !hd.icon || (DBID[hd.item.toLowerCase()] || []).includes(+id), hd.item + " icon " + String(hd.icon).slice(0, 60));
     await tapIt("#hdeal");
     const t = await title(); ok("mover opens the item it names", t === hd.name.trim(), hd.name + " -> " + t);
     await p.screenshot({ path: OUT + "fd-mover-" + (PHONE ? "phone" : "desk") + ".png" }); await close();
@@ -58,5 +60,14 @@ const log = []; const ok = (n, c, note) => log.push((c ? "ok   " : "FAIL ") + n 
     await p.screenshot({ path: OUT + "fd-" + n.replace(/\W+/g, "-") + "-" + (PHONE ? "phone" : "desk") + ".png" }); if (v.card) await close(); await p.evaluate(() => scrollTo(0, 0)); await p.fill("#q", "");
   }
   ok("no script errors", !errs.length, errs.slice(0, 2).join("; "));
+  // 5. the item list arriving late (a slow phone connection): no shop-window crop stands in for a known item's icon
+  const p2 = await ctx.newPage();
+  await p2.route(/data\/itemdb\.json/, async (r) => { await new Promise((z) => setTimeout(z, 6000)); r.continue(); });
+  await p2.goto("https://maplefm.gg/", { waitUntil: "load" });
+  await p2.waitForFunction(() => document.querySelectorAll("#picks .pk").length > 0, null, { timeout: 60000 }).catch(() => {});
+  await p2.waitForTimeout(9000);
+  const crops = await p2.evaluate(() => [...document.querySelectorAll("#hdeal img, #picks img, #rows img")].filter((im) => /^data:|\/shard|crop/.test(im.getAttribute("src") || "")).map((im) => (im.closest("[data-item]") || {}).dataset ? im.closest("[data-item]").dataset.item : "?"));
+  ok("slow item list: no crops on known items", crops.length === 0, crops.slice(0, 5).join(", "));
+  await p2.close();
   console.log(log.join("\n")); await b.close(); process.exit(log.some((x) => x.startsWith("FAIL")) ? 1 : 0);
 })();
