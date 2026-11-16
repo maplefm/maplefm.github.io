@@ -517,6 +517,13 @@ const MEMBER_FILES = ["watcher.json", "watcher-2.json", "watcher-3.json", "watch
 // Per-account and per-address limits on the member bundle: the board asks about once every five minutes, a
 // script pulling it in a loop gets cut off. Counted per Worker instance, with Cloudflare's limiter on top when bound.
 const HITS = new Map();
+// The in-memory count above is per Worker copy, so traffic spread over Cloudflare's locations can pass it. RL_PUB is
+// Cloudflare's own rate limiter (120 requests a minute per key, counted across locations) as a backstop on the
+// public routes. Missing binding or an error: allow, the in-memory limit still applies.
+async function edgeOver(env, key) {
+  if (!env.RL_PUB) return false;
+  try { const r = await env.RL_PUB.limit({ key }); return !r.success; } catch (e) { return false; }
+}
 function overLimit(key, max, windowSec) {
   const t = Math.floor(Date.now() / 1000 / windowSec), k = key + "|" + t, n = (HITS.get(k) || 0) + 1;
   HITS.set(k, n);
@@ -535,7 +542,7 @@ async function sessionId(req, env) {
 async function inboxPost(req, env) {
   if (!env.INBOX_DB) return json({ error: "inbox offline" }, 503);
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if (overLimit("p:" + ip, 200, 600)) { await inboxReject(env, "slow down"); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
+  if (overLimit("p:" + ip, 200, 600) || await edgeOver(env, "p:" + ip)) { await inboxReject(env, "slow down"); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
   const body = await req.text();
   if (body.length > 60000) { await inboxReject(env, "too big"); return json({ error: "too big" }, 413); }
   let msg = "";
@@ -619,7 +626,7 @@ async function inboxReject(env, why) {
 // shows the real popup on hover. Only PNGs the size of a popup are taken; they expire after 30 days.
 async function tipImgPut(req, env) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if (overLimit("ti:" + ip, 120, 600)) return json({ error: "slow down" }, 429);
+  if (overLimit("ti:" + ip, 120, 600) || await edgeOver(env, "ti:" + ip)) return json({ error: "slow down" }, 429);
   if (!/^[0-9a-f]{16}$/.test(req.headers.get("X-Watcher") || "")) return json({ error: "no" }, 403);
   const buf = new Uint8Array(await req.arrayBuffer());
   if (buf.length < 200 || buf.length > 160000) return json({ error: "size" }, 413);
@@ -636,7 +643,7 @@ async function tipImgPut(req, env) {
 // samples, letters only, for learning the chat font), kept 14 days.
 async function missPut(req, env) {
   const ip = req.headers.get("CF-Connecting-IP") || "", hid = req.headers.get("X-Watcher") || "", kind = req.headers.get("X-Kind") || "";
-  if (overLimit("mi:" + ip, 60, 600)) return json({ error: "slow down" }, 429);
+  if (overLimit("mi:" + ip, 60, 600) || await edgeOver(env, "mi:" + ip)) return json({ error: "slow down" }, 429);
   if (!/^[0-9a-f]{16}$/.test(hid) || !/^(tip|room|bar|row|name)$/.test(kind)) return json({ error: "no" }, 403);
   const buf = new Uint8Array(await req.arrayBuffer());
   if (buf.length < 200 || buf.length > 300000) return json({ error: "size" }, 413);
@@ -655,7 +662,7 @@ async function missPut(req, env) {
 // by the pump. Admins get a DM for the first 30 reports a day so a broken price is seen the same day.
 async function wrongPut(req, env) {
   const ip = req.headers.get("CF-Connecting-IP") || "", day = new Date().toISOString().slice(0, 10);
-  if (overLimit("wp:" + ip, 10, 600)) return json({ error: "slow down" }, 429);
+  if (overLimit("wp:" + ip, 10, 600) || await edgeOver(env, "wp:" + ip)) return json({ error: "slow down" }, 429);
   let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: "bad" }, 400); }
   const item = String(b && b.i || "").replace(/[^\x20-\x7e]/g, "").slice(0, 80).trim();
   if (item.length < 2) return json({ error: "bad" }, 400);
@@ -1365,7 +1372,7 @@ async function discordPrice(env, q) {
 async function chatPrice(req, env, url) {
   const ip = req.headers.get("CF-Connecting-IP") || "";
   const txt = (t) => new Response(t.slice(0, 390), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } });
-  if (overLimit("cp:" + ip, 120, 60)) return txt("Club FM: slow down a little, try again in a minute.");
+  if (overLimit("cp:" + ip, 120, 60) || await edgeOver(env, "cp:" + ip)) return txt("Club FM: slow down a little, try again in a minute.");
   // Nightbot says which channel asked (Nightbot-Channel: name=...&provider=twitch...), StreamElements doesn't
   let chan = ""; try { chan = (new URLSearchParams(req.headers.get("Nightbot-Channel") || "").get("name") || "").toLowerCase().slice(0, 40); } catch (e) {}
   logHit(env, "!price", chan, "", ip).catch(() => {});
@@ -1705,7 +1712,7 @@ async function refHit(req, env, url) {
   const who = String(url.searchParams.get("p") || "").toLowerCase();
   if (!PARTNERS.includes(who)) return json({ ok: false }, 404);
   const ip = req.headers.get("CF-Connecting-IP") || "", day = new Date().toISOString().slice(0, 10);
-  if (overLimit("ref:" + ip, 20, 600)) return json({ ok: true });
+  if (overLimit("ref:" + ip, 20, 600) || await edgeOver(env, "ref:" + ip)) return json({ ok: true });
   const vh = (await hmac(env.SESSION_SECRET || "x", "ref|" + day + "|" + ip)).slice(0, 16);
   const seenKey = "refseen:" + who + ":" + day + ":" + vh;
   const k = "ref:" + who + ":" + day, c = (await env.ACCOUNTS.get(k, "json")) || { visits: 0, uniques: 0 };
@@ -1991,7 +1998,7 @@ async function hit(req, env) {
   const ok = new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*" } });
   const ua = req.headers.get("User-Agent") || "", ip = req.headers.get("CF-Connecting-IP") || "";
   if (/bot|crawl|spider|slurp|headless|preview|lighthouse|playwright|python|curl/i.test(ua) || !ua) return ok;
-  if (overLimit("hit:" + ip, 60, 60)) return ok;
+  if (overLimit("hit:" + ip, 60, 60) || await edgeOver(env, "hit:" + ip)) return ok;
   // visits from cloud servers are automated browsers, not players: on Nov 11 at 04:22 UTC about 1,200 single-page
   // "visitors" arrived inside one minute from as many addresses, each on a different page, with a normal Chrome name.
   // Only the network's name is looked at (never stored); skipped visits are counted per day in KV hit:skip:<day>.
@@ -2019,7 +2026,7 @@ async function gonePost(req, env) {
   const h = { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" };
   const ua = req.headers.get("User-Agent") || "", ip = req.headers.get("CF-Connecting-IP") || "";
   if (!ua || /bot|crawl|spider|headless|python|curl/i.test(ua)) return json({ ok: false }, 200, h);
-  if (overLimit("gone:" + ip, 20, 600)) return json({ ok: false, error: "slow down" }, 429, h);
+  if (overLimit("gone:" + ip, 20, 600) || await edgeOver(env, "gone:" + ip)) return json({ ok: false, error: "slow down" }, 429, h);
   let b = {}; try { b = JSON.parse(await req.text()); } catch (e) { return json({ ok: false }, 400, h); }
   const k = String(b.k || "").toLowerCase().slice(0, 160);
   if (!/^[^|]{1,40}\|[^|]{1,100}\|\d{1,12}$/.test(k) || !env.INBOX_DB) return json({ ok: false }, 400, h);
