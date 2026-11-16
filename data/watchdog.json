@@ -1,159 +1,163 @@
 {
- "at": 1794853986,
- "ok": true,
- "failing": [],
+ "at": 1794857726,
+ "ok": false,
+ "failing": [
+  "!price (api.maplefm.gg)",
+  "Player market",
+  "Server-built board"
+ ],
  "checks": [
   {
    "name": "Price board",
-   "ok": true,
-   "detail": "loads",
-   "ms": 203,
-   "fix": null
-  },
-  {
-   "name": "For streamers",
-   "ok": true,
-   "detail": "loads",
-   "ms": 195,
-   "fix": null
-  },
-  {
-   "name": "How it works",
    "ok": true,
    "detail": "loads",
    "ms": 187,
    "fix": null
   },
   {
+   "name": "For streamers",
+   "ok": true,
+   "detail": "loads",
+   "ms": 326,
+   "fix": null
+  },
+  {
+   "name": "How it works",
+   "ok": true,
+   "detail": "loads",
+   "ms": 335,
+   "fix": null
+  },
+  {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 217,
+   "ms": 283,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 286,
+   "ms": 300,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 193,
+   "ms": 225,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 401,
+   "ms": 329,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 190,
+   "ms": 186,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 147,
+   "ms": 428,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 152,
+   "ms": 340,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 152,
+   "ms": 137,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 176,
+   "ms": 201,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 113,
+   "ms": 273,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 186,
+   "ms": 374,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 168,
+   "ms": 202,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 113,
+   "ms": 318,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 146,
+   "ms": 113,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
-   "ok": true,
-   "detail": "Work Gloves: clean 1,699 to 2,000 (9 sold) · clean +1 crit rate 434K to 509K (7 sold) · +1",
-   "ms": 521,
+   "ok": false,
+   "detail": "status 0 The read operation timed out",
+   "ms": 25341,
    "fix": null
   },
   {
    "name": "Server-built board",
-   "ok": true,
-   "detail": "uploaded 1 min ago",
-   "ms": 128,
+   "ok": false,
+   "detail": "no status (status 0)",
+   "ms": 25315,
    "fix": null
   },
   {
    "name": "Player market",
-   "ok": true,
-   "detail": "66 open listings, #selling synced 3 min ago",
-   "ms": 407,
+   "ok": false,
+   "detail": "no answer (status 0)",
+   "ms": 25341,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "6 visits, 0 crashed",
-   "ms": 683,
+   "detail": "8 visits, 0 crashed",
+   "ms": 145,
    "fix": null
   },
   {
    "name": "Board on a phone",
    "ok": true,
-   "detail": "loads, card and search work (37s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (35s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -168,21 +172,21 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 71,
+   "ms": 146,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
    "detail": "1403 items",
-   "ms": 120,
+   "ms": 132,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": true,
    "detail": "all scanners within the bars",
-   "ms": 138,
+   "ms": 141,
    "fix": null
   },
   {
@@ -209,20 +213,6 @@
  ],
  "repairs": [],
  "history": [
-  {
-   "at": 1793661234,
-   "failing": [
-    "Scanner health",
-    "Scheduled jobs",
-    "Server-built board"
-   ],
-   "repairs": [
-    {
-     "what": "re-ran failed job: Speed watch",
-     "ok": true
-    }
-   ]
-  },
   {
    "at": 1793673857,
    "failing": [
@@ -673,7 +663,16 @@
    "at": 1794688823,
    "failing": [],
    "repairs": []
+  },
+  {
+   "at": 1794857726,
+   "failing": [
+    "!price (api.maplefm.gg)",
+    "Player market",
+    "Server-built board"
+   ],
+   "repairs": []
   }
  ],
- "beat": 1794853986
+ "beat": 1794857726
 }
