@@ -61,7 +61,9 @@ jobs:
           node tests/search-ux.cjs chromium desktop
       - name: Cut-off names never price the shorter item
         run: |
-          pip install -q playwright==1.56.0 && python3 -m playwright install chromium >/dev/null
+          # the runner's Python is system-managed (PEP 668), so pip needs leave to install
+          python3 -m pip install -q --break-system-packages playwright==1.56.0
+          python3 -m playwright install chromium > /tmp/pwpy.log 2>&1 || { tail -20 /tmp/pwpy.log; exit 1; }
           python3 tests/cutnames.py --board
       - name: Every indexable page names its canonical address
         run: |
