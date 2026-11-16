@@ -375,6 +375,7 @@
         if (cv) { var vn = r[0] + " (" + cv + ")", vk = vn.toLowerCase(), vr = r.slice(); vr[0] = vn; if (!DB[vk]) { DB[vk] = vr; (DBB[vk.slice(0, 2)] || (DBB[vk.slice(0, 2)] = [])).push(vk); } }
       });
       DBN = Object.keys(DB).length;
+      ICONWAIT.splice(0).forEach(function (w) { loadIcon(w[0], w[1]); });
       CN = {}; SBC = {}; SB = null; SIDX = null; DIRTY = true; tieredCache = {}; mark("db"); seedNames(); if (D && scans.length) render();   // before any prices are in, the poll's render is the first real one
     }).catch(function () {});
   }
@@ -420,7 +421,10 @@
       var rword = isNaN(rm[2]) ? rm[2] : rm[3], rv = +(isNaN(rm[2]) ? rm[3] : rm[2]);
       var rk = /^(crit ?d|cdmg)/.test(rword) ? "CRITDMG" : /^crit/.test(rword) ? "CRIT" : /^(magic|matt|matk|m\.?att)/.test(rword) ? "MATT" : /^(att|attack|weapon|watk|atk|w\.?att)/.test(rword) ? "ATT" : /def/.test(rword) ? (/^m/.test(rword) ? "MDEF" : "WDEF") : rword === "accuracy" ? "ACC" : rword.toUpperCase();
       var rest = ql.replace(rm[0], " ").replace(/\s+/g, " ").trim();
-      if (rest && rv > 0 && rv <= (/^(HP|MP)$/.test(rk) ? 300 : 40)) { QROLL = { k: rk, v: rv, at: Date.now() }; ql = rest; }
+      // "claw att 10" is the 10% Claw Attack Scroll, not a claw with 10 ATT: a 100, 60 or 10 after words that name a
+      // scroll is its success rate
+      var asScroll = (rv === 10 || rv === 60 || rv === 100) && /scroll$/i.test(ABBR[nrm(ql.replace(new RegExp("(^|\\s)\\+?" + rv + "(?![0-9])"), " "))] || "");
+      if (rest && rv > 0 && !asScroll && rv <= (/^(HP|MP)$/.test(rk) ? 300 : 40)) { QROLL = { k: rk, v: rv, at: Date.now() }; ql = rest; }
     }
     var tier = "";
     ql = ql.replace(/(^|[^0-9])(100|60|10)\s*%/, function (m, a, n) { tier = TIERPCT[n]; return a + " "; });
@@ -465,7 +469,7 @@
       try {
         for (var dk = 0; dk < toks.length && !out.length; dk++) {
           var q2 = toks.filter(function (_, x) { return x !== dk; }).join(" ");
-          out = searchItems((tier ? q2 + " " + ({ lesser: "100%", intermediate: "60%", greater: "10%" }[tier] || "") : q2), limit).map(function (r) { return { n: r.n, score: Math.min(r.score, 440) - 60, why: r.why }; });
+          out = searchItems((tier ? q2 + " " + ({ lesser: "100%", intermediate: "60%", greater: "10%" }[tier] || "") : q2), limit).map(function (r) { return { n: r.n, score: Math.min(r.score, 440) - 60, why: r.why, it: r.it }; });   // keep the price: without it a sold item read "not seen yet"
         }
       } finally { searchItems.inner = false; }
     }
@@ -748,12 +752,16 @@
   function iconSrcs(name) {
     var out = [], r = dbRow(name);
     if (r) { out.push("/i/" + r[1] + ".png"); out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
-    var v = ICONS[name]; if (typeof v === "string") out.push(v);
+    // a scanner's crop of the shop window only stands in for items the game data doesn't have: a crop is filed under the
+    // name that was read, and a misread name (a scroll cut short to "Two-Handed Sword") puts the wrong picture on an item
+    var v = ICONS[name]; if (!r && DBN && typeof v === "string") out.push(v);
     return out;
   }
   function iconSrc(name) { return iconSrcs(name)[0] || ""; }
   // try each source in turn, then a shop window crop, until one loads
+  var ICONWAIT = [];   // pictures asked for before the item list loaded: drawn once it has, so no crop stands in for a known item
   function loadIcon(im, name) {
+    if (!DBN) { ICONWAIT.push([im, name]); return true; }
     var list = iconSrcs(name), k = 0, triedCap = false, again = false;
     // a crop from a shop window is only for items with no icon anywhere; a known item that failed to load (a busy
     // moment on the network) tries its icon once more instead of showing a crop from someone's screen
@@ -1645,7 +1653,7 @@
       var end = function () { if (fin) return; fin = true; done(); };
       im.onload = function () { try { g.fillStyle = "rgba(255,255,255,.14)"; g.beginPath(); g.roundRect(W - 150, 70, 120, 120, 22); g.fill(); var sc = Math.min(96 / im.width, 96 / im.height, 3); var w = im.width * sc, h = im.height * sc; g.imageSmoothingEnabled = false; g.drawImage(im, W - 90 - w / 2, 130 - h / 2, w, h); } catch (e) {} end(); };
       // the icon host may refuse cross-origin drawing; then the icon a watcher captured in game (same origin) is used
-      im.onerror = function () { k++; if (k < srcs.length) im.src = srcs[k]; else capturedAsync(i.item).then(function (src) { if (src && !fin) { im.onerror = end; im.src = src; } else end(); }, end); };
+      im.onerror = function () { k++; if (k < srcs.length) im.src = srcs[k]; else if (dbRow(i.item)) end(); else capturedAsync(i.item).then(function (src) { if (src && !fin) { im.onerror = end; im.src = src; } else end(); }, end); };
       if (srcs.length) im.src = srcs[0]; else im.onerror(); setTimeout(end, 3000);
     }); });
   }
