@@ -1373,7 +1373,7 @@ async function discordPrice(env, q) {
     else lines.push(rl + ": no sales caught at that roll lately.");
     if (!rq.sale && rq.near.length) lines.push("Closest rolls that sold: " + rq.near.map((x) => x.label + " **" + meso(x.p) + "**" + C + " (" + x.n + " sales)").join(" · "));
     if (!rq.sale) lines.push("Every roll's price is on the [item's card](" + link + ")");
-  } else if (r.rk && r.equip && !ladL.length) lines.push("Typical is for clean copies. Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
+  } else if (r.rk && r.equip && !ladL.length) lines.push((firmRow(r) ? "Typical is for clean copies. " : "") + "Rolls are priced by **" + statLabel(r.rk) + "** on the [item's card](" + link + ")");
   lines.push(r.n + " listings seen" + (r.cat ? " · " + r.cat : "") + " · [open on the board](" + link + ")");
   const more = hits.slice(1, 4).map((h) => shown(h.item)).join(", ");
   return ({ type: 4, data: { embeds: [{ title: shown(r.item), description: lines.join("\n"), url: link, color: 0x5b4bdb, footer: { text: (more ? "Also matched: " + more + " · " : "") + "Club FM, priced by watched sales · add /price: maplefm.gg/bot" } }] } });
