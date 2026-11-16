@@ -20,7 +20,9 @@
     if (top) rng = meso(top[2]) !== meso(top[3]) ? meso(top[2]) + " to " + meso(top[3]) : meso(top[4]);
     // an equip's typical is its busiest grade's, the same grade as the big number, never a blend of clean and scrolled
     var tv = top ? top[4] : r.typ;
-    set("rng", rng); set("typ", full(tv)); set("t2", meso(tv)); set("sn", full(r.salesN)); set("ln", full(r.n));
+    // a price the board isn't sure of (flagged, rough, a lead, under 3 sales) keeps its range and never shows one number
+    var sure = !!top || (r.kind === "sale" && !r.check && r.conf !== "lead" && (r.salesN || 0) >= 3 && !(r.flags || []).some(function (f) { return /^Rough price/.test(f); }));
+    set("rng", rng); if (sure) { set("typ", full(tv)); set("t2", meso(tv)); } set("sn", full(r.salesN)); set("ln", full(r.n));
     if (r.best) set("ba", meso(r.best));
     set("upd", "Live as of " + new Date(s.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + ".");
   }).catch(function () {});

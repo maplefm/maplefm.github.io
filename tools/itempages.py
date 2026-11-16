@@ -381,6 +381,12 @@ def gname(n):
     return str(n).replace(" att", " ATT").replace(" matt", " MATT")
 
 
+def firm(r):
+    """A price the board states as a fact: 3+ sales, nothing flagged, not rough, not a lead (the board's own rule).
+    Anything else shows the range it was seen at and no typical, trend or NPC multiple."""
+    return bool(r) and r.get("kind") == "sale" and bool(r.get("typ")) and not r.get("check") and r.get("conf") != "lead" \
+        and not any(str(f).startswith("Rough price") for f in (r.get("flags") or [])) and (r.get("salesN") or 0) >= 3
+
 def summary_lines(r, top, vp, daily, g):
     """Three short lines that only this item's page can say, all from its own numbers; nothing is said that the
     numbers on the page don't show."""
@@ -392,7 +398,8 @@ def summary_lines(r, top, vp, daily, g):
     else:
         rng = meso(r["typ"]) if not (r.get("hi", 0) > r.get("lo", 0) and meso(r["lo"]) != meso(r["hi"])) else f"{meso(r['lo'])} to {meso(r['hi'])}"
         l1 = f"Asking prices run {rng}" if asked(r) else f"Sells for {rng}"
-    if vp and typ:
+    sure = bool(top) or firm(r)
+    if vp and typ and sure:
         x = typ / vp
         l1 += (f", about {x:.0f} times the {meso(vp)} an NPC pays" if x >= 3 else f", about {x:.1f} times the {meso(vp)} an NPC pays" if x >= 1.25
                else f", close to the {meso(vp)} an NPC pays" if x >= 0.95 else "")
@@ -408,7 +415,7 @@ def summary_lines(r, top, vp, daily, g):
     if best:
         rr = meso(best[2]) if meso(best[2]) == meso(best[3]) else f"{meso(best[2])} to {meso(best[3])}"
         out.append(f"{gname(best[0])} copies sell for {rr}, about {best[4] / top[4]:.0f} times {gname(top[0]).lower()}, from {best[5]} sales.")
-    elif len(daily) >= 4 and min(d[1] for d in daily) * 0.9 <= typ <= max(d[1] for d in daily) * 1.1:
+    elif sure and len(daily) >= 4 and min(d[1] for d in daily) * 0.9 <= typ <= max(d[1] for d in daily) * 1.1:
         # only when the day table agrees with the typical above it; otherwise the two lines would read as a contradiction
         # the first three days against the last three (middle of each), so one odd day can't make a trend; a move
         # over 60% on day middles that include asking prices is more likely one odd listing than the market, so it's left out
@@ -512,9 +519,9 @@ def main():
         # and scrolled copies
         top = lad_top(r.get("lad"))
         if top: rng = f"{meso(top[2])} to {meso(top[3])}" if meso(top[2]) != meso(top[3]) else meso(top[4])
-        mv = (r.get("mv") or [None])[0]
+        mv = (r.get("mv") or [None])[0] if (top or firm(r)) else None
         chg = f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}% in 24h</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else ""
-        conf = CONF.get(r.get("conf") or "", None)
+        conf = CONF.get(r.get("conf") or "", None) if (top or firm(r)) else None
         basis = "from asking prices; few sales seen yet" if r.get("kind") != "sale" else "from today's asking prices, above older sales" if asked(r) else "from sales players watched happen"
         icon = f"https://maplefm.gg/i/{ids[name]}.png"
         # equips: the busiest grade's own daily middle (dailyC); the all-copies daily mixes clean and scrolled copies,
@@ -550,16 +557,17 @@ def main():
 
         price_txt = (f"{top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')} sells for {rng} mesos" if top else
                      (f"is listed at about {full(r['typ'])} mesos" + (f", most asks {rng}" if " to " in rng else "")) if asked(r) else
-                     f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else ""))
+                     f"sells for about {full(r['typ'])} mesos" + (f", most sales {rng}" if " to " in rng else "")) if (top or firm(r)) else \
+                    f"has been seen at {rng} mesos, too few sure sales for one price yet"
         l3 = r.get("last3"); r1 = r.get("r1")
-        more_txt = (f" Last 3 sales average {meso(l3)}." if l3 else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
+        more_txt = (f" Last 3 sales average {meso(l3)}." if l3 and (top or firm(r)) else "") + (f" {roll_words(r1)} has sold around {meso(r1[1])}." if r1 else "")
         if price_first or not fx:
             # the price answers the search; what's only on the page (prices by grade, the daily chart) is the reason to click
-            hook = "See prices by grade and the daily chart." if top else "See the daily price chart."
+            hook = "See prices by grade and the daily chart." if top else "See the daily price chart." if firm(r) else "See every listing on the live card."
             desc = (f"{nm} {price_txt} in MapleStory Classic.{more_txt} {hook} {r.get('salesN') or 0:,} Free Market sales seen"
                     f"{', from asking prices' if asked(r) and not top else ''}, updated daily." + (f" Also called {', '.join(al[:2])}." if al else "") + eq_line(dbrow.get(name), KINDS))
             # the price itself in the title: a search for a price shows the answer, and the result that has it gets the click
-            pt = f"{nm} price: {meso(top[4] if top else r['typ'])}" if (top or r.get('typ')) else f"{nm} price"
+            pt = f"{nm} price: {meso(top[4] if top else r['typ'])}" if (top or (r.get('typ') and firm(r))) else f"{nm} price"
             title = fit_title(pt, "MapleStory Classic", "Club FM") if not nx else fit_title(pt, "Cash Shop · MapleStory Classic", "Club FM")
             if "MapleStory Classic" not in title: title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM")
             if tw and not nx:
@@ -567,26 +575,26 @@ def main():
                 if "MapleStory Classic" in tt: title = tt
         else:
             desc = f"{nm} in MapleStory Classic: {'; '.join(fx)}. On the Free Market it {price_txt}, updated daily."
-            pt = f"{nm} price: {meso(r['typ'])}" if r.get('typ') else f"{nm} price"
+            pt = f"{nm} price: {meso(r['typ'])}" if r.get('typ') and (top or firm(r)) else f"{nm} price"
             title = fit_title(pt + ", drops & quests", "MapleStory Classic", "Club FM") if not nx else fit_title(f"{nm} Cash Shop and FM price", "MapleStory Classic", "Club FM")
             if "MapleStory Classic" not in title: title = fit_title(pt, "MapleStory Classic", "Club FM")
             if "MapleStory Classic" not in title: title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM")
         lines = summary_lines(r, top, vp, daily, GUIDE.get(name))
         body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng" class="mz">{rng}</span>{chg}{f"<small>{html.escape(top[0])}</small>" if top else ""}</p>
-<p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"} <span id="typ" class="mz">{full(top[4] if top else r['typ'])}</span>{', from asking prices' if asked(r) and not top else ''}{f' · <span title="{html.escape(conf[1])}">{conf[0]}</span>' if conf else ''} · <a href="/how-it-works.html#grades">how prices work</a></p>
+<p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical" if firm(r) else "No sure typical yet, the range is what was seen"}{f' <span id="typ" class="mz">{full(top[4] if top else r["typ"])}</span>' if top or firm(r) else ''}{', from asking prices' if asked(r) and not top else ''}{f' · <span title="{html.escape(conf[1])}">{conf[0]}</span>' if conf else ''} · <a href="/how-it-works.html#grades">how prices work</a></p>
 <ul class="sum">{"".join(f"<li>{html.escape(x)}</li>" for x in lines)}</ul>
 <p class="ctaw"><a class="cta" href="/#item={urllib.parse.quote(name)}">Open live card <span>→</span></a></p>
-<div class="grid"><div><span>{"Typical, " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"}</span><b id="t2" class="mz">{meso(top[4] if top else r['typ'])}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
+<div class="grid"><div><span>{"Typical, " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"}</span><b id="t2" class="mz">{meso(top[4] if top else r['typ']) if top or firm(r) else "not sure yet"}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
 {f'<div><span>Cheapest ask now</span><b id="ba" class="mz">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b class="mz">{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
 {ladder_html(r.get('lad'))}
-{f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab else ''}
+{f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab and (top or firm(r)) else ''}
 {equip_html(dbrow.get(name), KINDS)}
 {guide_html(name, GUIDE.get(name), page_of)}
 {questions(nm, r, top, vp, GUIDE.get(name), rng)}
 {f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
 <p class="note" id="upd">Updated {D_TXT}.</p></div>
-<script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js?v=3" defer></script>"""
+<script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js?v=4" defer></script>"""
         ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Club FM", "item": SITE + "/"},
             {"@type": "ListItem", "position": 2, "name": "Item prices", "item": SITE + "/items/"},
