@@ -7,8 +7,10 @@
   var B = null;                     // the board's helpers (board.js FMS)
   var $ = function (id) { return document.getElementById(id); };
   var OPEN = false, TYPED = "", LAST = "", RUN_T = null;
-  // the filters set in the panel; the stats themselves live in the search text, so the box and the panel never disagree
-  var F = { sub: "", cls: 0, lvlo: "", lvhi: "", clean: false, slots: "", sort: "price", lo: "", hi: "", older: false };
+  // the filters set in the panel. Stats typed in the box ("wg 8 att") count too; once a stat is set in the panel, every
+  // stat lives in the panel (F.st) and the box keeps just the item, so the two never disagree or pile up
+  var F0 = function () { return { sub: "", cls: 0, lvlo: "", lvhi: "", clean: false, slots: "", sort: "price", lo: "", hi: "", older: false, st: {} }; };
+  var F = F0(), COUNT = null, MULTI = false;
   var ORDER = ["ATT", "MATT", "STR", "DEX", "INT", "LUK", "CRIT", "CRITDMG", "ACC", "AVOID", "SPEED", "JUMP", "HP", "MP", "WDEF", "MDEF"];
   var WORD = { ATT: "att", MATT: "matt", STR: "str", DEX: "dex", INT: "int", LUK: "luk", CRIT: "crit", CRITDMG: "crit dmg", ACC: "acc", AVOID: "avoid", SPEED: "speed", JUMP: "jump", HP: "hp", MP: "mp", WDEF: "wdef", MDEF: "mdef" };
   var LABEL = { ATT: "ATT", MATT: "MATT", STR: "STR", DEX: "DEX", INT: "INT", LUK: "LUK", CRIT: "Crit rate", CRITDMG: "Crit dmg", ACC: "ACC", AVOID: "Avoid", SPEED: "Speed", JUMP: "Jump", HP: "HP", MP: "MP", WDEF: "W.DEF", MDEF: "M.DEF" };
@@ -29,9 +31,15 @@
       ".advbox .ax-stc{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:12px;background:var(--panel2);overflow:hidden;min-height:38px}",
       ".advbox .ax-stc.on{border-color:var(--accent);background:var(--accent-soft)}",
       ".advbox .ax-stc b{font:800 .78rem var(--body);padding:0 8px 0 10px;white-space:nowrap}",
-      ".advbox .ax-stc button{border:0;background:transparent;font:800 1rem var(--body);color:var(--accent-ink,var(--ink));width:34px;height:38px;cursor:pointer}",
-      ".advbox .ax-stc output{min-width:22px;text-align:center;font:800 .9rem var(--body)}",
-      ".advbox .ax-stc .ax-ge{font:800 .7rem var(--body);color:var(--muted);padding-right:6px}",
+      ".advbox .ax-stc input[type=number]{width:64px;min-height:30px;margin:4px 0;padding:4px 6px;text-align:center;font:800 .9rem var(--body)}",
+      ".advbox .ax-stc .ax-ge{border:0;border-left:1px solid var(--line2);background:transparent;font:800 .72rem var(--body);color:var(--muted);padding:0 10px;min-height:38px;margin-left:6px;cursor:pointer;white-space:nowrap}",
+      ".advbox .ax-stc .ax-ge[aria-pressed=true]{color:var(--accent-ink,var(--ink));background:var(--accent-soft)}",
+      ".advbox .ax-stc .ax-ge:disabled{opacity:.45;cursor:default}",
+      ".advbox .ax-full{flex:1 0 100%;order:-1}",
+      ".advbox .ax-show{display:block;width:100%;margin:12px 0 0;border:0;border-radius:12px;padding:12px;font:800 .95rem var(--body);color:#fff;background:var(--accent,#6d3fd1);cursor:pointer;position:sticky;bottom:10px;box-shadow:0 6px 18px rgba(60,30,120,.25)}",
+      ".sres h3 .ax-edit{margin-left:auto;border:1px solid var(--line2);background:var(--panel2);border-radius:999px;padding:4px 12px;font:800 .76rem var(--body);color:var(--accent-ink,var(--ink));cursor:pointer}",
+      ".hsearch.ax-open{position:static!important;top:auto!important}",
+      ".advbox .ax-show:disabled{background:var(--panel2);color:var(--muted);box-shadow:none;cursor:default}",
       ".advbox .ax-tg{text-transform:none;letter-spacing:normal;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:999px;padding:6px 12px;background:var(--panel2);font:700 .8rem var(--body);cursor:pointer;min-height:36px}",
       ".advbox .ax-tg[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink,var(--ink))}",
       ".advbox .ax-clr{margin-left:auto;border:0;background:none;color:var(--accent-ink,var(--ink));font:800 .8rem var(--body);cursor:pointer;text-decoration:underline}",
@@ -72,6 +80,7 @@
   function parse(text) {
     var sq = B.statQuery(text || ""), f = { stats: [], clean: F.clean, slots: F.slots === "" ? null : +F.slots, older: F.older, lo: +F.lo || 0, hi: +F.hi || 0, rest: String(text || "").trim() };
     if (sq) { f.stats = sq.stats; f.clean = f.clean || sq.clean; if (sq.slots != null) f.slots = sq.slots; f.rest = sq.rest; }
+    Object.keys(F.st).forEach(function (k) { f.stats = f.stats.filter(function (x) { return x.k !== k; }); f.stats.push({ k: k, v: F.st[k].v, ge: !!F.st[k].ge }); });
     return f;
   }
   // the items the search covers: one named item, or every item of a type (the panel's type, or a type word typed)
@@ -81,15 +90,18 @@
   function itemsFor(f) {
     var D = B.D(); if (!ready()) { clearTimeout(WAIT_T); WAIT_T = setTimeout(function () { run(); }, 1500); return { list: [], why: "loading" }; }
     var named = null;
-    if (f.rest) {
-      var hits = B.searchItems(f.rest, 3);
+    // a type typed in the box ("claw", "earrings", "gloves") picks that type
+    var restN = f.rest;
+    if (restN) { var tw = restN.toLowerCase().replace(/s$/, ""), ty = typesWithListings().filter(function (k) { return k.toLowerCase().replace(/s$/, "") === tw; })[0]; if (ty) { F.sub = ty; restN = ""; } }
+    if (restN) {
+      var hits = B.searchItems(restN, 3);
       if (hits.length && hits[0].score >= 450) named = hits[0].n;
     }
     if (named) {
       var it = D.byName[named];
       return { list: it && it.equip ? [it] : [], name: named, notEquip: !!(it && !it.equip) || (!it && !/^Equip:/.test(B.kindOf(named))), unpriced: !it };
     }
-    if (!F.sub) return { list: [], why: f.rest ? "noitem" : "pick" };
+    if (!F.sub) return { list: [], why: restN ? "noitem" : "pick" };
     var lo = F.lvlo === "" ? 0 : +F.lvlo, hi = F.lvhi === "" ? 999 : +F.lvhi;
     var list = D.list.filter(function (i) {
       if (!i.equip || B.subKind(i.item) !== F.sub) return false;
@@ -155,6 +167,7 @@
     var box = $("sres"); if (!box) return;
     var f = parse(text), wantAny = f.stats.length || f.clean || f.slots != null || F.lo || F.hi;
     var scope = itemsFor(f);
+    COUNT = null; showBtn();
     if (!wantAny && !(OPEN && F.sub)) { box.hidden = true; box.textContent = ""; return; }
     box.hidden = false; box.textContent = "";
     var h = B.el("h3");
@@ -167,6 +180,7 @@
     var wt = wantText(f.stats.map(function (s) { return { k: scope.list[0] ? B.critLine(scope.list[0].item, s.k) : s.k, v: s.v, ge: s.ge }; }), f);
     if (wt) h.appendChild(B.el("small", null, wt));
     box.appendChild(h);
+    if (OPEN) { var up = B.el("button", "ax-edit", "Change filters"); up.type = "button"; up.addEventListener("click", function () { var a = $("advbox"); if (a) a.scrollIntoView({ block: "start", behavior: "smooth" }); }); h.appendChild(up); }
     if (scope.unpriced || !scope.list.length) {
       box.appendChild(B.el("p", "ax-sum", scope.name ? "No copies of " + B.showName(scope.name) + " seen on the Free Market yet, so no price for any roll." : "No " + scope.sub.toLowerCase() + " with listings in that range."));
       B.ev("#adv:none"); return;
@@ -176,7 +190,7 @@
       var m = B.statMatch(i, f); odd += m.odd; unsure += m.unsure; if (scope.list.length === 1) M = m;
       m.exact.forEach(function (l) { rows.push({ i: i, l: l, m: m, d: 0 }); });
     });
-    sortList(rows, f);
+    sortList(rows, f); COUNT = rows.length; MULTI = scope.list.length > 1; showBtn();
     var multi = scope.list.length > 1, want = M ? M.want : f.stats;
     // the short summary: how many copies, from what price
     var sum = B.el("p", "ax-sum");
@@ -284,22 +298,30 @@
     var keys = statsFor(name, name ? "" : F.sub);
     var r2 = B.el("div", "ax-ar"); r2.appendChild(B.el("span", "ax-al", "Stats"));
     if (!keys.length) r2.appendChild(B.el("span", "ax-hint", name || F.sub ? "No stats to pick on this item." : "Name an item or pick a type first."));
-    var cur = {}; f.stats.forEach(function (s) { cur[name ? B.critLine(name, s.k) : s.k] = s; });
+    if (keys.length) r2.appendChild(B.el("span", "ax-hint ax-full", "Type the total the item shows, like 8. Leave empty for any."));
+    var cur = {}; f.stats.forEach(function (s0) { cur[name ? B.critLine(name, s0.k) : s0.k] = s0; });
+    // every stat set so far moves into the panel and the box keeps only the item
+    var adopt = function () {
+      var st = {}; f.stats.forEach(function (s0) { var k0 = name ? B.critLine(name, s0.k) : s0.k; st[k0] = { v: s0.v, ge: !!s0.ge }; });
+      if (f.clean) F.clean = true;
+      F.st = st; var t = f.rest || ""; if ($("q").value !== t) { $("q").value = t; TYPED = t; }
+    };
     keys.forEach(function (k) {
-      var s = cur[k], c = B.el("span", "ax-stc" + (s ? " on" : ""));
+      var s0 = cur[k], c = B.el("label", "ax-stc" + (s0 ? " on" : ""));
       c.appendChild(B.el("b", null, LABEL[k] || k));
-      var minus = B.el("button", null, "−"), plus = B.el("button", null, "+"), out = B.el("output", s ? null : "none", s ? String(s.v) : "any");
-      minus.type = plus.type = "button"; minus.setAttribute("aria-label", "Less " + (LABEL[k] || k)); plus.setAttribute("aria-label", "More " + (LABEL[k] || k));
-      var step = /^(HP|MP)$/.test(k) ? 5 : 1;
-      var setv = function (v) {
-        var list = f.stats.filter(function (x) { return (name ? B.critLine(name, x.k) : x.k) !== k; });
-        if (v != null) list.push({ k: k, v: v, ge: s ? s.ge : false });
-        setText(f, list); B.ev("#adv:stat:" + k); panel(); run();
+      var inp = B.el("input"); inp.type = "number"; inp.min = 0; inp.max = /^(HP|MP)$/.test(k) ? 400 : 250; inp.inputMode = "numeric"; inp.placeholder = "any";
+      inp.value = s0 ? String(s0.v) : ""; inp.setAttribute("aria-label", (LABEL[k] || k) + " total");
+      var ge = B.el("button", "ax-ge", "or more"); ge.type = "button"; ge.setAttribute("aria-pressed", s0 && s0.ge ? "true" : "false"); ge.disabled = !s0;
+      ge.title = "Off: exactly this total. On: this total or more.";
+      var set = function () {
+        adopt(); var v = inp.value.trim();
+        if (v === "" || !(+v >= 0)) delete F.st[k]; else F.st[k] = { v: Math.min(+v, +inp.max), ge: ge.getAttribute("aria-pressed") === "true" };
+        c.classList.toggle("on", !!F.st[k]); ge.disabled = !F.st[k]; B.ev("#adv:stat:" + k); run();
       };
-      minus.addEventListener("click", function () { if (!s) return; var v = s.v - step; setv(v < 0 ? null : v); });
-      plus.addEventListener("click", function () { var b0 = name ? B.fullBase(name).s[k] || 0 : 0; setv(s ? s.v + step : Math.max(step, b0)); });
-      if (s) c.appendChild(minus); c.appendChild(out); c.appendChild(plus);
-      if (s) { var ge = B.el("button", "ax-ge", s.ge ? "or more" : "exact"); ge.type = "button"; ge.style.width = "auto"; ge.title = "Exact total, or this total or more"; ge.addEventListener("click", function () { var list = f.stats.map(function (x) { return x === s ? { k: x.k, v: x.v, ge: !x.ge } : x; }); setText(f, list); panel(); run(); }); c.appendChild(ge); }
+      var t0 = null; inp.addEventListener("input", function () { clearTimeout(t0); t0 = setTimeout(set, 250); });
+      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); clearTimeout(t0); set(); showResults(); } });
+      ge.addEventListener("click", function (e) { e.preventDefault(); ge.setAttribute("aria-pressed", ge.getAttribute("aria-pressed") === "true" ? "false" : "true"); set(); });
+      c.appendChild(inp); c.appendChild(ge);
       r2.appendChild(c);
     });
     box.appendChild(r2);
@@ -319,9 +341,13 @@
     so.addEventListener("change", function () { F.sort = so.value; run(); });
     r4.appendChild(so);
     var clr = B.el("button", "ax-clr", "Clear"); clr.type = "button";
-    clr.addEventListener("click", function () { F = { sub: "", cls: 0, lvlo: "", lvhi: "", clean: false, slots: "", sort: "price", lo: "", hi: "", older: false }; setText({ rest: f.rest, clean: false }, []); panel(); run(); });
+    clr.addEventListener("click", function () { F = F0(); setText({ rest: f.rest, clean: false }, []); panel(); run(); });
     r4.appendChild(clr);
     box.appendChild(r4);
+    // the results build below as you go; this button says how many and takes you there
+    var go = B.el("button", "ax-show"); go.type = "button"; go.id = "advshow";
+    go.addEventListener("click", showResults);
+    box.appendChild(go); showBtn();
   }
 
   // ---------- the URL: a search link opens the same results (and is noindex, never in the sitemap)
@@ -329,12 +355,13 @@
     var p = [];
     if (F.sub) p.push("t:" + F.sub); if (F.cls) p.push("c:" + F.cls); if (F.lvlo !== "") p.push("l:" + F.lvlo); if (F.lvhi !== "") p.push("h:" + F.lvhi);
     if (F.clean) p.push("clean"); if (F.slots !== "") p.push("s:" + F.slots); if (F.sort !== "price") p.push("o:" + F.sort); if (F.lo) p.push("p:" + F.lo); if (F.hi) p.push("q:" + F.hi); if (F.older) p.push("old");
+    Object.keys(F.st).forEach(function (k) { p.push("st:" + k + "." + F.st[k].v + (F.st[k].ge ? ".g" : "")); });
     return p.join(";");
   }
   function syncUrl() {
     try {
       var q = $("q").value.trim(), a = advParam(), sp = new URLSearchParams();
-      if (q && (B.statQuery(q) || a)) sp.set("q", q); if (a && (q || F.sub)) sp.set("a", a);
+      if (q && (B.statQuery(q) || a)) sp.set("q", q); if (a && (q || F.sub || Object.keys(F.st).length)) sp.set("a", a);
       var qs = sp.toString(), want = location.pathname + (qs ? "?" + qs : "") + location.hash;
       if (want !== location.pathname + location.search + location.hash) history.replaceState(history.state, "", want);
       if (qs && !document.querySelector('meta[name="robots"][content^="noindex"]')) { var m = document.createElement("meta"); m.name = "robots"; m.content = "noindex,follow"; document.head.appendChild(m); }
@@ -344,15 +371,35 @@
     String(a || "").split(";").forEach(function (p) {
       var m = /^([a-z]+):(.*)$/.exec(p);
       if (p === "clean") F.clean = true; else if (p === "old") F.older = true;
-      else if (m) { var v = m[2].slice(0, 40); if (m[1] === "t") F.sub = v; else if (m[1] === "c") F.cls = +v || 0; else if (m[1] === "l") F.lvlo = v.replace(/\D/g, ""); else if (m[1] === "h") F.lvhi = v.replace(/\D/g, ""); else if (m[1] === "s") F.slots = v.replace(/\D/g, ""); else if (m[1] === "o" && /^(price|new|sold|close)$/.test(v)) F.sort = v; else if (m[1] === "p") F.lo = v.replace(/\D/g, ""); else if (m[1] === "q") F.hi = v.replace(/\D/g, ""); }
+      else if (m) { var v = m[2].slice(0, 40); if (m[1] === "t") F.sub = v; else if (m[1] === "c") F.cls = +v || 0; else if (m[1] === "l") F.lvlo = v.replace(/\D/g, ""); else if (m[1] === "h") F.lvhi = v.replace(/\D/g, ""); else if (m[1] === "s") F.slots = v.replace(/\D/g, ""); else if (m[1] === "o" && /^(price|new|sold|close)$/.test(v)) F.sort = v; else if (m[1] === "p") F.lo = v.replace(/\D/g, ""); else if (m[1] === "q") F.hi = v.replace(/\D/g, ""); else if (m[1] === "st") { var z = /^([A-Z]+)\.(\d{1,3})(\.g)?$/.exec(v); if (z && ORDER.indexOf(z[1]) >= 0) F.st[z[1]] = { v: +z[2], ge: !!z[3] }; } }
     });
   }
 
-  function run() { clearTimeout(RUN_T); RUN_T = setTimeout(function () { SHOWN = 25; try { render($("q").value.trim()); } catch (e) { var b = $("sres"); if (b) { b.hidden = false; b.textContent = "Search by stats hit an error. Try again in a moment."; } } syncUrl(); }, 60); }
+  function showBtn() {
+    var b = $("advshow"); if (!b) return;
+    b.disabled = COUNT == null;
+    b.textContent = COUNT == null ? "Set a stat or pick a type to see copies" : COUNT === 0 ? (MULTI ? "None match: try fewer filters" : "No exact copies: see the closest") : "Show " + COUNT + (COUNT === 1 ? " copy" : " copies");
+  }
+  function showResults() {
+    var r = $("sres"); if (!r || r.hidden) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // the phone keyboard closes
+    r.scrollIntoView({ block: "start", behavior: "smooth" }); B.ev("#adv:show");
+  }
+  // the search box sticks to the top while scrolling; with the panel or results under it, that whole block stuck and
+  // the results could never scroll into view on a phone. Open, it scrolls with the page.
+  function unstick() { var hs = $("hsearch"), r = $("sres"); if (hs) hs.classList.toggle("ax-open", OPEN || !!(r && !r.hidden)); }
+  function run() { clearTimeout(RUN_T); RUN_T = setTimeout(function () { SHOWN = 25; try { render($("q").value.trim()); unstick(); } catch (e) { var b = $("sres"); if (b) { b.hidden = false; b.textContent = "Search by stats hit an error. Try again in a moment."; } } syncUrl(); }, 60); }
 
   window.FMADV = {
     init: function (fms) { B = fms; css(); },
-    typed: function (v) { TYPED = v; if (OPEN) panel(); run(); },
+    // with the panel closed, the box alone says what to find: stats set earlier in the panel don't linger unseen
+    // a stat typed in the box wins over the same stat set in the panel
+    typed: function (v) {
+      TYPED = v;
+      if (!OPEN) F.st = {};
+      else { var sq = B.statQuery(v || ""); (sq && sq.stats || []).forEach(function (x) { if (/^CRIT/.test(x.k)) { delete F.st.CRIT; delete F.st.CRITDMG; } else delete F.st[x.k]; }); panel(); }
+      run();
+    },
     toggle: function () {
       OPEN = !OPEN; var box = $("advbox"), bt = $("advbtn");
       box.hidden = !OPEN; bt.setAttribute("aria-expanded", OPEN ? "true" : "false");
