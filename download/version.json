@@ -1,10 +1,15 @@
 {
- "version": "2026.11.14.1",
- "date": "2026-11-15T00:20:24+00:00",
- "notes": "Trade chat: \"Composite Bow 60 att\" is the bow with 60 attack, not a 60% bow scroll; \"wg\", \"wlr\" and \"pe\" are read; a one-word item inside a longer name (\"Red Beret\", \"Cupid's Crossbow\") is no longer read as the short item; \"4 str above average\" is a roll grade, not 4 STR.",
- "sha256": "43a626c44d8b4519af306081905ba9a4dc1223800d1670fbf03138305f1ce55b",
- "size": 185062,
+ "version": "2026.11.16.1",
+ "date": "2026-11-16T17:14:08+00:00",
+ "notes": "Shop names: a long name the shop cuts short (\"Two-handed Sword A..\", \"Black Knucklevest P..\") is no longer read as the shorter item it starts with. It goes to the scroll or item it really is, or is left unnamed when it could be several.",
+ "sha256": "41c483e68633479d35f448a762c3273db808d70634b6a90e3af6db65de6c8bed",
+ "size": 185460,
  "history": [
+  {
+   "version": "2026.11.16.1",
+   "date": "2026-11-16",
+   "notes": "Shop names: a long name the shop cuts short (\"Two-handed Sword A..\", \"Black Knucklevest P..\") is no longer read as the shorter item it starts with. It goes to the scroll or item it really is, or is left unnamed when it could be several."
+  },
   {
    "version": "2026.11.14.1",
    "date": "2026-11-15",
@@ -177,5 +182,5 @@
   }
  ],
  "pip": [],
- "sig": "6c5cefaf4615907e05c25a4bafeea92d36e86dc2c44562a961a24a9e382c4a8628482ff71523ee2781b59633814001a9ecb93538b0948b46ca2c53b73d8fc7d1948de478faceba1016e8170121b28d78ab642404251bff54d7af6865f2011374ddb45d2861397d33a5251479701e59afbe39d1026117e2b1b482f47a32c73f34e9b4d6b76acb7448f79366c749ea6843e536ea04c157b705fa1d0cec8cca1917843507582937b74bd94fd973246c9afd6f49475cda2eac18373819d86515a9c80d4b90791184c73c8dcd92cc8d7733874c79ca76e64b5434e64a8fdc9f57248b6b44f83f4cec20dbe269e5705555c2ffeee7939f1815d20c514dce09caafe9ed"
+ "sig": "b260a5c7d77f3c84d25acaca396f10bb2ca639371bc9de952ab2e646f041195a6709193e72a862ad96a83602cc4940c7828649c2d573e6abac28a55b834cff132f959d0afb8f17493d8948375d9eb9ee11dfcbdc675afb24efef7b5a971526c2be49af716e19a5ab1b38036c8a32813544212638106abd67904a558b7f9c754d70a9e0cb2e310e829c68778dc2b2af234716f78f59a4344e2fe0d425fc97d94fccc0bf3167f32d6b6da177b42e1bb663bc01771a4f383bbd7652552d55522e8848d8e7f02780371cd60f442fbabd13b0d63952a504ee90e87697edabb08e291790ea3cebce0974a88e89fadf0de930375fd135c3bcdd89494ded9fae48825ecf"
 }

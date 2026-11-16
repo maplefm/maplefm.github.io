@@ -22,6 +22,18 @@ db = {}
 for r in json.load(open(DB, encoding="utf-8"))["items"]:
     db.setdefault(r[0].lower(), r)
 
+# The board's own verdict on each item (summary.json, built by the site): movers and the biggest sale only name items
+# whose price the board is sure of. No board file means nothing is sure, so nothing is named.
+try:
+    _BOARD = {r.get("item"): r for r in json.load(open(os.path.join(DATA, "summary.json"), encoding="utf-8")).get("rows") or [] if isinstance(r, dict)}
+except Exception:
+    _BOARD = {}
+
+def firm(name):
+    it = _BOARD.get(name)
+    return bool(it) and it.get("kind") == "sale" and bool(it.get("typ")) and not it.get("check") and it.get("conf") != "lead" \
+        and not any(str(f).startswith("Rough price") for f in (it.get("flags") or [])) and (it.get("salesN") or 0) >= 3
+
 def category(name):
     r = db.get(name.lower())
     if not r:
@@ -119,7 +131,7 @@ def move(d, cat=None):
             # a top mover needs enough prices on both days to mean something (a handful of listings swings 100%
             # on one odd ask), and a move past 4x either way is a misread, not a market
             raw = v[d][0] / v[p][0]
-            if min(v[d][1], v[p][1]) >= MOVER_MIN and 0.25 <= raw <= 4:
+            if min(v[d][1], v[p][1]) >= MOVER_MIN and 0.25 <= raw <= 4 and firm(name):
                 movers.append((name, raw - 1, v[d][0], v[p][0], v[d][1]))
     if not logs:
         return None
@@ -174,7 +186,7 @@ def make(today):
         "gainers": [fmt(x) for x in movers[::-1][:8] if x[1] > 0],
         "losers": [fmt(x) for x in movers[:8] if x[1] < 0],
         "most_traded": [{"item": k, "sales": v[0], "volume": v[1], "cat": category(k)} for k, v in sorted(vol.items(), key=lambda kv: -kv[1][1])[:8]],
-        "biggest_sale": (lambda b: {"item": b[0], "price": b[2], "seller": b[3]} if b else None)(max(day_sales, key=lambda x: x[2]) if day_sales else None),
+        "biggest_sale": (lambda b: {"item": b[0], "price": b[2], "seller": b[3]} if b else None)(max((x for x in day_sales if firm(x[0])), key=lambda x: x[2], default=None)),
         "stats": {"sales": len(day_sales), "volume": sum(x[2] for x in day_sales),
                   "listings": sum(1 for v in obs.values() for r in v if r[0] == today),
                   "items": sum(1 for v in daily.values() if today in v)},
@@ -246,7 +258,7 @@ def make_range(key, label, n):
         if not a or not b: continue
         pa = statistics.median(v[d][0] for d in a); pb = statistics.median(v[d][0] for d in b)
         na = sum(v[d][1] for d in a); nb = sum(v[d][1] for d in b)
-        if min(na, nb) < MOVER_MIN or not pa or not (0.25 <= pb / pa <= 4): continue
+        if min(na, nb) < MOVER_MIN or not pa or not (0.25 <= pb / pa <= 4) or not firm(name): continue
         movers.append((name, pb / pa - 1, pb, pa, na + nb))
     movers.sort(key=lambda x: x[1])
     fmt = lambda x: {"item": x[0], "chg": round(x[1], 4), "price": round(x[2]), "was": round(x[3]), "seen": x[4], "cat": category(x[0])}

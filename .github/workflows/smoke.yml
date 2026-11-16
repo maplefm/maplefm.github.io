@@ -49,6 +49,16 @@ jobs:
       # Search by stats used like a person on a phone: shipped once with a + button that piled "1 att" into the box
       - name: Search by stats works when tapped and typed
         run: node tests/advsearch-ux.cjs chromium
+      # Nov 16: the Biggest mover showed Two-Handed Sword at 149K, built from scroll listings whose cut-off name was read as
+      # the sword. What a strip, pick or badge shows must be what it opens, and only sure prices headline.
+      - name: Front page shows what it opens, sure prices only
+        run: |
+          node tests/frontdoor-ux.cjs chromium phone
+          node tests/frontdoor-ux.cjs chromium desktop
+      - name: Cut-off names never price the shorter item
+        run: |
+          pip install -q playwright==1.56.0 && python3 -m playwright install chromium >/dev/null
+          python3 tests/cutnames.py --board
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'

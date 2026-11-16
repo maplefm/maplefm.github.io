@@ -1305,6 +1305,17 @@ async function interactions(req, env) {
   return json({ type: 4, data: { content: "Unknown command", flags: 64 } });
 }
 
+// A price the board states as a fact: 3+ sales, nothing flagged, not rough, not a lead (same rule as the site and the
+// Discord posts). Anything else answers with the range it was seen at, never one number.
+function firmRow(r) {
+  return !!r && r.kind === "sale" && !!r.typ && !r.check && r.conf !== "lead" && (r.salesN || 0) >= 3 &&
+    !(Array.isArray(r.flags) && r.flags.some((f) => /^Rough price/.test(String(f))));
+}
+function roughLine(r, money) {
+  const n = r.kind === "sale" && !/^ask/.test(r.basis || "") ? (r.salesN || 0) + " sales" : "asking prices";
+  return r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? "no sure price yet, seen " + meso(r.lo) + " to " + money(r.hi) + " (" + n + ")" : "no sure price yet (" + n + ")";
+}
+
 // /price in Discord: the embed for one item, with the roll's own sales when a roll is asked for
 async function discordPrice(env, q) {
   const C = " " + await coinE(env), mz = (n) => meso(n) + C;   // every amount carries the meso coin
@@ -1326,14 +1337,16 @@ async function discordPrice(env, q) {
     ladL.slice(0, 6).forEach((g) => lines.push((g[7] ? "**" : "") + g[0] + ": " + ladRange(g) + (g[7] ? "**" : "")));
     if (r.lad.length > 1) lines.push("Also priced by " + r.lad.slice(1, 5).map((x) => x[0]).join(", ") + " on the [item's card](" + link + ")");
   }
+  else if (r.typ && !firmRow(r)) lines.push("**" + roughLine(r, mz).replace(/^no/, "No") + "**");
   else if (r.typ) lines.push("**Typical: " + meso(r.typ) + "**" + C + (r.lo && r.hi ? "  (" + meso(r.lo) + " to " + mz(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? "  from " + (r.salesN || 0) + " watched sales" : "  from asking prices"));
-  if (r.best) lines.push("Cheapest ask now: " + mz(r.best) + "" + (r.deal >= 0.1 ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
+  if (r.best) lines.push("Cheapest ask now: " + mz(r.best) + "" + (r.deal >= 0.1 && firmRow(r) ? "  (" + Math.round(r.deal * 100) + "% under typical)" : ""));
   // where to find it: the seller, channel and room of that cheapest listing, when they were read
   if (r.best && r.bestS && r.bestW) lines.push("Where: " + String(r.bestS).replace(/[*_`~|<>@]/g, "").slice(0, 20) + " · " + String(r.bestW).replace(/[*_`~|<>@]/g, "").slice(0, 40) + (r.bestT > 0 ? " · <t:" + Math.floor(r.bestT / 1000) + ":R>" : ""));
   // mv[0] is the last 24 hours against the 24 before; daily is the typical per day, so the week comes from its ends
   const d = Array.isArray(r.daily) ? r.daily.filter((x) => x && x[1] > 0) : [];
   const wk = d.length >= 3 ? d[d.length - 1][1] / d[0][1] - 1 : null;
-  if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
+  if (!firmRow(r)) { /* a price the board isn't sure of has no move worth stating */ }
+  else if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) lines.push((r.mv[0] > 0 ? "Up " : "Down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% in 24h");
   else if (wk != null && Math.abs(wk) >= 0.03) lines.push((wk > 0 ? "Up " : "Down ") + Math.round(Math.abs(wk) * 100) + "% over " + d.length + " days");
   // "2 crit" on a 1 crit pair is the total: the grade is +1 (the same reading as !price and the site's search)
   if (sr.roll && sr.g != null && /^CRIT/.test(sr.stat || "") && !sr.plus) {
@@ -1569,7 +1582,7 @@ async function priceLine(env, raw) {
     if (rq.near.length) return (head + " no sales of this exact roll yet. Closest that sold: " + rq.near.map((x) => x.label + " " + meso(x.p) + " (" + x.n + " sales)").join(", ") + ". Every roll: maplefm.gg/item/" + slug0).slice(0, 390);
     const b0 = [shown(r0.item) + " " + sr.roll + ": no sales caught at that roll lately."];
     if (r0.rk && sr.stat && sr.stat !== r0.rk && /DEF$/.test(sr.stat)) b0.push("Defense isn't what this sells by: rolls go by " + statLabel(r0.rk) + ".");
-    if (r0.typ) b0.push("Clean ones typical " + meso(r0.typ) + ".");
+    if (r0.typ && firmRow(r0)) b0.push("Clean ones typical " + meso(r0.typ) + ".");
     b0.push("Every roll's price: maplefm.gg/c/" + slug0);
     return b0.join(" ").slice(0, 390);
   }
@@ -1590,9 +1603,10 @@ async function priceLine(env, raw) {
     const parts = lad.slice(0, 4).map((g) => g[0].replace(/^Clean, /, "clean ").replace(/^Clean$/, "clean").replace(/^Slots used, no gain$/, "no gain") + " " + (meso(g[2]) === meso(g[3]) ? meso(g[2]) : meso(g[2]) + " to " + meso(g[3])) + (g[1] === "sold" ? " (" + g[5] + " sold)" : " (asking)"));
     return (shown(r.item) + ": " + parts.join(" · ") + (r.lad.length > 1 ? " · by " + r.lad.slice(1, 4).map((x) => x[0]).join(", ") + " too" : "") + " · maplefm.gg/c/" + slugL).slice(0, 390);
   }
-  if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? " from " + (r.salesN || 0) + " sales" : " from asks"));
+  if (r.typ && !firmRow(r)) bits.push(roughLine(r, meso));
+  else if (r.typ) bits.push("typical " + meso(r.typ) + (r.lo && r.hi && meso(r.lo) !== meso(r.hi) ? " (" + meso(r.lo) + " to " + meso(r.hi) + ")" : "") + (r.kind === "sale" && !/^ask/.test(r.basis || "") ? " from " + (r.salesN || 0) + " sales" : " from asks"));
   if (r.best) bits.push("· cheapest now " + meso(r.best) + (r.bestS && r.bestW ? " (" + String(r.bestS).replace(/[^A-Za-z0-9]/g, "").slice(0, 20) + ", " + String(r.bestW).replace(/[^A-Za-z0-9 ,()]/g, "").slice(0, 40) + ")" : ""));
-  if (Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
+  if (firmRow(r) && Array.isArray(r.mv) && typeof r.mv[0] === "number" && Math.abs(r.mv[0]) >= 0.03) bits.push("· " + (r.mv[0] > 0 ? "up " : "down ") + Math.round(Math.abs(r.mv[0]) * 100) + "% today");
   const slug = shown(r.item).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   bits.push("· maplefm.gg/c/" + slug);
   return bits.join(" ").slice(0, 390);

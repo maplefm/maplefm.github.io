@@ -198,6 +198,20 @@ def tooltip_title(img, prefix):
                     return " ".join(full)
     return None
 
+def longer_names(n):
+    """Known names that start with the normalised read n and run past it."""
+    return sorted({v for k, v in _ITEM_NORM.items() if len(k) > len(n) and k.startswith(n) and not k.endswith("fortransformation")})   # quest costumes never sell
+
+def pick_longer(core, longer):
+    """The item a cut-short read belongs to: the one longer name, or a scroll whose tier is cut off, or unknown."""
+    bases = {v.split(": ")[0] for v in longer}
+    if len(bases) == 1 and all(re.search(r"scroll", v, re.I) for v in longer):
+        b = next(iter(bases))
+        return (b if b in longer else b + " (tier cut off)"), True
+    if len(longer) == 1:
+        return longer[0], True
+    return core + " (name cut off)", False
+
 def clean_item(raw):
     """Snap an OCR'd shop item name to a known item where it is clearly the same one."""
     raw = re.sub(r"^[^A-Za-z0-9\[]+", "", raw).strip()
@@ -217,8 +231,18 @@ def clean_item(raw):
         if s:
             return s, True
     n = norm(core)
+    # A whole known name followed by the shop's "..", or by more letters, is a longer item cut short, never the short
+    # one: "Two-handed Sword A.." is the Two-handed Sword Attack Scroll, not the Two-Handed Sword; "Black Knucklevest P"
+    # is the Pants. The game only cuts a name that doesn't fit.
     if n in _ITEM_NORM:
-        return _ITEM_NORM[n], True
+        longer = longer_names(n) if cut else []
+        if not longer:
+            return _ITEM_NORM[n], True
+        return pick_longer(core, longer)
+    if any(len(k) >= 4 and n.startswith(k) for k in _ITEM_NORM if len(k) < len(n)):
+        longer = longer_names(n)
+        if longer:
+            return pick_longer(core, longer)
     best = difflib.get_close_matches(n, list(_ITEM_NORM), n=2, cutoff=0.78)
     if best:
         r0 = difflib.SequenceMatcher(None, n, best[0]).ratio()
