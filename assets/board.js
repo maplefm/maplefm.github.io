@@ -1834,7 +1834,7 @@
   function renderTicker() {
     var run = $("ticker"); if (!run || !D || D.preview) return;
     var now = Date.now(), seen = {};
-    var ev = D.sales.filter(function (l) { var it = D.byName[l.i]; return l.p >= TICK_MIN && now - l.t <= DAY && firm(it) && !(it.typ && l.p > it.typ * 8) && !/\u2026$/.test(l.i); })
+    var ev = D.sales.filter(function (l) { var it = D.byName[l.i]; return l.p >= TICK_MIN && now - l.t <= DAY && firm(it) && !(it.typ && l.p > it.typ * 8 && !(it.equip && l.x && l.x._ok)) && !/\u2026$/.test(l.i); })
       .sort(function (a, b) { return b.t - a.t; }).filter(function (l) { var k = l.s + "|" + l.i + "|" + l.p; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 20);
     var sig = ev.map(function (l) { return l.s + l.i + l.p + l.t; }).join("|") + "|" + Math.floor(now / 6e4);
     if (run.dataset.sig === sig) return; run.dataset.sig = sig; run.textContent = "";
