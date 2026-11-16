@@ -46,6 +46,9 @@ jobs:
           python3 tools/itempages.py /tmp/summary-public.json /tmp/ip /tmp/itemguide.json /tmp/world.json assets/training-notes.json
           test "$(ls /tmp/ip/item | wc -l)" -gt 500
       - run: node tools/smoke.cjs
+      # Search by stats used like a person on a phone: shipped once with a + button that piled "1 att" into the box
+      - name: Search by stats works when tapped and typed
+        run: node tests/advsearch-ux.cjs chromium
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'

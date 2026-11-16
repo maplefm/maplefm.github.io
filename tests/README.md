@@ -10,3 +10,4 @@ Rerun after any change. Live site, read only: test visits never reach the visit 
 6. `bash tests/endpoints.sh`: every public Worker route, admin and member routes without a session. One request a second.
 
 Playwright: `NODE_PATH=$(npm root -g)` in this container. WebKit and Firefox run in CI only.
+7. `node tests/advsearch-ux.cjs [chromium|webkit]`: Search by stats used like a person on an iPhone: pick a type, type a stat total, "or more", typed stats then edited in the panel, the Show button scrolling to the results, a shared link, and no leftover stats after closing. Any change to Search by stats runs this first.
