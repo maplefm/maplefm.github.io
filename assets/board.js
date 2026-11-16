@@ -3032,7 +3032,11 @@
       if (!loose) for (var j = 0; j < want.length; j++) { var t = statTotal(n, l, want[j].k); if (t == null || (want[j].ge ? t < want[j].v : t !== want[j].v)) return false; }
       return true;
     }
-    var live = (i.buy || []).filter(function (l) { return l.st !== "gone" && l.st !== "sold" && !l.chat && (f.older || now - l.t <= SQ_DAY) && (!f.lo || l.u >= f.lo) && (!f.hi || l.u <= f.hi); });
+    // "Older listings too": Where to buy holds only the last day, so the item's other asks from the last 7 days join
+    // in (the server board keeps every ask with stats). A shop seen since without the item stays out.
+    var pool = i.buy || [];
+    if (f.older && i.asks) { var inBuy = new Set(pool); pool = pool.concat(i.asks.filter(function (l) { return !inBuy.has(l) && l.x && !l.chat && now - l.t <= 7 * DAY && l.st !== "gone" && l.st !== "sold"; })); }
+    var live = pool.filter(function (l) { return l.st !== "gone" && l.st !== "sold" && !l.chat && (f.older || now - l.t <= SQ_DAY) && (!f.lo || l.u >= f.lo) && (!f.hi || l.u <= f.hi); });
     var good = [], seen = {}, spot = {};
     live.slice().sort(function (a, b) { return b.t - a.t; }).forEach(function (l) {
       var k0 = keyOf(l); if (seen[k0]) { seen[k0].n++; return; }
