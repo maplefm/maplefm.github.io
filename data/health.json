@@ -1,5 +1,5 @@
 {
- "at": 1794810146372,
+ "at": 1794813262367,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -44,8 +44,8 @@
    "rows24": 5463,
    "room24": 5463,
    "ch24": 5463,
-   "rows7": 66088,
-   "room7": 66085,
+   "rows7": 63597,
+   "room7": 63594,
    "late7": 0,
    "chat24": 2,
    "last": 1794805749,
@@ -215,6 +215,22 @@
    "room_rate7": null,
    "late_share7": null,
    "behind": 1
+  },
+  "Gola": {
+   "rows24": 12,
+   "room24": 0,
+   "ch24": 12,
+   "rows7": 12,
+   "room7": 0,
+   "late7": 0,
+   "chat24": 4,
+   "last": 1794812989,
+   "ver": "2026.11.14.1",
+   "lag_median_min": null,
+   "room_rate24": 0.0,
+   "room_rate7": 0.0,
+   "late_share7": 0.0,
+   "behind": 0
   }
  },
  "drops": {
@@ -242,7 +258,7 @@
    "incomplete upload": 1315
   },
   "2026-11-16": {
-   "incomplete upload": 303
+   "incomplete upload": 348
   }
  },
  "rejects": {
