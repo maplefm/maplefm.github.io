@@ -228,7 +228,10 @@ def job_sales(data_dir, state_path):
             p = int(r.get("p") or 0)
             if p < BIG or "cut off" in str(r.get("i") or ""): continue
             it = board.get(r.get("i"))
-            if not firm(it) or p / max(1, int(r.get("q") or 1)) > it["typ"] * 8: continue
+            # past 8x the typical is usually a misread, except a scrolled equip whose popup was read exactly: a +3 LUK
+            # Black Napoleon sells at 1M against an 80K clean typical
+            sure_roll = it and it.get("equip") and isinstance(r.get("x"), dict) and r["x"].get("_ok")
+            if not firm(it) or (p / max(1, int(r.get("q") or 1)) > it["typ"] * 8 and not sure_roll): continue
             if not club and len(seen_by.get(f'{str(r.get("s")).lower()}|{str(r.get("i")).lower()}|{p}', ())) < 2: continue
             # one sale, one post: the same seller, item and price within a day is the same sale, however many
             # scanners caught it or re-sent it (the time each one saw it differs)
