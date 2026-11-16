@@ -192,8 +192,16 @@ def scan_docs(data_dir):
                 yield (links.get(tag) if isinstance(links, dict) else None) or d.get("who") or "Guest", d
 
 # ---------------------------------------------------------------- sales
+def firm(it):
+    """A price the board states as a fact: 3+ sales, nothing flagged, not rough, not a lead. Same rule as the site."""
+    return bool(it) and it.get("kind") == "sale" and bool(it.get("typ")) and not it.get("check") and it.get("conf") != "lead" \
+        and not any(str(f).startswith("Rough price") for f in (it.get("flags") or [])) and (it.get("salesN") or 0) >= 3
+
 def job_sales(data_dir, state_path):
     st = load(state_path, {})
+    # a big sale posts only for an item whose name and price the board is sure of (a cut-off scroll name read as the
+    # weapon it starts with once posted "Two-Handed Sword sold for 1.3M")
+    board = {r.get("item"): r for r in (load(os.path.join(data_dir, "summary.json"), {}).get("rows") or []) if isinstance(r, dict)}
     seen = st.get("sales_seen") or {}
     mark = st.get("sales_mark")
     now = int(time.time())
@@ -219,6 +227,8 @@ def job_sales(data_dir, state_path):
             if not r.get("so") or r.get("k") == "b": continue
             p = int(r.get("p") or 0)
             if p < BIG or "cut off" in str(r.get("i") or ""): continue
+            it = board.get(r.get("i"))
+            if not firm(it) or p / max(1, int(r.get("q") or 1)) > it["typ"] * 8: continue
             if not club and len(seen_by.get(f'{str(r.get("s")).lower()}|{str(r.get("i")).lower()}|{p}', ())) < 2: continue
             # one sale, one post: the same seller, item and price within a day is the same sale, however many
             # scanners caught it or re-sent it (the time each one saw it differs)
@@ -589,7 +599,7 @@ def job_deals(data_dir, summary_path, state_path):
             t = int(r.get("t") or 0)
             if r.get("so") or r.get("k") == "b" or r.get("spot") or now - t > DEAL_WIN or "cut off" in str(r.get("i") or ""): continue
             it = rows.get(r.get("i"))
-            if not it or it.get("kind") != "sale" or not it.get("typ") or it.get("check") or (it.get("salesN") or 0) < 3: continue
+            if not firm(it): continue
             if it.get("equip"): continue                                   # equips are judged by roll below, never by name
             if it.get("basis") not in ("24h", "3d"): continue              # a typical that rests on 3+ sales in 3 days
             tw = [str(w).lower() for w in (it.get("typWho") or [])]
@@ -743,7 +753,7 @@ def job_members(summary_path, feed_path, state_path):
     sm = load(summary_path, {}); feed = load(feed_path, [])
     moves = []
     for r in sm.get("rows") or []:
-        if not isinstance(r, dict) or (r.get("salesN") or 0) < 8 or r.get("equip"): continue
+        if not isinstance(r, dict) or (r.get("salesN") or 0) < 8 or r.get("equip") or not firm(r): continue
         d = [x for x in (r.get("daily") or []) if x and x[1]]
         if len(d) < 4 or not d[0][1]: continue
         ch = d[-1][1] / d[0][1] - 1
@@ -872,7 +882,7 @@ def job_potd(summary_path, state_path):
     if st.get("day") == day:
         return
     rows = [r for r in (load(summary_path, {}).get("rows") or []) if isinstance(r, dict) and r.get("kind") == "sale"
-            and (r.get("salesN") or 0) >= 15 and (r.get("typ") or 0) >= 20000 and r.get("item")]
+            and (r.get("salesN") or 0) >= 15 and (r.get("typ") or 0) >= 20000 and r.get("item") and firm(r)]
     recent = {x for x in st.get("seen", [])[-21:]}
     def week(r):
         d = [x for x in (r.get("daily") or []) if x and x[1]]

@@ -947,6 +947,32 @@
       if (DB[String(l.i).toLowerCase()]) { delete l.x.SUCCESS; return; }
       l.i = l.i + " Scroll\u2026";
     });
+    // A real item whose name starts a longer one (Two-Handed Sword / Two-handed Sword Attack Scroll, Black Knucklevest /
+    // Black Knucklevest Pants): the shop list cuts the long name, and watchers before 2026.11.16.1 snapped it to the short
+    // one. When the long item sells 3x or more above the short one's usual price, an unhovered listing of the short name
+    // at half the long item's price or more could be either, so it's treated as cut off: never priced as the short item.
+    // Below that it's the short item. A hovered copy with the short item's own stats always stays.
+    (function () {
+      var med = {}, buck = {}, held = 0;
+      L.forEach(function (l) { if (!l.b && DB[String(l.i).toLowerCase()]) (med[l.i] || (med[l.i] = [])).push(l.u); });
+      Object.keys(med).forEach(function (n) { var k = n.slice(0, 4).toLowerCase(); (buck[k] || (buck[k] = [])).push(n); });
+      var cut = {};
+      Object.keys(med).forEach(function (s) {
+        var sl = s.toLowerCase() + " ", lim = 0;
+        (buck[sl.slice(0, 4)] || []).forEach(function (n) {
+          if (n.length <= sl.length || n.toLowerCase().indexOf(sl) !== 0 || med[n].length < 3) return;
+          var lm = median(med[n]), low = med[s].filter(function (u) { return u < lm / 2; });
+          if (low.length >= 3 && lm >= 3 * median(low) && (!lim || lm / 2 < lim)) lim = lm / 2;
+        });
+        if (lim) cut[s] = lim;
+      });
+      L.forEach(function (l) {
+        var lim = cut[l.i]; if (!lim || l.u < lim) return;
+        if (l.x && Object.keys(l.x).some(function (k) { return k !== "SUCCESS" && k.charAt(0) !== "_"; })) return;
+        l.i = l.i + "…"; held++;
+      });
+      if (held) mark("short names held back as cut off " + held);
+    })();
     // a colour item read without its colour (older watchers): the colour whose price it sits on, or left out
     var colBase = {}; Object.keys(COLOURS).forEach(function (b) { colBase[b] = Object.keys(COLOURS[b]).map(function (id) { return b + " (" + COLOURS[b][id] + ")"; }); });
     var colMed = {}; L.forEach(function (l) { Object.keys(colBase).forEach(function (b) { if (colBase[b].indexOf(l.i) >= 0 && !l.b) (colMed[l.i] || (colMed[l.i] = [])).push(l.u); }); });
@@ -1377,6 +1403,11 @@
     });
   }
 
+  // A price the site states as a fact: 3+ sales, nothing flagged, not rough, not a lead. Anything else shows a range
+  // or nothing in the places that headline a number (mover, Popular, NPC badge, Big sales, deals, bots).
+  function firm(i) { return !!i && i.kind === "sale" && !i.check && !i.unreadTyp && i.conf !== "lead" && (i.salesN || 0) >= 3; }
+  window.fmFirm = function (n) { return D ? firm(D.byName[n]) : null; };
+
   // ---------- top cards
   var finderIdx = 0, finderTimer = null;
   function card(label, title, sub, icon, cls, onclick) {
@@ -1749,14 +1780,14 @@
   }
   function renderPicks() {
     var box = $("picks"); if (!box || !D) return; loadPopular();
-    var score = {}, add = function (i, v) { if (i && i.typ) score[i.item] = (score[i.item] || 0) + v; };
+    var score = {}, add = function (i, v) { if (i && i.typ && firm(i)) score[i.item] = (score[i.item] || 0) + v; };
     (POP || []).forEach(function (x) { add(D.byName[x[0]], x[1] * 6); });
     D.list.forEach(function (i) { if (i.n >= MIN && i.salesN) add(i, Math.min(i.salesN, 60) / 10); });
     var top = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; }).slice(0, 10);
     var sig = top.join("|") + top.map(function (n) { var i = D.byName[n]; return i.typ + ":" + (i.mv[0] || 0); }).join(",");
     if (box.dataset.sig === sig) return; box.dataset.sig = sig; box.textContent = "";
     top.forEach(function (n) {
-      var i = D.byName[n], b = el("button", "pk"); b.type = "button"; b.setAttribute("role", "listitem");
+      var i = D.byName[n], b = el("button", "pk"); b.type = "button"; b.setAttribute("role", "listitem"); b.dataset.item = n;
       b.setAttribute("aria-label", showName(n) + ", about " + short(i.typ) + " mesos");
       var im = iconImg(n); if (im) b.appendChild(im); else b.appendChild(el("span", null, ""));
       b.appendChild(el("span", "pn", pickLabel(n)));
@@ -1771,13 +1802,13 @@
     var best = null, lbl = "", txt = "";
     // deals stay with Mega Deals; the front door only shows the biggest mover
     if (!best) {
-      D.list.forEach(function (i) { if (i.n >= MIN && i.typ >= 100000 && i.mv[0] != null && (!best || Math.abs(i.mv[0]) > Math.abs(best.mv[0]))) best = i; });
+      D.list.forEach(function (i) { if (i.n >= MIN && i.typ >= 100000 && firm(i) && i.mv[0] != null && (!best || Math.abs(i.mv[0]) > Math.abs(best.mv[0]))) best = i; });
       if (best && Math.abs(best.mv[0]) >= 0.05) { lbl = "Biggest mover today"; txt = (best.mv[0] > 0 ? "▲ " : "▼ ") + Math.round(Math.abs(best.mv[0]) * 100) + "%"; } else best = null;
     }
     a.hidden = !best; if (!best) return;
     var sig = lbl + best.item + txt; if (a.dataset.sig === sig) return; a.dataset.sig = sig; a.textContent = "";
     var im = iconImg(best.item); if (im) a.appendChild(im);
-    a.appendChild(el("small", null, lbl)); a.appendChild(el("b", null, showName(best.item))); a.appendChild(document.createTextNode(txt));
+    a.appendChild(el("small", null, lbl)); a.appendChild(el("b", null, showName(best.item))); a.appendChild(document.createTextNode(txt)); a.dataset.item = best.item;
     a.onclick = function (e) { e.preventDefault(); ev("#pick:" + best.item); pick(best.item); jumpToCard(); };
   }
   function openSources() {
@@ -1795,14 +1826,14 @@
   function renderTicker() {
     var run = $("ticker"); if (!run || !D || D.preview) return;
     var now = Date.now(), seen = {};
-    var ev = D.sales.filter(function (l) { var it = D.byName[l.i]; return l.p >= TICK_MIN && now - l.t <= DAY && !(it && it.typ && l.p > it.typ * 8) && !/\u2026$/.test(l.i); })
+    var ev = D.sales.filter(function (l) { var it = D.byName[l.i]; return l.p >= TICK_MIN && now - l.t <= DAY && firm(it) && !(it.typ && l.p > it.typ * 8) && !/\u2026$/.test(l.i); })
       .sort(function (a, b) { return b.t - a.t; }).filter(function (l) { var k = l.s + "|" + l.i + "|" + l.p; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 20);
     var sig = ev.map(function (l) { return l.s + l.i + l.p + l.t; }).join("|") + "|" + Math.floor(now / 6e4);
     if (run.dataset.sig === sig) return; run.dataset.sig = sig; run.textContent = "";
     // no sales at all means the sales didn't load (the Worker or the network is down), not a quiet market
     if (!ev.length) { run.appendChild(el("span", "tq", (D.sales || []).length ? "No sales over 250K in the last 24 hours" : "Recent sales didn't load. Try again in a minute.")); return; }
     ev.forEach(function (l) {
-      var sp = el("span"); sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
+      var sp = el("span"); sp.dataset.item = l.i; sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
       sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", "mz", short(l.p)));
       var rm = /^FM\d+$/.test(l.r || "") || isMap(l.r) ? roomLabel(l.r) : "";
       sp.appendChild(document.createTextNode((rm ? " · " + (l.c && !l.ci ? "CH " + l.c + ", " : "") + rm : "") + " · " + ago(l.t)));
@@ -4075,7 +4106,7 @@
     if (i.equip) { var bt = baseText(i.item); if (bt) { var bl = el("p", "baseln"); bl.appendChild(el("b", null, "Base ")); bl.appendChild(document.createTextNode(bt.t)); bl.title = "The stats this item comes with, before any roll. From the item database" + (bt.from === "hovers" ? "; attack from hovers in the game where the data leaves it out (a ? means only one hover so far)" : "") + "."; ht.appendChild(bl); } }
     var vp = vendor(i.item), nxp = nxOf(i.item);
     if (nxp) { var nl = el("p", "vend"); nl.title = "What this costs in the Cash Shop, and what a thousand NX comes to in mesos at this item's typical sale."; nl.appendChild(document.createTextNode("Cash Shop " + fmt(nxp) + " NX")); if (i.typ) { var per = i.typ / nxp, rate = nxRate(); nl.appendChild(el("span", null, " · " + M(Math.round(per * 1000)) + " per 1,000 NX")); if (rate && Math.abs(per / rate - 1) >= 0.15) nl.appendChild(el("span", "tg " + (per > rate ? "ok" : "ask"), (per > rate ? "above" : "below") + " the board rate of " + M(Math.round(rate * 1000)))); } ht.appendChild(nl); }
-    if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); else if (i.typ && vp >= 100) { var mult = i.typ / vp; vl.appendChild(el("span", "tg ok", mult >= 2 ? "FM pays " + (mult >= 10 ? Math.round(mult) : Math.round(mult * 10) / 10) + "× more" : "FM pays " + Math.round((mult - 1) * 100) + "% more")); vl.title += " The Free Market typical is " + fmt(i.typ) + ", so listing it beats the NPC."; } ht.appendChild(vl); }
+    if (vp) { var vl = el("p", "vend"); vl.title = "What an NPC shop pays you for one. Don't list it for less than this."; vl.appendChild(document.createTextNode("Vendor price ")); vl.appendChild(money(vp)); vl.appendChild(document.createTextNode(" each")); if (i.typ && firm(i) && i.typ < vp * 1.1) vl.appendChild(el("span", "tg deal", "Sell to NPC")); else if (i.typ && vp >= 100 && firm(i)) { var mult = i.typ / vp; vl.appendChild(el("span", "tg ok", mult >= 2 ? "FM pays " + (mult >= 10 ? Math.round(mult) : Math.round(mult * 10) / 10) + "× more" : "FM pays " + Math.round((mult - 1) * 100) + "% more")); vl.title += " The Free Market typical is " + fmt(i.typ) + ", so listing it beats the NPC."; } ht.appendChild(vl); }
     hd.appendChild(ht); ip.appendChild(hd);
     // equips: the price ladder replaces the one blended price, its 24h move and its sale boxes
     // every equip gets the price ladder, even before any grade has 2 copies (then it says so and gives the overall price)
@@ -4508,14 +4539,14 @@
         // Mega Deals: a +1 crit Work Gloves with 4 of 5 slots left took a failed scroll and is worth far less than a
         // clean one. Slots not read, or no sales of that exact roll and slots yet: no deal.
         var su = slotsUsed(l.i, l), rt = su != null && i.rollTyp ? i.rollTyp[rollKey(l.i, l, su)] : null;
-        if (!rt) return;
+        if (!rt || rt.n < 3) return;
         ref = rt.typ;
       }
       var flip = ref && i.kind === "sale" ? (ref * (1 - FASTPCT / 100) - l.u) * q : 0;
       var off = ref ? 1 - l.u / ref : 0;
       var r = { l: l, typ: ref, off: off, profit: 0, why: "", check: false, roll: g };
       if (npcGain >= 1000 && npcGain >= flip) { r.profit = npcGain; r.why = "NPC buys at " + M(vp); }
-      else if (i.typ && i.kind === "sale" && sold7 >= 3 && off >= 0.2 && flip >= MINPROF) {
+      else if (i.typ && i.kind === "sale" && sold7 >= 3 && off >= 0.2 && flip >= MINPROF && (g != null || firm(i))) {   // a flagged, rough or thin price is never a deal
         if (i.equip && g == null) r.lowFlip = i.bands ? (i.bands.lo * (1 - FASTPCT / 100) - l.u) * q : null;
         r.profit = flip; r.why = Math.round(off * 100) + "% under " + M(ref) + (i.equip ? (g == null ? " if average roll" : g === 0 ? " for an average roll" : " for a " + (g > 0 ? "+" : "") + g + " roll") : ""); r.check = off > 0.85 || (l.chat && off > 0.7) || i.check || (i.equip && g == null && i.unreadTyp);
         // the going rate, not a deal: 3 or more other sellers in the last day ask within 25% of this price
