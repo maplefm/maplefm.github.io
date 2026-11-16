@@ -1637,3 +1637,25 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 
 /* keyboard focus shows on the strip links and the watchlist button too */
 .strip button.st:focus-visible, .strip a.st:focus-visible, .wbtn:focus-visible, button.star:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Ko-fi goal strip under the menu: one row on desktop, two on phones; height fixed so loading never moves the page */
+.kofigoal { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; padding: 0 14px; height: 40px; box-sizing: border-box; border-radius: 12px; text-decoration: none; color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); font-size: 13.5px; overflow: hidden; }
+.kofigoal:hover { border-color: var(--orange); }
+.kofigoal:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.kofigoal .kg-cup { font-size: 17px; }
+.kofigoal .kg-text { white-space: nowrap; }
+.kofigoal .kg-text b { font-family: var(--display); font-weight: 600; margin-right: 2px; }
+.kofigoal .kg-have { font-weight: 700; color: var(--orange-lo); }
+.kofigoal .kg-when { color: var(--muted); font-size: 12px; }
+.kofigoal .kg-bar { flex: 1 1 120px; min-width: 80px; height: 10px; border-radius: 6px; background: var(--panel2); border: 1px solid var(--line); overflow: hidden; }
+.kofigoal .kg-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--orange), var(--gold)); border-radius: 6px; transition: width .6s ease; }
+.kofigoal .kg-note { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
+.kofigoal .kg-go { flex: 0 0 auto; padding: 4px 12px; border-radius: 999px; background: linear-gradient(180deg, #ff8a65, #e2577a); color: #fff; font-weight: 700; font-size: 12.5px; }
+.kofigoal.kg-off .kg-bar, .kofigoal.kg-off .kg-have, .kofigoal.kg-off .kg-when, .kofigoal.kg-off .kg-of { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .kofigoal .kg-fill { transition: none; } }
+@media (max-width: 760px) {
+  .kofigoal { flex-wrap: wrap; height: 62px; margin: 6px 0 0; padding: 6px 12px; row-gap: 4px; align-content: center; }
+  .kofigoal .kg-note { display: none; }
+  .kofigoal .kg-bar { order: 5; flex: 1 0 100%; }
+  .kofigoal .kg-go { margin-left: auto; }
+}
