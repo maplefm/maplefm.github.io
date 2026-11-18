@@ -1,12 +1,12 @@
 {
- "at": 1794976191418,
+ "at": 1794979879157,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.11.16.1",
+ "current": "2026.11.18.1",
  "scanners": {
   "PikaDexLess": {
    "rows24": 0,
@@ -22,18 +22,18 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 6
+   "behind": 7
   },
   "Zik": {
-   "rows24": 17291,
-   "room24": 17287,
-   "ch24": 17291,
-   "rows7": 68637,
-   "room7": 68630,
+   "rows24": 18270,
+   "room24": 18266,
+   "ch24": 18270,
+   "rows7": 71178,
+   "room7": 71171,
    "late7": 0,
-   "chat24": 14,
-   "last": 1794976082,
-   "ver": "2026.11.16.1",
+   "chat24": 12,
+   "last": 1794979435,
+   "ver": "2026.11.18.1",
    "lag_median_min": 1.9,
    "room_rate24": 1.0,
    "room_rate7": 1.0,
@@ -54,7 +54,7 @@
    "room_rate24": 0.946,
    "room_rate7": 0.968,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": 1
   },
   "4DDDD": {
    "rows24": 0,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 5
+   "behind": 6
   },
   "Mesoniac": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 4
+   "behind": 5
   },
   "CamelToaster": {
    "rows24": 0,
@@ -102,7 +102,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 4
+   "behind": 5
   },
   "PockyStick": {
    "rows24": 0,
@@ -118,7 +118,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 4
+   "behind": 5
   },
   "Guest-c334": {
    "rows24": 0,
@@ -134,7 +134,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 4
+   "behind": 5
   },
   "Guest-bcea": {
    "rows24": 0,
@@ -150,7 +150,7 @@
    "room_rate24": null,
    "room_rate7": 0.656,
    "late_share7": 0.0,
-   "behind": 3
+   "behind": 4
   },
   "Guest-e9e5": {
    "rows24": 0,
@@ -166,7 +166,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 2
+   "behind": 3
   },
   "Gola": {
    "rows24": 0,
@@ -182,7 +182,7 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.0,
-   "behind": 1
+   "behind": 2
   }
  },
  "drops": {
@@ -208,7 +208,7 @@
    "incomplete upload": 1275
   },
   "2026-11-18": {
-   "incomplete upload": 244
+   "incomplete upload": 300
   }
  },
  "rejects": {
