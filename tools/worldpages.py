@@ -368,22 +368,27 @@ def build(world, guide, summary, notes, out):
         sp = sprite_url(n)
         ev = sum(r / 100 * PRICE[i] for i, r, qo in drops.get(n, []) if not qo and i in PRICE and r)
         desc = (f"{n} in MapleStory Classic World: level {mb['lv']}, {fmt(mb['hp'])} HP, {fmt(mb['exp'])} EXP. " +
-                (f"Found in {', '.join(p for p, _ in sorted(homes.get(n, []), key=lambda x: -x[1])[:3])}. " if homes.get(n) else "") +
+                (f"Found in {', '.join(p for p, _ in sorted(homes.get(n, []), key=lambda x: -x[1])[:3])}. " if homes.get(n) else f"Found in {mb['region']}. " if mb.get("region") else "") +
                 ("Drops, drop rates and what they sell for." if drops.get(n) else ""))
         b = f'<div class="hd">' + (f'<img class="sprite" src="{sp}" alt="{E(n)}">' if sp else "") + f'<div><h1>{E(n)}</h1><p class="sub">MapleStory Classic monster · Level {mb["lv"]}{" · Boss" if mb.get("boss") else ""}{" · Undead" if mb.get("undead") else ""}</p></div></div>'
         b += ('<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
             ("HP", fmt(mb["hp"])), ("EXP", fmt(mb["exp"])), ("Attack", fmt(mb["atk"])), ("Accuracy", fmt(mb.get("acc"))), ("Avoid", fmt(mb.get("eva"))),
-            ("Defense", f'{fmt(mb.get("wdef"))} / {fmt(mb.get("mdef"))} magic'), ("Weak to", E(mb.get("weak") or "Nothing")), ("Resists", E(mb.get("resist") or "Nothing"))]) + "</div>")
+            ("Defense", "Changed in the " + datetime.date.fromisoformat(mb["defnew"]).strftime("%b %-d") + " update · new numbers not out yet" if mb.get("defnew") else f'{fmt(mb.get("wdef"))} / {fmt(mb.get("mdef"))} magic'), ("Weak to", E(mb.get("weak") or "Nothing")), ("Resists", E(mb.get("resist") or "Nothing"))]) + "</div>")
         mz = mb.get("meso")
         b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (
             (f" Drops {mz[0]} to {mzf(mz[1])}" + (f" {mz[2]}% of the time" if mz[2] else "") + (f" (measured over {mz[4]} kills on the wiki)." if mz[3] == "wiki" and mz[4] else " (wiki measurement)." if mz[3] == "wiki" else " (player reports).")) if mz else "") + (f" Drops worth about {mzs(ev)} a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
         if homes.get(n):
             b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>Count</th><th>Levels</th><th></th></tr>" + "".join(
                 f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td><td>{navbtn(p)}</td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
+        if not homes.get(n) and mb.get("region"):
+            b += f'<h2>Where to find it</h2><p>{E(mb["region"])}. The exact maps go up once the region is mapped.</p>'
         if drops.get(n):
             b += "<h2>Drops</h2><table><tr><th>Item</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
                 f'<tr><td>{ilink(i)}{live(i)}{" <small>(only while on the quest)</small>" if qo else ""}</td><td>{f"{r:g}%" if r is not None else ""}</td><td class="n">{mzs(PRICE[i]) if i in PRICE else ""}</td></tr>'
-                for i, r, qo in sorted(drops[n], key=lambda x: -(PRICE.get(x[0], 0) * (x[1] or 0)))) + "</table><p class=\"note\">Drop rates measured by players on the wiki.</p>"
+                for i, r, qo in sorted(drops[n], key=lambda x: -(PRICE.get(x[0], 0) * (x[1] or 0)))) + "</table><p class=\"note\">" + (
+                "Drop rates measured by players on the wiki." if all(r is not None for _, r, _ in drops[n]) else
+                "Reported by players, no drop rates measured yet." if all(r is None for _, r, _ in drops[n]) else
+                "Drop rates measured by players on the wiki. Drops without a rate are player reports.") + "</p>"
         qq = [(q, c, "Hunt") for q, c in qkill.get(n, [])] + [(q, c, "Bring " + i) for i, _, _ in drops.get(n, []) for q, c in qneed.get(i, [])]
         if qq:
             seen = set(); rows = ""
@@ -544,6 +549,11 @@ def build(world, guide, summary, notes, out):
                 + (f"<p>{E(why)}</p>" if why else "") + f'<div class="mobs">{mobs}</div>'
                 f'<p class="note">Touch from {blink(st["worst"])}: about {fmt(dmg)} damage at level {L} in typical gear, hits {round(hit * 100)}% of the time, about {mzf(cost)} of {E(HP[0])} each.</p></div>')
     BAR = '<p class="note"><b>Typical gear estimates.</b> Clean shop weapon for the level, usual stats and skill order. Every map shown lets that build land 80% of its attacks or more and kill each common monster in 8 s or less. <a href="/map.html#train">Enter your own build</a> for your numbers.</p>'
+    # a patch changed these monsters' defense without publishing the numbers: say the ranks use the old values
+    _dn = sorted(n for n, v in MOB.items() if v.get("defnew") and not v.get("base") and not v.get("region"))
+    if _dn:
+        BAR += (f'<p class="note"><b>{datetime.date.fromisoformat(MOB[_dn[0]]["defnew"]).strftime("%b %-d")} update.</b> Defense changed on {len(_dn)} monsters '
+                f'({E(", ".join(_dn))}) without published numbers. Maps with them are ranked on the old defense until the new game data is out.</p>')
     tr_links = []
     for br in brackets:
         lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2

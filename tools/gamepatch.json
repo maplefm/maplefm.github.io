@@ -225,6 +225,60 @@
      ]
     }
    }
+  },
+  {
+   "version": "2.0.0",
+   "date": "2026-11-18",
+   "source": "https://www.nexon.com/maplestory/news/update/48255/november-update-forgotten-hollow-patch-notes",
+   "about": "Forgotten Hollow. Nexon's notes name the region's 10 field monsters and the Lv 60 boss Rotten Mushmom; all 11 are in the old game files (MCW/1) with closed-test stats but no spawn points. Nexon also changed defense on 18 older monsters without giving the numbers, and the region's own monsters' defense differs from closed test. Defense on all of these is held back until game files with the v2.0 numbers are published.",
+   "released_mobs": {
+    "54": "Glowshroom",
+    "55": "Raffle",
+    "56": "Golden Stirge",
+    "57": "Aqumander",
+    "58": "Echopus",
+    "59": "Rafflesia",
+    "60": "Duskmander",
+    "61": "Myewood",
+    "62": "Rotten Mushroom",
+    "63": "Sporewood",
+    "700003": "Rotten Mushmom"
+   },
+   "region": "Forgotten Hollow",
+   "defense_changed": [
+    "Red Snail",
+    "Slime",
+    "Octopus",
+    "Green Mushroom",
+    "Blue Mushroom",
+    "Stirge",
+    "Jr. Necki",
+    "Zombie Mushroom",
+    "Wild Boar",
+    "Curse Eye",
+    "Lupin",
+    "Lorang",
+    "Cold Eye",
+    "Zombie Lupin",
+    "Clang",
+    "Malady",
+    "Stone Golem",
+    "Dark Stone Golem",
+    "Glowshroom",
+    "Raffle",
+    "Golden Stirge",
+    "Aqumander",
+    "Echopus",
+    "Rafflesia",
+    "Duskmander",
+    "Myewood",
+    "Rotten Mushroom",
+    "Sporewood",
+    "Rotten Mushmom"
+   ],
+   "until_mcw": "1",
+   "drops_since_report": 2000,
+   "drops_note": "Forgotten Hollow was only in the April closed test before Nov 18, so player drop reports for its monsters made before launch describe the test, not the live game. Only each monster's own drop (its first report) and reports newer than report 2000 are used: the launch-day reports start at 2069, the closed-test ones end at 1093."
   }
  ]
 }

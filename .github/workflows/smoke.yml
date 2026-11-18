@@ -75,6 +75,10 @@ jobs:
       # after the step above installs Pillow and numpy, which the watcher imports
       - name: Zenith scans stay out of Windia
         run: python3 tests/worlds.py
+      # Nov 18: v2.0 data newer than maplestory.io (tools/gamepatch.json): new monsters reach the pages, changed
+      # defense is never shown as fact, closed-test drop reports stay out
+      - name: Patch data newer than the game files
+        run: python3 tests/v2patch.py
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'
