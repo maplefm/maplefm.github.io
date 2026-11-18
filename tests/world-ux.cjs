@@ -11,13 +11,13 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
   const b = await ENGINE.launch(); const ctx = await b.newContext(PHONE ? Object.assign({}, pw.devices["iPhone 13"]) : { viewport: { width: 1440, height: 900 } });
   await ctx.route(/api\.maplefm\.gg\/hit/, (r) => r.fulfill({ status: 204, body: "" }));
   const seen = { snap: 0, summary: 0, zenLive: 0, liveNoWorld: 0, leakServed: 0 };
-  await ctx.route(/api\.maplefm\.gg\/data\/live/, async (r) => { const u = r.request().url(); if (/world=zenith/.test(u)) { seen.zenLive++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox-zenith.json": ZEN }) }); } seen.liveNoWorld++;
+  await ctx.route(/api\.maplefm\.gg\/data\/live/, async (r) => { const u = r.request().url(); if (/world=zenith/.test(u)) { seen.zenLive++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox-zenith.json": zenEmpty ? [] : ZEN }) }); } seen.liveNoWorld++;
     // Windia's bundle as the Worker's fast lane carries it before the pump splits worlds: a Zenith-tagged row inside
     // data/fast.json must never reach Windia's board. Made up here, so the real 45 MB bundle is never pulled.
     const win = { at, src: "watcher-shop", who: "WinScanner", inbox: "win1", day, rows: rows("Wn", "Elixir", 600, 8, 5).map((x) => (delete x.w, x)) };
     const leak = { at, src: "watcher-shop", who: "Guest-fast", inbox: "fast-zz", day, fast: 1, rows: rows("Zf", "Zenith Test Only Item", 2500, 8, 5) };
     seen.leakServed++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox.json": [win], "data/fast.json": [leak] }) }); });
-  let rawOnly = false;   // phase 4: the server board is down, so the board builds from the raw bundle
+  let rawOnly = false, zenEmpty = false;   // phase 4: the server board is down, so the board builds from the raw bundle
   await ctx.route(/api\.maplefm\.gg\/data\/snap/, (r) => { seen.snap++; return rawOnly ? r.fulfill({ status: 503, body: "" }) : r.continue(); });
   await ctx.route(/summary-public\.json/, (r) => { seen.summary++; return rawOnly ? r.fulfill({ status: 404, body: "" }) : r.continue(); });
   await ctx.route(/^https:\/\/maplefm\.gg\/(\?[^#]*)?$|^https:\/\/maplefm\.gg\/assets\/(board\.min\.js|board\.min\.css|advsearch\.js|kofigoal\.js)/, (r) => { const u = new URL(r.request().url()); const f = u.pathname === "/" ? "index.html" : u.pathname.slice(1); r.fulfill({ status: 200, contentType: f.endsWith(".js") ? "text/javascript" : f.endsWith(".css") ? "text/css" : "text/html", body: fs.readFileSync(R + f) }); });
@@ -68,6 +68,22 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
   const raw = { elixir: await rowPrice("Elixir"), zen: await p.evaluate(() => /Zenith Test Only/.test(document.body.innerText)) };
   ok("raw Windia board loaded (test exercised)", seen.leakServed > 0 && !!raw.elixir, "bundle " + seen.leakServed + "x, Elixir " + raw.elixir);
   ok("fast-lane Zenith row stays off Windia", seen.leakServed > 0 && !raw.zen);
+  // 5. Zenith with no scans yet (opening day): an honest empty board, never Windia's saved prices, and Windia's saved
+  // copy left as it was. Live caught this on Nov 18: the quick-start copy of Windia's board showed under Zenith.
+  rawOnly = false; zenEmpty = true;
+  await p.goto("https://maplefm.gg/"); await p.waitForFunction(() => document.querySelectorAll("#rows tr[data-item]").length > 20, null, { timeout: 60000 }).catch(() => {}); await p.waitForTimeout(2500);
+  const sumOf = () => p.evaluate(() => { try { return (JSON.parse(localStorage.getItem("fm-summary")) || {}).rows.length; } catch (e) { return -1; } });
+  const sumBefore = await sumOf();
+  // a Zenith board with prices must not save over Windia's quick-start copy either
+  zenEmpty = false; await p.evaluate(() => { localStorage.setItem("fm-world", "Zenith"); }); await p.goto("https://maplefm.gg/?w=zenith"); await p.waitForTimeout(6000);
+  const sumZen = await sumOf();
+  zenEmpty = true; await p.goto("https://maplefm.gg/?w=zenith"); await p.waitForTimeout(6000);
+  const ze = await p.evaluate(() => ({ rows: document.querySelectorAll("#rows tr[data-item]").length, empty: ((document.getElementById("empty").hidden ? "" : document.getElementById("empty").innerText) || "").replace(/\s+/g, " ").trim().slice(0, 120), sum: (function () { try { return (JSON.parse(localStorage.getItem("fm-summary")) || {}).rows.length; } catch (e) { return -1; } })() }));
+  ok("empty Zenith shows no Windia prices", ze.rows === 0, JSON.stringify(ze));
+  ok("empty Zenith says why", /Zenith|no scans|nothing/i.test(ze.empty), ze.empty);
+  ok("Windia's saved copy untouched by Zenith", sumBefore > 0 && sumZen === sumBefore && ze.sum === sumBefore, sumBefore + " -> " + sumZen + " -> " + ze.sum);
+  await p.screenshot({ path: OUT + "world-zenith-empty-" + (PHONE ? "phone" : "desk") + ".png" });
+  await p.evaluate(() => { localStorage.setItem("fm-world", "Windia"); });
   ok("no script errors", !errs.length, errs.slice(0, 2).join("; "));
   console.log(log.join("\n")); await b.close(); process.exit(log.some((x) => x.startsWith("FAIL")) ? 1 : 0);
 })();

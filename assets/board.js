@@ -2058,7 +2058,7 @@
         $("empty").hidden = false; $("count").textContent = "Showing 0 of " + fmt(D.list.length) + " items"; return;
       }
     }
-    if (!shown.length) { $("empty").textContent = ""; $("empty").appendChild(el("strong", null, D.list.length ? "No items match" : "No prices yet")); $("empty").appendChild(document.createTextNode(D.list.length ? "Clear the search, pick another category or class, or open Filters." : "Waiting for the first scan.")); }
+    if (!shown.length) { $("empty").textContent = ""; $("empty").appendChild(el("strong", null, D.list.length ? "No items match" : ALTW ? "No " + WORLD + " prices yet" : "No prices yet")); $("empty").appendChild(document.createTextNode(D.list.length ? "Clear the search, pick another category or class, or open Filters." : ALTW ? " " + WORLD + " is new. Prices show here as players scan its Free Market." : "Waiting for the first scan.")); }
     $("count").textContent = "Showing " + shown.length + " of " + D.list.length + " items";
     fitBoard();
     document.querySelectorAll("thead button[data-k]").forEach(function (b) { if (b.dataset.k === state.sortK) b.setAttribute("aria-sort", state.sortDir < 0 ? "descending" : "ascending"); else b.removeAttribute("aria-sort"); });
@@ -4359,7 +4359,7 @@
         if ((used[day] || 0) >= 10) { msg.textContent = "That's 10 reports today from this browser. Thanks, try again tomorrow."; return; }
         go.disabled = true; msg.textContent = "Sending…";
         var body = { i: n, typ: i ? Math.round(i.typ || 0) : 0, best: i ? Math.round(i.best || 0) : 0, last3: i ? Math.round(i.last3 || 0) : 0, ls: i && i.lastSale ? Math.round(i.lastSale.u || 0) : 0, note: ta.value.slice(0, 300) };
-        fetch("https://api.maplefm.gg/wrongprice", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(body) }).then(function (r) {
+        fetch("https://api.maplefm.gg/wrongprice", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(ALTW ? Object.assign({ w: WORLD }, body) : body) }).then(function (r) {
           if (r.status === 429) { msg.textContent = "That's 10 reports today. Thanks, try again tomorrow."; return; }
           if (!r.ok) throw 0;
           used = {}; used[day] = (loadLS("fm-wrong", {})[day] || 0) + 1; saveLSRaw("fm-wrong", JSON.stringify(used));
@@ -4681,7 +4681,7 @@
     return best && best !== "SUCCESS" ? best : "";
   }
   function saveSummary() {
-    if (!D || D.preview || !D.list.length) return;
+    if (!D || D.preview || !D.list.length || ALTW) return;   // fm-summary is Windia's quick start: never another world's prices
     var rows = D.list.map(function (i) { var o = {}; SUMK.forEach(function (k) { if (i[k] !== undefined) o[k] = i[k]; }); if (i.bestL) { o.bestS = i.bestL.s; o.bestT = i.bestL.t; var bw = where(i.bestL); if (bw) o.bestW = bw; } if (i.equip) { var rkk = rollKeyName(i); if (rkk) o.rk = rkk; var LDs = ladderOf(i); if (LDs && LDs.top && LDs.top.basis === "sold" && LDs.top.use && LDs.top.use.length >= 2) { var cby = {}; LDs.top.use.forEach(function (l) { var dd = new Date(l.t).toDateString(); (cby[dd] || (cby[dd] = [])).push(l.u); }); o.dailyC = Object.keys(cby).map(function (dd) { return [Date.parse(dd), Math.round(median(cby[dd])), cby[dd].length]; }).sort(function (a, b) { return a[0] - b[0]; }).slice(-14); } if (LDs && LDs.top) o.lad = [LDs.pick].concat(LDs.stats.filter(function (k) { return k !== LDs.pick; })).map(function (k) { return [ladName(k), LDs.views[k].map(function (g) { return [g.name, g.basis, Math.round(g.lo || 0), Math.round(g.hi || 0), Math.round(g.mid || 0), g.use ? g.use.length : 0, g.asks.length, g === LDs.top ? 1 : 0]; })]; }); } if (i.rollTyp) { var rt = {}, rn = 0; Object.keys(i.rollTyp).forEach(function (g) { var rv = i.rollTyp[g], sp = g.indexOf("|"); if (rn++ < 60) rt[rv.g + "|" + g.slice(0, sp) + "|" + (rv.k || "") + "|" + g.slice(sp + 1)] = [Math.round(rv.typ), rv.n]; }); if (rn) o.rt = rt; }
       // rt: sold typical per "roll|slots used|stat|every stat that moved" ("1|0|CRIT|CRIT+1": a clean pair with +1 crit rate);
       // the cheapest open listing for each roll, from the last 2 days, per "roll|stat|moves|slots used": what the chat bot quotes for "7 att wg"
@@ -4700,7 +4700,7 @@
     var who = (sm.who || []).map(function (w) { w.sales = w.sales || 0; w.week = w.week || 0; return w; });
     return { list: sm.rows, byName: byName, L: [], sales: [], active: [], latest: sm.at, who: who.slice(0, 10), whoAll: who, spotN: 0, preview: true, at: sm.at, kpi: sm.kpi || null };
   }
-  function loadPreview() { return previewFrom(loadLS("fm-summary", null)); }
+  function loadPreview() { return ALTW ? null : previewFrom(loadLS("fm-summary", null)); }   // the saved copy is Windia's
   function remotePreview() {
     if (ALTW) return Promise.resolve();                   // Windia's prices: never shown as another world's
     var local = loadLS("fm-summary", null), lat = local && local.at || 0;
