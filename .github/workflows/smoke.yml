@@ -65,8 +65,6 @@ jobs:
         run: |
           node tests/world-ux.cjs chromium phone
           node tests/world-ux.cjs chromium desktop
-      - name: Zenith scans stay out of Windia
-        run: python3 tests/worlds.py
       - name: Cut-off names never price the shorter item
         run: |
           # the runner's Python is system-managed (PEP 668), so pip needs leave to install
@@ -74,6 +72,9 @@ jobs:
           # no Playwright Chromium for this Ubuntu yet: tools/snapshot.py uses the runner's own Google Chrome first
           which google-chrome || python3 -m playwright install chromium
           python3 tests/cutnames.py --board
+      # after the step above installs Pillow and numpy, which the watcher imports
+      - name: Zenith scans stay out of Windia
+        run: python3 tests/worlds.py
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'
