@@ -20,15 +20,20 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
   let rawOnly = false, zenEmpty = false;   // phase 4: the server board is down, so the board builds from the raw bundle
   await ctx.route(/api\.maplefm\.gg\/data\/snap/, (r) => { seen.snap++; return rawOnly ? r.fulfill({ status: 503, body: "" }) : r.continue(); });
   await ctx.route(/summary-public\.json/, (r) => { seen.summary++; return rawOnly ? r.fulfill({ status: 404, body: "" }) : r.continue(); });
-  await ctx.route(/^https:\/\/maplefm\.gg\/(\?[^#]*)?$|^https:\/\/maplefm\.gg\/assets\/(board\.min\.js|board\.min\.css|advsearch\.js|kofigoal\.js)/, (r) => { const u = new URL(r.request().url()); const f = u.pathname === "/" ? "index.html" : u.pathname.slice(1); r.fulfill({ status: 200, contentType: f.endsWith(".js") ? "text/javascript" : f.endsWith(".css") ? "text/css" : "text/html", body: fs.readFileSync(R + f) }); });
+  await ctx.route(/^https:\/\/maplefm\.gg\/(\?[^#]*)?$|^https:\/\/maplefm\.gg\/assets\/(board\.min\.js|board\.min\.css|advsearch\.js|kofigoal\.js|world-[a-z]+\.png)/, (r) => { const u = new URL(r.request().url()); const f = u.pathname === "/" ? "index.html" : u.pathname.slice(1); r.fulfill({ status: 200, contentType: f.endsWith(".js") ? "text/javascript" : f.endsWith(".css") ? "text/css" : f.endsWith(".png") ? "image/png" : "text/html", body: fs.readFileSync(R + f) }); });
   const p = await ctx.newPage(); const errs = []; p.on("pageerror", (e) => errs.push(e.message));
   const tap = async (sel) => { const l = p.locator(sel).first(); await l.scrollIntoViewIfNeeded(); if (PHONE) await l.tap(); else await l.click(); };
   const rowPrice = (n) => p.evaluate((n) => { const tr = document.querySelector('#rows tr[data-item="' + n + '"]'); return tr ? tr.innerText.replace(/\s+/g, " ") : null; }, n);
   // 1. Windia, the default
   await p.goto("https://maplefm.gg/"); await p.waitForFunction(() => document.querySelectorAll("#rows tr[data-item]").length > 20, null, { timeout: 60000 });
   await p.waitForTimeout(1500);
-  const wb = await p.evaluate(() => { const b = document.getElementById("worldbtn"); const r = b && b.getBoundingClientRect(); return b && { txt: b.innerText.trim(), top: Math.round(r.top), vis: r.width > 0 && r.height > 0, note: !document.getElementById("worldnote").hidden }; });
-  ok("World button shows Windia at the top", wb && /Windia/.test(wb.txt) && wb.vis && wb.top < 200, JSON.stringify(wb));
+  // the Server switch shows both servers, each with its game emblem, the one on screen pressed
+  const wb = await p.evaluate(() => { const s = document.getElementById("worldsw"); const r = s && s.getBoundingClientRect();
+    const bs = s ? [...s.querySelectorAll("button[data-world]")].map((b) => { const im = b.querySelector("img"); const br = b.getBoundingClientRect(); return { w: b.dataset.world, on: b.getAttribute("aria-pressed"), img: !!(im && im.complete && im.naturalWidth >= 32), tall: Math.round(br.height) }; }) : [];
+    return s && { top: Math.round(r.top), vis: r.width > 0 && r.height > 0, bs, note: !document.getElementById("worldnote").hidden }; });
+  ok("Server switch at the top shows both servers with their emblems", wb && wb.vis && wb.top < 260 && wb.bs.length === 2 && wb.bs.every((b) => b.img) && wb.bs.map((b) => b.w).join() === "Windia,Zenith", JSON.stringify(wb));
+  ok("Windia is the one pressed", wb && wb.bs[0].on === "true" && wb.bs[1].on === "false");
+  ok("each server is a real tap target", wb && wb.bs.every((b) => b.tall >= (PHONE ? 36 : 28)), wb && wb.bs.map((b) => b.tall).join("/"));
   ok("no Zenith note on Windia", wb && !wb.note);
   const wFirst = await p.evaluate(() => { const tr = document.querySelector("#rows tr[data-item]"); return { n: tr.dataset.item, t: tr.innerText.replace(/\s+/g, " ") }; });
   ok("Windia board is Windia's", !/Zenith/.test(wFirst.n) && !(await rowPrice("Zenith Test Only Item")), wFirst.n);
@@ -36,10 +41,10 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
   await p.screenshot({ path: OUT + "world-windia-" + (PHONE ? "phone" : "desk") + ".png" });
   // 2. one tap to Zenith
   seen.snap = 0; seen.summary = 0;
-  await tap("#worldbtn"); await p.waitForURL(/\?w=zenith/, { timeout: 15000 }).catch(() => {});
+  await tap('#worldsw button[data-world="Zenith"]'); await p.waitForURL(/\?w=zenith/, { timeout: 15000 }).catch(() => {});
   await p.waitForFunction(() => document.querySelectorAll("#rows tr[data-item]").length > 0, null, { timeout: 60000 }).catch(() => {});
   await p.waitForTimeout(2000);
-  const z = await p.evaluate(() => ({ url: location.href, btn: document.getElementById("worldbtn").innerText.trim(), note: !document.getElementById("worldnote").hidden, items: [...document.querySelectorAll("#rows tr[data-item]")].map((t) => t.dataset.item) }));
+  const z = await p.evaluate(() => ({ url: location.href, btn: document.querySelector('#worldsw [aria-pressed="true"]').dataset.world, note: !document.getElementById("worldnote").hidden, items: [...document.querySelectorAll("#rows tr[data-item]")].map((t) => t.dataset.item) }));
   ok("tap goes to Zenith", /\?w=zenith/.test(z.url) && /Zenith/.test(z.btn), z.url + " " + z.btn);
   ok("Zenith note shows", z.note);
   ok("Zenith board lists only Zenith items", z.items.length >= 2 && z.items.every((n) => ["Elixir", "Work Gloves"].includes(n)), z.items.join(", "));
@@ -52,10 +57,12 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
   if (PHONE) await tap("#sheetback"); else await p.keyboard.press("Escape"); await p.waitForTimeout(800);
   // 3. the choice sticks on the next visit, and Back to Windia returns
   await p.goto("https://maplefm.gg/"); await p.waitForTimeout(3000);
-  ok("next visit stays on Zenith", /Zenith/.test(await p.evaluate(() => document.getElementById("worldbtn").innerText)));
+  ok("next visit stays on Zenith", (await p.evaluate(() => document.querySelector('#worldsw [aria-pressed="true"]').dataset.world)) === "Zenith");
+  // tapping the server already shown does nothing
+  await tap('#worldsw button[data-world="Zenith"]'); await p.waitForTimeout(1200); ok("tapping the shown server stays put", /\?w=zenith/.test(p.url()) || (await p.evaluate(() => localStorage.getItem("fm-world"))) === "Zenith", p.url());
   await tap("#worldback"); await p.waitForURL((u) => !/\?w=/.test(u.toString()), { timeout: 15000 }).catch(() => {});
   await p.waitForFunction(() => document.querySelectorAll("#rows tr[data-item]").length > 20, null, { timeout: 60000 }).catch(() => {});
-  const back = await p.evaluate(() => ({ btn: document.getElementById("worldbtn").innerText.trim(), note: !document.getElementById("worldnote").hidden }));
+  const back = await p.evaluate(() => ({ btn: document.querySelector('#worldsw [aria-pressed="true"]').dataset.world, note: !document.getElementById("worldnote").hidden }));
   ok("Back to Windia", /Windia/.test(back.btn) && !back.note, JSON.stringify(back));
   // live data can move between loads; the typical price (first number) must be Windia's, within a few percent
   const num = (t) => { const m = /([\d,.]+)\s*([KMB])?/.exec(String(t || "").replace(/^[^\d]*/, "")); return m ? parseFloat(m[1].replace(/,/g, "")) * ({ K: 1e3, M: 1e6, B: 1e9 }[m[2]] || 1) : NaN; };
