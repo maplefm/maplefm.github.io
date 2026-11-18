@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-16",
- "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io) or the MapleStory Classic Wiki. Map stats on the page come from the same data and update daily.",
+ "updated": "2026-11-18",
+ "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io), the MapleStory Classic Wiki or Nexon's patch notes. Map stats on the page come from the same data and update daily.",
  "brackets": [
   {
    "lo": 1,
@@ -230,19 +230,35 @@
  ],
  "upcoming": [
   {
-   "name": "Forgotten Hollow",
-   "date": "2026-11-18",
-   "note": "Nexon set the opening for November 18: a hidden cave on Victoria Island with 34 quests for level 39 and up. The game files already hold 10 new monsters from level 39 (Glowshroom) to 59 (Sporewood) and a level 60 field boss, Rotten Mushmom. Maps, quests and drops show here once the game opens them."
-  },
-  {
-   "name": "Moon Bunny's Rice Cake party quest",
-   "date": "2026-11-18",
-   "note": "A Thanksgiving party quest from level 11: Tory in Henesys sends parties into Henesys Park. Nexon said it runs from November 18 into early December."
-  },
-  {
    "name": "Forgotten Hollow party quest",
    "date": "2026-12-09",
    "note": "Arrives with guilds on December 9."
+  }
+ ],
+ "now": [
+  {
+   "name": "Forgotten Hollow",
+   "since": "2026-11-18",
+   "until": "2026-12-09",
+   "note": "Open since the November 18 update: a cave region for level 39 and up with 34 quests, 10 monsters from Glowshroom (39) to Sporewood (59) and the level 60 boss Rotten Mushmom, entered through Someone Else's Grave. Its maps and quests show here once they're published."
+  },
+  {
+   "name": "Moon Bunny's Rice Cake party quest",
+   "since": "2026-11-18",
+   "until": "2026-12-09",
+   "note": "Level 11 and up, parties of 3. Talk to Tory in Henesys Park: Windia channels 20 to 30, Zenith channels 7 to 10. Rewards are Primrose Seeds. Ends December 9, 11:59 PM UTC."
+  },
+  {
+   "name": "Thanksgiving Pumpkin Pie and Escaped Thanksgiving Turkey",
+   "since": "2026-11-18",
+   "until": "2026-12-08",
+   "note": "Thanksgiving events with Grandma Benson in Henesys. End December 8, 11:59 PM UTC."
+  },
+  {
+   "name": "The New Journey Begins",
+   "since": "2026-11-18",
+   "until": "2026-12-16",
+   "note": "Daily check-in event. Ends December 16, 11:59 PM UTC."
   }
  ]
 }

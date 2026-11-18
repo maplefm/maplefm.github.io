@@ -10,7 +10,20 @@ world = json.load(open(sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 
 names = {int(r[1]): r[0] for r in json.load(open(os.path.join(ROOT, "data", "itemdb.json"), encoding="utf-8"))["items"] if r and r[1]}
 old = json.load(open(OUT, encoding="utf-8"))
 out, changed = {}, []
-for mob, m in sorted(world["mobs"].items()):
+# monsters a patch released before the wiki lists them (tools/gamepatch.json), so their drops reach the item pages
+sys.path.insert(0, os.path.join(ROOT, "tools")); import gamepatch
+mobs = dict(world["mobs"])
+for gid, (nm, _) in gamepatch.released_mobs().items():
+    if nm in mobs: continue
+    lv = 0
+    try:
+        import mcwver
+        with urllib.request.urlopen(urllib.request.Request(f"{mcwver.base()}/mob/{gid}", headers=UA), timeout=40) as r:
+            lv = (json.load(r).get("meta") or {}).get("level") or 0
+    except Exception as e:
+        print("no game-file level for", nm, e)
+    mobs[nm] = {"id": gid, "lv": lv}
+for mob, m in sorted(mobs.items()):
     try:
         with urllib.request.urlopen(urllib.request.Request(f"https://meowdb.com/msclassic/api/drops?monsterId={int(m['id'])}", headers=UA), timeout=40) as r:
             rows = json.load(r).get("drops") or []
@@ -21,6 +34,11 @@ for mob, m in sorted(world["mobs"].items()):
         if mob in old: out[mob] = old[mob]
         continue
     d = []
+    since = gamepatch.drops_since().get(int(m["id"]))
+    if since and rows:
+        # a monster that was only on a test server before its patch: its own drop (the first report) and launch reports
+        first_id = min(x.get("id") or 0 for x in rows)
+        rows = [x for x in rows if (x.get("id") or 0) == first_id or (x.get("id") or 0) >= since]
     for x in sorted(rows, key=lambda x: -(x.get("score") or 0)):
         gid = str(x.get("itemIconKey") or "")
         if (x.get("score") or 0) < 1 or not gid.isdigit() or int(gid) not in names: continue

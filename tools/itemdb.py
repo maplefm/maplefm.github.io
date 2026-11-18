@@ -106,6 +106,70 @@ with ThreadPoolExecutor(16) as ex:
 print(sum(1 for r in want if r[6]), "of", len(want), "non-cash items have an NPC price")
 eq = [r for r in want if KINDS_EQUIP[r[5]]]
 print(len(eq), "equips,", sum(1 for r in eq if len(r) > 7), "with base stats,", sum(1 for r in eq if len(r) > 7 and ("ATT" in r[7] or "MATT" in r[7])), "with attack")
+
+
+# Items the game has that maplestory.io doesn't yet (Nov 18 2026: v2.0 added weapons, event items and furniture, and
+# maplestory.io stayed on the old files). MeowDB, used with its owners' permission for items, reads the new client
+# sooner. Only non-Cash items with a game id maplestory.io lacks are added; names MeowDB labels "(Alt)" are its own
+# tags, never seen in game, so they are left out. Kind and class come from items both sources share.
+def meow_new(rows, kinds):
+    have = {int(r[1]) for r in rows}
+    allit = []
+    try:
+        for page in range(1, 80):
+            r = urllib.request.Request("https://meowdb.com/msclassic/api/items?locale=en&limit=200&page=" + str(page), headers={"User-Agent": "maplefm-itemdb (maplefm.github.io)"})
+            j = json.load(urllib.request.urlopen(r, timeout=60))
+            allit += j.get("items") or []
+            if not j.get("hasMore"): break
+    except Exception as e:
+        print("MeowDB item list not reachable right now:", e)
+        return []
+    byid = {int(r[1]): r for r in rows}
+    # kind: what the shared items of the same MeowDB type and subtype are filed as, within the same game id block
+    # (ids group by kind: 4000xxx monster drops, 4031xxx quest items), else across the type when they all agree
+    votes, wide = {}, {}
+    for it in allit:
+        try: gid = int(it.get("iconKey"))
+        except (TypeError, ValueError): continue
+        if gid in byid and not byid[gid][4]:
+            t = (it.get("type"), it.get("subtype"))
+            for d, key in ((votes, t + (gid // 1000,)), (votes, t + (gid // 10000,)), (wide, t)):
+                d.setdefault(key, {}).setdefault(byid[gid][5], 0); d[key][byid[gid][5]] += 1
+    def pick(v, need):
+        if not v: return None
+        k, n = max(v.items(), key=lambda x: x[1])
+        return k if n >= need and n >= 0.9 * sum(v.values()) else None
+    names = {r[0] for r in rows}
+    added = []
+    for it in allit:
+        try: gid = int(it.get("iconKey"))
+        except (TypeError, ValueError): continue
+        name = (it.get("name") or "").strip()
+        # "(Alt)", "(Thief)" and the like are MeowDB's own labels for items that share a name; the screen never shows them
+        if gid in have or not name or "(" in name or "Cash" in (it.get("type") or ""): continue
+        # a new id under a name we already have (v2.0's account-only Citizenship scrolls) is never the one players
+        # sell; the tradeable item keeps the name and its prices
+        if name in names: continue
+        t = (it.get("type"), it.get("subtype"))
+        kind = pick(votes.get(t + (gid // 1000,)), 2)
+        if kind is None: kind = pick(votes.get(t + (gid // 10000,)), 3)
+        if kind is None: kind = pick(wide.get(t), 5)
+        if kind is None: continue
+        try: st = json.loads(it.get("stats") or "{}")
+        except ValueError: st = {}
+        eq = kinds[kind].startswith("Equip")
+        job = 0
+        for j in str(st.get("reqJob") or "").replace(",", "/").split("/"):
+            job |= JOBS.get({"Mage": "Magician"}.get(j.strip(), j.strip()), 0)
+        row = [name, gid, int(it.get("levelReq") or 0) if eq else 0, job, 0, kind, int(st.get("price") or 0)]
+        bs = {MEOWKEYS[k]: int(x) for k, x in st.items() if k in MEOWKEYS and isinstance(x, (int, float)) and x}
+        if bs and eq: row.append(bs)
+        rows.append(row); have.add(gid); names.add(name); added.append(name)
+    print(len(added), "items from MeowDB that maplestory.io doesn't have yet:", added[:30])
+    return added
+
+
+MEOW_ADDED = meow_new(rows, kinds)
 out = sys.argv[1] if len(sys.argv) > 1 else "data/itemdb.json"
 with open(out, "w", encoding="utf-8") as f:
     json.dump({"source": "maplestory.io MCW 1, MapleStory Classic World", "kinds": kinds, "items": rows}, f, separators=(",", ":"), ensure_ascii=False)

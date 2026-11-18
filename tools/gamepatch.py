@@ -29,3 +29,41 @@ def skill(sid, lv):
         for f, ch in (p.get("skills", {}).get(str(sid)) or {}).items():
             if isinstance(ch, list) and len(ch) == 2 and lv.get(f) == ch[0]: lv[f] = list(ch[1])
     return lv
+
+
+def _live(p):
+    """a patch that only holds while maplestory.io still serves the old data set ("until_mcw")"""
+    u = p.get("until_mcw")
+    if not u: return True
+    try:
+        import mcwver
+        return mcwver.base().rstrip("/").split("/")[-1] == str(u)
+    except Exception:
+        return True
+
+
+def released_mobs():
+    """{game id: (name, region)} for monsters a patch put in the game that the wiki may not list yet"""
+    out = {}
+    for p in patches():
+        if not _live(p): continue
+        for k, n in (p.get("released_mobs") or {}).items(): out[int(k)] = (n, p.get("region") or "")
+    return out
+
+
+def defense_changed():
+    """{monster name: patch date} whose defense a patch changed without published numbers"""
+    out = {}
+    for p in patches():
+        if not _live(p): continue
+        for n in p.get("defense_changed") or []: out[n] = p.get("date") or ""
+    return out
+
+
+def drops_since():
+    """{game id: first trusted drop report id} for monsters released by a patch: older reports came from a test server"""
+    out = {}
+    for p in patches():
+        if not _live(p) or not p.get("drops_since_report"): continue
+        for k in p.get("released_mobs") or {}: out[int(k)] = int(p["drops_since_report"])
+    return out

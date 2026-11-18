@@ -144,6 +144,28 @@ for w in mons:
     }
     if w.get("variant"): mob[key].update(variant=w["variant"], base=nm)
 
+# monsters a patch released that the wiki hasn't listed yet (v2.0, Nov 18 2026: Forgotten Hollow). Stats come from the
+# game files; there are no spawn points until the wiki maps the region, so they never enter training math, and pages
+# say where they live by region. Once the wiki lists one, its own row above wins and this skips it.
+ELEM = {"F": "Fire", "I": "Ice", "L": "Lightning", "S": "Poison", "H": "Holy"}
+have_ids = {v["id"] for v in mob.values()}
+for gid, (nm, region) in gamepatch.released_mobs().items():
+    g = io_mobs.get(gid)
+    if gid in have_ids or nm in mob or not g or g.get("level") is None: continue
+    code = str(g.get("elementalAttributes") or "")
+    pairs = re.findall(r"([FILSH])([123])", code)
+    mob[nm] = {"id": gid, "lv": g.get("level"), "hp": g.get("maxHP"), "exp": g.get("exp"), "atk": g.get("physicalDamage") or 0,
+               "matk": g.get("magicDamage") or 0, "acc": g.get("accuracy") or 0, "eva": g.get("evasion") or 0,
+               "wdef": g.get("physicalDefense") or 0, "mdef": g.get("magicDefense") or 0, "kb": g.get("minimumPushDamage") or 0,
+               "weak": ", ".join(ELEM[e] for e, s in pairs if s == "3"), "resist": ", ".join(ELEM[e] for e, s in pairs if s in "12"),
+               "elem": code, "undead": bool(g.get("isUndead")), "boss": bool(g.get("isBoss")), "region": region}
+    print("released, not on the wiki yet:", nm, region)
+# defense a patch changed without publishing the numbers: the old value stays for the math, pages say it changed
+for nm, day in gamepatch.defense_changed().items():
+    if nm in mob: mob[nm]["defnew"] = day
+    for k, v in mob.items():
+        if v.get("base") == nm: v["defnew"] = day
+
 # mesos a kill: [min, max, chance %, source]. The wiki's measured range first; tools/mesos_reported.json (player reports)
 # only for monsters the wiki hasn't measured yet. Neither: no entry, and pages fall back to the level estimate.
 for r in meso_rows:

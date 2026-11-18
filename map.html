@@ -161,7 +161,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 </section>
 <section id="v-maps" hidden>
   <div class="card"><label class="fld" style="display:block"><input id="mapq" placeholder="Find any map: Sleepywood, Line 1 (Area 2), Hidden Street..." autocomplete="off" style="font:600 1rem Inter;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:100%"></label>
-  <p class="note" id="newmaps" style="margin:8px 0 0"></p></div>
+  <p class="note" id="newmaps" style="margin:8px 0 0"></p>
+  <p class="note" id="defnote" style="margin:8px 0 0" hidden></p></div>
   <div id="mapview"></div>
 </section>
 <p class="foot" id="credit"></p>
@@ -178,6 +179,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   function M(n) { return "\uE000" + short(n) + "\uE001"; }
   function MF(n) { return "\uE000" + fmt(n) + "\uE001"; }
   function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
+  // a patch changed these monsters' defense without publishing the numbers (tools/gamepatch.json)
+  function defDay(d) { var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(d || ""); return m ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+m[2] - 1] + " " + (+m[3]) : "latest"; }
   function short(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "K" : fmt(n); }
   function secs(t) { t = Math.round(t); return t < 60 ? t + "s" : Math.floor(t / 60) + "m " + (t % 60 < 10 ? "0" : "") + (t % 60) + "s"; }
   var W = null, NOTES = null, PRICE = {}, MAPS = {}, PAGES = [], BYID = {}, MOBX = {}, EQUIP = {};
@@ -467,6 +470,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     });
     side.appendChild(pl);
     if (NOTES && NOTES.party) { side.appendChild(el("h3", null, "Party play")); side.lastChild.style.marginTop = "10px"; var pu = el("ul", "list"); NOTES.party.forEach(function (t) { pu.appendChild(el("li", null, t)); }); side.appendChild(pu); }
+    if (NOTES && NOTES.now) { var td = new Date().toISOString().slice(0, 10), on = NOTES.now.filter(function (u) { return u.since <= td && u.until >= td; }); if (on.length) { side.appendChild(el("h3", null, "Happening now")); side.lastChild.style.marginTop = "10px"; var un = el("ul", "list"); on.forEach(function (u) { un.appendChild(el("li", null, u.name + ". " + u.note)); }); side.appendChild(un); } }
     if (NOTES && NOTES.upcoming) { var up = (NOTES.upcoming || []).filter(function (u) { return u.date >= new Date().toISOString().slice(0, 10); }); if (up.length) { side.appendChild(el("h3", null, "Coming soon")); side.lastChild.style.marginTop = "10px"; var uu = el("ul", "list"); up.forEach(function (u) { uu.appendChild(el("li", null, u.name + " · " + u.date + ". " + u.note)); }); side.appendChild(uu); } }
     side.appendChild(el("p", "note", "Notes from the game data and the MapleStory Classic Wiki, checked " + (NOTES ? NOTES.updated : "") + ". Map and monster data refreshed " + W.built + "."));
     v.appendChild(side);
@@ -551,7 +555,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       if (!r) { li.textContent = row.name + " ×" + row.n + ": no attack works on it · walked past"; nl.appendChild(li); return; }
       li.appendChild(el("b", null, row.name + " ×" + row.n + ": "));
       li.appendChild(document.createTextNode(r.atk.name + " " + fmt(r.line) + " a " + (r.atk.lines > 1 ? (r.atk.id === "4001003" ? "star" : "hit") + " ×" + r.atk.lines : "hit") +
-        " (" + Math.round(r.defMult * r.gap * r.el * 100) + "% gets through: " + fmt(row.mob[r.atk.def] || 0) + " " + (r.atk.def === "wdef" ? "weapon" : "magic") + " defense" + (r.gap < 1 ? ", level gap" : "") + (r.el !== 1 ? ", " + (r.el > 1 ? "weak" : r.el === 0 ? "immune" : "resists") : "") + ")" +
+        " (" + Math.round(r.defMult * r.gap * r.el * 100) + "% gets through: " + fmt(row.mob[r.atk.def] || 0) + " " + (r.atk.def === "wdef" ? "weapon" : "magic") + " defense" + (row.mob.defnew ? " from before the " + defDay(row.mob.defnew) + " update" : "") + (r.gap < 1 ? ", level gap" : "") + (r.el !== 1 ? ", " + (r.el > 1 ? "weak" : r.el === 0 ? "immune" : "resists") : "") + ")" +
         " · " + r.casts + (r.casts === 1 ? " cast" : " casts") + " · " + Math.round(r.hc * 100) + "% hit · " + r.kill.toFixed(1) + " s" + (row.ok ? "" : " · under the bar, walked past")));
       nl.appendChild(li);
     });
@@ -762,6 +766,8 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     $("credit").textContent = W.credit + " Training notes summarize what players report; potion costs are estimates.";
     var recent = PAGES.filter(function (p) { return MAPS[p].since && MAPS[p].since > W.first0 && Date.now() - Date.parse(MAPS[p].since) < 14 * 864e5; });
     $("newmaps").textContent = PAGES.length + " maps" + (recent.length ? " · new lately: " + recent.slice(0, 6).join(", ") : "") + ". Updated " + W.built + ".";
+    var dn = Object.keys(W.mobs).filter(function (k) { return W.mobs[k].defnew && !W.mobs[k].base && !W.mobs[k].region; }).sort();
+    if (dn.length) { var dd = defDay(W.mobs[dn[0]].defnew); $("defnote").textContent = "The " + dd + " update changed defense on " + dn.length + " monsters (" + dn.join(", ") + ") without publishing the new numbers. Hits and kill times on their maps use the old defense until the new game data is out."; $("defnote").hidden = false; }
     suggest($("from"), function (p) { if (p) { FROM = p; if ($("to").value) findRoute(); else $("to").focus(); } });
     suggest($("to"), function (p) { if (p && $("from").value) findRoute(); });
     suggest($("mapq"), function (p) { if (p) renderMap(p); });
