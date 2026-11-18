@@ -803,6 +803,9 @@
   // ---------- data
   function build() {
     var winDays = +$("win").value, now = Date.now();
+    // a row read in another world (tagged "w") never prices Windia, whichever file brought it: the Worker's fast lane
+    // carries every new upload before the pump splits them by world
+    if (!ALTW) scans.forEach(function (s) { if (Array.isArray(s.rows) && s.rows.some(function (r) { return r && r.w; })) s.rows = s.rows.filter(function (r) { return !(r && r.w); }); });
     var ordered = scans.filter(function (s) { return Array.isArray(s.rows) && (s.world || "Windia") === WORLD && (!ALTW || s.world); }).sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });
     var raws = {};
     ordered.forEach(function (s) { s.rows.forEach(function (r) { raws[r.i] = (raws[r.i] || 0) + 1; }); });
