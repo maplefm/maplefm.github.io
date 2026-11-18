@@ -373,6 +373,9 @@ for name, mb in mob.items():
                 im.save(path, format="PNG")   # served under the same name; browsers read the PNG inside
             except Exception as e:
                 print("wiki sprite", name, e)
+# a monster with no picture anywhere yet (Golden Stirge, Nov 18): pages show no sprite instead of a broken image
+for name, mb in mob.items():
+    if mb.get("id") and not os.path.exists(os.path.join(OUT, "sprite", f"{mb['id']}.gif")): mb["nosprite"] = True
 out = {"at": int(time.time()), "built": TODAY, "maps": M, "mobs": mob, "cabs": cabs, "vip": vip, "boats": boats, "scrolls": scrolls, "pots": pots,
        "first": first, "unreleased": len(unreleased),
        "credit": "Maps, portals, spawns and shops: MapleStory Classic Wiki (CC BY-NC-SA 4.0). Minimaps, monster stats and sprites: Classic World game files via maplestory.io."}

@@ -190,7 +190,7 @@ def build(world, guide, summary, notes, out):
     def mnav(p): return mlink(p) + navbtn(p)
     def blink(n): return f'<a href="/monster/{BSLUG[n]}/">{E(n)}</a>' if n in MOB else E(n)
     def qlink(q): return f'<a href="/quest/{QSLUG[q["id"]]}/">{E(q["n"])}</a>'
-    def sprite_url(n): return f"{LIVE}data/sprite/{MOB[n]['id']}.gif" if n in MOB and MOB[n].get("id") else ""
+    def sprite_url(n): return f"{LIVE}data/sprite/{MOB[n]['id']}.gif" if n in MOB and MOB[n].get("id") and not MOB[n].get("nosprite") else ""
     built = world.get("built") or datetime.date.today().isoformat()
     paths, quiet = [], []   # quiet: pages built for visitors but kept out of search and the sitemap
     try: QKEEP = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "seo_keep.json"))).get("quests") or [])
