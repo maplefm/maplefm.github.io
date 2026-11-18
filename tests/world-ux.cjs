@@ -10,10 +10,16 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
 (async () => {
   const b = await ENGINE.launch(); const ctx = await b.newContext(PHONE ? Object.assign({}, pw.devices["iPhone 13"]) : { viewport: { width: 1440, height: 900 } });
   await ctx.route(/api\.maplefm\.gg\/hit/, (r) => r.fulfill({ status: 204, body: "" }));
-  const seen = { snap: 0, summary: 0, zenLive: 0, liveNoWorld: 0 };
-  await ctx.route(/api\.maplefm\.gg\/data\/live/, (r) => { const u = r.request().url(); if (/world=zenith/.test(u)) { seen.zenLive++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox-zenith.json": ZEN }) }); } seen.liveNoWorld++; return r.continue(); });
-  await ctx.route(/api\.maplefm\.gg\/data\/snap/, (r) => { seen.snap++; return r.continue(); });
-  await ctx.route(/summary-public\.json/, (r) => { seen.summary++; return r.continue(); });
+  const seen = { snap: 0, summary: 0, zenLive: 0, liveNoWorld: 0, leakServed: 0 };
+  await ctx.route(/api\.maplefm\.gg\/data\/live/, async (r) => { const u = r.request().url(); if (/world=zenith/.test(u)) { seen.zenLive++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox-zenith.json": ZEN }) }); } seen.liveNoWorld++;
+    // Windia's bundle as the Worker's fast lane carries it before the pump splits worlds: a Zenith-tagged row inside
+    // data/fast.json must never reach Windia's board. Made up here, so the real 45 MB bundle is never pulled.
+    const win = { at, src: "watcher-shop", who: "WinScanner", inbox: "win1", day, rows: rows("Wn", "Elixir", 600, 8, 5).map((x) => (delete x.w, x)) };
+    const leak = { at, src: "watcher-shop", who: "Guest-fast", inbox: "fast-zz", day, fast: 1, rows: rows("Zf", "Zenith Test Only Item", 2500, 8, 5) };
+    seen.leakServed++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox.json": [win], "data/fast.json": [leak] }) }); });
+  let rawOnly = false;   // phase 4: the server board is down, so the board builds from the raw bundle
+  await ctx.route(/api\.maplefm\.gg\/data\/snap/, (r) => { seen.snap++; return rawOnly ? r.fulfill({ status: 503, body: "" }) : r.continue(); });
+  await ctx.route(/summary-public\.json/, (r) => { seen.summary++; return rawOnly ? r.fulfill({ status: 404, body: "" }) : r.continue(); });
   await ctx.route(/^https:\/\/maplefm\.gg\/(\?[^#]*)?$|^https:\/\/maplefm\.gg\/assets\/(board\.min\.js|board\.min\.css|advsearch\.js|kofigoal\.js)/, (r) => { const u = new URL(r.request().url()); const f = u.pathname === "/" ? "index.html" : u.pathname.slice(1); r.fulfill({ status: 200, contentType: f.endsWith(".js") ? "text/javascript" : f.endsWith(".css") ? "text/css" : "text/html", body: fs.readFileSync(R + f) }); });
   const p = await ctx.newPage(); const errs = []; p.on("pageerror", (e) => errs.push(e.message));
   const tap = async (sel) => { const l = p.locator(sel).first(); await l.scrollIntoViewIfNeeded(); if (PHONE) await l.tap(); else await l.click(); };
@@ -55,6 +61,13 @@ const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, r
   const num = (t) => { const m = /([\d,.]+)\s*([KMB])?/.exec(String(t || "").replace(/^[^\d]*/, "")); return m ? parseFloat(m[1].replace(/,/g, "")) * ({ K: 1e3, M: 1e6, B: 1e9 }[m[2]] || 1) : NaN; };
   const after = await rowPrice(wFirst.n), a0 = num(wFirst.t.replace(wFirst.n, "")), a1 = num(String(after).replace(wFirst.n, ""));
   ok("Windia board back after the round trip", !!after && Math.abs(a1 - a0) <= a0 * 0.05, wFirst.n + " " + a0 + " -> " + a1);
+  // 4. Windia built from the raw bundle, with a Zenith row riding in the fast lane: it never shows
+  rawOnly = true; seen.leakServed = 0;
+  await p.goto("https://maplefm.gg/"); await p.waitForFunction(() => !!document.querySelector('#rows tr[data-item="Elixir"]'), null, { timeout: 60000 }).catch(() => {});
+  await p.waitForTimeout(2000);
+  const raw = { elixir: await rowPrice("Elixir"), zen: await p.evaluate(() => /Zenith Test Only/.test(document.body.innerText)) };
+  ok("raw Windia board loaded (test exercised)", seen.leakServed > 0 && !!raw.elixir, "bundle " + seen.leakServed + "x, Elixir " + raw.elixir);
+  ok("fast-lane Zenith row stays off Windia", seen.leakServed > 0 && !raw.zen);
   ok("no script errors", !errs.length, errs.slice(0, 2).join("; "));
   console.log(log.join("\n")); await b.close(); process.exit(log.some((x) => x.startsWith("FAIL")) ? 1 : 0);
 })();

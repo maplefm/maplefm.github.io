@@ -180,6 +180,8 @@ def scan_docs(data_dir):
         if not isinstance(docs, list): continue
         for d in docs:
             if isinstance(d, dict) and isinstance(d.get("rows"), list):
+                if any(isinstance(r, dict) and r.get("w") for r in d["rows"]):
+                    d = dict(d, rows=[r for r in d["rows"] if not (isinstance(r, dict) and r.get("w"))])
                 yield names.get(b) or d.get("who") or d.get("by") or "Guest", d
     # the Worker's fast lane: rows sent in the last minutes that the pump hasn't folded in yet (FAST_DOCS, written by
     # the pump's quick deal check). The scanner's name is the one its linked account shows, as the inbox gives it.
@@ -188,6 +190,9 @@ def scan_docs(data_dir):
         links = load(os.environ.get("FAST_LINKS") or "", {}) if os.environ.get("FAST_LINKS") else {}
         for d in load(fp, []) or []:
             if isinstance(d, dict) and isinstance(d.get("rows"), list) and d["rows"]:
+                # rows read in another world (Zenith) are its own economy: never Windia's deals or sales
+                d = dict(d, rows=[r for r in d["rows"] if not (isinstance(r, dict) and r.get("w"))])
+                if not d["rows"]: continue
                 tag = str(d.get("inbox") or "").replace("fast-", "")[:4]
                 yield (links.get(tag) if isinstance(links, dict) else None) or d.get("who") or "Guest", d
 

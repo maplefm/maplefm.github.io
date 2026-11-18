@@ -60,7 +60,11 @@ ok("inbox: Zenith file has only Zenith rows", sorted(r["s"] for r in zen) == ["Z
 # 3. Discord big sales from a data folder holding both files
 data = os.path.join(tmp, "data"); os.makedirs(data)
 docs = lambda rows: [{"at": time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime(now)), "src": "watcher-shop", "who": "Maya", "inbox": "aaaa", "rows": rows}]   # a club scanner: one sighting is enough to post
-json.dump(docs(win), open(os.path.join(data, "inbox.json"), "w")); json.dump(docs(zen), open(os.path.join(data, "inbox-zenith.json"), "w"))
+json.dump(docs(win), open(os.path.join(data, "inbox.json"), "w"))
+# the Worker's fast lane carries every new upload, Zenith's too, before the pump splits them: as a fast doc and mixed
+# into a Windia file, a Zenith-tagged row must still never post
+fastp = os.path.join(tmp, "fast.json"); json.dump(docs(zen), open(fastp, "w")); os.environ["FAST_DOCS"] = fastp
+json.dump(docs(win) + docs(zen), open(os.path.join(data, "watcher.json"), "w")); json.dump(docs(zen), open(os.path.join(data, "inbox-zenith.json"), "w"))
 json.dump({"rows": [{"item": "Work Gloves", "kind": "sale", "typ": 2000000, "salesN": 50, "conf": "verified", "equip": True}]}, open(os.path.join(data, "summary.json"), "w"))
 dc = load(os.path.join(ROOT, "tools", "discord.py"), "discord"); sent = []
 dc.post = lambda *a, **k: sent.append([a, k]) or True
