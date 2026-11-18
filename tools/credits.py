@@ -75,7 +75,7 @@ def observations(data_dir):
     TAGS.clear(); HOVERS.clear(); SPOTS.clear(); KEYSPOT.clear()
     for f in sorted(glob.glob(os.path.join(data_dir, "*.json"))):
         b = os.path.basename(f)
-        if b not in NAMES and b not in ("inbox.json", "streams.json", "streams-vods.json"): continue
+        if b not in NAMES and b not in ("inbox.json", "inbox-zenith.json", "streams.json", "streams-vods.json"): continue
         stream = b.startswith("streams")
         docs = load(f, [])
         if not isinstance(docs, list): continue

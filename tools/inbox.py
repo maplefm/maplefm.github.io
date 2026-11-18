@@ -102,6 +102,9 @@ def clean_row(r, now):
         return None
     if not (s_(r.get("s"), 24) and s_(r.get("i"), 64) and i_(r.get("p"), 1, 10**11) and i_(r.get("q", 1), 1, 32767)):
         return None
+    w = r.get("w")
+    if w and w != "Windia" and w not in WORLDS:
+        return None                                        # a world the site doesn't keep yet: never mixed into Windia
     o = {"s": r["s"], "i": r["i"], "p": r["p"], "q": r.get("q", 1)}
     if i_(r.get("t"), now - 86400 * (KEEP_DAYS + 1), now + 86400):
         o["t"] = min(r["t"], now)                           # a row cannot be newer than the moment it arrived
@@ -124,16 +127,21 @@ def clean_row(r, now):
         o["xj"] = r["xj"]
     if s_(r.get("xn"), 64):
         o["xn"] = r["xn"]
+    if r.get("w") in WORLDS:
+        o["w"] = r["w"]
     return o
 
 
 def ident(r):
     """A listing is the same listing when seller, item, price, bundle size and side match; _o tells apart
     identical listings in one shop."""
-    return json.dumps([r.get("s"), r.get("i"), r.get("p"), r.get("q", 1), r.get("k", ""), r.get("_o", 0)])
+    return json.dumps([r.get("s"), r.get("i"), r.get("p"), r.get("q", 1), r.get("k", ""), r.get("_o", 0)] + ([r["w"]] if r.get("w") else []))
 
 
 FMROOM = re.compile(r"^FM\d{1,2}$")
+# Worlds other than Windia (Zenith opened Nov 18 2026 with its own economy). A watcher set to one tags its rows "w";
+# those rows go to their own file, data/inbox-<world>.json, so no Windia price, deal, bot or post ever sees them.
+WORLDS = ("Zenith",)
 DROPS = {}   # why uploads or rows were dropped this run, folded into the state per day (merge)
 def drop(why, n=1): DROPS[why] = DROPS.get(why, 0) + n
 
@@ -271,8 +279,9 @@ def merge(state, rows, block=()):
     return state
 
 
-def publish(state):
-    """The site's copy: one document per watcher, day and kind, with the watcher's name as who."""
+def publish(state, world=None):
+    """The site's copy: one document per watcher, day and kind, with the watcher's name as who. world=None gives
+    Windia's rows (no "w"), world="Zenith" gives only that world's rows."""
     names, taken = {}, {}
     for sid in sorted(state.get("ids", {})):
         linked = LINKS.get(sid[:4])
@@ -292,7 +301,7 @@ def publish(state):
         for key, doc in me["docs"].items():
             if not key.endswith("|watcher-shop"): continue
             for r in doc["rows"].values():
-                if FMROOM.match(str(r.get("r") or "")) and r.get("c") and not r.get("ri"):
+                if r.get("w") == world and FMROOM.match(str(r.get("r") or "")) and r.get("c") and not r.get("ri"):
                     seen.setdefault((str(r.get("s", "")).lower(), r["c"]), []).append((r.get("t", 0), r["r"], sid))
     def infer(r, sid):
         if FMROOM.match(str(r.get("r") or "")) or not r.get("c") or r.get("ri"): return r
@@ -307,8 +316,10 @@ def publish(state):
             doc = me["docs"][key]
             rows = []
             for k in sorted(doc["rows"]):              # a fixed order, so an unchanged copy writes the same file
+                if doc["rows"][k].get("w") != world: continue
                 r = dict(doc["rows"][k]); r.pop("_o", None)
                 rows.append(infer(r, sid) if src == "watcher-shop" else r)
+            if not rows and (world or doc["rows"]): continue   # every row was another world's
             total += len(rows)
             if total > MAX_ROWS_ID:
                 break
@@ -352,6 +363,10 @@ def main():
         json.dump(state, open(statep, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False, sort_keys=True)
     docs = publish(state)
     json.dump(docs, open(out, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+    for w in WORLDS:                                       # data/inbox-zenith.json, written even when empty
+        wd = publish(state, w)
+        json.dump(wd, open(out.replace(".json", "-" + w.lower() + ".json"), "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+        if wd: print(w + ":", len(wd), "documents,", sum(len(d["rows"]) for d in wd), "rows")
     print(len(docs), "documents,", sum(len(d["rows"]) for d in docs), "rows, from", len(state.get("ids", {})), "watchers")
 
 

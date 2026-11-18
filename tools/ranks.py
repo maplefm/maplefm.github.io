@@ -6,7 +6,7 @@ bigger of the old and new counts, so a file that has trimmed its old days never 
 import sys, os, json, datetime
 ET = datetime.timezone(datetime.timedelta(hours=-4))
 FILES = {"watcher.json": "Maya", "watcher-2.json": "Jack", "watcher-3.json": "Matt", "watcher-4.json": "Jimmy",
-         "streams.json": None, "streams-vods.json": None, "inbox.json": None}
+         "streams.json": None, "streams-vods.json": None, "inbox.json": None, "inbox-zenith.json": None}
 OWNH = {"a4959daa", "bd22ad91", "6d3b4a44", "5b5738ce", "7528a716"}   # club members' own shops, as fingerprints
 
 def own(name):

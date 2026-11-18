@@ -514,6 +514,8 @@ async function vaultJSON(env, path, ttl) {
 // what a member's board loads: the raw scans, joined into one object without parsing them
 const MEMBER_FILES = ["watcher.json", "watcher-2.json", "watcher-3.json", "watcher-4.json", "streams.json", "streams-vods.json", "inbox.json",
   "watcher-sell.json", "watcher-2-sell.json", "watcher-3-sell.json", "watcher-4-sell.json"];
+// Another world's board (Zenith, opened Nov 18 2026) loads only that world's scans, and Windia's never includes them.
+const WORLD_FILES = { zenith: ["inbox-zenith.json"] };
 // Per-account and per-address limits on the member bundle: the board asks about once every five minutes, a
 // script pulling it in a loop gets cut off. Counted per Worker instance, with Cloudflare's limiter on top when bound.
 const HITS = new Map();
@@ -871,48 +873,53 @@ async function dataLive(req, env) {
   if ((id && overLimit("a:" + id, club ? 90 : 30, 600)) || overLimit("i:" + ip, club ? 120 : id ? 60 : 24, 600)) return json({ error: "slow down" }, 429, { "Retry-After": "300" });
   if (env.RL && !club) { try { const ok = await env.RL.limit({ key: id ? "a:" + id : "i:" + ip }); if (!ok.success) return json({ error: "slow down" }, 429, { "Retry-After": "300" }); } catch (e) {} }
   const ref = await archSig(env).catch(() => null);
-  const parts = await Promise.all(MEMBER_FILES.map((f) => archFetch(env, "data/" + f, 60, ref).catch(() => null)));
-  if (!parts.some(Boolean)) return json({ error: "not ready" }, 503);
+  const world = String(new URL(req.url).searchParams.get("world") || "").toLowerCase();
+  const FILES = WORLD_FILES[world] || MEMBER_FILES;
+  const parts = await Promise.all(FILES.map((f) => archFetch(env, "data/" + f, 60, ref).catch(() => null)));
+  if (!parts.some(Boolean)) return WORLD_FILES[world] ? json({ "data/inbox-zenith.json": [] }, 200, { "Cache-Control": "no-store" }) : json({ error: "not ready" }, 503);
   const mk = await markKey(env, id || "ip:" + ip);
   // ?after=<ms>: only the uploads newer than that, so an open board refreshes with a few KB instead of the whole bundle
   const after = Number(new URL(req.url).searchParams.get("after")) || 0;
   if (after > 0) {
     // the cut is rounded down to 10 minutes and kept per archive version, so first visits share one filtered copy
     const ak = Math.floor(after / 6e5) * 6e5;
-    const ck = new Request("https://archive.cache/live-after?ref=" + (ref || "x") + "&after=" + ak);
+    const ck = new Request("https://archive.cache/live-after?ref=" + (ref || "x") + "&after=" + ak + (WORLD_FILES[world] ? "&world=" + world : ""));
     let body = null; const hit = ref ? await caches.default.match(ck) : null;
     if (hit) body = await hit.text();
     else {
       let out = "{", first = true;
-      for (let i = 0; i < MEMBER_FILES.length; i++) {
+      for (let i = 0; i < FILES.length; i++) {
         if (!parts[i]) continue;
         let arr; try { arr = await docsAfter(parts[i], ak); } catch (e) { continue; }
-        out += (first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":" + JSON.stringify(arr); first = false;
+        out += (first ? "" : ",") + JSON.stringify("data/" + FILES[i]) + ":" + JSON.stringify(arr); first = false;
       }
       body = out + "}";
       if (ref) await caches.default.put(ck, new Response(body, { headers: { "Cache-Control": "public, max-age=900" } })).catch(() => {});
     }
-    const o = JSON.parse(body); o["data/fast.json"] = (await fastDocs(env)).docs;
-    if (!club) { const hp = await holdPrices(env); Object.keys(o).forEach((k) => holdDeals(o[k], hp)); }
+    const o = JSON.parse(body);
+    // the fast lane and the 10-minute deal hold are Windia's: worked out from its prices
+    if (!WORLD_FILES[world]) { o["data/fast.json"] = (await fastDocs(env)).docs; if (!club) { const hp = await holdPrices(env); Object.keys(o).forEach((k) => holdDeals(o[k], hp)); } }
     body = JSON.stringify(o);
     return new Response(mk === null ? body : markTimes(body, mk), { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store", "X-Delta": hit ? "cached" : "1" } });
   }
-  const hp = club ? null : await holdPrices(env);
+  const hp = club || WORLD_FILES[world] ? null : await holdPrices(env);
   const { readable, writable } = new TransformStream();
   (async () => {
     const w = writable.getWriter(), enc = new TextEncoder();
     let first = true;
     await w.write(enc.encode("{"));
-    for (let i = 0; i < MEMBER_FILES.length; i++) {
+    for (let i = 0; i < FILES.length; i++) {
       if (!parts[i]) continue;
-      await w.write(enc.encode((first ? "" : ",") + JSON.stringify("data/" + MEMBER_FILES[i]) + ":")); first = false;
+      await w.write(enc.encode((first ? "" : ",") + JSON.stringify("data/" + FILES[i]) + ":")); first = false;
       // everyone but deal holders: fresh deals stay out for their first 10 minutes (hp)
       try { await pipeFile(parts[i], w, enc, hp, mk); } catch (e) { await w.write(enc.encode("]")); }
     }
-    // the fast lane: new rows the pump hasn't folded in yet
-    const fd = (await fastDocs(env)).docs; if (hp) holdDeals(fd, hp);
-    const ft = JSON.stringify(fd);
-    await w.write(enc.encode((first ? "" : ",") + '"data/fast.json":' + (mk === null ? ft : markTimes(ft, mk))));
+    // the fast lane: new rows the pump hasn't folded in yet (Windia's board only)
+    if (!WORLD_FILES[world]) {
+      const fd = (await fastDocs(env)).docs; if (hp) holdDeals(fd, hp);
+      const ft = JSON.stringify(fd);
+      await w.write(enc.encode((first ? "" : ",") + '"data/fast.json":' + (mk === null ? ft : markTimes(ft, mk))));
+    }
     await w.write(enc.encode("}")); await w.close();
   })();
   return new Response(readable, { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } });

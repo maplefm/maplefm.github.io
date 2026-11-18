@@ -49,6 +49,9 @@
 
   $("name").value = F.name();
   $("name").addEventListener("change", function () { F.setName($("name").value); });
+  // the world you're scanning in: each world's prices are kept apart. Same choice as the board's World button.
+  $("world").value = F.world();
+  $("world").addEventListener("change", function () { F.setWorld($("world").value); addLog("Scanning " + $("world").value + " now. Listings from here on go to " + $("world").value + "'s prices."); });
   $("sound").checked = F.sound();
   $("sound").addEventListener("change", function () { F.sound($("sound").checked); });
   $("start").addEventListener("click", function () { F.start(); });

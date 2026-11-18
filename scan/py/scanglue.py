@@ -84,6 +84,17 @@ def set_who(name="", ign=""):
     ST["cfg"]["name"] = name; ST["cfg"]["ign"] = ign
 
 
+def set_world(world="Windia"):
+    """The world being scanned (the page's World choice). Rows read from now on carry it; another world's rows
+    never reach Windia's prices. Deal lines and coverage tips come from Windia's board, so they wait in Zenith."""
+    w = watcher.norm_world(world)
+    watcher.WORLD[0] = w
+    cfg = ST["cfg"] or {}
+    watcher.CFG_DEALS[0] = w == "Windia" and cfg.get("deal_alerts", True)
+    watcher.CFG_COV[0] = w == "Windia" and cfg.get("coverage_tips", True)
+    return w
+
+
 # ---------------------------------------------------------------- where the game is in the shared picture
 
 def plate_frame(crop):
