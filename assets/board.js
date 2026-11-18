@@ -5758,11 +5758,17 @@
   };
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
   if (ENGINE) { engineMain(); return; }
-  // the World button at the top: one tap goes to the other world's board (the page reloads, so nothing carries over)
+  // the Server switch at the top: both servers side by side with their game emblems, the one shown filled in. A tap on
+  // the other goes to its board (the page reloads, so nothing carries over)
   (function () {
-    var b = $("worldbtn"), nx = WORLDS[(WORLDS.indexOf(WORLD) + 1) % WORLDS.length];
     function go(w) { try { localStorage.setItem("fm-world", w); } catch (e) {} location.href = "/" + (w === "Windia" ? "" : "?w=" + w.toLowerCase()); }
-    if (b) { $("worldname").textContent = WORLD; b.setAttribute("aria-label", "World: " + WORLD + ". Switch to " + nx); b.addEventListener("click", function () { go(nx); }); }
+    var sw = $("worldsw");
+    if (sw) [].forEach.call(sw.querySelectorAll("button[data-world]"), function (b) {
+      var w = b.getAttribute("data-world"), on = w === WORLD;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.setAttribute("aria-label", on ? w + " prices, showing now" : "Show " + w + " prices");
+      b.addEventListener("click", function () { if (w !== WORLD) go(w); });
+    });
     document.body.classList.toggle("altworld", ALTW);
     if (ALTW && $("worldnote")) { $("worldnote").hidden = false; $("worldback").addEventListener("click", function () { go("Windia"); }); }
   })();
