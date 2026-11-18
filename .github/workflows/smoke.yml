@@ -59,6 +59,14 @@ jobs:
         run: |
           node tests/search-ux.cjs chromium phone
           node tests/search-ux.cjs chromium desktop
+      # Nov 18: the Zenith world opened with its own economy. One button switches the board; Zenith scans never
+      # reach Windia's prices, reports or Discord posts.
+      - name: World button shows one world's prices
+        run: |
+          node tests/world-ux.cjs chromium phone
+          node tests/world-ux.cjs chromium desktop
+      - name: Zenith scans stay out of Windia
+        run: python3 tests/worlds.py
       - name: Cut-off names never price the shorter item
         run: |
           # the runner's Python is system-managed (PEP 668), so pip needs leave to install

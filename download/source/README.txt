@@ -38,6 +38,10 @@ While it runs, the window also tells you things worth knowing:
    board most. Turn off with "coverage_tips": false.
 3. Every half hour, your shops and sold slots caught so far.
 
+Playing in Zenith? Put "world": "Zenith" in config.json and restart the watcher. Your scans then go to Zenith's prices
+only and never mix with Windia's. Set it back to "Windia" when you scan Windia again. DEAL lines and the "most needed"
+tips are Windia only for now.
+
 Stop it by closing the window.
 
 Reviewing your own data

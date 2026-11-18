@@ -5,6 +5,18 @@
   // phones and small-memory devices: never the full listing history (see bundlePoll)
   var LITE = (function () { try { return /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); } catch (e) { return false; } })();
   var MYSRC = !ENGINE && document.currentScript ? document.currentScript.src : "";
+  // The world this board shows. Windia is the server's board, the bots and every post; Zenith (opened Nov 18 2026, its
+  // own economy) is built here from Zenith scans only. Picked with the World button, kept in fm-world, or ?w=zenith.
+  var WORLDS = ["Windia", "Zenith"];
+  var WORLD = (function () {
+    if (ENGINE) return "Windia";
+    try {
+      var m = /[?&]w=([a-z]+)/i.exec(location.search), w = m ? m[1] : localStorage.getItem("fm-world");
+      w = w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : "Windia";
+      return WORLDS.indexOf(w) >= 0 ? w : "Windia";
+    } catch (e) { return "Windia"; }
+  })();
+  var ALTW = WORLD !== "Windia";
   // Club members' own shops are left out of prices. Stored as fingerprints, not names.
   var OWNH = { "a4959daa": 1, "bd22ad91": 1, "6d3b4a44": 1, "5b5738ce": 1, "7528a716": 1 }, OWNC = {};
   function ownShop(sl) {
@@ -17,7 +29,7 @@
   var CREW = ["Maya", "Jack", "Matt", "Jimmy"];
   // trade chat rows read wrong before a reader fix, corrected by hand: seller|item as read|price -> real item
   var CHATFIX = { "videogame|Claw Attack Scroll: Intermediate|140000": "Earring LUK Scroll: Intermediate" };
-  var FILES = [["data/watcher.json", "Maya"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"], ["data/inbox.json", null], ["data/fast.json", null]];   // fast.json: new rows from the Worker before the pump folds them in
+  var FILES = [["data/watcher.json", "Maya"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"], ["data/inbox.json", null], ["data/fast.json", null], ["data/inbox-zenith.json", null, "Zenith"]];   // fast.json: new rows from the Worker before the pump folds them in
   var MIN = 5, HOT = 0.5, H = 36e5, DAY = 864e5;
   var $ = function (id) { return document.getElementById(id); };
   var ICONS = {}; try { ICONS = JSON.parse($("icon-ids").textContent); } catch (e) {}
@@ -353,7 +365,7 @@
     });
   }
   var SNAP_P = null;
-  if (ENGINE) SNAP_P = Promise.resolve(null);
+  if (ENGINE || ALTW) SNAP_P = Promise.resolve(null);   // the server's board is Windia's
   else try {
     SNAP_P = snapFetch("https://api.maplefm.gg/data/snap");
   } catch (e) { SNAP_P = Promise.resolve(null); }
@@ -791,7 +803,7 @@
   // ---------- data
   function build() {
     var winDays = +$("win").value, now = Date.now();
-    var ordered = scans.filter(function (s) { return Array.isArray(s.rows); }).sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });
+    var ordered = scans.filter(function (s) { return Array.isArray(s.rows) && (s.world || "Windia") === WORLD && (!ALTW || s.world); }).sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });
     var raws = {};
     ordered.forEach(function (s) { s.rows.forEach(function (r) { raws[r.i] = (raws[r.i] || 0) + 1; }); });
     if (Object.keys(raws).some(function (r) { return !CN[r]; })) CN = canonAll(raws);
@@ -1839,7 +1851,7 @@
     var sig = ev.map(function (l) { return l.s + l.i + l.p + l.t; }).join("|") + "|" + Math.floor(now / 6e4);
     if (run.dataset.sig === sig) return; run.dataset.sig = sig; run.textContent = "";
     // no sales at all means the sales didn't load (the Worker or the network is down), not a quiet market
-    if (!ev.length) { run.appendChild(el("span", "tq", (D.sales || []).length ? "No sales over 250K in the last 24 hours" : "Recent sales didn't load. Try again in a minute.")); return; }
+    if (!ev.length) { run.appendChild(el("span", "tq", (D.sales || []).length ? "No sales over 250K in the last 24 hours" : ALTW ? "No " + WORLD + " sales caught yet" : "Recent sales didn't load. Try again in a minute.")); return; }
     ev.forEach(function (l) {
       var sp = el("span"); sp.dataset.item = l.i; sp.appendChild(document.createTextNode(l.s + " sold ")); sp.appendChild(el("b", null, showName(l.i)));
       sp.appendChild(document.createTextNode(" for ")); sp.appendChild(el("b", "mz", short(l.p)));
@@ -4687,6 +4699,7 @@
   }
   function loadPreview() { return previewFrom(loadLS("fm-summary", null)); }
   function remotePreview() {
+    if (ALTW) return Promise.resolve();                   // Windia's prices: never shown as another world's
     var local = loadLS("fm-summary", null), lat = local && local.at || 0;
     return fetch(LIVE + "data/summary-public.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (sm) {
       if (sm && sm.rows) sm.rows.forEach(function (r) { if (r && r.item && r.typ && (r.n || 0) >= 5) ITEMPAGES[r.item] = 1; });
@@ -5517,7 +5530,7 @@
       // closed the page). They keep the last 30 hours and top it up; the weekly numbers come from the board snapshot.
       else if (LITE && BUNDLE) { delta = true; since = Math.max(bundleNewest() - 15 * 6e4, Date.now() - 30 * 36e5); }
       mark("liveReq");
-      return fetch(ACCT + "/data/live" + (delta ? "?after=" + since : ""), { credentials: "include", cache: "no-cache" }).then(function (r) {
+      return fetch(ACCT + "/data/live" + (delta ? "?after=" + since : "") + (ALTW ? (delta ? "&" : "?") + "world=" + WORLD.toLowerCase() : ""), { credentials: "include", cache: "no-cache" }).then(function (r) {
         if (r.status === 401 || r.status === 403) { MEMBER = false; gateText(r.status === 403); $("gate").hidden = false; return null; }
         return r.ok ? r.json() : null;
       }).then(function (b) {
@@ -5560,6 +5573,7 @@
   }
   function bundleCached() {
     if (bundleTried) return Promise.resolve(); bundleTried = true;
+    if (ALTW) return Promise.resolve();                   // the saved copy is Windia's
     // phones never reuse a saved history: a full one saved before this fix is tens of megabytes, and only reading it
     // was enough for iPhone Safari to close the page. Deleted unread.
     if (LITE) { idb("readwrite", function (st) { return st.delete("bundle"); }); return Promise.resolve(); }
@@ -5569,7 +5583,7 @@
   }
   function bundleSave() {
     clearTimeout(saveT);
-    if (LITE) return;                     // phones keep the last 30 hours in memory only
+    if (LITE || ALTW) return;             // phones keep the last 30 hours in memory only; the saved copy is Windia's
     saveT = setTimeout(function () { var b = BUNDLE, f = bundleFull; if (b) idb("readwrite", function (st) { return st.put({ b: b, full: f, at: Date.now() }, "bundle"); }); }, 3000);
   }
   function bundleNewest() {
@@ -5580,7 +5594,7 @@
   setInterval(function () { if (DEALS_ON && D && !document.hidden && !engineLive()) livePoll(); }, 15000);
   function livePoll() {
     getBundle().then(function (b) {
-      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
+      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); if (f[2]) s.world = f[2]; }); live[f[0]] = x; } });
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
       var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
       if (sig === lastSig) return;
@@ -5597,7 +5611,7 @@
     // missing or stale snap, and anyone already on raw listings keep the old path.
     rawWanted().then(function (want) { return want ? getBundle() : "skip"; }).then(function (b) {
       if (b === "skip") return "skip";
-      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
+      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); if (f[2]) s.world = f[2]; }); live[f[0]] = x; } });
     }).then(function (sk) {
       if (sk === "skip") { livePill(); armed = true; wArmed = true; return; }
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
@@ -5630,7 +5644,7 @@
     var rk = Date.now() - (ENG.rk || 0) > 6e4 ? getJSON("data/ranks.json").then(function (r) { ENG.rk = Date.now(); if (r && r.who) { if (!RANKS || RANKS.updated !== r.updated) force = true; RANKS = r; } }) : Promise.resolve();
     rk.then(function () { return getBundle(); }).then(function (b) {
       if (MEMBER === false) { self.postMessage({ type: "denied" }); return; }
-      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); }); live[f[0]] = x; } });
+      FILES.forEach(function (f) { var x = b && b[f[0]]; if (Array.isArray(x)) { x.forEach(function (s) { s.who = f[1] || String(s.who || "Guest").slice(0, 16); if (f[2]) s.world = f[2]; }); live[f[0]] = x; } });
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
       var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
       var changed = force || sig !== lastSig; lastSig = sig; scans = all;
@@ -5655,7 +5669,7 @@
   }
   function engineUI() { return { win: { value: $("win").value }, "f-spot": { checked: $("f-spot").checked } }; }
   function engineStart() {
-    if (ENGINE || ENGW || ENG_BROKEN || !window.Worker || !MYSRC) return false;
+    if (ENGINE || ALTW || ENGW || ENG_BROKEN || !window.Worker || !MYSRC) return false;
     try { ENGW = new Worker("/fmengine.js?v=2"); } catch (e) { ENG_BROKEN = true; return false; }
     var ls = {}; try { for (var k = 0; k < localStorage.length; k++) { var key = localStorage.key(k); if (/^fm-/.test(key) && key !== "fm-summary") ls[key] = localStorage.getItem(key); } } catch (e) {}
     var ids = engineUI(); ["scan-data", "icon-ids"].forEach(function (id) { var n = $(id); if (n) ids[id] = { textContent: n.textContent }; });
@@ -5741,13 +5755,21 @@
   };
   var dbReady = Promise.race([loadDB(), new Promise(function (ok) { setTimeout(ok, 2500); })]);
   if (ENGINE) { engineMain(); return; }
+  // the World button at the top: one tap goes to the other world's board (the page reloads, so nothing carries over)
+  (function () {
+    var b = $("worldbtn"), nx = WORLDS[(WORLDS.indexOf(WORLD) + 1) % WORLDS.length];
+    function go(w) { try { localStorage.setItem("fm-world", w); } catch (e) {} location.href = "/" + (w === "Windia" ? "" : "?w=" + w.toLowerCase()); }
+    if (b) { $("worldname").textContent = WORLD; b.setAttribute("aria-label", "World: " + WORLD + ". Switch to " + nx); b.addEventListener("click", function () { go(nx); }); }
+    document.body.classList.toggle("altworld", ALTW);
+    if (ALTW && $("worldnote")) { $("worldnote").hidden = false; $("worldback").addEventListener("click", function () { go("Windia"); }); }
+  })();
   mark("start"); render(); try { if (MAINT) renderMaint(); } catch (e) {} mark("render0"); rotateFinder(); remotePreview(); window.FM_T0 = T0;
   // the server's finished board first; the raw listings follow when the page is idle (straight away for deal holders)
   var SNAP_OK = false, SNAP_SEEN = 0, SNAP_DONE = null;
-  function rawWanted() { return (SNAP_DONE || Promise.resolve()).then(function () { return DEALS_ON || !SNAP_OK || hasRaw() || !D || !D.snap; }, function () { return true; }); }
+  function rawWanted() { return (SNAP_DONE || Promise.resolve()).then(function () { return ALTW || DEALS_ON || !SNAP_OK || hasRaw() || !D || !D.snap; }, function () { return true; }); }
   // a newer copy of the server's board replaces this one, unless this browser has moved on to the raw listings
   function snapRefresh() {
-    if (!SNAP_OK || hasRaw() || DEALS_ON || document.hidden) return;
+    if (ALTW || !SNAP_OK || hasRaw() || DEALS_ON || document.hidden) return;
     // a 1 KB check first: the board itself (about 3 MB sent, 24 MB unpacked) only downloads when the server has a newer one
     fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) {
       if (st && st.at && st.at === SNAP_SEEN) return null;
@@ -5761,7 +5783,7 @@
       });
     }).catch(function () {});
   }
-  fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) { if (st && st.at && !SNAP_SEEN) SNAP_SEEN = st.at; }).catch(function () {});
+  if (!ALTW) fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) { if (st && st.at && !SNAP_SEEN) SNAP_SEEN = st.at; }).catch(function () {});
   SNAP_DONE = SNAP_P.then(function (j) { return snapDecodeAsync(j); }).then(function (d) {
     if (D && D.engine) return;   // the club engine's board already landed
     if (!d || hasRaw() || (D && !D.preview && !D.snap && D.list.length)) { getBundle(); return; }

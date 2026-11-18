@@ -28,11 +28,14 @@
       .then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) ls("fm-scan-linked", hid); }).catch(function () {});
   }
   function myName() { return (ls("fm-scan-name") || "").slice(0, 16); }
-  function who() { if (w && ready) w.postMessage({ type: "who", name: myName(), ign: acct && acct.ign || "" }); }
+  // the world being scanned: the same choice as the board's World button (fm-world), so a Zenith player's scans go
+  // to Zenith's prices only
+  function myWorld() { return ls("fm-world") === "Zenith" ? "Zenith" : "Windia"; }
+  function who() { if (w && ready) w.postMessage({ type: "who", name: myName(), ign: acct && acct.ign || "", world: myWorld() }); }
 
   function boot() {
     if (w || !supported()) return;
-    w = new Worker("/scan/worker.js?v=4");
+    w = new Worker("/scan/worker.js?v=5");
     w.onmessage = function (e) {
       var m = e.data;
       if (m.type === "ready") { ready = true; hid = m.hid || ""; link(); who(); emit("ready", m); if (running) next(0); }
@@ -41,7 +44,7 @@
       if (m.type === "tick") look();
       if (m.type === "published" || m.type === "counts") { S.counts = m.counts; emit("counts", m.counts); }
     };
-    w.postMessage({ type: "init", api: API, dry: !onSite(), name: myName(), ign: acct && acct.ign || "" });
+    w.postMessage({ type: "init", api: API, dry: !onSite(), name: myName(), ign: acct && acct.ign || "", world: myWorld() });
     emit("status", "loading");
   }
 
@@ -119,6 +122,7 @@
     running: function () { return running; }, isReady: function () { return ready; },
     on: function (f) { fns.push(f); },
     name: myName, setName: function (n) { ls("fm-scan-name", String(n || "").trim().slice(0, 16)); who(); },
+    world: myWorld, setWorld: function (x) { if (running) send(); ls("fm-world", x === "Zenith" ? "Zenith" : "Windia"); who(); },
     sound: function (on) { if (on === undefined) return ls("fm-scan-sound") !== "0"; ls("fm-scan-sound", on ? "1" : "0"); },
     counts: function () { if (w && ready) w.postMessage({ type: "counts" }); }
   };

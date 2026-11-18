@@ -1,5 +1,5 @@
 {
- "version": "2026.11.16.1",
+ "version": "2026.11.18.1",
  "files": {
   "fmparse.py": "0a9dcf8dd95f",
   "glyphs.py": "1e92a6455033",
@@ -13,10 +13,10 @@
   "tiers.png": "e401f89149c7",
   "statfit.json": "9809ccd4d8cd",
   "tipglyphs.json": "e32d7ca1b288",
-  "watcher.py": "6ed7ad056fb0",
+  "watcher.py": "c5c592f1e278",
   "boards.py": "da2c2295c4ca",
   "reference.json": "df0dae63d305",
-  "scanglue.py": "81512e5b6891",
+  "scanglue.py": "32cc12a67c22",
   "cursor.json": "017a90f1f96b"
  }
 }

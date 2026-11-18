@@ -38,6 +38,7 @@ const I = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 function clean(r) {
   if (!r || !S(r.s, 24) || !S(r.i, 80) || !I(r.p, 1, 1e11) || !I(r.q || 1, 1, 30000) || !I(r.t, 1e9, 4e9)) return null;
   if (r.k === "b") return null;                         // buy posts aren't listings
+  if (r.w && r.w !== "Windia") return null;             // another world (Zenith): the fast lane feeds Windia's board only
   const o = { s: r.s, i: r.i, p: r.p, q: r.q || 1, t: r.t };
   if (r.so) o.so = true;
   if (r.ns === 1) o.ns = 1;

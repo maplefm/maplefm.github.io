@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.16.1"
+VERSION = "2026.11.18.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -89,7 +89,13 @@ DEFAULTS = {
     "inbox_every_minutes": 10,
     "deal_alerts": True,            # say so in this window when a shop you open has something well under the usual price
     "coverage_tips": True,          # name the rooms and channels nobody usually reads at this hour
+    "world": "Windia",              # the world you scan: "Windia" or "Zenith". Each world's prices are kept apart on the site
 }
+WORLDS = ("Windia", "Zenith")
+WORLD = ["Windia"]                  # set from config.json at start; rows from any other world carry "w"
+def norm_world(w):
+    w = str(w or "Windia").strip().capitalize()
+    return w if w in WORLDS else "Windia"
 
 def load_config():
     cfg = dict(DEFAULTS)
@@ -866,6 +872,8 @@ class Store:
                 if key not in self.d["shop"] and not when: self.fresh = True     # a new listing: send it soon (fast lane)
                 o = self.d["shop"].setdefault(key, {"n": 1, "reads": 0, "first": now, "known": g["known"], "so": False, "so_reads": 0})
                 o["reads"] += 1; o["last"] = max(o.get("last", 0), now)
+                if WORLD[0] != "Windia": o["w"] = WORLD[0]
+                else: o.pop("w", None)
                 o["known"] = o["known"] or g["known"]
                 o["n"] = max(o["n"], g["S"] + g["U"])
                 if "nu" not in o and o["so"] and o["so_reads"] >= 2:      # saved by an older version as sold
@@ -1078,6 +1086,8 @@ class Store:
         with self.lock:
             key = json.dumps([day, player.lower(), side, item, price])
             o = self.d["chat"].setdefault(key, {"reads": 0, "first": now, "last_read": 0})
+            if WORLD[0] != "Windia": o["w"] = WORLD[0]
+            else: o.pop("w", None)
             if now - o["last_read"] >= 4:      # one read per capture
                 o["reads"] += 1; o["last_read"] = now
             o["last"] = now
@@ -1194,6 +1204,7 @@ class Store:
                 if o.get("x"): row["x"] = dict(o["x"], _img=o["xi"]) if o.get("xi") else o["x"]; row["xt"] = o.get("xt", [])
                 if o.get("xj"): row["xj"] = o["xj"]
                 if o.get("xn"): row["xn"] = o["xn"]
+                if o.get("w"): row["w"] = o["w"]
                 row["t"] = int(o["last"])
                 doc["rows"].extend([dict(row, so=True)] * sold + [row] * opn)
             # the same post read with one digit swapped (90K and 30K): keep the reading nearer the board's price
@@ -1224,6 +1235,7 @@ class Store:
                 if o.get("x"): row["x"] = dict(o["x"], _img=o["xi"]) if o.get("xi") else o["x"]
                 if o.get("xt"): row["xt"] = o["xt"]
                 if o.get("xj"): row["xj"] = o["xj"]
+                if o.get("w"): row["w"] = o["w"]
                 doc["rows"].append(row)
         out = []
         with HV_LOCK: hvc = (HV["day"], dict(HV["c"]))
@@ -2137,6 +2149,10 @@ def chores(cfg, t, L, store):
 
 def main():
     cfg = load_config(); CFG_CHIME[0] = cfg.get("hover_sound", True); CFG_DEALS[0] = cfg.get("deal_alerts", True); CFG_COV[0] = cfg.get("coverage_tips", True)
+    WORLD[0] = norm_world(cfg.get("world"))
+    if WORLD[0] != "Windia":
+        CFG_DEALS[0] = False; CFG_COV[0] = False      # deal lines and coverage tips are worked out from Windia's board
+        print("[Club FM] Scanning " + WORLD[0] + ". Its prices go to the " + WORLD[0] + " board on maplefm.gg, kept apart from Windia. Change \"world\" in config.json to switch.", flush=True)
     if sys.platform == "win32":
         import ctypes
         try: ctypes.windll.shcore.SetProcessDpiAwareness(2)

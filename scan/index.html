@@ -53,6 +53,7 @@ a { color: var(--accent-ink); }
 .btn:disabled { opacity: .5; cursor: default; }
 .go label { font-size: .9rem; color: var(--muted); }
 .go input { font: 700 .95rem var(--body); padding: 8px 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--panel2); color: var(--ink); width: 150px; }
+.go select { font: 700 .95rem var(--body); padding: 8px 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--panel2); color: var(--ink); }
 .status { font-weight: 800; min-height: 1.5em; }
 .status.ok { color: var(--ok); } .status.no { color: var(--no); }
 .small { color: var(--muted); font-size: .9rem; margin: 6px 0 0; }
@@ -91,6 +92,7 @@ td.deal { color: var(--ok); font-weight: 800; }
       <button class="btn" id="start" type="button">Start scanning</button>
       <button class="btn alt" id="stop" type="button" hidden>Stop</button>
       <label>Scanner name <input id="name" maxlength="16" placeholder="Guest"></label>
+      <label>World <select id="world"><option>Windia</option><option>Zenith</option></select></label>
       <label class="chk"><input type="checkbox" id="sound" checked> Sounds</label>
     </div>
     <p class="status" id="status" role="status" aria-live="polite">Loading…</p>
@@ -122,7 +124,7 @@ td.deal { color: var(--ok); font-weight: 800; }
     </ul>
   </div>
 </div>
-<script src="/scan/engine.js?v=3" defer></script>
-<script src="/scan/scan.js?v=3" defer></script>
+<script src="/scan/engine.js?v=4" defer></script>
+<script src="/scan/scan.js?v=4" defer></script>
 <!--foot--><footer class="clubfoot"><div class="sf-cols"><div><b>Prices</b><a href="/">Price board</a><a href="/items/">All items</a><a href="/items/class/">Items by class</a><a href="/guides/">Guides</a><a href="/recap/">Weekly recap</a><a href="/how-it-works.html">How prices work</a></div><div><b>Trade</b><a href="/market.html">Player market</a><a href="/shop.html">Shops</a><a href="/market.html#new">List an item</a><a href="/#positions">My positions</a></div><div><b>Quests and training</b><a href="/quests.html">Quests</a><a href="/map.html">Training</a><a href="/training/">Training guides</a><a href="/maps/">All maps</a><a href="/monsters/">Monsters</a><a href="/crafting/">Crafting recipes</a></div><div><b>Club FM</b><a href="/contribute.html">Earn by scanning</a><a href="/streamers.html">For streamers</a><a href="/bot/">Add /price to Discord</a><a href="https://discord.gg/cXnVBTUUPk">Discord</a><a href="/terms.html">Terms</a></div></div><p>Club FM is a free fan project built by players. Not affiliated with or endorsed by NEXON; MapleStory is a trademark of NEXON. Item icons from <a href="https://maplestory.io" rel="noopener">maplestory.io</a>, character pictures from <a href="https://classicrank.com" rel="noopener">classicrank.com</a>. Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot--></body>
 </html>

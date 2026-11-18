@@ -56,7 +56,8 @@ def category(name):
 obs = {}
 for f in glob.glob(os.path.join(DATA, "*.json")):
     b = os.path.basename(f)
-    if any(x in b for x in ("icons", "sell", "maintenance", "report", "itemdb")):
+    # another world's scans (inbox-zenith.json, Nov 18) are its own economy: never Windia's prices
+    if any(x in b for x in ("icons", "sell", "maintenance", "report", "itemdb", "zenith")):
         continue
     try:
         scans = json.load(open(f, encoding="utf-8"))
@@ -73,7 +74,7 @@ for f in glob.glob(os.path.join(DATA, "*.json")):
         except Exception:
             st = None
         for r in s.get("rows") or []:
-            if r.get("k") == "b" or not r.get("p"):
+            if r.get("k") == "b" or not r.get("p") or r.get("w"):
                 continue
             name = (r.get("i") or "").strip()
             cat = category(name)
@@ -289,7 +290,7 @@ report["first"] = first
 unk = {}
 for f in glob.glob(os.path.join(DATA, "*.json")):
     b = os.path.basename(f)
-    if any(x in b for x in ("icons", "sell", "maintenance", "report", "itemdb", "credits", "ranks", "summary", "discord", "inbox_state", "inbox_block", "names")):
+    if any(x in b for x in ("icons", "sell", "maintenance", "report", "itemdb", "credits", "ranks", "summary", "discord", "inbox_state", "inbox_block", "names", "zenith")):
         continue
     try: scans = json.load(open(f, encoding="utf-8"))
     except Exception: continue

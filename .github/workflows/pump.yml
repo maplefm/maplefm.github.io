@@ -50,6 +50,8 @@ jobs:
             curl -sS -m 20 https://api.maplefm.gg/public/links -o /tmp/links.json || echo '{}' > /tmp/links.json
             python3 $T/inbox.py /tmp/inbox.json data/inbox_block.json data/inbox_state.json /tmp/links.json || true
             if [ -s /tmp/inbox.json ] && ! cmp -s /tmp/inbox.json data/inbox.json; then cp /tmp/inbox.json data/inbox.json; fi
+            # other worlds (Zenith) in their own file: no Windia price, deal or post reads it; the board's world switch does
+            if [ -s /tmp/inbox-zenith.json ] && ! cmp -s /tmp/inbox-zenith.json data/inbox-zenith.json; then cp /tmp/inbox-zenith.json data/inbox-zenith.json; fi
             if [ $(( n % 15 )) -eq 0 ]; then python3 $T/ranks.py data data/ranks.json /tmp/links.json || true; fi
             # Club FM Discord: big sales every pass, rank changes every half hour (quiet when the secret is missing)
             python3 $T/discord.py sales data data/discord_sales.json || true

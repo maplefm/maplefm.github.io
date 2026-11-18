@@ -54,7 +54,7 @@ self.tess_tsv = function (png, psm, allow) {
   return HEAD + t;
 };
 
-async function init(name, ign) {
+async function init(name, ign, world) {
   const man = await (await fetch("py/manifest.json", { cache: "no-cache" })).json();
   TM = await TesseractCore();
   TM.FS.writeFile("/eng.traineddata", new Uint8Array(await (await fetch("tess/eng.traineddata")).arrayBuffer()));
@@ -111,6 +111,7 @@ import scanglue
 `);
   glue = py.globals.get("scanglue");
   glue.init(name || "", ign || "");
+  glue.set_world(world || "Windia");
   await keep();
   const id = py.runPython("watcher.anon_id()");
   const hb = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("fm-inbox:" + id)));
@@ -131,7 +132,7 @@ onmessage = async (e) => {
   if (m.type === "init") {
     if (m.api) API = m.api;
     DRY = !!m.dry;
-    if (!ready) ready = init(m.name, m.ign);
+    if (!ready) ready = init(m.name, m.ign, m.world);
     try { postMessage({ type: "ready", version: await ready, hid: self.HID }); } catch (err) { postMessage({ type: "error", error: String(err).slice(-400) }); }
     return;
   }
@@ -156,7 +157,7 @@ onmessage = async (e) => {
     await keep();
     postMessage({ type: "published", ok, counts: JSON.parse(glue.counts()) });
   }
-  if (m.type === "who") { await ready; glue.set_who(String(m.name || "").slice(0, 16), String(m.ign || "").slice(0, 13)); return; }
+  if (m.type === "who") { await ready; glue.set_who(String(m.name || "").slice(0, 16), String(m.ign || "").slice(0, 13)); if (m.world) glue.set_world(String(m.world)); return; }
   if (m.type === "counts") { await ready; postMessage({ type: "counts", counts: JSON.parse(glue.counts()) }); }
   if (m.type === "save") { await ready; await keep(); postMessage({ type: "saved" }); }
   if (m.type === "mem") { postMessage({ type: "mem", py: py && py._module.HEAPU8.length, tess: TM && TM.HEAPU8.length }); }

@@ -1,10 +1,15 @@
 {
- "version": "2026.11.16.1",
- "date": "2026-11-16T17:14:08+00:00",
- "notes": "Shop names: a long name the shop cuts short (\"Two-handed Sword A..\", \"Black Knucklevest P..\") is no longer read as the shorter item it starts with. It goes to the scroll or item it really is, or is left unnamed when it could be several.",
- "sha256": "41c483e68633479d35f448a762c3273db808d70634b6a90e3af6db65de6c8bed",
- "size": 185460,
+ "version": "2026.11.18.1",
+ "date": "2026-11-18T03:50:09+00:00",
+ "notes": "Zenith: a new \"world\" setting in config.json. Put \"world\": \"Zenith\" when you scan Zenith and your listings go to Zenith's prices only, never mixed with Windia's. Windia stays the default.",
+ "sha256": "d73d4c70d4c2ffff0b6a092bceef78726e8fc3c58c9d1196799a232d420d2963",
+ "size": 185943,
  "history": [
+  {
+   "version": "2026.11.18.1",
+   "date": "2026-11-18",
+   "notes": "Zenith: a new \"world\" setting in config.json. Put \"world\": \"Zenith\" when you scan Zenith and your listings go to Zenith's prices only, never mixed with Windia's. Windia stays the default."
+  },
   {
    "version": "2026.11.16.1",
    "date": "2026-11-16",
@@ -182,5 +187,5 @@
   }
  ],
  "pip": [],
- "sig": "b260a5c7d77f3c84d25acaca396f10bb2ca639371bc9de952ab2e646f041195a6709193e72a862ad96a83602cc4940c7828649c2d573e6abac28a55b834cff132f959d0afb8f17493d8948375d9eb9ee11dfcbdc675afb24efef7b5a971526c2be49af716e19a5ab1b38036c8a32813544212638106abd67904a558b7f9c754d70a9e0cb2e310e829c68778dc2b2af234716f78f59a4344e2fe0d425fc97d94fccc0bf3167f32d6b6da177b42e1bb663bc01771a4f383bbd7652552d55522e8848d8e7f02780371cd60f442fbabd13b0d63952a504ee90e87697edabb08e291790ea3cebce0974a88e89fadf0de930375fd135c3bcdd89494ded9fae48825ecf"
+ "sig": "2816c6499bdb683b6528b2e980fc3605eeb89864054e1b3525903b5a30972b036fd3d1d01207fc1090a52d52ecadbb914ecba39d37d9560a7879128af6e2ac6835cabf110b3d4ac5c6104e99c81debacccbda36b6f949bee7f3b6fa4cf3c9f501f6bb9b9a2e0382bbbfb93f5d0c09a33a5c1fe5482dfd0e25de4a13e3144794ba3be0f860937ccdd1a7ccddcd22010ec4f3e44646cb9ebdbce89274cd599abeaf363b5b4a0ab6de25d655c6e0d453e3baad61da9e9be8975e3f52efc3ac7c925789f6503d32e5be3a3abc2cfd7108c3c7187458570701e34d9f657f8c48fb13c578b18046b49153384401ff34e4ca293b30b86014bacc19faf4a8d81f0124d22"
 }
