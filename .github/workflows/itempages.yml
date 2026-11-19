@@ -22,18 +22,20 @@ jobs:
         run: |
           git config user.name maplefm
           git config user.email maplefm@users.noreply.github.com
-          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json -o /tmp/summary.json
-          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemguide.json -o /tmp/itemguide.json || echo '{"items":{}}' > /tmp/itemguide.json
-          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/world.json -o /tmp/world.json || rm -f /tmp/world.json
+          # the data branch through git, not raw.githubusercontent.com: its CDN serves a copy up to 5 minutes old, so a run
+          # world.yml or itemguide.yml dispatches right after their push built pages from the old data (Nov 19)
+          git fetch -q origin live
+          git worktree add -q /tmp/live origin/live
+          cp /tmp/live/data/summary-public.json /tmp/summary.json
+          cp /tmp/live/data/itemguide.json /tmp/itemguide.json || echo '{"items":{}}' > /tmp/itemguide.json
+          cp /tmp/live/data/world.json /tmp/world.json || rm -f /tmp/world.json
           # the site's item list (data/itemdb.json, read by the price bots, the Worker and these pages) follows the daily copy on the
           # data branch, so items the game adds are known everywhere; a short or broken download keeps the current one
-          curl -fsSL https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json -o /tmp/itemdb.json && python3 -c "import json,sys; d=json.load(open('/tmp/itemdb.json')); sys.exit(0 if len(d.get('items') or []) > 5000 and d.get('kinds') else 1)" && cp /tmp/itemdb.json data/itemdb.json || echo 'item list kept'
+          cp /tmp/live/data/itemdb.json /tmp/itemdb.json && python3 -c "import json,sys; d=json.load(open('/tmp/itemdb.json')); sys.exit(0 if len(d.get('items') or []) > 5000 and d.get('kinds') else 1)" && cp /tmp/itemdb.json data/itemdb.json || echo 'item list kept'
           python3 tools/itempages.py /tmp/summary.json . /tmp/itemguide.json /tmp/world.json assets/training-notes.json
           python3 tools/recap.py /tmp/summary.json . /tmp/recap.json
           # share images live on the data branch, redrawn only when an item's price line changes
           pip install -q pillow
-          git fetch -q origin live
-          git worktree add -q /tmp/live origin/live
           python3 tools/ogimages.py /tmp/summary.json /tmp/live /tmp/recap.json /tmp/world.json
           # the site's own copy of every item icon (/i/<id>.png): only new items are fetched
           python3 tools/iconmirror.py /tmp/live/data/itemdb.json i /tmp/itemguide.json || true
