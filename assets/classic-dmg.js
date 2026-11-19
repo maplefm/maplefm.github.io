@@ -329,9 +329,12 @@
 
     // ---------------------------------------------------------------- an hour on one map
     // Every monster type that makes up a tenth or more of the spawns must pass the bar, or the map isn't ranked:
-    // land at least HIT_BAR of attacks and kill one in KILL_BAR seconds or less. Monsters under the bar that are rarer
-    // than that are walked past and leave the hour.
-    var HIT_BAR = 0.8, KILL_BAR = 8;
+    // land at least HIT_BAR of attacks and kill one in KILL_BAR seconds or less. A rarer monster can't simply be walked
+    // past: it stands in front of single-target attacks and soaks them (Nov 19: two Jr. Boogies in the Cave of Evil Eye,
+    // 0% hit for most level 25 to 28 builds, ranked the cave first). So a rare monster under the bar counts in the hour:
+    // each one costs its kill time, or BLOCK seconds of stepping around it when killing it takes longer, and gives its
+    // EXP only when it dies within that. The map's entry names it (h.slow) so players know what's in the way.
+    var HIT_BAR = 0.8, KILL_BAR = 8, BLOCK = 12;
     function mapHour(b, m, mobs) {
       var rows = [], all = 0;
       (m.mobs || []).forEach(function (x) { var mb = mobs[x[0]]; if (!mb || mb.boss || !mb.hp) return; all += x[1]; rows.push({ name: x[0], n: x[1], mob: mb, r: best(b, mb) }); });
@@ -339,16 +342,18 @@
       var tot = 0, exp = 0, ks = 0, fit = true, why = [];
       rows.forEach(function (row) {
         var r = row.r; row.ok = !!r && r.hc >= HIT_BAR && r.kill <= KILL_BAR;
-        if (!row.ok) { if (row.n / all >= 0.1) { fit = false; why.push(row); } return; }
+        row.count = row.ok || row.n / all < 0.1;
+        if (!row.count) { fit = false; why.push(row); return; }
+        if (!row.ok) { var kt = r && isFinite(r.kill) ? r.kill : Infinity; tot += row.n; ks += Math.min(kt, BLOCK) * row.n; if (kt <= BLOCK) exp += row.mob.exp * row.n; return; }
         tot += row.n; exp += row.mob.exp * row.n; ks += r.kill * row.n;
       });
-      var out = { rows: rows, all: all, fit: fit && tot > 0, fail: why };
+      var out = { rows: rows, all: all, fit: fit && tot > 0, fail: why, slow: rows.filter(function (row) { return row.count && !row.ok; }) };
       if (!tot) return out;
       exp /= tot; ks /= tot;
       // walking between monsters: shorter on busy maps (an estimate). Refill: most maps every 7.5 s with 3 of 4 spawn
       // points reachable solo; monsters with their own timer in the wiki refill no faster than it.
       var walk = 0.8 + 12 / Math.sqrt(all), cap = 0;
-      rows.forEach(function (row) { if (!row.ok) return; var rt = m.respawn && typeof m.respawn === "object" ? m.respawn[row.name] : 0; cap += rt ? row.n * 3600 / Math.max(rt, 7.56) : row.n * 0.75 * 3600 / 7.56; });
+      rows.forEach(function (row) { if (!row.count) return; var rt = m.respawn && typeof m.respawn === "object" ? m.respawn[row.name] : 0; cap += rt ? row.n * 3600 / Math.max(rt, 7.56) : row.n * 0.75 * 3600 / 7.56; });
       var kph = Math.min(3600 / (ks + walk), cap * 0.8);
       out.exp = exp; out.ks = ks; out.walk = walk; out.cap = cap * 0.8; out.capped = 3600 / (ks + walk) > cap * 0.8; out.kph = kph; out.eph = kph * exp; out.reach = tot;
       return out;
@@ -379,10 +384,11 @@
       if (!main) return "";
       var r = main.r, a = r.atk.name + (r.casts === 1 ? " kills " + main.name + " in 1 cast" : ": " + r.casts + " casts per " + main.name);
       var el = r.el > 1 ? " · weak to " + r.atk.el.toLowerCase() : r.el < 1 && r.el > 0 ? " · resists " + r.atk.el.toLowerCase() : "";
-      return a + el + (r.hc < 1 ? " · " + Math.round(r.hc * 100) + "% hit" : "") + " · " + h.all + " spawns" + (h.capped ? " · respawn-limited" : "");
+      var slow = (h.slow || []).map(function (s) { return s.n + " " + s.name + " in the way (" + (s.r ? Math.round(s.r.hc * 100) : 0) + "% hit)"; }).join(", ");
+      return a + el + (r.hc < 1 ? " · " + Math.round(r.hc * 100) + "% hit" : "") + " · " + h.all + " spawns" + (h.capped ? " · respawn-limited" : "") + (slow ? " · watch for " + slow : "");
     }
 
-    return { JOBS: JOBS, BUILDS: BUILDS, buildTypes: buildTypes, isSwap: isSwap, baseType: baseType, jobName: jobName, typical: typical, mapHour: mapHour, rankMaps: rankMaps, why: why, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, typicalSkills: typicalSkills, acc: acc, attacks: attacks, onMob: onMob, best: best,
+    return { BLOCK: BLOCK, JOBS: JOBS, BUILDS: BUILDS, buildTypes: buildTypes, isSwap: isSwap, baseType: baseType, jobName: jobName, typical: typical, mapHour: mapHour, rankMaps: rankMaps, why: why, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, HIT_BAR: HIT_BAR, KILL_BAR: KILL_BAR, typicalSkills: typicalSkills, acc: acc, attacks: attacks, onMob: onMob, best: best,
       hitChance: hitChance, accNeeded: accNeeded, elemMult: elemMult, gapMult: gapMult, actionMs: actionMs, FRAMES: FRAMES, weaponAt: weaponAt, swapLevel: swapLevel, skill: sk };
   }
 
