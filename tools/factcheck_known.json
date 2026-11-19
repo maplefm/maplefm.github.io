@@ -1,6 +1,8 @@
 {
  "about": "Known disagreements between the game files (maplestory.io MCW) and the MapleStory Classic Wiki. Our data keeps the game's value; the weekly fact check lists these under 'unconfirmed' instead of failing. Add an entry once a new disagreement has been looked at; remove it when the sources agree again. ignore_new: source entries that look new but are not released content.",
  "disagree": [
+  {"kind": "map", "id": "80003000", "field": "spawns", "note": "Primrose Hill (Moon Bunny PQ): the wiki's v2.0.0 page has Stirge 4, Flyeye 2, Goblin Fire 2; the pre-v2.0 MCW/1 files Goblin Fire 2, Flyeye 1. Ours follows the wiki until maplestory.io has v2.0 files"},
+  {"kind": "map", "id": "10006121", "field": "exits", "note": "Someone Else's Grave: the pre-v2.0 MCW/1 files have an exit to Bygone Days the wiki's v2.0.0 page lacks. Recheck when maplestory.io has v2.0 files"},
   {"kind": "quest", "id": "1002", "field": "need", "note": "Roger's Apple: the game lists item 2010000 with no count; the wiki says 1"},
   {"kind": "quest", "id": "1002", "field": "exp", "note": "Roger's Apple: game 0, wiki 2"},
   {"kind": "quest", "id": "1002", "field": "get", "note": "Roger's Apple: game no item reward, wiki 3 Apples"},
