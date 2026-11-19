@@ -1754,7 +1754,7 @@
     kf.appendChild(el("span", "kl-cup", "☕")); kf.appendChild(el("span", "kl-t", "Donations pay the scanners"));
     var kb = el("span", "kl-bar"); kb.setAttribute("role", "progressbar"); kb.setAttribute("aria-label", "Ko-fi donations toward $250, last 28 days");
     kb.setAttribute("aria-valuemin", "0"); kb.setAttribute("aria-valuemax", "250"); kb.appendChild(el("span", "kl-fill")); kf.appendChild(kb);
-    kf.appendChild(el("span", "kl-have")); kf.appendChild(el("b", "kl-go", "Support"));
+    kf.appendChild(el("span", "kl-have")); kf.appendChild(el("span", "kl-of")); kf.appendChild(el("b", "kl-go", "Support"));
     kf.addEventListener("click", function () { ev("#kofi:stats"); });
     c.appendChild(kf); if (window.fmKofiPaint) window.fmKofiPaint();
     renderPicks();
@@ -5307,7 +5307,7 @@
       b.addEventListener("click", function () { $("drawer").classList.remove("open"); pick(l.i); }); box.appendChild(b);
     });
   }
-  function setTheme(night) { if (night) document.documentElement.setAttribute("data-theme", "dark"); else document.documentElement.removeAttribute("data-theme"); $("m-night").checked = night; }
+  function setTheme(night) { document.documentElement.setAttribute("data-theme", night ? "dark" : "light"); $("m-night").checked = night; }
   setTheme(loadLS("fm-night", null) == null ? !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) : loadLS("fm-night", false));
   $("m-night").addEventListener("change", function () { saveLS("fm-night", this.checked); setTheme(this.checked); });
   $("m-activity").checked = loadLS("fm-activity", false); $("activity").hidden = !$("m-activity").checked;
@@ -5325,6 +5325,9 @@
     function fbTuck(on) { fbT = on; $("fbwrap").classList.toggle("tucked", on); $("fbtuck").textContent = on ? "💬" : "›"; $("fbtuck").title = on ? "Show the feedback button" : "Tuck away"; $("fbtuck").setAttribute("aria-label", on ? "Show the feedback button" : "Tuck the feedback button away"); try { localStorage.setItem("fm-fb-tuck", on ? "1" : ""); } catch (e) {} }
     fbTuck(fbT);
     $("fbtuck").addEventListener("click", function () { fbTuck(!fbT); });
+    // phones: the round button steps aside while the stats and Ko-fi line are on screen; the menu always has it
+    $("m-feedback").hidden = false; $("m-feedback").addEventListener("click", function () { closeMenus(); $("fbk").click(); });
+    if (window.IntersectionObserver && $("cards")) new IntersectionObserver(function (es) { $("fbwrap").classList.toggle("fbaway", es[0].isIntersecting && innerWidth <= 760); }).observe($("cards"));
     $("fbk").addEventListener("click", function () { $("fb-ctxv").textContent = ctx(); $("fb-msg").textContent = ""; $("feedback").showModal(); setTimeout(function () { $("fb-text").focus(); }, 50); });
     $("fb-send").addEventListener("click", function () {
       var t = $("fb-text").value.trim(), last = +loadLS("fm-fb-last", 0);
