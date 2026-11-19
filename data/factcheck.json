@@ -1,53 +1,12 @@
 {
- "at": 1795113381,
+ "at": 1795114650,
  "checked": {
   "quests": 343,
   "monsters": 108,
   "maps_game": 309,
   "maps": 337
  },
- "diff": [
-  {
-   "kind": "map",
-   "id": 80003000,
-   "field": "spawns",
-   "ours": {
-    "Stirge": 4,
-    "Flyeye": 2,
-    "Goblin Fire": 2
-   },
-   "source": {
-    "game_spawn_points": {
-     "Goblin Fire": 2,
-     "Flyeye": 1
-    }
-   },
-   "url": [
-    "https://mapleclassic.wiki/index.php?title=Primrose_Hill",
-    "https://maplestory.io/api/MCW/1/map/80003000"
-   ],
-   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
-  },
-  {
-   "kind": "map",
-   "id": 10006121,
-   "field": "exits",
-   "ours": [
-    "Decayed Tunnel I",
-    "Rotten House"
-   ],
-   "source": {
-    "game_exits_not_on_wiki": [
-     "Bygone Days"
-    ]
-   },
-   "url": [
-    "https://mapleclassic.wiki/index.php?title=Someone_Else%27s_Grave",
-    "https://maplestory.io/api/MCW/1/map/10006121"
-   ],
-   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
-  }
- ],
+ "diff": [],
  "new": [],
  "unconfirmed": [
   {
@@ -525,11 +484,49 @@
     "https://maplestory.io/api/MCW/1/quest/20303",
     "https://mapleclassic.wiki/index.php?title=Proof_of_Qualification_%28Thief%29"
    ]
+  },
+  {
+   "kind": "map",
+   "id": 80003000,
+   "field": "spawns",
+   "ours": {
+    "Stirge": 4,
+    "Flyeye": 2,
+    "Goblin Fire": 2
+   },
+   "source": {
+    "game_spawn_points": {
+     "Goblin Fire": 2,
+     "Flyeye": 1
+    }
+   },
+   "url": [
+    "https://mapleclassic.wiki/index.php?title=Primrose_Hill",
+    "https://maplestory.io/api/MCW/1/map/80003000"
+   ]
+  },
+  {
+   "kind": "map",
+   "id": 10006121,
+   "field": "exits",
+   "ours": [
+    "Decayed Tunnel I",
+    "Rotten House"
+   ],
+   "source": {
+    "game_exits_not_on_wiki": [
+     "Bygone Days"
+    ]
+   },
+   "url": [
+    "https://mapleclassic.wiki/index.php?title=Someone_Else%27s_Grave",
+    "https://maplestory.io/api/MCW/1/map/10006121"
+   ]
   }
  ],
  "partial": false,
  "failed": [],
- "seconds": 215,
+ "seconds": 214,
  "sources": [
   "maplestory.io MCW game data",
   "MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0)"
