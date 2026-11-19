@@ -118,7 +118,7 @@
       if (r.where) t.appendChild(el("small", null, r.where));
       if (r.drops.length) {
         pv.appendChild(el("div", "ss-h", "Drops, worth today"));
-        r.drops.slice(0, 6).forEach(function (d) { var p = priceOf(d), it = IDX.i[d]; pv.appendChild(line(d, p[0], p[1], it ? href(it) : null)); });
+        r.drops.slice(0, matchMedia("(max-width:760px)").matches ? 4 : 6).forEach(function (d) { var p = priceOf(d), it = IDX.i[d]; pv.appendChild(line(d, p[0], p[1], it ? href(it) : null)); });
       } else pv.appendChild(el("p", "ss-hint", "No drops recorded yet."));
       acts.appendChild(btn("Open " + r.n, href(r), true));
       var home = (r.where || "").split(", ")[0]; if (IDX.p[home]) acts.appendChild(btn("Map: " + home, href(IDX.p[home])));
