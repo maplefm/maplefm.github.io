@@ -117,7 +117,7 @@ def page(title, desc, path, crumbs, body, og=None, robots=None):
 
 {f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card{' wide' if 'class="lay ' in body else ''}">{itempages.BRAND}{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
-</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script>{'<script src="/assets/fmprice.js?v=2" defer></script>' if 'data-fmi=' in body else ''}{'<script src="/assets/pagetabs.js?v=1" defer></script>' if 'data-tabs' in body else ''}{'<script src="/assets/mapnav.js?v=1" defer></script>' if path.startswith("/map/") else ''}</body></html>"""
+</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script>{'<script src="/assets/fmprice.js?v=2" defer></script>' if 'data-fmi=' in body else ''}{'<script src="/assets/pagetabs.js?v=1" defer></script>' if 'data-tabs' in body else ''}{'<script src="/assets/mapnav.js?v=2" defer></script>' if path.startswith("/map/") else ''}</body></html>"""
 
 
 def write(out, path, text):
@@ -515,13 +515,13 @@ def build(world, guide, summary, notes, out):
         nx = nextq.get(q["id"], [])
         if nx: rw += "<h3>Opens next</h3><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
         br = next((x for x in (notes or {}).get("brackets") or [] if x["lo"] <= max(q["lv"], 1) < x["hi"]), None)
-        rw += ('<div class="nextbar">' + f'<a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>'
+        nb = ('<div class="nextbar">' + f'<a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>'
               + "".join(f'<a class="alt" href="/quest/{QSLUG[x["id"]]}/">Next: {E(x["n"])}</a>' for x in nx[:2])
               + (f'<a class="alt" href="/training/level-{br["lo"]}-{br["hi"]}/">Where to train at level {br["lo"]} to {br["hi"]}</a>' if br else "") + "</div>")
         # Quest C: the quest in the order you play it, left to right: talk to the NPC, hunt, bring, rewards
         stt = (f"<h2>Talk to {E(q['g'])}</h2>" + st) if st else ""
         if rw and not rw.startswith("<h2>"): rw = "<h2>What's next</h2>" + rw
-        b = sec(hd, "head band", "") + lay("quest", [sec(stt, "", "Start"), sec(hu, "", "Hunt"), sec(br_, "", "Bring"), sec(rw, "", "Rewards")], tabs=True)
+        b = sec(hd, "head band", "") + lay("quest", [sec(stt, "", "Start"), sec(hu, "", "Hunt"), sec(br_, "", "Bring"), sec(rw, "", "Rewards")], tabs=True) + nb
         b += f'<p class="note">Updated {built}.</p>' + BOARD_CTA
         crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
         # a quest that is only talking (nothing to bring, hunt or win) stays out of search unless people found it there

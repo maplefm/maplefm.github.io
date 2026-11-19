@@ -3359,6 +3359,7 @@
   // doesn't filter the board behind it, and closing the card puts the old search back
   var CARD_Y = 0, CARD_Q = "";
   function boardQ() { return cardOpen() ? CARD_Q : $("q").value; }
+  window.addEventListener("pagehide", function () { try { sessionStorage.setItem("fm-board-q", boardQ() || ""); } catch (e) {} });
   function cardOpen() { var b = document.body.classList; return b.contains("bigcard") || b.contains("sheet"); }
   function showCard() {
     var b = document.body, hs = $("hsearch"), ph = $("hsph"), wide = window.innerWidth > 1180;
@@ -5364,7 +5365,20 @@
       var tries0 = 0, t0 = setInterval(function () { if (++tries0 > 120) return clearInterval(t0); if (!D || !D.list || !D.list.length) return; clearInterval(t0); advLoad().then(function (A) { if (A) A.fromUrl(q, adv); }); }, 250);
       return;
     }
-    if (!q) return;
+    if (!q) {
+      // Back from an item page or anywhere else: the search you had typed comes back with the board
+      var nv = null; try { nv = performance.getEntriesByType("navigation")[0]; } catch (e) {}
+      var was = ""; try { was = sessionStorage.getItem("fm-board-q") || ""; } catch (e) {}
+      if (was && nv && nv.type === "back_forward") {
+        var tb = 0, tB = setInterval(function () {
+          if (++tb > 120) return clearInterval(tB);
+          if (!D || !D.list || !D.list.length) return;
+          clearInterval(tB);
+          if (cardOpen()) CARD_Q = was; else { var bx = $("q"); if (bx && !bx.value) { bx.value = was; render(); } }
+        }, 250);
+      }
+      return;
+    }
     try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
     var tries = 0, t = setInterval(function () {
       if (++tries > 120) return clearInterval(t);
