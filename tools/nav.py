@@ -47,7 +47,7 @@ def nav_html(active="", home=False):
     return ('<!--nav--><nav class="sitenav' + (' sn-home' if home else ' sn-pin') + '" aria-label="Club FM">'
             '<a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a>'
             + ('' if home else SEARCH) +
-            '<div class="sn-links">' + "".join(out) + '</div>' + SITE_BTN + '</nav>' + ('' if home else PIN_JS) + (play_html(active, sub) if active in SUB else '') + '<script src="/assets/hscroll.js?v=4" defer></script><script src="/assets/sitesearch.js?v=1" defer></script><!--/nav-->')
+            '<div class="sn-links">' + "".join(out) + '</div>' + SITE_BTN + '</nav>' + ('' if home else PIN_JS) + (play_html(active, sub) if active in SUB else '') + '<script src="/assets/hscroll.js?v=4" defer></script><script src="/assets/sitesearch.js?v=1" defer></script><script src="/assets/navback.js?v=1" defer></script><!--/nav-->')
 
 
 FOOT_COLS = [
@@ -66,21 +66,32 @@ def foot_html():
             'Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot-->')
 
 
-NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=7">'
+NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=8">'
 PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "shop.html": ("market", False), "map.html": ("training", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
-         "report.html": ("", False), "streamers.html": ("", False), "how-it-works.html": ("", False), "shortcuts.html": ("", False),
-         "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("", False), "scan/index.html": ("earn", False)}
+         "report.html": ("prices", False), "streamers.html": ("earn", False), "how-it-works.html": ("prices", False), "shortcuts.html": ("prices", False),
+         "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("prices", False), "scan/index.html": ("earn", False)}
+# the help pages say where they sit, like every built page: Prices › How prices work. Width matches each page's column.
+CRUMBS = {"how-it-works.html": ([("Prices", "/"), ("How prices work", "")], 720), "streamers.html": ([("Earn by scanning", "/contribute.html"), ("For streamers", "")], 720),
+          "shortcuts.html": ([("Prices", "/"), ("Shortcuts", "")], 892), "terms.html": ([("Club FM", "/"), ("Terms of use", "")], 792),
+          "bot/index.html": ([("Prices", "/"), ("Add /price to Discord", "")], 792), "report.html": ([("Prices", "/"), ("Report a wrong price", "")], 1120),
+          "404.html": ([("Club FM", "/"), ("Page not found", "")], 720)}
+
+
+def crumbs_html(cr, width):
+    parts = [f'<a href="{u}">{n}</a>' for n, u in cr[:-1]] + [f'<span aria-current="page">{cr[-1][0]}</span>']
+    return f'<nav class="crumbs" aria-label="You are here" style="max-width:{width}px;margin:0 auto 10px;padding:0 16px;box-sizing:border-box">' + ' <i>›</i> '.join(parts) + '</nav>'
 
 if __name__ == "__main__":
     root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
     for f, (act, home) in PAGES.items():
         p = os.path.join(root, f); s = open(p, encoding="utf-8").read()
         if "<!--nav-->" not in s: print("no nav slot in", f); continue
-        s = re.sub(r"<!--nav-->.*?<!--/nav-->", lambda m: nav_html(act, home), s, flags=re.S)
+        cr = CRUMBS.get(f)
+        s = re.sub(r"<!--nav-->.*?<!--/nav-->", lambda m: nav_html(act, home).replace("<!--/nav-->", (crumbs_html(*cr) if cr else "") + "<!--/nav-->"), s, flags=re.S)
         # the old one-line footers give way to the shared one
         s = re.sub(r'<footer class="sitefoot">.*?</footer>\s*', "", s, flags=re.S)
         if "<!--foot-->" in s: s = re.sub(r"<!--foot-->.*?<!--/foot-->", lambda m: foot_html(), s, flags=re.S)
         else: s = s.replace("</body>", foot_html() + "</body>", 1)
         if "/assets/nav.css" not in s: s = s.replace("</head>", NAV_CSS + "</head>", 1)
-        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=7", s)
+        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=8", s)
         open(p, "w", encoding="utf-8").write(s); print("nav", f)
