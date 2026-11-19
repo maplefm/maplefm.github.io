@@ -16,6 +16,11 @@ SEARCH = ('<form class="sn-search" action="/" method="get" role="search"><label>
           '<input type="search" name="q" placeholder="Search any item price" data-ph="Search any item price|Search items|Search" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form>')
 
 
+# search the site (assets/sitesearch.js): monsters, items and drops, quests and maps; the price search stays its own box
+SITE_BTN = ('<button type="button" class="sn-site" data-sitesearch aria-label="Search the site: quests, monsters, maps, drops">'
+            '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/>'
+            '<path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>Search site</span></button>')
+
 # phones: the pinned menu slides away while you scroll down a page and comes back as soon as you scroll up
 PIN_JS = ('<script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};'
           '["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});'
@@ -42,14 +47,14 @@ def nav_html(active="", home=False):
     return ('<!--nav--><nav class="sitenav' + (' sn-home' if home else ' sn-pin') + '" aria-label="Club FM">'
             '<a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a>'
             + ('' if home else SEARCH) +
-            '<div class="sn-links">' + "".join(out) + '</div></nav>' + ('' if home else PIN_JS) + (play_html(active, sub) if active in SUB else '') + '<script src="/assets/hscroll.js?v=4" defer></script><!--/nav-->')
+            '<div class="sn-links">' + "".join(out) + '</div>' + SITE_BTN + '</nav>' + ('' if home else PIN_JS) + (play_html(active, sub) if active in SUB else '') + '<script src="/assets/hscroll.js?v=4" defer></script><script src="/assets/sitesearch.js?v=1" defer></script><!--/nav-->')
 
 
 FOOT_COLS = [
     ("Prices", [("Price board", "/"), ("All items", "/items/"), ("Items by class", "/items/class/"), ("Guides", "/guides/"), ("Weekly recap", "/recap/"), ("How prices work", "/how-it-works.html")]),
     ("Trade", [("Player market", "/market.html"), ("Shops", "/shop.html"), ("List an item", "/market.html#new"), ("My positions", "/#positions")]),
     ("Quests and training", [("Quests", "/quests.html"), ("Training", "/map.html"), ("Training guides", "/training/"), ("All maps", "/maps/"), ("Monsters", "/monsters/"), ("Crafting recipes", "/crafting/")]),
-    ("Club FM", [("Earn by scanning", "/contribute.html"), ("For streamers", "/streamers.html"), ("Add /price to Discord", "/bot/"), ("Discord", "https://discord.gg/cXnVBTUUPk"), ("Terms", "/terms.html")]),
+    ("Club FM", [("Support on Ko-fi", "https://ko-fi.com/maplefm"), ("Earn by scanning", "/contribute.html"), ("For streamers", "/streamers.html"), ("Add /price to Discord", "/bot/"), ("Discord", "https://discord.gg/cXnVBTUUPk"), ("Terms", "/terms.html")]),
 ]
 
 
@@ -61,7 +66,7 @@ def foot_html():
             'Price data © Club FM. No scraping, bulk copying or AI training without permission. <a href="/terms.html">Terms of Use</a></p></footer><!--/foot-->')
 
 
-NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=6">'
+NAV_CSS = '<link rel="stylesheet" href="/assets/nav.css?v=7">'
 PAGES = {"index.html": ("prices", True), "market.html": ("market", False), "shop.html": ("market", False), "map.html": ("training", False), "quests.html": ("quests", False), "contribute.html": ("earn", False),
          "report.html": ("", False), "streamers.html": ("", False), "how-it-works.html": ("", False), "shortcuts.html": ("", False),
          "terms.html": ("", False), "404.html": ("", False), "bot/index.html": ("", False), "scan/index.html": ("earn", False)}
@@ -77,5 +82,5 @@ if __name__ == "__main__":
         if "<!--foot-->" in s: s = re.sub(r"<!--foot-->.*?<!--/foot-->", lambda m: foot_html(), s, flags=re.S)
         else: s = s.replace("</body>", foot_html() + "</body>", 1)
         if "/assets/nav.css" not in s: s = s.replace("</head>", NAV_CSS + "</head>", 1)
-        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=6", s)
+        s = re.sub(r"/assets/nav\.css\?v=\d+", "/assets/nav.css?v=7", s)
         open(p, "w", encoding="utf-8").write(s); print("nav", f)

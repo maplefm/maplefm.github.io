@@ -460,6 +460,7 @@ def main():
     except Exception: GUIDE = {}
     summ = json.load(open(summ_path, encoding="utf-8"))
     world_paths = []
+    wj, gfull = {}, {}
     if len(sys.argv) > 4 and os.path.exists(sys.argv[4]):
         # map, monster, quest and training pages first, so item pages can link to them
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -731,6 +732,12 @@ def main():
         h2 = noicon(h2)
         if h2 != h: open(ip, "w", encoding="utf-8").write(h2)
     print(len(made), "item pages")
+    # the site search (assets/sitesearch.js) reads one small index of every page built above
+    try:
+        import sitesearch
+        sitesearch.build(out, wj, gfull, summ.get("rows") or [], {n: s for n, s in page_of.items() if s in keep}, QSLUG, BSLUG, MSLUG, firm, KINDS, dbrow)
+    except Exception as e:
+        print("site search index not built:", e)
 
 
 if __name__ == "__main__":
