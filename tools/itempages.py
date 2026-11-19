@@ -76,7 +76,18 @@ def lad_top(lad):
 BRAND = '<a class="pbrand" href="/"><img src="/clubfm-icon-512.png" alt="" width="20" height="20">Club FM <b>maplefm.gg</b></a>'
 
 
-def ladder_html(lad):
+def _sec(h, cls="", tab=""):
+    """One part of a page as a card (assets/pages.css); data-tab names it for the phone tabs (assets/pagetabs.js)."""
+    h = (h or "").strip()
+    return (f'<section class="blk{(" " + cls) if cls else ""}"' + (f' data-tab="{html.escape(tab)}"' if tab else "") + f">{h}</section>") if h else ""
+
+
+def _lay(kind, cols, tabs=False):
+    cols = [c for c in cols if c]
+    return f'<div class="lay lay-{kind} n{len(cols)}"' + (" data-tabs" if tabs else "") + ">" + "".join(f'<div class="col">{c}</div>' for c in cols) + "</div>"
+
+
+def ladder_html(lad, card=""):
     """An equip's price by grade (Clean, +1 ATT...), from the board's summary, one table per stat buyers look for:
     the middle of each grade's last 7 days of sales, or its asking prices when it has under 2 sales."""
     if not lad: return ""
@@ -91,7 +102,7 @@ def ladder_html(lad):
             if basis in ("sold", "asking") or (basis == "few" and lo): price = '<span class="mz">' + meso(lo) + ("" if meso(lo) == meso(hi) else " to " + meso(hi)) + "</span>"
             else: continue
             note = f"{ns} sold" if basis == "sold" else f"asking, {na} listed" if basis == "asking" else "only 1 sold" if ns else "asking, only 1 listed"
-            trs += f"<tr><td><b>{html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
+            trs += f"<tr><td><b>{f'<a href="{card}">' + html.escape(str(name)) + '</a>' if card else html.escape(str(name))}</b></td><td>{price}</td><td>{note}</td></tr>"
         if trs: out += (f"<h3>{html.escape(str(stat))}</h3>" if len(lad) > 1 else "") + f"<table><tr><th>Grade</th><th>Price</th><th>Based on</th></tr>{trs}</table>"
     if not out: return ""
     return '<h2>Price by grade</h2><p class="note"><a href="/how-it-works.html#grades">How grades are priced</a></p>' + out
@@ -195,10 +206,10 @@ def page0(title, desc, canon, body, ld=None, og=None, active="items", crumbs=Non
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{t}</title><meta name="description" content="{d}"><link rel="canonical" href="{canon}">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/assets/nav.css?v=7">{ld or ''}</head><body><main>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/assets/nav.css?v=7"><link rel="stylesheet" href="/assets/pages.css?v=1">{ld or ''}</head><body><main>
 {NAV(active)}
 {crumbs_html(crumbs)}{body.replace('<div class="card">', '<div class="card">' + BRAND, 1)}
-</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script></body></html>"""
+</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script>{'<script src="/assets/pagetabs.js?v=1" defer></script>' if 'data-tabs' in body else ''}</body></html>"""
 
 
 NX = {}
@@ -268,6 +279,12 @@ QSLUG, BSLUG, MSLUG, MOBID = {}, {}, {}, {}
 NPC_AT = {}   # where each NPC stands, from the map data: the same place the quest page names
 
 
+def npc_link(n):
+    """An NPC's name linked to the map where it stands, when we know it."""
+    at = giver_at(n)
+    return f'<a href="/map/{MSLUG[at[0]]}/" title="Where {html.escape(n)} stands">{html.escape(n)}</a>' if at and at[0] in MSLUG else html.escape(n)
+
+
 def giver_at(g):
     return NPC_AT.get(g) or NPC_AT.get(re.sub(r"\s*\([^)]*\)\s*$", "", g or "")) or []
 
@@ -307,7 +324,7 @@ def guide_html(name, g, page_of):
     for x in g.get("g") or []:
         get += f'<p class="rc">{"Given by the NPC during" if x[2] == "given" else "Reward from the quest"} {qlink(x[0], x[1])}</p>'
     if g.get("s"):
-        get += "<table>" + "".join(f"<tr><td><b>{html.escape(x[0])}</b><br><small>Sold by NPC{(' · ' + html.escape(x[1])) if x[1] else ''}</small></td><td class=n>{(full(x[2]) + ' ' + html.escape(x[3])) if x[3] else '<span class="mz">' + full(x[2]) + '</span>'}</td></tr>" for x in g["s"]) + "</table>"
+        get += "<table>" + "".join(f"<tr><td><b>{npc_link(x[0])}</b><br><small>Sold by NPC{(' · ' + html.escape(x[1])) if x[1] else ''}</small></td><td class=n>{(full(x[2]) + ' ' + html.escape(x[3])) if x[3] else '<span class="mz">' + full(x[2]) + '</span>'}</td></tr>" for x in g["s"]) + "</table>"
     for x in g.get("r") or []:
         get += f'<p class="rc">From {html.escape(x[0])}{f" ({x[1]}%)" if x[1] is not None else ""}{(" · during " + html.escape(x[2])) if x[2] else ""}</p>'
     if not get and g.get("t"):
@@ -386,6 +403,18 @@ def firm(r):
     Anything else shows the range it was seen at and no typical, trend or NPC multiple."""
     return bool(r) and r.get("kind") == "sale" and bool(r.get("typ")) and not r.get("check") and r.get("conf") != "lead" \
         and not any(str(f).startswith("Rough price") for f in (r.get("flags") or [])) and (r.get("salesN") or 0) >= 3
+
+def link_line(x, name, g):
+    """One summary line with its names linked: "Clean, +1 crit rate copies" to the item's live card on the board, a
+    monster it drops from to that monster's page."""
+    h = html.escape(x)
+    h = re.sub(r"^(.+?) copies sell", lambda m: f'<a href="/#item={urllib.parse.quote(name)}">{m.group(1)} copies</a> sell', h, count=1)
+    for mob in sorted({d[0] for d in (g or {}).get("d") or [] if d and d[0] in BSLUG}, key=len, reverse=True):
+        e = html.escape(mob)
+        if re.search(r"(?<![\w>])" + re.escape(e) + r"(?![\w<])", h):
+            h = re.sub(r"(?<![\w>])" + re.escape(e) + r"(?![\w<])", f'<a href="/monster/{BSLUG[mob]}/">{e}</a>', h, count=1)
+    return h
+
 
 def summary_lines(r, top, vp, daily, g):
     """Three short lines that only this item's page can say, all from its own numbers; nothing is said that the
@@ -581,20 +610,24 @@ def main():
             if "MapleStory Classic" not in title: title = fit_title(pt, "MapleStory Classic", "Club FM")
             if "MapleStory Classic" not in title: title = fit_title(f"{nm} price", "MapleStory Classic", "Club FM")
         lines = summary_lines(r, top, vp, daily, GUIDE.get(name))
-        body = f"""<div class="card"><div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
+        head = f"""<div class="hd"><img src="{icon}" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[name]}/icon&#39;" alt="{html.escape(nm)}" width="56" height="56" loading="lazy"><div><h1>{html.escape(nm)} price</h1><p class="sub">MapleStory Classic · {html.escape(cat)}{(" · also called " + html.escape(", ".join(al))) if al else ""}</p></div></div>
 <p class="big"><span id="rng" class="mz">{rng}</span>{chg}{f"<small>{html.escape(top[0])}</small>" if top else ""}</p>
 <p class="note">{"Typical " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical" if firm(r) else "No sure typical yet, the range is what was seen"}{f' <span id="typ" class="mz">{full(top[4] if top else r["typ"])}</span>' if top or firm(r) else ''}{', from asking prices' if asked(r) and not top else ''}{f' · <span title="{html.escape(conf[1])}">{conf[0]}</span>' if conf else ''} · <a href="/how-it-works.html#grades">how prices work</a></p>
-<ul class="sum">{"".join(f"<li>{html.escape(x)}</li>" for x in lines)}</ul>
+<ul class="sum">{"".join(f"<li>{link_line(x, name, GUIDE.get(name))}</li>" for x in lines)}</ul>
 <p class="ctaw"><a class="cta" href="/#item={urllib.parse.quote(name)}">Open live card <span>→</span></a></p>
 <div class="grid"><div><span>{"Typical, " + html.escape(top[0].lower().replace(' att', ' ATT').replace(' matt', ' MATT')) if top else "Typical"}</span><b id="t2" class="mz">{meso(top[4] if top else r['typ']) if top or firm(r) else "not sure yet"}</b></div><div><span>Sales seen</span><b id="sn">{full(r.get('salesN') or 0)}</b></div><div><span>Listings seen</span><b id="ln">{full(r.get('n') or 0)}</b></div>
-{f'<div><span>Cheapest ask now</span><b id="ba" class="mz">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b class="mz">{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>
-{ladder_html(r.get('lad'))}
-{f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab and (top or firm(r)) else ''}
-{equip_html(dbrow.get(name), KINDS)}
-{guide_html(name, GUIDE.get(name), page_of)}
-{questions(nm, r, top, vp, GUIDE.get(name), rng)}
-{f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''}
-<p class="note" id="upd">Updated {D_TXT}.</p></div>
+{f'<div><span>Cheapest ask now</span><b id="ba" class="mz">{meso(r["best"])}</b></div>' if r.get('best') else ''}{f'<div><span>NPC pays</span><b class="mz">{meso(vp)}</b></div>' if vp else ''}{f'<div><span>Cash Shop</span><b>{full(nx)} NX</b></div>' if nx else ''}</div>"""
+        lad = ladder_html(r.get('lad'), "/#item=" + urllib.parse.quote(name))
+        days = f'<h2>Typical price by day</h2><div class="days">{dtab}</div>' if dtab and (top or firm(r)) else ''
+        eqh = equip_html(dbrow.get(name), KINDS)
+        guide = guide_html(name, GUIDE.get(name), page_of)
+        faq = questions(nm, r, top, vp, GUIDE.get(name), rng)
+        more = f'<h2>More {html.escape(cat)} prices</h2><div class="rel">{rels}</div>' if rels else ''
+        # Item A (Nov 19 2026): price and its days on the left, every grade's price in the middle, stats and how to get
+        # it on the right. No grades: how to get it takes the middle.
+        mid, right = (lad, eqh + guide) if lad else (guide, eqh)
+        cols = [_sec(head, "head", "Price") + _sec(days, "", "History"), _sec(mid, "", "Grades" if lad else "How to get"), _sec(right, "", "Stats" if eqh else "How to get") + _sec(faq + more, "", "More")]
+        body = '<div class="card wide">' + _lay("item", cols, tabs=True) + f"""<p class="note" id="upd">Updated {D_TXT}.</p></div>
 <script>window.FM_ITEM={json.dumps(name)};</script><script src="/item/live.js?v=4" defer></script>"""
         ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Club FM", "item": SITE + "/"},
