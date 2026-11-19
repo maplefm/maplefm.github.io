@@ -1,6 +1,6 @@
 """Patch data newer than maplestory.io (tools/gamepatch.json), checked offline.
 Nov 18 2026: v2.0 opened Forgotten Hollow. Its monsters had to reach monster and item pages before the wiki mapped them,
-defense Nexon changed without numbers had to stop showing as fact, and drop reports from the closed test had to stay out.
+defense Nexon changed without numbers had to stop showing as fact (until the wiki published v2.0 numbers on Nov 19), and drop reports from the closed test had to stay out.
   python3 tests/v2patch.py"""
 import json, os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,7 +15,12 @@ def ok(name, cond, extra=""):
 rel = gamepatch.released_mobs()
 ok("11 Forgotten Hollow monsters released", len(rel) == 11 and rel.get(58) == ("Echopus", "Forgotten Hollow") and rel.get(700003, ("",))[0] == "Rotten Mushmom", rel.get(58))
 dc = gamepatch.defense_changed()
-ok("Nexon's 18 defense changes plus the region's 11", len(dc) == 29 and all(n in dc for n in ("Lorang", "Malady", "Jr. Necki", "Echopus")))
+ok("no defense held back now that the v2.0 numbers are out", dc == {}, dc)
+# Nov 19: the wiki published v2.0 defense; it applies only over the old game-file value
+ok("Lorang gets its v2.0 defense", gamepatch.mob(36, {"physicalDefense": 0, "magicDefense": 30}) == {"physicalDefense": 20, "magicDefense": 10})
+ok("Red Snail magic defense 30 to 15", gamepatch.mob(5, {"physicalDefense": 0, "magicDefense": 30})["magicDefense"] == 15)
+ok("newer game files win", gamepatch.mob(36, {"physicalDefense": 7, "magicDefense": 8}) == {"physicalDefense": 7, "magicDefense": 8})
+ok("26 monsters changed, Echopus, Rafflesia and Rotten Mushmom already right", len([k for p in gamepatch.patches() if p.get("version") == "2.0.0" for k in p.get("mobs", {})]) == 26)
 
 # world.py's own block, run on a game-file record and a wiki monster
 src = open(os.path.join(ROOT, "tools", "world.py")).read()
@@ -30,8 +35,7 @@ ok("Echopus added from the game files", e.get("lv") == 45 and e.get("hp") == 216
 rm = mob.get("Rotten Mushmom") or {}
 ok("Rotten Mushmom: boss, undead, weak to fire and holy, resists poison", rm.get("boss") and rm.get("undead") and rm.get("weak") == "Fire, Holy" and rm.get("resist") == "Poison", rm)
 ok("a monster missing from the game files is not invented", "Glowshroom" not in mob)
-ok("defense flagged on Lorang, its job test copy and the new monsters", mob["Lorang"].get("defnew") == "2026-11-18" and mob["Lorang (Thief 2nd job test)"].get("defnew") and e.get("defnew"))
-ok("old defense kept for the math", mob["Lorang"]["mdef"] == 30)
+ok("no defense flags left, job test copies included", not any(v.get("defnew") for v in mob.values()))
 
 # drop reports: the monster's own drop and launch reports only
 since = gamepatch.drops_since()
