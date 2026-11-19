@@ -144,3 +144,22 @@ html.ss-open{overflow:hidden}
 .ss-btn.main{background:var(--accent,#6d3fd1);border-color:transparent;color:#fff}
 .ss-note{margin:10px 0 0;font-size:.72rem;color:var(--muted,#6c6188)}
 @media (max-width:760px){.ss-list .ss-pv .ss-note{display:none}.ss-list .ss-pv .ss-ph .ss-ic{width:44px;height:44px}.ss-list .ss-pv .ss-ph .ss-ic img{max-width:44px;max-height:44px}.ss-list .ss-pv{box-shadow:none;border:1.5px solid #bfe0cd;margin:2px 4px 10px;padding:12px}.ss-dlg{margin-top:8px}.ss-box{max-height:calc(100vh - 16px)}.ss-body{grid-template-columns:1fr}.ss-pv{position:static}.ss-chip{display:none}}
+/* Getting back (Nov 19 2026): bigger menu taps on phones, a Top button on long pages, and the board's menu sliding
+   back in when you scroll up on a phone (assets/navback.js) */
+@media (max-width:700px){
+  .sitenav .sn-links a{min-height:40px;box-sizing:border-box;justify-content:center}
+  .crumbs a{padding:6px 0}
+}
+.sn-top{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:85;display:inline-flex;align-items:center;gap:6px;
+  border:0;border-radius:999px;padding:10px 15px;background:var(--accent,#6d3fd1);color:#fff;font:800 .88rem Inter,system-ui,sans-serif;cursor:pointer;
+  box-shadow:0 6px 18px rgba(60,30,120,.28)}
+.sn-top[hidden]{display:none}
+.sn-top:focus-visible{outline:3px solid var(--gold,#e0a91c);outline-offset:2px}
+@media (min-width:701px){.sn-top{left:auto;bottom:92px;right:24px}}
+.sitenav.sn-float{position:fixed;top:0;left:0;right:0;z-index:90;margin:0;padding:6px max(10px,env(safe-area-inset-left,0px)) 6px max(10px,env(safe-area-inset-right,0px));
+  background:var(--bg,#f4effc);box-shadow:0 4px 14px rgba(60,30,120,.12);transform:translateY(-110%);transition:transform .2s ease;visibility:hidden}
+.sitenav.sn-float.on{transform:none;visibility:visible}
+.sitenav.sn-float .sn-links{flex:1 1 100%}
+@media (min-width:701px){.sitenav.sn-float{display:none}}
+body.snf .hsearch{top:var(--snfh,52px)!important;transition:top .2s ease}
+@media (prefers-reduced-motion:reduce){.sitenav.sn-float,body.snf .hsearch{transition:none}}

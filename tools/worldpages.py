@@ -111,7 +111,7 @@ def page(title, desc, path, crumbs, body, og=None, robots=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}">{f'<meta name="robots" content="{robots}">' if robots else ""}<link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/item/world.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=7"><link rel="stylesheet" href="/assets/pages.css?v=2">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/item/world.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=8"><link rel="stylesheet" href="/assets/pages.css?v=2">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
@@ -316,6 +316,9 @@ def build(world, guide, summary, notes, out):
         return (f'<a class="mob" href="/monster/{BSLUG[n]}/">' + (f'<img src="{sp}" alt="{E(n)}" loading="lazy">' if sp else '<span></span>') +
                 f'<span><b>{E(n)}{extra}</b><small>Lv {mb["lv"]} · {fmt(mb["hp"])} HP · {fmt(mb["exp"])} EXP</small></span></a>')
 
+    DROPPERS = {}   # how many monsters drop each item
+    for _n, _ds in drops.items():
+        for _i, _r, _qo in _ds: DROPPERS[_i] = DROPPERS.get(_i, 0) + 1
     # ---------------------------------------------------------- map pages
     for p, m in M.items():
         hid = [x for x in m["portals"] if x[1] == "hidden"]
@@ -370,10 +373,22 @@ def build(world, guide, summary, notes, out):
             npch = "<h2>NPCs</h2><ul>" + "".join(f"<li>{E(n[0])}{' · ' + E(n[3]) if n[3] else ''}</li>" for n in m["npcs"]) + "</ul>"
         if m.get("shops"): npch += f'<p class="note">Shops here: {E(", ".join(m["shops"]))}.</p>'
         q_here = [q for q in QS if q.get("g") in {n[0] for n in m.get("npcs") or []}]
+        # quests whose monsters live here: hunt them, or bring what they drop (the same list the monster pages show)
+        # hunts first, then items only a few monsters drop (a Stirge Wing, not an ore half the island drops)
+        hq, seen_h = [], set()
+        for n, _ in mobs_sorted or []:
+            for q, c in qkill.get(n, []):
+                if q["id"] not in seen_h: seen_h.add(q["id"]); hq.append(((0, 0, q["lv"]), q, f"Hunt {n} ×{c:,}"))
+            for i, _, qo in drops.get(n, []):
+                for q, c in qneed.get(i, []):
+                    if q["id"] not in seen_h: seen_h.add(q["id"]); hq.append(((1, DROPPERS.get(i, 99), q["lv"]), q, f"Bring {itempages.shown(i)} ×{c:,} · from {n}"))
+        hq = [(q, why) for _, q, why in sorted(hq, key=lambda x: x[0])]
+        hunt_h = ("<h2>Quests that hunt here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}{E(why)}</small></li>" for q, why in hq[:10]) + "</ul>"
+                  + (f'<p class="note">{len(hq) - 10} more on the monster pages.</p>' if len(hq) > 10 else "")) if hq else ""
         if q_here: qh = "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
         hd += f'<p class="note"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p>'
         # Map B: minimap, monsters and NPCs on the left, the way out (exits) and quests on the right
-        b = lay("map", [sec(hd, "head", "Map") + sec(mo, "", "Monsters") + sec(vmh) + sec(npch, "npcs", "NPCs"), sec(ex, "exits", "Exits") + sec(dv, "", "Drops") + sec(qh, "qlist", "Quests")], tabs=True, first="Exits")
+        b = lay("map", [sec(hd, "head", "Map") + sec(mo, "", "Monsters") + sec(vmh) + sec(npch, "npcs", "NPCs"), sec(ex, "exits", "Exits") + sec(dv, "", "Drops") + sec(qh + hunt_h, "qlist", "Quests")], tabs=True, first="Exits")
         b += f'<p class="note">Updated {built}.</p>' + BOARD_CTA
         crumbs = [("Maps", "/maps/"), (p, f"/map/{MSLUG[p]}/")]
         write(out, f"map/{MSLUG[p]}", page(itempages.fit_title(f"{p} map, portals & monsters", "MapleStory Classic", "Club FM"), desc, f"/map/{MSLUG[p]}/", crumbs, b, f"{OG}map/{MSLUG[p]}.png")); paths.append(f"/map/{MSLUG[p]}/")

@@ -30,7 +30,9 @@ BANDS = [(1, 19, "Level 1 to 19"), (20, 34, "Level 20 to 34"), (35, 49, "Level 3
 
 CSS = ("<style>.gd h2{margin-top:26px}.gd ol,.gd ul{padding-left:22px;line-height:1.6}.gd li{margin:4px 0}.gd .ex{background:var(--panel2);border:1px solid var(--line2);"
        "border-radius:12px;padding:12px 14px;margin:14px 0}.gd .ex b{white-space:nowrap}.gd table{width:100%}.gd td small{color:var(--muted)}"
-       ".ghub{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}@media (max-width:640px){.ghub{grid-template-columns:1fr}}"
+       ".ghub{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:10px;margin:14px 0}"
+       # articles stay a comfortable reading width on wide pages; the hub uses the whole width
+       ".card.gd{max-width:980px;margin-left:auto;margin-right:auto}.card.gd.hub{max-width:none}"
        ".ghub a{display:block;padding:14px;border:1px solid var(--line2);border-radius:14px;background:var(--panel2);text-decoration:none;color:var(--ink)}"
        ".ghub a b{display:block;font-size:1.02rem}.ghub a span{color:var(--muted);font-size:.88rem}.gd .tw{overflow-x:auto}</style>")
 
@@ -269,7 +271,7 @@ def build(out, rows, ids, dbrow, kinds, guide, vendor, when, h):
     cards = "".join(f'<a href="/guides/{x[0]}/"><b>{H(x[1])}</b><span>{H(x[2])}</span></a>' for x in G)
     if cls_links: cards += '<a href="/items/class/"><b>Equipment by class</b><span>Every warrior, magician, bowman and thief equip with its price.</span></a>'
     write("/guides/", "MapleStory Classic Free Market guides · Club FM", "Guides to pricing, buying, selling and making mesos in MapleStory Classic, built from real Free Market sales.",
-          f'<div class="card gd"><h1>MapleStory Classic Free Market guides</h1><p class="sub">Built from real sales · updated {when}</p><div class="ghub">{cards}</div>'
+          f'<div class="card gd hub"><h1>MapleStory Classic Free Market guides</h1><p class="sub">Built from real sales · updated {when}</p><div class="ghub">{cards}</div>'
           '<p class="note">Training: <a href="/training/">where to train at every level</a> · Quests: <a href="/quests.html">Quest Log</a></p></div>',
           [("Guides", "/guides/")], [("Prices", "/"), ("Guides", "")])
     return paths
