@@ -63,8 +63,14 @@ def weapons(itemdb):
     site's item data (the same game-file numbers). Event and starter copies are left out."""
     if not itemdb: return {}
     out = {}
+    # the item list also carries items only MeowDB has (v2.0 client items maplestory.io lacks); of those, only weapons
+    # a patch note names count: a client item nobody can get yet must never become the typical weapon for a level
+    import gamepatch
+    io_ids = {i.get("id") for i in (get(f"{IO}/item") or []) if isinstance(i, dict)}
+    named = gamepatch.released_weapons()
     for it in json.load(open(itemdb, encoding="utf-8"))["items"]:
         if len(it) < 8 or not isinstance(it[-1], dict): continue
+        if io_ids and it[1] not in io_ids and it[0] not in named: continue
         c = WCLASS.get(it[1] // 10000)
         if not c or it[0].startswith("Beginner's") or it[6] == 1: continue   # price 1: event copies
         s = it[-1]

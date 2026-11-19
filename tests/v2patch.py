@@ -22,6 +22,14 @@ ok("Red Snail magic defense 30 to 15", gamepatch.mob(5, {"physicalDefense": 0, "
 ok("newer game files win", gamepatch.mob(36, {"physicalDefense": 7, "magicDefense": 8}) == {"physicalDefense": 7, "magicDefense": 8})
 ok("26 monsters changed, Echopus, Rafflesia and Rotten Mushmom already right", len([k for p in gamepatch.patches() if p.get("version") == "2.0.0" for k in p.get("mobs", {})]) == 26)
 
+rw = gamepatch.released_weapons()
+ok("Nexon's 15 v2.0 weapons named, client-only items not", len(rw) == 15 and "Blade of Harmony" in rw and "Frying Pan" not in rw)
+sk = open(os.path.join(ROOT, "tools", "skilldata.py")).read()
+ok("skilldata keeps MeowDB-only weapons out unless a patch names them", "it[1] not in io_ids and it[0] not in named" in sk)
+import json as _j
+W = {w[0] for c in _j.load(open(os.path.join(ROOT, "assets", "classic-skills.json")))["weapons"].values() for w in c}
+ok("training tables have Blade of Harmony, not Frying Pan or Sworn Brother Dagger", "Blade of Harmony" in W and "Frying Pan" not in W and "Sworn Brother Dagger" not in W)
+
 # world.py's own block, run on a game-file record and a wiki monster
 src = open(os.path.join(ROOT, "tools", "world.py")).read()
 blk = src[src.index("ELEM = {"):src.index("# mesos a kill:")]
