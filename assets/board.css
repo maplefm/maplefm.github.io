@@ -1703,3 +1703,6 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 }
 /* the search box hint: Enter, the key people know */
 .search kbd { font-weight: 700; letter-spacing: .02em; }
+
+/* the item card while its prices load: room for the price and listings, so what sits below doesn't jump (Nov 19 2026) */
+.ipwait { min-height: 80vh; }
