@@ -4389,8 +4389,11 @@
     e.appendChild(wrongLink(n, ip)); f.appendChild(e);
     ip.appendChild(f);
     // members' own listings for this item: shown apart from the shop listings and never counted in the price
+    var mkt0 = performance.now();
     mktLoad().then(function (L) {
       if (state.sel !== n || !ip.isConnected || ip.querySelector(".mkt")) return;
+      // listings that arrive after the card is on screen go at its foot, so nothing the reader is looking at jumps down
+      var late = performance.now() - mkt0 > 150;
       var mine = L.filter(function (l) { return l.item === n; }).sort(function (a, b) { return (a.status === "pending") - (b.status === "pending") || a.price - b.price; });
       if (!mine.length) return;
       var box = el("div", "mkt"), h = el("div", "mkh"); h.appendChild(el("b", null, "Listed on maplefm.gg")); h.appendChild(el("span", null, mine.length + (mine.length === 1 ? " member listing" : " member listings") + " · not counted in the price"));
@@ -4402,7 +4405,7 @@
         r.appendChild(el("span", "mkv", "View listing →")); box.appendChild(r);
       });
       if (mine.length > 5) { var m = el("a", "mkr mkmore", "All " + mine.length + " listings →"); m.href = "/market.html#q=" + encodeURIComponent(showName(n)); box.appendChild(m); }
-      ip.insertBefore(box, ip.children[1] || null);
+      if (late && f.isConnected) ip.insertBefore(box, f); else ip.insertBefore(box, ip.children[1] || null);
     });
     // where to farm it: the monsters that drop it, with their picture, up near the price
     dropsBox(n, ip);
