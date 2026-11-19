@@ -12,6 +12,14 @@ import json, os, sys, urllib.request, urllib.error
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
 from concurrent.futures import ThreadPoolExecutor
 
+# MeowDB blocked our requests on Nov 19 2026 ("faster than one every 10 seconds ... any earlier permission no longer
+# applies"). Until Adam has its owners' permission again, nothing here calls MeowDB: what it gave before (equip stats,
+# the v2.0 items maplestory.io lacks) is carried over from the last item list. MEOWDB_FETCH=1 turns calls back on.
+MEOWDB_FETCH = os.environ.get("MEOWDB_FETCH") == "1"
+PREV = os.environ.get("PREV_ITEMDB") or (sys.argv[1] if len(sys.argv) > 1 else "data/itemdb.json")
+try: PREVDB = json.load(open(PREV, encoding="utf-8"))
+except (OSError, ValueError): PREVDB = {"kinds": [], "items": []}
+
 URL = mcwver.base() + "/item"   # MapleStory Classic World: Classic names, ids and icons (newest data set)
 JOBS = {"Warrior": 1, "Magician": 2, "Bowman": 4, "Thief": 8, "Pirate": 16}
 
@@ -79,6 +87,12 @@ MEOWKEYS = {"watk": "ATT", "matk": "MATT", "wdef": "WDEF", "mdef": "MDEF", "str"
 
 def meow_stats():
     out = {}
+    if not MEOWDB_FETCH:
+        pk = PREVDB.get("kinds") or []
+        for r in PREVDB.get("items") or []:
+            if len(r) > 7 and isinstance(r[7], dict) and r[5] < len(pk) and pk[r[5]].startswith("Equip"): out[int(r[1])] = dict(r[7])
+        print(len(out), "equip stats carried over from the last item list (MeowDB calls paused)")
+        return out
     try:
         for page in range(1, 40):
             r = urllib.request.Request(MEOW + str(page), headers={"User-Agent": "maplefm-itemdb (maplefm.github.io)"})
@@ -114,6 +128,16 @@ print(len(eq), "equips,", sum(1 for r in eq if len(r) > 7), "with base stats,", 
 # tags, never seen in game, so they are left out. Kind and class come from items both sources share.
 def meow_new(rows, kinds):
     have = {int(r[1]) for r in rows}
+    if not MEOWDB_FETCH:
+        # carry over the non-Cash items the last list had that maplestory.io still lacks (the ones MeowDB added)
+        pk, names, added = PREVDB.get("kinds") or [], {r[0] for r in rows}, []
+        for r in PREVDB.get("items") or []:
+            if int(r[1]) in have or r[4] or r[0] in names or r[5] >= len(pk): continue
+            if pk[r[5]] not in kinds: kinds.append(pk[r[5]])
+            row = list(r); row[5] = kinds.index(pk[r[5]])
+            rows.append(row); have.add(int(r[1])); names.add(r[0]); added.append(r[0])
+        print(len(added), "items carried over from the last item list that maplestory.io doesn't have yet (MeowDB calls paused)")
+        return added
     allit = []
     try:
         for page in range(1, 80):

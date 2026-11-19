@@ -230,7 +230,7 @@
    "version": "2.0.0",
    "date": "2026-11-18",
    "source": "https://www.nexon.com/maplestory/news/update/48255/november-update-forgotten-hollow-patch-notes",
-   "about": "Forgotten Hollow. Nexon's notes name the region's 10 field monsters and the Lv 60 boss Rotten Mushmom; all 11 are in the old game files (MCW/1) with closed-test stats but no spawn points. Nexon also changed defense on 18 older monsters without giving the numbers, and the region's own monsters' defense differs from closed test. Defense on all of these is held back until game files with the v2.0 numbers are published.",
+   "about": "Forgotten Hollow. Nexon's notes name the region's 10 field monsters and the Lv 60 boss Rotten Mushmom; all 11 are in the old game files (MCW/1) with closed-test stats but no spawn points. Nexon also changed defense on 18 older monsters without giving the numbers, and the region's own monsters' defense differs from closed test. The v2.0 defense numbers came from the wiki on Nov 19 and apply through mobs while maplestory.io still serves the old files.",
    "released_mobs": {
     "54": "Glowshroom",
     "55": "Raffle",
@@ -245,37 +245,268 @@
     "700003": "Rotten Mushmom"
    },
    "region": "Forgotten Hollow",
-   "defense_changed": [
-    "Red Snail",
-    "Slime",
-    "Octopus",
-    "Green Mushroom",
-    "Blue Mushroom",
-    "Stirge",
-    "Jr. Necki",
-    "Zombie Mushroom",
-    "Wild Boar",
-    "Curse Eye",
-    "Lupin",
-    "Lorang",
-    "Cold Eye",
-    "Zombie Lupin",
-    "Clang",
-    "Malady",
-    "Stone Golem",
-    "Dark Stone Golem",
-    "Glowshroom",
-    "Raffle",
-    "Golden Stirge",
-    "Aqumander",
-    "Echopus",
-    "Rafflesia",
-    "Duskmander",
-    "Myewood",
-    "Rotten Mushroom",
-    "Sporewood",
-    "Rotten Mushmom"
-   ],
+   "mobs": {
+    "5": {
+     "magicDefense": [
+      30,
+      15
+     ],
+     "name": "Red Snail"
+    },
+    "7": {
+     "magicDefense": [
+      20,
+      5
+     ],
+     "name": "Slime"
+    },
+    "12": {
+     "magicDefense": [
+      30,
+      15
+     ],
+     "name": "Octopus"
+    },
+    "13": {
+     "magicDefense": [
+      30,
+      20
+     ],
+     "name": "Green Mushroom"
+    },
+    "16": {
+     "magicDefense": [
+      20,
+      10
+     ],
+     "name": "Blue Mushroom"
+    },
+    "17": {
+     "physicalDefense": [
+      0,
+      5
+     ],
+     "magicDefense": [
+      30,
+      15
+     ],
+     "name": "Stirge"
+    },
+    "18": {
+     "physicalDefense": [
+      0,
+      15
+     ],
+     "magicDefense": [
+      30,
+      5
+     ],
+     "name": "Jr. Necki"
+    },
+    "21": {
+     "physicalDefense": [
+      15,
+      10
+     ],
+     "magicDefense": [
+      15,
+      20
+     ],
+     "name": "Zombie Mushroom"
+    },
+    "22": {
+     "physicalDefense": [
+      15,
+      20
+     ],
+     "magicDefense": [
+      15,
+      10
+     ],
+     "name": "Wild Boar"
+    },
+    "31": {
+     "physicalDefense": [
+      30,
+      20
+     ],
+     "magicDefense": [
+      0,
+      10
+     ],
+     "name": "Curse Eye"
+    },
+    "35": {
+     "physicalDefense": [
+      0,
+      5
+     ],
+     "magicDefense": [
+      30,
+      20
+     ],
+     "name": "Lupin"
+    },
+    "36": {
+     "physicalDefense": [
+      0,
+      20
+     ],
+     "magicDefense": [
+      30,
+      10
+     ],
+     "name": "Lorang"
+    },
+    "37": {
+     "physicalDefense": [
+      0,
+      10
+     ],
+     "magicDefense": [
+      30,
+      20
+     ],
+     "name": "Cold Eye"
+    },
+    "38": {
+     "physicalDefense": [
+      0,
+      5
+     ],
+     "magicDefense": [
+      30,
+      20
+     ],
+     "name": "Zombie Lupin"
+    },
+    "44": {
+     "physicalDefense": [
+      15,
+      20
+     ],
+     "magicDefense": [
+      15,
+      10
+     ],
+     "name": "Clang"
+    },
+    "47": {
+     "physicalDefense": [
+      0,
+      5
+     ],
+     "magicDefense": [
+      50,
+      20
+     ],
+     "name": "Malady"
+    },
+    "48": {
+     "physicalDefense": [
+      30,
+      25
+     ],
+     "magicDefense": [
+      0,
+      5
+     ],
+     "name": "Stone Golem"
+    },
+    "49": {
+     "physicalDefense": [
+      0,
+      5
+     ],
+     "magicDefense": [
+      30,
+      25
+     ],
+     "name": "Dark Stone Golem"
+    },
+    "54": {
+     "physicalDefense": [
+      10,
+      15
+     ],
+     "magicDefense": [
+      10,
+      5
+     ],
+     "name": "Glowshroom"
+    },
+    "55": {
+     "physicalDefense": [
+      10,
+      20
+     ],
+     "magicDefense": [
+      0,
+      10
+     ],
+     "name": "Raffle"
+    },
+    "56": {
+     "physicalDefense": [
+      0,
+      15
+     ],
+     "magicDefense": [
+      0,
+      15
+     ],
+     "name": "Golden Stirge"
+    },
+    "57": {
+     "physicalDefense": [
+      0,
+      20
+     ],
+     "magicDefense": [
+      20,
+      10
+     ],
+     "name": "Aqumander"
+    },
+    "60": {
+     "physicalDefense": [
+      0,
+      10
+     ],
+     "name": "Duskmander"
+    },
+    "61": {
+     "physicalDefense": [
+      10,
+      20
+     ],
+     "magicDefense": [
+      0,
+      10
+     ],
+     "name": "Myewood"
+    },
+    "62": {
+     "magicDefense": [
+      10,
+      5
+     ],
+     "name": "Rotten Mushroom"
+    },
+    "63": {
+     "physicalDefense": [
+      0,
+      20
+     ],
+     "magicDefense": [
+      0,
+      10
+     ],
+     "name": "Sporewood"
+    }
+   },
+   "defense_changed": [],
+   "defense_source": "mapleclassic.wiki monster pages at game_version 2.0.0, edited Nov 18 23:25 to 23:42 UTC. Nexon's notes named the 18 older monsters without numbers; the region's 11 differ from the closed-test files.",
    "until_mcw": "1",
    "drops_since_report": 2000,
    "drops_note": "Forgotten Hollow was only in the April closed test before Nov 18, so player drop reports for its monsters made before launch describe the test, not the live game. Only each monster's own drop (its first report) and reports newer than report 2000 are used: the launch-day reports start at 2069, the closed-test ones end at 1093."
