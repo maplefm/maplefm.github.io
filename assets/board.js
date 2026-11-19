@@ -4105,7 +4105,8 @@
       var pi = state.sel && D.byName[state.sel];
       if (!pi) { ip.appendChild(el("p", "note", MEMBER === false ? "Pick an item to see its price." : "Loading the latest prices…")); return; }
       var ph = el("div", "ih"); ph.appendChild(iconBox(pi.item)); var pt = el("div"); pt.appendChild(el("h3", null, showName(pi.item)));
-      if (MEMBER !== false) { pt.appendChild(el("p", null, "Loading the latest prices…")); ph.appendChild(pt); ip.appendChild(ph); return; }
+      // a full card's worth of room while the prices load, so the drops and quests underneath don't jump down after
+      if (MEMBER !== false) { pt.appendChild(el("p", null, "Loading the latest prices…")); ph.appendChild(pt); ip.appendChild(ph); ip.appendChild(el("div", "ipwait")); return; }
       pt.appendChild(el("p", null, (pi.cat || "") + (pi.salesN ? " · " + pi.salesN + " sales" : ""))); ph.appendChild(pt); ip.appendChild(ph);
       // signed out: the price, the range and the move are open to everyone; listings and deals are for members
       if (pi.lad && pi.lad.length) ip.appendChild(ladderStatic(pi.lad));
