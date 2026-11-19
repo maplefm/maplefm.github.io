@@ -4312,6 +4312,7 @@
   function itemSlug(n) { return String(showName(n)).toLowerCase().replace(/%/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
   // the player market: one small list for the whole board, fetched when an item is first opened
   var MKT = { at: 0, L: null, p: null };
+  var MKTPOS = {};
   function mktLoad() {
     if (MKT.L && Date.now() - MKT.at < 60000) return Promise.resolve(MKT.L);
     if (MKT.p) return MKT.p;
@@ -4390,12 +4391,13 @@
     e.appendChild(wrongLink(n, ip)); f.appendChild(e);
     ip.appendChild(f);
     // members' own listings for this item: shown apart from the shop listings and never counted in the price
-    var mkt0 = performance.now();
-    mktLoad().then(function (L) {
+    // listings that arrive after this card is on screen go at its foot, so nothing the reader is looking at jumps
+    // down, and they stay there when the card redraws; once the listings are loaded, new cards show them at the top
+    if (!(n in MKTPOS)) MKTPOS[n] = MKT.L ? "top" : "foot";
+    var addMkt = function (L) {
       if (state.sel !== n || !ip.isConnected || ip.querySelector(".mkt")) return;
-      // listings that arrive after the card is on screen go at its foot, so nothing the reader is looking at jumps down
-      var late = performance.now() - mkt0 > 150;
-      var mine = L.filter(function (l) { return l.item === n; }).sort(function (a, b) { return (a.status === "pending") - (b.status === "pending") || a.price - b.price; });
+      var late = MKTPOS[n] === "foot";
+      var mine = (L || []).filter(function (l) { return l.item === n; }).sort(function (a, b) { return (a.status === "pending") - (b.status === "pending") || a.price - b.price; });
       if (!mine.length) return;
       var box = el("div", "mkt"), h = el("div", "mkh"); h.appendChild(el("b", null, "Listed on maplefm.gg")); h.appendChild(el("span", null, mine.length + (mine.length === 1 ? " member listing" : " member listings") + " · not counted in the price"));
       box.appendChild(h);
@@ -4406,8 +4408,10 @@
         r.appendChild(el("span", "mkv", "View listing →")); box.appendChild(r);
       });
       if (mine.length > 5) { var m = el("a", "mkr mkmore", "All " + mine.length + " listings →"); m.href = "/market.html#q=" + encodeURIComponent(showName(n)); box.appendChild(m); }
-      if (late && f.isConnected) ip.insertBefore(box, f); else ip.insertBefore(box, ip.children[1] || null);
-    });
+      if (late) ip.insertBefore(box, ip.querySelector(".ifoot")); else ip.insertBefore(box, ip.children[1] || null);   // the card may have redrawn since: its own foot
+    };
+    // already loaded: drawn with the card in the same frame; still on its way: added at the card's foot when it lands
+    if (MKT.L) { addMkt(MKT.L); if (Date.now() - MKT.at > 60000) mktLoad(); } else mktLoad().then(addMkt);
     // where to farm it: the monsters that drop it, with their picture, up near the price
     dropsBox(n, ip);
     // a roll asked for in the search: jump to its row in "Price by ATT", or say none has been seen
