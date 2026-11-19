@@ -509,7 +509,25 @@
    "defense_source": "mapleclassic.wiki monster pages at game_version 2.0.0, edited Nov 18 23:25 to 23:42 UTC. Nexon's notes named the 18 older monsters without numbers; the region's 11 differ from the closed-test files.",
    "until_mcw": "1",
    "drops_since_report": 2000,
-   "drops_note": "Forgotten Hollow was only in the April closed test before Nov 18, so player drop reports for its monsters made before launch describe the test, not the live game. Only each monster's own drop (its first report) and reports newer than report 2000 are used: the launch-day reports start at 2069, the closed-test ones end at 1093."
+   "drops_note": "Forgotten Hollow was only in the April closed test before Nov 18, so player drop reports for its monsters made before launch describe the test, not the live game. Only each monster's own drop (its first report) and reports newer than report 2000 are used: the launch-day reports start at 2069, the closed-test ones end at 1093.",
+   "weapons": [
+    "Bamboo Sword",
+    "Newspaper Sword",
+    "Beige Umbrella",
+    "Blue Flowery Tube",
+    "Red Flowery Tube",
+    "Green Paint Brush",
+    "Blade of Harmony",
+    "Lion's Fang",
+    "Bamboo Spear",
+    "Yellow Mop",
+    "White Mop",
+    "Indigo Mop",
+    "Magical Destruction Bow",
+    "Silver Crow",
+    "Sai"
+   ],
+   "weapons_note": "The 15 weapons Nexon's v2.0 notes list. Weapons only MeowDB has (client items like Frying Pan or the other umbrellas) stay out of the training weapon tables until a source shows players can get them."
   }
  ]
 }

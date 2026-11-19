@@ -67,3 +67,12 @@ def drops_since():
         if not _live(p) or not p.get("drops_since_report"): continue
         for k in p.get("released_mobs") or {}: out[int(k)] = int(p["drops_since_report"])
     return out
+
+
+def released_weapons():
+    """names of weapons a patch released before maplestory.io has them (Nexon's notes)"""
+    out = set()
+    for p in patches():
+        if not _live(p): continue
+        out |= set(p.get("weapons") or [])
+    return out
