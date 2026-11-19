@@ -16,6 +16,7 @@ const path = (p) => decodeURIComponent(new URL(p.url()).pathname + new URL(p.url
   const setups = [["desktop", { viewport: { width: 1440, height: 900 } }], ["phone", { ...pw.devices["iPhone 13"] }]].filter((x) => WHICH === "both" || x[0] === WHICH);
   for (const [dn, opt] of setups) {
     const c = await b.newContext(opt); let beacons = 0;
+    await c.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
     await c.route(/api\.maplefm\.gg\/(hit|ev|ref)/, (r) => { beacons++; r.fulfill({ status: 204, body: "" }); });
     const p = await c.newPage(); const errs = []; p.on("pageerror", (e) => errs.push(p.url() + " " + e.message));
     const tap = async (loc) => { await loc.first().scrollIntoViewIfNeeded(); if (dn === "phone") await loc.first().tap(); else await loc.first().click(); };

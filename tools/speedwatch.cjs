@@ -23,6 +23,7 @@ async function measure(bn, prof, opts, cpu, pg) {
   try {
     const o = Object.assign({ ignoreHTTPSErrors: !!process.env.SW_PROXY }, opts); if (bn === "firefox") { delete o.isMobile; delete o.hasTouch; }
     const ctx = await b.newContext(o);
+    await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
     await ctx.route("https://api.maplefm.gg/hit**", (r) => r.fulfill({ status: 204, body: "" }));   // never count ourselves as visitors
     await ctx.addInitScript(() => {
       window.__lt = []; window.__cls = 0;

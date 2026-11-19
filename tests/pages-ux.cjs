@@ -23,7 +23,7 @@ srv.listen(PORT, async () => {
   };
   const b = await pw.chromium.launch();
   for (const [dn, o] of [["desktop", { viewport: { width: 1440, height: 900 } }], ["phone", { ...pw.devices["iPhone 13"] }]]) {
-    const c = await b.newContext(o); await c.route(/api\.maplefm\.gg\/hit|raw\.githubusercontent|maplestory\.io/, (r) => r.fulfill({ status: 204, body: "" }));
+    const c = await b.newContext(o); await c.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' })); await c.route(/api\.maplefm\.gg\/hit|raw\.githubusercontent|maplestory\.io/, (r) => r.fulfill({ status: 204, body: "" }));
     const p = await c.newPage(); const errs = []; p.on("pageerror", (e) => errs.push(e.message));
     for (const [k, u] of Object.entries(pages)) {
       if (!u) { ok(`${dn} ${k}: a page to test`, false); continue; }

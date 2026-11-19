@@ -10,6 +10,7 @@ const TYPES = { ".js": "text/javascript", ".css": "text/css", ".json": "applicat
 (async () => {
   const b = await ENGINE.launch();
   const ctx = await b.newContext(PHONE ? Object.assign({}, pw.devices["iPhone 13"]) : { viewport: { width: 1440, height: 900 } });
+  await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
   let hits = 0; await ctx.route(/api\.maplefm\.gg\/hit/, (r) => { hits++; r.fulfill({ status: 204, body: "" }); });
   // this checkout's pages, scripts and the index; everything else (data, icons) from the live site
   await ctx.route(/^https:\/\/maplefm\.gg\/((\?[^#]*)?$|[a-z]+\.html|assets\/(board\.min\.js|board\.min\.css|nav\.css|sitesearch\.js|kofigoal\.js)|data\/sitesearch\.json|(monster|item|quest|map)\/[^/]+\/$)/, (r) => {

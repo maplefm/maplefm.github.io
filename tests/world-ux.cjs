@@ -9,6 +9,7 @@ function rows(seller, item, p, n, sold) { const o = []; for (let k = 0; k < n; k
 const ZEN = [{ at, src: "watcher-shop", who: "ZenScanner", inbox: "zen1", day, rows: [].concat(rows("Zn", "Elixir", 4400, 8, 5), rows("Zb", "Zenith Test Only Item", 1, 0, 0), rows("Zw", "Work Gloves", 777000, 6, 4)) }];
 (async () => {
   const b = await ENGINE.launch(); const ctx = await b.newContext(PHONE ? Object.assign({}, pw.devices["iPhone 13"]) : { viewport: { width: 1440, height: 900 } });
+  await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
   await ctx.route(/api\.maplefm\.gg\/hit/, (r) => r.fulfill({ status: 204, body: "" }));
   const seen = { snap: 0, summary: 0, zenLive: 0, liveNoWorld: 0, leakServed: 0 };
   await ctx.route(/api\.maplefm\.gg\/data\/live/, async (r) => { const u = r.request().url(); if (/world=zenith/.test(u)) { seen.zenLive++; return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ "data/inbox-zenith.json": zenEmpty ? [] : ZEN }) }); } seen.liveNoWorld++;

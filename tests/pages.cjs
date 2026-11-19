@@ -19,6 +19,7 @@ function ctxFor(b) {
 }
 async function swap(ctx) {
   // test visits never reach the visit counter, whatever browser name or network they come from
+  await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
   await ctx.route(/api\.maplefm\.gg\/hit/, (r) => r.fulfill({ status: 204, body: "" }));
   if (!process.env.SWAP) return;
   await ctx.route(/^https:\/\/maplefm\.gg\/(\?[^#]*)?$|^https:\/\/maplefm\.gg\/index\.html|^https:\/\/maplefm\.gg\/assets\/(board\.min\.js|board\.min\.css|advsearch\.js)/, async (r) => {

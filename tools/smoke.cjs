@@ -24,6 +24,7 @@ const ok = (c, name) => { checks++; if (!c) fails.push(name); };
       const ctx = await b.newContext({ viewport: { width: w, height: h }, colorScheme: tag.startsWith("dark") ? "dark" : "light" });
       // the live site's own address answers from this checkout, so absolute links and data paths work
       // answered straight from this checkout: switching an https request to http isn't allowed for every request type
+      await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
       await ctx.route("https://maplefm.gg/**", (route) => {
         let f = decodeURIComponent(new URL(route.request().url()).pathname); if (f.endsWith("/")) f += "index.html";
         const p = path.join(ROOT, f);
