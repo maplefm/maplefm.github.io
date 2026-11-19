@@ -1,12 +1,53 @@
 {
- "at": 1794952204,
+ "at": 1795110897,
  "checked": {
   "quests": 343,
-  "monsters": 83,
-  "maps_game": 303,
-  "maps": 303
+  "monsters": 108,
+  "maps_game": 309,
+  "maps": 337
  },
- "diff": [],
+ "diff": [
+  {
+   "kind": "map",
+   "id": 80003000,
+   "field": "spawns",
+   "ours": {
+    "Stirge": 4,
+    "Flyeye": 2,
+    "Goblin Fire": 2
+   },
+   "source": {
+    "game_spawn_points": {
+     "Goblin Fire": 2,
+     "Flyeye": 1
+    }
+   },
+   "url": [
+    "https://mapleclassic.wiki/index.php?title=Primrose_Hill",
+    "https://maplestory.io/api/MCW/1/map/80003000"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  },
+  {
+   "kind": "map",
+   "id": 10006121,
+   "field": "exits",
+   "ours": [
+    "Decayed Tunnel I",
+    "Rotten House"
+   ],
+   "source": {
+    "game_exits_not_on_wiki": [
+     "Bygone Days"
+    ]
+   },
+   "url": [
+    "https://mapleclassic.wiki/index.php?title=Someone_Else%27s_Grave",
+    "https://maplestory.io/api/MCW/1/map/10006121"
+   ],
+   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
+  }
+ ],
  "new": [],
  "unconfirmed": [
   {
@@ -61,6 +102,308 @@
    "url": [
     "https://maplestory.io/api/MCW/1/quest/1002",
     "https://mapleclassic.wiki/index.php?title=Roger%27s_Apple_%28quest%29"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10621,
+   "field": "get",
+   "ours": {
+    "get": [
+     [
+      "White Potion",
+      30
+     ],
+     [
+      "Return Scroll to Forgotten Hollow",
+      2
+     ]
+    ],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "returnscrolltoforgottenhollow": 2,
+     "whitepotion": 15
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10621",
+    "https://mapleclassic.wiki/index.php?title=Embers_in_the_Garden"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10622,
+   "field": "get",
+   "ours": {
+    "get": [
+     [
+      "Blue Potion",
+      25
+     ]
+    ],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "bluepotion": 30
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10622",
+    "https://mapleclassic.wiki/index.php?title=Words_Nobody_Taught"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10623,
+   "field": "kill",
+   "ours": [],
+   "source": {
+    "wiki": {
+     "myewood": 60
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10623",
+    "https://mapleclassic.wiki/index.php?title=Boughs_for_the_Lanterns"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10623,
+   "field": "get",
+   "ours": {
+    "get": [
+     [
+      "Earring STR Scroll: Greater",
+      1
+     ],
+     [
+      "Earring DEX Scroll: Greater",
+      1
+     ],
+     [
+      "Earring INT Scroll: Greater",
+      1
+     ],
+     [
+      "Earring LUK Scroll: Greater",
+      1
+     ]
+    ],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "sapofancienttree": 3
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10623",
+    "https://mapleclassic.wiki/index.php?title=Boughs_for_the_Lanterns"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10624,
+   "field": "lv",
+   "ours": 55,
+   "source": {
+    "game": 55,
+    "wiki": 53
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10624",
+    "https://mapleclassic.wiki/index.php?title=Charms_Gone_Gray"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10624,
+   "field": "kill",
+   "ours": [],
+   "source": {
+    "wiki": {
+     "rottenmushroom": 60
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10624",
+    "https://mapleclassic.wiki/index.php?title=Charms_Gone_Gray"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10624,
+   "field": "exp",
+   "ours": 16200,
+   "source": {
+    "wiki": [
+     15600
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10624",
+    "https://mapleclassic.wiki/index.php?title=Charms_Gone_Gray"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10624,
+   "field": "meso",
+   "ours": 1725,
+   "source": {
+    "wiki": [
+     1667
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10624",
+    "https://mapleclassic.wiki/index.php?title=Charms_Gone_Gray"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10625,
+   "field": "lv",
+   "ours": 55,
+   "source": {
+    "game": 55,
+    "wiki": 53
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10625",
+    "https://mapleclassic.wiki/index.php?title=The_Dilapidated_Tomb"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10625,
+   "field": "exp",
+   "ours": 16200,
+   "source": {
+    "wiki": [
+     15600
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10625",
+    "https://mapleclassic.wiki/index.php?title=The_Dilapidated_Tomb"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10625,
+   "field": "meso",
+   "ours": 1725,
+   "source": {
+    "wiki": [
+     1667
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10625",
+    "https://mapleclassic.wiki/index.php?title=The_Dilapidated_Tomb"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10625,
+   "field": "get",
+   "ours": {
+    "get": [
+     [
+      "Mana Elixir",
+      10
+     ]
+    ],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "manaelixir": 15
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10625",
+    "https://mapleclassic.wiki/index.php?title=The_Dilapidated_Tomb"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10626,
+   "field": "lv",
+   "ours": 55,
+   "source": {
+    "game": 55,
+    "wiki": 53
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10626",
+    "https://mapleclassic.wiki/index.php?title=The_Last_Lantern"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10626,
+   "field": "exp",
+   "ours": 16200,
+   "source": {
+    "wiki": [
+     15600
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10626",
+    "https://mapleclassic.wiki/index.php?title=The_Last_Lantern"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10626,
+   "field": "meso",
+   "ours": 1725,
+   "source": {
+    "wiki": [
+     1667
+    ]
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10626",
+    "https://mapleclassic.wiki/index.php?title=The_Last_Lantern"
+   ]
+  },
+  {
+   "kind": "quest",
+   "id": 10626,
+   "field": "get",
+   "ours": {
+    "get": [
+     [
+      "Bottomwear HP Scroll: Greater",
+      1
+     ],
+     [
+      "Cape Accuracy Scroll: Greater",
+      1
+     ],
+     [
+      "Elixir",
+      20
+     ]
+    ],
+    "get2": null
+   },
+   "source": {
+    "wiki": {
+     "hearthkeeperlantern": 1
+    }
+   },
+   "url": [
+    "https://maplestory.io/api/MCW/1/quest/10626",
+    "https://mapleclassic.wiki/index.php?title=The_Last_Lantern"
    ]
   },
   {
@@ -186,7 +529,7 @@
  ],
  "partial": false,
  "failed": [],
- "seconds": 197,
+ "seconds": 220,
  "sources": [
   "maplestory.io MCW game data",
   "MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0)"
