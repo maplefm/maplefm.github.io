@@ -79,6 +79,7 @@ def exists(p):
     return None
 
 info, broken, badhash, ext = {}, collections.defaultdict(list), collections.defaultdict(list), collections.Counter()
+notes = collections.defaultdict(list)
 graph, cgraph = collections.defaultdict(set), collections.defaultdict(set)
 nlinks = 0
 for path, f in pages.items():
@@ -97,7 +98,9 @@ for path, f in pages.items():
             m = re.match(r"item=([^&]+)", h)
             h = urllib.parse.unquote(h)
             if m and target == "/":
-                if urllib.parse.unquote(m.group(1)) not in ITEMS: badhash["item:" + urllib.parse.unquote(m.group(1))].append(path)
+                if urllib.parse.unquote(m.group(1)) not in ITEMS:
+                    # a share link (/c/) or item page made when the item had a price: the card still opens and says no sales yet
+                    (notes if path.startswith(("/c/", "/item/")) else badhash)["item:" + urllib.parse.unquote(m.group(1))].append(path)
             elif target == "/quests.html" and re.match(r"q-\d+$", h):
                 if h[2:] not in QIDS: badhash["quest:" + h].append(path)
             elif target == "/map.html" and h.startswith("route="):
@@ -105,7 +108,7 @@ for path, f in pages.items():
                     if nm and nm not in MAPS: badhash["map:" + nm].append(path)
             elif target == "/map.html" and h.startswith("map="):
                 if h[4:] not in MAPS: badhash["map:" + h[4:]].append(path)
-            elif target == path and not re.search(r"[=&]", h) and h not in p.ids and h not in ("top", ""):
+            elif target == path and not re.search(r"[=&]", h) and h not in p.ids and h not in ("top", "", "positions", "new"):   # #positions and #new are read by the page's script
                 badhash["anchor:" + path + "#" + h].append(path)
         if t and t in pages and t != path:
             graph[path].add(t); out += 1
@@ -134,7 +137,7 @@ real = [p for p in pages if not info[p]["refresh"] and not p.startswith("/c/")] 
 by = collections.defaultdict(list)
 for p in real: by[kind(p)].append(p)
 rep = {"pages": len(pages), "redirect_pages": len(pages) - len(real), "links": nlinks, "broken": {k: [len(v), v[0]] for k, v in broken.items()},
-       "bad_hash": {k: [len(v), v[0]] for k, v in badhash.items()}, "external_domains": dict(ext.most_common()),
+       "bad_hash": {k: [len(v), v[0]] for k, v in badhash.items()}, "share_links_no_data": {k: [len(v), v[0]] for k, v in notes.items()}, "external_domains": dict(ext.most_common()),
        "by_kind": {}, "orphans": [p for p in real if not inb[p] and p != "/"], "unreached": [p for p in real if p not in dist],
        "far": sorted([[dist[p], p] for p in real if dist.get(p, 0) > 3], reverse=True)[:40]}
 for k, ps in sorted(by.items(), key=lambda x: -len(x[1])):
