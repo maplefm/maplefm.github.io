@@ -15,7 +15,7 @@
 [hidden]{display:none!important}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
 a{color:var(--accent)}
-main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+main{max-width:1600px;margin:0 auto;padding:0 16px 40px}
 img.px{image-rendering:pixelated;object-fit:contain}
 /* header: name, one line, then your level and class, saved for Quests and Training */
 .hero{background:linear-gradient(135deg,#3b1a7a,#6d3fd1 60%,#8b5cf6);color:#fff;border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center}
@@ -398,12 +398,12 @@ img.px{image-rendering:pixelated;object-fit:contain}
     if (q.ended) notes.push(["Event ended", "this quest can't be started now"]);
     else if (q.from || q.to) notes.push(["Event", (q.from ? "from " + q.from.slice(0, 10) : "") + (q.to ? " until " + q.to.slice(0, 10) : "")]);
     if (q.unconfirmed && q.unconfirmed.length) notes.push(["Unconfirmed", "sources disagree on " + q.unconfirmed.join(", ")]);
-    notes.forEach(function (n) { var p = el("p", "pre"); p.appendChild(el("b", null, n[0] + ": ")); if (n[2]) { var a = el("a", null, n[1]); a.href = n[2]; p.appendChild(a); } else p.appendChild(el("span", null, n[1])); if (n[3]) { var nv = el("a", "navh", "Nav here"); nv.href = "/map.html#route=|" + encodeURIComponent(n[3]); nv.title = "The fastest way there from where you are"; p.appendChild(nv); } b.appendChild(p); });
-    // the quest window's to-do list; the quest guide page has the map for each step with Nav here
+    notes.forEach(function (n) { var p = el("p", "pre"); p.appendChild(el("b", null, n[0] + ": ")); if (n[2]) { var a = el("a", null, n[1]); a.href = n[2]; p.appendChild(a); } else p.appendChild(el("span", null, n[1])); if (n[3]) { var nv = el("a", "navh", "Directions"); nv.href = "/map.html#route=|" + encodeURIComponent(n[3]); nv.title = "The fastest way there from where you are"; p.appendChild(nv); } b.appendChild(p); });
+    // the quest window's to-do list; the quest guide page has the map for each step with Directions
     if (q.steps && q.steps.length && !q.need.length && !q.kill.length) {
       var sx = el("div", "sec"); sx.appendChild(el("h4", null, "Steps")); var ol = el("ol", "qsteps");
       q.steps.forEach(function (t) { ol.appendChild(el("li", null, t.replace(/\{m:\d+\}/g, "").trim())); }); sx.appendChild(ol);
-      if (PLAY.q[q.id]) { var gl = el("a", null, "Where each step is, with Nav here"); gl.href = "/quest/" + PLAY.q[q.id] + "/"; sx.appendChild(gl); }
+      if (PLAY.q[q.id]) { var gl = el("a", null, "Where each step is, with Directions"); gl.href = "/quest/" + PLAY.q[q.id] + "/"; sx.appendChild(gl); }
       b.appendChild(sx);
     }
     if (q.start && q.start.length) { var s0 = el("div", "sec"); s0.appendChild(el("h4", null, "You're given")); var rw0 = el("div", "rw"); q.start.forEach(function (x) { var s = el("span"); var i = itemImg(x[0]); if (i) s.appendChild(i); s.appendChild(document.createTextNode(shown(x[0]) + (x[1] > 1 ? " ×" + x[1] : ""))); rw0.appendChild(s); }); s0.appendChild(rw0); b.appendChild(s0); }

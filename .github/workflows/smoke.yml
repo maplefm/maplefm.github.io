@@ -45,6 +45,11 @@ jobs:
           mkdir -p /tmp/ip/item && cp item/*.css item/*.js /tmp/ip/item/
           python3 tools/itempages.py /tmp/summary-public.json /tmp/ip /tmp/itemguide.json /tmp/world.json assets/training-notes.json
           test "$(ls /tmp/ip/item | wc -l)" -gt 500
+      # Nov 19 2026: the pages use the width of the screen; every link on them must land, and the map tools must work
+      - name: Built pages link only to pages that exist
+        run: python3 tests/links.py /tmp/ip
+      - name: Built pages show columns, phone tabs, numbered exits and Directions
+        run: node tests/pages-ux.cjs /tmp/ip
       - run: node tools/smoke.cjs
       # Search by stats used like a person on a phone: shipped once with a + button that piled "1 att" into the box
       - name: Search by stats works when tapped and typed

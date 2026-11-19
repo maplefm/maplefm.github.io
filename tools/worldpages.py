@@ -111,13 +111,13 @@ def page(title, desc, path, crumbs, body, og=None, robots=None):
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title><meta name="description" content="{E(desc)}">{f'<meta name="robots" content="{robots}">' if robots else ""}<link rel="canonical" href="{canon}">
 <meta property="og:title" content="{E(title)}"><meta property="og:description" content="{E(desc)}"><meta property="og:url" content="{canon}"><meta property="og:image" content="{og or SITE + "/og.png"}"><meta property="og:type" content="article"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/item/world.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=7">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="stylesheet" href="/item/item.css?v=11"><link rel="stylesheet" href="/item/world.css?v=6"><link rel="stylesheet" href="/assets/nav.css?v=7"><link rel="stylesheet" href="/assets/pages.css?v=1">
 <script type="application/ld+json">{json.dumps(ld)}</script>{f'<meta name="thumbnail" content="{og}">' if og else ''}</head><body><main>
 {NAV("qlevels" if path.startswith("/quests/") else "quests" if path.startswith("/quest") else "crafting" if path.startswith("/crafting") else "guides" if path.startswith("/training") else "monsters" if path.startswith(("/monster", "/monsters")) else "maps")}
 
-{f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card">{itempages.BRAND}{body}</div>
+{f'<nav class="crumbs" aria-label="You are here">{nav}</nav>' if nav else ''}<div class="card{' wide' if 'class="lay ' in body else ''}">{itempages.BRAND}{body}</div>
 <p class="foot">MapleStory Classic World facts from the game files and the <a href="https://mapleclassic.wiki/" rel="noopener">MapleStory Classic Wiki</a> (CC BY-NC-SA 4.0), refreshed daily.</p>
-</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script>{'<script src="/assets/fmprice.js?v=2" defer></script>' if 'data-fmi=' in body else ''}</body></html>"""
+</main>{FOOT()}<script src="/assets/hit.js" defer></script><script src="/assets/trail.js" defer></script>{'<script src="/assets/fmprice.js?v=2" defer></script>' if 'data-fmi=' in body else ''}{'<script src="/assets/pagetabs.js?v=1" defer></script>' if 'data-tabs' in body else ''}{'<script src="/assets/mapnav.js?v=1" defer></script>' if path.startswith("/map/") else ''}</body></html>"""
 
 
 def write(out, path, text):
@@ -184,11 +184,19 @@ def build(world, guide, summary, notes, out):
     try: QWHERE = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "quest_where.json"), encoding="utf-8"))
     except Exception: QWHERE = {}
     def mlink(p): return f'<a href="/map/{MSLUG[p]}/">{E(p)}</a>' if p in M else E(p)
-    # Nav here: the route finder from wherever you are (it remembers your last spot) to this map, shortest way first.
+    # Directions: the route finder from wherever you are (it remembers your last spot) to this map, shortest way first.
     # Next to every map a player has to go to: where a monster lives, where a quest starts or what it hunts.
-    def navbtn(p): return f' <a class="navh" href="/map.html#route=|{urllib.parse.quote(p, safe="")}" title="The fastest way to {E(p)} from where you are">Nav here</a>' if p in M else ""
+    def navbtn(p): return f' <a class="navh" href="/map.html#route=|{urllib.parse.quote(p, safe="")}" title="The fastest way to {E(p)} from where you are">Directions</a>' if p in M else ""
+    # Nov 19 2026 layout (assets/pages.css): each part of a page is a card, and the cards sit in columns that use the
+    # width of the screen. data-tab names the card for the phone tabs (assets/pagetabs.js).
+    def sec(h, cls="", tab=""): return (f'<section class="blk{(" " + cls) if cls else ""}"' + (f' data-tab="{E(tab)}"' if tab else "") + f">{h}</section>") if h else ""
+    def lay(kind, cols, tabs=False, first=""):
+        cols = [c for c in cols if c]
+        return f'<div class="lay lay-{kind} n{len(cols)}"' + (' data-tabs' if tabs else '') + (f' data-first="{first}"' if first else '') + ">" + "".join(f'<div class="col">{c}</div>' for c in cols) + "</div>"
+    # a map as one button: its name goes to the map page, Directions to the route finder
+    def mchip(p): return f'<span class="mchip">{mlink(p)}{navbtn(p).strip()}</span>' if p in M else E(p)
     def mnav(p): return mlink(p) + navbtn(p)
-    def blink(n): return f'<a href="/monster/{BSLUG[n]}/">{E(n)}</a>' if n in MOB else E(n)
+    def blink(n): return f'<a href="/monster/{BSLUG[n]}/">{E(n)}</a>' if n in BSLUG else E(n)
     def qlink(q): return f'<a href="/quest/{QSLUG[q["id"]]}/">{E(q["n"])}</a>'
     def sprite_url(n): return f"{LIVE}data/sprite/{MOB[n]['id']}.gif" if n in MOB and MOB[n].get("id") and not MOB[n].get("nosprite") else ""
     built = world.get("built") or datetime.date.today().isoformat()
@@ -223,6 +231,12 @@ def build(world, guide, summary, notes, out):
     for q in QS:
         for k in q.get("kill") or []: qkill.setdefault(k[0], []).append((q, k[1]))
         for k in q.get("need") or []: qneed.setdefault(k[0], []).append((q, k[1]))
+    # only monsters with a page get a link; a job test or party quest copy links to the monster it copies
+    _haspage = {n for n, mb in MOB.items() if not mb.get("variant") and (homes.get(n) or drops.get(n) or qkill.get(n))}
+    for n, mb in MOB.items():
+        if n in _haspage: continue
+        if mb.get("base") in _haspage: BSLUG[n] = slug(mb["base"])
+        else: BSLUG.pop(n, None)
     npc_at = {}
     for p, m in M.items():
         for n in m.get("npcs") or []: npc_at.setdefault(n[0], []).append(p)
@@ -312,16 +326,17 @@ def build(world, guide, summary, notes, out):
         desc = (f"{p} in MapleStory Classic World: " + (f"{lvtxt} map, " if lvtxt else "") +
                 (f"{', '.join(n for n, _ in mobs_sorted[:3])}, " if mobs_sorted else "") +
                 (f"{len(hid)} hidden portal{'s' if len(hid) != 1 else ''}, " if hid else "") + "the in-game minimap and every exit.")
-        b = f'<h1>{E(p)}</h1><p class="sub">MapleStory Classic · {E(m.get("region") or "")}{" · " + E(m["type"]) if m.get("type") else ""}{" · " + lvtxt.capitalize() if lvtxt else ""}</p>'
-        b += f'<p class="navrow"><a class="navh big" href="/map.html#route=|{urllib.parse.quote(p, safe="")}">Nav here</a> <small>the fastest way here from where you are</small></p>'
+        hd = f'<h1>{E(p)}</h1><p class="sub">MapleStory Classic · {E(m.get("region") or "")}{" · " + E(m["type"]) if m.get("type") else ""}{" · " + lvtxt.capitalize() if lvtxt else ""}</p>'
+        hd += f'<p class="navrow"><a class="navh big" href="/map.html#route=|{urllib.parse.quote(p, safe="")}">Directions</a> <small>the fastest way here from where you are</small></p>'
         intro = []
         if m.get("near") and m["near"] != p: intro.append(f"Nearest town: {mlink(m['near'])}.")
         if m.get("ret") and m["ret"] != p and m["ret"] != m.get("near"): intro.append(f"Return Scroll goes to {mlink(m['ret'])}.")
         if st: intro.append(f"{st['n']} monster spawn points, average level {st['lv']:.0f}, {st['eph']:.1f} EXP per 100 HP." +
                             (f" Monster rate setting in the game files: {m['rate']:g}." if m.get("rate") is not None else ""))
         if timers(m): intro.append(f"Slow respawns: {timers(m)}.")
-        if intro: b += f'<p>{" ".join(intro)}</p>'
-        b += minimap(m)
+        if intro: hd += f'<p>{" ".join(intro)}</p>'
+        hd += minimap(m)
+        ex = mo = dv = vmh = npch = qh = ""
         # portals that read the same (same place, same kind, same spot in words) are one line with a count, so a map
         # with four hidden portals to one room doesn't list the same sentence four times
         def pgroup(xs):
@@ -332,32 +347,34 @@ def build(world, guide, summary, notes, out):
                 else: idx[k] = len(out); out.append([x, 1, k[2]])
             return out
         if hid:
-            b += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: stand on the purple spot ({w or "see the minimap"}) and press up.{f" There are {c} spots like this." if c > 1 else ""}{f" Needs level {x[5]}." if x[5] else ""} {navbtn(x[0])}</div>' for x, c, w in pgroup(hid))
+            ex += "<h2>Hidden portals</h2>" + "".join(f'<div class="hid"><b>To {mlink(x[0])}</b>: stand on the purple spot ({w or "see the minimap"}) and press up.{f" There are {c} spots like this." if c > 1 else ""}{f" Needs level {x[5]}." if x[5] else ""} {navbtn(x[0])}</div>' for x, c, w in pgroup(hid))
         walk = [x for x in m["portals"] if x[1] != "hidden"]
         if walk:
-            b += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th><th></th></tr>" + "".join(
+            ex += "<h2>Exits</h2><table><tr><th>Goes to</th><th>Kind</th><th>Where on the map</th><th></th></tr>" + "".join(
                 f'<tr><td>{mlink(x[0])}{f" <small>×{c}</small>" if c > 1 else ""}</td><td>{"Door" if x[1] == "door" else "Portal"}{f" · Lv {x[5]}+" if x[5] else ""}</td><td><small>{w}</small></td><td>{navbtn(x[0])}</td></tr>' for x, c, w in pgroup(walk)) + "</table>"
         if mobs_sorted:
-            b += "<h2>Monsters</h2><p class=\"note\">×N is the number of spawn points.</p><div class=\"mobs\">" + "".join(mobcard(n, f" ×{c}") for n, c in mobs_sorted if n in MOB) + "</div>"
+            mo = "<h2>Monsters</h2><p class=\"note\">×N is the number of spawn points.</p><div class=\"mobs\">" + "".join(mobcard(n, f" ×{c}") for n, c in mobs_sorted if n in MOB) + "</div>"
             dr = []
             for n, _ in mobs_sorted:
                 for it, rate, qo in drops.get(n, []):
                     if not qo and it in PRICE and rate: dr.append((rate / 100 * PRICE[it], it, n, rate))
             if dr:
                 dr.sort(key=lambda x: -x[0])
-                b += "<h2>Most valuable drops here</h2><table><tr><th>Item</th><th>From</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
+                dv = "<h2>Most valuable drops here</h2><table><tr><th>Item</th><th>From</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
                     f'<tr><td>{ilink(it)}{live(it)}</td><td>{blink(n)}</td><td>{rate:g}%</td><td class="n">{mzs(PRICE[it])}</td></tr>' for _, it, n, rate in dr[:8]) + "</table>"
         vm = [(n, c) for n, c in m.get("vmobs") or [] if n in MOB]
         if vm:
-            b += ("<h2>Party quest and job test monsters</h2><p class=\"note\">Copies made for this map, with their own stats.</p><div class=\"mobs\">" +
+            vmh = ("<h2>Party quest and job test monsters</h2><p class=\"note\">Copies made for this map, with their own stats.</p><div class=\"mobs\">" +
                   "".join(f'<div class="mob"><span></span><span><b>{E(n)} ×{c}</b><small>Lv {MOB[n]["lv"]} · {fmt(MOB[n]["hp"])} HP · {fmt(MOB[n]["exp"])} EXP</small></span></div>' for n, c in sorted(vm, key=lambda x: -x[1])) + "</div>")
         if m.get("npcs"):
-            b += "<h2>NPCs</h2><ul>" + "".join(f"<li>{E(n[0])}{' · ' + E(n[3]) if n[3] else ''}</li>" for n in m["npcs"]) + "</ul>"
-        if m.get("shops"): b += f'<p class="note">Shops here: {E(", ".join(m["shops"]))}.</p>'
+            npch = "<h2>NPCs</h2><ul>" + "".join(f"<li>{E(n[0])}{' · ' + E(n[3]) if n[3] else ''}</li>" for n in m["npcs"]) + "</ul>"
+        if m.get("shops"): npch += f'<p class="note">Shops here: {E(", ".join(m["shops"]))}.</p>'
         q_here = [q for q in QS if q.get("g") in {n[0] for n in m.get("npcs") or []}]
-        if q_here: b += "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
-        b += f'<p style="margin-top:16px"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p><p class="note">Updated {built}.</p>'
-        b += BOARD_CTA
+        if q_here: qh = "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
+        hd += f'<p class="note"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p>'
+        # Map B: minimap, monsters and NPCs on the left, the way out (exits) and quests on the right
+        b = lay("map", [sec(hd, "head", "Map") + sec(mo, "", "Monsters") + sec(vmh) + sec(npch, "npcs", "NPCs"), sec(ex, "exits", "Exits") + sec(dv, "", "Drops") + sec(qh, "qlist", "Quests")], tabs=True, first="Exits")
+        b += f'<p class="note">Updated {built}.</p>' + BOARD_CTA
         crumbs = [("Maps", "/maps/"), (p, f"/map/{MSLUG[p]}/")]
         write(out, f"map/{MSLUG[p]}", page(itempages.fit_title(f"{p} map, portals & monsters", "MapleStory Classic", "Club FM"), desc, f"/map/{MSLUG[p]}/", crumbs, b, f"{OG}map/{MSLUG[p]}.png")); paths.append(f"/map/{MSLUG[p]}/")
 
@@ -370,20 +387,21 @@ def build(world, guide, summary, notes, out):
         desc = (f"{n} in MapleStory Classic World: level {mb['lv']}, {fmt(mb['hp'])} HP, {fmt(mb['exp'])} EXP. " +
                 (f"Found in {', '.join(p for p, _ in sorted(homes.get(n, []), key=lambda x: -x[1])[:3])}. " if homes.get(n) else f"Found in {mb['region']}. " if mb.get("region") else "") +
                 ("Drops, drop rates and what they sell for." if drops.get(n) else ""))
-        b = f'<div class="hd">' + (f'<img class="sprite" src="{sp}" alt="{E(n)}">' if sp else "") + f'<div><h1>{E(n)}</h1><p class="sub">MapleStory Classic monster · Level {mb["lv"]}{" · Boss" if mb.get("boss") else ""}{" · Undead" if mb.get("undead") else ""}</p></div></div>'
-        b += ('<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
+        head = f'<div class="hd">' + (f'<img class="sprite" src="{sp}" alt="{E(n)}">' if sp else "") + f'<div><h1>{E(n)}</h1><p class="sub">MapleStory Classic monster · Level {mb["lv"]}{" · Boss" if mb.get("boss") else ""}{" · Undead" if mb.get("undead") else ""}</p></div></div>'
+        head += ('<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
             ("HP", fmt(mb["hp"])), ("EXP", fmt(mb["exp"])), ("Attack", fmt(mb["atk"])), ("Accuracy", fmt(mb.get("acc"))), ("Avoid", fmt(mb.get("eva"))),
             ("Defense", "Changed in the " + datetime.date.fromisoformat(mb["defnew"]).strftime("%b %-d") + " update · new numbers not out yet" if mb.get("defnew") else f'{fmt(mb.get("wdef"))} / {fmt(mb.get("mdef"))} magic'), ("Weak to", E(mb.get("weak") or "Nothing")), ("Resists", E(mb.get("resist") or "Nothing"))]) + "</div>")
         mz = mb.get("meso")
-        b += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (
+        head += f'<p>{E(n)} gives {mb["exp"] / max(1, mb["hp"]) * 100:.1f} EXP per 100 HP.' + (
             (f" Drops {mz[0]} to {mzf(mz[1])}" + (f" {mz[2]}% of the time" if mz[2] else "") + (f" (measured over {mz[4]} kills on the wiki)." if mz[3] == "wiki" and mz[4] else " (wiki measurement)." if mz[3] == "wiki" else " (player reports).")) if mz else "") + (f" Drops worth about {mzs(ev)} a kill at today's Free Market prices." if ev >= 1 else "") + (" Undead: Heal damages it." if mb.get("undead") else "") + "</p>"
+        wh = dr = qs = ""
         if homes.get(n):
-            b += "<h2>Where to find it</h2><table><tr><th>Map</th><th>Count</th><th>Levels</th><th></th></tr>" + "".join(
+            wh = "<h2>Where to find it</h2><table><tr><th>Map</th><th>Count</th><th>Levels</th><th></th></tr>" + "".join(
                 f'<tr><td>{mlink(p)}</td><td>{c}</td><td><small>{(str(M[p]["lv"][0]) + "–" + str(M[p]["lv"][1])) if M[p].get("lv") and M[p]["lv"][0] and M[p]["lv"][1] else ""}</small></td><td>{navbtn(p)}</td></tr>' for p, c in sorted(homes[n], key=lambda x: -x[1])) + "</table>"
         if not homes.get(n) and mb.get("region"):
-            b += f'<h2>Where to find it</h2><p>{E(mb["region"])}. The exact maps go up once the region is mapped.</p>'
+            wh = f'<h2>Where to find it</h2><p>{E(mb["region"])}. The exact maps go up once the region is mapped.</p>'
         if drops.get(n):
-            b += "<h2>Drops</h2><table><tr><th>Item</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
+            dr = "<h2>Drops</h2><table><tr><th>Item</th><th>Rate</th><th>Sells for</th></tr>" + "".join(
                 f'<tr><td>{ilink(i)}{live(i)}{" <small>(only while on the quest)</small>" if qo else ""}</td><td>{f"{r:g}%" if r is not None else ""}</td><td class="n">{mzs(PRICE[i]) if i in PRICE else ""}</td></tr>'
                 for i, r, qo in sorted(drops[n], key=lambda x: -(PRICE.get(x[0], 0) * (x[1] or 0)))) + "</table><p class=\"note\">" + (
                 "Drop rates measured by players on the wiki." if all(r is not None for _, r, _ in drops[n]) else
@@ -395,9 +413,10 @@ def build(world, guide, summary, notes, out):
             for q, c, why in sorted(qq, key=lambda x: x[0]["lv"]):
                 if (q["id"], why) in seen: continue
                 seen.add((q["id"], why)); rows += f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}{E(why)} ×{c:,}</small></li>"
-            b += f"<h2>Quests that need it</h2><ul>{rows}</ul>"
-        b += f'<p class="note">Updated {built}.</p>'
-        b += BOARD_CTA
+            qs = f"<h2>Quests that need it</h2><ul>{rows}</ul>"
+        # Monster A: stats on the left, every drop with its price in the middle, where it lives and quests on the right
+        b = lay("mob", [sec(head, "head", "Stats"), sec(dr, "", "Drops"), sec(wh, "", "Where") + sec(qs, "", "Quests")], tabs=True)
+        b += f'<p class="note">Updated {built}.</p>' + BOARD_CTA
         crumbs = [("Monsters", "/monsters/"), (n, f"/monster/{BSLUG[n]}/")]
         write(out, f"monster/{BSLUG[n]}", page(itempages.fit_title(f"{n} drops, stats & location", "MapleStory Classic", "Club FM"), desc, f"/monster/{BSLUG[n]}/", crumbs, b, f"{OG}monster/{BSLUG[n]}.png" if mb.get("id") else None)); paths.append(f"/monster/{BSLUG[n]}/")
 
@@ -428,7 +447,8 @@ def build(world, guide, summary, notes, out):
                 # every item it needs, so a search for any one of them finds the quest
                 (", ".join(f"{c} {i}" for i, c in q.get("need", [])) or ", ".join(f"hunt {c} {k}" for k, c, *_ in q.get("kill", [])[:2]) or "what to do") +
                 (f", rewards {fmt(q['exp'])} EXP" if q.get("exp") else "") + ".")
-        b = f'<h1>{E(q["n"])}</h1><p class="sub">{("In the game's quest log as " + E(q["arc"]) + " · ") if q.get("arc") else ""}MapleStory Classic quest · Level {q["lv"]}+ · {E(q.get("a") or "")}{" · Repeatable" if q.get("rep") else ""}</p>'
+        b = st = hu = br_ = rw = ""
+        hd = f'<h1>{E(q["n"])}</h1><p class="sub">{("In the game's quest log as " + E(q["arc"]) + " · ") if q.get("arc") else ""}MapleStory Classic quest · Level {q["lv"]}+ · {E(q.get("a") or "")}{" · Repeatable" if q.get("rep") else ""}</p>'
         extra = []
         if q.get("lv2"): extra.append(f"Turn it in at level {q['lv2']}.")
         if q.get("cost"): extra.append(f"Costs {mzf(q['cost'])} to accept.")
@@ -437,20 +457,20 @@ def build(world, guide, summary, notes, out):
         elif q.get("from") or q.get("to"): extra.append("Event quest" + (f", opens {E(q['from'][:10])}" if q.get("from") else "") + (f", ends {E(q['to'][:10])}" if q.get("to") else "") + ".")
         if q.get("start"): extra.append("You're given " + ", ".join(ilink(i, c) for i, c in q["start"]) + " when you start.")
         if q.get("unconfirmed"): extra.append("Sources disagree on: " + E(", ".join(q["unconfirmed"])) + ". Shown from the game data.")
-        if extra: b += '<div class="tip">' + "<br>".join(extra) + "</div>"
-        b += '<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
-            ("Start from", E(q["g"])), ("Level", f"{q['lv']}+"), ("Who can do it", jobs_text(q.get("jobs") or [])),
+        if extra: hd += '<div class="tip">' + "<br>".join(extra) + "</div>"
+        hd += '<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
+            ("Start from", (f'<a href="/map/{MSLUG[where_g[0]]}/" title="Where {E(q["g"])} stands">{E(q["g"])}</a>' if where_g and where_g[0] in MSLUG else E(q["g"]))), ("Level", f"{q['lv']}+"), ("Who can do it", jobs_text(q.get("jobs") or [])),
             ("EXP", fmt(q.get("exp"))), ("Mesos", fmt(q.get("meso"))), ("Fame", fmt(q.get("fame")))] if v not in ("0",)).replace(f"<span>Mesos</span><b>{fmt(q.get('meso'))}</b>", f'<span>Mesos</span><b class="mz">{fmt(q.get("meso"))}</b>') + "</div>"
         if where_g:
             npic = f'<img class="npcpic" src="{IO}/npc/{q["gid"]}/icon" alt="" loading="lazy">' if q.get("gid") is not None else ""
-            b += f"<p>{npic}{E(q['g'])} stands in {', '.join(mnav(p) for p in where_g[:4])}</p>"
+            st += f'<p class="npcat">{npic}<span>{E(q["g"])} stands in</span> ' + " ".join(mchip(p) for p in where_g[:4]) + "</p>"
             gm = next((M[p] for p in where_g if M[p].get("mm")), None)
             if gm:
                 np_ = next((n for n in gm.get("npcs") or [] if n[0] == q["g"]), None)
-                if np_: b += minimap(gm, spawns=False, hl=(np_[1], np_[2], q["g"] + " is here")) + f'<p class="note">{E(q["g"])} is the green dot{(", " + where(gm, np_[1], np_[2])) if where(gm, np_[1], np_[2]) else ""}, in {E(gm["name"])}.</p>'
+                if np_: st += minimap(gm, spawns=False, hl=(np_[1], np_[2], q["g"] + " is here")) + f'<p class="note">{E(q["g"])} is the green dot{(", " + where(gm, np_[1], np_[2])) if where(gm, np_[1], np_[2]) else ""}, in {E(gm["name"])}.</p>'
         if q.get("pre"):
             pre = [QBYID[i] for i in q["pre"] if i in QBYID]
-            if pre: b += "<h2>Finish first</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in pre) + "</ul>"
+            if pre: hd += '<p class="pre"><b>Finish first:</b> ' + ", ".join(f"{qlink(x)}{(' <small>Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}" for x in pre) + "</p>"
         # the quest window's to-do list, with the map for each step when we know it
         steps = q.get("steps") or []
         qw = QWHERE.get(str(q["id"])) or {}
@@ -459,44 +479,50 @@ def build(world, guide, summary, notes, out):
                 t2 = re.sub(r"\{m:(\d+)\}", lambda mm: MBYID.get(int(mm.group(1)), "") , t)
                 hit = qw.get(t.strip()) or qw.get(t2.strip())
                 if hit and hit[1] in M:
-                    return f"<li>{E(t2)}: {E(hit[0])} in {mnav(hit[1])}" + (f" <small>· {E(hit[2])}</small>" if len(hit) > 2 and hit[2] else "") + "</li>"
+                    return f"<li>{E(t2)}: {E(hit[0])} in {mchip(hit[1])}" + (f" <small>· {E(hit[2])}</small>" if len(hit) > 2 and hit[2] else "") + "</li>"
                 maps = [MBYID[int(x)] for x in re.findall(r"\{m:(\d+)\}", t) if int(x) in MBYID]
                 return f"<li>{E(t2)}" + (" " + " ".join(navbtn(x) for x in maps) if maps else "") + "</li>"
-            b += "<h2>Steps</h2><ol>" + "".join(stepl(t) for t in steps) + "</ol>"
+            st += "<h3>Steps</h3><ol class=\"qsteps\">" + "".join(stepl(t) for t in steps) + "</ol>"
         if q.get("kill"):
-            b += "<h2>Hunt</h2><ul>" + "".join(
-                f"<li>" + (f'<img class="ms" src="{sprite_url(k[0])}" alt="" loading="lazy">' if sprite_url(k[0]) else "") + f"{blink(k[0])} ×{k[1]:,}" + (f" <small>· found in {', '.join(mnav(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:3])}</small>" if homes.get(k[0]) else "") + "</li>" for k in q["kill"]) + "</ul>"
+            hu = "<h2>Hunt</h2>" + "".join(
+                '<div class="hunt"><div class="who">' + (f'<img class="ms" src="{sprite_url(k[0])}" alt="" loading="lazy">' if sprite_url(k[0]) else "") + f'{blink(k[0])}<b class="cnt">×{k[1]:,}</b></div>'
+                + ('<div class="where"><small>Hunt them in</small>' + "".join(mchip(p) for p, _ in sorted(homes.get(k[0], []), key=lambda x: -x[1])[:4]) + "</div>" if homes.get(k[0]) else
+                   f'<p class="note">{E(MOB[k[0]]["region"])}</p>' if k[0] in MOB and MOB[k[0]].get("region") else "") + "</div>" for k in q["kill"])
         if q.get("need"):
             acc = {"fee": 0, "cat": {}, "base": {}}; rows = ""; crafted = 0
             for i, c in q["need"]:
                 nd = plan(i, c, frozenset(), acc)
-                rows += f'<div class="need"><div class="nl"><span class="nm">{ilink(i)}{live(i)}</span><span class="n">×{c:,}</span>{fp(i, c)}</div>'
+                rows += f'<div class="need"><div class="nh"><span class="nm">{ilink(i)}</span><b class="cnt">×{c:,}</b></div><div class="ways">'
+                rows += (f'<div class="way"><small>Buy it</small>{fp(i, c)}' + (f' <a class="see" href="/#item={urllib.parse.quote(i)}">See listings</a>' if i in PRICE else "") + "</div>")
                 if nd["r"]:
                     crafted += 1
-                    rows += craft_line(nd) + '<div class="tk">' + "".join(tree_html(k) for k in nd["kids"]) + "</div>"
-                else: rows += srcs(i)
-                rows += "</div>"
-            b += f'<h2>Bring</h2>{rows}<p class="note fpnote">FM prices change with the market; these are today\'s.</p>'
+                    rows += '<div class="way"><small>Or make it</small>' + craft_line(nd) + '<div class="tk">' + "".join(tree_html(k) for k in nd["kids"]) + "</div></div>"
+                elif srcs(i): rows += '<div class="way"><small>Or get it</small>' + srcs(i) + "</div>"
+                rows += "</div></div>"
+            br_ = f'<h2>Bring</h2>{rows}<p class="note fpnote">FM prices change with the market; these are today\'s.</p>'
             if crafted:
-                b += ('<div class="basebox"><b>Everything to gather</b>' + "".join(f"<span>{ilink(n, c)}</span>" for n, c in sorted(acc["base"].items(), key=lambda x: -x[1]))
+                br_ += ('<div class="basebox"><b>Everything to gather</b>' + "".join(f"<span>{ilink(n, c)}</span>" for n, c in sorted(acc["base"].items(), key=lambda x: -x[1]))
                       + (f"<div>{mzs(acc['fee'])} in crafting fees" + "".join(f" · catalyst {E(itempages.shown(n))} ×{c}" for n, c in acc["cat"].items()) + "</div>" if acc["fee"] or acc["cat"] else "") + "</div>")
             tot = sum(PRICE[i] * c for i, c in q["need"] if i in PRICE)
-            if tot: b += f'<p data-fmtot="{E(json.dumps(q["need"]))}">Buy it all on the Free Market: <b>{"about" if all(i in PRICE for i, _ in q["need"]) else "at least"} <span class="mz">{meso(tot)}</span></b>.</p>'
+            if tot: br_ += f'<p data-fmtot="{E(json.dumps(q["need"]))}">Buy it all on the Free Market: <b>{"about" if all(i in PRICE for i, _ in q["need"]) else "at least"} <span class="mz">{meso(tot)}</span></b>.</p>'
         if q.get("get") or q.get("get2") or q.get("skill") or q.get("exp") or q.get("meso"):
-            b += ("<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)} {fp(i, c) if i in PRICE else ''}</li>" for i, c in q.get("get") or [])
+            rw += ("<h2>Rewards</h2><ul>" + "".join(f"<li>{ilink(i, c)} {fp(i, c) if i in PRICE else ''}</li>" for i, c in q.get("get") or [])
                   + "".join(f"<li>{ilink(x[0], x[1])} <small>· {E(x[2])}</small> {fp(x[0], x[1]) if x[0] in PRICE else ''}</li>" for x in q.get("get2") or [])
                   + "".join(f"<li>Skill: {E(n)}</li>" for n in q.get("skill") or [])
                   + ("<li>" + fmt(q["exp"]) + " EXP</li>" if q.get("exp") else "") + ("<li>" + mzf(q["meso"]) + "</li>" if q.get("meso") else "") + "</ul>")
         rv = sum(PRICE[i] * c for i, c in q.get("get") or [] if i in PRICE)
-        if rv: b += f'<p data-fmtot="{E(json.dumps(q.get("get") or []))}">The item rewards sell for <b>{"about" if all(i in PRICE for i, _ in q.get("get") or []) else "at least"} <span class="mz">{meso(rv)}</span></b> on the Free Market today.</p>'
+        if rv: rw += f'<p data-fmtot="{E(json.dumps(q.get("get") or []))}">The item rewards sell for <b>{"about" if all(i in PRICE for i, _ in q.get("get") or []) else "at least"} <span class="mz">{meso(rv)}</span></b> on the Free Market today.</p>'
         nx = nextq.get(q["id"], [])
-        if nx: b += "<h2>Opens next</h2><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
+        if nx: rw += "<h3>Opens next</h3><ul>" + "".join(f"<li>{qlink(x)} {('<small>· Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}</li>" for x in nx) + "</ul>"
         br = next((x for x in (notes or {}).get("brackets") or [] if x["lo"] <= max(q["lv"], 1) < x["hi"]), None)
-        b += ('<div class="nextbar">' + f'<a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>'
+        rw += ('<div class="nextbar">' + f'<a href="/quests.html#q-{q["id"]}">Track it in your Quest Log</a>'
               + "".join(f'<a class="alt" href="/quest/{QSLUG[x["id"]]}/">Next: {E(x["n"])}</a>' for x in nx[:2])
               + (f'<a class="alt" href="/training/level-{br["lo"]}-{br["hi"]}/">Where to train at level {br["lo"]} to {br["hi"]}</a>' if br else "") + "</div>")
-        b += f'<p class="note">Updated {built}.</p>'
-        b += BOARD_CTA
+        # Quest C: the quest in the order you play it, left to right: talk to the NPC, hunt, bring, rewards
+        stt = (f"<h2>Talk to {E(q['g'])}</h2>" + st) if st else ""
+        if rw and not rw.startswith("<h2>"): rw = "<h2>What's next</h2>" + rw
+        b = sec(hd, "head band", "") + lay("quest", [sec(stt, "", "Start"), sec(hu, "", "Hunt"), sec(br_, "", "Bring"), sec(rw, "", "Rewards")], tabs=True)
+        b += f'<p class="note">Updated {built}.</p>' + BOARD_CTA
         crumbs = [("Quest guides", "/quests/"), (q["n"], f"/quest/{s}/")]
         # a quest that is only talking (nothing to bring, hunt or win) stays out of search unless people found it there
         thin = not (q.get("need") or q.get("kill") or q.get("get") or q.get("get2")) and s not in QKEEP
@@ -561,15 +587,17 @@ def build(world, guide, summary, notes, out):
         s = f"level-{lo}-{hi}"
         b = f"<h1>Where to train from level {lo} to {hi} in MapleStory Classic</h1><p class=\"sub\">Training guide · every job · updated {built}</p>"
         b += "".join(f'<div class="tip">{E(t)}</div>' for t in br.get("tips") or [])
-        b += "<h2>Players recommend</h2>"
+        hd, b = b, "<h2>Players recommend</h2>"
         for x in br.get("picks") or []:
             if x["map"] not in M: continue
             st = stats(M[x["map"]])
             if not st: continue
             dmg, hit = touch(MOB[st["worst"]], L, "Bowman")
             b += pick_html(x["map"], st, dmg, hit, dmg * hit * HP[1], L, x["why"] + (f" Best for: {', '.join(x['classes'])}." if x.get("classes") else ""))
-        b += f"<h2>Best maps for each job at level {L}</h2>" + BAR + "".join(rank_list(k, L) for k in keys_at(L))
-        b += "<h2>By class</h2><p>" + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
+        rk = f"<h2>Best maps for each job at level {L}</h2>" + BAR + "".join(rank_list(k, L) for k in keys_at(L))
+        hd += "<p><b>By class:</b> " + " · ".join(f'<a href="/training/{c.lower()}/">{c}</a>' for c in CLASSES) + "</p>"
+        # wide: the players' picks on the left (two across on big screens), each job's best maps on the right
+        b = sec(hd, "head band1", "") + lay("train", [sec(b, "picks", "Players recommend"), sec(rk, "", "Best by job")], tabs=True)
         crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
         desc = f"Best MapleStory Classic training spots from level {lo} to {hi} for every job: " + ", ".join(list(picks)[:3]) + ", with EXP an hour, monsters and potion costs."
         write(out, f"training/{s}", page(itempages.fit_title(f"Where to train level {lo} to {hi}", "MapleStory Classic", "Club FM"), desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
@@ -577,10 +605,13 @@ def build(world, guide, summary, notes, out):
     for cls in CLASSES:
         b = f"<h1>{cls} training guide for MapleStory Classic</h1><p class=\"sub\">Where a {cls.lower()} should train at every level · updated {built}</p>"
         b += BAR + ("<p class=\"note\">Mages hit magic defense and use elements: maps differ by 2nd job.</p>" if cls == "Magician" else "<p class=\"note\">Physical attacks hit weapon defense: high-defense monsters like Iron Hogs are slow for every physical job.</p>")
+        bs = ""
         for br in brackets:
             lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
-            b += f'<h2>Level {lo} to {hi} <small class="note">· shown for level {L}</small></h2>' + "".join(rank_list(k, L) for k in keys_at(L, [cls]))
-            b += f'<p class="note"><a href="/training/level-{lo}-{hi}/">All of level {lo} to {hi}</a></p>'
+            bs += sec(f'<h2>Level {lo} to {hi} <small class="note">· shown for level {L}</small></h2>' + "".join(rank_list(k, L) for k in keys_at(L, [cls]))
+                      + f'<p class="note"><a href="/training/level-{lo}-{hi}/">All of level {lo} to {hi}</a></p>')
+        # each level bracket a card, as many across as fit
+        b = sec(b, "head band1", "") + f'<div class="lay lay-brk">{bs}</div>'
         crumbs = [("Training guide", "/training/"), (cls, f"/training/{cls.lower()}/")]
         write(out, f"training/{cls.lower()}", page(itempages.fit_title(f"{cls} training guide, every level", "MapleStory Classic", "Club FM"),
                                                     f"Where a {cls} should train in MapleStory Classic from level 1 to 100, by 2nd job: the best maps at each level with EXP an hour.", f"/training/{cls.lower()}/", crumbs, b))
@@ -606,7 +637,7 @@ def build(world, guide, summary, notes, out):
             f'<li>{mlink(p)}{" <small>· Lv " + str(M[p]["lv"][0]) + "+</small>" if M[p].get("lv") and M[p]["lv"][0] else ""}</li>' for p in sorted(regions[r])) + "</ul>"
     write(out, "maps", page("MapleStory Classic maps, hidden portals and monsters · Club FM", f"Every MapleStory Classic map: in-game minimaps, {hidc} hidden portals, monsters, NPCs and exits.", "/maps/", [("Maps", "/maps/")], b)); paths.append("/maps/")
 
-    mons = sorted([n for n in MOB if f"/monster/{BSLUG[n]}/" in paths], key=lambda n: (MOB[n]["lv"], n))
+    mons = sorted([n for n in MOB if n in BSLUG and not MOB[n].get("variant") and f"/monster/{BSLUG[n]}/" in paths], key=lambda n: (MOB[n]["lv"], n))
     b = f"<h1>MapleStory Classic monsters</h1><p class=\"sub\">{len(mons)} monsters with stats, drops and where to find them · updated {built}</p><div class=\"mobs\">" + "".join(mobcard(n) for n in mons) + "</div>"
     write(out, "monsters", page("All MapleStory Classic monsters · drops, stats and locations · Club FM", "Every MapleStory Classic monster: level, HP, EXP, drops with rates and Free Market value, and the maps they spawn on.", "/monsters/", [("Monsters", "/monsters/")], b)); paths.append("/monsters/")
 
@@ -689,7 +720,7 @@ def build(world, guide, summary, notes, out):
         return t
     # data/play.json: what the Quests and Training pages link to (quest guide pages, where monsters live, where NPCs stand)
     play = {"q": {str(q["id"]): QSLUG[q["id"]] for q in QS},
-            "mob": {n: [BSLUG[n], [[p, MSLUG[p]] for p, c in sorted(_sum(homes.get(n, [])).items(), key=lambda x: -x[1])[:3]]] for n in MOB if not MOB[n].get("boss") or homes.get(n)},
+            "mob": {n: [BSLUG[n], [[p, MSLUG[p]] for p, c in sorted(_sum(homes.get(n, [])).items(), key=lambda x: -x[1])[:3]]] for n in MOB if n in BSLUG and (not MOB[n].get("boss") or homes.get(n))},
             "npc": {n: [[p, MSLUG[p]] for p in ps[:2]] for n, ps in npc_at.items()}}
     os.makedirs(os.path.join(out, "data"), exist_ok=True)
     with open(os.path.join(out, "data", "play.json"), "w", encoding="utf-8") as f: json.dump(play, f, separators=(",", ":"), ensure_ascii=False)

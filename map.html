@@ -14,7 +14,7 @@
 :root[data-theme="dark"]{--bg:#140f22;--card:#1e1733;--ink:#efe9ff;--muted:#a79cc4;--line:#30264d;--accent:#a78bfa;--soft:#2a2045;--gold:#f6c94a;--gold-soft:#3a2f10;--ok:#4ade80;--ok-soft:#14321f;--warn:#fbbf24;--bad:#fb923c;--hid:#d8b4fe}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}
 a{color:var(--accent)}
-main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
+main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .brand{font:800 1.25rem Outfit,sans-serif;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}
 .brand img{height:30px;image-rendering:pixelated}
@@ -61,6 +61,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 #v-train{min-height:100vh}
 .qhere{font-size:.85rem;margin:6px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--soft);border-radius:10px;padding:6px 10px}.qhere small{color:var(--muted)}
 .tmore{margin-top:8px}.tmore summary{cursor:pointer;font-weight:700;color:var(--accent);font-size:.9rem}
+.gostep{margin:10px 0;background:var(--accent,#6d3fd1)!important;color:#fff!important;border-color:transparent!important;font-size:.95rem!important;padding:10px 16px!important}
 .btn{font:700 .85rem Inter;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 /* minimap */
@@ -673,6 +674,13 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     });
     var last = el("div", "step"); last.appendChild(el("div", "n", "✓")); var lb = el("div"); lb.appendChild(el("h4", null, "You're in " + MAPS[b].name)); lb.appendChild(minimap(MAPS[b], { you: r.steps.length ? r.steps[r.steps.length - 1].e.arrive : centre(MAPS[b]), size: 300, maxh: 300 })); last.appendChild(lb); steps.appendChild(last);
     box.appendChild(steps); box.appendChild(legend());
+    // Directions on the map pages: each map of the route opens with its portal glowing (assets/mapnav.js reads fm-dir)
+    if (r.steps.length) {
+      var dir = { to: b, at: Date.now(), steps: r.steps.map(function (s) { var p = s.e.kind === "walk" ? MAPS[s.from].portals[s.e.portal] : null; return { from: s.from, to: s.e.to, kind: s.e.kind, portal: s.e.kind === "walk" ? s.e.portal : null, what: s.e.what || "", hidden: !!(p && p[1] === "hidden") }; }) };
+      var go = el("a", "btn gostep", "Directions on the map pages, step by step ▸"); go.href = "/map/" + String(a).toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "/";
+      go.addEventListener("click", function () { try { localStorage.setItem("fm-dir", JSON.stringify(dir)); } catch (e) {} });
+      box.insertBefore(go, steps);
+    }
   }
   function resolve(v) { v = String(v || "").trim(); if (!v) return null; if (MAPS[v]) return v; var lo = v.toLowerCase(); var hit = PAGES.filter(function (p) { return p.toLowerCase() === lo || MAPS[p].name.toLowerCase() === lo; })[0]; return hit || PAGES.filter(function (p) { return p.toLowerCase().indexOf(lo) === 0; })[0] || null; }
 

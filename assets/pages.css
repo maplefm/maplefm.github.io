@@ -1,0 +1,169 @@
+/* Item, monster, map, quest and guide pages (Nov 19 2026): the look of the front page. White cards on the lavender
+   background instead of a cream box in a brown frame, and pages that use the width of the screen. Pages built with
+   columns (tools/worldpages.py and itempages.py: .card.wide > .lay > .col > section.blk) put each part in its own card;
+   the rest keep one card, now white and wider. Phones get one column, and pages marked data-tabs get tabs
+   (assets/pagetabs.js). Loaded after item.css and world.css, so it wins where they disagree. */
+:root{--bg:#f4effc;--panel:#ffffff;--panel2:#f5f1fc;--line:#e6ddf6;--line2:#e6ddf6;--wood:#e6ddf6;--shadow:0 2px 10px rgba(60,30,120,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#151022;--panel:#1f1832;--panel2:#2a2142;--line:#3a2f56;--line2:#3a2f56;--wood:#3a2f56;--shadow:0 2px 10px rgba(0,0,0,.35)}}
+body{background:var(--bg)}
+main{max-width:min(1680px,calc(100% - 48px));padding:10px 0 56px}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.card.wide{background:none;border:0;padding:0;box-shadow:none}
+.card.wide>.pbrand{display:none}
+h1{font-family:Outfit,Inter,system-ui,sans-serif;letter-spacing:-.01em}
+h2{font-family:Outfit,Inter,system-ui,sans-serif}
+h2::before{display:none}h2{padding-left:0}
+.tip{border-left-color:var(--accent)}
+
+/* columns of cards */
+.lay{display:grid;gap:14px;align-items:start}
+.lay>.col{display:grid;gap:14px;align-content:start;min-width:0}
+.blk{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.blk>h2:first-child{margin-top:0}
+.blk h3{font-size:.95rem;margin:14px 0 4px}
+.blk table{margin-top:4px}
+.blk td,.blk th{padding:5px 8px}
+.card.wide>.note,.card.wide>.cta{margin-left:4px;margin-right:4px}
+.lay-item{grid-template-columns:minmax(320px,400px) minmax(0,1fr) minmax(300px,400px)}
+.lay-mob{grid-template-columns:minmax(300px,360px) minmax(0,1fr) minmax(300px,400px)}
+.lay-map{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+.lay-quest{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:14px}
+.lay.n2.lay-item,.lay.n2.lay-mob{grid-template-columns:minmax(320px,400px) minmax(0,1fr)}
+.lay.n1{grid-template-columns:minmax(0,1fr)}
+.head .grid{grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.head .grid div{padding:8px 10px}.head .grid b{font-size:1.05rem}
+.head .sprite{width:80px;height:80px}
+.head p.big{font-size:2rem;margin-top:12px}
+.navh.big{font-size:.9rem}
+.npcs ul{columns:2;column-gap:24px}.npcs li{break-inside:avoid}
+.qlist ul{max-height:440px;overflow:auto;margin:6px 0 0;padding-right:6px}
+.exits table td:nth-child(2),.exits table th:nth-child(2){white-space:nowrap}
+
+/* quest pages: the quest header as a band, then the steps left to right, numbered */
+.blk.band{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:6px 28px;align-items:center}
+.blk.band>h1,.blk.band>.sub,.blk.band>.tip,.blk.band>.pre{grid-column:1}
+.blk.band>.grid{grid-column:2;grid-row:1 / span 4;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin:0}
+.blk.band .pre{margin:6px 0 0;font-size:.92rem}.blk.band .pre small{color:var(--muted)}
+.lay-quest{counter-reset:qstep}
+.lay-quest>.col>.blk>h2:first-child::before{display:inline-grid;place-items:center;counter-increment:qstep;content:counter(qstep);position:static;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font:800 .82rem Inter,system-ui,sans-serif;margin-right:8px;vertical-align:2px}
+.npcat{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0 0 6px}.npcat .npcpic{margin:0}
+.qsteps{padding-left:20px;font-size:.92rem}.qsteps li{margin:4px 0}
+.lay-quest .mmap .in,html.mini .mmap .in,.dcard .mmap .in{width:100%!important}
+
+/* a map as one button: the name goes to the map page, Directions to the route finder */
+.mchip{display:inline-flex;align-items:stretch;border:1px solid var(--line2);border-radius:999px;overflow:hidden;margin:2px 4px 2px 0;vertical-align:middle;background:var(--panel)}
+.mchip{max-width:100%}.mchip>a:first-child{padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;color:var(--ink);text-decoration:none;font-weight:600;font-size:.86rem}
+.mchip>a:first-child:hover{text-decoration:underline}
+.mchip .navh{margin:0;border-radius:0;box-shadow:none;padding:4px 10px 4px 8px;font-size:.74rem;align-items:center}
+.navh::before{border-left-width:6px}
+
+/* quest Hunt and Bring: one card per monster or item, the count in a badge */
+.hunt,.need{border:1.5px solid var(--line2);border-radius:14px;padding:10px 12px;margin:10px 0 0;display:grid;gap:8px}
+.need:first-of-type{border-top:1.5px solid var(--line2)}
+.hunt .who,.need .nh{display:flex;align-items:center;gap:8px;font-weight:700;min-width:0}
+.hunt .who a,.need .nh a{color:var(--ink)}
+.cnt{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:2px 10px;font-size:.88rem;white-space:nowrap}
+.hunt .where{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.hunt .where small,.way>small{flex-basis:100%;display:block;color:var(--muted);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+.ways{display:grid;gap:8px}
+.way{background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:.88rem;display:grid;gap:4px}
+.way .see{font-weight:700;font-size:.82rem}
+.way .crt,.way .srcs{margin:0}
+.way .tk{margin:2px 0 0;padding-left:8px}
+
+/* phones: one column; pages with data-tabs show one part at a time under the header (assets/pagetabs.js) */
+.ptabs{display:none}
+@media (max-width:1180px){
+  .lay-item,.lay-mob{grid-template-columns:minmax(300px,380px) minmax(0,1fr)}
+  .lay-item>.col:nth-child(3),.lay-mob>.col:nth-child(3){grid-column:2}
+  .lay-map{grid-template-columns:1fr 1fr}
+  .blk.band{grid-template-columns:1fr}.blk.band>.grid{grid-column:1;grid-row:auto}
+}
+@media (max-width:760px){
+  main{max-width:none;padding:6px 12px 48px}
+  .lay,.lay-item,.lay-mob,.lay-map,.lay-quest,.lay.n2.lay-item,.lay.n2.lay-mob{grid-template-columns:minmax(0,1fr)}
+  .lay>.col{display:contents}
+  .lay>.col:nth-child(n){grid-column:auto}
+  .card{padding:16px}
+  .blk{padding:14px}
+  .head .grid{grid-template-columns:repeat(2,1fr);gap:6px}.head .grid div{padding:6px 9px}.head .grid b{font-size:.95rem}
+  .lay-mob .head .grid div{padding:5px 9px}.lay-mob .head .grid span{font-size:.62rem}.lay-mob .head .grid b{font-size:.88rem}
+  .head .sprite{width:56px;height:56px}.head h1{font-size:1.35rem}.head p.big{font-size:1.6rem}
+  .npcs ul{columns:1}
+  .ptabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 2px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+  .ptabs::-webkit-scrollbar{display:none}
+  .ptabs button{flex:none;border:1px solid var(--line2);background:var(--panel);color:var(--ink);font:700 .88rem Inter,system-ui,sans-serif;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .ptabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .lay.tabbed section.blk[data-tab]:not(.head):not(.on){display:none}
+  .qlist ul{max-height:none}
+}
+
+/* map pages (assets/mapnav.js): every exit labeled on the minimap with its number */
+.mmap .in{overflow:visible}
+.pchip{position:absolute;transform:translate(-50%,-140%);display:inline-flex;align-items:center;gap:5px;background:var(--accent);color:#fff!important;font:700 .74rem Inter,system-ui,sans-serif;padding:3px 9px 3px 4px;border-radius:999px;white-space:nowrap;text-decoration:none!important;box-shadow:0 3px 10px rgba(40,10,90,.45);z-index:3;max-width:220px}
+.pchip span{overflow:hidden;text-overflow:ellipsis}
+.pchip.dn{transform:translate(-50%,40%)}
+.pchip.l{transform:translate(-12px,-140%)}.pchip.l.dn{transform:translate(-12px,40%)}
+.pchip.r{transform:translate(calc(-100% + 12px),-140%)}.pchip.r.dn{transform:translate(calc(-100% + 12px),40%)}
+.pchip.short span{display:none}.pchip.short{padding:3px 4px}
+.pchip kbd{background:#fff;color:var(--accent);border-radius:50%;width:17px;height:17px;display:inline-grid;place-items:center;font:800 .7rem Inter,system-ui,sans-serif;flex:none}
+.pchip:hover{filter:brightness(1.12);z-index:6}
+.xk{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:6px;background:var(--panel2);border:1px solid var(--line2);font:800 .7rem Inter,system-ui,sans-serif;color:var(--accent);margin-right:2px;vertical-align:1px}
+.mhint{margin:6px 0 0}.mhint kbd,.dnext kbd{border:1px solid var(--line2);border-radius:5px;padding:0 5px;background:var(--panel2);font-size:.75rem}
+.minibtn{margin-left:8px;border:1px solid var(--line2);background:var(--panel);color:var(--accent);font:700 .82rem Inter,system-ui,sans-serif;border-radius:999px;padding:6px 12px;cursor:pointer}
+/* Directions: the portal to take pulses gold, the others fade */
+.mk.tgt{width:24px!important;height:24px!important;background:#ffd66b!important;border:3px solid #fff;z-index:4;animation:dpulse 1.2s ease-in-out infinite}
+.mk.fade,.pchip.fade{opacity:.3}
+.pchip.glow{background:#ffd66b;color:#2b1b57!important;z-index:5;animation:dpulse 1.2s ease-in-out infinite}.pchip.glow kbd{background:#2b1b57;color:#ffd66b}
+@keyframes dpulse{0%,100%{box-shadow:0 0 0 5px rgba(255,214,107,.45),0 0 18px 6px rgba(255,214,107,.6)}50%{box-shadow:0 0 0 12px rgba(255,214,107,.18),0 0 30px 12px rgba(255,214,107,.4)}}
+@media (prefers-reduced-motion:reduce){.mk.tgt,.pchip.glow{animation:none;box-shadow:0 0 0 6px rgba(255,214,107,.5)}}
+.dbar{display:flex;align-items:center;gap:14px;background:#2b1b57;color:#fff;border-radius:14px;padding:8px 10px 8px 16px;margin:10px 0}
+.dbar .dt{font:800 1rem Outfit,Inter,sans-serif}.dbar .dgo1{font-size:1.02rem;min-width:0}.dbar .dgo1 b{color:#ffd66b}
+.ddots{display:inline-flex;gap:5px}.ddots i{width:20px;height:6px;border-radius:6px;background:rgba(255,255,255,.3)}.ddots i.on{background:#ffd66b}.ddots i.done{background:#a98bff}
+.dbar button{border:0;border-radius:999px;font:800 .9rem Inter,system-ui,sans-serif;padding:8px 14px;cursor:pointer}
+.dnext{margin-left:auto;background:#ffd66b;color:#2b1b57}.dnext kbd{background:#2b1b57;color:#fff;border:0;margin-left:4px}
+.dbar .dend{background:rgba(255,255,255,.15);color:#fff}
+/* phones: Directions on their own screen */
+.dsheet{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;gap:12px;padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));overflow:auto}
+.dtop{display:flex;align-items:center;justify-content:space-between}.dtop b{font:800 1.15rem Outfit,Inter,sans-serif}
+.dtop .dend{border:1px solid var(--line2);background:var(--panel);color:var(--muted);font:700 .85rem Inter,sans-serif;border-radius:999px;padding:6px 14px}
+.dprog{display:flex;align-items:center;gap:10px;color:var(--muted);font-weight:700;font-size:.85rem}.dprog .ddots i{background:var(--line2)}.dprog .ddots i.on{background:var(--accent)}
+.dcard{background:var(--panel);border-radius:20px;padding:16px;display:grid;gap:10px;box-shadow:var(--shadow)}.dcard.thin{border:1px solid var(--line2);box-shadow:none;padding:12px 14px;gap:2px}
+.dcard small{color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
+.drow{display:flex;align-items:center;gap:14px}.darr{font:800 3.4rem/1 Outfit,Inter,sans-serif;color:var(--accent);flex:none;width:64px;text-align:center}
+.drow b{display:block;font:800 1.3rem/1.2 Outfit,Inter,sans-serif}.drow span{color:var(--muted);font-weight:600}
+.dcard .mmap{margin:0}
+.dgo{margin-top:auto;border:0;border-radius:18px;background:var(--accent);color:#fff;font:800 1.15rem Outfit,Inter,sans-serif;padding:18px;display:flex;justify-content:center;gap:10px;align-items:baseline;cursor:pointer}
+.dgo small{font:600 .82rem Inter,sans-serif;opacity:.85}
+html.dir-on.dsheet-open{overflow:hidden}
+/* the mini window (?mini=1): the map, its exits and a box to jump anywhere */
+html.mini .sitenav,html.mini .playbar,html.mini .crumbs,html.mini footer,html.mini .foot,html.mini .card.wide>.note,html.mini .cta,html.mini .ptabs{display:none!important}
+html.mini main{max-width:none;padding:10px 12px}
+html.mini .lay{grid-template-columns:1fr!important}
+html.mini .lay>.col{display:contents}
+html.mini .lay section.blk:not(.head):not(.exits){display:none}
+html.mini .head .navrow,html.mini .head>p:not(.sub):not(.mhint):not(.note),html.mini .head>.note,html.mini .lg{display:none}
+html.mini .blk{padding:12px;border-radius:14px}
+.minitop{display:grid;gap:8px;margin-bottom:10px}.minitop .mt{display:flex;align-items:center;gap:8px;font:800 1rem Outfit,Inter,sans-serif}.minitop .mt img{width:26px}
+.minitop .mt span{margin-left:auto;font:700 .72rem Inter,sans-serif;background:#e8f4ee;color:#226a4c;border-radius:999px;padding:3px 9px}
+.mgo input{width:100%;box-sizing:border-box;border:2px solid var(--accent);border-radius:12px;padding:10px 12px;font:600 .95rem Inter,sans-serif;background:var(--panel);color:var(--ink)}
+.msug{display:grid;background:var(--panel);border:1px solid var(--line2);border-radius:12px;overflow:hidden}.msug a{padding:8px 12px;color:var(--ink);text-decoration:none;font-weight:600}.msug a:hover{background:var(--panel2)}
+.mrec{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.78rem}.mrec span{color:var(--muted);font-weight:700}.mrec a{background:var(--panel);border:1px solid var(--line2);border-radius:999px;padding:3px 9px;text-decoration:none;color:var(--accent);font-weight:600}
+@media (max-width:760px){.pchip span{display:none}.pchip{padding:3px 4px}.minibtn{display:none}}
+html.mini .exits th:nth-child(2),html.mini .exits td:nth-child(2),html.mini .exits th:nth-child(4),html.mini .exits td:nth-child(4),html.mini .exits .hid .navh{display:none}
+html.mini .exits h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 4px}
+
+/* training guides: the players' picks two across, each job's best maps beside them; class pages one card per level */
+.lay-train{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);margin-top:14px}
+.picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;align-content:start}
+.picks>h2{grid-column:1 / -1}
+.picks .pick{margin:0;background:var(--panel2);border-color:var(--line2)}
+.picks .mobs{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.lay-brk{grid-template-columns:repeat(auto-fill,minmax(440px,1fr));margin-top:14px}
+.blk.band1>h1{margin-bottom:2px}
+/* hubs and lists: use the width */
+.toc{columns:4 230px}
+.mobs{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.its{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
+@media (max-width:1180px){.lay-train{grid-template-columns:1fr}}
+@media (max-width:760px){.picks,.lay-brk{grid-template-columns:minmax(0,1fr)}.picks .mobs{grid-template-columns:1fr 1fr}}
