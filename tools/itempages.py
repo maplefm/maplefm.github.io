@@ -724,7 +724,7 @@ def main():
     hublinks = '<p class="note" style="margin:6px 0 10px">By category: ' + " · ".join(f'<a href="/items/{h}/">{html.escape(w[0].upper() + w[1:])}</a>' for h, w in hubs) + (' · <a href="/items/class/">By class</a> · <a href="/guides/">Guides</a>' if guide_paths else "") + "</p>"
     idx = idx.replace('<input id="q"', hublinks + '<input id="q"', 1)
     os.makedirs(os.path.join(out, "items"), exist_ok=True)
-    open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx))
+    open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx, crumbs=[("Prices", "/"), ("All items", "/items/")]))
     # remove pages for items that dropped out, so stale prices don't linger in search
     keep = {s for s, _, _ in made}
     root = os.path.join(out, "item")

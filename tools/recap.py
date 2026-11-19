@@ -3,7 +3,7 @@ share (recap/index.html) plus a dated copy every Sunday, and RECAP.json for the 
 
   python tools/recap.py SUMMARY.json OUT_DIR RECAP.json
 """
-import json, os, sys, datetime, html
+import json, os, re, sys, datetime, html
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import itempages
 
@@ -31,7 +31,10 @@ def main():
     hot = sorted([r for r in summ.get("rows") or [] if isinstance(r, dict) and r.get("typ") and r.get("vol")], key=lambda r: -r["vol"])[:10]
     end = datetime.datetime.fromtimestamp(now, datetime.timezone.utc); start = end - datetime.timedelta(days=7)
     rng = f"{start.strftime('%b %-d')} to {end.strftime('%b %-d, %Y')}"
-    link = lambda n: f'<a href="/item/{itempages.slug(n)}/">{E(itempages.shown(n))}</a>'
+    import urllib.parse
+    # an item without its own page (too few sales) opens its live card instead of a missing page
+    link = lambda n: (f'<a href="/item/{itempages.slug(n)}/">{E(itempages.shown(n))}</a>' if os.path.isdir(os.path.join(out, "item", itempages.slug(n)))
+                      else f'<a href="/#item={urllib.parse.quote(n)}">{E(itempages.shown(n))}</a>')
     def table(xs):
         return "<table><tr><th>Item</th><th>Week ago</th><th>Now</th><th>Change</th></tr>" + "".join(
             f'<tr><td>{link(x["item"])}</td><td>{itempages.meso(x["then"])}</td><td><b>{itempages.meso(x["now"])}</b></td><td><span class="chg {"up" if x["chg"] > 0 else "down"}">{"▲" if x["chg"] > 0 else "▼"} {abs(round(x["chg"] * 100))}%</span></td></tr>' for x in xs) + "</table>"
@@ -54,9 +57,14 @@ def main():
             b += "<table><tr><th>Member deal</th><th>Price</th><th>Typical</th><th>Under</th></tr>" + "".join(
                 f'<tr><td><a href="{E(d["url"])}">{E(d["item"])}</a></td><td><b>{itempages.meso(d["price"])}</b></td><td>{itempages.meso(d["typ"])}</td><td>{round(d["off"] * 100)}%</td></tr>' for d in mk["best"]) + "</table>"
     b += '<p style="margin-top:16px"><a href="/">Live prices</a> · <a href="/items/">Every item</a></p>'
+    # every earlier week stays one tap away (the Sunday copies)
+    et0 = end - datetime.timedelta(hours=4)
+    weeks = sorted([d for d in os.listdir(os.path.join(out, "recap")) if re.match(r"^\d{4}-\d{2}-\d{2}$", d)] if os.path.isdir(os.path.join(out, "recap")) else [], reverse=True)
+    weeks = [d for d in weeks if d != et0.strftime("%Y-%m-%d")]
+    if weeks: b += "<h2>Earlier weeks</h2><p>" + " · ".join(f'<a href="/recap/{d}/">Week ending {datetime.datetime.strptime(d, "%Y-%m-%d").strftime("%b %-d")}</a>' for d in weeks) + "</p>"
     b += f'<p class="note">Typical sale now against about a week ago. Items with 8 or more sales only. Updated {end.strftime("%B %-d, %Y")}.</p></div>'
     desc = f"MapleStory Classic Free Market, {rng}: " + (", ".join(f"{itempages.shown(x['item'])} {'up' if x['chg'] > 0 else 'down'} {abs(round(x['chg'] * 100))}%" for x in (up[:2] + down[:2])) or "the week's prices") + "."
-    pg = itempages.page("This week on the MapleStory Classic Free Market · Club FM", desc, itempages.SITE + "/recap/", b, None, itempages.OG + "recap.png", active="prices")
+    pg = itempages.page("This week on the MapleStory Classic Free Market · Club FM", desc, itempages.SITE + "/recap/", b, None, itempages.OG + "recap.png", active="prices", crumbs=[("Prices", "/"), ("Weekly recap", "/recap/")])
     os.makedirs(os.path.join(out, "recap"), exist_ok=True)
     open(os.path.join(out, "recap", "index.html"), "w", encoding="utf-8").write(pg)
     et = end - datetime.timedelta(hours=4)

@@ -157,7 +157,7 @@ table.tw{border-collapse:collapse;width:100%}
 .tw-bar{height:7px;width:110px;border-radius:4px;background:var(--bg);overflow:hidden;margin-top:4px}.tw-bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}.tw-bar.m i{background:var(--gold)}
 .tw-pot{font-weight:700;white-space:nowrap}
 .tw-x td{background:var(--soft);padding:0 10px 12px}
-.tw-x .tcard{margin:0;box-shadow:none}.tw-x .tcard > div > .row:first-child,.tw-x .tcard .stats{display:none}
+.tw-xb{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 10px}.tw-x .tcard{margin:0;box-shadow:none}.tw-x .tcard > div > .row:first-child,.tw-x .tcard .stats{display:none}
 .tw-more td{text-align:center;border-bottom:0;padding-top:12px}
 @media (max-width:760px){
  .tw-hid{text-align:left}.tw-picks{display:none}
@@ -540,7 +540,15 @@ table.tw{border-collapse:collapse;width:100%}
         function tog() { OPEN = OPEN === c.pg ? "-" : c.pg; rows(); }
         tr.addEventListener("click", tog); tr.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tog(); } });
         body.appendChild(tr);
-        if (c.pg === OPEN) { var xr = el("tr", "tw-x"), xd = el("td"); xd.colSpan = 7; xd.appendChild(trainCard(c, i, L, hpPot, b)); xr.appendChild(xd); body.appendChild(xr); }
+        if (c.pg === OPEN) {
+          var xr = el("tr", "tw-x"), xd = el("td"); xd.colSpan = 7;
+          // the way there first, on phones too (the row's own Directions button is a desktop column)
+          var xb = el("div", "tw-xb"), d1 = el("button", "btn pri", "Directions"); d1.type = "button";
+          d1.addEventListener("click", function () { TO = c.pg; showTab("route"); $("to").value = c.pg; if (FROM) findRoute(); else $("from").focus(); });
+          var d2 = el("a", "btn", "Map page"); d2.href = "/map/" + String(c.pg).toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "/";
+          xb.appendChild(d1); xb.appendChild(d2); xd.appendChild(xb);
+          xd.appendChild(trainCard(c, i, L, hpPot, b)); xr.appendChild(xd); body.appendChild(xr);
+        }
       });
       if (list.length > shown) { var mr = el("tr", "tw-more"), md = el("td"); md.colSpan = 7; var mbtn = el("button", "btn", "Show " + Math.min(10, list.length - shown) + " more maps"); mbtn.type = "button"; mbtn.addEventListener("click", function () { shown += 10; rows(); }); md.appendChild(mbtn); mr.appendChild(md); body.appendChild(mr); }
     }

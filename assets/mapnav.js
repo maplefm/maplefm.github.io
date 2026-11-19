@@ -119,6 +119,8 @@
   var recent = ls("fm-recent-maps") || []; recent = [HERE].concat(recent.filter(function (x) { return x !== HERE; })).slice(0, 8); ls("fm-recent-maps", recent);
   if (MINI) {
     document.documentElement.classList.add("mini");
+    // every map link on the page (the exits table, hidden portals) stays in the mini window
+    [].forEach.call(document.querySelectorAll('a[href^="/map/"]'), function (a) { var u = a.getAttribute("href"); if (!/[?]/.test(u)) a.setAttribute("href", u.replace(/(#.*)?$/, "?mini=1$1")); });
     var box = el("div", "minitop");
     box.innerHTML = '<div class="mt"><img src="/assets/superstar@4x.png" alt=""><b>Club FM</b><span>Mini window</span></div>';
     var lab = el("label", "mgo"), inp = el("input"); inp.id = "mgo-q"; inp.placeholder = "Go to a map: type 3 letters"; inp.autocomplete = "off"; inp.setAttribute("aria-label", "Go to a map");
