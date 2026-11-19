@@ -141,7 +141,7 @@ def main():
 
     # ---- wiki tables
     wq = cargo("quests", ["_pageName=page", "id", "name_en", "required_level", "complete_level", "giver", "turn_in", "region", "area", "repeatable", "profession", "profession_level",
-                          "meso_cost", "exp_reward", "meso_reward", "fame_reward", "available_until", "arc"])
+                          "meso_cost", "exp_reward", "meso_reward", "fame_reward", "available_until", "arc", "prerequisite"])
     wqi = cargo("quest_required_items", ["quest_id", "item_id", "quantity"])
     wqr = cargo("quest_rewards", ["quest_id", "item_id", "quantity", "reward_type", "choice_group", "job", "gender", "chance"])
     wqe = cargo("quest_enemies", ["quest_id", "monster_id", "quantity"])
@@ -349,6 +349,7 @@ def main():
     # ---- wiki quests the game data doesn't list yet go in the quest log too (the Lith Harbor snail line, the
     # Sleepywood rumor line...), with what the wiki knows: level, giver, region and the items it asks for
     have = {norm2(q["n"]) for q in allq} | {norm2(p) for p in page_qid}; have_id = {q["id"] for q in allq} | set(hidden)
+    wpre = {}
     for w in wq:
         nm, wid = str(w.get("name_en") or "").strip(), str(w.get("id") or "").strip()
         if not nm or not wid.isdigit() or int(wid) in have_id or norm2(nm) in have: continue
@@ -361,9 +362,22 @@ def main():
         if str(w.get("arc") or "").strip() and str(w.get("arc")).strip() != nm: q["arc"] = str(w["arc"]).strip()
         if npc_town.get(str(q["g"]).lower()): q["town"] = npc_town[str(q["g"]).lower()]
         allq.append(q); page_qid[nm] = q["id"]; page_qid[str(w.get("page") or nm).strip()] = q["id"]
+        if str(w.get("prerequisite") or "").strip(): wpre[q["id"]] = str(w["prerequisite"])
         for iname, cnt in q["need"]:
             if (q["id"], iname) not in seen:
                 seen.add((q["id"], iname)); g(iname)["q"].append([nm, q["lv"], cnt, q["g"], q["a"], q["rep"], q["gid"], q["id"]])
+    # prerequisites of those wiki quests, once every quest has an id: a page the log can't place is left out, never guessed
+    # (the list is ";"-separated; a name with a comma in it, like "Two Thieves, One Plan", stays whole)
+    byid = {q["id"]: q for q in allq}
+    for i, txt in wpre.items():
+        ids = []
+        for part in [x.strip() for x in txt.split(";") if x.strip()]:
+            got = qid_of(part)
+            if got is None and "," in part: got = None if any(qid_of(x.strip()) is None for x in part.split(",")) else [qid_of(x.strip()) for x in part.split(",")]
+            for x in (got if isinstance(got, list) else [got]):
+                if x is not None and x != i and x not in ids: ids.append(x)
+        byid[i]["pre"] = ids
+    print("wiki quests with prerequisites", sum(1 for i in wpre if byid[i]["pre"]), "of", len(wpre))
     print("quests in the log", len(allq))
 
     # ---- wiki required items for quests that are neither in the game data nor a quest row of their own
