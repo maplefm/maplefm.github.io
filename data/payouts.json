@@ -4,12 +4,22 @@
    "date": "2026-10-30",
    "amount": 50.0,
    "via": "direct"
+  },
+  {
+   "date": "2026-11-18",
+   "amount": 150.0,
+   "via": "direct"
   }
  ],
  "laclac": [
   {
    "date": "2026-10-30",
    "amount": 50.0,
+   "via": "direct"
+  },
+  {
+   "date": "2026-11-18",
+   "amount": 150.0,
    "via": "direct"
   }
  ],
