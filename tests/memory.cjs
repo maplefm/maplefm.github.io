@@ -2,6 +2,7 @@
 const { chromium } = require("playwright");
 const MIN = +(process.argv[2] || 60);
 (async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1366, height: 900 } });
+  await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
   await ctx.route(/api\.maplefm\.gg\/hit/, (r) => r.fulfill({ status: 204, body: "" }));
   const p = await ctx.newPage(); const errs = []; p.on("pageerror", (e) => errs.push(e.message));
   await p.goto("https://maplefm.gg/", { waitUntil: "load" }); const t0 = Date.now(); const s = [];

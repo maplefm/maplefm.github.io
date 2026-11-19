@@ -11,6 +11,7 @@ async function ctxWith(b, opts, routes) {
   const ctx = await b.newContext(Object.assign({ viewport: { width: 1366, height: 900 } }, opts || {}));
   const sent = [];
   // safety: no writes reach the live Worker from a test
+  await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
   await ctx.route(/api\.maplefm\.gg\/(hit|sold|vote|report|me\/|missimg|scan|inbox|alerts|watch)/, (r) => { sent.push(r.request().method() + " " + r.request().url()); return r.request().method() === "GET" ? r.continue() : r.fulfill({ status: 204, body: "" }); });
   for (const [re, fn] of routes || []) await ctx.route(re, fn);
   ctx.__sent = sent;

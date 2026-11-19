@@ -4,6 +4,7 @@ const pw = require("playwright"), devices = pw.devices, ENGINE = pw[process.argv
 const OUT = (process.env.OUT || require("os").tmpdir()) + "/"; const log = []; const ok = (n, c, note) => { log.push((c ? "ok   " : "FAIL ") + n + (note ? " | " + note : "")); };
 (async () => { const b = await ENGINE.launch();
 const ctx = await b.newContext(Object.assign({}, devices["iPhone 13"]));
+await ctx.route(/classicrank\.com/, (r) => r.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' }));   // automated checks stay off classicrank.com's keyless API (Nov 19 2026)
 await ctx.route(/api\.maplefm\.gg\/hit/, (r) => r.fulfill({ status: 204, body: "" }));
 await ctx.route(/^https:\/\/maplefm\.gg\/(\?[^#]*)?$|^https:\/\/maplefm\.gg\/assets\/(board\.min\.js|board\.min\.css|advsearch\.js|kofigoal\.js)/, (r) => { const u = new URL(r.request().url()); const f = u.pathname === "/" ? "index.html" : u.pathname.slice(1); r.fulfill({ status: 200, contentType: f.endsWith(".js") ? "text/javascript" : f.endsWith(".css") ? "text/css" : "text/html", body: fs.readFileSync(R + f) }); });
 const p = await ctx.newPage(); const errs = []; p.on("pageerror", (e) => errs.push(e.message));

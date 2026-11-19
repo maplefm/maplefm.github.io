@@ -4,7 +4,7 @@
 // Run: NODE_PATH=$(npm root -g) node tests/getting-around.cjs [base url]   (exit 1 on any failure)
 const pw=require("playwright");const B=process.argv[2]||"https://maplefm.gg",O="/tmp/claude-0/bt/ga/";const log=[];const ok=(n,c,x)=>log.push((c?"ok   ":"FAIL ")+n+(x?" | "+x:""));
 (async()=>{const b=await pw.chromium.launch();
-const mk=async o=>{const c=await b.newContext(o);await c.route(/api\.maplefm\.gg\/hit/,r=>r.fulfill({status:204,body:""}));const p=await c.newPage();p.errs=[];p.on("pageerror",e=>p.errs.push(e.message));return [c,p]};
+const mk=async o=>{const c=await b.newContext(o);await c.route(/classicrank\.com/,r=>r.fulfill({status:200,contentType:"application/json",body:'{"data":[]}'}));await c.route(/api\.maplefm\.gg\/hit/,r=>r.fulfill({status:204,body:""}));const p=await c.newPage();p.errs=[];p.on("pageerror",e=>p.errs.push(e.message));return [c,p]};
 const D={viewport:{width:1440,height:900},deviceScaleFactor:1},P={...pw.devices["iPhone 13"]};
 // 1 map page quests, desktop
 {const [c,p]=await mk(D);await p.goto(B+"/map/dangerous-steam/");await p.waitForTimeout(1200);

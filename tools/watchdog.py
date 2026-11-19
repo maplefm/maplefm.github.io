@@ -133,6 +133,8 @@ if PW:
         try: b = pw.webkit.launch() if phone else chrome()
         except Exception as e: return ["WebKit didn't start: " + str(e).split("\n")[0][:80]], "not run"
         ctx = b.new_context(**pw.devices["iPhone 13"]) if phone else b.new_context(viewport={"width": 1440, "height": 900})
+        # automated checks stay off classicrank.com's keyless API (Nov 19 2026): the pictures are answered here instead
+        ctx.route(re.compile(r"classicrank\.com"), lambda r: r.fulfill(status=200, content_type="application/json", body='{"data":[]}'))
         pg = ctx.new_page(); errs = []; live = [0]; full = [0]
         # a failed load from another site (the character pictures from classicrank.com) is caught by the board and
         # only costs a picture, so it isn't a board error; anything from our own pages still is
