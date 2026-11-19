@@ -1748,7 +1748,16 @@
     }
     showHook(); clearInterval(HOOK_T);
     if (big.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) HOOK_T = setInterval(function () { HOOK_K++; showHook(); }, 6000);
-    renderPicks(); renderHeroDeal();
+    // Ko-fi: one quiet line at the end of the stats; assets/kofigoal.js fills in the goal bar and the amount
+    var kf = el("a", "st kofiline"); kf.href = "https://ko-fi.com/maplefm"; kf.target = "_blank"; kf.rel = "noopener";
+    kf.setAttribute("aria-label", "Support Club FM on Ko-fi. Donations pay the scanners.");
+    kf.appendChild(el("span", "kl-cup", "☕")); kf.appendChild(el("span", "kl-t", "Donations pay the scanners"));
+    var kb = el("span", "kl-bar"); kb.setAttribute("role", "progressbar"); kb.setAttribute("aria-label", "Ko-fi donations toward $250, last 28 days");
+    kb.setAttribute("aria-valuemin", "0"); kb.setAttribute("aria-valuemax", "250"); kb.appendChild(el("span", "kl-fill")); kf.appendChild(kb);
+    kf.appendChild(el("span", "kl-have")); kf.appendChild(el("b", "kl-go", "Support"));
+    kf.addEventListener("click", function () { ev("#kofi:stats"); });
+    c.appendChild(kf); if (window.fmKofiPaint) window.fmKofiPaint();
+    renderPicks();
   }
   // board events for the popular list and the traffic report: no cookies, same counter as page visits
   var EV_SEEN = {};
@@ -1806,8 +1815,9 @@
     var score = {}, add = function (i, v) { if (i && i.typ && firm(i)) score[i.item] = (score[i.item] || 0) + v; };
     (POP || []).forEach(function (x) { add(D.byName[x[0]], x[1] * 6); });
     D.list.forEach(function (i) { if (i.n >= MIN && i.salesN) add(i, Math.min(i.salesN, 60) / 10); });
-    var top = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; }).slice(0, 10);
-    var sig = top.join("|") + top.map(function (n) { var i = D.byName[n]; return i.typ + ":" + (i.mv[0] || 0); }).join(",");
+    var N = picksFit(box), top = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; }).slice(0, N);
+    box.style.setProperty("--pn", N);
+    var sig = N + ":" + top.join("|") + top.map(function (n) { var i = D.byName[n]; return i.typ + ":" + (i.mv[0] || 0); }).join(",");
     if (box.dataset.sig === sig) return; box.dataset.sig = sig; box.textContent = "";
     top.forEach(function (n) {
       var i = D.byName[n], b = el("button", "pk"); b.type = "button"; b.setAttribute("role", "listitem"); b.dataset.item = n;
@@ -1820,20 +1830,14 @@
       box.appendChild(b);
     });
   }
-  function renderHeroDeal() {
-    var a = $("hdeal"); if (!a || !D) return;
-    var best = null, lbl = "", txt = "";
-    // deals stay with Mega Deals; the front door only shows the biggest mover
-    if (!best) {
-      D.list.forEach(function (i) { if (i.n >= MIN && i.typ >= 100000 && firm(i) && i.mv[0] != null && (!best || Math.abs(i.mv[0]) > Math.abs(best.mv[0]))) best = i; });
-      if (best && Math.abs(best.mv[0]) >= 0.05) { lbl = "Biggest mover today"; txt = (best.mv[0] > 0 ? "▲ " : "▼ ") + Math.round(Math.abs(best.mv[0]) * 100) + "%"; } else best = null;
-    }
-    a.hidden = !best; if (!best) return;
-    var sig = lbl + best.item + txt; if (a.dataset.sig === sig) return; a.dataset.sig = sig; a.textContent = "";
-    var im = iconImg(best.item); if (im) a.appendChild(im);
-    a.appendChild(el("small", null, lbl)); a.appendChild(el("b", null, showName(best.item))); a.appendChild(document.createTextNode(txt)); a.dataset.item = best.item;
-    a.onclick = function (e) { e.preventDefault(); ev("#pick:" + best.item); pick(best.item); jumpToCard(); };
+  // one full row of popular items: as many as fit the width, 5 on a phone, 30 and more on a very wide screen
+  var PICK_W = 70, PICK_GAP = 8, PICK_MAX = 40, PICK_RT = 0;
+  function picksFit(box) {
+    var w = box.clientWidth || (box.parentNode && box.parentNode.clientWidth) || 0;
+    if (innerWidth <= 700) return 5;
+    return Math.max(5, Math.min(PICK_MAX, Math.floor((w + PICK_GAP) / (PICK_W + PICK_GAP)) || 10));
   }
+  addEventListener("resize", function () { clearTimeout(PICK_RT); PICK_RT = setTimeout(function () { if (D) renderPicks(); }, 150); });
   function openSources() {
     var box = $("crew"); box.textContent = "";
     D.who.forEach(function (w, k) { var d = el("div", k === 0 ? "crowned" : ""); d.appendChild(avatarBadged(w, k + 1)); var t = el("span"); var nb = el("b", null, ""); if (w.stream) { var a = el("a", null, w.name); a.href = "https://www.twitch.tv/" + encodeURIComponent(w.name); a.target = "_blank"; a.rel = "noopener"; nb.appendChild(a); } else nb.appendChild(document.createTextNode(w.name)); t.appendChild(nb); var bl = el("span", "fsub"); bl.appendChild(tierBadge(w)); if (w.club) bl.appendChild(el("span", "clubtag", "Club")); t.appendChild(bl); t.appendChild(el("small", null, fmt(w.sales) + " sales · " + fmt(w.shopsN) + " shops · " + w.daysN + (w.daysN === 1 ? " day" : " days") + (w.stream ? " · stream" : ""))); d.appendChild(t); box.appendChild(d); });

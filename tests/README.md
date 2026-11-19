@@ -11,3 +11,4 @@ Rerun after any change. Live site, read only: test visits never reach the visit 
 
 Playwright: `NODE_PATH=$(npm root -g)` in this container. WebKit and Firefox run in CI only.
 7. `node tests/advsearch-ux.cjs [chromium|webkit]`: Search by stats used like a person on an iPhone: pick a type, type a stat total, "or more", typed stats then edited in the panel, the Show button scrolling to the results, a shared link, and no leftover stats after closing. Any change to Search by stats runs this first.
+8. `node tests/sitesearch-ux.cjs [chromium|webkit] [phone|desktop]`: Search the site, the green button at the end of the menu: it sits at the right end on every page, finds monsters, items, quests and maps, the preview's numbers match data/sitesearch.json and the pages, an item's price shows only when the board is sure, Enter opens the page, Esc closes, and test visits send nothing to the visit counter.

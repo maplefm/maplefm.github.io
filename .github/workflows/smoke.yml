@@ -59,6 +59,10 @@ jobs:
         run: |
           node tests/search-ux.cjs chromium phone
           node tests/search-ux.cjs chromium desktop
+      - name: Search the site, phone and desktop
+        run: |
+          node tests/sitesearch-ux.cjs chromium phone
+          node tests/sitesearch-ux.cjs chromium desktop
       # Nov 18: the Zenith world opened with its own economy. One button switches the board; Zenith scans never
       # reach Windia's prices, reports or Discord posts.
       - name: World button shows one world's prices

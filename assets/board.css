@@ -1152,13 +1152,6 @@ dialog h3 { color: var(--accent-ink); }
 .pk .tip .num { color: #ffd66b; }
 @media (hover: hover) { .pk:hover .tip, .pk:focus-visible .tip { display: flex; } }
 .picks .pk:first-child .tip { left: 0; transform: none; }
-.hdeal { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 999px; border: 2px solid #e9b21c; background: #fff6d2; color: var(--ink); font-weight: 800; font-size: .84rem; text-decoration: none; max-width: 100%; min-width: 0; }
-:root[data-theme="dark"] .hdeal { background: #3d2f10; }
-.hdeal[hidden] { display: none; }
-.hdeal img { max-width: 26px; max-height: 26px; }
-.hdeal small { font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.hdeal b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.hdeal:hover { transform: translateY(-1px); }
 .cards.strip { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; padding-top: 10px; border-top: 2px dashed var(--line); font-size: .84rem; font-weight: 700; color: var(--muted); }
 .strip .st { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .strip .st b { color: var(--ink); font-weight: 800; }
@@ -1285,17 +1278,14 @@ footer.clubfoot { padding-bottom: 96px; }
   .plbl .allitems { order: 2; }
   .plbl .mbar { order: 3; max-width: calc(100% - 130px); }
   .plbl .plt { flex-basis: 100%; }
-  .picks:empty { min-height: 136px; }
+  .picks:empty { min-height: 64px; }
   #cards:empty { min-height: 40px; }
-  .hrow:has(.picks:empty) .hdeal[hidden] { display: inline-flex !important; visibility: hidden; min-height: 54px; width: 100%; box-sizing: border-box; }
 }
 @media (min-width: 701px) {
   .picks:empty { min-height: 66px; }
   #cards:empty { min-height: 31px; }
   /* the biggest mover always starts its own line, so it doesn't hop when the picks fill in */
   .hrow::after { content: ""; flex-basis: 100%; height: 0; margin-top: -10px; order: 1; }
-  .hrow .hdeal { order: 2; }
-  .hrow:has(.picks:empty) .hdeal[hidden] { display: inline-flex !important; visibility: hidden; min-height: 42px; box-sizing: border-box; }   /* hold its row while the board loads */
   .plbl .mbar { width: 0; min-width: 100%; }
 }
 
@@ -1419,8 +1409,6 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
 /* the stats strip under the search keeps its height while the numbers load, so the board never jumps */
 .cards.strip { min-height: 34px; }
 /* the biggest mover pill keeps its height while its icon loads */
-.hdeal { min-height: 42px; box-sizing: border-box; }
-.hdeal img { width: 26px; height: 26px; object-fit: contain; }
 
 /* phones and tablets: the board tabs and the category filters each stay on one row; what doesn't fit scrolls sideways */
 @media (max-width: 900px) {
@@ -1639,26 +1627,6 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 .strip button.st:focus-visible, .strip a.st:focus-visible, .wbtn:focus-visible, button.star:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* Ko-fi goal strip under the menu: one row on desktop, two on phones; height fixed so loading never moves the page */
-.kofigoal { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; padding: 0 14px; height: 40px; box-sizing: border-box; border-radius: 12px; text-decoration: none; color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); font-size: 13.5px; overflow: hidden; }
-.kofigoal:hover { border-color: var(--orange); }
-.kofigoal:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.kofigoal .kg-cup { font-size: 17px; }
-.kofigoal .kg-text { white-space: nowrap; }
-.kofigoal .kg-text b { font-family: var(--display); font-weight: 600; margin-right: 2px; }
-.kofigoal .kg-have { font-weight: 700; color: var(--orange-lo); }
-.kofigoal .kg-when { color: var(--muted); font-size: 12px; }
-.kofigoal .kg-bar { flex: 1 1 120px; min-width: 80px; height: 10px; border-radius: 6px; background: var(--panel2); border: 1px solid var(--line); overflow: hidden; }
-.kofigoal .kg-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--orange), var(--gold)); border-radius: 6px; transition: width .6s ease; }
-.kofigoal .kg-note { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
-.kofigoal .kg-go { flex: 0 0 auto; padding: 4px 12px; border-radius: 999px; background: linear-gradient(180deg, #ff8a65, #e2577a); color: #fff; font-weight: 700; font-size: 12.5px; }
-.kofigoal.kg-off .kg-bar, .kofigoal.kg-off .kg-have, .kofigoal.kg-off .kg-when, .kofigoal.kg-off .kg-of { visibility: hidden; }
-@media (prefers-reduced-motion: reduce) { .kofigoal .kg-fill { transition: none; } }
-@media (max-width: 760px) {
-  .kofigoal { flex-wrap: wrap; height: 62px; margin: 6px 0 0; padding: 6px 12px; row-gap: 4px; align-content: center; }
-  .kofigoal .kg-note { display: none; }
-  .kofigoal .kg-bar { order: 5; flex: 1 0 100%; }
-  .kofigoal .kg-go { margin-left: auto; }
-}
 
 /* Server switch (Nov 18 2026: Zenith opened beside Windia, each with its own Free Market). Both servers always show,
    with their game emblems, so it reads as a choice; the one on screen is filled in. Phones give it its own row. */
@@ -1680,3 +1648,36 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 /* phones: the World button sits in the pill row, so Discord shows its icon only and the row stays one line as the
    live label grows (a second line pushed the page down after load, Nov 18) */
 @media (max-width: 480px) { #discpill .dl, #discpill .cnt { display: none; } .top-right .pill.worldpill { padding: 5px 8px; } }
+
+/* Nov 18 2026 front page: "Popular right now" is a bold header on its own line and the items fill one whole row,
+   as many as fit (board.js picksFit sets --pn): 5 on a phone, 30 and more on a very wide screen. */
+.hrow { flex-direction: column; align-items: stretch; gap: 8px; }
+.plbl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; width: 100%; text-transform: none; letter-spacing: 0; }
+.plbl .plt { margin: 0; font: 700 1.05rem/1.2 var(--display); color: var(--ink); }
+.plbl .allitems { display: inline; margin: 0; font-size: .8rem; }
+.plbl .mbar { margin-top: 0; }
+.picks { display: grid; grid-template-columns: repeat(var(--pn, 10), minmax(0, 1fr)); gap: 8px; width: 100%; }
+.picks .pk { width: auto; min-width: 0; }
+.picks .pk:last-child .tip { left: auto; right: 0; transform: none; }
+.picks:empty { min-height: 66px; }
+@media (max-width: 700px) { .picks { grid-template-columns: repeat(5, minmax(0, 1fr)); } .plbl .plt { flex-basis: auto; } .plbl .mbar { max-width: 100%; } }
+/* Ko-fi: one quiet line at the end of the stats (kofigoal.js fills the bar and amount) */
+.strip a.st.kofiline { gap: 7px; padding: 3px 10px; border-radius: 999px; border: 1px solid #ffd0bd; background: #fff6f1; color: #7a4a3a; font-weight: 600; }
+:root[data-theme="dark"] .strip a.st.kofiline { background: #3a2620; border-color: #6b3f30; color: #f1c9b8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .strip a.st.kofiline { background: #3a2620; border-color: #6b3f30; color: #f1c9b8; } }
+.kofiline .kl-bar { display: inline-block; width: 64px; height: 6px; border-radius: 6px; background: #ffe0d2; overflow: hidden; flex: none; }
+.kofiline .kl-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ff8a65, #e2577a); transition: width .6s ease; }
+.kofiline .kl-have { font-weight: 700; color: #b6461f; font-variant-numeric: tabular-nums; }
+.kofiline .kl-have:empty { display: none; }
+.kofiline .kl-go { color: #b6461f; }
+:root[data-theme="dark"] .kofiline .kl-have, :root[data-theme="dark"] .kofiline .kl-go { color: #ffab8a; }
+.kofiline.kl-off .kl-bar, .kofiline.kl-off .kl-have { display: none; }
+.strip a.st.kofiline:hover .kl-go { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) { .kofiline .kl-fill { transition: none; } }
+@media (max-width: 700px) { .strip a.st.kofiline { flex-wrap: nowrap; white-space: nowrap; box-sizing: border-box; max-width: 100%; overflow: hidden; gap: 6px; padding: 3px 9px; } .strip a.st.kofiline * { white-space: nowrap; flex: none; } .strip a.st.kofiline .kl-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; } .kofiline .kl-bar { width: 36px; } }
+/* Ko-fi first in the ☰ menu */
+.menu a.mkofi { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #fff6f1; color: var(--ink); text-decoration: none; margin-bottom: 4px; }
+.menu a.mkofi:hover, .menu a.mkofi:focus-visible { background: #ffeadf; outline: none; }
+:root[data-theme="dark"] .menu a.mkofi { background: #3a2620; }
+.menu a.mkofi b { display: block; font-size: .88rem; }
+.menu a.mkofi small { display: block; font-size: .74rem; color: var(--muted); font-weight: 600; }
