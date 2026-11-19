@@ -88,6 +88,8 @@ jobs:
       # defense is never shown as fact, closed-test drop reports stay out
       - name: Patch data newer than the game files
         run: python3 tests/v2patch.py
+      - name: Wiki quest prerequisites
+        run: python3 tests/wikiquestpre.py
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'
