@@ -71,7 +71,7 @@ const path = (p) => decodeURIComponent(new URL(p.url()).pathname + new URL(p.url
       check("route opens for that map", (await p.inputValue("#to").catch(() => "")) === first, await p.inputValue("#to").catch(() => ""));
       const go = p.locator("a.gostep"); check("step by step link on the map pages", (await go.count()) > 0);
       if (await go.count()) {
-        await click(go, "Directions on the map pages"); check("first map page shows the way on", await p.locator(".dbar, .dsheet").count() > 0, path(p));
+        await click(go, "Directions on the map pages"); await wait(p, 2000); check("first map page shows the way on", await p.locator(".dbar, .dsheet").count() > 0, path(p));
         if (dn === "phone") await click(p.locator(".dsheet .dend, .dsheet button:has-text('End')"), "End"); else { await p.keyboard.press("Escape"); await wait(p, 600); }
         check("route ended", (await p.evaluate(() => localStorage.getItem("fm-dir"))) === null);
         const wt = p.locator(".playbar a[href*='map.html'], .crumbs a[href*='map.html']");
@@ -84,7 +84,7 @@ const path = (p) => decodeURIComponent(new URL(p.url()).pathname + new URL(p.url
       await p.goto(S + "/monster/stirge/"); await wait(p, 1500);
       if (dn === "phone") { const wt = p.locator(".ptabs button:has-text('Where')"); if (await wt.count()) await wt.first().tap(); await wait(p, 300); }
       await click(p.locator(".lay a[href^='/map/']:visible"), "a map"); check("map page", /\/map\//.test(p.url()), p.url());
-      const qn = await p.locator(".lay a[href^='/quest/']").count(); idea(dn + " " + name + ": map page lists quests that hunt here", qn > 0, qn + " quest links on " + path(p));
+      const qn = await p.locator(".lay a[href^='/quest/']").count(); idea(dn + " 5 monster to map to quest to quest log: map page lists quests that hunt here", qn > 0, qn + " quest links on " + path(p));
       if (dn === "phone") { const mt = p.locator(".ptabs button:has-text('Monsters')"); if (await mt.count()) await mt.first().tap(); await wait(p, 300); }
       await click(p.locator(".lay a[href^='/monster/']:visible"), "a monster here");
       if (dn === "phone") { const qt = p.locator(".ptabs button:has-text('Quest')"); if (await qt.count()) await qt.first().tap(); await wait(p, 300); }
@@ -137,7 +137,8 @@ const path = (p) => decodeURIComponent(new URL(p.url()).pathname + new URL(p.url
         const lit = [...document.querySelectorAll(".sitenav .sn-links a")].filter((a) => a.getAttribute("aria-current") || a.classList.contains("on") || a.classList.contains("cur")).map((a) => a.textContent.trim());
         const small = [...document.querySelectorAll(".sitenav a, .sitenav button, .crumbs a, .playbar a")].filter((e) => { const r = e.getBoundingClientRect(); return r.width && (r.height < 32 || r.width < 32); }).map((e) => e.textContent.trim().slice(0, 14) + " " + Math.round(e.getBoundingClientRect().width) + "x" + Math.round(e.getBoundingClientRect().height));
         const fb = document.querySelector(".fbk, #fbk, .feedback"); let under = [];
-        if (fb && fb.getBoundingClientRect().width) { const f = fb.getBoundingClientRect(); under = [...document.querySelectorAll("a, button")].filter((e) => { if (fb.contains(e)) return false; const r = e.getBoundingClientRect(); return r.width && r.left < f.right && r.right > f.left && r.top < f.bottom && r.bottom > f.top; }).map((e) => e.textContent.trim().slice(0, 20)); }
+        const hid = (e) => { for (; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.opacity === "0" || cs.pointerEvents === "none" || cs.visibility === "hidden") return true; } return false; };
+        if (fb && fb.getBoundingClientRect().width && !hid(fb)) { const f = fb.getBoundingClientRect(); under = [...document.querySelectorAll("a, button")].filter((e) => { if (fb.contains(e)) return false; const r = e.getBoundingClientRect(); return r.width && r.left < f.right && r.right > f.left && r.top < f.bottom && r.bottom > f.top; }).map((e) => e.textContent.trim().slice(0, 20)); }
         return { home: !!brand && brand.getAttribute("href") === "/", crumbs, lit, small: small.slice(0, 6), nsmall: small.length, under: under.slice(0, 4), h: document.documentElement.scrollHeight, top: !!document.querySelector(".totop, #totop, [aria-label*='top' i]") };
       }, dn);
       ok(`${dn} ${k}: logo goes home`, m.home);
