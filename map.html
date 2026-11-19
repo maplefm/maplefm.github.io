@@ -167,7 +167,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
 </section>
 <p class="foot" id="credit"></p>
 </main>
-<script src="/assets/classic-dmg.js?v=3"></script>
+<script src="/assets/classic-dmg.js?v=4"></script>
 <script>
 (function () {
   "use strict";
@@ -457,7 +457,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
     if (near.length) {
       var sk = el("details", "card tmore"), ss = el("summary"); ss.appendChild(el("h2", null, "Not ranked near your level")); ss.firstChild.style.display = "inline"; sk.appendChild(ss);
       var su = el("ul", "list");
-      near.forEach(function (h) { var f = h.fail[0], r = f && f.r, li = el("li"); li.appendChild(el("b", null, h.pg)); li.appendChild(el("span", "note", f ? f.name + ": " + (!r || r.hc < 0.05 ? "can't hit it yet, needs " + ENG.accNeeded(L, f.mob) + " ACC" : r.hc < ENG.HIT_BAR ? Math.round(r.hc * 100) + "% hit, needs " + ENG.accNeeded(L, f.mob) + " ACC" : r.el === 0 ? "immune to " + r.atk.el.toLowerCase() : r.kill.toFixed(0) + " s a kill") : "")); su.appendChild(li); });
+      near.forEach(function (h) { var f = h.fail[0], r = f && f.r, li = el("li"); li.appendChild(el("b", null, h.pg)); li.appendChild(el("span", "note", f ? f.name + ": " + (!r || r.hc < 0.05 ? "can't hit it yet, needs " + ENG.accNeeded(L, f.mob) + " ACC" : r.hc < ENG.HIT_BAR ? Math.round(r.hc * 100) + "% hit, needs " + ENG.accNeeded(L, f.mob) + " ACC" : r.el === 0 ? "immune to " + r.atk.el.toLowerCase() : r.kill.toFixed(0) + " s a kill") : "")); if (f && f.n / h.all < 0.1) li.lastChild.textContent += " · only " + f.n + " spawn points, but it stands in the way of your attacks"; su.appendChild(li); });
       sk.appendChild(su); v.appendChild(sk);
     }
     var side = el("details", "card tmore"); var sh2 = el("summary"); sh2.appendChild(el("h2", null, "Potions, prices and party play")); sh2.firstChild.style.display = "inline"; side.appendChild(sh2);
@@ -495,7 +495,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
   }
   function hourly(c, L, cls, hpPot) {
     var h = c.h, mz = 0, dv = 0, rep = 0, tot = 0;
-    h.rows.forEach(function (row) { if (!row.ok) return; var mm = mobMesos(row.name, row.mob); tot += row.n; mz += mm.v * row.n; if (mm.rep) rep += row.n; dv += mobDrops(row.name) * row.n; });
+    h.rows.forEach(function (row) { if (!row.count) return; var mm = mobMesos(row.name, row.mob); tot += row.n; mz += mm.v * row.n; if (mm.rep) rep += row.n; dv += mobDrops(row.name) * row.n; });
     mz /= tot; dv /= tot;
     var kph = h.kph, hpHr = kph * (TOUCH[cls] || 0.2) * c.t.hit * c.t.dmg;
     var potHr = hpHr / (W.pots[hpPot.name] && W.pots[hpPot.name].hp || 100), potCost = hpHr * hpPot.per;
@@ -556,7 +556,7 @@ main{max-width:1160px;margin:0 auto;padding:14px 16px 40px}
       li.appendChild(el("b", null, row.name + " ×" + row.n + ": "));
       li.appendChild(document.createTextNode(r.atk.name + " " + fmt(r.line) + " a " + (r.atk.lines > 1 ? (r.atk.id === "4001003" ? "star" : "hit") + " ×" + r.atk.lines : "hit") +
         " (" + Math.round(r.defMult * r.gap * r.el * 100) + "% gets through: " + fmt(row.mob[r.atk.def] || 0) + " " + (r.atk.def === "wdef" ? "weapon" : "magic") + " defense" + (row.mob.defnew ? " from before the " + defDay(row.mob.defnew) + " update" : "") + (r.gap < 1 ? ", level gap" : "") + (r.el !== 1 ? ", " + (r.el > 1 ? "weak" : r.el === 0 ? "immune" : "resists") : "") + ")" +
-        " · " + r.casts + (r.casts === 1 ? " cast" : " casts") + " · " + Math.round(r.hc * 100) + "% hit · " + r.kill.toFixed(1) + " s" + (row.ok ? "" : " · under the bar, walked past")));
+        " · " + r.casts + (r.casts === 1 ? " cast" : " casts") + " · " + Math.round(r.hc * 100) + "% hit · " + r.kill.toFixed(1) + " s" + (row.ok ? "" : row.count ? " · slow, but it's in the way, so it counts in the hour" : " · under the bar")));
       nl.appendChild(li);
     });
     var rt = m.respawn && typeof m.respawn === "object" ? Object.keys(m.respawn) : [];
