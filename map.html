@@ -128,6 +128,48 @@ main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
   .facts li.lw { color: var(--warn); font-weight: 600; }
 /* one menu row from 1000 px, as the finished page always is: a font arriving late used to wrap it for a moment */
 @media (min-width:1000px){nav.sitenav{flex-wrap:nowrap}}
+/* Where to train as one ranked table (Nov 19 2026) */
+.tw-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.tw-top h2{font-size:1.15rem;margin:0;flex:1 1 320px}.tw-top .seg{margin:0}.tw-top .bld{border:0;box-shadow:none;padding:0;margin:8px 0 0;background:none;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}.tw-top .bld>.row{justify-content:flex-start!important;gap:10px}.tw-top .bld>.grid{display:flex!important;gap:10px}.tw-top .bld>p,.tw-top .bld>details,.tw-top .bld>.warn{flex-basis:100%;margin:0}.tw-top .bld>p.bdesc{flex-basis:auto;flex:1 1 200px}.tw-top>.warn{margin-top:8px}
+.tog{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 13px 5px 6px;font:700 .86rem Inter,sans-serif;cursor:pointer;white-space:nowrap}
+.tog i{width:30px;height:18px;border-radius:9px;background:var(--line);position:relative;flex:none}.tog i::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}
+.tog.on{border-color:var(--accent);background:var(--soft);color:var(--accent)}.tog.on i{background:var(--accent)}.tog.on i::after{left:14px}
+.tw-hid{flex:1 1 260px;text-align:right}.tw-hid b{color:var(--ink)}
+.tw-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 4px}
+.tw-pk{border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--card);color:var(--ink);text-align:left;font:inherit;cursor:pointer;min-width:0}
+.tw-pk.on{border-color:var(--accent);background:var(--soft)}
+.tw-pk small{display:block;font-weight:800;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}.tw-pk b{display:block;font:700 1rem Outfit,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tw-wrap{overflow-x:auto;margin-top:6px}
+table.tw{border-collapse:collapse;width:100%}
+.tw th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}.tw th.on{color:var(--accent)}
+.tw td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tw-r{cursor:pointer}.tw-r:hover td{background:var(--bg)}.tw-r.open td{background:var(--soft);border-bottom-color:transparent}
+.tw-r:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tw-rk{font:800 .85rem Outfit,sans-serif;color:var(--muted);width:28px}
+.tw-nm b{font-size:.95rem}.tw-sub{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:2px}
+.tw-town{font-size:.72rem;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 6px}
+.tw-one{font-size:.74rem;font-weight:800;color:var(--ok)}.tw-one.no{color:var(--muted)}
+.tw-ms{display:flex;gap:12px;align-items:center}
+.sp.tw-sp{width:36px;height:36px;position:relative;display:grid;place-items:center}.sp.tw-sp img{max-width:36px;max-height:36px}
+.tw-sp em{position:absolute;right:-7px;bottom:-4px;font:800 .64rem Inter,sans-serif;font-style:normal;background:var(--ok);color:#fff;border-radius:6px;padding:0 4px;line-height:15px}
+.tw-sp em.h2{background:#8f80ad}.tw-sp em.h3{background:var(--warn)}
+.tw-num b{font:800 1rem Outfit,sans-serif;white-space:nowrap}.tw-num.on b,.tw-pot.on{color:var(--accent)}
+.tw-bar{height:7px;width:110px;border-radius:4px;background:var(--bg);overflow:hidden;margin-top:4px}.tw-bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}.tw-bar.m i{background:var(--gold)}
+.tw-pot{font-weight:700;white-space:nowrap}
+.tw-x td{background:var(--soft);padding:0 10px 12px}
+.tw-x .tcard{margin:0;box-shadow:none}.tw-x .tcard > div > .row:first-child,.tw-x .tcard .stats{display:none}
+.tw-more td{text-align:center;border-bottom:0;padding-top:12px}
+@media (max-width:760px){
+ .tw-hid{text-align:left}.tw-picks{display:none}
+ .tw thead{display:none}.tw,.tw tbody{display:block}
+ .tw-r{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:6px 8px;padding:10px 4px;border-bottom:1px solid var(--line)}.tw-r td{border:0;padding:0;background:none!important}
+ .tw-r.open{background:var(--soft);border-radius:10px 10px 0 0}
+ .tw-rk{grid-row:1;grid-column:1}.tw-nm{grid-row:1;grid-column:2}.tw-mobs{grid-row:2;grid-column:2/4}.tw-num.e,.tw-pot,.tw-go{display:none}
+ .tw-num.m{grid-row:1;grid-column:3;text-align:right}
+ .tw-r[data-s="exp"] .tw-num.m,.tw-r[data-s="safe"] .tw-num.m{display:none}.tw-r[data-s="exp"] .tw-num.e{display:block;grid-row:1;grid-column:3;text-align:right}.tw-r[data-s="safe"] .tw-pot{display:block;grid-row:1;grid-column:3;text-align:right}
+ .tw-bar{width:64px;margin-left:auto}
+ .tw-x,.tw-more{display:block}.tw-x td,.tw-more td{display:block}.tw-x td{border-radius:0 0 10px 10px}
+}
 </style><link rel="stylesheet" href="/assets/nav.css?v=7"></head><body><main>
 <!--nav--><nav class="sitenav sn-pin" aria-label="Club FM"><a class="sn-brand" href="/"><img src="/assets/superstar@4x.png" alt="">Club <b>FM</b></a><form class="sn-search" action="/" method="get" role="search"><label><span class="sn-sr">Search item prices</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input type="search" name="q" placeholder="Search any item price" data-ph="Search any item price|Search items|Search" autocomplete="off" enterkeyhint="search" maxlength="80"></label></form><div class="sn-links"><a href="/"><span class="sn-l">Prices</span><span class="sn-s">Prices</span></a><a href="/market.html"><span class="sn-l">Player market</span><span class="sn-s">Market</span></a><a href="/quests.html"><span class="sn-l">Quests</span><span class="sn-s">Quests</span></a><a href="/map.html" aria-current="page"><span class="sn-l">Training and maps</span><span class="sn-s">Training</span></a><a href="/contribute.html" class="sn-earn"><span class="sn-l">Earn by scanning</span><span class="sn-s">Earn</span></a></div><button type="button" class="sn-site" data-sitesearch aria-label="Search the site: quests, monsters, maps, drops"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>Search site</span></button></nav><script>(function(){var n=document.querySelector(".sitenav.sn-pin");if(!n)return;var y=scrollY,t=0,h=0,u=function(){t=Date.now()};["wheel","touchmove","keydown"].forEach(function(e){addEventListener(e,u,{passive:true})});addEventListener("scroll",function(){var d=scrollY-y,H=document.documentElement.scrollHeight;if(H!==h){h=H;y=scrollY;return}if(scrollY<=120||d<-6){n.classList.remove("sn-hide");y=scrollY;return}if(d>30){if(innerWidth<=700&&Date.now()-t<500&&!n.contains(document.activeElement))n.classList.add("sn-hide");y=scrollY}},{passive:true});})();</script><nav class="playbar" aria-label="Training and maps"><a href="/map.html" aria-current="page">Where to train</a><a href="/training/">Training guides</a><a href="/maps/">Maps</a><a href="/monsters/">Monsters</a></nav><script src="/assets/hscroll.js?v=4" defer></script><script src="/assets/sitesearch.js?v=1" defer></script><!--/nav-->
 
@@ -186,6 +228,9 @@ main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
   function secs(t) { t = Math.round(t); return t < 60 ? t + "s" : Math.floor(t / 60) + "m " + (t % 60 < 10 ? "0" : "") + (t % 60) + "s"; }
   var W = null, NOTES = null, PRICE = {}, MAPS = {}, PAGES = [], BYID = {}, MOBX = {}, EQUIP = {};
   var SORT = "exp"; try { SORT = localStorage.getItem("fm-train-sort") || "exp"; } catch (e) {}
+  // the two switches on Where to train, and the map row that is open
+  var TF = { one: false, crowd: false }; try { TF = Object.assign(TF, JSON.parse(localStorage.getItem("fm-train-f") || "{}")); } catch (e) {}
+  var OPEN = "", ONE_BAR = 0.7, CROWD = { Sleepywood: 1 };
   var ME = { lv: 0, cls: "" }; try { var s0 = JSON.parse(localStorage.getItem("fm-map-me") || "{}"); ME.lv = s0.lv || 0; ME.cls = s0.cls || ""; var q0 = JSON.parse(localStorage.getItem("fm-qlog") || "{}"); if (!ME.lv && q0.level) ME.lv = q0.level; } catch (e) {}
   var FAM = { Warrior: 1, Magician: 2, Bowman: 3, Thief: 4, Pirate: 5, Beginner: 0 }, FAMCLS = ["", "Warrior", "Magician", "Bowman", "Thief", "Warrior"];
   try { var p0 = JSON.parse(localStorage.getItem("fm-play") || "null"); if (p0) { if (p0.lv) ME.lv = p0.lv; if (p0.fam && !ME.cls) ME.cls = FAMCLS[p0.fam] || ""; } } catch (e) {}
@@ -316,7 +361,7 @@ main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
       md.appendChild(bt);
     });
     top.appendChild(md);
-    top.appendChild(el("span", "est" + (b.generic ? "" : " me2"), b.generic ? "Typical gear estimate" : "Your build"));
+    top.appendChild(el("span", "est" + (b.generic ? "" : " me2"), b.generic ? "Typical gear estimate" : ACCT.synced ? "Your build · saved to your account" : "Your build · saved on this device"));
     c.appendChild(top);
     var tt = jobTypes(job);
     if (tt.length > 1) {
@@ -412,16 +457,21 @@ main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
     var b = current(), fam = famOf(b.job) || "Bowman", cls = fam === "Beginner" ? "Beginner" : fam;
     var hpPot = bestPot("hp"), mpPot = bestPot("mp"), br = bracket(L);
     if (!QIDX) setTimeout(loadQuests, 400);
-    var head = el("div", "card");
-    head.appendChild(el("h2", null, "Level " + L + " " + b.job + (b.type && b.type !== "pure" ? " (" + CD.BUILDS[b.type].name.split(" (")[0].toLowerCase().replace(/\b(str|luk)\b/g, function (s) { return s.toUpperCase(); }) + ")" : "") + ": where to train"));
-    head.appendChild(el("p", "note", "Maps where you hit and kill reliably, ranked by EXP an hour. Potions and mesos included."));
-    var pr = el("div", "row"); pr.style.marginTop = "6px";
-    pr.appendChild(el("span", "chip ok wrap", "Cheapest HP now: " + hpPot.name + " · " + hpPot.per.toFixed(2) + " mesos per HP" + (hpPot.fm ? " on the Free Market" : " at the NPC")));
-    pr.appendChild(el("span", "chip wrap", "Cheapest MP now: " + mpPot.name + " · " + mpPot.per.toFixed(2) + " per MP" + (mpPot.fm ? " on the Free Market" : " at the NPC")));
-    head.appendChild(pr);
-    if (br) br.tips.forEach(function (t) { head.appendChild(el("div", "warn", t)); });
-    v.appendChild(head);
-    v.appendChild(buildCard(b));
+    // one compact bar: whose numbers, the build in one line, and what to rank by
+    var tw = el("div", "card tw-top");
+    var t1 = el("div", "tw-row");
+    t1.appendChild(el("h2", null, "Where to train · level " + L + " " + b.job + (b.type && b.type !== "pure" ? " (" + CD.BUILDS[b.type].name.split(" (")[0].toLowerCase().replace(/\b(str|luk)\b/g, function (s) { return s.toUpperCase(); }) + ")" : "")));
+    var sb = el("div", "seg tw-sort"); sb.setAttribute("role", "group"); sb.setAttribute("aria-label", "Rank maps by");
+    [["exp", "Most EXP"], ["meso", "Most mesos"], ["safe", "Fewest potions"]].forEach(function (x) {
+      var bt = el("button", SORT === x[0] ? "on" : "", x[1]); bt.type = "button"; bt.setAttribute("aria-pressed", SORT === x[0] ? "true" : "false");
+      if (x[0] === "safe") bt.title = "Fewest " + hpPot.name + "s an hour: the maps where monsters touch you least";
+      bt.addEventListener("click", function () { SORT = x[0]; try { localStorage.setItem("fm-train-sort", SORT); } catch (e) {} renderTrain(); });
+      sb.appendChild(bt);
+    });
+    t1.appendChild(sb); tw.appendChild(t1);
+    tw.appendChild(buildCard(b));
+    if (br) br.tips.forEach(function (t) { tw.appendChild(el("div", "warn", t)); });
+    v.appendChild(tw);
     var picks = {}; (br ? br.picks : []).forEach(function (p) { picks[p.map] = p; });
     var rk = ENG.rankMaps(b, W), cand = [];
     rk.fit.forEach(function (h) {
@@ -429,30 +479,77 @@ main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
       var t = touch(st.worst, L, cls), cost = t.dmg * t.hit * hpPot.per;
       var c = hourly({ pg: h.pg, m: h.m, st: st, t: t, cost: cost, pick: picks[h.pg], h: h }, L, cls, hpPot); if (c.kph > 0) cand.push(c);
     });
+    // one hit: spawns whose monster dies to one cast, out of all spawns on the map
+    cand.forEach(function (c) { var one = 0, all = 0; c.h.rows.forEach(function (r) { all += r.n; if (r.r && r.r.casts === 1) one += r.n; }); c.one = one; c.all = all; c.oneOk = all > 0 && one / all >= ONE_BAR; c.busy = CROWD[c.m.near] || CROWD[c.m.region] ? 1 : 0; });
     var KEY = { exp: "eph", meso: "mph", safe: "safe" };
-    function order(k) { return cand.slice().sort(function (a, c) { return k === "safe" ? (a.potHr - c.potHr) || (c.eph - a.eph) : c[KEY[k]] - a[KEY[k]]; }); }
-    if (cand.length) {
-      var top = el("div", "card");
-      var bx = order("exp")[0], bm = order("meso")[0];
-      top.appendChild(el("h2", null, "Best for you at level " + L));
-      var tl = el("div", "stats");
-      [[bx.m.name, "Most EXP · " + short(bx.eph) + " an hour"], [bm.m.name, "Most mesos · " + M(bm.mph) + " an hour"]].forEach(function (x) { var s = el("div", "stat"); s.appendChild(el("b", null, x[0])); s.appendChild(el("small", null, x[1])); tl.appendChild(s); });
-      top.appendChild(tl);
-      var sb = el("div", "seg"); sb.setAttribute("role", "tablist"); sb.setAttribute("aria-label", "Rank maps by");
-      [["exp", "Most EXP an hour"], ["meso", "Most mesos an hour"], ["safe", "Fewest potions"]].forEach(function (x) {
-        var bt = el("button", SORT === x[0] ? "on" : "", x[1]); bt.type = "button"; bt.setAttribute("aria-pressed", SORT === x[0] ? "true" : "false");
-        bt.addEventListener("click", function () { SORT = x[0]; try { localStorage.setItem("fm-train-sort", SORT); } catch (e) {} renderTrain(); var c = document.querySelector("#v-train .seg"); if (c) c.scrollIntoView({ block: "start" }); });
-        sb.appendChild(bt);
+    function order(list, k) { return list.slice().sort(function (a, c) { return k === "safe" ? (a.potHr - c.potHr) || (c.eph - a.eph) : c[KEY[k]] - a[KEY[k]]; }); }
+    var shownC = cand.filter(function (c) { return (!TF.one || c.oneOk) && (!TF.crowd || !c.busy); });
+    var hidB = TF.crowd ? cand.filter(function (c) { return c.busy; }).length : 0, hidO = TF.one ? cand.filter(function (c) { return !c.oneOk && !(TF.crowd && c.busy); }).length : 0;
+    var box = el("div", "card tw-box");
+    var fr = el("div", "tw-row");
+    [["one", "One hit only", "Maps where " + Math.round(ONE_BAR * 100) + "% or more of the monsters die in one hit"], ["crowd", "Skip the crowds", "Leaves out Sleepywood and its dungeons, where most players train at these levels"]].forEach(function (x) {
+      var bt = el("button", "tog" + (TF[x[0]] ? " on" : "")); bt.type = "button"; bt.setAttribute("aria-pressed", TF[x[0]] ? "true" : "false"); bt.title = x[2];
+      bt.appendChild(el("i")); bt.appendChild(document.createTextNode(x[1]));
+      bt.addEventListener("click", function () { TF[x[0]] = !TF[x[0]]; try { localStorage.setItem("fm-train-f", JSON.stringify(TF)); } catch (e) {} renderTrain(); });
+      fr.appendChild(bt);
+    });
+    var hn = el("span", "note tw-hid");
+    if (hidB + hidO) { hn.appendChild(el("b", null, (hidB + hidO) + " " + (hidB + hidO === 1 ? "map" : "maps") + " hidden: ")); hn.appendChild(document.createTextNode([hidB ? hidB + " around Sleepywood" : "", hidO ? hidO + " where most monsters take 2 hits or more" : ""].filter(Boolean).join(", "))); }
+    fr.appendChild(hn); box.appendChild(fr);
+    if (shownC.length) {
+      var pk = el("div", "tw-picks");
+      [["meso", "Most mesos", function (c) { return M(c.mph) + " an hour"; }], ["exp", "Most EXP", function (c) { return short(c.eph) + " an hour"; }], ["safe", "Fewest potions", function (c) { return (c.potHr < 0.5 ? "under 1" : fmt(c.potHr)) + " " + hpPot.name + "s an hour"; }]].forEach(function (x) {
+        var c = order(shownC, x[0])[0], d = el("button", "tw-pk" + (SORT === x[0] ? " on" : "")); d.type = "button";
+        d.appendChild(el("small", null, x[1])); d.appendChild(el("b", null, c.m.name)); d.appendChild(el("span", "note", x[2](c) + (c.m.near ? " · " + c.m.near : "")));
+        d.addEventListener("click", function () { SORT = x[0]; OPEN = c.pg; try { localStorage.setItem("fm-train-sort", SORT); } catch (e) {} renderTrain(); });
+        pk.appendChild(d);
       });
-      top.appendChild(sb);
-      top.appendChild(el("p", "note", (b.generic ? "Typical gear estimate" : "Your build") + ", solo, nonstop. Every map here passes the bar: " + Math.round(ENG.HIT_BAR * 100) + "% hit or better and " + ENG.KILL_BAR + " s a kill or less for each common monster."));
-      v.appendChild(top);
+      box.appendChild(pk);
     }
-    var list = order(SORT), shown = 3;
-    var holder = el("div"); v.appendChild(holder);
-    function more() { holder.textContent = ""; list.slice(0, shown).forEach(function (c, i) { holder.appendChild(trainCard(c, i, L, hpPot, b)); }); if (list.length > shown) { var mb = el("button", "btn", "Show " + Math.min(5, list.length - shown) + " more maps"); mb.type = "button"; mb.style.margin = "0 auto 14px"; mb.style.display = "block"; mb.addEventListener("click", function () { shown += 5; more(); }); holder.appendChild(mb); } }
-    more();
+    var list = order(shownC, SORT), mx = { e: 1, m: 1 };
+    list.forEach(function (c) { mx.e = Math.max(mx.e, c.eph); mx.m = Math.max(mx.m, c.mph); });
+    if (!OPEN || !list.some(function (c) { return c.pg === OPEN; })) OPEN = list.length ? list[0].pg : "";
+    var wrap = el("div", "tw-wrap"), tb = el("table", "tw"), th = el("thead"), hr = el("tr");
+    [["", ""], ["Map", ""], ["Monsters · hits to kill", ""], ["Mesos an hour", "meso"], ["EXP an hour", "exp"], [hpPot.name + "s an hour", "safe"], ["", ""]].forEach(function (x) { var c = el("th", SORT === x[1] && x[1] ? "on" : "", x[0]); hr.appendChild(c); });
+    th.appendChild(hr); tb.appendChild(th);
+    var body = el("tbody"); tb.appendChild(body);
+    var shown = 12;
+    function bar(v, m, cl) { var d = el("div", "tw-bar " + cl), i = el("i"); i.style.width = Math.max(2, Math.round(Math.max(0, v) / m * 100)) + "%"; d.appendChild(i); return d; }
+    function rows() {
+      body.textContent = "";
+      list.slice(0, shown).forEach(function (c, i) {
+        var tr = el("tr", "tw-r" + (c.pg === OPEN ? " open" : "")); tr.dataset.s = SORT; tr.tabIndex = 0; tr.setAttribute("aria-expanded", c.pg === OPEN ? "true" : "false");
+        tr.appendChild(el("td", "tw-rk", String(i + 1)));
+        var nm = el("td", "tw-nm"), a = el("b", null, c.m.name); nm.appendChild(a);
+        var sub = el("div", "tw-sub"); if (c.m.near) sub.appendChild(el("span", "tw-town", c.m.near));
+        sub.appendChild(el("span", "tw-one" + (c.one === c.all ? "" : c.oneOk ? "" : " no"), c.one === c.all ? "Every spawn in 1 hit" : c.one + " of " + c.all + " spawns in 1 hit"));
+        if (c.pick) sub.appendChild(el("span", "chip ok", "Players recommend"));
+        nm.appendChild(sub); tr.appendChild(nm);
+        var mt = el("td", "tw-mobs"), mb = el("div", "tw-ms");
+        c.h.rows.slice().sort(function (x, z) { return z.n - x.n; }).slice(0, 4).forEach(function (row) {
+          var hits = row.r ? row.r.casts : 0, s = sprite(row.name); s.classList.add("tw-sp"); s.title = row.name + " ×" + row.n + ": " + (hits ? hits + (hits === 1 ? " hit" : " hits") : "can't hurt it");
+          s.appendChild(el("em", hits === 1 ? "" : hits === 2 ? "h2" : "h3", hits ? String(hits) : "–")); mb.appendChild(s);
+        });
+        mt.appendChild(mb); tr.appendChild(mt);
+        var tm = el("td", "tw-num m" + (SORT === "meso" ? " on" : "")); tm.appendChild(el("b", null, (c.mph < 0 ? "−" : "") + M(Math.abs(c.mph)))); tm.appendChild(bar(c.mph, mx.m, "m")); tr.appendChild(tm);
+        var te = el("td", "tw-num e" + (SORT === "exp" ? " on" : "")); te.appendChild(el("b", null, short(c.eph))); te.appendChild(bar(c.eph, mx.e, "e")); tr.appendChild(te);
+        tr.appendChild(el("td", "tw-pot" + (SORT === "safe" ? " on" : ""), c.potHr < 0.5 ? "under 1" : fmt(c.potHr)));
+        var gt = el("td", "tw-go"), gb = el("button", "btn", "Directions"); gb.type = "button";
+        gb.addEventListener("click", function (e) { e.stopPropagation(); TO = c.pg; showTab("route"); $("to").value = c.pg; if (FROM) findRoute(); else $("from").focus(); });
+        gt.appendChild(gb); tr.appendChild(gt);
+        function tog() { OPEN = OPEN === c.pg ? "-" : c.pg; rows(); }
+        tr.addEventListener("click", tog); tr.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tog(); } });
+        body.appendChild(tr);
+        if (c.pg === OPEN) { var xr = el("tr", "tw-x"), xd = el("td"); xd.colSpan = 7; xd.appendChild(trainCard(c, i, L, hpPot, b)); xr.appendChild(xd); body.appendChild(xr); }
+      });
+      if (list.length > shown) { var mr = el("tr", "tw-more"), md = el("td"); md.colSpan = 7; var mbtn = el("button", "btn", "Show " + Math.min(10, list.length - shown) + " more maps"); mbtn.type = "button"; mbtn.addEventListener("click", function () { shown += 10; rows(); }); md.appendChild(mbtn); mr.appendChild(md); body.appendChild(mr); }
+    }
+    rows();
+    if (list.length) { wrap.appendChild(tb); box.appendChild(wrap); }
+    box.appendChild(el("p", "note", (b.generic ? "Typical gear estimate" : "Your build") + ", solo, nonstop. Numbers on monsters are hits to kill. Mesos are after potions, at today's cheapest HP potion: " + hpPot.name + ", " + hpPot.per.toFixed(2) + " mesos per HP" + (hpPot.fm ? " on the Free Market" : " at the NPC") + ". Tap a map for why, quests and the math."));
+    v.appendChild(box);
     if (!cand.length) v.appendChild(el("div", "card note", "No map near level " + L + " passes the bar for this build yet: every one has a common monster you'd hit under " + Math.round(ENG.HIT_BAR * 100) + "% of the time or take over " + ENG.KILL_BAR + " s to kill. More attack, accuracy or a higher skill level opens them up."));
+    else if (!list.length) v.appendChild(el("div", "card note", "Every map that fits your level is hidden by the switches above. Turn one off to see them."));
     // near your level but not ranked, and why: the monster you can't hit or kill
     var near = rk.skip.filter(function (h) { return Math.abs(h.lv - L) <= 6; }).sort(function (a, c) { return Math.abs(a.lv - L) - Math.abs(c.lv - L); }).slice(0, 6);
     if (near.length) {
