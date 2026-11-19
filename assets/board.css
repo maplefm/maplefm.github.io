@@ -1643,7 +1643,7 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 @media (max-width: 820px){.top-right .worldsw{order:20;flex:1 1 100%;margin-top:2px}.worldsw button{flex:1;justify-content:center;font-size:.86rem;padding:6px 10px;min-height:40px}.worldsw .wsl{padding:0 2px 0 8px}}
 .worldnote{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0;padding:10px 14px;border-radius:12px;background:#fff6d6;color:#3b2a00;border:1px solid #f1d27a;font-size:14px}
 .worldnote button{margin-left:auto;font:inherit;font-weight:600;border:1px solid #d8b24a;background:#fff;border-radius:999px;padding:4px 12px;cursor:pointer}
-@media (prefers-color-scheme:dark){:root:not(.light) .worldnote{background:#3a3110;color:#f7e7b5;border-color:#6b5a1d}:root:not(.light) .worldnote button{background:#2a2410;color:#f7e7b5;border-color:#6b5a1d}}
+:root[data-theme="dark"] .worldnote{background:#3a3110;color:#f7e7b5;border-color:#6b5a1d}:root[data-theme="dark"] .worldnote button{background:#2a2410;color:#f7e7b5;border-color:#6b5a1d}
 .altworld .ifb a[href*="/item/"]{display:none}
 /* phones: the World button sits in the pill row, so Discord shows its icon only and the row stays one line as the
    live label grows (a second line pushed the page down after load, Nov 18) */
@@ -1663,21 +1663,43 @@ body.sheet .advrow, body.sheet .advbox, body.sheet .sres, body.bigcard .advrow, 
 @media (max-width: 700px) { .picks { grid-template-columns: repeat(5, minmax(0, 1fr)); } .plbl .plt { flex-basis: auto; } .plbl .mbar { max-width: 100%; } }
 /* Ko-fi: one quiet line at the end of the stats (kofigoal.js fills the bar and amount) */
 .strip a.st.kofiline { gap: 7px; padding: 3px 10px; border-radius: 999px; border: 1px solid #ffd0bd; background: #fff6f1; color: #7a4a3a; font-weight: 600; }
-:root[data-theme="dark"] .strip a.st.kofiline { background: #3a2620; border-color: #6b3f30; color: #f1c9b8; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .strip a.st.kofiline { background: #3a2620; border-color: #6b3f30; color: #f1c9b8; } }
+:root[data-theme="dark"] .strip a.st.kofiline { background: rgba(255,138,101,.12); border-color: rgba(255,138,101,.45); color: #ffd9c9; }
+:root[data-theme="dark"] .kofiline .kl-bar { background: rgba(255,255,255,.16); }
 .kofiline .kl-bar { display: inline-block; width: 64px; height: 6px; border-radius: 6px; background: #ffe0d2; overflow: hidden; flex: none; }
 .kofiline .kl-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ff8a65, #e2577a); transition: width .6s ease; }
 .kofiline .kl-have { font-weight: 700; color: #b6461f; font-variant-numeric: tabular-nums; }
-.kofiline .kl-have:empty { display: none; }
+.kofiline .kl-have:empty, .kofiline .kl-of:empty { display: none; }
+.kofiline .kl-of { color: var(--muted); font-weight: 600; margin-left: -3px; }
+.strip .kofiline b.kl-go { color: #b6461f; }
+:root[data-theme="dark"] .strip .kofiline b.kl-go { color: #ffab8a; }
 .kofiline .kl-go { color: #b6461f; }
 :root[data-theme="dark"] .kofiline .kl-have, :root[data-theme="dark"] .kofiline .kl-go { color: #ffab8a; }
-.kofiline.kl-off .kl-bar, .kofiline.kl-off .kl-have { display: none; }
+.kofiline.kl-off .kl-bar, .kofiline.kl-off .kl-have, .kofiline.kl-off .kl-of { display: none; }
 .strip a.st.kofiline:hover .kl-go { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) { .kofiline .kl-fill { transition: none; } }
-@media (max-width: 700px) { .strip a.st.kofiline { flex-wrap: nowrap; white-space: nowrap; box-sizing: border-box; max-width: 100%; overflow: hidden; gap: 6px; padding: 3px 9px; } .strip a.st.kofiline * { white-space: nowrap; flex: none; } .strip a.st.kofiline .kl-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; } .kofiline .kl-bar { width: 36px; } }
+@media (max-width: 700px) {
+  /* phones: the line and Support on top, the goal bar and amount under it, so nothing gets cut off */
+  .strip a.st.kofiline { display: flex; flex-wrap: wrap; width: 100%; box-sizing: border-box; border-radius: 14px; padding: 6px 12px; gap: 4px 6px; white-space: nowrap; }
+  .strip a.st.kofiline * { white-space: nowrap; flex: none; }
+  .kofiline .kl-go { order: 3; margin-left: auto; }
+  .kofiline .kl-bar { order: 4; flex: 1 1 calc(100% - 120px) !important; width: auto; align-self: center; }
+  .kofiline .kl-have { order: 5; } .kofiline .kl-of { order: 6; margin-left: 0; }
+  .kofiline.kl-off .kl-go { margin-left: auto; }
+}
 /* Ko-fi first in the ☰ menu */
 .menu a.mkofi { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #fff6f1; color: var(--ink); text-decoration: none; margin-bottom: 4px; }
 .menu a.mkofi:hover, .menu a.mkofi:focus-visible { background: #ffeadf; outline: none; }
 :root[data-theme="dark"] .menu a.mkofi { background: #3a2620; }
 .menu a.mkofi b { display: block; font-size: .88rem; }
 .menu a.mkofi small { display: block; font-size: .74rem; color: var(--muted); font-weight: 600; }
+
+/* Feedback on phones: a round icon, and it steps aside while the stats and the Ko-fi line are on screen */
+.fbwrap { transition: right .2s, opacity .2s; }
+.fbwrap.fbaway { opacity: 0; pointer-events: none; }
+@media (max-width: 760px) {
+  .fbwrap:not(.tucked) .fbtuck { display: none; }
+  .fbk { width: 46px; height: 46px; padding: 0; display: grid; place-items: center; font-size: 20px; }
+  .fbk .fbl { display: none; }
+}
+/* the search box hint: Enter, the key people know */
+.search kbd { font-weight: 700; letter-spacing: .02em; }

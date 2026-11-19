@@ -12,7 +12,7 @@
       if (OFF) { box.classList.add("kl-off"); box.title = "Support Club FM on Ko-fi"; continue; }
       if (TOTAL == null) continue;
       var pct = Math.max(0, Math.min(100, TOTAL / GOAL * 100));
-      have.textContent = money(TOTAL);
+      have.textContent = money(TOTAL); box.querySelector(".kl-of").textContent = "of " + money(GOAL);
       box.querySelector(".kl-fill").style.width = (TOTAL > 0 ? Math.max(pct, 3) : 0) + "%";
       bar.setAttribute("aria-valuenow", String(Math.round(TOTAL))); bar.setAttribute("aria-valuetext", money(TOTAL) + " of " + money(GOAL));
       box.title = TOTAL >= GOAL ? "Goal reached: the scanners' weekly pay cap is off. Support Club FM on Ko-fi." : money(TOTAL) + " of " + money(GOAL) + " in the last 28 days. At " + money(GOAL) + " the scanners' weekly pay cap comes off.";
