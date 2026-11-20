@@ -256,6 +256,16 @@ for page, m in M.items():
         if not isinstance(x, dict) or x.get("hidden"): continue
         n = npc_by_id.get(x.get("id"))
         if n: m["npcs"].append([n.get("name_en") or n["page"], x.get("x"), x.get("y"), n.get("role") or ""])
+# maps the game-file source doesn't have yet (new content, Forgotten Hollow on Nov 19): the wiki's NPC list says which
+# map each NPC stands on, without a spot, so they are listed on the page with no dot on the minimap
+n_wnpc = 0
+for n in npcs:
+    pg = n.get("map")
+    if pg in M and (not M[pg]["id"] or M[pg]["id"] not in io_ids):
+        nm = n.get("name_en") or n["page"]
+        if nm and not any(x[0] == nm for x in M[pg]["npcs"]):
+            M[pg]["npcs"].append([nm, None, None, n.get("role") or ""]); n_wnpc += 1
+print("NPCs placed from the wiki on maps the game files don't have yet:", n_wnpc)
 # maps the game-file source doesn't have yet (new content): shrink the wiki's full map render into a stand-in minimap
 OLD = os.path.dirname(os.path.abspath(PREV))
 need = [p for p, m in M.items() if not m.get("mm") and IMG.get(p) and IMG[p][3] and IMG[p][4]]

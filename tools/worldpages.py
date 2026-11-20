@@ -295,7 +295,8 @@ def build(world, guide, summary, notes, out):
         mk = ""
         if spawns:
             for _, x, y in (m.get("mobpos") or [])[:60]: mk += f'<span class="mk s" style="{pos(x, y)}"></span>'
-        for n in m.get("npcs") or []: mk += f'<span class="mk n" style="{pos(n[1], n[2])}" title="{E(n[0])}"></span>'
+        for n in m.get("npcs") or []:
+            if n[1] is not None and n[2] is not None: mk += f'<span class="mk n" style="{pos(n[1], n[2])}" title="{E(n[0])}"></span>'
         for p in m["portals"]:
             k = "h" if p[1] == "hidden" else "d" if p[1] == "door" else "p"
             mk += f'<span class="mk {k}" style="{pos(p[2], p[3])}" title="{"Hidden portal to " if k == "h" else "To "}{E(p[0])}"></span>'
@@ -482,7 +483,7 @@ def build(world, guide, summary, notes, out):
             gm = next((M[p] for p in where_g if M[p].get("mm")), None)
             if gm:
                 np_ = next((n for n in gm.get("npcs") or [] if n[0] == q["g"]), None)
-                if np_: st += minimap(gm, spawns=False, hl=(np_[1], np_[2], q["g"] + " is here")) + f'<p class="note">{E(q["g"])} is the green dot{(", " + where(gm, np_[1], np_[2])) if where(gm, np_[1], np_[2]) else ""}, in {E(gm["name"])}.</p>'
+                if np_ and np_[1] is not None: st += minimap(gm, spawns=False, hl=(np_[1], np_[2], q["g"] + " is here")) + f'<p class="note">{E(q["g"])} is the green dot{(", " + where(gm, np_[1], np_[2])) if where(gm, np_[1], np_[2]) else ""}, in {E(gm["name"])}.</p>'
         if q.get("pre"):
             pre = [QBYID[i] for i in q["pre"] if i in QBYID]
             if pre: hd += '<p class="pre"><b>Finish first:</b> ' + ", ".join(f"{qlink(x)}{(' <small>Lv ' + str(x['lv']) + '+</small>') if x['lv'] else ''}" for x in pre) + "</p>"
