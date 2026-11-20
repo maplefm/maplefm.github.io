@@ -29,5 +29,12 @@
    "amount": 24.3,
    "via": "paypal"
   }
+ ],
+ "4DDDD": [
+  {
+   "date": "2026-11-19",
+   "amount": 5.51,
+   "via": "paypal"
+  }
  ]
 }
