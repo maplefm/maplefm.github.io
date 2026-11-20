@@ -387,6 +387,12 @@ def build(world, guide, summary, notes, out):
         hunt_h = ("<h2>Quests that hunt here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}{E(why)}</small></li>" for q, why in hq[:10]) + "</ul>"
                   + (f'<p class="note">{len(hq) - 10} more on the monster pages.</p>' if len(hq) > 10 else "")) if hq else ""
         if q_here: qh = "<h2>Quests that start here</h2><ul>" + "".join(f"<li>{qlink(q)} <small>· {('Lv ' + str(q['lv']) + '+ · ') if q['lv'] else ''}from {E(q['g'])}</small></li>" for q in sorted(q_here, key=lambda q: q["lv"])) + "</ul>"
+        rec_br = [x for x in (notes or {}).get("brackets") or [] if any(y.get("map") == p for y in x.get("picks") or [])]
+        if rec_br:
+            hd += "<p><b>Players recommend it</b> for " + " and ".join(f'<a href="/training/level-{x["lo"]}-{x["hi"]}/">level {x["lo"]} to {x["hi"]}</a>' for x in rec_br) + ". See every training spot for that level.</p>"
+        elif st and m.get("type") != "Town":
+            lvb = next((x for x in (notes or {}).get("brackets") or [] if x["lo"] <= round(st["lv"]) < x["hi"]), None)
+            if lvb: hd += f'<p class="note">Monsters here are around level {st["lv"]:.0f}: <a href="/training/level-{lvb["lo"]}-{lvb["hi"]}/">training spots for level {lvb["lo"]} to {lvb["hi"]}</a>.</p>'
         hd += f'<p class="note"><a href="/map.html#map={E(p)}">Open {E(p)} in the interactive map</a> · <a href="/map.html#route=|{E(p)}">Find the fastest route here</a></p>'
         # Map B: minimap, monsters and NPCs on the left, the way out (exits) and quests on the right
         b = lay("map", [sec(hd, "head", "Map") + sec(mo, "", "Monsters") + sec(vmh) + sec(npch, "npcs", "NPCs"), sec(ex, "exits", "Exits") + sec(dv, "", "Drops") + sec(qh + hunt_h, "qlist", "Quests")], tabs=True, first="Exits")
@@ -602,7 +608,8 @@ def build(world, guide, summary, notes, out):
         lo, hi = br["lo"], br["hi"]; L = (lo + min(hi, lo + 15)) // 2
         picks = {x["map"]: x for x in br.get("picks") or []}
         s = f"level-{lo}-{hi}"
-        b = f"<h1>Where to train from level {lo} to {hi} in MapleStory Classic</h1><p class=\"sub\">Training guide · every job · updated {built}</p>"
+        b = (f"<h1>Where to train from level {lo} to {hi} in MapleStory Classic</h1><p class=\"sub\">Best training spots and grinding maps for level "
+             + (f"{lo}, {L}, {hi} and in between" if hi - lo <= 15 else f"{lo} to {hi}") + f" · every job · updated {built}</p>")
         b += "".join(f'<div class="tip">{E(t)}</div>' for t in br.get("tips") or [])
         hd, b = b, "<h2>Players recommend</h2>"
         for x in br.get("picks") or []:
@@ -616,8 +623,8 @@ def build(world, guide, summary, notes, out):
         # wide: the players' picks on the left (two across on big screens), each job's best maps on the right
         b = sec(hd, "head band1", "") + lay("train", [sec(b, "picks", "Players recommend"), sec(rk, "", "Best by job")], tabs=True)
         crumbs = [("Training guide", "/training/"), (f"Level {lo} to {hi}", f"/training/{s}/")]
-        desc = f"Best MapleStory Classic training spots from level {lo} to {hi} for every job: " + ", ".join(list(picks)[:3]) + ", with EXP an hour, monsters and potion costs."
-        write(out, f"training/{s}", page(itempages.fit_title(f"Where to train level {lo} to {hi}", "MapleStory Classic", "Club FM"), desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
+        desc = f"Where to train at level {lo} to {hi} in MapleStory Classic: " + ", ".join(list(picks)[:3]) + f" and the best training spots for every job at level {L}, with EXP an hour, monsters and potion costs."
+        write(out, f"training/{s}", page(itempages.fit_title(f"MapleStory Classic training spots, level {lo} to {hi}", "Club FM"), desc, f"/training/{s}/", crumbs, b)); paths.append(f"/training/{s}/")
         tr_links.append((lo, hi, s, list(picks)[:3]))
     for cls in CLASSES:
         b = f"<h1>{cls} training guide for MapleStory Classic</h1><p class=\"sub\">Where a {cls.lower()} should train at every level · updated {built}</p>"
@@ -635,14 +642,14 @@ def build(world, guide, summary, notes, out):
         paths.append(f"/training/{cls.lower()}/")
 
     # ---------------------------------------------------------- hubs
-    b = "<h1>MapleStory Classic training guide</h1><p class=\"sub\">Where to train at every level, for every class · updated " + built + "</p>"
+    b = "<h1>MapleStory Classic training guide</h1><p class=\"sub\">Training spots and where to train at every level, for every class · updated " + built + "</p>"
     b += "<p>From the game files and the MapleStory Classic Wiki: monsters, spawns, respawn times and elements. Maps ranked by EXP an hour for each job's typical build, only where it hits and kills reliably.</p>"
     b += "<h2>By level</h2><ul>" + "".join(f'<li><a href="/training/{s}/">Level {lo} to {hi}</a> <small>· {E(", ".join(p))}</small></li>' for lo, hi, s, p in tr_links) + "</ul>"
     b += "<h2>By class</h2><ul>" + "".join(f'<li><a href="/training/{c.lower()}/">{c}</a></li>' for c in CLASSES) + "</ul>"
     if notes and notes.get("economy"): b += "<h2>Potions and money</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["economy"]) + "</ul>"
     if notes and notes.get("party"): b += "<h2>Party play</h2><ul>" + "".join(f"<li>{E(t)}</li>" for t in notes["party"]) + "</ul>"
     b += '<p style="margin-top:16px"><a href="/map.html#train">Your level, your class: get a personal list</a></p>'
-    write(out, "training", page("MapleStory Classic training guide · every level · Club FM", "Where to train in MapleStory Classic at every level and for every class: the best maps by job with EXP an hour, monsters and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
+    write(out, "training", page(itempages.fit_title("MapleStory Classic training spots by level, 1 to 100", "Club FM"), "Where to train in MapleStory Classic at every level and for every class: the best training spots and grinding maps by job with EXP an hour, monsters and potion costs, updated daily.", "/training/", [("Training guide", "/training/")], b)); paths.append("/training/")
 
     regions = {}
     for p, m in M.items(): regions.setdefault(m.get("region") or "Other", []).append(p)
