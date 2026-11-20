@@ -254,7 +254,7 @@ table.tw{border-collapse:collapse;width:100%}
       if (extra) extra(k); wrap.appendChild(k); return k;
     }
     if (o.mobs !== false) (m.mobpos || []).forEach(function (p) { mark("spawn", p[1], p[2], null); });
-    (m.npcs || []).forEach(function (n) { mark("npc", n[1], n[2], n[0] + (n[3] ? " (" + n[3] + ")" : "")); });
+    (m.npcs || []).forEach(function (n) { if (n[1] != null && n[2] != null) mark("npc", n[1], n[2], n[0] + (n[3] ? " (" + n[3] + ")" : "")); });   // a new map's NPC from the wiki has no spot yet
     m.portals.forEach(function (p, i) {
       if (o.exit === i) return;
       var t = p[1] === "hidden" ? "h" : p[1] === "door" ? "d" : "p";
