@@ -366,6 +366,30 @@ def main():
         for iname, cnt in q["need"]:
             if (q["id"], iname) not in seen:
                 seen.add((q["id"], iname)); g(iname)["q"].append([nm, q["lv"], cnt, q["g"], q["a"], q["rep"], q["gid"], q["id"]])
+    # ---- quests the game client has that neither source lists yet (tools/quests_extra.json: three sources agree on each).
+    # One is added only while its id and name are missing, so the wiki or game data wins as soon as it has the quest.
+    n_extra = 0
+    try: xq = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "quests_extra.json"))).get("quests") or []
+    except Exception as e: xq = []; print("quests_extra.json unreadable:", e)
+    for x in xq:
+        if x["id"] in have_id or x["id"] in {q["id"] for q in allq} or norm2(x["n"]) in have: continue
+        have.add(norm2(x["n"]))
+        q = {"id": x["id"], "n": x["n"], "lv": x["lv"], "g": x["g"], "gid": npc_id.get(x["g"].lower()), "a": x.get("a") or "", "rep": 0, "jobs": [],
+             "pre": [i for i in x.get("pre") or []], "need": [list(i) for i in x.get("need") or []],
+             "kill": [[k[0], k[1], mob_id.get(k[0].lower())] for k in x.get("kill") or []], "exp": x.get("exp", 0), "meso": x.get("meso", 0),
+             "fame": x.get("fame", 0), "get": [list(i) for i in x.get("get") or []], "end": None, "src": "client"}
+        if x.get("get2"): q["get2"] = [list(i) for i in x["get2"]]
+        if x.get("arc"): q["arc"] = x["arc"]
+        if npc_town.get(x["g"].lower()): q["town"] = npc_town[x["g"].lower()]
+        allq.append(q); page_qid[q["n"]] = q["id"]; n_extra += 1
+        for iname, cnt in q["need"]:
+            if (q["id"], iname) not in seen:
+                seen.add((q["id"], iname)); g(iname)["q"].append([q["n"], q["lv"], cnt, q["g"], q["a"], q["rep"], q["gid"], q["id"]])
+    print("quests from the client list that neither source has yet:", n_extra)
+    # a prerequisite that isn't on the list (the wiki dropped it) is left out, never guessed
+    ids_now = {q["id"] for q in allq}
+    for q in allq:
+        if q.get("src") == "client": q["pre"] = [i for i in q["pre"] if i in ids_now]
     # prerequisites of those wiki quests, once every quest has an id: a page the log can't place is left out, never guessed
     # (the list is ";"-separated; a name with a comma in it, like "Two Thieves, One Plan", stays whole)
     byid = {q["id"]: q for q in allq}

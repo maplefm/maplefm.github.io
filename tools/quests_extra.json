@@ -1,0 +1,18 @@
+{
+ "_about": "Quests the game client has that neither the wiki nor the maplestory.io game data lists yet. Each one is in the client's quest list (maplestatus.info, MSCW 2.0.0) and matched on two community quest sites (ms-classic.com, maplestory-classic.com), which agree on every field. itemguide.py adds one only when its id and name are missing from both main sources, so the wiki wins as soon as it has the quest. Checked Nov 19 2026.",
+ "quests": [
+  {"id": 10429, "n": "Red Eyes Below", "lv": 58, "arc": "The Balrog's Shadow", "g": "Manji", "a": "Perion", "pre": [10428],
+   "need": [["Wild Kargo Eye", 40]], "kill": [["Wild Kargo", 100]], "exp": 18700, "meso": 1813, "get": [["Hat Accuracy Scroll: Chaos", 1]]},
+  {"id": 10430, "n": "The Eyes Glow", "lv": 65, "arc": "Into the Cursed Sanctuary", "g": "Manji", "a": "Perion", "pre": [10429],
+   "need": [], "kill": [["Tauromacis", 30], ["Taurospear", 30]], "exp": 25900, "meso": 2032, "get": [["Power Elixir", 5]]},
+  {"id": 10431, "n": "Where Tristan Stood", "lv": 65, "arc": "Into the Cursed Sanctuary", "g": "Manji", "a": "Perion", "pre": [10430],
+   "need": [], "kill": [["Jr. Balrog", 1]], "exp": 25900, "meso": 2032, "get": [],
+   "get2": [["One-Handed Sword Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["One-Handed Axe Attack Scroll: Chaos", 1, "one of these at random (7%)"],
+            ["Polearm Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["Bow Attack Scroll: Chaos", 1, "one of these at random (7%)"],
+            ["Crossbow Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["Claw Attack Scroll: Chaos", 1, "one of these at random (7%)"],
+            ["One-Handed Blunt Weapon Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["Dagger Attack Scroll: Chaos", 1, "one of these at random (7%)"],
+            ["Wand Magic Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["Staff Magic Attack Scroll: Chaos", 1, "one of these at random (7%)"],
+            ["Two-handed Sword Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["Two-handed Axe Attack Scroll: Chaos", 1, "one of these at random (7%)"],
+            ["Two-handed Blunt Weapon Attack Scroll: Chaos", 1, "one of these at random (7%)"], ["Spear Attack Scroll: Chaos", 1, "one of these at random (7%)"]]}
+ ]
+}

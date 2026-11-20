@@ -268,7 +268,7 @@ def main():
                 wg = bag((norm(wname(r.get("item_id"))), num(r.get("quantity"), 0)) for r in wr_items)
                 if wg != allget: disagree("quest", qid, "get", {"get": o.get("get"), "get2": o.get("get2")}, {"wiki": wg}, wu, "get" in carried)
         for qid, o in Q.items():
-            if qid not in gids and not o.get("wiki") and qid not in wq_by_id:
+            if qid not in gids and not o.get("wiki") and not o.get("src") and qid not in wq_by_id:   # src "client": tools/quests_extra.json
                 D("quest", qid, "exists", o["n"], None, None, "on our list but in neither source")
         # quests only the wiki has (not in the game files yet), released and still running
         have = {norm(o["n"]) for o in Q.values()} | {norm(x.get("name")) for x in glist if isinstance(x, dict)}
