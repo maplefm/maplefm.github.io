@@ -105,6 +105,38 @@ main{max-width:1600px;margin:0 auto;padding:14px 16px 40px}
 .sugg div{padding:7px 10px;cursor:pointer;font-size:.9rem}.sugg div small{color:var(--muted);margin-left:6px}
 .sugg div[aria-selected="true"],.sugg div:hover{background:var(--soft)}
 .fld{position:relative}
+/* Get somewhere: tap the in-game world map (Nov 20) */
+.wm{margin-top:12px;display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.wm-bar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}.wm-or{margin:0}
+/* phone: the map stays big enough to tap, and pans sideways in its box */
+.wm-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
+
+.wm-h{font:800 1.05rem Outfit,Inter,sans-serif}.wm-steps{color:var(--muted);font-size:.9rem;flex:1 1 220px}.wm-steps span{white-space:nowrap}
+.wm-set,.wm-regs{display:inline-flex;gap:6px;flex-wrap:wrap}
+.wm-mode,.wm-reg{font:700 .85rem Inter;min-height:40px;padding:0 12px;border-radius:999px;cursor:pointer;background:var(--card);color:var(--ink);border:1.5px solid var(--line)}
+.wm-mode.from{border-color:var(--ok);color:var(--ok)}.wm-mode.to{border-color:var(--accent);color:var(--accent)}
+.wm-mode.from[aria-pressed="true"]{background:var(--ok);color:var(--card)}.wm-mode.to[aria-pressed="true"]{background:var(--accent);color:var(--card)}
+.wm-reg[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);color:var(--accent)}
+.wm-box{position:relative;width:636px;max-width:100%;border-radius:14px;overflow:hidden;border:1px solid var(--line);line-height:0}
+.wm-box img{width:100%;height:auto;display:block}
+.wm-dot{position:absolute;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;border:2px solid #fff;background:#ffd84d;box-shadow:0 1px 4px rgba(0,0,0,.5);padding:0;cursor:pointer}
+.wm-dot::after{content:"";position:absolute;inset:-10px}
+.wm-swipe{display:none;margin:0}
+@media (max-width:700px){.wm-dot::after{inset:-7px}.wm-box{width:600px;max-width:none}.wm-swipe{display:block}}
+.wm-dot.many{width:15px;height:15px}.wm-dot.town{width:18px;height:18px;background:#f5a524}
+.wm-dot:hover,.wm-dot:focus-visible{transform:translate(-50%,-50%) scale(1.3);outline:none}
+.wm-dot.is-from{background:var(--ok)}.wm-dot.is-to{background:var(--accent)}.wm-dot.open{background:#22183d}
+.wm-tip{position:absolute;transform:translate(-50%,-100%);margin-top:-12px;pointer-events:none;background:rgba(20,14,40,.9);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:5px 9px;font:600 13px/1.2 Inter,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35);z-index:2}
+.wm-tip small{font-weight:500;color:#cfc4ff}
+.wm-pop{max-width:636px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:8px}
+.wm-pop .hd{display:flex;align-items:center;gap:8px;padding:2px 6px 6px}.wm-pop .hd b{font:800 1rem Outfit,Inter,sans-serif}.wm-pop .hd small{color:var(--muted)}
+.wm-pop .hd button{margin-left:auto;border:0;background:none;font-size:1.3rem;color:var(--muted);cursor:pointer;min-width:40px;min-height:40px}
+.wm-pop .ls{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px;max-height:260px;overflow:auto}
+.wm-pop .ls button{display:flex;justify-content:space-between;gap:8px;text-align:left;border:0;background:none;border-radius:8px;padding:9px 8px;font:500 .92rem Inter;color:var(--ink);cursor:pointer;min-height:40px}
+.wm-pop .ls button:hover,.wm-pop .ls button:focus-visible{background:var(--soft)}.wm-pop .ls small{color:var(--muted);white-space:nowrap}
+/* wide: the map on the left, the steps, buttons and a spot's list on the right */
+@media (min-width:980px){.wm{grid-template-columns:636px minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"map bar" "map pop" "or or";align-items:start;column-gap:18px}
+.wm-scroll{grid-area:map}.wm-bar{grid-area:bar;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;align-self:start}.wm-steps{flex:none;font-size:1rem;color:var(--ink)}.wm-steps span{display:block}.wm-pop{grid-area:pop;max-width:none}.wm-pop .ls{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));max-height:300px}.wm-or{grid-area:or}}
 .warn{border-left:4px solid var(--gold);background:var(--gold-soft);border-radius:10px;padding:8px 10px;font-size:.88rem;margin:8px 0}
 .foot{color:var(--muted);font-size:.78rem;margin-top:20px}
 [hidden]{display:none!important}
@@ -197,6 +229,21 @@ table.tw{border-collapse:collapse;width:100%}
       <button type="button" class="swap" id="swap" title="Swap" aria-label="Swap start and destination">⇄</button>
       <label class="fld">I want to go to<input id="to" placeholder="Any map" autocomplete="off"></label>
       <button type="button" class="btn pri" id="go" style="height:44px">Find route</button>
+    </div>
+    <div id="wm" class="wm" hidden>
+      <div class="wm-bar">
+        <b class="wm-h">Tap the map</b>
+        <span class="wm-steps"><span>1. Tap where you are.</span> <span>2. Tap where you're going.</span></span>
+        <span class="wm-set" role="group" aria-label="What a tap on the map sets">
+          <button type="button" id="wm-from" class="wm-mode from" aria-pressed="true">● Where I am</button>
+          <button type="button" id="wm-to" class="wm-mode to" aria-pressed="false">★ Where I'm going</button>
+        </span>
+        <span class="wm-regs" id="wm-regs" role="group" aria-label="World map"></span>
+      </div>
+      <div class="wm-scroll" id="wm-scroll"><div class="wm-box" id="wm-box"><img id="wm-img" alt="" width="636" height="466" loading="lazy" decoding="async"><div id="wm-tip" class="wm-tip" hidden></div></div></div>
+      <p class="note wm-swipe">Swipe the map sideways to see the whole island.</p>
+      <div id="wm-pop" class="wm-pop" hidden></div>
+      <p class="note wm-or">Or type a map name in the boxes.</p>
     </div>
     <p class="note" style="margin:8px 0 0">There's no map navigation in game, so this walks the real portal connections, cabs and return scrolls. Times are estimates; cab fares use your level.</p>
   </div>
@@ -732,6 +779,7 @@ table.tw{border-collapse:collapse;width:100%}
     var a = resolve($("from").value), b = resolve($("to").value), box = $("routes"); box.textContent = "";
     if (!a || !b) { box.appendChild(el("div", "card note", !a ? "Pick where you are from the list." : "Pick where you're going from the list.")); return; }
     $("from").value = a; $("to").value = b; FROM = a; TO = b; try { localStorage.setItem("fm-map-from", a); } catch (e) {}
+    if (WM) drawWM();
     try { history.replaceState(null, "", "#route=" + encodeURIComponent(a) + "|" + encodeURIComponent(b)); } catch (e) {}
     if (a === b) { box.appendChild(el("div", "card note", "You're already there.")); return; }
     ROUTES = { fast: route(a, b, "fast"), value: route(a, b, "value"), free: route(a, b, "free") };
@@ -853,8 +901,71 @@ table.tw{border-collapse:collapse;width:100%}
   $("lv").addEventListener("change", function () { ME.lv = Math.max(1, Math.min(200, parseInt(this.value, 10) || 0)); saveMe(); renderTrain(); if (TAB === "route" && $("routes").childNodes.length) findRoute(); });
   $("cls").addEventListener("change", function () { ME.cls = this.value; saveMe(); renderTrain(); });
 
+  // ---- Get somewhere: tap where you are and where you're going on the in-game world map (assets/worldmap, tools/worldmap.py)
+  var WM = null, WMI = 0, WMODE = "from", WOPEN = -1;
+  function worldMap() {
+    fetch("/assets/worldmap/worldmap.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.length) return;
+      var byId = {}; PAGES.forEach(function (p) { if (MAPS[p].id) byId[MAPS[p].id] = p; });
+      d.forEach(function (w) { w.spots.forEach(function (s) {
+        s.maps = s.ids.map(function (i) { return byId[i]; }).filter(Boolean);
+        var town = s.maps.filter(function (p) { return MAPS[p].type === "Town"; })[0];
+        s.label = town || s.maps[0];
+      }); w.spots = w.spots.filter(function (s) { return s.maps.length; }); });
+      WM = d; $("wm").hidden = false;
+      var regs = $("wm-regs");
+      if (WM.length > 1) WM.forEach(function (w, i) { var b = el("button", "wm-reg", w.name); b.type = "button"; b.setAttribute("aria-pressed", i === WMI); b.addEventListener("click", function () { WMI = i; WOPEN = -1; drawWM(); }); regs.appendChild(b); });
+      $("wm-from").addEventListener("click", function () { setMode("from"); });
+      $("wm-to").addEventListener("click", function () { setMode("to"); });
+      drawWM();
+    }).catch(function () {});
+  }
+  function setMode(m) { WMODE = m; $("wm-from").setAttribute("aria-pressed", m === "from"); $("wm-to").setAttribute("aria-pressed", m === "to"); }
+  function wmPick(pg) {
+    if (WMODE === "from") { $("from").value = pg; FROM = pg; try { localStorage.setItem("fm-map-from", pg); } catch (e) {} setMode("to"); }
+    else $("to").value = pg;
+    WOPEN = -1; drawWM();
+    if ($("from").value && $("to").value) findRoute();
+  }
+  function drawWM() {
+    if (!WM) return;
+    var w = WM[WMI], box = $("wm-box"), img = $("wm-img"), tip = $("wm-tip"), pop = $("wm-pop");
+    [].forEach.call($("wm-regs").children, function (b, i) { b.setAttribute("aria-pressed", i === WMI); });
+    if (img.getAttribute("src") !== w.img) { img.src = w.img; img.alt = w.name + " world map"; img.width = w.w; img.height = w.h; }
+    [].slice.call(box.querySelectorAll(".wm-dot")).forEach(function (n) { n.remove(); });
+    var from = resolve($("from").value), to = resolve($("to").value);
+    w.spots.forEach(function (s, i) {
+      var b = el("button", "wm-dot" + (s.town ? " town" : s.maps.length > 1 ? " many" : "")); b.type = "button";
+      if (from && s.maps.indexOf(from) >= 0) b.classList.add("is-from");
+      if (to && s.maps.indexOf(to) >= 0) b.classList.add("is-to");
+      if (i === WOPEN) b.classList.add("open");
+      var name = s.maps.length === 1 ? s.maps[0] : s.label;
+      b.setAttribute("aria-label", name + (s.maps.length > 1 ? ", " + s.maps.length + " maps" : ""));
+      b.style.left = (s.x / w.w * 100) + "%"; b.style.top = (s.y / w.h * 100) + "%";
+      var show = function () { tip.textContent = name; if (s.maps.length > 1) tip.appendChild(el("small", null, " · " + s.maps.length + " maps")); tip.style.left = b.style.left; tip.style.top = b.style.top; tip.hidden = false; };
+      b.addEventListener("mouseenter", show); b.addEventListener("focus", show);
+      b.addEventListener("mouseleave", function () { tip.hidden = true; }); b.addEventListener("blur", function () { tip.hidden = true; });
+      b.addEventListener("click", function () { tip.hidden = true; if (s.maps.length === 1) wmPick(s.maps[0]); else { WOPEN = WOPEN === i ? -1 : i; drawWM(); if (WOPEN >= 0) pop.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
+      box.appendChild(b);
+    });
+    centerWM();
+    var s = w.spots[WOPEN]; pop.textContent = ""; pop.hidden = !s;
+    if (!s) return;
+    var hd = el("div", "hd"); hd.appendChild(el("b", null, s.label)); hd.appendChild(el("small", null, s.maps.length + " maps · " + (WMODE === "from" ? "where are you?" : "where are you going?")));
+    var x = el("button", null, "×"); x.type = "button"; x.setAttribute("aria-label", "Close the list"); x.addEventListener("click", function () { WOPEN = -1; drawWM(); }); hd.appendChild(x); pop.appendChild(hd);
+    var ls = el("div", "ls");
+    // the town (or the spot's own name) first, then by level; the game files mark some quest rooms "Town" too, so only
+    // the spot's own town gets that tag
+    s.maps.slice().sort(function (a, c) { return (a === s.label ? -1 : c === s.label ? 1 : 0) || ((MAPS[a].lv || [0])[0] || 0) - ((MAPS[c].lv || [0])[0] || 0) || a.localeCompare(c); }).forEach(function (pg) {
+      var m = MAPS[pg], lv = m.lv && m.lv[0] ? "Lv " + m.lv[0] + (m.lv[1] && m.lv[1] !== m.lv[0] ? "–" + m.lv[1] : "") : (pg === s.label && s.town ? "Town" : "");
+      var b = el("button"); b.type = "button"; b.appendChild(el("span", null, pg)); if (lv) b.appendChild(el("small", null, lv));
+      b.addEventListener("click", function () { wmPick(pg); }); ls.appendChild(b);
+    });
+    pop.appendChild(ls);
+  }
+  function centerWM() { var sc = $("wm-scroll"); if (WM && !WM.centered && sc.clientWidth && sc.scrollWidth > sc.clientWidth) { sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; WM.centered = 1; } }
   function showTab(t) {
-    TAB = t; [].forEach.call(document.querySelectorAll(".tabs button"), function (b) { b.setAttribute("aria-pressed", b.dataset.t === t); });
+    TAB = t; if (t === "route") setTimeout(centerWM, 0); [].forEach.call(document.querySelectorAll(".tabs button"), function (b) { b.setAttribute("aria-pressed", b.dataset.t === t); });
     $("v-train").hidden = t !== "train"; $("v-route").hidden = t !== "route"; $("v-maps").hidden = t !== "maps";
     if (t === "train") try { history.replaceState(null, "", "#train"); } catch (e) {}
   }
@@ -885,6 +996,7 @@ table.tw{border-collapse:collapse;width:100%}
     suggest($("from"), function (p) { if (p) { FROM = p; if ($("to").value) findRoute(); else $("to").focus(); } });
     suggest($("to"), function (p) { if (p && $("from").value) findRoute(); });
     suggest($("mapq"), function (p) { if (p) renderMap(p); });
+    worldMap();
     if (FROM) $("from").value = FROM;
     if (ME.lv) $("lv").value = ME.lv; if (ME.cls) $("cls").value = ME.cls;
     renderTrain();
