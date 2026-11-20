@@ -352,8 +352,10 @@
       exp /= tot; ks /= tot;
       // walking between monsters: shorter on busy maps (an estimate). Refill: most maps every 7.5 s with 3 of 4 spawn
       // points reachable solo; monsters with their own timer in the wiki refill no faster than it.
-      var walk = 0.8 + 12 / Math.sqrt(all), cap = 0;
-      rows.forEach(function (row) { if (!row.count) return; var rt = m.respawn && typeof m.respawn === "object" ? m.respawn[row.name] : 0; cap += rt ? row.n * 3600 / Math.max(rt, 7.56) : row.n * 0.75 * 3600 / 7.56; });
+      // a map whose monster rate a patch cut (spawnf, world.json) keeps that share of its monsters up: fewer to reach, farther apart
+      var sf = m.spawnf > 0 && m.spawnf < 1.5 ? m.spawnf : 1;
+      var walk = 0.8 + 12 / Math.sqrt(all * sf), cap = 0;
+      rows.forEach(function (row) { if (!row.count) return; var rt = m.respawn && typeof m.respawn === "object" ? m.respawn[row.name] : 0; cap += (rt ? row.n * 3600 / Math.max(rt, 7.56) : row.n * 0.75 * 3600 / 7.56) * sf; });
       var kph = Math.min(3600 / (ks + walk), cap * 0.8);
       out.exp = exp; out.ks = ks; out.walk = walk; out.cap = cap * 0.8; out.capped = 3600 / (ks + walk) > cap * 0.8; out.kph = kph; out.eph = kph * exp; out.reach = tot;
       return out;

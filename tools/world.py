@@ -237,6 +237,10 @@ for page, m in M.items():
     m["w"], m["h"] = vr.get("width") or 0, vr.get("height") or 0
     m["town"] = bool(d.get("isTown"))
     if d.get("mobRate") is not None: m["rate"] = round(float(d["mobRate"]), 2)   # the map's monster rate setting in the game files
+    if m.get("rate") is not None:
+        # a patch that changed the rate (v2.0.0 cut it on 27 maps): fewer monsters up at once for one player, in proportion
+        now, was, day = gamepatch.map_rate(m["id"], m["rate"])
+        if was is not None: m["rate"], m["rate_was"], m["rate_day"], m["spawnf"] = now, was, day, round(now / was, 3)
     mm = d.get("miniMap") or {}
     if mm.get("canvas"):
         png = base64.b64decode(mm["canvas"])
