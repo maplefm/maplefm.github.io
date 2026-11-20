@@ -354,10 +354,14 @@
       // points reachable solo; monsters with their own timer in the wiki refill no faster than it.
       // a map whose monster rate a patch cut (spawnf, world.json) keeps that share of its monsters up: fewer to reach, farther apart
       var sf = m.spawnf > 0 && m.spawnf < 1.5 ? m.spawnf : 1;
-      var walk = 0.8 + 12 / Math.sqrt(all * sf), cap = 0;
+      // walking between kills: from the map simulator (tools/trainsim.cjs, world.json m.walk = [melee, ranged] s) where it
+      // read the whole map; otherwise the old estimate, shorter on busy maps
+      var main = null; rows.forEach(function (row) { if (row.ok && (!main || row.n > main.n)) main = row; });
+      var far = !!(main && main.r && main.r.atk && (main.r.atk.kind === "m" || /^(Bow|Crossbow|Claw)$/.test(main.r.atk.w || "")));
+      var walk = m.walk && m.walk.length === 2 ? m.walk[far ? 1 : 0] : 0.8 + 12 / Math.sqrt(all * sf), cap = 0;
       rows.forEach(function (row) { if (!row.count) return; var rt = m.respawn && typeof m.respawn === "object" ? m.respawn[row.name] : 0; cap += (rt ? row.n * 3600 / Math.max(rt, 7.56) : row.n * 0.75 * 3600 / 7.56) * sf; });
       var kph = Math.min(3600 / (ks + walk), cap * 0.8);
-      out.exp = exp; out.ks = ks; out.walk = walk; out.cap = cap * 0.8; out.capped = 3600 / (ks + walk) > cap * 0.8; out.kph = kph; out.eph = kph * exp; out.reach = tot;
+      out.exp = exp; out.ks = ks; out.walk = walk; out.walkSim = !!(m.walk && m.walk.length === 2); out.far = far; out.cap = cap * 0.8; out.capped = 3600 / (ks + walk) > cap * 0.8; out.kph = kph; out.eph = kph * exp; out.reach = tot;
       return out;
     }
 
@@ -369,6 +373,8 @@
       if (!W.__inc) { W.__inc = {}; Object.keys(W.maps).forEach(function (p) { (W.maps[p].portals || []).forEach(function (x) { if (x[0] !== p) W.__inc[x[0]] = 1; }); }); }
       Object.keys(W.maps).forEach(function (pg) {
         var m = W.maps[pg]; if (m.type === "Town" || !m.mobs || !m.mobs.length || !W.__inc[pg]) return;
+        // a map with no way out (the Subway Depots past the Kerning jump quests) isn't a place to train: no potions, no leaving
+        if (m.portals && !m.portals.some(function (x) { return x[0] !== pg; })) return;
         if (m.mobs.some(function (x) { var mb = W.mobs[x[0]]; return !mb || mb.boss || mb.lv >= 150 || !mb.hp; })) return;
         var n = 0, lv = 0; m.mobs.forEach(function (x) { var mb = W.mobs[x[0]]; n += x[1]; lv += mb.lv * x[1]; }); lv /= n;
         if (lv < L - (o.below || 15) || lv > L + (o.above || 10)) return;

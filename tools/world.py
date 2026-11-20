@@ -260,6 +260,12 @@ for page, m in M.items():
         if not isinstance(x, dict) or x.get("hidden"): continue
         n = npc_by_id.get(x.get("id"))
         if n: m["npcs"].append([n.get("name_en") or n["page"], x.get("x"), x.get("y"), n.get("role") or ""])
+# seconds of moving between kills from the map simulator (tools/trainsim.cjs -> tools/trainwalk.json), [melee, ranged]
+try: _tw = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "trainwalk.json"), encoding="utf-8")).get("maps") or {}
+except (OSError, ValueError): _tw = {}
+for page, m in M.items():
+    if page in _tw: m["walk"] = _tw[page]
+print("maps with simulated walking times:", sum(1 for m in M.values() if m.get("walk")))
 # NPCs the game-file source doesn't have yet (new content, v2.0 on Nov 19): new maps like Forgotten Hollow, and new
 # NPCs on old maps (Alston and Whitney in Kerning City, the Worn Notice Board). The wiki's NPC list says which map each
 # stands on, without a spot, so they are listed on the page with no dot on the minimap
