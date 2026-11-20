@@ -133,7 +133,7 @@ body{padding-bottom:70px}
       .catch(function () { return { _s: 0, error: "Couldn't reach Club FM. Check your connection and try again." }; });
   }
   function signIn() { var a = el("a", "btn gold", "Sign in with Discord"); a.href = API + "/login?back=market"; return a; }
-  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "/i/" + id + ".png"; i.onerror = function () { if (i.dataset.io) { i.src = i.dataset.io; i.dataset.io = ""; } else i.remove(); }; i.dataset.io = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; return i; }
+  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id || NOICON[id]) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "/i/" + id + ".png"; i.onerror = function () { if (i.dataset.io) { i.src = i.dataset.io; i.dataset.io = ""; } else i.remove(); }; i.dataset.io = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; return i; }
   function vsTyp(l) {
     var r = ROWS[l.item], rt = refOf(r); if (!rt || l.stats) return null;
     var d = l.price / rt - 1;
@@ -169,7 +169,9 @@ body{padding-bottom:70px}
   }).catch(function () {});
   // item pictures: ids from the board's item list, drawn as the cards come in
   var BASES = {};
-  var IDS = {}, idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; if (m.kinds) KIND[r[0].toLowerCase()] = m.kinds[r[5]] || ""; if (r[7] && typeof r[7] === "object") BASES[r[0].toLowerCase()] = r[7]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
+  // items no source has an icon for (i/missing.json): never asked for
+  var NOICON = {}, NOICONP = fetch("/i/missing.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) (Array.isArray(j) ? j : Object.keys(j)).forEach(function (i) { NOICON[i] = 1; }); }).catch(function () {});
+  var IDS = {}, idsP = NOICONP.then(function () { return fetch("/data/itemdb.json"); }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; if (m.kinds) KIND[r[0].toLowerCase()] = m.kinds[r[5]] || ""; if (r[7] && typeof r[7] === "object") BASES[r[0].toLowerCase()] = r[7]; }); [].forEach.call(document.querySelectorAll("[data-ic]"), function (h) { var i = icon(h.dataset.ic); if (i) h.insertBefore(i, h.firstChild); h.removeAttribute("data-ic"); }); }).catch(function () {});
 
   // ---- the list
   var KIND = {};

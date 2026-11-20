@@ -102,6 +102,8 @@ main{max-width:1600px;margin:0 auto;padding:0 16px 40px}
 </main>
 <script>
 (function () {
+  // items no source has an icon for (i/missing.json): never asked for
+  var NOICON = {}; fetch("/i/missing.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) (Array.isArray(j) ? j : Object.keys(j)).forEach(function (i) { NOICON[i] = 1; }); }).catch(function () {});
   var API = "https://api.maplefm.gg", ROWS = {}, NAMES = {}, IDS = {}, ME = null, CUR = null;
   function $(id) { return document.getElementById(id); }
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) { if (typeof x === "string" && x.indexOf("\uE000") >= 0) rich(e, x); else e.textContent = x; } return e; }
@@ -116,7 +118,7 @@ main{max-width:1600px;margin:0 auto;padding:0 16px 40px}
     if (body !== undefined) { o.method = "POST"; o.headers = { "Content-Type": "application/json" }; o.body = JSON.stringify(body); }
     return fetch(API + path, o).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j = j || {}; j._s = r.status; return j; }); }).catch(function () { return { _s: 0, error: "Couldn't reach Club FM. Try again." }; });
   }
-  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "/i/" + id + ".png"; i.onerror = function () { if (i.dataset.io) { i.src = i.dataset.io; i.dataset.io = ""; } else i.remove(); }; i.dataset.io = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; return i; }
+  function icon(n) { var id = IDS[String(n).toLowerCase()]; if (!id || NOICON[id]) return null; var i = el("img"); i.alt = ""; i.loading = "lazy"; i.src = "/i/" + id + ".png"; i.onerror = function () { if (i.dataset.io) { i.src = i.dataset.io; i.dataset.io = ""; } else i.remove(); }; i.dataset.io = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; return i; }
   var rowsP = fetch("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/summary-public.json?m=" + Math.floor(Date.now() / 3e5)).then(function (r) { return r.ok ? r.json() : null; }).then(function (s) { (s && s.rows || []).forEach(function (r) { if (r && r.item) ROWS[r.item] = r; }); }).catch(function () {});
   var idsP = fetch("/data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { (m && m.items || []).forEach(function (r) { IDS[r[0].toLowerCase()] = r[1]; }); }).catch(function () {});
   var meP = api("/market?mine=1").then(function (j) { ME = j.signedIn ? j.me : null; who(); });
