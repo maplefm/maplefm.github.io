@@ -472,6 +472,7 @@ def build(world, guide, summary, notes, out):
         if q.get("ended"): extra.append("This event has ended" + (f" ({E(q['to'][:10])})" if q.get("to") else "") + ". The quest can't be started now.")
         elif q.get("from") or q.get("to"): extra.append("Event quest" + (f", opens {E(q['from'][:10])}" if q.get("from") else "") + (f", ends {E(q['to'][:10])}" if q.get("to") else "") + ".")
         if q.get("start"): extra.append("You're given " + ", ".join(ilink(i, c) for i, c in q["start"]) + " when you start.")
+        if q.get("src") == "client": extra.append("New quest: the wiki doesn't list it yet. From the game client's quest list, with the details matched on two community quest lists.")
         if q.get("unconfirmed"): extra.append("Sources disagree on: " + E(", ".join(q["unconfirmed"])) + ". Shown from the game data.")
         if extra: hd += '<div class="tip">' + "<br>".join(extra) + "</div>"
         hd += '<div class="grid">' + "".join(f"<div><span>{k}</span><b>{v}</b></div>" for k, v in [
