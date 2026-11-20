@@ -320,6 +320,10 @@ def build(world, guide, summary, notes, out):
     DROPPERS = {}   # how many monsters drop each item
     for _n, _ds in drops.items():
         for _i, _r, _qo in _ds: DROPPERS[_i] = DROPPERS.get(_i, 0) + 1
+    def cut_txt(m):
+        # v2.0.0 cut the monster rate on 27 maps (tools/gamepatch.json map_rate): fewer monsters up at once for one player
+        d = datetime.date.fromisoformat(m["rate_day"]).strftime("%b %-d") if m.get("rate_day") else "a recent"
+        return f"Fewer monsters up at once since the {d} update: monster rate {m['rate_was']:g} to {m['rate']:g}, about {round((1 - m['spawnf']) * 100)}% fewer for one player."
     # ---------------------------------------------------------- map pages
     for p, m in M.items():
         hid = [x for x in m["portals"] if x[1] == "hidden"]
@@ -336,8 +340,9 @@ def build(world, guide, summary, notes, out):
         if m.get("near") and m["near"] != p: intro.append(f"Nearest town: {mlink(m['near'])}.")
         if m.get("ret") and m["ret"] != p and m["ret"] != m.get("near"): intro.append(f"Return Scroll goes to {mlink(m['ret'])}.")
         if st: intro.append(f"{st['n']} monster spawn points, average level {st['lv']:.0f}, {st['eph']:.1f} EXP per 100 HP." +
-                            (f" Monster rate setting in the game files: {m['rate']:g}." if m.get("rate") is not None else ""))
+                            (f" Monster rate setting in the game files: {m['rate']:g}." if m.get("rate") is not None and not m.get("rate_was") else ""))
         if timers(m): intro.append(f"Slow respawns: {timers(m)}.")
+        if m.get("rate_was"): intro.append(cut_txt(m))
         if intro: hd += f'<p>{" ".join(intro)}</p>'
         hd += minimap(m)
         ex = mo = dv = vmh = npch = qh = ""
@@ -593,6 +598,7 @@ def build(world, guide, summary, notes, out):
         return out
     def pick_html(p, st, dmg, hit, cost, L, why=""):
         m = M[p]
+        if m.get("rate_was"): why = (why + " " if why else "") + cut_txt(m)
         mobs = "".join(mobcard(n, f" ×{c}") for n, c in sorted(m["mobs"], key=lambda x: -x[1]) if n in MOB and not MOB[n].get("boss"))
         return (f'<div class="pick"><h3>{mlink(p)}{navbtn(p)}</h3><p class="note">{E(m.get("region") or "")}{" · nearest town " + mlink(m["near"]) if m.get("near") else ""} · {st["n"]} spawn points{(" · slow respawns: " + timers(m)) if timers(m) else ""}</p>'
                 + (f"<p>{E(why)}</p>" if why else "") + f'<div class="mobs">{mobs}</div>'

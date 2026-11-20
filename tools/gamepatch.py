@@ -76,3 +76,12 @@ def released_weapons():
         if not _live(p): continue
         out |= set(p.get("weapons") or [])
     return out
+
+
+def map_rate(mid, rate):
+    """(rate now, rate before the patch) for a map whose monster rate a patch changed, while the game files hold the old one"""
+    for p in patches():
+        if not _live(p): continue
+        ch = (p.get("map_rate") or {}).get(str(mid))
+        if ch and rate is not None and abs(float(rate) - ch["mobRate"][0]) < 0.01: return ch["mobRate"][1], ch["mobRate"][0], p.get("date") or ""
+    return rate, None, ""

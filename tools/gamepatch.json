@@ -527,7 +527,199 @@
     "Silver Crow",
     "Sai"
    ],
-   "weapons_note": "The 15 weapons Nexon's v2.0 notes list. Weapons only MeowDB has (client items like Frying Pan or the other umbrellas) stay out of the training weapon tables until a source shows players can get them."
+   "weapons_note": "The 15 weapons Nexon's v2.0 notes list. Weapons only MeowDB has (client items like Frying Pan or the other umbrellas) stay out of the training weapon tables until a source shows players can get them.",
+   "map_rate": {
+    "10005076": {
+     "name": "The Tunnel That Lost Light I",
+     "mobRate": [
+      0.8,
+      0.3
+     ]
+    },
+    "10003080": {
+     "name": "Construction Site North of Kerning City",
+     "mobRate": [
+      1,
+      0.5
+     ]
+    },
+    "41": {
+     "name": "Snail Hunting Ground II",
+     "mobRate": [
+      1,
+      0.5
+     ]
+    },
+    "1000": {
+     "name": "The Field West of Amherst",
+     "mobRate": [
+      0.9,
+      0.5
+     ]
+    },
+    "10005065": {
+     "name": "Dangerous Steam",
+     "mobRate": [
+      0.7,
+      0.4
+     ]
+    },
+    "10001010": {
+     "name": "Henesys Hunting Ground I",
+     "mobRate": [
+      1.5,
+      0.9
+     ]
+    },
+    "10005070": {
+     "name": "Ant Tunnel Park",
+     "mobRate": [
+      0.8,
+      0.5
+     ]
+    },
+    "10005063": {
+     "name": "Ant Tunnel IV",
+     "mobRate": [
+      0.6,
+      0.4
+     ]
+    },
+    "40": {
+     "name": "Snail Hunting Ground I",
+     "mobRate": [
+      1,
+      0.7
+     ]
+    },
+    "10003010": {
+     "name": "Kerning City Construction Site",
+     "mobRate": [
+      0.7,
+      0.5
+     ]
+    },
+    "1005": {
+     "name": "Hunting Ground Middle of the Forest I",
+     "mobRate": [
+      1,
+      0.8
+     ]
+    },
+    "10004040": {
+     "name": "Perion Street Corner",
+     "mobRate": [
+      1,
+      0.8
+     ]
+    },
+    "42": {
+     "name": "Snail Hunting Ground III",
+     "mobRate": [
+      1,
+      0.8
+     ]
+    },
+    "1001": {
+     "name": "In a Small Forest",
+     "mobRate": [
+      1.1,
+      0.9
+     ]
+    },
+    "10005060": {
+     "name": "Ant Tunnel I",
+     "mobRate": [
+      0.6,
+      0.5
+     ]
+    },
+    "10005062": {
+     "name": "Ant Tunnel III",
+     "mobRate": [
+      0.6,
+      0.5
+     ]
+    },
+    "10005066": {
+     "name": "Deep Ant Tunnel I",
+     "mobRate": [
+      0.6,
+      0.5
+     ]
+    },
+    "10005067": {
+     "name": "Deep Ant Tunnel II",
+     "mobRate": [
+      0.6,
+      0.5
+     ]
+    },
+    "10005090": {
+     "name": "Drake's Meal Table",
+     "mobRate": [
+      0.6,
+      0.5
+     ]
+    },
+    "1014": {
+     "name": "Snail Field of Flowers",
+     "mobRate": [
+      1.2,
+      1
+     ]
+    },
+    "10005077": {
+     "name": "The Tunnel That Lost Light II",
+     "mobRate": [
+      0.6,
+      0.5
+     ]
+    },
+    "10001011": {
+     "name": "Henesys Hunting Ground II",
+     "mobRate": [
+      1.5,
+      1.3
+     ]
+    },
+    "10001012": {
+     "name": "Henesys Hunting Ground III",
+     "mobRate": [
+      1.5,
+      1.3
+     ]
+    },
+    "10005100": {
+     "name": "Another Path",
+     "mobRate": [
+      0.8,
+      0.7
+     ]
+    },
+    "10005061": {
+     "name": "Ant Tunnel II",
+     "mobRate": [
+      0.8,
+      0.7
+     ]
+    },
+    "50": {
+     "name": "A Split Road",
+     "mobRate": [
+      1,
+      0.9
+     ]
+    },
+    "1020": {
+     "name": "The Field East of Amherst",
+     "mobRate": [
+      1,
+      0.9
+     ]
+    }
+   },
+   "map_rate_source": "Map monster rate (mobRate) before and after v2.0.0 from MetaRoad's client database (metaroad.gg, Nov 19); its 27 old values match the maplestory.io MCW/1 game files exactly. henesys.gg lists the same 27 maps and gives monsters up for one player on 7: six scale the same as these rates (Ant Tunnel Park 40 to 26, Dangerous Steam 36 to 21, Henesys Hunting Ground I 30 to 18, Snail Hunting Ground II 35 to 17, Construction Site North of Kerning City 34 to 17, The Field West of Amherst 37 to 21). The Tunnel That Lost Light I disagrees (henesys.gg 40 to 26, the same line as Ant Tunnel Park; MetaRoad 0.8 to 0.3); MetaRoad's value is used. Applies while maplestory.io serves MCW/1."
   }
  ]
 }

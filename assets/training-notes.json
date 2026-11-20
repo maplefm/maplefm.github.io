@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-18",
- "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io), the MapleStory Classic Wiki or Nexon's patch notes. Map stats on the page come from the same data and update daily.",
+ "updated": "2026-11-19",
+ "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io), the MapleStory Classic Wiki or Nexon's patch notes, plus the Nov 18 monster rate cuts on 27 maps from MetaRoad's client data, matched on henesys.gg (tools/gamepatch.json). Map stats on the page come from the same data and update daily.",
  "brackets": [
   {
    "lo": 1,
@@ -134,7 +134,7 @@
    "picks": [
     {
      "map": "Monkey Swamp III",
-     "why": "Zombie Lupins (level 41): undead, 0 weapon defense. Heal hurts them."
+     "why": "Zombie Lupins (level 41): undead, 5 weapon defense since the Nov 18 update (was 0). Heal hurts them."
     },
     {
      "map": "Line 2 (Area 3)",

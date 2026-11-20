@@ -210,7 +210,7 @@ table.tw{border-collapse:collapse;width:100%}
 </section>
 <p class="foot" id="credit"></p>
 </main>
-<script src="/assets/classic-dmg.js?v=4"></script>
+<script src="/assets/classic-dmg.js?v=5"></script>
 <script>
 (function () {
   "use strict";
@@ -667,6 +667,7 @@ table.tw{border-collapse:collapse;width:100%}
     });
     var rt = m.respawn && typeof m.respawn === "object" ? Object.keys(m.respawn) : [];
     nl.appendChild(el("li", null, "Walking between kills: about " + h.walk.toFixed(1) + " s (estimate, shorter on busy maps; " + h.all + " spawn points)"));
+    if (m.spawnf && m.rate_was) nl.appendChild(el("li", null, "Fewer monsters since the Nov 18 update: monster rate " + m.rate_was + " to " + m.rate + ", so about " + Math.round((1 - m.spawnf) * 100) + "% fewer up at once solo. Counted in these numbers."));
     nl.appendChild(el("li", null, "Respawn: the map refills about every 7.5 s and you reach about 3 of 4 points solo" + (rt.length ? "; " + rt.map(function (n) { return n + " every " + m.respawn[n] + " s"; }).join(", ") : "") + " · at most " + fmt(h.cap) + " kills an hour"));
     nl.appendChild(el("li", null, "Kills an hour: " + (h.capped ? "respawn-limited at " + fmt(h.kph) : "3,600 ÷ (" + h.ks.toFixed(1) + " s a kill + " + h.walk.toFixed(1) + " s walking) = " + fmt(h.kph))));
     nl.appendChild(el("li", null, "EXP an hour: " + fmt(h.kph) + " × " + fmt(h.exp) + " EXP a kill = " + fmt(h.eph)));
