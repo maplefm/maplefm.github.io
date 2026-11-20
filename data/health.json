@@ -1,5 +1,5 @@
 {
- "at": 1795172232670,
+ "at": 1795174973877,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -57,18 +57,18 @@
    "behind": 6
   },
   "Zik": {
-   "rows24": 10648,
-   "room24": 8386,
-   "ch24": 8903,
-   "rows7": 83004,
-   "room7": 80731,
+   "rows24": 8595,
+   "room24": 6333,
+   "ch24": 6850,
+   "rows7": 81513,
+   "room7": 79240,
    "late7": 0,
    "chat24": 6,
    "last": 1795170161,
    "ver": "2026.11.18.1",
    "lag_median_min": 2.2,
-   "room_rate24": 0.788,
-   "room_rate7": 0.973,
+   "room_rate24": 0.737,
+   "room_rate7": 0.972,
    "late_share7": 0.0,
    "behind": 0
   },
@@ -222,7 +222,7 @@
    "incomplete upload": 559
   },
   "2026-11-20": {
-   "incomplete upload": 189
+   "incomplete upload": 197
   }
  },
  "rejects": {
@@ -237,6 +237,6 @@
   }
  },
  "flags": [
-  "Zik: 79% of shops placed in a room in the last 24 hours (10648 shop rows)"
+  "Zik: 74% of shops placed in a room in the last 24 hours (8595 shop rows)"
  ]
 }
