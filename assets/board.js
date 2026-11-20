@@ -375,8 +375,10 @@
   function loadDB() {
     fetch("data/abbr.json?v=2").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) { ABBR = j; SIDX = null; } }).catch(function () {});
     fetch("data/mapnames.json?v=1").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.length) { j.forEach(function (n) { MAPSET[n] = 1; }); frCache = {}; DIRTY = true; if (D && !ENGINE) render(); } }).catch(function () {});
+    // items no source has an icon for (i/missing.json, tools/iconmirror.py): never asked for, so no failed requests
+    var noIcon = fetch("/i/missing.json?d=" + new Date().toISOString().slice(0, 10)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) (Array.isArray(j) ? j : Object.keys(j)).forEach(function (i) { NOICON[i] = 1; }); }).catch(function () {});
     // the weekly refreshed list lives with the price data; the copy next to the page is the fallback
-    return fetch(LIVE + "data/itemdb.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    return noIcon.then(function () { return fetch(LIVE + "data/itemdb.json"); }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       .then(function (j) { return j && j.items ? j : fetch("data/itemdb.json?v=mcw4").then(function (r) { return r.ok ? r.json() : null; }); }).then(function (j) {
       if (!j || !j.items) return; mark("dbIn");
       DBK = j.kinds || [];
@@ -759,14 +761,15 @@
   }
   function capturedAsync(name) { var k = ocrKey(name); if (k.length < 3) return Promise.resolve(""); return shard(k).then(function (m) { return (m && m[k]) || ""; }); }
   // Classic World's own icons from maplestory.io first; then icons cut from real shop windows.
-  var IO = "https://maplestory.io/api/MCW/1/item/";
+  var IO = "https://maplestory.io/api/MCW/1/item/", NOICON = {};
   // the site's own copy of the icon first (/i/<id>.png, same connection, long cached), then maplestory.io
   function iconSrcs(name) {
     var out = [], r = dbRow(name);
-    if (r) { out.push("/i/" + r[1] + ".png"); out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
+    var none = r && NOICON[r[1]];
+    if (r && !none) { out.push("/i/" + r[1] + ".png"); out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
     // a scanner's crop of the shop window only stands in for items the game data doesn't have: a crop is filed under the
     // name that was read, and a misread name (a scroll cut short to "Two-Handed Sword") puts the wrong picture on an item
-    var v = ICONS[name]; if (!r && DBN && typeof v === "string") out.push(v);
+    var v = ICONS[name]; if ((!r || none) && DBN && typeof v === "string") out.push(v);
     return out;
   }
   function iconSrc(name) { return iconSrcs(name)[0] || ""; }
@@ -3830,7 +3833,7 @@
         var parts = c[2].map(function (x) { return [x[0], x[1], ""]; }); if (c[5]) parts.push([c[5][0], c[5][1], "catalyst"]);
         parts.forEach(function (x) {
           var row = el("div", "gci"), id = GUIDE.ids && GUIDE.ids[x[0]];
-          if (id) { var im = new Image(); im.src = "/i/" + id + ".png"; im.alt = ""; im.loading = "lazy"; im.onerror = function () { if (/^\/i\//.test(new URL(im.src).pathname)) im.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; else im.remove(); }; row.appendChild(im); }
+          if (id && !NOICON[id]) { var im = new Image(); im.src = "/i/" + id + ".png"; im.alt = ""; im.loading = "lazy"; im.onerror = function () { if (/^\/i\//.test(new URL(im.src).pathname)) im.src = "https://maplestory.io/api/MCW/1/item/" + id + "/icon"; else im.remove(); }; row.appendChild(im); }
           row.appendChild(guideLink(x[0])); if (x[2]) row.appendChild(el("small", null, " " + x[2])); row.appendChild(el("em", null, "×" + fmt(x[1]))); rc.appendChild(row);
         });
         where.appendChild(rc);
