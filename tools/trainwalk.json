@@ -1,0 +1,719 @@
+{
+ "about": "Seconds of moving between kills on each map, [melee, ranged], from tools/trainsim.cjs: the map's platforms, ropes, ladders and in-map portals from the game files, the client's movement values (walk 125 px/s, jump 77 px, fall cap 670 px/s), monsters wandering, spawns refilling every 7.56 s with 75 percent of points up solo (henesys.gg's counts of monsters up for one player on 7 maps: 56 to 83 percent, median 70). The simulator plays perfectly, so each column is scaled to keep the site's old median walk (2.83 s): melee x1.41, ranged x2.53. Only maps where the map reading reaches every spawn point. world.py puts these on world.json maps as walk; assets/classic-dmg.js uses them in place of the 0.8 + 12/sqrt(spawns) estimate. Rebuild: python3 tools/trainsim_geo.py, then node tools/trainsim.cjs ... table.",
+ "built": "2026-11-20",
+ "cfg": {
+  "minutes": 32,
+  "tick": 7.56,
+  "capfrac": 0.75,
+  "mobSpeed": 40,
+  "climb": 100,
+  "rangeNear": 90,
+  "bandNear": 40,
+  "rangeFar": 380,
+  "bandFar": 60,
+  "policy": "greedy"
+ },
+ "scale": {
+  "near": 1.407,
+  "far": 2.525,
+  "median_formula": 2.828
+ },
+ "maps": {
+  "3-Way Road-Split": [
+   6.26,
+   8.54
+  ],
+  "A Look-Out Shed Around the Beach": [
+   2.91,
+   3.89
+  ],
+  "A Split Road": [
+   2.34,
+   2.8
+  ],
+  "An Empty House": [
+   2.48,
+   2.02
+  ],
+  "Another Path": [
+   7.46,
+   12.02
+  ],
+  "Ant Tunnel I": [
+   4.63,
+   7.22
+  ],
+  "Ant Tunnel III": [
+   3.1,
+   4.77
+  ],
+  "Ant Tunnel IV": [
+   4.02,
+   8.16
+  ],
+  "Ant Tunnel Park": [
+   5.61,
+   8.59
+  ],
+  "B1 (Area 2)": [
+   2.48,
+   2.8
+  ],
+  "B1 (Subway Depot)": [
+   1.72,
+   0.76
+  ],
+  "B2 (Subway Depot)": [
+   1.98,
+   1.54
+  ],
+  "B3 (Subway Depot)": [
+   1.51,
+   0.88
+  ],
+  "Beach Hunting Ground": [
+   3.08,
+   3.51
+  ],
+  "Camp 1": [
+   2.74,
+   2.47
+  ],
+  "Camp 2": [
+   2.72,
+   2.07
+  ],
+  "Camp 3": [
+   2.63,
+   1.74
+  ],
+  "Caution Falling Down": [
+   3.28,
+   2.12
+  ],
+  "Clang and Lorang": [
+   2.21,
+   1.64
+  ],
+  "Construction Site North of Kerning City": [
+   4.09,
+   5.93
+  ],
+  "Dangerous Croko I": [
+   2.36,
+   2.5
+  ],
+  "Dangerous Forest": [
+   2.46,
+   2.37
+  ],
+  "Dangerous Steam": [
+   9.58,
+   12.3
+  ],
+  "Dangerous Valley": [
+   3.01,
+   3.03
+  ],
+  "Dangerous Valley II": [
+   3.53,
+   4.32
+  ],
+  "Dark Cave": [
+   2.22,
+   2.83
+  ],
+  "Deep Ant Tunnel I": [
+   3.94,
+   6.97
+  ],
+  "Deep Ant Tunnel II": [
+   6.05,
+   8.38
+  ],
+  "Deep Valley I": [
+   4.18,
+   5.61
+  ],
+  "Deep Valley II": [
+   2.59,
+   2.73
+  ],
+  "Deep Valley III": [
+   3.07,
+   3.23
+  ],
+  "Downstairs at the Forest": [
+   2.04,
+   1.14
+  ],
+  "Drake's Meal Table": [
+   5.57,
+   5.86
+  ],
+  "Dungeon, Southern Forest I": [
+   2.63,
+   3.33
+  ],
+  "Dungeon, Southern Forest II": [
+   3.07,
+   4.12
+  ],
+  "Dungeon, Southern Forest III": [
+   2.86,
+   3.48
+  ],
+  "Dungeon, Southern Forest IV": [
+   2.91,
+   3.91
+  ],
+  "East Domain of Perion": [
+   2.66,
+   3.13
+  ],
+  "East Entrance to Mushroom Town": [
+   7.74,
+   9.19
+  ],
+  "East Rocky Mountain I": [
+   2.73,
+   2.78
+  ],
+  "East Rocky Mountain II": [
+   2.46,
+   2.55
+  ],
+  "East Rocky Mountain IV": [
+   2.72,
+   2.65
+  ],
+  "East Rocky Mountain V": [
+   3.57,
+   4.19
+  ],
+  "East Rocky Mountain VI": [
+   2.17,
+   2.12
+  ],
+  "East Rocky Mountain VII": [
+   3.32,
+   3.28
+  ],
+  "Excavation Site I": [
+   2.29,
+   2.3
+  ],
+  "Excavation Site II": [
+   2.87,
+   3.74
+  ],
+  "Excavation Site III": [
+   2.41,
+   1.92
+  ],
+  "Forest West of Henesys": [
+   2.42,
+   2.65
+  ],
+  "Golem's Temple I": [
+   3.6,
+   2.75
+  ],
+  "Golem's Temple II": [
+   2.69,
+   1.54
+  ],
+  "Golem's Temple III": [
+   2.1,
+   1.72
+  ],
+  "Golem's Temple IV": [
+   2.27,
+   1.21
+  ],
+  "Henesys Dungeon Entrance": [
+   3.74,
+   3.54
+  ],
+  "Henesys Hunting Ground I": [
+   3.36,
+   3.81
+  ],
+  "Henesys Hunting Ground II": [
+   2.91,
+   2.78
+  ],
+  "Henesys Hunting Ground III": [
+   2.55,
+   3.08
+  ],
+  "Hot Sand": [
+   1.89,
+   2.3
+  ],
+  "Hunting Ground Middle of the Forest I": [
+   4.83,
+   5.71
+  ],
+  "Hunting Ground Middle of the Forest II": [
+   2.39,
+   2.4
+  ],
+  "Hunting Ground in the Deep Forest II": [
+   3.21,
+   3.43
+  ],
+  "In a Small Forest": [
+   3.46,
+   4.44
+  ],
+  "Kerning City Construction Site": [
+   4.83,
+   5.53
+  ],
+  "Kerning City Middle Forest II": [
+   4.5,
+   6.39
+  ],
+  "Kerning City Middle Forest III": [
+   2.79,
+   3.96
+  ],
+  "L Forest II": [
+   4.53,
+   3.26
+  ],
+  "L Forest III": [
+   6.01,
+   6.14
+  ],
+  "Land of Wild Boar": [
+   1.98,
+   1.77
+  ],
+  "Line 1 (Area 1)": [
+   2.28,
+   2.53
+  ],
+  "Line 1 (Area 2)": [
+   1.96,
+   2.17
+  ],
+  "Line 1 (Area 3)": [
+   1.74,
+   1.84
+  ],
+  "Line 1 (Area 4)": [
+   2.39,
+   2.73
+  ],
+  "Line 2 (Area 1)": [
+   1.53,
+   1.64
+  ],
+  "Line 2 (Area 2)": [
+   1.44,
+   1.57
+  ],
+  "Line 2 (Area 3)": [
+   2.28,
+   2.78
+  ],
+  "Lorang Lorang": [
+   4.49,
+   5.4
+  ],
+  "Lorang Lorang Lorang": [
+   3.0,
+   2.1
+  ],
+  "Lorang and Clang": [
+   3.11,
+   3.61
+  ],
+  "Monkey Forest I": [
+   2.74,
+   2.42
+  ],
+  "Monkey Forest II": [
+   3.12,
+   3.74
+  ],
+  "Monkey Swamp I": [
+   4.6,
+   5.73
+  ],
+  "Monkey Swamp II": [
+   4.47,
+   4.6
+  ],
+  "Monkey Swamp III": [
+   3.76,
+   3.91
+  ],
+  "Mushroom Garden (Maple Island)": [
+   2.29,
+   1.97
+  ],
+  "Mushroom Garden (Victoria Island)": [
+   1.89,
+   1.72
+  ],
+  "Northern Top of Construction Site": [
+   2.87,
+   1.92
+  ],
+  "Over the Wall": [
+   2.45,
+   2.3
+  ],
+  "Perion Dungeon Entrance": [
+   3.35,
+   3.51
+  ],
+  "Perion Street Corner": [
+   3.29,
+   4.75
+  ],
+  "Pig Park": [
+   2.56,
+   2.45
+  ],
+  "Pig Park II": [
+   4.83,
+   4.97
+  ],
+  "Remains (Cliff)": [
+   3.95,
+   4.97
+  ],
+  "Remains (Tomb) I": [
+   2.07,
+   1.92
+  ],
+  "Remains (Tomb) II": [
+   2.11,
+   1.74
+  ],
+  "Remains (Tomb) III": [
+   2.24,
+   1.41
+  ],
+  "Remains (Tomb) IV": [
+   4.76,
+   5.76
+  ],
+  "Right Around Lith Harbor": [
+   1.87,
+   1.59
+  ],
+  "Rocky Road I": [
+   2.41,
+   2.55
+  ],
+  "Rocky Road II": [
+   2.46,
+   2.5
+  ],
+  "Rocky Road III": [
+   4.05,
+   4.07
+  ],
+  "Sanctuary Entrance I": [
+   2.0,
+   1.44
+  ],
+  "Sanctuary Entrance II": [
+   1.91,
+   1.77
+  ],
+  "Sanctuary Entrance IV": [
+   2.31,
+   2.1
+  ],
+  "Sleepy Dungeon I": [
+   1.83,
+   0.98
+  ],
+  "Sleepy Dungeon II": [
+   2.05,
+   1.44
+  ],
+  "Sleepy Dungeon III": [
+   2.91,
+   2.55
+  ],
+  "Sleepy Dungeon IV": [
+   2.15,
+   1.64
+  ],
+  "Sleepy Dungeon V": [
+   2.69,
+   2.83
+  ],
+  "Snail Field of Flowers": [
+   3.05,
+   3.66
+  ],
+  "Snail Garden": [
+   2.53,
+   2.75
+  ],
+  "Snail Hunting Ground I": [
+   5.08,
+   7.53
+  ],
+  "Snail Hunting Ground II": [
+   6.57,
+   9.47
+  ],
+  "Snail Hunting Ground III": [
+   5.33,
+   7.73
+  ],
+  "Sunset Sky": [
+   4.39,
+   5.63
+  ],
+  "The Blue Mushroom Forest": [
+   2.04,
+   1.89
+  ],
+  "The Breathing Rock": [
+   2.14,
+   1.62
+  ],
+  "The Burnt Land I": [
+   2.65,
+   2.6
+  ],
+  "The Burnt Land II": [
+   2.35,
+   2.6
+  ],
+  "The Burnt Land III": [
+   2.29,
+   2.63
+  ],
+  "The Burnt Land IV": [
+   1.89,
+   2.25
+  ],
+  "The Burnt Land V": [
+   1.97,
+   1.87
+  ],
+  "The Cave of Evil Eye I": [
+   5.53,
+   7.4
+  ],
+  "The Cave of Evil Eye II": [
+   2.24,
+   1.82
+  ],
+  "The Cave of Evil Eye III": [
+   2.83,
+   2.37
+  ],
+  "The Entrance of Golem's Temple": [
+   3.25,
+   3.59
+  ],
+  "The Field East of Amherst": [
+   3.39,
+   3.64
+  ],
+  "The Field South of Ellinia": [
+   3.74,
+   4.97
+  ],
+  "The Field Up North of Ellinia": [
+   3.52,
+   4.92
+  ],
+  "The Field West of Amherst": [
+   6.11,
+   9.8
+  ],
+  "The Forest East of Henesys": [
+   3.38,
+   4.12
+  ],
+  "The Forest North of Ellinia": [
+   10.12,
+   16.11
+  ],
+  "The Forest South of Ellinia": [
+   7.35,
+   10.48
+  ],
+  "The Forest of Evil I": [
+   2.34,
+   2.27
+  ],
+  "The Forest of Evil II": [
+   2.24,
+   2.07
+  ],
+  "The Forest of Wisdom": [
+   3.05,
+   1.89
+  ],
+  "The Hill East of Henesys": [
+   2.74,
+   2.65
+  ],
+  "The Land of Wild Boar II": [
+   1.67,
+   1.39
+  ],
+  "The Murky Swamp I": [
+   2.8,
+   2.8
+  ],
+  "The Murky Swamp II": [
+   3.71,
+   4.12
+  ],
+  "The Pig Beach": [
+   3.74,
+   5.0
+  ],
+  "The Rain-Forest East of Henesys": [
+   3.08,
+   2.3
+  ],
+  "The Road to the Dungeon": [
+   3.48,
+   4.24
+  ],
+  "The Swamp of Despair I": [
+   3.15,
+   4.24
+  ],
+  "The Swamp of Despair II": [
+   2.87,
+   3.81
+  ],
+  "The Swamp of Despair III": [
+   3.18,
+   3.99
+  ],
+  "The Tree That Grew II": [
+   1.91,
+   1.39
+  ],
+  "The Tree That Grew III": [
+   2.25,
+   2.02
+  ],
+  "The Tunnel That Lost Light I": [
+   12.81,
+   19.87
+  ],
+  "Thicket Around the Beach II": [
+   4.46,
+   4.82
+  ],
+  "Tomato Field": [
+   1.53,
+   1.01
+  ],
+  "Transfer Area": [
+   3.25,
+   3.89
+  ],
+  "Tree Dungeon, Forest Up North I": [
+   3.64,
+   4.39
+  ],
+  "Tree Dungeon, Forest Up North II": [
+   3.29,
+   4.6
+  ],
+  "Tree Dungeon, Forest Up North III": [
+   2.21,
+   2.5
+  ],
+  "Tree Dungeon, Forest Up North IV": [
+   2.5,
+   3.28
+  ],
+  "Tree Dungeon, Forest Up North V": [
+   2.48,
+   2.4
+  ],
+  "Tree Dungeon, Forest Up North VI": [
+   3.08,
+   4.37
+  ],
+  "Tree Dungeon, Forest Up North VII": [
+   4.32,
+   5.76
+  ],
+  "Tree Dungeon, Forest Up North VIII": [
+   2.72,
+   3.64
+  ],
+  "Tree Dungeon, Monkey Forest I": [
+   2.91,
+   3.23
+  ],
+  "Tree Dungeon, Monkey Forest II": [
+   2.84,
+   3.36
+  ],
+  "Utah's Pig Farm": [
+   4.26,
+   4.39
+  ],
+  "West Domain of Perion": [
+   2.69,
+   3.08
+  ],
+  "West Rocky Mountain I": [
+   2.72,
+   3.48
+  ],
+  "West Rocky Mountain II": [
+   2.31,
+   2.42
+  ],
+  "West Rocky Mountain III": [
+   2.12,
+   2.5
+  ],
+  "West Rocky Mountain IV": [
+   2.81,
+   2.9
+  ],
+  "West Street Corner of Perion": [
+   2.18,
+   2.15
+  ],
+  "Wild Kargo's Area": [
+   3.15,
+   2.83
+  ]
+ },
+ "left_out": {
+  "A Hill West of Henesys": "map reading reaches 39 of 54 spawn points",
+  "Ant Tunnel II": "map reading reaches 43 of 47 spawn points",
+  "Damp Forest": "map reading reaches 22 of 28 spawn points",
+  "Damp Tree-Forest": "map reading reaches 26 of 46 spawn points",
+  "Dangerous Croko II": "map reading reaches 48 of 54 spawn points",
+  "Deep Forest": "map reading reaches 39 of 43 spawn points",
+  "Drake Hunting Ground": "map reading reaches 18 of 22 spawn points",
+  "East Rocky Mountain III": "map reading reaches 38 of 42 spawn points",
+  "Hunting Ground in the Deep Forest I": "map reading reaches 27 of 36 spawn points",
+  "Kerning City Middle Forest I": "map reading reaches 27 of 53 spawn points",
+  "L Forest I": "map reading reaches 68 of 73 spawn points",
+  "Sanctuary Entrance III": "map reading reaches 8 of 14 spawn points",
+  "Swampy Land in a Deep Forest": "map reading reaches 46 of 50 spawn points",
+  "The Cave of Evil Eye IV": "map reading reaches 14 of 25 spawn points",
+  "The Tree That Grew I": "map reading reaches 35 of 40 spawn points",
+  "The Tunnel That Lost Light II": "map reading reaches 31 of 47 spawn points",
+  "Thicket Around the Beach I": "map reading reaches 33 of 67 spawn points",
+  "Tree Dungeon, Forest Up North IX": "map reading reaches 12 of 20 spawn points"
+ }
+}

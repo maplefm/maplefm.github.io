@@ -90,6 +90,8 @@ jobs:
         run: python3 tests/v2patch.py
       - name: Wiki quest prerequisites
         run: python3 tests/wikiquestpre.py
+      - name: Training map simulator checks (hand-made maps with known answers)
+        run: node tests/trainsim-check.cjs
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'
