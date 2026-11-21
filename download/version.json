@@ -1,10 +1,15 @@
 {
- "version": "2026.11.18.1",
- "date": "2026-11-18T03:50:09+00:00",
- "notes": "Zenith: a new \"world\" setting in config.json. Put \"world\": \"Zenith\" when you scan Zenith and your listings go to Zenith's prices only, never mixed with Windia's. Windia stays the default.",
- "sha256": "d73d4c70d4c2ffff0b6a092bceef78726e8fc3c58c9d1196799a232d420d2963",
- "size": 185943,
+ "version": "2026.11.20.1",
+ "date": "2026-11-21T03:14:18+00:00",
+ "notes": "Hover list: an item you just read in full isn't asked for again in that room and channel, even when the seller's name reads differently on the next pass. When the game window runs past the bottom of your screen, the watcher now says that's why the lower rows' popups can't be read.",
+ "sha256": "b2cdbad8759645d7e6630fb7aae959e7c22161a50aceb1e4905d0f841f4dbe23",
+ "size": 186336,
  "history": [
+  {
+   "version": "2026.11.18.1",
+   "date": "2026-11-18T03:50:09+00:00",
+   "notes": "Zenith: a new \"world\" setting in config.json. Put \"world\": \"Zenith\" when you scan Zenith and your listings go to Zenith's prices only, never mixed with Windia's. Windia stays the default."
+  },
   {
    "version": "2026.11.18.1",
    "date": "2026-11-18",
@@ -99,93 +104,8 @@
    "version": "2026.10.31.5",
    "date": "2026-10-31",
    "notes": "Talks to Club FM at api.maplefm.gg"
-  },
-  {
-   "version": "2026.10.31.4",
-   "date": "2026-10-31",
-   "notes": "Channel window: reads right when another window covers the top of the game (it counts rows up from the Cancel button), and never guesses when part of the grid is hidden. Fixes wrong channels like 17 or 24 while on 25."
-  },
-  {
-   "version": "2026.10.31.3",
-   "date": "2026-10-31",
-   "notes": "Free Market room numbers read again where the game's small 7 and 1 looked like / and | (FM7 shops were landing as just FM). The time warning at the top of the window is gone."
-  },
-  {
-   "version": "2026.10.31.2",
-   "date": "2026-10-31",
-   "notes": "Fix: game windows smaller than 1920 x 1080 read shops again. The game only scales its picture past 1920 x 1080, so smaller windows are read as they are, like before."
-  },
-  {
-   "version": "2026.10.31.1",
-   "date": "2026-10-30",
-   "notes": "Reads the game at any window size: 4K, ultrawide and stretched windows now read shops, item popups, chat and the Change Channel window. Channel reads are stricter: a picture it can't be sure of is skipped, never guessed."
-  },
-  {
-   "version": "2026.10.30.7",
-   "date": "2026-10-30",
-   "notes": "A shop row whose name picks up a stray letter or two from the pointer now still reads when the rest is a real item."
-  },
-  {
-   "version": "2026.10.30.6",
-   "date": "2026-10-30",
-   "notes": "Faster hovers: when every stat line reads exactly, one text pass is enough, so popups read in about half the time. The watcher's loop is now shared with the browser scanner."
-  },
-  {
-   "version": "2026.10.30.5",
-   "date": "2026-10-30",
-   "notes": "Deals reach the site in about a minute: new listings are sent within half a minute instead of every 10 minutes."
-  },
-  {
-   "version": "2026.10.30.4",
-   "date": "2026-10-30",
-   "notes": "Weapons with a Knockback Chance line now read exactly too."
-  },
-  {
-   "version": "2026.10.30.3",
-   "date": "2026-10-30",
-   "notes": "Faster hovers: an open shop is no longer read again every second because the seller's character moves, and an item read exactly isn't read twice more. Saves a few whole-game pictures in a frames folder for testing other window sizes."
-  },
-  {
-   "version": "2026.10.30.2",
-   "date": "2026-10-30",
-   "notes": "Fixes weapons not getting their stats: the popup's Type line (like Two-handed Sword) was being read as the item's name, so the stats didn't match the row."
-  },
-  {
-   "version": "2026.10.30.1",
-   "date": "2026-10-29",
-   "notes": "Popups are read exactly in the game's own font: stats are trusted only when every line reads exactly and fits the item. A popup that can't be read fully is sent as a lossless picture so the reader can learn it."
-  },
-  {
-   "version": "2026.10.29.3",
-   "date": "2026-10-29",
-   "notes": "Popups and room names the watcher can't read are sent as small pictures (up to 30 a day) so Club FM can fix the reader without asking for your review folder."
-  },
-  {
-   "version": "2026.10.29.2",
-   "date": "2026-10-29",
-   "notes": "Hover counts now reach Club FM with your shop scans, so we can see why some equips come in without stats."
-  },
-  {
-   "version": "2026.10.29.1",
-   "date": "2026-10-29",
-   "notes": "Reads the Free Market room when the minimap is minimized to its title bar, so those shops land in the right room. Re-sends listings still up every 15 minutes instead of every hour, so the site can tell a listing that left from one still up."
-  },
-  {
-   "version": "2026.10.28.1",
-   "date": "2026-10-28",
-   "notes": "Counts hovers (rested, popup shown or not, read, matched) and sends the day's totals with your shop scans, so we can see where equipment stats get lost. No pictures, no change to what gets read."
-  },
-  {
-   "version": "2026.10.27.13",
-   "date": "2026-10-27",
-   "notes": "Deal lines when a shop you open has something well under the usual price, the busiest rooms and channels nobody reads at this hour, a half-hour tally of your scans, and a heads-up when the FM room can't be read."
-  },
-  {
-   "version": "2026.10.27.12",
-   "date": "2026-10-27",
-   "notes": "Reads how many scrolls passed from the item's title, and fixes a 1 read as 4 on lines no scroll could have changed"
   }
  ],
  "pip": [],
- "sig": "2816c6499bdb683b6528b2e980fc3605eeb89864054e1b3525903b5a30972b036fd3d1d01207fc1090a52d52ecadbb914ecba39d37d9560a7879128af6e2ac6835cabf110b3d4ac5c6104e99c81debacccbda36b6f949bee7f3b6fa4cf3c9f501f6bb9b9a2e0382bbbfb93f5d0c09a33a5c1fe5482dfd0e25de4a13e3144794ba3be0f860937ccdd1a7ccddcd22010ec4f3e44646cb9ebdbce89274cd599abeaf363b5b4a0ab6de25d655c6e0d453e3baad61da9e9be8975e3f52efc3ac7c925789f6503d32e5be3a3abc2cfd7108c3c7187458570701e34d9f657f8c48fb13c578b18046b49153384401ff34e4ca293b30b86014bacc19faf4a8d81f0124d22"
+ "sig": "a0d6cc9a02db2b444901290a6bbf634806aa9ddf411630cc430075f87c41a92904e82a2e7d7cbd905ceb1973607f9e65b49ed827fcf8d99868df42e1614d4f53a076dc48014007b77d3c3a0141bab767c33a8be940cf37912d7c3e7b41f959ceac7c5358653f4ced66cc81e4d7fd9635509e2ea9ec723c38d30d49bbb3a8116b228bdffa6d693bbafd56eaf6aef8292e2db23d4712da45a4cfa52f60a96792882f5b094665ba84fee2d99594cd170f0e28d5f0605ef1b1258aebab5a892c5ca5c201394e43c659c3a6947194746e4d79a2ab1d2cfef237aef0de874973cfa42aa8d8c393d287ae85c72fad078f9f88ff70d16303b0e320c4636d75838fa73380"
 }
