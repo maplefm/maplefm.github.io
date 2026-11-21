@@ -1,43 +1,41 @@
 {
- "at": 1795263655,
- "ok": false,
- "failing": [
-  "Scanner health"
- ],
+ "at": 1795280517,
+ "ok": true,
+ "failing": [],
  "checks": [
   {
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 212,
+   "ms": 315,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 118,
+   "ms": 112,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 112,
+   "ms": 120,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 125,
+   "ms": 290,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 121,
+   "ms": 986,
    "fix": null
   },
   {
@@ -51,7 +49,7 @@
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 129,
+   "ms": 328,
    "fix": null
   },
   {
@@ -65,104 +63,104 @@
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 117,
+   "ms": 111,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 130,
+   "ms": 109,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 131,
+   "ms": 110,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 118,
+   "ms": 107,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 117,
+   "ms": 121,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 372,
+   "ms": 150,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 105,
+   "ms": 104,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 145,
+   "ms": 122,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 108,
+   "ms": 121,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
    "detail": "Work Gloves: clean 1,724 to 2,000 (7 sold) · clean +1 crit rate 407K to 484K (6 sold) · +2",
-   "ms": 477,
+   "ms": 613,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
-   "detail": "uploaded 2 min ago",
-   "ms": 115,
+   "detail": "uploaded 1 min ago",
+   "ms": 108,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "38 open listings, #selling synced 0 min ago",
-   "ms": 841,
+   "detail": "38 open listings, #selling synced 1 min ago",
+   "ms": 1046,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "2 visits, 0 crashed",
-   "ms": 105,
+   "detail": "7 visits, 0 crashed",
+   "ms": 162,
    "fix": null
   },
   {
    "name": "Board on a phone",
    "ok": true,
-   "detail": "loads, card and search work (36s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (34s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (33s, 42 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (32s, 42 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -170,21 +168,21 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 91,
+   "ms": 134,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1516 items",
-   "ms": 140,
+   "detail": "1514 items",
+   "ms": 144,
    "fix": null
   },
   {
    "name": "Scanner health",
-   "ok": false,
-   "detail": "laclac: 32% of shops placed in a room in the last 24 hours (2178 shop rows)",
-   "ms": 254,
+   "ok": true,
+   "detail": "all scanners within the bars",
+   "ms": 130,
    "fix": null
   },
   {
@@ -211,11 +209,6 @@
  ],
  "repairs": [],
  "history": [
-  {
-   "at": 1793747200,
-   "failing": [],
-   "repairs": []
-  },
   {
    "at": 1793809305,
    "failing": [
@@ -658,7 +651,12 @@
     "Scanner health"
    ],
    "repairs": []
+  },
+  {
+   "at": 1795280517,
+   "failing": [],
+   "repairs": []
   }
  ],
- "beat": 1795263655
+ "beat": 1795280517
 }
