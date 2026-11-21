@@ -1,5 +1,5 @@
 {
- "at": 1795217445826,
+ "at": 1795220702666,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -8,7 +8,7 @@
  },
  "current": "2026.11.18.1",
  "scanners": {
-  "PikaDexLess": {
+  "Mesoniac": {
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
@@ -17,44 +17,12 @@
    "late7": 0,
    "chat24": 0,
    "last": 0,
-   "ver": "2026.11.2.7",
+   "ver": "2026.11.6.2",
    "lag_median_min": null,
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 7
-  },
-  "laclac": {
-   "rows24": 2178,
-   "room24": 692,
-   "ch24": 692,
-   "rows7": 68621,
-   "room7": 64079,
-   "late7": 13,
-   "chat24": 4,
-   "last": 1795199139,
-   "ver": "2026.11.18.1",
-   "lag_median_min": 1.9,
-   "room_rate24": 0.318,
-   "room_rate7": 0.934,
-   "late_share7": 0.0,
-   "behind": 0
-  },
-  "4DDDD": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.11.6.1",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
-   "behind": 6
+   "behind": 5
   },
   "Zik": {
    "rows24": 8595,
@@ -72,21 +40,21 @@
    "late_share7": 0.0,
    "behind": 0
   },
-  "Mesoniac": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.11.6.2",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
-   "behind": 5
+  "laclac": {
+   "rows24": 2178,
+   "room24": 692,
+   "ch24": 692,
+   "rows7": 68621,
+   "room7": 64079,
+   "late7": 13,
+   "chat24": 4,
+   "last": 1795199139,
+   "ver": "2026.11.18.1",
+   "lag_median_min": 1.9,
+   "room_rate24": 0.318,
+   "room_rate7": 0.934,
+   "late_share7": 0.0,
+   "behind": 0
   },
   "CamelToaster": {
    "rows24": 0,
@@ -202,10 +170,6 @@
   }
  },
  "drops": {
-  "2026-11-14": {
-   "bad row: 3a3a (p zero)": 40,
-   "incomplete upload": 1966
-  },
   "2026-11-15": {
    "incomplete upload": 1315
   },
@@ -222,7 +186,10 @@
    "incomplete upload": 559
   },
   "2026-11-20": {
-   "incomplete upload": 398
+   "incomplete upload": 406
+  },
+  "2026-11-21": {
+   "incomplete upload": 7
   }
  },
  "rejects": {
@@ -237,7 +204,7 @@
   }
  },
  "flags": [
-  "laclac: 32% of shops placed in a room in the last 24 hours (2178 shop rows)",
-  "Zik: 74% of shops placed in a room in the last 24 hours (8595 shop rows)"
+  "Zik: 74% of shops placed in a room in the last 24 hours (8595 shop rows)",
+  "laclac: 32% of shops placed in a room in the last 24 hours (2178 shop rows)"
  ]
 }
