@@ -1,12 +1,12 @@
 {
- "at": 1795230220661,
+ "at": 1795233488335,
  "bars": {
   "room": 0.8,
   "late": 0.02,
   "behind": 2,
   "min_rows": 300
  },
- "current": "2026.11.18.1",
+ "current": "2026.11.20.1",
  "scanners": {
   "Mesoniac": {
    "rows24": 0,
@@ -22,23 +22,23 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 5
+   "behind": 6
   },
   "Zik": {
-   "rows24": 8595,
-   "room24": 6333,
-   "ch24": 6850,
-   "rows7": 80342,
-   "room7": 78069,
+   "rows24": 10600,
+   "room24": 8450,
+   "ch24": 8967,
+   "rows7": 81223,
+   "room7": 78950,
    "late7": 0,
    "chat24": 6,
-   "last": 1795170161,
-   "ver": "2026.11.18.1",
+   "last": 1795233378,
+   "ver": "2026.11.20.1",
    "lag_median_min": 2.2,
-   "room_rate24": 0.737,
+   "room_rate24": 0.797,
    "room_rate7": 0.972,
    "late_share7": 0.0,
-   "behind": 0
+   "behind": null
   },
   "laclac": {
    "rows24": 2178,
@@ -70,7 +70,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 5
+   "behind": 6
   },
   "PockyStick": {
    "rows24": 0,
@@ -86,7 +86,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 5
+   "behind": 6
   },
   "Guest-c334": {
    "rows24": 0,
@@ -102,7 +102,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 5
+   "behind": 6
   },
   "Guest-bcea": {
    "rows24": 0,
@@ -118,7 +118,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 4
+   "behind": 5
   },
   "Guest-e9e5": {
    "rows24": 0,
@@ -134,7 +134,7 @@
    "room_rate24": null,
    "room_rate7": null,
    "late_share7": null,
-   "behind": 3
+   "behind": 4
   },
   "Gola": {
    "rows24": 0,
@@ -150,7 +150,7 @@
    "room_rate24": null,
    "room_rate7": 0.0,
    "late_share7": 0.0,
-   "behind": 2
+   "behind": 3
   },
   "PityPocket": {
    "rows24": 0,
@@ -189,7 +189,7 @@
    "incomplete upload": 406
   },
   "2026-11-21": {
-   "incomplete upload": 52
+   "incomplete upload": 68
   }
  },
  "rejects": {
@@ -204,7 +204,7 @@
   }
  },
  "flags": [
-  "Zik: 74% of shops placed in a room in the last 24 hours (8595 shop rows)",
+  "Zik: 80% of shops placed in a room in the last 24 hours (10600 shop rows)",
   "laclac: 32% of shops placed in a room in the last 24 hours (2178 shop rows)"
  ]
 }
