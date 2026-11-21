@@ -33,6 +33,12 @@ def main():
             if open(fn, encoding="utf-8").read() == body: continue
         except OSError: pass
         open(fn, "w", encoding="utf-8").write(body)
+    # the list of files that exist, so the site never asks for one that doesn't (a 404 in every visitor's console)
+    fn = os.path.join(od, "index.json"); keep.add(fn)
+    body = json.dumps(sorted(out), separators=(",", ":"))
+    try: same = open(fn, encoding="utf-8").read() == body
+    except OSError: same = False
+    if not same: open(fn, "w", encoding="utf-8").write(body)
     for fn in glob.glob(os.path.join(od, "*.json")):
         if fn not in keep: os.remove(fn)
     print(len(out), "files,", sum(len(m) for m in out.values()), "icons")
