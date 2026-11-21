@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.20.1"
+VERSION = "2026.11.21.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -220,6 +220,7 @@ def digit_twins(a, b):
 NUDGED = {}
 READ_HERE = {}   # (room, channel, item) -> when this watcher last read its popup in full
 def hover_wanted():
+    apply_itemdb()
     if time.time() - HW["at"] > 1200:
         HW["at"] = time.time()
         refresh_itemdb()
@@ -313,6 +314,15 @@ def cov_tip(here=None):
     if gaps:
         log("most needed this hour: " + ", ".join(f"FM{k.split('|')[0]} ch {k.split('|')[1]} (~{e:g} shops)" for k, _, e in gaps))
 ITEMDB_URL = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json"
+ITEMDB_NEW = []   # names downloaded on a side thread, added by the reader between shops
+def apply_itemdb():
+    """Add the downloaded names to the reader's name tables. Only the reader thread calls this: adding them from the
+    download thread while the reader was matching a shop broke the match ("dictionary changed size during iteration",
+    Nov 20, three shops in a row on Zik's watcher)."""
+    if not ITEMDB_NEW: return
+    names = ITEMDB_NEW.pop()
+    n = fmparse.refresh_items(names)
+    if n: log(f"{n} new items from the site's item list")
 def refresh_itemdb():
     """Once a day: the site's full item list, so items the game added since this release are known right away."""
     try:
@@ -326,10 +336,9 @@ def refresh_itemdb():
                 j = json.loads(r.read().decode("utf-8"))
             kinds = j.get("kinds") or []
             skip = {"Equip:Hair", "Equip:Face", "Equip:Head", "Cash:Facial Expression"}   # styles, never sold in shops
-            n = fmparse.refresh_items([row[0] for row in (j.get("items") or []) if isinstance(row, list) and len(row) > 5
-                                       and (kinds[row[5]] if isinstance(row[5], int) and row[5] < len(kinds) else "") not in skip
-                                       and "\ufffd" not in str(row[0])])
-            if n: log(f"{n} new items from the site's item list")
+            ITEMDB_NEW.append([row[0] for row in (j.get("items") or []) if isinstance(row, list) and len(row) > 5
+                               and (kinds[row[5]] if isinstance(row[5], int) and row[5] < len(kinds) else "") not in skip
+                               and "\ufffd" not in str(row[0])])
         except Exception:
             pass
     spawn(go)
@@ -1794,7 +1803,9 @@ def worker(cfg, jobs, store):
         try:
             handle_job(cfg, kind, img, extra, store, jobs.qsize())
         except Exception:
-            log("reader error:", traceback.format_exc().splitlines()[-1])
+            tb = traceback.extract_tb(sys.exc_info()[2])
+            at = f" (at {os.path.basename(tb[-1].filename)} line {tb[-1].lineno})" if tb else ""
+            log("reader error:", traceback.format_exc().splitlines()[-1] + at)
         finally:
             jobs.task_done()
 
