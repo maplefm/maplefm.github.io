@@ -753,11 +753,17 @@
   // Icons cut out of real Classic shop windows by the watchers and the stream reader. Classic reuses
   // some item ids for different items, so these beat the old v83 item list whenever we have one.
   // They live in small files by name (data/icons/abc.json) and load only when maplestory.io has no icon.
-  var SHARDS = {};
+  var SHARDS = {}, SHARDLIST = null;
+  // data/icons/index.json lists the files that exist, so a name with no crop asks for nothing (no 404s);
+  // without the list every file is tried as before
   function shard(k) {
     var p = k.slice(0, 3);
-    if (!SHARDS[p]) SHARDS[p] = fetch(LIVE + "data/icons/" + p + ".json").then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
-    return SHARDS[p];
+    if (!SHARDLIST) SHARDLIST = fetch(LIVE + "data/icons/index.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!Array.isArray(j)) return null; var o = {}; j.forEach(function (x) { o[x] = 1; }); return o; }).catch(function () { return null; });
+    return SHARDLIST.then(function (have) {
+      if (have && !have[p]) return {};
+      if (!SHARDS[p]) SHARDS[p] = fetch(LIVE + "data/icons/" + p + ".json").then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+      return SHARDS[p];
+    });
   }
   function capturedAsync(name) { var k = ocrKey(name); if (k.length < 3) return Promise.resolve(""); return shard(k).then(function (m) { return (m && m[k]) || ""; }); }
   // Classic World's own icons from maplestory.io first; then icons cut from real shop windows.
