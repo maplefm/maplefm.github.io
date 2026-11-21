@@ -1,5 +1,5 @@
 {
- "at": 1795195655,
+ "at": 1795281611,
  "checked": {
   "quests": 343,
   "monsters": 108,
@@ -526,7 +526,7 @@
  ],
  "partial": false,
  "failed": [],
- "seconds": 212,
+ "seconds": 210,
  "sources": [
   "maplestory.io MCW game data",
   "MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0)"
