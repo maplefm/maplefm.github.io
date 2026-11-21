@@ -17,7 +17,7 @@ try:
 except Exception:          # numpy missing: everything else still works
     boards = None
 
-VERSION = "2026.11.18.1"
+VERSION = "2026.11.20.1"
 
 # Which stats an equip can carry, and the check on an exact read: in fmparse, shared with the browser scanner
 from fmparse import _SCROLLABLE, _WEAPON, _STATS, _SMALL, _FIT, _FIT_LOW, exact_fits
@@ -218,6 +218,7 @@ def digit_twins(a, b):
     diff = [(x, y) for x, y in zip(a, b) if x != y]
     return len(diff) == 1 and diff[0][0] in CONFUSE and diff[0][1] in CONFUSE
 NUDGED = {}
+READ_HERE = {}   # (room, channel, item) -> when this watcher last read its popup in full
 def hover_wanted():
     if time.time() - HW["at"] > 1200:
         HW["at"] = time.time()
@@ -351,6 +352,10 @@ def hover_nudge(res):
         if r.get("so") or r.get("i") not in wanted: continue
         k = (seller, r["i"])
         if time.time() - NUDGED.get(k, 0) < 900: continue
+        # read in full in this room and channel in the last 30 minutes: the shop is the same one even when its
+        # seller's name reads differently (Nov 20: Golden Pride read three times from Sporky, then asked for again
+        # when the name read as "Snarky" on the next pass)
+        if time.time() - READ_HERE.get((res.get("room") or "", res.get("ch"), r["i"]), 0) < 1800: continue
         if res.get("tip") and res["tip"].get("row") == n: continue
         NUDGED[k] = time.time()
         typ = wanted.get(r["i"]) or 0
@@ -623,10 +628,15 @@ def popup_cut(img):
         return bool(box) and box[3] >= img.height - 2
     except Exception: return False
 
+SCREEN = {"low": False}   # the game window's bottom edge is below the bottom of the screen
 def cut_note(st={"t": 0}):
     """Tell the scanner, at most every 30 minutes, why the bottom rows' stats aren't coming in."""
     if time.time() - st["t"] < 1800: return
     st["t"] = time.time()
+    if SCREEN["low"]:
+        log("hover: the game window runs past the bottom of your screen, so popups on the lower shop rows are cut off "
+            "and their stats can't be read. Move the game window up until its bottom edge shows, or make it smaller.")
+        return
     log("hover: the bottom of this item's popup is hidden (under the chat box or past the bottom of the game window), "
         "so its stats can't be read. Drag the shop window higher, shrink the chat box, or make the game window taller "
         "so the whole popup fits.")
@@ -1899,6 +1909,7 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
                         # a read without the upgrades line isn't done: the hover list may ask for this one again
                         if "SLOTS" in res["tip"].get("stats", {}) or not any(k in res["tip"].get("stats", {}) for k in ("ATT", "MATT", "WDEF", "MDEF", "STR", "DEX", "INT", "LUK")):
                             NUDGED[(res.get("seller") or "", res["tip"].get("name") or "")] = time.time() + 86400
+                            READ_HERE[(res.get("room") or "", res.get("ch"), hit[0])] = time.time()
                     else: log(f"hover: read {res['tip']['name']} but couldn't match it to a row in this shop")
                 for hit in store.flush_pending(res):
                     log(f"stats {hit[0]} {hit[1]} (from an earlier hover)")
@@ -2191,6 +2202,11 @@ def main():
             t = time.time()
             try:
                 game = find_game(cfg["window_title"])
+                if game:
+                    try:
+                        mon = sct.monitors[0]   # every screen together
+                        SCREEN["low"] = game[1] + game[3] > mon["top"] + mon["height"] + 2
+                    except Exception: pass
                 if not game:
                     if announced is not False:
                         log("waiting for the MapleStory window"); announced = False
