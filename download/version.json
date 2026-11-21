@@ -1,10 +1,17 @@
 {
- "version": "2026.11.20.1",
- "date": "2026-11-21T03:14:18+00:00",
- "notes": "Hover list: an item you just read in full isn't asked for again in that room and channel, even when the seller's name reads differently on the next pass. When the game window runs past the bottom of your screen, the watcher now says that's why the lower rows' popups can't be read.",
- "sha256": "b2cdbad8759645d7e6630fb7aae959e7c22161a50aceb1e4905d0f841f4dbe23",
- "size": 186336,
+ "version": "2026.11.21.1",
+ "date": "2026-11-21T13:35:09+00:00",
+ "notes": "Fixes \"reader error: dictionary changed size during iteration\": the daily item list download no longer changes the reader's name list while it is matching a shop. Reader errors now say where they happened.",
+ "sha256": "c17bdf359f16c4ddaf20b61f769f6428c837c28f1c7332cde2ad4ed2e038a7c7",
+ "size": 186595,
+ "pip": [],
+ "sig": "9df7e80027a3e803ce891bee19f8779fb479ea550c922245d94255386ce0701c2bc90514388942af4201407eabb2fc987e670c0cf755332767f5b9d121a6025c03482d8622d7c25630f3870197acc6ba735c933b53dfa4f6bbfa4e5f61763f1bc9818598ee0ea6909a78128d24b0851b6f31ba54f76b5bab66b09087d6f4241cf084dd0202106daaeaf0ce167b7d37c89a714b029671f3b514c164f72547eb746901c6a4f32176fd85a44b0ff1690690ebe6c583563fe4c7f836fb89d40a07cb6b0f6d071e1128c3529d26184e0eb4e0907a89114a2f89e666c3b92b244854e65d8c723a59e630ab6fea5167886013f283b43fb86ac103a91c90c57fabf18279",
  "history": [
+  {
+   "version": "2026.11.20.1",
+   "date": "2026-11-21T03:14:18+00:00",
+   "notes": "Hover list: an item you just read in full isn't asked for again in that room and channel, even when the seller's name reads differently on the next pass. When the game window runs past the bottom of your screen, the watcher now says that's why the lower rows' popups can't be read."
+  },
   {
    "version": "2026.11.18.1",
    "date": "2026-11-18T03:50:09+00:00",
@@ -99,13 +106,6 @@
    "version": "2026.10.31.6",
    "date": "2026-10-31",
    "notes": "Popups that name another item are never put on a row; a 0 price is never sent"
-  },
-  {
-   "version": "2026.10.31.5",
-   "date": "2026-10-31",
-   "notes": "Talks to Club FM at api.maplefm.gg"
   }
- ],
- "pip": [],
- "sig": "a0d6cc9a02db2b444901290a6bbf634806aa9ddf411630cc430075f87c41a92904e82a2e7d7cbd905ceb1973607f9e65b49ed827fcf8d99868df42e1614d4f53a076dc48014007b77d3c3a0141bab767c33a8be940cf37912d7c3e7b41f959ceac7c5358653f4ced66cc81e4d7fd9635509e2ea9ec723c38d30d49bbb3a8116b228bdffa6d693bbafd56eaf6aef8292e2db23d4712da45a4cfa52f60a96792882f5b094665ba84fee2d99594cd170f0e28d5f0605ef1b1258aebab5a892c5ca5c201394e43c659c3a6947194746e4d79a2ab1d2cfef237aef0de874973cfa42aa8d8c393d287ae85c72fad078f9f88ff70d16303b0e320c4636d75838fa73380"
+ ]
 }
