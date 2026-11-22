@@ -92,6 +92,8 @@ jobs:
         run: python3 tests/wikiquestpre.py
       - name: Training map simulator checks (hand-made maps with known answers)
         run: node tests/trainsim-check.cjs
+      - name: Mega Deals repeat rules (one post per seller and item a day, a cap per item)
+        run: python3 tests/deals-repeat.py
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'

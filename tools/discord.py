@@ -556,6 +556,7 @@ def kofi_week(st):
 # is skipped. Typical prices come from data/summary.json, which the board itself builds. One post per listing.
 DEAL_MIN, DEAL_OFF, DEAL_FAST, DEAL_WIN = 50000, 0.20, 0.05, 12 * 60
 PING_CAP = 12   # Mega Deals pings one scanner's catches can trigger per day
+ITEM_CAP = 3    # Mega Deals posts one item can get per day, all sellers together
 def who_caught(docs, d):
     """The scanner whose watcher saw this exact listing, for the Caught by field."""
     s, p = str(d.get("s") or "").lower(), int(d.get("p") or 0)
@@ -650,14 +651,27 @@ def job_deals(data_dir, summary_path, state_path):
             r = {"i": it["item"], "s": d.get("s"), "p": u, "q": q, "r": d.get("r"), "c": d.get("c"), "x": True, "roll": roll, "rolln": int(d.get("n") or 0)}
             hot.append((flip, off, r, dict(it, typ=typ), d.get("by") or who_caught(docs, d), key))
     hot.sort(key=lambda x: -x[0])
+    # Repeats: the fast lane runs this every 15 seconds, so "one per item per run" let one seller's three copies of an
+    # item post in 18 seconds and a repriced listing post again. Now one post per seller and item a day, again only
+    # when the price drops another 25% or more, and at most ITEM_CAP posts per item a day across all sellers.
+    last = st.get("deals_last") or {}
+    per_item = st.get("deals_item") or {}
+    def repeat(r):
+        k2 = f'{str(r.get("s")).lower()}|{str(r.get("i")).lower()}'
+        was = last.get(k2)
+        if was and now - int(was[0]) < 86400 and int(r.get("p") or 0) > int(was[1]) * 0.75: return True
+        return per_item.get(f'{day}|{str(r.get("i")).lower()}', 0) >= ITEM_CAP
     items_done = set()
     feed_path = os.path.join(os.path.dirname(state_path) or ".", "discord_dealfeed.json")
     feed = load(feed_path, [])
     if not isinstance(feed, list): feed = []
     for flip, off, r, it, who, key in hot:
         if len(items_done) >= 6 or str(r.get("i")).lower() in items_done: continue   # one ping per item per run
+        if repeat(r): seen[key] = now; continue
         items_done.add(str(r.get("i")).lower())
         seen[key] = now
+        last[f'{str(r.get("s")).lower()}|{str(r.get("i")).lower()}'] = [now, int(r.get("p") or 0)]
+        ik = f'{day}|{str(r.get("i")).lower()}'; per_item[ik] = per_item.get(ik, 0) + 1
         pk = f"{day}|{str(who).lower()}"; pinged[pk] = pinged.get(pk, 0) + 1
         q = int(r.get("q") or 1)
         where = spot(r)
@@ -682,6 +696,8 @@ def job_deals(data_dir, summary_path, state_path):
     cutoff = now - 86400
     st["deals_seen"] = {k: v for k, v in seen.items() if v >= cutoff}
     st["deals_by"] = {k: v for k, v in pinged.items() if k.startswith(day)}
+    st["deals_last"] = {k: v for k, v in last.items() if int(v[0]) >= cutoff}
+    st["deals_item"] = {k: v for k, v in per_item.items() if k.startswith(day)}
     save(state_path, st)
 
 # ---------------------------------------------------------------- weekly digest
