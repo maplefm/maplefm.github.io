@@ -1348,20 +1348,33 @@
         // Equips: only listings with their stats read, priced against their own roll's sales
         it.rd = [];
         var rdSeen = {}, LG = ladderOf(it);
-        // the grade a listing falls in, when that grade's price rests on sales: deals are judged against it, the same
-        // price the card shows; otherwise against the listing's exact roll
+        // the grade a listing falls in, when that grade's price rests on 3+ sales: deals are judged against it, the
+        // same price the card shows; otherwise against the listing's exact roll (3+ sales too). A merged grade
+        // ("+3 LUK or more", "Clean 57 ATT or more") spans rolls worth 4 times each other: there a listing is judged
+        // only against the sales of rolls no better than its own, so a +3 is never priced off the +8s sold beside it.
         var gradeRef = function (x) {
           if (!LG) return null; var hit = null;
           LG.stats.some(function (k) { return LG.views[k].some(function (g) { if (g.basis === "sold" && g.asks.indexOf(x) >= 0) { hit = g; return true; } return false; }); });
-          if (!hit) return null; var w = {}; hit.use.forEach(function (l) { if (l.who) w[l.who] = 1; });
-          return { typ: hit.mid, n: hit.use.length, who: Object.keys(w), name: hit.name };
+          if (!hit) return null;
+          var use = hit.use, name = hit.name;
+          if (hit.parts && hit.parts.length > 1) {
+            var mine = null; hit.parts.forEach(function (pt) { if (pt.asks.indexOf(x) >= 0) mine = pt; });
+            if (!mine) return null;
+            var low = []; hit.parts.forEach(function (pt) { if (pt.sv <= mine.sv) low = low.concat(pt.sold); });
+            use = use.filter(function (l) { return low.indexOf(l) >= 0; });
+            name = mine.name;   // the listing's own roll ("+5 LUK"), never the merged label
+          }
+          if (use.length < DEALN) return null;
+          var w = {}; use.forEach(function (l) { if (l.who) w[l.who] = 1; });
+          return { typ: median(use.map(function (l) { return l.u; })), n: use.length, who: Object.keys(w), name: name };
         };
+        var exactRef = function (x, su) { var r = it.rollTyp[rollKey(it.item, x, su)]; return r && r.n >= DEALN ? r : null; };
         still.forEach(function (x) {
           if (!x.x || x.chat || !rollKeyOk(it.item, x)) return;
           if (!trusted(x.who)) return;                        // stats uploaded by a fresh watcher id prove nothing yet
           var g = rollOf(it.item, x); if (g == null) return;
           var su = slotsUsed(it.item, x); if (su == null) return;
-          var rt = gradeRef(x) || it.rollTyp[rollKey(it.item, x, su)]; if (!rt) return;
+          var rt = gradeRef(x) || exactRef(x, su); if (!rt) return;
           var off = 1 - x.u / rt.typ;
           if (off < 0.15 || off > 0.85 || rt.typ - x.u < 100) return;
           if (x.who && String(x.who).toLowerCase() === String(x.s).toLowerCase()) return;   // a seller's own watcher vouching for the seller's own roll
@@ -2878,7 +2891,7 @@
   // no gain, then +1, +2... on the item's key stat (the stat its scrolled copies most often gained), at most 5 grades.
   // Only hovers that pass the roll checks count (rollKeyOk, slots read). A grade with 3+ sales in the board's window
   // shows the middle of its sales; otherwise its asking prices, labeled as asking.
-  var LADMIN = 2, LADSEL = {}, LADSTAT = {}, LADHEAD = {};   // LADHEAD: the grade a search or a picked copy opened the card on
+  var LADMIN = 2, DEALN = 3, LADSEL = {}, LADSTAT = {}, LADHEAD = {};   // LADHEAD: the grade a search or a picked copy opened the card on
   var CRITK = { CRIT: 1, CRITDMG: 1 };
   function ladName(k) { return k === "TOTAL" ? "stats" : k === "CRIT" ? "crit rate" : k === "CRITDMG" ? "crit damage" : STATABBR[k] || k; }
   // the server's board carries each equip's grades worked out from every listing; they stand until the item changes
@@ -2975,13 +2988,14 @@
     }
     // merge the thin ends of a run of numbered grades ("27 ATT or less", "+4 LUK or more") so a row stays short
     function squeeze(list, max, lowEnd) {
-      list = list.slice().sort(function (a, b) { return a.sv - b.sv; }).map(function (g) { return { id: g.id, sv: g.sv, base: g.name, sold: g.sold.slice(), asks: g.asks.slice(), lo: false, hi: false }; });
+      // each merged grade keeps its parts: a deal is judged only against the sales of rolls no better than its own
+      list = list.slice().sort(function (a, b) { return a.sv - b.sv; }).map(function (g) { return { id: g.id, sv: g.sv, base: g.name, sold: g.sold.slice(), asks: g.asks.slice(), lo: false, hi: false, parts: [{ sv: g.sv, name: g.name, sold: g.sold.slice(), asks: g.asks.slice() }] }; });
       var busy = function (g) { return g.sold.length * 3 + g.asks.length; };
       while (list.length > max) {
-        if (lowEnd && busy(list[0]) <= busy(list[list.length - 1])) { var t = list.shift(), f = list[0]; f.sold = f.sold.concat(t.sold); f.asks = f.asks.concat(t.asks); f.lo = true; }
-        else { var t2 = list.pop(), l2 = list[list.length - 1]; l2.sold = l2.sold.concat(t2.sold); l2.asks = l2.asks.concat(t2.asks); l2.hi = true; }
+        if (lowEnd && busy(list[0]) <= busy(list[list.length - 1])) { var t = list.shift(), f = list[0]; f.sold = f.sold.concat(t.sold); f.asks = f.asks.concat(t.asks); f.parts = t.parts.concat(f.parts); f.lo = true; }
+        else { var t2 = list.pop(), l2 = list[list.length - 1]; l2.sold = l2.sold.concat(t2.sold); l2.asks = l2.asks.concat(t2.asks); l2.parts = l2.parts.concat(t2.parts); l2.hi = true; }
       }
-      list.forEach(function (g) { g.name = g.base + (g.lo ? " or less" : g.hi ? " or more" : ""); if (g.lo) g.id += "-"; if (g.hi) g.id += "+"; });
+      list.forEach(function (g) { g.name = g.base + (g.lo ? " or less" : g.hi ? " or more" : ""); if (g.lo) g.id += "-"; if (g.hi) g.id += "+"; if (g.parts.length < 2) delete g.parts; });
       return list;
     }
     var clean = order.filter(function (g) { return /^C\|/.test(g.id); }), nogain = G["S|0"] || null, views = {}, stats = [];
