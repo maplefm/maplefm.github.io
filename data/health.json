@@ -1,5 +1,5 @@
 {
- "at": 1795380453091,
+ "at": 1795383556835,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -153,16 +153,16 @@
    "behind": 1
   },
   "meisvanni": {
-   "rows24": 1602,
-   "room24": 1602,
-   "ch24": 1602,
+   "rows24": 367,
+   "room24": 367,
+   "ch24": 367,
    "rows7": 2672,
    "room7": 2672,
    "late7": 0,
    "chat24": 1,
    "last": 1795298348,
    "ver": "2026.11.21.1",
-   "lag_median_min": 2.1,
+   "lag_median_min": 2.4,
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
@@ -189,7 +189,7 @@
    "incomplete upload": 374
   },
   "2026-11-22": {
-   "incomplete upload": 453
+   "incomplete upload": 483
   }
  },
  "rejects": {
