@@ -5323,7 +5323,14 @@
     var w = window.innerWidth > 1180; if (!cardOpen()) { cardWide = w; return; }
     if (w !== cardWide) { cardWide = w; showCard(); renderItem(); } else placeCard();
   });
-  $("drawerbtn").addEventListener("click", function () { var d = $("drawer"), o = !d.classList.contains("open"); d.classList.toggle("open", o); this.setAttribute("aria-expanded", o); });
+  // Recent sales drawer: open it from its bar; close it from the bar, its Close tag, a tap anywhere outside it, Escape,
+  // or by starting a search. Open, it sits above the sticky search so its bar is always tappable (Nov 22: on a phone the
+  // search covered the bar and the drawer couldn't be closed).
+  function drawerSet(o) { var d = $("drawer"); d.classList.toggle("open", o); $("drawerbtn").setAttribute("aria-expanded", o); }
+  $("drawerbtn").addEventListener("click", function () { drawerSet(!$("drawer").classList.contains("open")); });
+  document.addEventListener("pointerdown", function (e) { var d = $("drawer"); if (d.classList.contains("open") && !d.contains(e.target)) drawerSet(false); }, true);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && $("drawer").classList.contains("open")) drawerSet(false); });
+  $("q").addEventListener("focus", function () { drawerSet(false); });
   function renderDrawer() {
     var s = D.sales.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 40), d = $("drawer");
     d.hidden = !s.length; if (!s.length) return;

@@ -1038,7 +1038,11 @@ dialog h3 { color: var(--accent-ink); }
 .drawer .dl { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; flex: 0 0 auto; }
 .drawer .dlast { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .drawer .dlist { display: grid; max-height: 0; overflow: auto; transition: max-height .28s ease; }
-.drawer.open .dlist { max-height: min(46vh, 420px); border-top: 1px solid var(--line); }
+.drawer.open { z-index: 60; }
+.drawer.open .dlist { max-height: min(40vh, 420px); border-top: 1px solid var(--line); }
+.drawer .dx { display: none; margin-left: auto; flex: 0 0 auto; color: var(--muted); font-size: .76rem; font-weight: 700; }
+.drawer.open .dx { display: inline; }
+.drawer.open .dlast { display: none; }
 .drawer .dlist button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 0 10px; align-items: center; padding: 7px 16px; border-bottom: 1px solid var(--line); }
 .drawer .dlist button:hover { background: var(--panel2); }
 .drawer .dlist b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
