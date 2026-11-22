@@ -1,5 +1,5 @@
 {
- "at": 1795303994525,
+ "at": 1795306818008,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -8,22 +8,6 @@
  },
  "current": "2026.11.21.1",
  "scanners": {
-  "Mesoniac": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.11.6.2",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
-   "behind": 7
-  },
   "Zik": {
    "rows24": 13558,
    "room24": 13555,
@@ -186,9 +170,6 @@
   }
  },
  "drops": {
-  "2026-11-15": {
-   "incomplete upload": 1315
-  },
   "2026-11-16": {
    "incomplete upload": 1102
   },
@@ -205,7 +186,10 @@
    "incomplete upload": 406
   },
   "2026-11-21": {
-   "incomplete upload": 366
+   "incomplete upload": 374
+  },
+  "2026-11-22": {
+   "incomplete upload": 7
   }
  },
  "rejects": {
@@ -213,9 +197,6 @@
    "bad post": 1
   },
   "2026-11-19": {
-   "bad post": 1
-  },
-  "2026-11-15": {
    "bad post": 1
   }
  },
