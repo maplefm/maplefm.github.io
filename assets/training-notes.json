@@ -1,6 +1,6 @@
 {
  "updated": "2026-11-23",
- "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io), the MapleStory Classic Wiki or Nexon's patch notes, plus the Nov 18 monster rate cuts on 27 maps from MetaRoad's client data, matched on henesys.gg (tools/gamepatch.json). Map stats on the page come from the same data and update daily.",
+ "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io), the MapleStory Classic Wiki or Nexon's patch notes. Map stats on the page come from the same data and update daily.",
  "brackets": [
   {
    "lo": 1,
@@ -19,7 +19,7 @@
     },
     {
      "map": "Henesys Hunting Ground III",
-     "why": "Slimes and mushrooms, two maps past Henesys Hunting Ground I."
+     "why": "Slimes and mushrooms, two maps past Henesys Hunting Ground I. The Nov 18 update cut its monster rate from 1.5 to 1.3."
     }
    ]
   },
@@ -57,7 +57,7 @@
     },
     {
      "map": "Dangerous Steam",
-     "why": "38 Stirge spawn points with a few Horny and Zombie Mushrooms."
+     "why": "38 Stirge spawn points with a few Horny and Zombie Mushrooms. The Nov 18 update cut its monster rate from 0.7 to 0.4."
     },
     {
      "map": "Damp Forest",
@@ -75,15 +75,15 @@
    "picks": [
     {
      "map": "Ant Tunnel III",
-     "why": "61 Zombie Mushroom and 38 Horny Mushroom spawn points, three maps from Sleepywood. Zombie Mushrooms are undead."
+     "why": "61 Zombie Mushroom and 38 Horny Mushroom spawn points, three maps from Sleepywood. Zombie Mushrooms are undead. The Nov 18 update cut its monster rate from 0.6 to 0.5."
     },
     {
      "map": "Ant Tunnel Park",
-     "why": "The 24 Hr Mobile Store on the map sells Fried Chicken, Pizza, Unagi, Cake and Pure Water."
+     "why": "The 24 Hr Mobile Store on the map sells Fried Chicken, Pizza, Unagi, Cake and Pure Water. The Nov 18 update cut its monster rate from 0.8 to 0.5."
     },
     {
      "map": "Deep Ant Tunnel I",
-     "why": "Ant Tunnel with Evil Eyes mixed in. Two level 35 Jr. Boogies spawn here too, and most builds under level 30 rarely hit them, so step around them."
+     "why": "Ant Tunnel with Evil Eyes mixed in. Two level 35 Jr. Boogies spawn here too, and most builds under level 30 rarely hit them, so step around them. The Nov 18 update cut its monster rate from 0.6 to 0.5."
     },
     {
      "map": "Dark Cave",
@@ -157,7 +157,7 @@
     },
     {
      "map": "The Tunnel That Lost Light I",
-     "why": "Cold Eyes (level 40) and Drakes (level 50), 15 maps from Sleepywood. Cold Eyes are weak to fire; Drakes resist fire and ice."
+     "why": "Cold Eyes (level 40) and Drakes (level 50), 15 maps from Sleepywood. Cold Eyes are weak to fire; Drakes resist fire and ice. The Nov 18 update cut its monster rate from 0.8 to 0.3."
     },
     {
      "map": "Remains (Tomb) I",
