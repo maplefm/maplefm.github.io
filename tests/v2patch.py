@@ -62,7 +62,8 @@ ok("training pages say ranks use the old defense", "ranked on the old defense" i
 mr = [p for p in gamepatch.patches() if p.get("map_rate")]
 ok("27 maps with a v2.0 monster rate", mr and len(mr[0]["map_rate"]) == 27, len(mr[0]["map_rate"]) if mr else 0)
 ok("Ant Tunnel Park 0.8 to 0.5", gamepatch.map_rate(10005070, 0.8)[:2] == (0.5, 0.8), gamepatch.map_rate(10005070, 0.8))
-ok("a game file that already has a new rate is left alone", gamepatch.map_rate(10005070, 0.5)[1] is None)
+ok("a game file that already has the new rate keeps the cut (spawn points unchanged)", gamepatch.map_rate(10005070, 0.5)[:2] == (0.5, 0.8), gamepatch.map_rate(10005070, 0.5))
+ok("a rate matching neither value is left alone", gamepatch.map_rate(10005070, 0.7)[1] is None)
 ok("a map with no change is left alone", gamepatch.map_rate(1, 1.0) == (1.0, None, ""))
 eng = open(os.path.join(ROOT, "assets", "classic-dmg.js")).read()
 ok("the training model counts fewer monsters on cut maps", "m.spawnf" in eng)
