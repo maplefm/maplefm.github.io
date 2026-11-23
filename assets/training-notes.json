@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19",
+ "updated": "2026-11-23",
  "note": "Picks by level, in our own words. Every fact here is from the game files (via maplestory.io), the MapleStory Classic Wiki or Nexon's patch notes, plus the Nov 18 monster rate cuts on 27 maps from MetaRoad's client data, matched on henesys.gg (tools/gamepatch.json). Map stats on the page come from the same data and update daily.",
  "brackets": [
   {
@@ -240,7 +240,7 @@
    "name": "Forgotten Hollow",
    "since": "2026-11-18",
    "until": "2026-12-09",
-   "note": "Open since the November 18 update: a cave region for level 39 and up with 34 quests, 10 monsters from Glowshroom (39) to Sporewood (59) and the level 60 boss Rotten Mushmom, entered through Someone Else's Grave. Its maps and quests show here once they're published."
+   "note": "Open since the November 18 update: a cave region for level 39 and up with 34 quests, 10 monsters from Glowshroom (39) to Sporewood (59) and the level 60 boss Rotten Mushmom, entered through Someone Else's Grave. Its maps and quests are on the Maps and Quests pages."
   },
   {
    "name": "Moon Bunny's Rice Cake party quest",
