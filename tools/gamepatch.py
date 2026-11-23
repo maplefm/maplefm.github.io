@@ -81,7 +81,10 @@ def released_weapons():
 def map_rate(mid, rate):
     """(rate now, rate before the patch) for a map whose monster rate a patch changed, while the game files hold the old one"""
     for p in patches():
-        if not _live(p): continue
         ch = (p.get("map_rate") or {}).get(str(mid))
-        if ch and rate is not None and abs(float(rate) - ch["mobRate"][0]) < 0.01: return ch["mobRate"][1], ch["mobRate"][0], p.get("date") or ""
+        if not ch or rate is None: continue
+        # game files still on the old rate: apply the cut
+        if _live(p) and abs(float(rate) - ch["mobRate"][0]) < 0.01: return ch["mobRate"][1], ch["mobRate"][0], p.get("date") or ""
+        # game files caught up (maplestory.io MCW 1.2 has the cut): spawn points are unchanged, so keep counting the cut
+        if abs(float(rate) - ch["mobRate"][1]) < 0.01: return ch["mobRate"][1], ch["mobRate"][0], p.get("date") or ""
     return rate, None, ""
