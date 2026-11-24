@@ -233,11 +233,18 @@ if TOKEN:
     EVERY = {"covmap.yml": 12, "icons.yml": 12, "itemdb.yml": 34, "itemguide.yml": 34, "itempages.yml": 34, "world.yml": 34,
              "maintenance.yml": 12, "news.yml": 34, "report.yml": 34, "seo.yml": 8 * 24 + 4, "weekly.yml": 8 * 24 + 4,
              "weeklyrecap.yml": 8 * 24 + 4, "speedwatch.yml": 34, "factcheck.yml": 8 * 24 + 4}
-    late, failing_now = [], []
+    late, failing_now, unread = [], [], []
     for wf, hrs in EVERY.items():
         s2, rr = gh(f"/actions/workflows/{wf}/runs?per_page=8&exclude_pull_requests=true")
+        if s2 not in (200, 404):
+            s2, rr = gh(f"/actions/workflows/{wf}/runs?per_page=8&exclude_pull_requests=true")    # one retry
         if s2 == 404:
             continue    # not added yet
+        if s2 != 200:
+            # GitHub's API timed out or errored: unknown, not late (Nov 24 03:28 every lookup timed out and all 13 jobs
+            # read as "last success never" while they had all run fine)
+            unread.append(wf)
+            continue
         rr = [r for r in (rr.get("workflow_runs") or []) if r.get("event") != "pull_request"] if isinstance(rr, dict) else []
         done = [r for r in rr if r.get("status") == "completed"]
         if done and done[0].get("conclusion") in ("failure", "timed_out", "startup_failure"):
@@ -248,7 +255,8 @@ if TOKEN:
         if NOW - last > hrs * 3600 and not busy:    # a run underway is on schedule, not late
             late.append(f"{(rr[0]['name'] if rr else wf)} (last success {'never' if not last else str(int((NOW - last) / 3600)) + 'h ago'})")
     check("Jobs still failing", not failing_now, "none" if not failing_now else ", ".join(sorted(set(failing_now))))
-    check("Jobs on schedule", not late, "all ran on time" if not late else "late: " + "; ".join(late))
+    check("Jobs on schedule", not late, ("all ran on time" if not late else "late: " + "; ".join(late))
+          + (f" (GitHub didn't answer for {len(unread)} jobs, checked next run)" if unread else ""))
 
     def running(wf_name):
         return any(r["name"] == wf_name and r["status"] in ("queued", "in_progress", "waiting", "pending") for r in runs)
