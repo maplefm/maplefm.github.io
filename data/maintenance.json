@@ -1,7 +1,17 @@
 {
- "checked": "2026-11-20T17:11:56.307340Z",
+ "checked": "2026-11-24T06:20:35.287116Z",
  "source": "Nexon news, Classic World maintenance",
  "notices": [
+  {
+   "id": 49052,
+   "title": "Scheduled Maintenance - November 24, 2026",
+   "status": "scheduled",
+   "start": "2026-11-24T15:00:00Z",
+   "end": "2026-11-24T18:00:00Z",
+   "down": "All MapleStory Classic World game servers.",
+   "posted": "2026-11-23T16:00:04Z",
+   "url": "https://www.nexon.com/maplestory/news/maintenance/49052"
+  },
   {
    "id": 48938,
    "title": "Scheduled Cash Shop Maintenance - November 19, 2026",
