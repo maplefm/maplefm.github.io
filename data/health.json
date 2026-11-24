@@ -1,5 +1,5 @@
 {
- "at": 1795485056046,
+ "at": 1795488720391,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -9,14 +9,14 @@
  "current": "2026.11.21.1",
  "scanners": {
   "Zik": {
-   "rows24": 23498,
-   "room24": 23492,
-   "ch24": 23498,
-   "rows7": 97668,
-   "room7": 95386,
+   "rows24": 23175,
+   "room24": 23169,
+   "ch24": 23175,
+   "rows7": 99087,
+   "room7": 96805,
    "late7": 0,
    "chat24": 10,
-   "last": 1795436244,
+   "last": 1795488600,
    "ver": "2026.11.21.1",
    "lag_median_min": 2.4,
    "room_rate24": 1.0,
@@ -157,7 +157,7 @@
    "incomplete upload": 652
   },
   "2026-11-24": {
-   "incomplete upload": 56
+   "incomplete upload": 84
   }
  },
  "rejects": {
