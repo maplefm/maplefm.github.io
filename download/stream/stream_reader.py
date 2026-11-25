@@ -737,12 +737,12 @@ def read_mega_line(crop):
             t = _tess(_big(_ink(a, bg, lo, hi), f * f0, flt), 7)
             mm = re.match(r"^\W*([A-Za-z0-9]{3,13})\s*[:;]\s*(.*)$", t)
             nm, m = (mm.group(1), mm.group(2)) if mm else ("", "")
-        if nm and nm[:1] in "0123456789O" and b and stamp[0] is None:
+        if nm and re.match(r"[jJlI|]?[0-9O]", nm) and b and stamp[0] is None:
             # chat timestamps on ("[06:22] DocFrost"): read the name's stretch with brackets and colons allowed once
             t = _tess(_big(_ink(a[:, :max(1, b[0] - 2)], bg, lo, hi), f * f0, flt), 7)
             mm = re.match(r"^\W{0,2}\d{1,2}\s?[:.]\s?\d{2}\s?[\]|)}]\s*", t)
             stamp[0] = len(re.sub(r"[^A-Za-z0-9]", "", mm.group(0))) if mm else 0
-        if nm and stamp[0]: nm = nm[stamp[0]:] if re.fullmatch(r"[0-9O]+", nm[:stamp[0]]) else nm
+        if nm and stamp[0]: nm = stamp_cut(nm, stamp[0])
         if nm:
             nm = il_rule(nm); names[nm] = names.get(nm, 0) + 1
         msgs.append(m)
@@ -763,6 +763,12 @@ def read_mega_line(crop):
     # the badge's channel number is 6 pixels tall on a stream: too small to read surely, so it is left out
     ch = None
     return {"name": name, "sure": sure, "votes": names, "msgs": msgs, "rows": rows, "ch": ch, "badge": b is not None}
+
+def stamp_cut(nm, n):
+    """The name without a chat timestamp's n digits in front, and the bracket the name reader took for a letter
+    ("j0956Sathona" with [09:56] is Sathona). Unchanged when those aren't digits."""
+    m = re.match(r"^[jJlI|]?([0-9O]{%d})(?=[A-Za-z0-9])" % n, nm)
+    return nm[m.end():] if m and len(nm) - m.end() >= 3 else nm
 
 def mega_text(m):
     """What the text reader gets wrong on stream video, put back before the chat parser sees it: > read as = or the B

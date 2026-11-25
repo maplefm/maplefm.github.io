@@ -56,6 +56,9 @@ ok("nothing found in a picture without megaphones", SR.mega_lines(rng.integers(0
 SR._BOOT = tuple(0 for _ in SR._CODE)
 ok("a code change is seen and the new code compiles", SR.code_changed() is True)
 
+ok("chat timestamps come off names", [SR.stamp_cut(n, 4) for n in ("j0956sathona", "0956reqime", "O625Late", "2001FordF150x", "Abc")] == ["sathona", "reqime", "Late", "FordF150x", "Abc"],
+   [SR.stamp_cut(n, 4) for n in ("j0956sathona", "0956reqime", "O625Late", "2001FordF150x", "Abc")])
+
 # 2. I and l
 ok("I and l like the watcher's exact names", [SR.il_rule(n) for n in ("lindenhan", "NeckSIice", "KatnissF", "XlV", "Ilovemaple")] == ["Iindenhan", "NeckSlice", "KatnissF", "XIV", "Ilovemaple"],
    [SR.il_rule(n) for n in ("lindenhan", "NeckSIice", "KatnissF", "XlV", "Ilovemaple")])
