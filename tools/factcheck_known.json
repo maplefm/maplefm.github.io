@@ -3,6 +3,7 @@
  "disagree": [
   {"kind": "map", "id": "80003000", "field": "spawns", "note": "Primrose Hill (Moon Bunny PQ): the wiki's v2.0.0 page has Stirge 4, Flyeye 2, Goblin Fire 2; the pre-v2.0 MCW/1 files Goblin Fire 2, Flyeye 1. Ours follows the wiki until maplestory.io has v2.0 files"},
   {"kind": "map", "id": "10006121", "field": "exits", "note": "Someone Else's Grave: the pre-v2.0 MCW/1 files have an exit to Bygone Days the wiki's v2.0.0 page lacks. Recheck when maplestory.io has v2.0 files"},
+  {"kind": "map", "id": "10006160", "field": "spawns", "note": "Precipice of Darkness (Forgotten Hollow, v2.0): the wiki lists Zombie Mushroom 6; the game files place mob 800011 there, which our monster list names Zombie Mushroom (Bowman 2nd job test), so the check does not count them. Ours follows the wiki. Recheck if the wiki adds a variant row"},
   {"kind": "quest", "id": "1002", "field": "need", "note": "Roger's Apple: the game lists item 2010000 with no count; the wiki says 1"},
   {"kind": "quest", "id": "1002", "field": "exp", "note": "Roger's Apple: game 0, wiki 2"},
   {"kind": "quest", "id": "1002", "field": "get", "note": "Roger's Apple: game no item reward, wiki 3 Apples"},
