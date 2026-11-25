@@ -58,7 +58,7 @@ def rows(data_dir, texts=None):
         for d in docs:
             if not isinstance(d, dict): continue
             src = str(d.get("src") or "")
-            if not stream and "shop" not in src: continue
+            if "chat" in src or (not stream and "shop" not in src): continue   # chat and megaphone posts are no shops
             who = str((d.get("by") if stream else d.get("who")) or d.get("inbox") or "Guest")[:24]
             for r in d.get("rows") or []:
                 rm = fm_room(r.get("r")) if not r.get("ri") else None; ch = r.get("c")   # an inferred room was not read

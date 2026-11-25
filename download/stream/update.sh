@@ -86,6 +86,7 @@ except Exception: pass
 out = {"at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "service": active,
        "status_at": st.get("at"), "watching": st.get("watching", []), "live_classic": st.get("live_classic", []),
        "shops_last_hour": shops_hour, "host": "cloud"}
+if st.get("mega"): out["mega"] = st["mega"]      # megaphone lines read, reused, posted, and their CPU seconds
 try:
     sys.path.insert(0, app); os.chdir(app)
     import platforms

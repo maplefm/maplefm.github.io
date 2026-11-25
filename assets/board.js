@@ -72,6 +72,13 @@
   function coin() { return el("span", "coin"); }
   function money(n, cls) { return el("span", "num mz" + (cls ? " " + cls : ""), short(n)); }
   function median(a) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+  // chat asks that agree with each other: with 3 or more, any 3x off their median goes; two that are 3x apart say nothing
+  function chatAsks(a) {
+    if (a.length < 2) return a;
+    var m = median(a.map(function (x) { return x.u; }));
+    if (a.length === 2) return Math.max(a[0].u, a[1].u) > 3 * Math.min(a[0].u, a[1].u) ? [] : a;
+    return a.filter(function (x) { return x.u <= m * 3 && x.u >= m / 3; });
+  }
   function quant(a, q) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var i = (a.length - 1) * q, lo = Math.floor(i); return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); }
   // Older watcher versions saved half-read map names like "ee Market <1> p" for Free Market 1.
   var frCache = {};
@@ -148,8 +155,9 @@
     if (!(l.stream && l.ns)) return el(tag || "b", cls || null, l.s);
     var w = el("span", "unk"); w.appendChild(document.createTextNode("name not read · ")); var a = streamLink(l); a.textContent = "see it on " + a.textContent; w.appendChild(a); return w;
   }
+  function megaWord(l) { return l.mg === "sm" ? "smega" : l.mg === "im" ? "item megaphone" : l.mg === "m" ? "megaphone" : "chat"; }
   function buyWhere(l) {
-    if (l.chat) return "whisper them, posted in chat" + (l.ns ? " (name may be misread: check it in chat)" : "");
+    if (l.chat) return "whisper them, posted " + (l.mg ? "by " + megaWord(l) + (l.c ? " from CH " + l.c : "") : "in chat") + (l.sn > 1 ? " · seen by " + l.sn + " readers" : "") + (l.ns ? " (name may be misread: check it in chat)" : "");
     var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" || isMap(l.r) ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
     var warn = "";
@@ -819,7 +827,7 @@
     var raws = {};
     ordered.forEach(function (s) { s.rows.forEach(function (r) { raws[r.i] = (raws[r.i] || 0) + 1; }); });
     if (Object.keys(raws).some(function (r) { return !CN[r]; })) CN = canonAll(raws);
-    var seen = {}, L = [], who = {}, sellerLast = {}, itemLast = {};
+    var seen = {}, L = [], who = {}, sellerLast = {}, itemLast = {}, chatSrc = new Map();   // chatSrc: who read each chat post
     // A shop row read as "4 for 133,333" when the same seller's same item at the same price was also read
     // as "1 for 133,333" is a misread bundle size; equipment never comes in bundles.
     var oneSeen = {}, bundleSeen = {};
@@ -867,8 +875,15 @@
           return;
         }
         var prev = seen[key];
-        if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
+        if (prev) {
+          if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; }
+          // one megaphone, many readers: every scanner and every stream on the channel sees the same smega. It stays one
+          // post; each reader adds to who saw it, a sure reading of the name wins, and the kind and channel are kept
+          if (chat) { var sv = chatSrc.get(prev) || {}; if (!sv[by]) { sv[by] = 1; chatSrc.set(prev, sv); prev.sn = (prev.sn || 1) + 1; } if (prev.ns && !r.ns) prev.ns = false; if (!prev.mg && /^(sm|m|im)$/.test(r.mg || "")) prev.mg = r.mg; if (!prev.c && r.c) prev.c = r.c; }
+          return;
+        }
         L.push(seen[key] = mk(r, s, name, cn, qty, cat0, t, chat, by, stream, !!r.so));
+        if (chat) { var o0 = {}; o0[by] = 1; chatSrc.set(seen[key], o0); }
       });
     });
     GO.forEach(function (key) {
@@ -889,7 +904,7 @@
         var set = cat0 === "Stars";
         var sp0 = splitTier(name); if ((sp0.t || cn.tl) && !tieredBase(sp0.b)) { name = sp0.b; cn = { n: cn.n, tl: false }; }   // a tier pinned on a scroll that has none
         if (/^scroll$/i.test(name)) name = "Scroll\u2026";                                                                  // just "Scroll": the real name was cut off
-        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, ns: !!((chat && r.ns) || (stream && r.su)), who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "" };
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, ns: !!((chat && r.ns) || (stream && r.su)), who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "", mg: chat && /^(sm|m|im)$/.test(r.mg || "") ? r.mg : "", sn: chat ? 1 : 0 };
         return l;
     }
     // A shop seen without a channel (the scanner never opened Change Channel) inherits the channel another
@@ -1184,7 +1199,15 @@
         if (day.length >= 5) { set = day; basis = "24h"; }
         else if (d3.length >= 3) { set = d3.slice(0, 10); basis = "3d"; }
         else { set = it.sales.filter(function (x) { return !x.pricey; }).slice(0, 10); if (!set.length) set = it.sales.slice(0, 10); basis = "old"; }
-      } else { var plain = it.asks.filter(function (x) { return !x.pricey; }); set = plain.length ? plain.slice(0, 10) : it.asks.length ? it.asks.slice(0, 10) : it.sales.slice(0, 10); basis = "ask"; }
+      } else {
+        // asking prices: shop listings when there are any. Trade chat and megaphone posts are asks from a named seller,
+        // never sales, and only price an item nobody has seen in a shop; one typed or read wrong (3x off the rest) is left out
+        var plain = it.asks.filter(function (x) { return !x.pricey; }), shopA = plain.filter(function (x) { return !x.chat; });
+        basis = "ask";
+        if (shopA.length) set = shopA.slice(0, 10);
+        else if (plain.length) { set = chatAsks(plain.slice(0, 10)); basis = "chat"; }
+        else set = it.asks.length ? it.asks.slice(0, 10) : it.sales.slice(0, 10);
+      }
       var su = set.map(function (x) { return x.u; });
       it.typ = median(su); it.lo = quant(su, .25); it.hi = quant(su, .75); it.typN = su.length; it.typDay = basis === "24h";
       it.typSet = set; it.basis = basis; it.moved = false;
@@ -1270,7 +1293,7 @@
             it.typ = median(ku); it.lo = quant(ku, .25); it.hi = quant(ku, .75); it.typN = ku.length; it.typSet = keep;
           }
         }
-        var pts = it.all.filter(function (x) { return !x.b && !x.spot && !x.pricey && now - x.t <= 7 * DAY; }).map(function (x) { return x.u; }).sort(function (a, b) { return a - b; });
+        var pts = it.all.filter(function (x) { return !x.b && !x.chat && !x.spot && !x.pricey && now - x.t <= 7 * DAY; }).map(function (x) { return x.u; }).sort(function (a, b) { return a - b; });
         if (pts.length >= 6) {
           var q1 = quant(pts, .25), q3 = quant(pts, .75);
           it.bands = { lo: median(pts.filter(function (v) { return v <= q1; })), mid: it.typ, hi: median(pts.filter(function (v) { return v >= q3; })), n: pts.length, from: "prices" };
@@ -1314,7 +1337,9 @@
       // background. Club and Mega Deals also see chat posts there, since a seller's name is enough to whisper.
       // Where to buy lists every shop listing; ones without a room read sit below full locations (listRank). Cheapest
       // now is the cheapest shop listing seen in the last 24 hours that nobody has seen gone or sold since.
-      it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON; });
+      // a megaphone post with a sure name fills For sale now for everyone when no shop listing is up (last 3 hours)
+      var shopUp = fresh.some(function (x) { return !x.chat; });
+      it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON || (!shopUp && x.mg && !x.ns && now - x.t <= 3 * H); });
       // one shop spot, one price, the same stats, two seller names inside two hours ("Unread", "UnReaden"): one of the
       // readings is wrong, so neither name is shown as fact (a wrong name sends buyers to the wrong player)
       var spotN = {};
@@ -3430,7 +3455,7 @@
     function row(l, kind) {
       var r = el("div", "rl " + kind); r.tabIndex = 0;
       var t = el("div", "rlt"); t.appendChild(sellerEl(l)); var c = statChip(i.item, l.x, l.xj); if (c) { var cw = el("span", "rlc"); cw.appendChild(c); t.appendChild(cw); }
-      t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? "trade chat" : "")) + " · " + ago(l.t)));
+      t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? (l.mg ? megaWord(l) : "trade chat") : "")) + " · " + ago(l.t)));
       r.appendChild(t);
       var p = el("div", "rlp"); p.appendChild(money(l.u)); p.appendChild(el("small", null, kind === "up" ? (l.st === "up" ? "likely still up" : "may be gone") : kind === "sold" ? "sold" : "seen, gone now")); r.appendChild(p);
       tipAttach(r, l, i.item);
@@ -3618,7 +3643,7 @@
     im.src = "https://api.maplefm.gg/tipimg/" + xi + ".png"; wrap.appendChild(im);
     var f = el("div", "gt-foot");
     var pl = el("div"); pl.appendChild(sellerEl(l)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
-    var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t)));
+    var w = l.chat ? (l.mg ? megaWord(l) + (l.c ? " from CH " + l.c : "") : "trade chat") : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t)));
     f.appendChild(el("div", "gt-dim", "The popup exactly as FM Watcher saw it in game"));
     wrap.appendChild(f);
     return wrap;
@@ -3666,7 +3691,7 @@
     if (l && l.s) {
       var f = el("div", "gt-foot");
       var pl = el("div"); pl.appendChild(sellerEl(l)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
-      var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
+      var w = l.chat ? (l.mg ? megaWord(l) + (l.c ? " from CH " + l.c : "") : "trade chat") : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
       var spl = read ? scrollSplit(name, l) : null;
       if (spl && spl.ok && spl.su > 0) {
         var pw = spl.passed[0] === spl.passed[1] ? spl.passed[0] + " passed, " + (spl.su - spl.passed[0]) + " failed" : spl.passed[0] + " to " + spl.passed[1] + " passed";
@@ -4178,8 +4203,8 @@
       ip.appendChild(eb);
       eb.appendChild(el("span", "tg roll etg", HG.name.toLowerCase()));      // which grade this price is for
     }
-    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used", "hovered": "the last " + i.typN + " sales whose stats were read in game, scrolled and odd rolls left out" }[i.basis] || "recent sales";
-    var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
+    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "chat": "megaphone and trade chat asking prices: no shop listings or sales seen yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used", "hovered": "the last " + i.typN + " sales whose stats were read in game, scrolled and odd rolls left out" }[i.basis] || "recent sales";
+    var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "chat": "chat asks", "rolls": "average rolls", "asks": "asking prices" };
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
     // the typical price once: when the big number already is the typical, this line only says where it comes from
     var tnote = el("p", "tline"), oneNum = !(i.hi > i.lo);

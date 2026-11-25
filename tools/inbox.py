@@ -114,6 +114,8 @@ def clean_row(r, now):
         o["k"] = "b"
     if r.get("ns") == 1:
         o["ns"] = 1                                        # a chat post whose sender's name wasn't sure
+    if r.get("mg") in ("sm", "m", "im"):
+        o["mg"] = r["mg"]                                  # a megaphone post: sm smega, m megaphone, im item megaphone
     if s_(r.get("r"), 40):
         o["r"] = r["r"]
     if i_(r.get("c"), 1, 40):
