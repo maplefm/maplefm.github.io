@@ -1,36 +1,12 @@
 {
- "at": 1795562458,
+ "at": 1795578300,
  "checked": {
   "quests": 391,
   "monsters": 108,
   "maps_game": 337,
   "maps": 337
  },
- "diff": [
-  {
-   "kind": "map",
-   "id": 10006160,
-   "field": "spawns",
-   "ours": {
-    "Rotten Mushroom": 15,
-    "Duskmander": 9,
-    "Zombie Lupin": 7,
-    "Zombie Mushroom": 6
-   },
-   "source": {
-    "game_spawn_points": {
-     "Duskmander": 9,
-     "Zombie Lupin": 7,
-     "Rotten Mushroom": 15
-    }
-   },
-   "url": [
-    "https://mapleclassic.wiki/index.php?title=Precipice_of_Darkness",
-    "https://maplestory.io/api/MCW/1.2/map/10006160"
-   ],
-   "note": "the game files and the wiki disagree; ours follows the authority. If that's confirmed, add it to tools/factcheck_known.json"
-  }
- ],
+ "diff": [],
  "new": [],
  "unconfirmed": [
   {
@@ -209,6 +185,28 @@
   },
   {
    "kind": "map",
+   "id": 10006160,
+   "field": "spawns",
+   "ours": {
+    "Rotten Mushroom": 15,
+    "Duskmander": 9,
+    "Zombie Lupin": 7,
+    "Zombie Mushroom": 6
+   },
+   "source": {
+    "game_spawn_points": {
+     "Duskmander": 9,
+     "Zombie Lupin": 7,
+     "Rotten Mushroom": 15
+    }
+   },
+   "url": [
+    "https://mapleclassic.wiki/index.php?title=Precipice_of_Darkness",
+    "https://maplestory.io/api/MCW/1.2/map/10006160"
+   ]
+  },
+  {
+   "kind": "map",
    "id": 80003000,
    "field": "spawns",
    "ours": {
@@ -230,7 +228,7 @@
  ],
  "partial": false,
  "failed": [],
- "seconds": 226,
+ "seconds": 269,
  "sources": [
   "maplestory.io MCW game data",
   "MapleStory Classic Wiki (mapleclassic.wiki, CC BY-NC-SA 4.0)"
