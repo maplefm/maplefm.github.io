@@ -1,5 +1,5 @@
 {
- "at": 1795641259991,
+ "at": 1795645170992,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -186,11 +186,11 @@
   }
  },
  "stream": {
-  "age_h": 1.0,
+  "age_h": 0.1,
   "service": "active",
   "watching": 10,
-  "live_classic": 61,
-  "shops_last_hour": 96
+  "live_classic": 69,
+  "shops_last_hour": 333
  },
  "drops": {
   "2026-11-19": {
@@ -212,7 +212,7 @@
    "incomplete upload": 626
   },
   "2026-11-25": {
-   "incomplete upload": 540
+   "incomplete upload": 570
   }
  },
  "rejects": {
