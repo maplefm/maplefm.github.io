@@ -63,11 +63,13 @@ def weapons(itemdb):
     site's item data (the same game-file numbers). Event and starter copies are left out."""
     if not itemdb: return {}
     out = {}
-    # the item list also carries items only MeowDB has (v2.0 client items maplestory.io lacks); of those, only weapons
-    # a patch note names count: a client item nobody can get yet must never become the typical weapon for a level
+    # the item list also carries v2.0 client items (MeowDB, and maplestory.io's newer data sets too); of those, only
+    # weapons a patch note names count: a client item nobody can get yet must never become the typical weapon for a level.
+    # The launch set (MCW/1) is the released baseline; anything newer has to be named by a patch.
     import gamepatch
-    io_ids = {i.get("id") for i in (get(f"{IO}/item") or []) if isinstance(i, dict)}
-    named = gamepatch.released_weapons()
+    io_ids = {i.get("id") for i in (get(f"{mcwver.ROOT}1/item") or []) if isinstance(i, dict)}
+    # every weapon a patch note names, even once maplestory.io serves the newer set (it then has the client-only ones too)
+    named = {w for p in gamepatch.patches() for w in (p.get("weapons") or [])}
     for it in json.load(open(itemdb, encoding="utf-8"))["items"]:
         if len(it) < 8 or not isinstance(it[-1], dict): continue
         if io_ids and it[1] not in io_ids and it[0] not in named: continue
