@@ -802,9 +802,12 @@
     if (list.length) im.src = list[0]; else cap();
     return true;
   }
-  function iconBox(name, cls) {
+  // eager: board rows. Rows are added 600px before they scroll into view; lazy icons there each finished loading on
+  // their own frame mid-scroll, and every one repainted the whole page (phones: 150+ repaints per long scroll, the main
+  // cause of the choppy board). Loading a row's icon with the row puts them all in one burst before the reader gets there.
+  function iconBox(name, cls, eager) {
     var b = el("span", "itc" + (cls ? " " + cls : ""));
-    var im = new Image(); im.alt = ""; im.loading = "lazy"; loadIcon(im, name); b.appendChild(im);
+    var im = new Image(); im.alt = ""; im.decoding = "async"; if (!eager) im.loading = "lazy"; loadIcon(im, name); b.appendChild(im);
     return b;
   }
   function iconImg(name) { var im = new Image(); im.alt = ""; return loadIcon(im, name) ? im : null; }
@@ -1918,6 +1921,24 @@
     run.style.setProperty("--dur", Math.max(30, ev.length * 8) + "s");
   }
   document.addEventListener("visibilitychange", function () { var b = $("tickbar"); if (b) b.classList.toggle("paused", document.hidden); });
+  // The Big sales strip's endless slide and pulsing dot made the browser redo its paint bookkeeping for the whole page on every
+  // frame of a scroll, even with the strip off screen: on a slowed phone that was 3 s of a 12 s scroll. It holds still
+  // while off screen and while the page or the board box is scrolling, and slides again 250 ms after the scroll stops.
+  (function () {
+    var b = $("tickbar"); if (!b) return;
+    var off = false, still = 0;
+    function set() { b.classList.toggle("still", off || !!still); }
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { off = !es[es.length - 1].isIntersecting; set(); }).observe(b);
+    // while scrolling, price rows don't light up or start a hover card under the pointer: a mouse wheel over the table
+    // repainted every row it passed, more than doubling the repaints of a desktop scroll. Clicks work as always.
+    var de = document.documentElement, sc = 0;
+    document.addEventListener("scroll", function () {
+      if (!still) { still = 1; set(); }
+      clearTimeout(still); still = setTimeout(function () { still = 0; set(); }, 250);
+      if (!sc) de.classList.add("fm-scrolling");
+      clearTimeout(sc); sc = setTimeout(function () { sc = 0; de.classList.remove("fm-scrolling"); }, 150);
+    }, { passive: true, capture: true });
+  })();
 
   // ---------- category chips
   var CATS = [["All", 0], ["Scrolls", 2040000], ["Weapons", 1302000], ["Equips", 1082002], ["Stars", 2070000], ["Use", 2000000], ["Etc", 4000019], ["Cash", 1007077], ["Other", 3010000]];
@@ -2018,7 +2039,7 @@
     b.title = CONFTXT[i.conf][0] + ": " + CONFTXT[i.conf][1]; return b;
   }
   function nameCell(i, extraTag) {
-    var td = el("td"), w = el("div", "nm"); w.appendChild(iconBox(i.item));
+    var td = el("td"), w = el("div", "nm"); w.appendChild(iconBox(i.item, null, true));
     var t = el("div", "t"); var b = el("b", null, i.baseName); b.title = i.item; t.appendChild(b);
     t.appendChild(el("small", null, CATNAME[i.cat] || i.cat));
     if (i.tier) { var tt = el("span", "tg tier", tierLabel(i.tier)); tt.title = i.tier + (TIERLBL[i.tier] && i.tier !== "Chaos" ? ": " + TIERLBL[i.tier] + " success" : ""); t.appendChild(tt); }
@@ -3364,11 +3385,12 @@
     if (y + hhgt > window.innerHeight - 8) y = Math.max(8, rc.top - hhgt - 4);
     h.style.left = x + "px"; h.style.top = y + "px";
   }
-  function hideHov() { clearTimeout(hovTimer); hovName = null; hovRow = null; $("hov").hidden = true; }
+  function hideHov() { clearTimeout(hovTimer); hovName = null; hovRow = null; var h = $("hov"); if (h && !h.hidden) h.hidden = true; }   // runs on every scroll: no write when already hidden
   document.addEventListener("mouseover", function (e) {
     var tr = e.target.closest && e.target.closest("#rows tr[data-item], #deal-rows tr[data-item]:not(.gtipable)");
     if (!tr) { if (hovName) hideHov(); return; }
     if (tr === hovRow) return;
+    if (document.documentElement.classList.contains("fm-scrolling")) { if (hovName) hideHov(); return; }   // rows passing under a wheel
     hideHov(); hovRow = tr; hovName = tr.dataset.item;
     hovTimer = setTimeout(function () { showHov(hovName); }, 260);
   });
@@ -3901,13 +3923,21 @@
     box.appendChild(src);
     return box;
   }
+  // the window width, read once before a card render writes anything: each read after a write made the browser lay out
+  // the half-built card on the spot (three times per open on a phone)
+  var RIW = 0;
+  function cardW() { return RIW || window.innerWidth; }
   function renderItem() {
+    RIW = window.innerWidth;
+    try { renderItem1(); } finally { RIW = 0; }
+  }
+  function renderItem1() {
     var r = $("ipr"); if (r) { r.textContent = ""; r.hidden = true; }
     $("ip").classList.remove("lclosed"); if ($("ipr")) $("ipr").classList.remove("lclosed");
     renderItem0();
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
-    if (window.innerWidth <= 1180) { var pch = state.sel && D && D.byName && D.byName[state.sel] && !D.preview && bigChart(D.byName[state.sel]); if (pch) $("ip").appendChild(pch); }
+    if (cardW() <= 1180) { var pch = state.sel && D && D.byName && D.byName[state.sel] && !D.preview && bigChart(D.byName[state.sel]); if (pch) $("ip").appendChild(pch); }
     orderCard($("ip"));
     foldLists($("ip"));
     foldStats($("ip"));
@@ -3923,13 +3953,13 @@
   function ladItem() { var i = state.sel && D && D.byName && D.byName[state.sel]; return !!(i && i.equip && ladderOf(i)); }
   function foldStats(ip) {
     var lad = ladItem();
-    if (!ip || (window.innerWidth > 1180 && !lad)) return;
+    if (!ip || (cardW() > 1180 && !lad)) return;
     ip.querySelectorAll(":scope > .rollbox, :scope > .pbs").forEach(function (box) {
       var h = box.querySelector(":scope > h4"); if (!h) return;
       var open = STATOPEN === state.sel || (lad && !!OPENS.stats);
       box.classList.add("fold"); box.classList.toggle("open", open);
       h.setAttribute("role", "button"); h.tabIndex = 0; h.setAttribute("aria-expanded", open);
-      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : lad && window.innerWidth > 1180 ? "Open" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
+      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : lad && cardW() > 1180 ? "Open" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
       var go = function (e) {
         if (e.target.closest(".inf")) return; if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return; e.preventDefault();
         var now = !box.classList.contains("open"); STATOPEN = now ? state.sel : ""; if (lad) { OPENS.stats = now ? 1 : 0; saveLS("fm-open", OPENS); }
@@ -3967,7 +3997,7 @@
   // price by grade and everything else on the right, in the card's reading order
   function isBuy(k) { return BUYSIDE.some(function (c) { return k.classList.contains(c); }); }
   function splitCard() {
-    var r = $("ipr"), ip = $("ip"); if (!r || !ip || window.innerWidth <= 1180 || !state.sel) return;
+    var r = $("ipr"), ip = $("ip"); if (!r || !ip || cardW() <= 1180 || !state.sel) return;
     var i = D && D.byName && D.byName[state.sel];
     var kids = [].slice.call(ip.children); if (!kids.some(isBuy)) return;
     var ch = i && !D.preview && bigChart(i), at = 0;

@@ -558,8 +558,8 @@ tbody td { padding: 5px 8px; height: 44px; border-bottom: 1px dashed var(--line)
 tbody td.c { text-align: center; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody td:first-child { text-align: left; white-space: normal; }
-tbody tr:hover { background: #fff2d6; }
-:root[data-theme="dark"] tbody tr:hover { background: var(--panel2); }
+:where(html:not(.fm-scrolling)) tbody tr:hover { background: #fff2d6; }
+:root[data-theme="dark"]:not(.fm-scrolling) tbody tr:hover { background: var(--panel2); }
 tbody tr.sel { background: var(--sel); box-shadow: inset 4px 0 0 var(--orange); }
 tbody tr.thin { opacity: .72; }   /* one layer of fade per row, not one per cell */
 .nm { display: flex; gap: 10px; align-items: center; min-width: 200px; }
@@ -981,8 +981,8 @@ button, .card, .cchip, .li, .pill, .tabs button, input, select { transition: bac
 .tbox { border: 0; border-top: 1px solid var(--line); border-radius: 0; margin: 0; background: transparent; }
 thead th { background: var(--th); font-weight: 700; border-bottom: 1px solid var(--line); }
 tbody td { border-bottom: 1px solid var(--line); height: 50px; }
-tbody tr:hover { background: var(--panel2); }
-:root[data-theme="dark"] tbody tr:hover { background: var(--panel2); }
+:where(html:not(.fm-scrolling)) tbody tr:hover { background: var(--panel2); }
+:root[data-theme="dark"]:not(.fm-scrolling) tbody tr:hover { background: var(--panel2); }
 tbody tr.sel { background: var(--sel); box-shadow: inset 3px 0 0 var(--accent); }
 .itc { border: 1px solid var(--line); background: var(--panel2); border-radius: 9px; }
 .nm b { font-weight: 600; }
@@ -1442,6 +1442,7 @@ a.qcard:hover, a.qcard:focus-visible { border-color: var(--accent, var(--wood));
 .ticker .run span { padding-right: 40px; } .ticker .run { gap: 0; }
 @keyframes runhalf { to { transform: translateX(-50%); } }
 .ticker.paused .run { animation-play-state: paused; }
+.ticker.still .run, .ticker.still .tag::before { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .ticker .run { animation: none; padding-left: 12px; } .ticker .run .dup { display: none; } }
 @media (max-width: 600px) { .ticker { height: 28px; font-size: .74rem; } .ticker .tag { padding: 0 8px; } }
 /* stat alerts */
