@@ -131,7 +131,21 @@ def main():
     for d, o in sorted(rej.items())[-1:]:
         n = sum(o.values())
         if n >= 20: flags.append(f"Worker turned away {n} uploads on {d}: " + ", ".join(f"{k} {v}" for k, v in o.items()))
-    json.dump({"at": int(now * 1000), "bars": BARS, "current": cur.get("version"), "scanners": S,
+    # The cloud stream reader (download/stream on the Hetzner server) reports in hourly to stream-status.json.
+    # A report over 3 hours old, or a service that isn't running, means it stopped reading streams.
+    ss = load(os.path.join(data, "stream-status.json"), None)
+    stream = None
+    if ss:
+        try:
+            import datetime
+            sage = (now - datetime.datetime.fromisoformat(ss["at"]).timestamp()) / 3600
+        except Exception:
+            sage = 99
+        stream = {"age_h": round(sage, 1), "service": ss.get("service"), "watching": len(ss.get("watching") or []),
+                  "live_classic": len(ss.get("live_classic") or []), "shops_last_hour": ss.get("shops_last_hour")}
+        if sage > 3: flags.append(f"Stream server: last report {sage:.0f} hours ago")
+        elif ss.get("service") != "active": flags.append(f"Stream server: reader is {ss.get('service')}")
+    json.dump({"at": int(now * 1000), "bars": BARS, "current": cur.get("version"), "scanners": S, "stream": stream,
                "drops": dict(sorted(drops.items())[-7:]), "rejects": rej, "flags": flags}, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print("scanner health:", len(S), "scanners,", len(flags), "flags")
     for f in flags: print(" ", f)

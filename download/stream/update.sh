@@ -52,7 +52,7 @@ if [ -s "$APP/token.txt" ] && { [ ! -f "$stamp" ] || [ $(( $(date +%s) - $(stat 
   API=https://api.github.com/repos/maplefm/clubfm-archive/contents/data/stream-status.json
   active=$(systemctl is-active clubfm-stream 2>/dev/null || echo unknown)
   body=$("$DIR/venv/bin/python" - "$APP" "$active" <<'PY'
-import json, sys, os, datetime, glob
+import json, sys, os, datetime, re
 app, active = sys.argv[1], sys.argv[2]
 st = {}
 try: st = json.load(open(os.path.join(app, "stream_status.json"), encoding="utf-8"))
@@ -61,7 +61,7 @@ shops_hour = 0
 cut = (datetime.datetime.now() - datetime.timedelta(hours=1)).strftime("%H:%M:%S")
 try:
     for line in open(os.path.join(app, "stream.log"), encoding="utf-8", errors="ignore").readlines()[-5000:]:
-        if " shop " in line and line[:8] >= cut: shops_hour += 1
+        if re.match(r"\d\d:\d\d:\d\d \S+\s+shop ", line) and line[:8] >= cut: shops_hour += 1
 except Exception: pass
 out = {"at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "service": active,
        "status_at": st.get("at"), "watching": st.get("watching", []), "live_classic": st.get("live_classic", []),
