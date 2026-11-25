@@ -87,7 +87,23 @@ def main():
         try:
             sample[name] = fn(yes, no)
         except Exception as e:
-            sample[name] = {"error": (type(e).__name__ + ": " + str(e))[:160]}
+            msg = type(e).__name__ + ": " + str(e)
+            try:   # Google and Kick put the reason in the body; keep it so a 403 can be told apart
+                b = json.loads(e.read().decode("utf-8", "replace"))
+                er = b.get("error") or {}
+                if isinstance(er, dict):
+                    rs = [x.get("reason") for x in er.get("errors") or [] if x.get("reason")]
+                    for x in er.get("details") or []:
+                        if x.get("reason"):
+                            rs.append(x["reason"])
+                    msg += " | " + ",".join(rs) + " | " + str(er.get("message") or "")
+                else:
+                    msg += " | " + str(er)
+            except Exception:
+                pass
+            for k in read_key("youtube_key.txt") + read_key("kick_client.txt"):
+                msg = msg.replace(k, "***")
+            sample[name] = {"error": msg[:300]}
     try:
         d = json.load(open(OUT, encoding="utf-8"))
     except Exception:
