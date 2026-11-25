@@ -1548,10 +1548,11 @@ _BOOT = _stamp()
 def code_changed():
     now = _stamp()
     if now == _BOOT: return False
-    import py_compile
+    # only restart into code that at least compiles. (Until Nov 25 this used py_compile with cfile=/dev/null, which
+    # Linux Pythons refuse, so the stream server never restarted itself on a code change.)
     try:
         for f in _CODE:
-            if os.path.exists(f): py_compile.compile(f, doraise=True, cfile=os.devnull if os.name != "nt" else None)
+            if os.path.exists(f): compile(open(f, encoding="utf-8").read(), f, "exec")
     except Exception:
         return False
     return True

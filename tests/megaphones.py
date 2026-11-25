@@ -52,6 +52,10 @@ ok("three megaphone lines found", len(lines) == 3 and all(a[0] == b[0] and abs(a
 ok("box edges", all(x0 == 400 and x1 == 1160 for _, _, _, x0, x1 in lines), lines)
 ok("nothing found in a picture without megaphones", SR.mega_lines(rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8))[0] == [])
 
+# the reader restarts itself into new code (it never did on Linux before Nov 25: py_compile refused /dev/null)
+SR._BOOT = tuple(0 for _ in SR._CODE)
+ok("a code change is seen and the new code compiles", SR.code_changed() is True)
+
 # 2. I and l
 ok("I and l like the watcher's exact names", [SR.il_rule(n) for n in ("lindenhan", "NeckSIice", "KatnissF", "XlV", "Ilovemaple")] == ["Iindenhan", "NeckSlice", "KatnissF", "XIV", "Ilovemaple"],
    [SR.il_rule(n) for n in ("lindenhan", "NeckSIice", "KatnissF", "XlV", "Ilovemaple")])
