@@ -42,8 +42,22 @@ cat > "$APP/config.json" <<'EOF'
 }
 EOF
 fi
+# Stream settings from maplefm.gg (download/stream/settings.json) win over the ones here, so how many channels it
+# watches can change without logging in. A change restarts the reader.
+if curl -fsSL "$SITE/stream/settings.json" -o "$DIR/settings.json" 2>/dev/null && [ -x "$DIR/venv/bin/python" ]; then
+  if "$DIR/venv/bin/python" - "$APP/config.json" "$DIR/settings.json" <<'PY'
+import json, sys
+cfg = json.load(open(sys.argv[1], encoding="utf-8")); new = json.load(open(sys.argv[2], encoding="utf-8"))
+st = cfg.get("streams") or {}
+if all(st.get(k) == v for k, v in new.items()): sys.exit(1)
+st.update(new); cfg["streams"] = st
+json.dump(cfg, open(sys.argv[1], "w", encoding="utf-8"), indent=2)
+PY
+  then echo "stream settings changed"; restart=1; fi
+fi
 id clubfm >/dev/null 2>&1 && chown -R clubfm:clubfm "$DIR"
 [ "${1:-}" = "--files-only" ] && exit 0
+[ "${restart:-0}" = 1 ] && systemctl restart clubfm-stream && echo "reader restarted"
 
 # Report in, at most once an hour
 stamp="$DIR/.last_report"
@@ -66,6 +80,11 @@ except Exception: pass
 out = {"at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "service": active,
        "status_at": st.get("at"), "watching": st.get("watching", []), "live_classic": st.get("live_classic", []),
        "shops_last_hour": shops_hour, "host": "cloud"}
+try:
+    out["load"] = [round(x, 2) for x in os.getloadavg()]; out["cpus"] = os.cpu_count()
+    m = dict(l.split(":", 1) for l in open("/proc/meminfo"))
+    out["mem_used_mb"] = (int(m["MemTotal"].split()[0]) - int(m["MemAvailable"].split()[0])) // 1024
+except Exception: pass
 print(json.dumps(out, separators=(",", ":")))
 PY
 )
