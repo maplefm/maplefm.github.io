@@ -51,7 +51,8 @@ const fs = require("fs"), R = require("path").join(__dirname, "..") + "/";
   // the strip slides again 250 ms after the scroll stops; a slow CI runner can take a few seconds to say it is back in view
   let still = true;
   for (let k = 0; k < 10 && still !== false; k++) { await p.waitForTimeout(500); still = await p.evaluate(() => { const t = document.getElementById("tickbar"); return t ? t.classList.contains("still") : null; }); }
-  ok(still === false, "Big sales strip slides again once the scroll stops and it is in view");
+  const why = still === false ? "" : await p.evaluate(() => { const t = document.getElementById("tickbar"); const r = t && t.getBoundingClientRect(); return JSON.stringify({ y: window.scrollY, top: r && Math.round(r.top), h: r && Math.round(r.height), vh: innerHeight, scrolling: document.documentElement.classList.contains("fm-scrolling"), cls: t && t.className }); });
+  ok(still === false, "Big sales strip slides again once the scroll stops and it is in view" + (why ? " | " + why : ""));
   // 4: a search typed while rows are still arriving
   await swipe(3);
   await p.fill("#q", "gloves"); await p.waitForTimeout(2000);
