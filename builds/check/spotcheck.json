@@ -1,0 +1,344 @@
+{
+ "version": "https://maplestory.io/api/MCW/1.2",
+ "checked": 56,
+ "ok": 56,
+ "accuracy_pct": 100.0,
+ "rows": [
+  {
+   "what": "Halfmoon Zamadar (1332011) attack",
+   "page": 53,
+   "game_files": 53,
+   "ok": true
+  },
+  {
+   "what": "Halfmoon Zamadar speed",
+   "page": 4,
+   "game_files": 4,
+   "ok": true
+  },
+  {
+   "what": "Korean Fan (1332013) attack",
+   "page": 55,
+   "game_files": 55,
+   "ok": true
+  },
+  {
+   "what": "Korean Fan speed",
+   "page": 3,
+   "game_files": 3,
+   "ok": true
+  },
+  {
+   "what": "Korean Fan needs",
+   "page": "70 LUK",
+   "game_files": "70 LUK",
+   "ok": true
+  },
+  {
+   "what": "Shinkita (1332015) attack",
+   "page": 68,
+   "game_files": 68,
+   "ok": true
+  },
+  {
+   "what": "Shinkita speed",
+   "page": 4,
+   "game_files": 4,
+   "ok": true
+  },
+  {
+   "what": "Shinkita needs",
+   "page": "45 DEX, 100 LUK",
+   "game_files": "45 DEX, 100 LUK",
+   "ok": true
+  },
+  {
+   "what": "Kandine (1332020) attack",
+   "page": 88,
+   "game_files": 88,
+   "ok": true
+  },
+  {
+   "what": "Kandine speed",
+   "page": 4,
+   "game_files": 4,
+   "ok": true
+  },
+  {
+   "what": "Kandine needs",
+   "page": "65 DEX, 140 LUK",
+   "game_files": "65 DEX, 140 LUK",
+   "ok": true
+  },
+  {
+   "what": "Mithril Guards (1472009) attack",
+   "page": 23,
+   "game_files": 23,
+   "ok": true
+  },
+  {
+   "what": "Mithril Guards speed",
+   "page": 4,
+   "game_files": 4,
+   "ok": true
+  },
+  {
+   "what": "Meba (1472007) attack",
+   "page": 19,
+   "game_files": 19,
+   "ok": true
+  },
+  {
+   "what": "Meba speed",
+   "page": 3,
+   "game_files": 3,
+   "ok": true
+  },
+  {
+   "what": "Zeco (1432005) attack",
+   "page": 59,
+   "game_files": 59,
+   "ok": true
+  },
+  {
+   "what": "Zeco speed",
+   "page": 6,
+   "game_files": 6,
+   "ok": true
+  },
+  {
+   "what": "Bamboo Spear (1432009) attack",
+   "page": 64,
+   "game_files": 64,
+   "ok": true
+  },
+  {
+   "what": "Bamboo Spear speed",
+   "page": 6,
+   "game_files": 6,
+   "ok": true
+  },
+  {
+   "what": "Bamboo Spear needs",
+   "page": "85 STR",
+   "game_files": "85 STR",
+   "ok": true
+  },
+  {
+   "what": "Serpent's Tongue (1432006) attack",
+   "page": 69,
+   "game_files": 69,
+   "ok": true
+  },
+  {
+   "what": "Serpent's Tongue speed",
+   "page": 6,
+   "game_files": 6,
+   "ok": true
+  },
+  {
+   "what": "Redemption (1432008) attack",
+   "page": 95,
+   "game_files": 95,
+   "ok": true
+  },
+  {
+   "what": "Redemption speed",
+   "page": 7,
+   "game_files": 7,
+   "ok": true
+  },
+  {
+   "what": "Redemption needs",
+   "page": "145 STR, 70 DEX",
+   "game_files": "145 STR, 70 DEX",
+   "ok": true
+  },
+  {
+   "what": "Crescent Polearm (1442006) attack",
+   "page": 65,
+   "game_files": 65,
+   "ok": true
+  },
+  {
+   "what": "Crescent Polearm speed",
+   "page": 8,
+   "game_files": 8,
+   "ok": true
+  },
+  {
+   "what": "Yellow Mop (1442010) attack",
+   "page": 67,
+   "game_files": 67,
+   "ok": true
+  },
+  {
+   "what": "Yellow Mop speed",
+   "page": 7,
+   "game_files": 7,
+   "ok": true
+  },
+  {
+   "what": "The Nine Dragons (1442007) attack",
+   "page": 75,
+   "game_files": 75,
+   "ok": true
+  },
+  {
+   "what": "The Nine Dragons speed",
+   "page": 8,
+   "game_files": 8,
+   "ok": true
+  },
+  {
+   "what": "The Nine Dragons needs",
+   "page": "105 STR, 50 DEX",
+   "game_files": "105 STR, 50 DEX",
+   "ok": true
+  },
+  {
+   "what": "The Gold Dragon (1442009) attack",
+   "page": 95,
+   "game_files": 95,
+   "ok": true
+  },
+  {
+   "what": "The Gold Dragon speed",
+   "page": 8,
+   "game_files": 8,
+   "ok": true
+  },
+  {
+   "what": "Lucky Seven 20: damage %",
+   "page": 140,
+   "game_files": 140.0,
+   "ok": true
+  },
+  {
+   "what": "Lucky Seven stars a cast",
+   "page": 2,
+   "game_files": 2.0,
+   "ok": true
+  },
+  {
+   "what": "Double Stab 20: damage %",
+   "page": 160,
+   "game_files": 160.0,
+   "ok": true
+  },
+  {
+   "what": "Double Stab hits",
+   "page": 2,
+   "game_files": 2.0,
+   "ok": true
+  },
+  {
+   "what": "Savage Blow 21: hits",
+   "page": 6,
+   "game_files": 6.0,
+   "ok": true
+  },
+  {
+   "what": "Savage Blow 21: % a hit",
+   "page": 65,
+   "game_files": 65.0,
+   "ok": true
+  },
+  {
+   "what": "Savage Blow 30: % a hit",
+   "page": 75,
+   "game_files": 75.0,
+   "ok": true
+  },
+  {
+   "what": "Dagger Booster 1: speed steps",
+   "page": -2,
+   "game_files": -2.0,
+   "ok": true
+  },
+  {
+   "what": "Dagger Mastery 20: mastery",
+   "page": 10,
+   "game_files": 10.0,
+   "ok": true
+  },
+  {
+   "what": "Keen Eyes 15: range",
+   "page": 200,
+   "game_files": 200.0,
+   "ok": true
+  },
+  {
+   "what": "Nimble Body 15: accuracy",
+   "page": 15,
+   "game_files": 15.0,
+   "ok": true
+  },
+  {
+   "what": "Disorder 6: monster defense down",
+   "page": 2,
+   "game_files": 2.0,
+   "ok": true
+  },
+  {
+   "what": "Power Strike 20: damage %",
+   "page": 260,
+   "game_files": 260.0,
+   "ok": true
+  },
+  {
+   "what": "Slash Blast targets",
+   "page": 6,
+   "game_files": 6.0,
+   "ok": true
+  },
+  {
+   "what": "Precise Strikes 15: accuracy",
+   "page": 20,
+   "game_files": 20.0,
+   "ok": true
+  },
+  {
+   "what": "Precise Strikes 15: crit %",
+   "page": 5,
+   "game_files": 5.0,
+   "ok": true
+  },
+  {
+   "what": "Max HP Increase 1: max HP %",
+   "page": 10,
+   "game_files": 10.0,
+   "ok": true
+  },
+  {
+   "what": "Final Attack: Spear 30: damage %",
+   "page": 350,
+   "game_files": 350.0,
+   "ok": true
+  },
+  {
+   "what": "Final Attack enable chance %",
+   "page": 25,
+   "game_files": 25.0,
+   "ok": true
+  },
+  {
+   "what": "Spear Mastery 20: ignore WDEF %",
+   "page": 20,
+   "game_files": 20.0,
+   "ok": true
+  },
+  {
+   "what": "Polearm Booster 1: speed steps",
+   "page": -2,
+   "game_files": -2.0,
+   "ok": true
+  },
+  {
+   "what": "Rush cooldown s",
+   "page": 2,
+   "game_files": 2.0,
+   "ok": true
+  }
+ ]
+}

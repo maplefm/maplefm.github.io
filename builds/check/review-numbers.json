@@ -1,0 +1,1487 @@
+{
+ "note": "model numbers behind the guides; they rest on formulas the audit lists as supported or unconfirmed, so they stay off the pages",
+ "accuracy": {
+  "sindit": {
+   "10": 33,
+   "20": 56,
+   "30": 73,
+   "35": 80,
+   "40": 86,
+   "46": 93,
+   "50": 101,
+   "60": 115,
+   "70": 129,
+   "80": 141,
+   "90": 154,
+   "100": 166
+  },
+  "spearman_spear": {
+   "10": 20,
+   "20": 28,
+   "30": 69,
+   "35": 75,
+   "40": 82,
+   "45": 86,
+   "50": 94,
+   "60": 107,
+   "70": 120,
+   "80": 128,
+   "90": 136,
+   "100": 144
+  },
+  "spearman_polearm": {
+   "10": 20,
+   "20": 36,
+   "30": 69,
+   "35": 75,
+   "40": 82,
+   "45": 86,
+   "50": 94,
+   "60": 107,
+   "70": 120,
+   "80": 128,
+   "90": 136,
+   "100": 144
+  }
+ },
+ "maps": {
+  "sindit": [
+   {
+    "levels": "10 to 14",
+    "map": "The Forest of Wisdom",
+    "exp_hour": 13932,
+    "engine_note": "Lucky Seven: 5 casts per Green Mushroom · 58 spawns"
+   },
+   {
+    "levels": "10 to 14",
+    "map": "Tree Dungeon, Forest Up North IV",
+    "exp_hour": 13555,
+    "engine_note": "Lucky Seven: 5 casts per Green Mushroom · 44 spawns"
+   },
+   {
+    "levels": "10 to 14",
+    "map": "Line 1 (Area 1)",
+    "exp_hour": 13274,
+    "engine_note": "Lucky Seven: 6 casts per Bubbling · 85% hit · 64 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Line 1 (Area 1)",
+    "exp_hour": 27097,
+    "engine_note": "Lucky Seven: 2 casts per Bubbling · 64 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Northern Top of Construction Site",
+    "exp_hour": 24378,
+    "engine_note": "Lucky Seven: 2 casts per Octopus · 21 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Caution Falling Down",
+    "exp_hour": 23149,
+    "engine_note": "Lucky Seven: 2 casts per Octopus · 20 spawns"
+   },
+   {
+    "levels": "20 to 29",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 42156,
+    "engine_note": "Lucky Seven: 3 casts per Wild Boar · 89% hit · 33 spawns"
+   },
+   {
+    "levels": "20 to 29",
+    "map": "Excavation Site III",
+    "exp_hour": 41484,
+    "engine_note": "Lucky Seven: 3 casts per Rocky Mask · 25 spawns"
+   },
+   {
+    "levels": "20 to 29",
+    "map": "Ant Tunnel II",
+    "exp_hour": 38286,
+    "engine_note": "Lucky Seven: 2 casts per Zombie Mushroom · 47 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 53951,
+    "engine_note": "Lucky Seven: 2 casts per Wild Boar · 33 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "The Burnt Land III",
+    "exp_hour": 51599,
+    "engine_note": "Lucky Seven: 2 casts per Fire Boar · 96% hit · 37 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "Excavation Site III",
+    "exp_hour": 51028,
+    "engine_note": "Lucky Seven: 2 casts per Rocky Mask · 25 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "Line 2 (Area 1)",
+    "exp_hour": 82997,
+    "engine_note": "Double Stab: 2 casts per Jr. Wraith · 95% hit · 97 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "Line 1 (Area 2)",
+    "exp_hour": 69571,
+    "engine_note": "Double Stab: 2 casts per Jr. Wraith · 95% hit · 90 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 65179,
+    "engine_note": "Double Stab kills Wild Boar in 1 cast · 33 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Remains (Tomb) I",
+    "exp_hour": 106836,
+    "engine_note": "Savage Blow: 2 casts per Skeledog · 23 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Line 2 (Area 1)",
+    "exp_hour": 102696,
+    "engine_note": "Savage Blow kills Jr. Wraith in 1 cast · 97 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Hanging Gardens of Rot",
+    "exp_hour": 97894,
+    "engine_note": "Savage Blow: 2 casts per Aqumander · 69 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Line 2 (Area 2)",
+    "exp_hour": 127670,
+    "engine_note": "Savage Blow: 2 casts per Wraith · 94% hit · 107 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Hot Sand",
+    "exp_hour": 125917,
+    "engine_note": "Savage Blow: 2 casts per Tortie · 38 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Line 2 (Area 3)",
+    "exp_hour": 115114,
+    "engine_note": "Savage Blow: 2 casts per Wraith · 94% hit · 68 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "The Forest of Evil II",
+    "exp_hour": 149858,
+    "engine_note": "Double Stab: 2 casts per Malady · 39 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "The Forest of Evil I",
+    "exp_hour": 144564,
+    "engine_note": "Double Stab: 2 casts per Malady · 26 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "Hot Sand",
+    "exp_hour": 132185,
+    "engine_note": "Double Stab: 2 casts per Tortie · 38 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 3",
+    "exp_hour": 176537,
+    "engine_note": "Savage Blow: 3 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 2",
+    "exp_hour": 167212,
+    "engine_note": "Savage Blow: 2 casts per Skeleton Soldier · 20 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 1",
+    "exp_hour": 162183,
+    "engine_note": "Savage Blow: 2 casts per Skeleton Soldier · 25 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Remains (Cliff)",
+    "exp_hour": 179434,
+    "engine_note": "Savage Blow: 5 casts per Commander Skeleton · 100% hit · 17 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Camp 3",
+    "exp_hour": 176537,
+    "engine_note": "Savage Blow: 3 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Remains (Tomb) IV",
+    "exp_hour": 142743,
+    "engine_note": "Savage Blow: 3 casts per Officer Skeleton · 14 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Sanctuary Entrance IV",
+    "exp_hour": 229528,
+    "engine_note": "Double Stab kills Cold Eye in 1 cast · 12 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Camp 3",
+    "exp_hour": 201971,
+    "engine_note": "Savage Blow: 2 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Remains (Cliff)",
+    "exp_hour": 199209,
+    "engine_note": "Savage Blow: 4 casts per Commander Skeleton · 17 spawns"
+   }
+  ],
+  "spearman_spear": [
+   {
+    "levels": "10 to 14",
+    "map": "An Empty House",
+    "exp_hour": 12943,
+    "engine_note": "Power Strike: 2 casts per Orange Mushroom · 6 spawns"
+   },
+   {
+    "levels": "10 to 14",
+    "map": "Mushroom Garden (Victoria Island)",
+    "exp_hour": 12157,
+    "engine_note": "Power Strike: 2 casts per Orange Mushroom · 34 spawns"
+   },
+   {
+    "levels": "10 to 14",
+    "map": "The Rain-Forest East of Henesys",
+    "exp_hour": 10919,
+    "engine_note": "Power Strike: 2 casts per Pig · 9 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Tree Dungeon, Forest Up North IV",
+    "exp_hour": 18622,
+    "engine_note": "Power Strike: 2 casts per Green Mushroom · 81% hit · 44 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Dungeon, Southern Forest III",
+    "exp_hour": 16583,
+    "engine_note": "Power Strike: 2 casts per Green Mushroom · 81% hit · 26 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "An Empty House",
+    "exp_hour": 16236,
+    "engine_note": "Power Strike kills Orange Mushroom in 1 cast · 6 spawns"
+   },
+   {
+    "levels": "20 to 24",
+    "map": "Line 1 (Area 1)",
+    "exp_hour": 24702,
+    "engine_note": "Power Strike: 2 casts per Bubbling · 87% hit · 64 spawns"
+   },
+   {
+    "levels": "20 to 24",
+    "map": "Tree Dungeon, Forest Up North IV",
+    "exp_hour": 20498,
+    "engine_note": "Power Strike: 2 casts per Green Mushroom · 44 spawns"
+   },
+   {
+    "levels": "20 to 24",
+    "map": "Dungeon, Southern Forest III",
+    "exp_hour": 17971,
+    "engine_note": "Power Strike: 2 casts per Green Mushroom · 26 spawns"
+   },
+   {
+    "levels": "25 to 29",
+    "map": "Tree Dungeon, Forest Up North III",
+    "exp_hour": 29140,
+    "engine_note": "Power Strike kills Green Mushroom in 1 cast · 44 spawns"
+   },
+   {
+    "levels": "25 to 29",
+    "map": "Dungeon, Southern Forest IV",
+    "exp_hour": 27498,
+    "engine_note": "Power Strike: 2 casts per Horny Mushroom · 81% hit · 25 spawns"
+   },
+   {
+    "levels": "25 to 29",
+    "map": "West Rocky Mountain III",
+    "exp_hour": 26840,
+    "engine_note": "Power Strike kills Green Mushroom in 1 cast · 67 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 45406,
+    "engine_note": "Power Strike: 2 casts per Wild Boar · 33 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "Dark Cave",
+    "exp_hour": 41932,
+    "engine_note": "Power Strike kills Stirge in 1 cast · 51 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "The Burnt Land III",
+    "exp_hour": 40336,
+    "engine_note": "Power Strike: 3 casts per Fire Boar · 85% hit · 37 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 61290,
+    "engine_note": "Power Strike kills Wild Boar in 1 cast · 33 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "Line 2 (Area 1)",
+    "exp_hour": 56788,
+    "engine_note": "Power Strike: 3 casts per Jr. Wraith · 82% hit · 97 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "Tree Dungeon, Forest Up North VIII",
+    "exp_hour": 54051,
+    "engine_note": "Power Strike: 2 casts per Curse Eye · 17 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Remains (Tomb) I",
+    "exp_hour": 88540,
+    "engine_note": "Power Strike: 3 casts per Skeledog · 97% hit · 23 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Hanging Gardens of Rot",
+    "exp_hour": 83000,
+    "engine_note": "Power Strike: 3 casts per Aqumander · 97% hit · 69 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Line 2 (Area 1)",
+    "exp_hour": 79237,
+    "engine_note": "Power Strike: 2 casts per Jr. Wraith · 97 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Hot Sand",
+    "exp_hour": 103764,
+    "engine_note": "Power Strike: 3 casts per Tortie · 38 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Clang and Lorang",
+    "exp_hour": 94928,
+    "engine_note": "Power Strike: 3 casts per Clang · 92% hit · 31 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Remains (Tomb) I",
+    "exp_hour": 92099,
+    "engine_note": "Power Strike: 3 casts per Skeledog · 23 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "The Forest of Evil II",
+    "exp_hour": 120159,
+    "engine_note": "Power Strike: 3 casts per Malady · 100% hit · 39 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "Line 2 (Area 3)",
+    "exp_hour": 119608,
+    "engine_note": "Power Strike: 2 casts per Wraith · 68 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "Hot Sand",
+    "exp_hour": 119117,
+    "engine_note": "Power Strike: 2 casts per Tortie · 38 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 1",
+    "exp_hour": 133748,
+    "engine_note": "Power Strike: 3 casts per Skeleton Soldier · 25 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 2",
+    "exp_hour": 131906,
+    "engine_note": "Power Strike: 3 casts per Skeleton Soldier · 20 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 3",
+    "exp_hour": 130840,
+    "engine_note": "Power Strike: 5 casts per Officer Skeleton · 84% hit · 20 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Camp 3",
+    "exp_hour": 150632,
+    "engine_note": "Power Strike: 4 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Remains (Cliff)",
+    "exp_hour": 134320,
+    "engine_note": "Power Strike: 7 casts per Commander Skeleton · 81% hit · 17 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Remains (Tomb) IV",
+    "exp_hour": 118625,
+    "engine_note": "Power Strike: 4 casts per Officer Skeleton · 14 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Camp 3",
+    "exp_hour": 174681,
+    "engine_note": "Power Strike: 3 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Camp 2",
+    "exp_hour": 165604,
+    "engine_note": "Power Strike: 2 casts per Skeleton Soldier · 20 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Remains (Cliff)",
+    "exp_hour": 164008,
+    "engine_note": "Power Strike: 6 casts per Commander Skeleton · 17 spawns"
+   }
+  ],
+  "spearman_polearm": [
+   {
+    "levels": "10 to 14",
+    "map": "An Empty House",
+    "exp_hour": 12688,
+    "engine_note": "Power Strike: 2 casts per Orange Mushroom · 6 spawns"
+   },
+   {
+    "levels": "10 to 14",
+    "map": "Mushroom Garden (Victoria Island)",
+    "exp_hour": 11925,
+    "engine_note": "Power Strike: 2 casts per Orange Mushroom · 34 spawns"
+   },
+   {
+    "levels": "10 to 14",
+    "map": "The Rain-Forest East of Henesys",
+    "exp_hour": 11586,
+    "engine_note": "Power Strike: 2 casts per Pig · 9 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Line 1 (Area 1)",
+    "exp_hour": 24771,
+    "engine_note": "Power Strike: 2 casts per Bubbling · 99% hit · 64 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Tree Dungeon, Forest Up North IV",
+    "exp_hour": 19610,
+    "engine_note": "Power Strike: 2 casts per Green Mushroom · 44 spawns"
+   },
+   {
+    "levels": "15 to 19",
+    "map": "Dungeon, Southern Forest III",
+    "exp_hour": 17282,
+    "engine_note": "Power Strike: 2 casts per Green Mushroom · 26 spawns"
+   },
+   {
+    "levels": "20 to 24",
+    "map": "Line 1 (Area 1)",
+    "exp_hour": 25378,
+    "engine_note": "Power Strike: 2 casts per Bubbling · 64 spawns"
+   },
+   {
+    "levels": "20 to 24",
+    "map": "Tree Dungeon, Forest Up North IV",
+    "exp_hour": 23523,
+    "engine_note": "Power Strike kills Green Mushroom in 1 cast · 44 spawns"
+   },
+   {
+    "levels": "20 to 24",
+    "map": "The Blue Mushroom Forest",
+    "exp_hour": 23315,
+    "engine_note": "Power Strike: 2 casts per Blue Mushroom · 97% hit · 32 spawns"
+   },
+   {
+    "levels": "25 to 29",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 41730,
+    "engine_note": "Power Strike: 2 casts per Wild Boar · 85% hit · 33 spawns"
+   },
+   {
+    "levels": "25 to 29",
+    "map": "Dark Cave",
+    "exp_hour": 41188,
+    "engine_note": "Power Strike kills Stirge in 1 cast · 51 spawns"
+   },
+   {
+    "levels": "25 to 29",
+    "map": "Excavation Site III",
+    "exp_hour": 37820,
+    "engine_note": "Power Strike: 2 casts per Rocky Mask · 98% hit · 25 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 44316,
+    "engine_note": "Power Strike: 2 casts per Wild Boar · 33 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "Dark Cave",
+    "exp_hour": 43251,
+    "engine_note": "Power Strike kills Stirge in 1 cast · 51 spawns"
+   },
+   {
+    "levels": "30 to 34",
+    "map": "Excavation Site I",
+    "exp_hour": 42394,
+    "engine_note": "Power Strike kills Ghost Stump in 1 cast · 33 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "Line 2 (Area 1)",
+    "exp_hour": 68228,
+    "engine_note": "Power Strike: 2 casts per Jr. Wraith · 82% hit · 97 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "The Land of Wild Boar II",
+    "exp_hour": 60044,
+    "engine_note": "Power Strike kills Wild Boar in 1 cast · 33 spawns"
+   },
+   {
+    "levels": "35 to 46",
+    "map": "Line 1 (Area 2)",
+    "exp_hour": 59121,
+    "engine_note": "Power Strike: 2 casts per Jr. Wraith · 82% hit · 90 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Remains (Tomb) I",
+    "exp_hour": 85835,
+    "engine_note": "Power Strike: 3 casts per Skeledog · 97% hit · 23 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Hanging Gardens of Rot",
+    "exp_hour": 80693,
+    "engine_note": "Power Strike: 3 casts per Aqumander · 97% hit · 69 spawns"
+   },
+   {
+    "levels": "47 to 49",
+    "map": "Line 2 (Area 1)",
+    "exp_hour": 77107,
+    "engine_note": "Power Strike: 2 casts per Jr. Wraith · 97 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Remains (Tomb) I",
+    "exp_hour": 98630,
+    "engine_note": "Power Strike: 2 casts per Skeledog · 23 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Hot Sand",
+    "exp_hour": 97082,
+    "engine_note": "Power Strike: 3 casts per Tortie · 38 spawns"
+   },
+   {
+    "levels": "50 to 59",
+    "map": "Clang and Lorang",
+    "exp_hour": 89421,
+    "engine_note": "Power Strike: 3 casts per Clang · 92% hit · 31 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "The Forest of Evil II",
+    "exp_hour": 127437,
+    "engine_note": "Power Strike: 2 casts per Malady · 100% hit · 39 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "The Forest of Evil I",
+    "exp_hour": 123262,
+    "engine_note": "Power Strike: 2 casts per Malady · 100% hit · 26 spawns"
+   },
+   {
+    "levels": "60 to 64",
+    "map": "Hot Sand",
+    "exp_hour": 121116,
+    "engine_note": "Power Strike: 2 casts per Tortie · 38 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 3",
+    "exp_hour": 135233,
+    "engine_note": "Power Strike: 4 casts per Officer Skeleton · 84% hit · 20 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 2",
+    "exp_hour": 131879,
+    "engine_note": "Power Strike: 3 casts per Skeleton Soldier · 20 spawns"
+   },
+   {
+    "levels": "65 to 74",
+    "map": "Camp 1",
+    "exp_hour": 130377,
+    "engine_note": "Power Strike: 3 casts per Skeleton Soldier · 25 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Camp 3",
+    "exp_hour": 169917,
+    "engine_note": "Power Strike: 3 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Remains (Cliff)",
+    "exp_hour": 142579,
+    "engine_note": "Power Strike: 6 casts per Commander Skeleton · 81% hit · 17 spawns"
+   },
+   {
+    "levels": "75 to 89",
+    "map": "Remains (Tomb) IV",
+    "exp_hour": 126868,
+    "engine_note": "Power Strike: 3 casts per Officer Skeleton · 14 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Remains (Cliff)",
+    "exp_hour": 172307,
+    "engine_note": "Power Strike: 5 casts per Commander Skeleton · 17 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Camp 3",
+    "exp_hour": 169917,
+    "engine_note": "Power Strike: 3 casts per Officer Skeleton · 20 spawns"
+   },
+   {
+    "levels": "90 to 100",
+    "map": "Camp 2",
+    "exp_hour": 161462,
+    "engine_note": "Power Strike: 2 casts per Skeleton Soldier · 20 spawns"
+   }
+  ]
+ },
+ "sindit_typical_vs_guide": [
+  {
+   "level": 30,
+   "guide": {
+    "weapon": "Mithril Guards",
+    "attack": "Lucky Seven",
+    "dmg_per_s": 661,
+    "accuracy": 73
+   },
+   "typical": {
+    "weapon": "Mithril Guards",
+    "attack": "Lucky Seven",
+    "dmg_per_s": 705,
+    "accuracy": 73,
+    "can_wear": false
+   }
+  },
+  {
+   "level": 40,
+   "guide": {
+    "weapon": "Korean Fan",
+    "attack": "Double Stab",
+    "dmg_per_s": 1446,
+    "accuracy": 86
+   },
+   "typical": {
+    "weapon": "Blood Avarice",
+    "attack": "Lucky Seven",
+    "dmg_per_s": 1060,
+    "accuracy": 85,
+    "can_wear": false
+   }
+  },
+  {
+   "level": 50,
+   "guide": {
+    "weapon": "Shinkita",
+    "attack": "Savage Blow",
+    "dmg_per_s": 2334,
+    "accuracy": 101
+   },
+   "typical": {
+    "weapon": "Shinkita",
+    "attack": "Savage Blow",
+    "dmg_per_s": 2403,
+    "accuracy": 98,
+    "can_wear": false
+   }
+  },
+  {
+   "level": 60,
+   "guide": {
+    "weapon": "Deadly Fin",
+    "attack": "Savage Blow",
+    "dmg_per_s": 3091,
+    "accuracy": 115
+   },
+   "typical": {
+    "weapon": "Deadly Fin",
+    "attack": "Savage Blow",
+    "dmg_per_s": 3209,
+    "accuracy": 110,
+    "can_wear": false
+   }
+  },
+  {
+   "level": 100,
+   "guide": {
+    "weapon": "Kandine",
+    "attack": "Savage Blow",
+    "dmg_per_s": 5487,
+    "accuracy": 166
+   },
+   "typical": {
+    "weapon": "Kandine",
+    "attack": "Savage Blow",
+    "dmg_per_s": 5665,
+    "accuracy": 160,
+    "can_wear": false
+   }
+  }
+ ],
+ "sindit_switch_table": [
+  {
+   "level": 30,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 661,
+    "exp_hour": 53951
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 594,
+    "exp_hour": 49025,
+    "weapon": "Reef Claw"
+   },
+   "no_reset_dagger": {
+    "attack": "Regular attack",
+    "dmg_per_s": 154,
+    "exp_hour": 29692,
+    "weapon": "Reef Claw"
+   }
+  },
+  {
+   "level": 31,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 679,
+    "exp_hour": 56611
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 632,
+    "exp_hour": 49025,
+    "weapon": "Reef Claw"
+   },
+   "no_reset_dagger": {
+    "attack": "Regular attack",
+    "dmg_per_s": 162,
+    "exp_hour": 29692,
+    "weapon": "Reef Claw"
+   }
+  },
+  {
+   "level": 32,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 697,
+    "exp_hour": 56611
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 804,
+    "exp_hour": 55730,
+    "weapon": "Reef Claw"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 525,
+    "exp_hour": 49025,
+    "weapon": "Reef Claw"
+   }
+  },
+  {
+   "level": 33,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 714,
+    "exp_hour": 61607
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 853,
+    "exp_hour": 55730,
+    "weapon": "Reef Claw"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 560,
+    "exp_hour": 49025,
+    "weapon": "Reef Claw"
+   }
+  },
+  {
+   "level": 34,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 732,
+    "exp_hour": 63733
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 934,
+    "exp_hour": 67264,
+    "weapon": "Reef Claw"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 597,
+    "exp_hour": 60711,
+    "weapon": "Reef Claw"
+   }
+  },
+  {
+   "level": 35,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 750,
+    "exp_hour": 62577
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1085,
+    "exp_hour": 82997,
+    "weapon": "Halfmoon Zamadar"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 707,
+    "exp_hour": 62577,
+    "weapon": "Halfmoon Zamadar"
+   }
+  },
+  {
+   "level": 36,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 767,
+    "exp_hour": 63464
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1181,
+    "exp_hour": 83861,
+    "weapon": "Halfmoon Zamadar"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 805,
+    "exp_hour": 63464,
+    "weapon": "Halfmoon Zamadar"
+   }
+  },
+  {
+   "level": 37,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 785,
+    "exp_hour": 64205
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1245,
+    "exp_hour": 84577,
+    "weapon": "Halfmoon Zamadar"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 857,
+    "exp_hour": 64205,
+    "weapon": "Halfmoon Zamadar"
+   }
+  },
+  {
+   "level": 38,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 803,
+    "exp_hour": 64205
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1272,
+    "exp_hour": 84577,
+    "weapon": "Halfmoon Zamadar"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 910,
+    "exp_hour": 78006,
+    "weapon": "Halfmoon Zamadar"
+   }
+  },
+  {
+   "level": 39,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 821,
+    "exp_hour": 64205
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1298,
+    "exp_hour": 84577,
+    "weapon": "Halfmoon Zamadar"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1029,
+    "exp_hour": 78006,
+    "weapon": "Halfmoon Zamadar"
+   }
+  },
+  {
+   "level": 40,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 838,
+    "exp_hour": 64205
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1446,
+    "exp_hour": 86397,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1235,
+    "exp_hour": 81159,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 41,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 856,
+    "exp_hour": 64205
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1475,
+    "exp_hour": 86397,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1353,
+    "exp_hour": 81159,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 42,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 874,
+    "exp_hour": 64205
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1504,
+    "exp_hour": 86397,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1431,
+    "exp_hour": 81159,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 43,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 891,
+    "exp_hour": 78006
+   },
+   "reset_dagger": {
+    "attack": "Double Stab",
+    "dmg_per_s": 1533,
+    "exp_hour": 86397,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1560,
+    "exp_hour": 81159,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 44,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 909,
+    "exp_hour": 78006
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1669,
+    "exp_hour": 86397,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1669,
+    "exp_hour": 81159,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 45,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 927,
+    "exp_hour": 78006
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1776,
+    "exp_hour": 86397,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1776,
+    "exp_hour": 81159,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 46,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 944,
+    "exp_hour": 78006
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1887,
+    "exp_hour": 104571,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 1887,
+    "exp_hour": 104571,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 47,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 962,
+    "exp_hour": 78006
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2001,
+    "exp_hour": 106836,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2001,
+    "exp_hour": 106836,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 48,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 980,
+    "exp_hour": 78060
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2020,
+    "exp_hour": 110621,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2020,
+    "exp_hour": 110060,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 49,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 997,
+    "exp_hour": 81780
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2040,
+    "exp_hour": 112882,
+    "weapon": "Korean Fan"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2040,
+    "exp_hour": 112298,
+    "weapon": "Korean Fan"
+   }
+  },
+  {
+   "level": 50,
+   "claw": {
+    "attack": "Lucky Seven",
+    "dmg_per_s": 1015,
+    "exp_hour": 84696
+   },
+   "reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2334,
+    "exp_hour": 127670,
+    "weapon": "Shinkita"
+   },
+   "no_reset_dagger": {
+    "attack": "Savage Blow",
+    "dmg_per_s": 2334,
+    "exp_hour": 126677,
+    "weapon": "Shinkita"
+   }
+  }
+ ],
+ "sindit_compare": [
+  {
+   "build": "Sindit (this guide)",
+   "main_attack": "Lucky Seven, Double Stab, Savage Blow",
+   "dmg_per_s": {
+    "40": 1446,
+    "60": 3091,
+    "100": 5487
+   },
+   "best_at": "ranged start, cheap gear",
+   "weak": "needs a reset at 35"
+  },
+  {
+   "build": "Sindit, no reset",
+   "main_attack": "Lucky Seven to 39, Savage Blow from 40",
+   "dmg_per_s": {
+    "40": 1235,
+    "60": 3091,
+    "100": 5487
+   },
+   "best_at": "no Cash Shop",
+   "weak": "17% less damage at 40, 5 weaker levels 35 to 39"
+  },
+  {
+   "build": "Pure Bandit (dagger from 10)",
+   "main_attack": "Double Stab, Savage Blow",
+   "dmg_per_s": {
+    "40": 1045,
+    "60": 3209,
+    "100": 5665
+   },
+   "best_at": "no reset",
+   "weak": "melee from 10",
+   "note": "training page Typical build"
+  },
+  {
+   "build": "Assassin (claw)",
+   "main_attack": "Lucky Seven, Drain",
+   "dmg_per_s": {
+    "40": 1366,
+    "60": 2751,
+    "100": 4680
+   },
+   "best_at": "range all the way",
+   "weak": "stars cost: Kumbi to Steely",
+   "note": "training page Typical build; Typical claws need more DEX than it has"
+  },
+  {
+   "build": "Dexless Bandit",
+   "main_attack": "Savage Blow",
+   "dmg_per_s": {
+    "40": 1054,
+    "60": 3292,
+    "100": 5759
+   },
+   "best_at": "highest LUK",
+   "weak": "misses; can't wear DEX daggers",
+   "note": "training page Typical build"
+  },
+  {
+   "build": "STR Bandit",
+   "main_attack": "Savage Blow with STR daggers",
+   "dmg_per_s": null,
+   "best_at": "faster daggers (Bazlud, Sai)",
+   "weak": "not in the engine yet",
+   "note": "waits for Adam's review; see str-bandit-engine.md"
+  }
+ ],
+ "spearman_spear_compare": [
+  {
+   "build": "Spearman, spear",
+   "dmg_per_s": {
+    "40": 1079,
+    "60": 2071,
+    "100": 3618
+   },
+   "best_at": "armored monsters, cheaper weapons",
+   "weak": "less damage on soft monsters"
+  },
+  {
+   "build": "Spearman, polearm",
+   "dmg_per_s": {
+    "40": 1186,
+    "60": 2157,
+    "100": 3898
+   },
+   "best_at": "most damage per hit",
+   "weak": "slowest weapons, pricier at 50"
+  },
+  {
+   "build": "Dexless spearman",
+   "dmg_per_s": {
+    "40": 1163,
+    "60": 2253,
+    "100": 3851
+   },
+   "best_at": "raw damage",
+   "weak": "can't wear level 30+ spears or polearms (DEX needs)",
+   "note": "training page Typical build; its weapon needs DEX it doesn't have"
+  }
+ ],
+ "spearman_spear_typical_vs_guide": [
+  {
+   "level": 30,
+   "guide": {
+    "weapon": "Forked Spear",
+    "attack": "Power Strike",
+    "dmg_per_s": 478,
+    "accuracy": 69
+   },
+   "typical": {
+    "weapon": "Forked Spear",
+    "attack": "Power Strike",
+    "dmg_per_s": 478,
+    "accuracy": 69,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 40,
+   "guide": {
+    "weapon": "Zeco",
+    "attack": "Power Strike",
+    "dmg_per_s": 1079,
+    "accuracy": 82
+   },
+   "typical": {
+    "weapon": "Zeco",
+    "attack": "Power Strike",
+    "dmg_per_s": 1079,
+    "accuracy": 82,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 50,
+   "guide": {
+    "weapon": "Serpent's Tongue",
+    "attack": "Power Strike",
+    "dmg_per_s": 1503,
+    "accuracy": 94
+   },
+   "typical": {
+    "weapon": "Serpent's Tongue",
+    "attack": "Power Strike",
+    "dmg_per_s": 1503,
+    "accuracy": 94,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 60,
+   "guide": {
+    "weapon": "Holy Spear",
+    "attack": "Power Strike",
+    "dmg_per_s": 2071,
+    "accuracy": 107
+   },
+   "typical": {
+    "weapon": "Holy Spear",
+    "attack": "Power Strike",
+    "dmg_per_s": 2071,
+    "accuracy": 107,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 100,
+   "guide": {
+    "weapon": "Redemption",
+    "attack": "Power Strike",
+    "dmg_per_s": 3618,
+    "accuracy": 144
+   },
+   "typical": {
+    "weapon": "Redemption",
+    "attack": "Power Strike",
+    "dmg_per_s": 3512,
+    "accuracy": 158,
+    "can_wear": true
+   }
+  }
+ ],
+ "spearman_polearm_compare": [
+  {
+   "build": "Spearman, spear",
+   "dmg_per_s": {
+    "40": 1079,
+    "60": 2071,
+    "100": 3618
+   },
+   "best_at": "armored monsters, cheaper weapons",
+   "weak": "less damage on soft monsters"
+  },
+  {
+   "build": "Spearman, polearm",
+   "dmg_per_s": {
+    "40": 1186,
+    "60": 2157,
+    "100": 3898
+   },
+   "best_at": "most damage per hit",
+   "weak": "slowest weapons, pricier at 50"
+  },
+  {
+   "build": "Dexless spearman",
+   "dmg_per_s": {
+    "40": 1163,
+    "60": 2253,
+    "100": 3851
+   },
+   "best_at": "raw damage",
+   "weak": "can't wear level 30+ spears or polearms (DEX needs)",
+   "note": "training page Typical build; its weapon needs DEX it doesn't have"
+  }
+ ],
+ "spearman_polearm_typical_vs_guide": [
+  {
+   "level": 30,
+   "guide": {
+    "weapon": "Mithril Pole Arm",
+    "attack": "Power Strike",
+    "dmg_per_s": 531,
+    "accuracy": 69
+   },
+   "typical": {
+    "weapon": "Mithril Pole Arm",
+    "attack": "Power Strike",
+    "dmg_per_s": 531,
+    "accuracy": 69,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 40,
+   "guide": {
+    "weapon": "Crescent Polearm",
+    "attack": "Power Strike",
+    "dmg_per_s": 1186,
+    "accuracy": 82
+   },
+   "typical": {
+    "weapon": "Crescent Polearm",
+    "attack": "Power Strike",
+    "dmg_per_s": 1186,
+    "accuracy": 82,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 50,
+   "guide": {
+    "weapon": "The Nine Dragons",
+    "attack": "Power Strike",
+    "dmg_per_s": 1636,
+    "accuracy": 94
+   },
+   "typical": {
+    "weapon": "The Nine Dragons",
+    "attack": "Power Strike",
+    "dmg_per_s": 1636,
+    "accuracy": 94,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 60,
+   "guide": {
+    "weapon": "Skylar",
+    "attack": "Power Strike",
+    "dmg_per_s": 2157,
+    "accuracy": 107
+   },
+   "typical": {
+    "weapon": "Skylar",
+    "attack": "Power Strike",
+    "dmg_per_s": 2157,
+    "accuracy": 107,
+    "can_wear": true
+   }
+  },
+  {
+   "level": 100,
+   "guide": {
+    "weapon": "The Gold Dragon",
+    "attack": "Power Strike",
+    "dmg_per_s": 3898,
+    "accuracy": 144
+   },
+   "typical": {
+    "weapon": "The Gold Dragon",
+    "attack": "Power Strike",
+    "dmg_per_s": 3765,
+    "accuracy": 158,
+    "can_wear": true
+   }
+  }
+ ]
+}

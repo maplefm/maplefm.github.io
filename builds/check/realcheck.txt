@@ -1,0 +1,15 @@
+OK   Lv35 Savage Blow 11, average a cast (5 hits)                   551                    real 539              +2.1% · assumed LUK 157, DEX 30 (Typical minus the DEX for the dagger); crits included
+OK   Lv35 Savage Blow 11, lowest a cast                             310                    real 314              -1.3% · no crit on the low end
+OK   Lv35 Savage Blow 11, highest a cast                            772                    real 763              +1.1% · non-crit top; a crit top would be 20% higher
+OK   Lv35 Lucky Seven, Meba + Wolbi, average a cast                 486                    real 474              +2.5% · same stat guess; the post says a level 35 claw, Dark Guardian assumed
+OK   Lv35 Lucky Seven, Meba + Wolbi, lowest                         352                    real 349              +0.9% · 
+OK   Lv35 Lucky Seven, Meba + Wolbi, highest                        610                    real 599              +1.8% · 
+OK   Lv35 Lucky Seven, Dark Guardian + Wolbi, average a cast        580                    real 567              +2.4% · same stat guess; the post says a level 35 claw, Dark Guardian assumed
+OK   Lv35 Lucky Seven, Dark Guardian + Wolbi, lowest                421                    real 417              +0.9% · 
+OK   Lv35 Lucky Seven, Dark Guardian + Wolbi, highest               728                    real 716              +1.7% · 
+OK   Lv52 Power Strike top / range top (skill 260%)                 260                    real 260              0% · pure game-file check: skill % times the stat window range
+OK   Lv52 Power Strike low / range low                              260                    real 260              0% · 
+OK   Lv52 Slash Blast top / range top (130%)                        130                    real 130              0% · 
+OK   Lv52 Final Attack top / range top (350%)                       350                    real 350              0% · 
+fit  Lv52 polearm stat window low/high ratio 0.413: STR that fits   {"0.7":[233,242]}      real STR not posted    · Typical level 52 STR is 220 base plus gear: the 0.7 constant fits 233 to 242 STR; the 0.8 constant fits no STR from 150 to 320
+fit  Lv52 bandit stat window 216 to 417 (top stab 2.0, low swing 1.0) {"0.7":[234,73]}       real LUK, STR, DEX not posted  · only the 0.7 constant fits (first fit shown as [LUK, STR+DEX]); 0.8 fits no mix with STR+DEX of 29 or more

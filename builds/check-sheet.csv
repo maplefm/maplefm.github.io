@@ -1,0 +1,571 @@
+build,section,item,value,source,status,note
+sindit,gear,Garnier id,1472000,game files MCW 1.2,confirmed,
+sindit,gear,"Garnier level, attack, speed","10, 10, 5",game files MCW 1.2,confirmed,
+sindit,gear,Garnier needs,25 LUK,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Garnier typical price,"3,500","live summary-public.json, basis old",live data,12 seen
+sindit,gear,Steel Titans id,1472001,game files MCW 1.2,confirmed,
+sindit,gear,"Steel Titans level, attack, speed","15, 13, 4",game files MCW 1.2,confirmed,
+sindit,gear,Steel Titans needs,"15 DEX, 35 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Steel Titans typical price,"6,500","live summary-public.json, basis ask",live data,5 seen
+sindit,gear,Bronze Igor id,1472004,game files MCW 1.2,confirmed,
+sindit,gear,"Bronze Igor level, attack, speed","20, 16, 4",game files MCW 1.2,confirmed,
+sindit,gear,Bronze Igor needs,"20 DEX, 45 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Bronze Igor typical price,"5,999","live summary-public.json, basis old",live data,6 seen
+sindit,gear,Meba id,1472007,game files MCW 1.2,confirmed,
+sindit,gear,"Meba level, attack, speed","25, 19, 3",game files MCW 1.2,confirmed,
+sindit,gear,Meba needs,"25 DEX, 55 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Meba typical price,"8,444","live summary-public.json, basis clean",live data,486 seen
+sindit,gear,Subi Throwing Stars id,2070000,game files MCW 1.2,confirmed,
+sindit,gear,"Subi Throwing Stars level, attack, speed","10, 15, None",game files MCW 1.2,confirmed,
+sindit,gear,Subi Throwing Stars needs,level only,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Subi Throwing Stars typical price,499,"live summary-public.json, basis ask",live data,19 seen
+sindit,gear,Wolbi Throwing Stars id,2070001,game files MCW 1.2,confirmed,
+sindit,gear,"Wolbi Throwing Stars level, attack, speed","10, 17, None",game files MCW 1.2,confirmed,
+sindit,gear,Wolbi Throwing Stars needs,level only,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Wolbi Throwing Stars typical price,"1,300","live summary-public.json, basis asks",live data,1285 seen
+sindit,gear,Mithril Guards id,1472009,game files MCW 1.2,confirmed,
+sindit,gear,"Mithril Guards level, attack, speed","30, 23, 4",game files MCW 1.2,confirmed,
+sindit,gear,Mithril Guards needs,"30 DEX, 65 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Mithril Guards typical price,22K,"live summary-public.json, basis 3d",live data,82 seen
+sindit,gear,Halfmoon Zamadar id,1332011,game files MCW 1.2,confirmed,
+sindit,gear,"Halfmoon Zamadar level, attack, speed","35, 53, 4",game files MCW 1.2,confirmed,
+sindit,gear,Halfmoon Zamadar needs,"30 DEX, 70 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Halfmoon Zamadar typical price,"9,988","live summary-public.json, basis clean",live data,230 seen
+sindit,gear,Korean Fan id,1332013,game files MCW 1.2,confirmed,
+sindit,gear,"Korean Fan level, attack, speed","40, 55, 3",game files MCW 1.2,confirmed,
+sindit,gear,Korean Fan needs,70 LUK,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Korean Fan typical price,67K,"live summary-public.json, basis 24h",live data,663 seen
+sindit,gear,Shinkita id,1332015,game files MCW 1.2,confirmed,
+sindit,gear,"Shinkita level, attack, speed","50, 68, 4",game files MCW 1.2,confirmed,
+sindit,gear,Shinkita needs,"45 DEX, 100 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Shinkita typical price,322K,"live summary-public.json, basis 3d",live data,184 seen
+sindit,gear,Deadly Fin id,1332018,game files MCW 1.2,confirmed,
+sindit,gear,"Deadly Fin level, attack, speed","60, 78, 4",game files MCW 1.2,confirmed,
+sindit,gear,Deadly Fin needs,"55 DEX, 120 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Deadly Fin typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+sindit,gear,Kandine id,1332020,game files MCW 1.2,confirmed,
+sindit,gear,"Kandine level, attack, speed","70, 88, 4",game files MCW 1.2,confirmed,
+sindit,gear,Kandine needs,"65 DEX, 140 LUK",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+sindit,gear,Kandine typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+sindit,skills,Lucky Seven 20 by level 17,17,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+sindit,skills,Nimble Body 15 by level 22,22,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+sindit,skills,Keen Eyes 15 by level 27,27,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+sindit,skills,Disorder 3 by level 28,28,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+sindit,skills,Dark Sight 8 by level 30,30,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+sindit,skills,Haste 13 by level 34,34,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (before reset)
+sindit,skills,Double Stab 20 by level 35,35,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job (after reset)
+sindit,skills,Nimble Body 15 by level 35,35,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job (after reset)
+sindit,skills,Disorder 6 by level 35,35,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job (after reset)
+sindit,skills,Dark Sight 20 by level 35,35,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job (after reset)
+sindit,skills,Dagger Mastery 5 by level 35,35,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Dagger Booster 1 by level 35,35,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Dagger Mastery 20 by level 37,37,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Savage Blow 21 by level 44,44,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Savage Blow 30 by level 47,47,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Dagger Booster 20 by level 53,53,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Haste 5 by level 55,55,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Steal 30 by level 65,65,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Haste 20 by level 70,70,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,skills,Nimble Recovery 20 by level 77,77,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job (after reset)
+sindit,stats,level 10,"{""STR"": 4, ""DEX"": 25, ""LUK"": 37}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 20,"{""STR"": 4, ""DEX"": 25, ""LUK"": 87}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 30,"{""STR"": 4, ""DEX"": 30, ""LUK"": 132}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 35,"{""STR"": 4, ""DEX"": 30, ""LUK"": 157}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 40,"{""STR"": 4, ""DEX"": 30, ""LUK"": 182}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 46,"{""STR"": 4, ""DEX"": 30, ""LUK"": 212}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 50,"{""STR"": 4, ""DEX"": 45, ""LUK"": 217}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 60,"{""STR"": 4, ""DEX"": 55, ""LUK"": 257}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 70,"{""STR"": 4, ""DEX"": 65, ""LUK"": 297}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 80,"{""STR"": 4, ""DEX"": 65, ""LUK"": 347}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 90,"{""STR"": 4, ""DEX"": 65, ""LUK"": 397}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,stats,level 100,"{""STR"": 4, ""DEX"": 65, ""LUK"": 447}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+sindit,why,"Reset at 35, not sooner",with a level 30 dagger the gain is only 15 to 28% (levels 32 to 34); Halfmoon Zamadar at 35 makes it 45%,see check-sheet.md,model (fits real hits within 2.5%),
+sindit,why,Double Stab before Savage Blow,"Double Stab 20 does more until Savage Blow has 21 points (6 hits), which is level 44",see check-sheet.md,game files,
+sindit,why,Shop gear to 50,every weapon here is under 70K mesos except Shinkita,see check-sheet.md,game files,
+sindit,why,Korean Fan at 40,"speed 3, no DEX need, within 3% of Gephart (35 DEX)",see check-sheet.md,model (fits real hits within 2.5%),
+sindit,why,Mastery first,Dagger Mastery 20 is mastery 10 in the game files; your lowest hit at 37 is 2.7x higher,see check-sheet.md,model (fits real hits within 2.5%),
+spearman_spear,gear,Spear id,1432000,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Spear level, attack, speed","10, 32, 7",game files MCW 1.2,confirmed,
+spearman_spear,gear,Spear needs,25 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Spear typical price,"3,000","live summary-public.json, basis old",live data,14 seen
+spearman_spear,gear,Fork on a Stick id,1432001,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Fork on a Stick level, attack, speed","15, 37, 7",game files MCW 1.2,confirmed,
+spearman_spear,gear,Fork on a Stick needs,25 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Fork on a Stick typical price,"3,166","live summary-public.json, basis 3d",live data,115 seen
+spearman_spear,gear,Fish Spear id,1432002,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Fish Spear level, attack, speed","20, 39, 6",game files MCW 1.2,confirmed,
+spearman_spear,gear,Fish Spear needs,35 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Fish Spear typical price,12K,"live summary-public.json, basis 3d",live data,80 seen
+spearman_spear,gear,Janitor's Mop id,1442003,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Janitor's Mop level, attack, speed","25, 50, 8",game files MCW 1.2,confirmed,
+spearman_spear,gear,Janitor's Mop needs,45 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Janitor's Mop typical price,30K,"live summary-public.json, basis clean",live data,17 seen
+spearman_spear,gear,Forked Spear id,1432003,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Forked Spear level, attack, speed","30, 52, 7",game files MCW 1.2,confirmed,
+spearman_spear,gear,Forked Spear needs,"65 STR, 30 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Forked Spear typical price,"9,888","live summary-public.json, basis 3d",live data,224 seen
+spearman_spear,gear,Nakamaki id,1432004,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Nakamaki level, attack, speed","35, 57, 7",game files MCW 1.2,confirmed,
+spearman_spear,gear,Nakamaki needs,"75 STR, 35 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Nakamaki typical price,20K,"live summary-public.json, basis 3d",live data,306 seen
+spearman_spear,gear,Zeco id,1432005,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Zeco level, attack, speed","40, 59, 6",game files MCW 1.2,confirmed,
+spearman_spear,gear,Zeco needs,"85 STR, 40 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Zeco typical price,22K,"live summary-public.json, basis 3d",live data,186 seen
+spearman_spear,gear,Bamboo Spear id,1432009,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Bamboo Spear level, attack, speed","45, 64, 6",game files MCW 1.2,confirmed,
+spearman_spear,gear,Bamboo Spear needs,85 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Bamboo Spear typical price,39K,"live summary-public.json, basis 3d",live data,142 seen
+spearman_spear,gear,Serpent's Tongue id,1432006,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Serpent's Tongue level, attack, speed","50, 69, 6",game files MCW 1.2,confirmed,
+spearman_spear,gear,Serpent's Tongue needs,"105 STR, 50 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Serpent's Tongue typical price,125K,"live summary-public.json, basis 3d",live data,109 seen
+spearman_spear,gear,Holy Spear id,1432007,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Holy Spear level, attack, speed","60, 82, 6",game files MCW 1.2,confirmed,
+spearman_spear,gear,Holy Spear needs,"125 STR, 60 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Holy Spear typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+spearman_spear,gear,Redemption id,1432008,game files MCW 1.2,confirmed,
+spearman_spear,gear,"Redemption level, attack, speed","70, 95, 7",game files MCW 1.2,confirmed,
+spearman_spear,gear,Redemption needs,"145 STR, 70 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_spear,gear,Redemption typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+spearman_spear,skills,Power Strike 20 by level 17,17,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_spear,skills,Slash Blast 20 by level 23,23,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_spear,skills,Improved HP Recovery 3 by level 24,24,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_spear,skills,Max HP Increase 1 by level 25,25,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_spear,skills,Precise Strikes 15 by level 30,30,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_spear,skills,Improved HP Recovery 5 by level 30,30,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_spear,skills,Spear Mastery 5 by level 32,32,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Spear Booster 1 by level 32,32,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Rush 1 by level 32,32,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Spear Mastery 20 by level 37,37,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Final Attack: Spear 30 by level 47,47,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Spear Booster 20 by level 54,54,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Rush 20 by level 60,60,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,skills,Iron Will 30 by level 70,70,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_spear,stats,level 10,"{""STR"": 58, ""DEX"": 4}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 20,"{""STR"": 108, ""DEX"": 4}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 30,"{""STR"": 132, ""DEX"": 30}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 35,"{""STR"": 152, ""DEX"": 35}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 40,"{""STR"": 172, ""DEX"": 40}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 45,"{""STR"": 197, ""DEX"": 40}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 50,"{""STR"": 212, ""DEX"": 50}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 60,"{""STR"": 252, ""DEX"": 60}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 70,"{""STR"": 292, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 80,"{""STR"": 342, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 90,"{""STR"": 392, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,stats,level 100,"{""STR"": 442, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_spear,why,Polearm or spear,"polearm swings at 3.5x and stabs at 1.5x, spear the reverse; most warrior hits are swings",see check-sheet.md,game files,
+spearman_spear,why,Precise Strikes 15,+20 accuracy and +5% crit (game files); missing is the warrior's weak spot from 30 to 40,see check-sheet.md,model (fits real hits within 2.5%),
+spearman_spear,why,DEX only for weapons,each spear and polearm from 30 needs DEX equal to its level; Bamboo Spear and the Mops need none,see check-sheet.md,game files,
+spearman_spear,why,Booster at 1 point,the game files give the full 2-step speed up at level 1,see check-sheet.md,game files,
+spearman_spear,why,Final Attack 30 before Booster 20,350% hit in the game files vs 260% Power Strike,see check-sheet.md,model (fits real hits within 2.5%),
+spearman_spear,why,Spear Mastery,up to 20% of hits ignore weapon defense: best on armored monsters,see check-sheet.md,model (fits real hits within 2.5%),
+spearman_polearm,gear,Pole Arm id,1442000,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Pole Arm level, attack, speed","10, 35, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Pole Arm needs,15 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Pole Arm typical price,"2,750","live summary-public.json, basis old",live data,13 seen
+spearman_polearm,gear,Iron Ball id,1442001,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Iron Ball level, attack, speed","15, 40, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Iron Ball needs,"35 STR, 15 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Iron Ball typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+spearman_polearm,gear,Studded Polearm id,1442002,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Studded Polearm level, attack, speed","20, 42, 7",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Studded Polearm needs,"45 STR, 20 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Studded Polearm typical price,"6,490","live summary-public.json, basis 3d",live data,19 seen
+spearman_polearm,gear,Janitor's Mop id,1442003,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Janitor's Mop level, attack, speed","25, 50, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Janitor's Mop needs,45 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Janitor's Mop typical price,30K,"live summary-public.json, basis clean",live data,17 seen
+spearman_polearm,gear,Mithril Pole Arm id,1442004,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Mithril Pole Arm level, attack, speed","30, 55, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Mithril Pole Arm needs,"65 STR, 30 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Mithril Pole Arm typical price,"9,999","live summary-public.json, basis 3d",live data,362 seen
+spearman_polearm,gear,Axe Pole Arm id,1442005,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Axe Pole Arm level, attack, speed","35, 60, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Axe Pole Arm needs,"75 STR, 35 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Axe Pole Arm typical price,13K,"live summary-public.json, basis 3d",live data,481 seen
+spearman_polearm,gear,Crescent Polearm id,1442006,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Crescent Polearm level, attack, speed","40, 65, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Crescent Polearm needs,"85 STR, 40 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Crescent Polearm typical price,22K,"live summary-public.json, basis 3d",live data,180 seen
+spearman_polearm,gear,Yellow Mop id,1442010,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Yellow Mop level, attack, speed","45, 67, 7",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Yellow Mop needs,85 STR,game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Yellow Mop typical price,82K,"live summary-public.json, basis ask",live data,27 seen
+spearman_polearm,gear,The Nine Dragons id,1442007,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"The Nine Dragons level, attack, speed","50, 75, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,The Nine Dragons needs,"105 STR, 50 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,The Nine Dragons typical price,494K,"live summary-public.json, basis 3d",live data,73 seen
+spearman_polearm,gear,Skylar id,1442008,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"Skylar level, attack, speed","60, 85, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,Skylar needs,"125 STR, 60 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,Skylar typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+spearman_polearm,gear,The Gold Dragon id,1442009,game files MCW 1.2,confirmed,
+spearman_polearm,gear,"The Gold Dragon level, attack, speed","70, 95, 8",game files MCW 1.2,confirmed,
+spearman_polearm,gear,The Gold Dragon needs,"145 STR, 70 DEX",game files MCW 1.2 reqSTR/DEX/LUK,confirmed,
+spearman_polearm,gear,The Gold Dragon typical price,no live price yet,"live summary-public.json, basis None",no price,0 seen
+spearman_polearm,skills,Power Strike 20 by level 17,17,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_polearm,skills,Slash Blast 20 by level 23,23,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_polearm,skills,Improved HP Recovery 3 by level 24,24,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_polearm,skills,Max HP Increase 1 by level 25,25,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_polearm,skills,Precise Strikes 15 by level 30,30,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_polearm,skills,Improved HP Recovery 5 by level 30,30,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,1st job
+spearman_polearm,skills,Polearm Mastery 5 by level 32,32,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Polearm Booster 1 by level 32,32,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Rush 1 by level 32,32,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Polearm Mastery 20 by level 37,37,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Final Attack: Polearm 30 by level 47,47,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Polearm Booster 20 by level 54,54,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Rush 20 by level 60,60,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,skills,Iron Will 30 by level 70,70,"SP 1 at 10, 3 a level; 1 at 30, 3 a level (players: 61 and 121 SP), skill max from game files MCW 1.2",supported,2nd job
+spearman_polearm,stats,level 10,"{""STR"": 58, ""DEX"": 4}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 20,"{""STR"": 92, ""DEX"": 20}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 30,"{""STR"": 132, ""DEX"": 30}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 35,"{""STR"": 152, ""DEX"": 35}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 40,"{""STR"": 172, ""DEX"": 40}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 45,"{""STR"": 197, ""DEX"": 40}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 50,"{""STR"": 212, ""DEX"": 50}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 60,"{""STR"": 252, ""DEX"": 60}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 70,"{""STR"": 292, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 80,"{""STR"": 342, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 90,"{""STR"": 392, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,stats,level 100,"{""STR"": 442, ""DEX"": 70}",25 total at level 1 plus 5 AP a level; DEX = weapon need (game files MCW 1.2),DEX confirmed; totals unconfirmed,starting total 25 is the engine's assumption; a different roll shifts the main stat a few points
+spearman_polearm,why,Polearm or spear,"polearm swings at 3.5x and stabs at 1.5x, spear the reverse; most warrior hits are swings",see check-sheet.md,game files,
+spearman_polearm,why,Precise Strikes 15,+20 accuracy and +5% crit (game files); missing is the warrior's weak spot from 30 to 40,see check-sheet.md,model (fits real hits within 2.5%),
+spearman_polearm,why,DEX only for weapons,each spear and polearm from 30 needs DEX equal to its level; Bamboo Spear and the Mops need none,see check-sheet.md,game files,
+spearman_polearm,why,Booster at 1 point,the game files give the full 2-step speed up at level 1,see check-sheet.md,game files,
+spearman_polearm,why,Final Attack 30 before Booster 20,350% hit in the game files vs 260% Power Strike,see check-sheet.md,model (fits real hits within 2.5%),
+spearman_polearm,why,Polearm swings at 3.5x,"60% of warrior attacks are swings, so the average hit is higher",see check-sheet.md,model (fits real hits within 2.5%),
+sindit,model only,accuracy at 10,33,engine F15,unconfirmed,
+sindit,model only,accuracy at 20,56,engine F15,unconfirmed,
+sindit,model only,accuracy at 30,73,engine F15,unconfirmed,
+sindit,model only,accuracy at 35,80,engine F15,unconfirmed,
+sindit,model only,accuracy at 40,86,engine F15,unconfirmed,
+sindit,model only,accuracy at 46,93,engine F15,unconfirmed,
+sindit,model only,accuracy at 50,101,engine F15,unconfirmed,
+sindit,model only,accuracy at 60,115,engine F15,unconfirmed,
+sindit,model only,accuracy at 70,129,engine F15,unconfirmed,
+sindit,model only,accuracy at 80,141,engine F15,unconfirmed,
+sindit,model only,accuracy at 90,154,engine F15,unconfirmed,
+sindit,model only,accuracy at 100,166,engine F15,unconfirmed,
+sindit,model only,"damage a second at 30 (Lucky Seven, Mithril Guards)",661,"engine F1 to F8, speed rows",supported,
+sindit,model only,hit on Stirge at 30,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+sindit,model only,hit on Jr. Necki at 30,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+sindit,model only,hit on Wild Boar at 30,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Evil Eye at 30,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Ligator at 30,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Fire Boar at 30,96%,"engine F15, F16",unconfirmed,kill 1.5 s
+sindit,model only,hit on Curse Eye at 30,80%,"engine F15, F16",unconfirmed,kill 2.7 s
+sindit,model only,hit on Jr. Wraith at 30,48%,"engine F15, F16",unconfirmed,kill 4.5 s
+sindit,model only,hit on Lupin at 30,12%,"engine F15, F16",unconfirmed,kill 23.2 s
+sindit,model only,hit on Lorang at 30,30%,"engine F15, F16",unconfirmed,kill 14.2 s
+sindit,model only,"damage a second at 35 (Double Stab, Halfmoon Zamadar)",1085,"engine F1 to F8, speed rows",supported,
+sindit,model only,hit on Stirge at 35,100%,"engine F15, F16",unconfirmed,kill 0.6 s
+sindit,model only,hit on Jr. Necki at 35,100%,"engine F15, F16",unconfirmed,kill 0.6 s
+sindit,model only,hit on Wild Boar at 35,100%,"engine F15, F16",unconfirmed,kill 0.6 s
+sindit,model only,hit on Evil Eye at 35,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Ligator at 35,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Fire Boar at 35,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Curse Eye at 35,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Jr. Wraith at 35,95%,"engine F15, F16",unconfirmed,kill 1.3 s
+sindit,model only,hit on Lupin at 35,65%,"engine F15, F16",unconfirmed,kill 2.8 s
+sindit,model only,hit on Lorang at 35,81%,"engine F15, F16",unconfirmed,kill 3 s
+sindit,model only,hit on Zombie Lupin at 35,23%,"engine F15, F16",unconfirmed,kill 10.3 s
+sindit,model only,"damage a second at 40 (Double Stab, Korean Fan)",1446,"engine F1 to F8, speed rows",supported,
+sindit,model only,hit on Wild Boar at 40,100%,"engine F15, F16",unconfirmed,kill 0.6 s
+sindit,model only,hit on Evil Eye at 40,100%,"engine F15, F16",unconfirmed,kill 0.6 s
+sindit,model only,hit on Ligator at 40,100%,"engine F15, F16",unconfirmed,kill 1.1 s
+sindit,model only,hit on Fire Boar at 40,100%,"engine F15, F16",unconfirmed,kill 1.1 s
+sindit,model only,hit on Curse Eye at 40,100%,"engine F15, F16",unconfirmed,kill 1.1 s
+sindit,model only,hit on Jr. Wraith at 40,100%,"engine F15, F16",unconfirmed,kill 1.1 s
+sindit,model only,hit on Lupin at 40,95%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Lorang at 40,100%,"engine F15, F16",unconfirmed,kill 1.7 s
+sindit,model only,hit on Zombie Lupin at 40,73%,"engine F15, F16",unconfirmed,kill 2.4 s
+sindit,model only,hit on Skeledog at 40,65%,"engine F15, F16",unconfirmed,kill 3.5 s
+sindit,model only,hit on Copper Drake at 40,51%,"engine F15, F16",unconfirmed,kill 4.4 s
+sindit,model only,hit on Wraith at 40,5%,"engine F15, F16",unconfirmed,kill 53.7 s
+sindit,model only,"damage a second at 50 (Savage Blow, Shinkita)",2334,"engine F1 to F8, speed rows",supported,
+sindit,model only,hit on Lupin at 50,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+sindit,model only,hit on Lorang at 50,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Zombie Lupin at 50,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Skeledog at 50,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Copper Drake at 50,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Wraith at 50,94%,"engine F15, F16",unconfirmed,kill 1.5 s
+sindit,model only,hit on Clang at 50,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Drake at 50,100%,"engine F15, F16",unconfirmed,kill 1.8 s
+sindit,model only,hit on Croco at 50,84%,"engine F15, F16",unconfirmed,kill 2.1 s
+sindit,model only,hit on Malady at 50,51%,"engine F15, F16",unconfirmed,kill 3.6 s
+sindit,model only,hit on Stone Golem at 50,63%,"engine F15, F16",unconfirmed,kill 5.7 s
+sindit,model only,hit on Skeleton Soldier at 50,32%,"engine F15, F16",unconfirmed,kill 9 s
+sindit,model only,hit on Dark Stone Golem at 50,44%,"engine F15, F16",unconfirmed,kill 8.1 s
+sindit,model only,"damage a second at 60 (Savage Blow, Deadly Fin)",3091,"engine F1 to F8, speed rows",supported,
+sindit,model only,hit on Copper Drake at 60,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Wraith at 60,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Clang at 60,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Drake at 60,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Croco at 60,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+sindit,model only,hit on Malady at 60,100%,"engine F15, F16",unconfirmed,kill 1.2 s
+sindit,model only,hit on Stone Golem at 60,100%,"engine F15, F16",unconfirmed,kill 2.2 s
+sindit,model only,hit on Skeleton Soldier at 60,100%,"engine F15, F16",unconfirmed,kill 1.8 s
+sindit,model only,hit on Dark Stone Golem at 60,100%,"engine F15, F16",unconfirmed,kill 2.2 s
+sindit,model only,hit on Red Drake at 60,100%,"engine F15, F16",unconfirmed,kill 2.2 s
+sindit,model only,hit on Wild Kargo at 60,81%,"engine F15, F16",unconfirmed,kill 3.6 s
+sindit,model only,hit on Officer Skeleton at 60,68%,"engine F15, F16",unconfirmed,kill 4.3 s
+sindit,model only,"damage a second at 100 (Savage Blow, Kandine)",5487,"engine F1 to F8, speed rows",supported,
+sindit,model only,"EXP an hour, The Forest of Wisdom (10 to 14)",13932,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Tree Dungeon, Forest Up North IV (10 to 14)",13555,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 1 (Area 1) (10 to 14)",13274,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 1 (Area 1) (15 to 19)",27097,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Northern Top of Construction Site (15 to 19)",24378,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Caution Falling Down (15 to 19)",23149,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, The Land of Wild Boar II (20 to 29)",42156,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Excavation Site III (20 to 29)",41484,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Ant Tunnel II (20 to 29)",38286,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, The Land of Wild Boar II (30 to 34)",53951,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, The Burnt Land III (30 to 34)",51599,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Excavation Site III (30 to 34)",51028,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 2 (Area 1) (35 to 46)",82997,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 1 (Area 2) (35 to 46)",69571,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, The Land of Wild Boar II (35 to 46)",65179,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Remains (Tomb) I (47 to 49)",106836,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 2 (Area 1) (47 to 49)",102696,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Hanging Gardens of Rot (47 to 49)",97894,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 2 (Area 2) (50 to 59)",127670,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Hot Sand (50 to 59)",125917,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Line 2 (Area 3) (50 to 59)",115114,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, The Forest of Evil II (60 to 64)",149858,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, The Forest of Evil I (60 to 64)",144564,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Hot Sand (60 to 64)",132185,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Camp 3 (65 to 74)",176537,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Camp 2 (65 to 74)",167212,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Camp 1 (65 to 74)",162183,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Remains (Cliff) (75 to 89)",179434,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Camp 3 (75 to 89)",176537,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Remains (Tomb) IV (75 to 89)",142743,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Sanctuary Entrance IV (90 to 100)",229528,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Camp 3 (90 to 100)",201971,engine map model,unconfirmed,
+sindit,model only,"EXP an hour, Remains (Cliff) (90 to 100)",199209,engine map model,unconfirmed,
+spearman_spear,model only,accuracy at 10,20,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 20,28,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 30,69,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 35,75,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 40,82,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 45,86,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 50,94,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 60,107,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 70,120,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 80,128,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 90,136,engine F15,unconfirmed,
+spearman_spear,model only,accuracy at 100,144,engine F15,unconfirmed,
+spearman_spear,model only,"damage a second at 30 (Power Strike, Forked Spear)",478,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_spear,model only,hit on Stirge at 30,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_spear,model only,hit on Jr. Necki at 30,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_spear,model only,hit on Wild Boar at 30,100%,"engine F15, F16",unconfirmed,kill 1.7 s
+spearman_spear,model only,hit on Evil Eye at 30,100%,"engine F15, F16",unconfirmed,kill 1.7 s
+spearman_spear,model only,hit on Ligator at 30,92%,"engine F15, F16",unconfirmed,kill 2.8 s
+spearman_spear,model only,hit on Fire Boar at 30,85%,"engine F15, F16",unconfirmed,kill 3 s
+spearman_spear,model only,hit on Curse Eye at 30,69%,"engine F15, F16",unconfirmed,kill 4.9 s
+spearman_spear,model only,hit on Jr. Wraith at 30,37%,"engine F15, F16",unconfirmed,kill 9.2 s
+spearman_spear,model only,hit on Lupin at 30,0%,"engine F15, F16",unconfirmed,kill 1253.3 s
+spearman_spear,model only,hit on Lorang at 30,19%,"engine F15, F16",unconfirmed,kill 31.6 s
+spearman_spear,model only,"damage a second at 35 (Power Strike, Nakamaki)",815,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_spear,model only,hit on Stirge at 35,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+spearman_spear,model only,hit on Jr. Necki at 35,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+spearman_spear,model only,hit on Wild Boar at 35,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+spearman_spear,model only,hit on Evil Eye at 35,100%,"engine F15, F16",unconfirmed,kill 1.5 s
+spearman_spear,model only,hit on Ligator at 35,100%,"engine F15, F16",unconfirmed,kill 1.5 s
+spearman_spear,model only,hit on Fire Boar at 35,100%,"engine F15, F16",unconfirmed,kill 1.5 s
+spearman_spear,model only,hit on Curse Eye at 35,100%,"engine F15, F16",unconfirmed,kill 1.5 s
+spearman_spear,model only,hit on Jr. Wraith at 35,82%,"engine F15, F16",unconfirmed,kill 2.7 s
+spearman_spear,model only,hit on Lupin at 35,52%,"engine F15, F16",unconfirmed,kill 4.3 s
+spearman_spear,model only,hit on Lorang at 35,68%,"engine F15, F16",unconfirmed,kill 4.3 s
+spearman_spear,model only,hit on Zombie Lupin at 35,10%,"engine F15, F16",unconfirmed,kill 30.1 s
+spearman_spear,model only,"damage a second at 40 (Power Strike, Zeco)",1079,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_spear,model only,hit on Wild Boar at 40,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+spearman_spear,model only,hit on Evil Eye at 40,100%,"engine F15, F16",unconfirmed,kill 0.7 s
+spearman_spear,model only,hit on Ligator at 40,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Fire Boar at 40,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Curse Eye at 40,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Jr. Wraith at 40,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Lupin at 40,85%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_spear,model only,hit on Lorang at 40,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Zombie Lupin at 40,63%,"engine F15, F16",unconfirmed,kill 3.3 s
+spearman_spear,model only,hit on Skeledog at 40,56%,"engine F15, F16",unconfirmed,kill 5 s
+spearman_spear,model only,hit on Copper Drake at 40,42%,"engine F15, F16",unconfirmed,kill 6.7 s
+spearman_spear,model only,hit on Wraith at 40,0%,"engine F15, F16",unconfirmed,kill None s
+spearman_spear,model only,"damage a second at 50 (Power Strike, Serpent's Tongue)",1503,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_spear,model only,hit on Lupin at 50,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Lorang at 50,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Zombie Lupin at 50,99%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Skeledog at 50,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Copper Drake at 50,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Wraith at 50,79%,"engine F15, F16",unconfirmed,kill 2.7 s
+spearman_spear,model only,hit on Clang at 50,92%,"engine F15, F16",unconfirmed,kill 2.3 s
+spearman_spear,model only,hit on Drake at 50,100%,"engine F15, F16",unconfirmed,kill 2.8 s
+spearman_spear,model only,hit on Croco at 50,70%,"engine F15, F16",unconfirmed,kill 4 s
+spearman_spear,model only,hit on Malady at 50,36%,"engine F15, F16",unconfirmed,kill 7.7 s
+spearman_spear,model only,hit on Stone Golem at 50,49%,"engine F15, F16",unconfirmed,kill 10 s
+spearman_spear,model only,hit on Skeleton Soldier at 50,18%,"engine F15, F16",unconfirmed,kill 23.7 s
+spearman_spear,model only,hit on Dark Stone Golem at 50,30%,"engine F15, F16",unconfirmed,kill 18.5 s
+spearman_spear,model only,"damage a second at 60 (Power Strike, Holy Spear)",2071,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_spear,model only,hit on Copper Drake at 60,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Wraith at 60,100%,"engine F15, F16",unconfirmed,kill 1.4 s
+spearman_spear,model only,hit on Clang at 60,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Drake at 60,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Croco at 60,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Malady at 60,100%,"engine F15, F16",unconfirmed,kill 2.1 s
+spearman_spear,model only,hit on Stone Golem at 60,100%,"engine F15, F16",unconfirmed,kill 3.5 s
+spearman_spear,model only,hit on Skeleton Soldier at 60,94%,"engine F15, F16",unconfirmed,kill 2.2 s
+spearman_spear,model only,hit on Dark Stone Golem at 60,100%,"engine F15, F16",unconfirmed,kill 2.8 s
+spearman_spear,model only,hit on Red Drake at 60,87%,"engine F15, F16",unconfirmed,kill 4 s
+spearman_spear,model only,hit on Wild Kargo at 60,66%,"engine F15, F16",unconfirmed,kill 5.3 s
+spearman_spear,model only,hit on Officer Skeleton at 60,53%,"engine F15, F16",unconfirmed,kill 6.6 s
+spearman_spear,model only,"damage a second at 100 (Power Strike, Redemption)",3618,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_spear,model only,"EXP an hour, An Empty House (10 to 14)",12943,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Mushroom Garden (Victoria Island) (10 to 14)",12157,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, The Rain-Forest East of Henesys (10 to 14)",10919,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Tree Dungeon, Forest Up North IV (15 to 19)",18622,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Dungeon, Southern Forest III (15 to 19)",16583,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, An Empty House (15 to 19)",16236,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Line 1 (Area 1) (20 to 24)",24702,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Tree Dungeon, Forest Up North IV (20 to 24)",20498,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Dungeon, Southern Forest III (20 to 24)",17971,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Tree Dungeon, Forest Up North III (25 to 29)",29140,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Dungeon, Southern Forest IV (25 to 29)",27498,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, West Rocky Mountain III (25 to 29)",26840,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, The Land of Wild Boar II (30 to 34)",45406,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Dark Cave (30 to 34)",41932,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, The Burnt Land III (30 to 34)",40336,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, The Land of Wild Boar II (35 to 46)",61290,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Line 2 (Area 1) (35 to 46)",56788,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Tree Dungeon, Forest Up North VIII (35 to 46)",54051,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Remains (Tomb) I (47 to 49)",88540,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Hanging Gardens of Rot (47 to 49)",83000,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Line 2 (Area 1) (47 to 49)",79237,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Hot Sand (50 to 59)",103764,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Clang and Lorang (50 to 59)",94928,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Remains (Tomb) I (50 to 59)",92099,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, The Forest of Evil II (60 to 64)",120159,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Line 2 (Area 3) (60 to 64)",119608,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Hot Sand (60 to 64)",119117,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Camp 1 (65 to 74)",133748,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Camp 2 (65 to 74)",131906,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Camp 3 (65 to 74)",130840,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Camp 3 (75 to 89)",150632,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Remains (Cliff) (75 to 89)",134320,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Remains (Tomb) IV (75 to 89)",118625,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Camp 3 (90 to 100)",174681,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Camp 2 (90 to 100)",165604,engine map model,unconfirmed,
+spearman_spear,model only,"EXP an hour, Remains (Cliff) (90 to 100)",164008,engine map model,unconfirmed,
+spearman_polearm,model only,accuracy at 10,20,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 20,36,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 30,69,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 35,75,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 40,82,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 45,86,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 50,94,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 60,107,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 70,120,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 80,128,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 90,136,engine F15,unconfirmed,
+spearman_polearm,model only,accuracy at 100,144,engine F15,unconfirmed,
+spearman_polearm,model only,"damage a second at 30 (Power Strike, Mithril Pole Arm)",531,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_polearm,model only,hit on Stirge at 30,100%,"engine F15, F16",unconfirmed,kill 0.9 s
+spearman_polearm,model only,hit on Jr. Necki at 30,100%,"engine F15, F16",unconfirmed,kill 0.9 s
+spearman_polearm,model only,hit on Wild Boar at 30,100%,"engine F15, F16",unconfirmed,kill 1.8 s
+spearman_polearm,model only,hit on Evil Eye at 30,100%,"engine F15, F16",unconfirmed,kill 1.8 s
+spearman_polearm,model only,hit on Ligator at 30,92%,"engine F15, F16",unconfirmed,kill 2.9 s
+spearman_polearm,model only,hit on Fire Boar at 30,85%,"engine F15, F16",unconfirmed,kill 3.1 s
+spearman_polearm,model only,hit on Curse Eye at 30,69%,"engine F15, F16",unconfirmed,kill 3.9 s
+spearman_polearm,model only,hit on Jr. Wraith at 30,37%,"engine F15, F16",unconfirmed,kill 7.3 s
+spearman_polearm,model only,hit on Lupin at 30,0%,"engine F15, F16",unconfirmed,kill 1052.4 s
+spearman_polearm,model only,hit on Lorang at 30,19%,"engine F15, F16",unconfirmed,kill 28.5 s
+spearman_polearm,model only,"damage a second at 35 (Power Strike, Axe Pole Arm)",901,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_polearm,model only,hit on Stirge at 35,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Jr. Necki at 35,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Wild Boar at 35,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Evil Eye at 35,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Ligator at 35,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Fire Boar at 35,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Curse Eye at 35,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Jr. Wraith at 35,82%,"engine F15, F16",unconfirmed,kill 1.9 s
+spearman_polearm,model only,hit on Lupin at 35,52%,"engine F15, F16",unconfirmed,kill 4.5 s
+spearman_polearm,model only,hit on Lorang at 35,68%,"engine F15, F16",unconfirmed,kill 4.6 s
+spearman_polearm,model only,hit on Zombie Lupin at 35,10%,"engine F15, F16",unconfirmed,kill 32 s
+spearman_polearm,model only,"damage a second at 40 (Power Strike, Crescent Polearm)",1186,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_polearm,model only,hit on Wild Boar at 40,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Evil Eye at 40,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Ligator at 40,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Fire Boar at 40,100%,"engine F15, F16",unconfirmed,kill 0.8 s
+spearman_polearm,model only,hit on Curse Eye at 40,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Jr. Wraith at 40,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Lupin at 40,85%,"engine F15, F16",unconfirmed,kill 1.8 s
+spearman_polearm,model only,hit on Lorang at 40,100%,"engine F15, F16",unconfirmed,kill 2.4 s
+spearman_polearm,model only,hit on Zombie Lupin at 40,63%,"engine F15, F16",unconfirmed,kill 3.7 s
+spearman_polearm,model only,hit on Skeledog at 40,56%,"engine F15, F16",unconfirmed,kill 4.2 s
+spearman_polearm,model only,hit on Copper Drake at 40,42%,"engine F15, F16",unconfirmed,kill 7.5 s
+spearman_polearm,model only,hit on Wraith at 40,0%,"engine F15, F16",unconfirmed,kill None s
+spearman_polearm,model only,"damage a second at 50 (Power Strike, The Nine Dragons)",1636,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_polearm,model only,hit on Lupin at 50,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Lorang at 50,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Zombie Lupin at 50,99%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Skeledog at 50,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Copper Drake at 50,100%,"engine F15, F16",unconfirmed,kill 2.4 s
+spearman_polearm,model only,hit on Wraith at 50,79%,"engine F15, F16",unconfirmed,kill 3 s
+spearman_polearm,model only,hit on Clang at 50,92%,"engine F15, F16",unconfirmed,kill 2.6 s
+spearman_polearm,model only,hit on Drake at 50,100%,"engine F15, F16",unconfirmed,kill 2.4 s
+spearman_polearm,model only,hit on Croco at 50,70%,"engine F15, F16",unconfirmed,kill 3.4 s
+spearman_polearm,model only,hit on Malady at 50,36%,"engine F15, F16",unconfirmed,kill 6.5 s
+spearman_polearm,model only,hit on Stone Golem at 50,49%,"engine F15, F16",unconfirmed,kill 9.6 s
+spearman_polearm,model only,hit on Skeleton Soldier at 50,18%,"engine F15, F16",unconfirmed,kill 22.3 s
+spearman_polearm,model only,hit on Dark Stone Golem at 50,30%,"engine F15, F16",unconfirmed,kill 15.7 s
+spearman_polearm,model only,"damage a second at 60 (Power Strike, Skylar)",2157,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_polearm,model only,hit on Copper Drake at 60,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Wraith at 60,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Clang at 60,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Drake at 60,100%,"engine F15, F16",unconfirmed,kill 2.4 s
+spearman_polearm,model only,hit on Croco at 60,100%,"engine F15, F16",unconfirmed,kill 2.4 s
+spearman_polearm,model only,hit on Malady at 60,100%,"engine F15, F16",unconfirmed,kill 1.6 s
+spearman_polearm,model only,hit on Stone Golem at 60,100%,"engine F15, F16",unconfirmed,kill 3.1 s
+spearman_polearm,model only,hit on Skeleton Soldier at 60,94%,"engine F15, F16",unconfirmed,kill 2.5 s
+spearman_polearm,model only,hit on Dark Stone Golem at 60,100%,"engine F15, F16",unconfirmed,kill 3.1 s
+spearman_polearm,model only,hit on Red Drake at 60,87%,"engine F15, F16",unconfirmed,kill 3.6 s
+spearman_polearm,model only,hit on Wild Kargo at 60,66%,"engine F15, F16",unconfirmed,kill 4.8 s
+spearman_polearm,model only,hit on Officer Skeleton at 60,53%,"engine F15, F16",unconfirmed,kill 7.4 s
+spearman_polearm,model only,"damage a second at 100 (Power Strike, The Gold Dragon)",3898,"engine F1 to F8, speed rows","unconfirmed (F10, F23)",
+spearman_polearm,model only,"EXP an hour, An Empty House (10 to 14)",12688,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Mushroom Garden (Victoria Island) (10 to 14)",11925,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Rain-Forest East of Henesys (10 to 14)",11586,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Line 1 (Area 1) (15 to 19)",24771,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Tree Dungeon, Forest Up North IV (15 to 19)",19610,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Dungeon, Southern Forest III (15 to 19)",17282,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Line 1 (Area 1) (20 to 24)",25378,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Tree Dungeon, Forest Up North IV (20 to 24)",23523,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Blue Mushroom Forest (20 to 24)",23315,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Land of Wild Boar II (25 to 29)",41730,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Dark Cave (25 to 29)",41188,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Excavation Site III (25 to 29)",37820,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Land of Wild Boar II (30 to 34)",44316,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Dark Cave (30 to 34)",43251,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Excavation Site I (30 to 34)",42394,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Line 2 (Area 1) (35 to 46)",68228,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Land of Wild Boar II (35 to 46)",60044,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Line 1 (Area 2) (35 to 46)",59121,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Remains (Tomb) I (47 to 49)",85835,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Hanging Gardens of Rot (47 to 49)",80693,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Line 2 (Area 1) (47 to 49)",77107,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Remains (Tomb) I (50 to 59)",98630,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Hot Sand (50 to 59)",97082,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Clang and Lorang (50 to 59)",89421,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Forest of Evil II (60 to 64)",127437,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, The Forest of Evil I (60 to 64)",123262,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Hot Sand (60 to 64)",121116,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Camp 3 (65 to 74)",135233,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Camp 2 (65 to 74)",131879,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Camp 1 (65 to 74)",130377,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Camp 3 (75 to 89)",169917,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Remains (Cliff) (75 to 89)",142579,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Remains (Tomb) IV (75 to 89)",126868,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Remains (Cliff) (90 to 100)",172307,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Camp 3 (90 to 100)",169917,engine map model,unconfirmed,
+spearman_polearm,model only,"EXP an hour, Camp 2 (90 to 100)",161462,engine map model,unconfirmed,

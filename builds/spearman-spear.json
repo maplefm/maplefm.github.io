@@ -1,0 +1,890 @@
+{
+ "slug": "/builds/spearman-spear/",
+ "header": {
+  "class": "Warrior",
+  "job_path": "Warrior (10) → Spearman (30)",
+  "build": "Spearman, spear",
+  "pitch": "Stab-heavy spearman: Spear Mastery skips weapon defense on hard targets.",
+  "best_at": [
+   "Hard, high-defense monsters",
+   "Cheaper weapons (Bamboo Spear, Serpent's Tongue)",
+   "Speed 6 weapons from 40"
+  ],
+  "weak_spots": [
+   "Accuracy at 30 to 40 (Jr. Wraiths, Lupins)",
+   "Potion cost",
+   "Big gap between low and high rolls",
+   "Less damage on soft monsters than polearm"
+  ],
+  "difficulty": "Easy",
+  "level_range": "10 to 100",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2 (v2.0.0)",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 264883,
+    "shown": "about 265K"
+   },
+   "note": "weapons only, live typical prices"
+  }
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "STR to 35, rest STR",
+    "why": "Warrior needs 35 STR at 10"
+   },
+   {
+    "levels": "10 to 100",
+    "ap": "STR, plus DEX only to the next weapon's need",
+    "why": "DEX adds accuracy and a little damage; STR adds more damage"
+   },
+   {
+    "levels": "DEX checkpoints",
+    "ap": "30 at 30, 35 at 35, 40 at 40, 50 at 50, 60 at 60, 70 at 70",
+    "why": "the weapon's DEX need; put the 5 AP of the level before into DEX when a step is 10"
+   },
+   {
+    "levels": "after 70",
+    "ap": "all STR",
+    "why": "no weapon needs more than 70 DEX"
+   },
+   {
+    "levels": "any",
+    "ap": "DEX from gear counts",
+    "why": "each DEX your gear gives is one more AP for STR"
+   },
+   {
+    "levels": "never",
+    "ap": "AP into HP",
+    "why": "the engine can't value it yet; see resets"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 58,
+    "DEX": 4
+   },
+   {
+    "level": 20,
+    "STR": 108,
+    "DEX": 4
+   },
+   {
+    "level": 30,
+    "STR": 132,
+    "DEX": 30
+   },
+   {
+    "level": 35,
+    "STR": 152,
+    "DEX": 35
+   },
+   {
+    "level": 40,
+    "STR": 172,
+    "DEX": 40
+   },
+   {
+    "level": 45,
+    "STR": 197,
+    "DEX": 40
+   },
+   {
+    "level": 50,
+    "STR": 212,
+    "DEX": 50
+   },
+   {
+    "level": 60,
+    "STR": 252,
+    "DEX": 60
+   },
+   {
+    "level": 70,
+    "STR": 292,
+    "DEX": 70
+   },
+   {
+    "level": 80,
+    "STR": 342,
+    "DEX": 70
+   },
+   {
+    "level": 90,
+    "STR": 392,
+    "DEX": 70
+   },
+   {
+    "level": 100,
+    "STR": 442,
+    "DEX": 70
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Power Strike",
+   "id": 1001001,
+   "to": 20,
+   "why": "main attack to 100: 260% at 20"
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Slash Blast",
+   "id": 1001002,
+   "to": 20,
+   "why": "hits 6 for mobbing"
+  },
+  {
+   "level": 24,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 3,
+   "why": "needed for Max HP Increase"
+  },
+  {
+   "level": 25,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
+   "why": "+10% max HP for 1 point"
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Precise Strikes",
+   "id": 1000002,
+   "to": 15,
+   "why": "+20 accuracy, +5% crit: hit chance is the warrior's weak spot"
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 5,
+   "why": "spare points: more potion healing"
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Spear Mastery",
+   "id": 1300000,
+   "to": 5,
+   "why": "opens the Booster"
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Spear Booster",
+   "id": 1301002,
+   "to": 1,
+   "why": "level 1 already gives the full 2-step speed up"
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1301005,
+   "to": 1,
+   "why": "mobbing move, 2 s cooldown"
+  },
+  {
+   "level": 37,
+   "book": "2nd job",
+   "skill": "Spear Mastery",
+   "id": 1300000,
+   "to": 20,
+   "why": "mastery 10: 1 to 20% chance to ignore weapon defense"
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Final Attack: Spear",
+   "id": 1301000,
+   "to": 30,
+   "why": "350% follow-up hit; heals up to 15% max HP (not in the model yet)"
+  },
+  {
+   "level": 54,
+   "book": "2nd job",
+   "skill": "Spear Booster",
+   "id": 1301002,
+   "to": 20,
+   "why": "longer buff only (100 to 300 s)"
+  },
+  {
+   "level": 60,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1301005,
+   "to": 20,
+   "why": "more Rush damage, cheaper MP"
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Iron Will",
+   "id": 1301004,
+   "to": 30,
+   "why": "defense buff, last"
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Spear",
+   "item": "Spear",
+   "id": 1432000,
+   "needs": "25 STR",
+   "attack": 32,
+   "speed": 7,
+   "price": {
+    "typical": 3000,
+    "shown": "3,000",
+    "basis": "old",
+    "sales_seen": 14
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Spear",
+   "item": "Fork on a Stick",
+   "id": 1432001,
+   "needs": "25 STR",
+   "attack": 37,
+   "speed": 7,
+   "price": {
+    "typical": 3166,
+    "shown": "3,166",
+    "basis": "3d",
+    "sales_seen": 115
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Spear",
+   "item": "Fish Spear",
+   "id": 1432002,
+   "needs": "35 STR",
+   "attack": 39,
+   "speed": 6,
+   "price": {
+    "typical": 12500,
+    "shown": "12K",
+    "basis": "3d",
+    "sales_seen": 80
+   },
+   "why": "speed 6, no DEX"
+  },
+  {
+   "level": 25,
+   "slot": "Polearm",
+   "item": "Janitor's Mop",
+   "id": 1442003,
+   "needs": "45 STR",
+   "attack": 50,
+   "speed": 8,
+   "price": {
+    "typical": 29999,
+    "shown": "30K",
+    "basis": "clean",
+    "sales_seen": 17
+   },
+   "why": "polearm: any warrior can use it before 30; strongest at 25"
+  },
+  {
+   "level": 30,
+   "slot": "Spear",
+   "item": "Forked Spear",
+   "id": 1432003,
+   "needs": "65 STR, 30 DEX",
+   "attack": 52,
+   "speed": 7,
+   "price": {
+    "typical": 9888,
+    "shown": "9,888",
+    "basis": "3d",
+    "sales_seen": 224
+   },
+   "why": "needs DEX 30"
+  },
+  {
+   "level": 35,
+   "slot": "Spear",
+   "item": "Nakamaki",
+   "id": 1432004,
+   "needs": "75 STR, 35 DEX",
+   "attack": 57,
+   "speed": 7,
+   "price": {
+    "typical": 19888,
+    "shown": "20K",
+    "basis": "3d",
+    "sales_seen": 306
+   },
+   "why": "needs DEX 35"
+  },
+  {
+   "level": 40,
+   "slot": "Spear",
+   "item": "Zeco",
+   "id": 1432005,
+   "needs": "85 STR, 40 DEX",
+   "attack": 59,
+   "speed": 6,
+   "price": {
+    "typical": 22000,
+    "shown": "22K",
+    "basis": "3d",
+    "sales_seen": 186
+   },
+   "why": "speed 6, needs DEX 40"
+  },
+  {
+   "level": 45,
+   "slot": "Spear",
+   "item": "Bamboo Spear",
+   "id": 1432009,
+   "needs": "85 STR",
+   "attack": 64,
+   "speed": 6,
+   "price": {
+    "typical": 39442,
+    "shown": "39K",
+    "basis": "3d",
+    "sales_seen": 142
+   },
+   "why": "no DEX needed, speed 6"
+  },
+  {
+   "level": 50,
+   "slot": "Spear",
+   "item": "Serpent's Tongue",
+   "id": 1432006,
+   "needs": "105 STR, 50 DEX",
+   "attack": 69,
+   "speed": 6,
+   "price": {
+    "typical": 125000,
+    "shown": "125K",
+    "basis": "3d",
+    "sales_seen": 109
+   },
+   "why": "needs DEX 50"
+  },
+  {
+   "level": 60,
+   "slot": "Spear",
+   "item": "Holy Spear",
+   "id": 1432007,
+   "needs": "125 STR, 60 DEX",
+   "attack": 82,
+   "speed": 6,
+   "price": {
+    "typical": null,
+    "shown": "no live price yet",
+    "basis": null
+   },
+   "why": "needs DEX 60"
+  },
+  {
+   "level": 70,
+   "slot": "Spear",
+   "item": "Redemption",
+   "id": 1432008,
+   "needs": "145 STR, 70 DEX",
+   "attack": 95,
+   "speed": 7,
+   "price": {
+    "typical": null,
+    "shown": "no live price yet",
+    "basis": null
+   },
+   "why": "needs DEX 70"
+  }
+ ],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Warrior",
+   "where": "Perion, Dances with Balrog",
+   "needs": "level 10, 35 STR (players; Nexon names only the level)",
+   "gets": "1 SP"
+  },
+  {
+   "level": 30,
+   "job": "Spearman",
+   "where": "Perion, Dances with Balrog",
+   "needs": "level 30",
+   "gets": "Spearman book; pick Spearman"
+  },
+  {
+   "level": "3rd job",
+   "job": "Dragon Knight",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "to change weapon line (spear ↔ polearm)",
+   "cost": {
+    "nx": 7000,
+    "mesos": {
+     "typical": null,
+     "shown": "no live price yet",
+     "basis": null
+    }
+   },
+   "worth_it": "Only to switch",
+   "why": "mastery, booster and Final Attack are weapon-specific; one line uses about 120 of 121 points at 70"
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix too much DEX",
+   "cost": {
+    "nx": 7000,
+    "mesos": {
+     "typical": null,
+     "shown": "no live price yet",
+     "basis": null
+    }
+   },
+   "worth_it": "Rarely",
+   "why": "returns all AP at once"
+  },
+  {
+   "what": "HP washing",
+   "when": "not now",
+   "cost": null,
+   "worth_it": "No",
+   "why": "the AP Reset returns HP AP too, so the old trick doesn't work"
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "An Empty House",
+     "monsters": [
+      "Orange Mushroom"
+     ]
+    },
+    {
+     "map": "Mushroom Garden (Victoria Island)",
+     "monsters": [
+      "Orange Mushroom",
+      "Shroom",
+      "Red Snail"
+     ]
+    },
+    {
+     "map": "The Rain-Forest East of Henesys",
+     "monsters": [
+      "Pig",
+      "Ribbon Pig"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "An Empty House",
+     "monsters": [
+      "Orange Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North III",
+     "monsters": [
+      "Green Mushroom",
+      "Horny Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest IV",
+     "monsters": [
+      "Horny Mushroom",
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "West Rocky Mountain III",
+     "monsters": [
+      "Green Mushroom",
+      "Dark Axe Stump",
+      "Red Snail"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "The Burnt Land III",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": "boars: high hit chance"
+  },
+  {
+   "levels": "35 to 46",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North VIII",
+     "monsters": [
+      "Curse Eye"
+     ]
+    }
+   ],
+   "tip": "Jr. Wraiths in Kerning's subway"
+  },
+  {
+   "levels": "47 to 49",
+   "maps": [
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Hanging Gardens of Rot",
+     "monsters": [
+      "Aqumander",
+      "Glowshroom",
+      "Rafflesia"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 59",
+   "maps": [
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    }
+   ],
+   "tip": "Clangs and Torties; Clang's defense was cut on Nov 24"
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "monsters": [
+      "Wraith"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 74",
+   "maps": [
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": "Excavation camps"
+  },
+  {
+   "levels": "75 to 89",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Remains (Cliff)",
+     "monsters": [
+      "Commander Skeleton",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) IV",
+     "monsters": [
+      "Officer Skeleton",
+      "Commander Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "90 to 100",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Remains (Cliff)",
+     "monsters": [
+      "Commander Skeleton",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "**Polearm or spear:** polearm swings at 3.5x and stabs at 1.5x, spear the reverse; most warrior hits are swings",
+  "**Precise Strikes 15:** +20 accuracy and +5% crit (game files); missing is the warrior's weak spot from 30 to 40",
+  "**DEX only for weapons:** each spear and polearm from 30 needs DEX equal to its level; Bamboo Spear and the Mops need none",
+  "**Booster at 1 point:** the game files give the full 2-step speed up at level 1",
+  "**Final Attack 30 before Booster 20:** 350% hit in the game files vs 260% Power Strike",
+  "**Spear Mastery:** up to 20% of hits ignore weapon defense: best on armored monsters"
+ ],
+ "mistakes": [
+  "**Skipping DEX:** Forked Spear and Mithril Pole Arm need 30 DEX at 30, 70 by 70",
+  "**Booster past 1 before mastery:** extra points only lengthen the buff",
+  "**Iron Will early:** defense only; last in the order",
+  "**AP Reset to fix skills:** SP and AP resets are different scrolls",
+  "**Maxing both weapon lines:** not enough points; pick one"
+ ],
+ "compare": [
+  {
+   "build": "Spearman, spear",
+   "best_at": "armored monsters, cheaper weapons",
+   "weak": "less damage on soft monsters"
+  },
+  {
+   "build": "Spearman, polearm",
+   "best_at": "most damage per hit",
+   "weak": "slowest weapons, pricier at 50"
+  },
+  {
+   "build": "Dexless spearman",
+   "best_at": "raw damage",
+   "weak": "can't wear level 30+ spears or polearms (DEX needs)",
+   "note": "training page Typical build; its weapon needs DEX it doesn't have"
+  }
+ ],
+ "future": [
+  {
+   "when": "3rd job (Dragon Knight)",
+   "status": "not in Classic World yet; no date from Nexon",
+   "plan": "players expect stab skills to favour spears; check the game files when they arrive, then decide on an SP reset"
+  }
+ ],
+ "phone_tabs": [
+  "Overview",
+  "Stats",
+  "Skills",
+  "Gear",
+  "Job",
+  "Resets",
+  "Train",
+  "Why",
+  "Mistakes",
+  "Compare",
+  "3rd job"
+ ],
+ "search": {
+  "title": "Spearman Spear Build: AP, SP, Gear by Level | Club FM",
+  "description": "MapleStory Classic spearman with a spear: STR and DEX plan, skill order, spears by level with prices, maps and spear vs polearm.",
+  "slug": "/builds/spearman-spear/",
+  "keywords": [
+   "spearman build",
+   "spear build",
+   "spear spearman",
+   "spearman ap build",
+   "spearman sp build",
+   "spearman skill build",
+   "spear vs polearm",
+   "polearm vs spear",
+   "best spearman build",
+   "dragon knight build",
+   "dk build",
+   "spearman guide",
+   "warrior build",
+   "best warrior build",
+   "spear mastery",
+   "maplestory classic spearman",
+   "classic world spearman"
+  ],
+  "sitesearch": [
+   "Spearman spear build guide",
+   "spearman-spear",
+   "Warrior",
+   "Spearman",
+   "/builds/spearman-spear/"
+  ]
+ }
+}

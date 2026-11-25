@@ -1,0 +1,120 @@
+{
+ "slug": "/builds/",
+ "title": "MapleStory Classic Build Guides: AP and SP | Club FM",
+ "description": "Club FM build guides for MapleStory Classic World: AP, SP, gear and training maps by level for every job, checked against the game files.",
+ "sections": [
+  {
+   "class": "Thief",
+   "builds": [
+    {
+     "name": "Sindit",
+     "slug": "/builds/sindit/",
+     "status": "draft for review"
+    },
+    {
+     "name": "DEX Bandit",
+     "slug": "/builds/bandit/",
+     "status": "waits for review"
+    },
+    {
+     "name": "STR Bandit",
+     "slug": "/builds/str-bandit/",
+     "status": "needs engine work"
+    },
+    {
+     "name": "Assassin",
+     "slug": "/builds/assassin/",
+     "status": "later"
+    }
+   ]
+  },
+  {
+   "class": "Warrior",
+   "builds": [
+    {
+     "name": "Spearman, spear",
+     "slug": "/builds/spearman-spear/",
+     "status": "draft for review"
+    },
+    {
+     "name": "Spearman, polearm",
+     "slug": "/builds/spearman-polearm/",
+     "status": "draft for review"
+    },
+    {
+     "name": "Fighter",
+     "slug": "/builds/fighter/",
+     "status": "later"
+    },
+    {
+     "name": "Page",
+     "slug": "/builds/page/",
+     "status": "later"
+    }
+   ]
+  },
+  {
+   "class": "Magician",
+   "builds": [
+    {
+     "name": "Fire Poison",
+     "status": "later"
+    },
+    {
+     "name": "Ice Lightning",
+     "status": "later"
+    },
+    {
+     "name": "Cleric",
+     "status": "later"
+    }
+   ]
+  },
+  {
+   "class": "Bowman",
+   "builds": [
+    {
+     "name": "Hunter",
+     "status": "later"
+    },
+    {
+     "name": "Crossbowman",
+     "status": "later"
+    }
+   ]
+  }
+ ],
+ "card": [
+  "build name",
+  "pitch (one line)",
+  "difficulty",
+  "gear cost to 50",
+  "level range"
+ ],
+ "links_in": [
+  "menu: Training sub-bar gets a Builds link",
+  "each /training/<job>/ page links its build guides",
+  "map.html build picker links the matching guide"
+ ],
+ "search": {
+  "keywords": [
+   "build guide",
+   "builds",
+   "ap build",
+   "sp build",
+   "skill build",
+   "best build",
+   "class guide",
+   "job guide",
+   "maplestory classic builds"
+  ],
+  "sitesearch": [
+   "Build guides",
+   "builds",
+   "",
+   "",
+   "/builds/"
+  ]
+ },
+ "sitesearch_note": "data/sitesearch.json has no build list yet (keys v, built, m, i, q, p). Proposed: a new key b, rows [name, slug, class, job, path, keywords]; tools/sitesearch.py and assets/sitesearch.js would need a small change, so it waits for Adam."
+}
