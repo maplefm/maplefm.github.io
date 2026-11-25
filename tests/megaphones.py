@@ -47,7 +47,8 @@ fr = rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8)
 fr[900:922, 400:1160] = SR.MEGA_BG["sm"]; fr[922:966, 400:1160] = SR.MEGA_BG["im"]
 fr[905:917, 420:470] = 30; fr[928:940, 420:470] = 30; fr[950:962, 420:470] = 30      # some letters
 lines, pitch = SR.mega_lines(fr)
-ok("three megaphone lines found", [(k, y0, y1) for k, y0, y1, _, _ in lines] == [("sm", 900, 922), ("im", 922, 944), ("im", 944, 966)], (lines, pitch))
+want = [("sm", 900, 922), ("im", 922, 944), ("im", 944, 966)]
+ok("three megaphone lines found", len(lines) == 3 and all(a[0] == b[0] and abs(a[1] - b[1]) <= 1 and abs(a[2] - b[2]) <= 1 for a, b in zip(lines, want)), (lines, pitch))
 ok("box edges", all(x0 == 400 and x1 == 1160 for _, _, _, x0, x1 in lines), lines)
 ok("nothing found in a picture without megaphones", SR.mega_lines(rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8))[0] == [])
 
@@ -66,9 +67,9 @@ SR.read_mega_line = fake_read
 mr = SR.MegaReader(stores)
 class Ch: pass
 a, b = Ch(), Ch(); a.login, a.name, b.login, b.name = "streama", "StreamA", "streamb", "StreamB"
-one = rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8); one[960:982, 400:1160] = SR.MEGA_BG["ig"]; one[965:977, 420:600] = 250
+one = rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8); one[960:982, 400:1160] = SR.MEGA_BG["ig"]; one[965:977, 420:600] = 40
 mr.look(a, one); mr.q.join()
-two = rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8); two[900:922, 380:1140] = SR.MEGA_BG["ig"]; two[905:917, 400:580] = 250
+two = rng.integers(0, 120, (1080, 1920, 3)).astype(np.uint8); two[900:922, 380:1140] = SR.MEGA_BG["ig"]; two[905:917, 400:580] = 40
 mr.look(b, two); mr.q.join(); mr.look(a, one)
 ok("a line is read once for every stream that shows it", len(reads) == 1, reads)
 ok("both streams posted it", getattr(a, "megas", 0) >= 1 and getattr(b, "megas", 0) >= 1, (getattr(a, "megas", 0), getattr(b, "megas", 0)))
@@ -201,14 +202,17 @@ if sets:
     for t in truth:
         crop = Image.open(os.path.join(sd, t["file"]))
         if crop.height < SR2.MEGA_MIN_H: st["skipped_small"] = st.get("skipped_small", 0) + 1; continue   # never read live
+        arr = np.asarray(crop.convert("RGB")); med = np.median(arr.reshape(-1, 3), axis=0)
+        kind = min(SR2.MEGA_BG, key=lambda k: np.abs(med - np.array(SR2.MEGA_BG[k])).sum())
+        if SR2._line_end(arr, kind)[1]: st["skipped_open"] = st.get("skipped_open", 0) + 1; continue      # cut or runs on: never read live
         r = SR2.read_mega_line(crop)
         want = {(s, i, p) for s, i, p, *_ in fmparse.parse_chat_message_x(t["text"])} if t.get("text") is not None else set()
         got = {(s, i, p) for s, i, p, _ in r["rows"]} if r["name"] else set()     # a post goes up only with a name
-        # what Stores.add_mega keeps: a price 3x off the board's typical for the item is left out
+        # what Stores.add_mega keeps: a price 3x off the board's typical for the item is left out (unless a roll is written)
         kept = set()
-        for s_, i_, p_ in got:
+        for s_, i_, p_, x_ in (r["rows"] if r["name"] else []):
             i2, p2 = W.chat_price(i_, p_); ref = W.BOARD_TYP.get(i2)
-            if not ref or ref / 3 <= p2 <= ref * 3: kept.add((s_, i_, p_))
+            if not ref or x_ or ref / 3 <= p2 <= ref * 3: kept.add((s_, i_, p_))
         st["kept_right"] = st.get("kept_right", 0) + len(want & kept); st["kept_wrong"] = st.get("kept_wrong", 0) + len(kept - want)
         st["lines"] += 1; st["posts_true"] += len(want)
         st["right"] += len(want & got); st["missed"] += len(want - got); st["extra"] += len(got - want)

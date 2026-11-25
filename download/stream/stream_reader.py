@@ -544,26 +544,30 @@ def mega_lines(frame, pitch=None):
             if x1 - x0 < 200: continue
             # lines of text in the band: runs of rows with letters, apart by at least a row of plain colour
             rf = bm[:, x0:x1].mean(1)
-            nt = len([r for r in _runs(np.nonzero(rf < 0.97)[0], 1) if r[1] - r[0] >= 4])
-            bands.append((kind, s, e, x0, x1, nt))
+            tr = [r for r in _runs(np.nonzero(rf < 0.97)[0], 1) if r[1] - r[0] >= 4]
+            bands.append((kind, s, e, x0, x1, tr))
     if not bands: return [], pitch
     # every line of one chat box starts at the same x: a band that reached further left took scenery with it
     xs = sorted(b[3] for b in bands); xm = xs[len(xs) // 2]
-    bands = [(k, s, e, xm if 0 < xm - x0 <= 400 and sum(abs(x - xm) <= 3 for x in xs) >= 2 else x0, x1, nt) for k, s, e, x0, x1, nt in bands]
+    bands = [(k, s, e, xm if 0 < xm - x0 <= 400 and sum(abs(x - xm) <= 3 for x in xs) >= 2 else x0, x1, tr) for k, s, e, x0, x1, tr in bands]
     # line pitch: the largest height every band is a whole number of (several lines of one colour make one band),
     # and no taller than a band's height over its lines of text
     hs = [e - s for _, s, e, _, _, _ in bands]
-    cap = min([(e - s) / max(1, nt) for _, s, e, _, _, nt in bands] + [40])
+    cap = min([(e - s) / max(1, len(tr)) for _, s, e, _, _, tr in bands] + [40])
     best = None
     for p in range(int(min(cap + 2, max(hs))), 11, -1):
         if all(abs(h - round(h / p) * p) <= 2 and round(h / p) >= 1 for h in hs): best = p; break
     if pitch and best and best > pitch * 1.5: best = pitch         # a frame with only two-line bands: keep the known pitch
     p = best or pitch or min(hs)
     out = []
-    for kind, s, e, x0, x1, nt in bands:
-        n = max(1, nt, int(round((e - s) / p)))
-        for k in range(n):
-            a = s + int(round(k * (e - s) / n)); b = s + int(round((k + 1) * (e - s) / n))
+    for kind, s, e, x0, x1, tr in bands:
+        n = max(1, len(tr), int(round((e - s) / p)))
+        if n > 1 and len(tr) == n:
+            # each line of text seen apart: cut halfway between them, so no line takes half of its neighbour
+            cuts = [s] + [s + (tr[k][1] + tr[k + 1][0]) // 2 for k in range(n - 1)] + [e]
+        else:
+            cuts = [s + int(round(k * (e - s) / n)) for k in range(n + 1)]
+        for a, b in zip(cuts, cuts[1:]):
             out.append((kind, int(y0 + a), int(y0 + b), int(x0), int(x1)))
     out.sort(key=lambda o: o[1])
     return out, p
@@ -578,6 +582,11 @@ def _line_end(a, kind):
     b = _mega_badge(a.astype(np.int16)); start = b[1] + 2 if b else 2 * h       # past the name and the channel badge
     for s_, e_ in _runs(np.nonzero(bgc == 0)[0], 1):
         if s_ >= start and e_ - s_ >= max(4, h // 3): return s_, "cut"
+    # the streamer's mouse pointer over the line (white; past the badge no letters are white): what's under it, a
+    # digit of the price perhaps, can't be read
+    wc = np.nonzero((a.min(axis=2) > 235).sum(0) >= 2)[0]
+    wc = wc[wc >= start + 2]
+    if len(wc): return int(wc[0]), "cut"
     tail = bgc[-max(4, int(0.8 * h)) - 2:-2]          # the last two columns are the box's own edge
     # letters in the last stretch: some rows off the line colour (two columns or more), not all (a border)
     return a.shape[1], "edge" if ((tail < 0.9) & (tail > 0.2)).sum() >= 2 else ""
@@ -683,16 +692,42 @@ def il_rule(name):
     return "".join(out)
 
 MEGA_WAYS = [(3.0, Image.LANCZOS, 60, 220), (4.0, Image.BICUBIC, 80, 260), (2.5, Image.LANCZOS, 50, 200)]
+def _mega_rows(msgs):
+    """Posts the readings agree on: three or more readings name the same item and price, and no reading saw another
+    price for that item ("1.4M" read as "14M" twice is a blurred decimal point; "3.8m" read "3.6m" twice is a blurred
+    digit: either way some reading disagrees and the item is left out). The roll goes along when three agree on it."""
+    votes, prices, xs = {}, {}, {}
+    for m in msgs:
+        try: rows = fmparse.parse_chat_message_x(mega_text(m))
+        except Exception: rows = []
+        seen = {}
+        for r in rows: seen.setdefault((r[0], r[1], r[2]), set()).add(json.dumps(r[3], sort_keys=True))
+        for k, xv in seen.items():
+            votes[k] = votes.get(k, 0) + 1
+            for x in xv: xs[(k, x)] = xs.get((k, x), 0) + 1
+        per = {}
+        for side, item, price in seen: per.setdefault((side, item), set()).add(price)
+        for k, v in per.items(): prices.setdefault(k, []).append(frozenset(v))
+    out = []
+    for (side, item, price), n in votes.items():
+        if n < MEGA_NEED or len(set(prices[(side, item)])) != 1: continue
+        x = next((json.loads(xx) for (k, xx), c in xs.items() if k == (side, item, price) and c >= MEGA_NEED), None)
+        out.append((side, item, price, x))
+    return out
+
+MEGA_MORE = [(3.5, Image.LANCZOS, 70, 240), (2.0, Image.BICUBIC, 60, 220)]
+MEGA_NEED = 3       # of the five readings; measured Nov 25: 2 of 3 let "tobi 3.8m" through as 3.6m, 3 of 5 had no wrong post
 def read_mega_line(crop):
-    """One megaphone line, read three ways. Returns {name, sure, msgs, rows, ch, badge}: rows are the
-    (side, item, price, roll) posts two or more readings agree on; name is the sender when two or more readings agree,
-    never marked sure (see below). ch stays None: the channel badge is too small on a stream to read surely."""
+    """One megaphone line, read three ways, and two more ways when any of the three names a priced post. Returns
+    {name, sure, votes, msgs, rows, ch, badge}: rows are the (side, item, price, roll) posts three readings agree on
+    (see _mega_rows); name is the sender's spelling most readings agree on (two or more), never marked sure (see
+    below). ch stays None: the channel badge is too small on a stream to read surely."""
     a = np.asarray(crop.convert("RGB")).astype(np.int16)
     bg = np.median(a.reshape(-1, 3), axis=0)
     h = a.shape[0]; f0 = 24.0 / max(10, h)        # every line brought to about 24 px tall, then enlarged
     b = _mega_badge(a)
-    names, msgs = {}, []
-    for f, flt, lo, hi in MEGA_WAYS:
+    names, msgs = {}, []; stamp = [None]      # stamp: how many digits a "[06:22]" timestamp puts before the name
+    def way(f, flt, lo, hi):
         if b:
             nm = re.sub(r"[^A-Za-z0-9]", "", _tess(_big(_ink(a[:, :max(1, b[0] - 2)], bg, lo, hi), f * f0, flt), 7, fmparse._IGN_CHARS))
             m = _tess(_big(_ink(a[:, b[1] + 1:], bg, lo, hi), f * f0, flt), 7)
@@ -702,9 +737,20 @@ def read_mega_line(crop):
             t = _tess(_big(_ink(a, bg, lo, hi), f * f0, flt), 7)
             mm = re.match(r"^\W*([A-Za-z0-9]{3,13})\s*[:;]\s*(.*)$", t)
             nm, m = (mm.group(1), mm.group(2)) if mm else ("", "")
+        if nm and nm[:1] in "0123456789O" and b and stamp[0] is None:
+            # chat timestamps on ("[06:22] DocFrost"): read the name's stretch with brackets and colons allowed once
+            t = _tess(_big(_ink(a[:, :max(1, b[0] - 2)], bg, lo, hi), f * f0, flt), 7)
+            mm = re.match(r"^\W{0,2}\d{1,2}\s?[:.]\s?\d{2}\s?[\]|)}]\s*", t)
+            stamp[0] = len(re.sub(r"[^A-Za-z0-9]", "", mm.group(0))) if mm else 0
+        if nm and stamp[0]: nm = nm[stamp[0]:] if re.fullmatch(r"[0-9O]+", nm[:stamp[0]]) else nm
         if nm:
             nm = il_rule(nm); names[nm] = names.get(nm, 0) + 1
         msgs.append(m)
+    for w in MEGA_WAYS: way(*w)
+    try: priced = any(fmparse.parse_chat_message_x(mega_text(m)) for m in msgs)
+    except Exception: priced = False
+    if priced:
+        for w in MEGA_MORE: way(*w)
     name, sure = None, False
     if names:
         top = max(names, key=lambda k: names[k])
@@ -713,13 +759,7 @@ def read_mega_line(crop):
             # (daddyfoo read daddytoo, beento read heento). The post goes up marked; a scanner's exact read of the
             # same post, or the same spelling from another reader, is what makes the name stand
             name = top; sure = False
-    votes = {}
-    for m in msgs:
-        try: rows = fmparse.parse_chat_message_x(mega_text(m))
-        except Exception: rows = []
-        for side, item, price, x in set((r[0], r[1], r[2], json.dumps(r[3], sort_keys=True)) for r in rows):
-            votes[(side, item, price, x)] = votes.get((side, item, price, x), 0) + 1
-    rows = [(s, i, p, json.loads(x)) for (s, i, p, x), n in votes.items() if n >= 2]
+    rows = _mega_rows(msgs)
     # the badge's channel number is 6 pixels tall on a stream: too small to read surely, so it is left out
     ch = None
     return {"name": name, "sure": sure, "votes": names, "msgs": msgs, "rows": rows, "ch": ch, "badge": b is not None}
@@ -757,8 +797,10 @@ class MegaReader:
     def look(self, ch, frame):
         """Called from a stream's own thread, at most every few seconds: find the lines, queue the new ones."""
         c0 = time.thread_time()
-        lines, ch.mega_pitch = mega_lines(frame, getattr(ch, "mega_pitch", None))
-        for kind, arr in mega_posts(frame, lines):
+        with np.errstate(all="ignore"):                    # an empty slice at a picture's edge is no reason to log
+            lines, ch.mega_pitch = mega_lines(frame, getattr(ch, "mega_pitch", None))
+            posts = mega_posts(frame, lines)
+        for kind, arr in posts:
             try: crop = Image.fromarray(arr); sig = _mega_sig(crop)
             except Exception: continue
             with self.lock: hit = self._find(kind, sig)
@@ -1061,8 +1103,9 @@ class Stores:
             item, price = W.chat_price(item, price)
             # a decimal point the video blurred away makes 1.4M into 14M, the same in every reading: a price 3x off
             # what the board says the item goes for is left out (the board drops chat asks far under it as well)
+            # (an equip with its roll written, like 79 att, is priced by that roll, not by the plain typical)
             ref = W.BOARD_TYP.get(item)
-            if ref and not ref / 3 <= price <= ref * 3: self.offboard = getattr(self, "offboard", 0) + 1; continue
+            if ref and not x and not ref / 3 <= price <= ref * 3: self.offboard = getattr(self, "offboard", 0) + 1; continue
             hot = s.hot
             s.add_chat(name, side, item, price, x or None, unsure=not sure)
             s.hot = hot
