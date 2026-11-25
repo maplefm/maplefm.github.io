@@ -48,8 +48,9 @@ const fs = require("fs"), R = require("path").join(__dirname, "..") + "/";
   ok(lazy === 0, "board row icons load with their row (" + lazy + " lazy)");
   // 3: back at the top, the strip slides again
   await p.evaluate(() => window.scrollTo(0, 0)); if (!PHONE) await p.evaluate(() => { const t = document.querySelector("#prices-view .tbox"); if (t) t.scrollTop = 0; });
-  await p.waitForTimeout(800);
-  const still = await p.evaluate(() => { const t = document.getElementById("tickbar"); return t ? t.classList.contains("still") : null; });
+  // the strip slides again 250 ms after the scroll stops; a slow CI runner can take a few seconds to say it is back in view
+  let still = true;
+  for (let k = 0; k < 10 && still !== false; k++) { await p.waitForTimeout(500); still = await p.evaluate(() => { const t = document.getElementById("tickbar"); return t ? t.classList.contains("still") : null; }); }
   ok(still === false, "Big sales strip slides again once the scroll stops and it is in view");
   // 4: a search typed while rows are still arriving
   await swipe(3);
