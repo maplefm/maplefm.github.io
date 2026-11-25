@@ -1099,7 +1099,7 @@ class Store:
             icons[r["i"]] = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
             self.dirty = True
 
-    def add_chat(self, player, side, item, price, x=None, unsure=False):
+    def add_chat(self, player, side, item, price, x=None, unsure=False, mg=None, ch=None):
         now = time.time(); day = datetime.date.today().isoformat()
         item, price = chat_price(item, price)
         with self.lock:
@@ -1113,6 +1113,8 @@ class Store:
             if x: o["x"] = x                    # the roll written in the message, like (+3) or 55 att
             if unsure: o["ns"] = 1
             elif o.get("ns"): del o["ns"]       # read sure once: the name stands
+            if mg in ("sm", "m", "im"): o["mg"] = mg    # a megaphone post, and the sender's channel off a smega's badge
+            if ch and isinstance(ch, int) and 1 <= ch <= 40: o["c"] = ch
             # a sell post is a deal someone wants to whisper now: send it as soon as it has been read twice
             if side == "S" and o["reads"] >= 2 and not o.get("sent"):
                 o["sent"] = 1; self.fresh = True; self.chat_fresh = True; self.hot = True
@@ -1251,6 +1253,8 @@ class Store:
                 row = {"s": player, "i": item, "p": price, "q": 1, "t": int(o.get("last_read") or o["first"])}
                 if side == "B": row["k"] = "b"
                 if o.get("ns"): row["ns"] = 1               # the sender's name wasn't sure
+                if o.get("mg"): row["mg"] = o["mg"]
+                if o.get("c"): row["c"] = o["c"]
                 if o.get("x"): row["x"] = dict(o["x"], _img=o["xi"]) if o.get("xi") else o["x"]
                 if o.get("xt"): row["xt"] = o["xt"]
                 if o.get("xj"): row["xj"] = o["xj"]
@@ -1986,7 +1990,7 @@ def handle_job(cfg, kind, img, extra, store, backlog=0):
             shown = name or fmparse.maybe_name(player, votes)
             if not shown: continue                  # no name we can stand behind, even marked unsure
             for side, item, price, x in rows:
-                store.add_chat(shown, side, item, price, x, unsure=not name)
+                store.add_chat(shown, side, item, price, x, unsure=not name, mg=votes.get("_mg"), ch=votes.get("_ch"))
                 found.append([shown, side, item, price] + ([x] if x else []) + ([] if name else ["name unsure"]))
         review_save(cfg, kind, img, {"messages": msgs, "rows": found})
         if found:

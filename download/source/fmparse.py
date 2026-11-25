@@ -1054,9 +1054,25 @@ def chat_name_exact(keys, table=None):
     return s if re.fullmatch(r"[A-Za-z0-9]{3,13}", s) else None
 
 
+# Megaphones in the chat box sit on a solid colour: pink for megaphones (a red channel badge and a heart when it's a
+# super megaphone every channel sees), teal and gold for item megaphones. Measured on stream and screen pictures.
+MEGA_BG = {"sm": (220, 162, 182), "im": (90, 212, 195), "ig": (229, 179, 5)}
+
+def chat_line_kind(region, y0, y1, ch=None):
+    """What kind of chat line this is: "sm" super megaphone (pink with a channel badge), "m" megaphone (pink, its
+    own channel), "im" item megaphone (teal or gold), or None for plain chat."""
+    import numpy as np
+    a = np.asarray(region.convert("RGB"))[max(0, int(y0)):int(y1) + 1].astype(np.int16)
+    if a.size == 0: return None
+    for k, c in MEGA_BG.items():
+        if (np.abs(a - np.array(c, np.int16)).sum(2) < 45).mean() > 0.35:
+            return "im" if k in ("im", "ig") else "sm" if ch else "m"
+    return None
+
 def read_chat_lines(region, scale=4):
     """Trade chat lines: [(player, message, name votes)]. Name votes are filled in for posts with a buy or sell mark
-    only (they take longer), so the caller can tell a sure name from a guess."""
+    only (they take longer), so the caller can tell a sure name from a guess. For those posts the votes also carry
+    "_mg" (megaphone kind, see chat_line_kind) and "_ch" (the sender's channel off a smega's badge) when read."""
     norm = chat_norm(region)
     img = norm.resize((norm.width * scale, norm.height * scale), Image.BICUBIC)
     msgs = []
@@ -1086,6 +1102,12 @@ def read_chat_lines(region, scale=4):
                     if keys: votes["_keys"] = keys        # for learning the letters (sent with name samples)
                     if m is not None: votes["_mask"] = m
             except Exception: votes = {}
+            try:
+                ch = _badge_channel(region, *yy)
+                mg = chat_line_kind(region, *yy, ch=ch)
+                if mg: votes["_mg"] = mg
+                if mg == "sm" and ch: votes["_ch"] = ch
+            except Exception: pass
         out.append((p, t, votes))
     return out
 
