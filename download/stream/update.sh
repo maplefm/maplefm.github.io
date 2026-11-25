@@ -9,7 +9,7 @@ mkdir -p "$APP"; rm -rf "$NEW"; mkdir -p "$NEW"
 
 ok=1
 curl -fsSL "$SITE/FMWatcher.zip" -o "$NEW/w.zip" && unzip -qo "$NEW/w.zip" -d "$NEW" || ok=0
-for f in stream_reader.py plateverify.py plategaps.json shop_buttons.png update.sh; do
+for f in stream_reader.py plateverify.py plategaps.json shop_buttons.png platforms.py keys.sh update.sh; do
   curl -fsSL "$SITE/stream/$f" -o "$NEW/FMWatcher/$f" || ok=0
 done
 if [ "$ok" = 1 ] && [ -s "$NEW/FMWatcher/stream_reader.py" ] && [ -s "$NEW/FMWatcher/watcher.py" ]; then
@@ -17,7 +17,7 @@ if [ "$ok" = 1 ] && [ -s "$NEW/FMWatcher/stream_reader.py" ] && [ -s "$NEW/FMWat
   for f in "$NEW"/FMWatcher/*; do
     b=$(basename "$f")
     case "$b" in config.json|*.bat|install.*|README.txt) continue;; esac
-    if [ "$b" = update.sh ]; then cmp -s "$f" "$DIR/update.sh" || cp "$f" "$DIR/update.sh"; continue; fi
+    if [ "$b" = update.sh ] || [ "$b" = keys.sh ]; then cmp -s "$f" "$DIR/$b" || cp "$f" "$DIR/$b"; continue; fi
     cmp -s "$f" "$APP/$b" || { cp "$f" "$APP/$b"; changed=1; }
   done
   [ "$changed" = 1 ] && echo "updated files"
@@ -59,6 +59,12 @@ id clubfm >/dev/null 2>&1 && chown -R clubfm:clubfm "$DIR"
 [ "${1:-}" = "--files-only" ] && exit 0
 [ "${restart:-0}" = 1 ] && systemctl restart clubfm-stream && echo "reader restarted"
 
+# Count live Classic streams on Kick and YouTube (only where keys.sh put a key); cheap, every run
+if [ -x "$DIR/venv/bin/python" ] && { [ -s "$APP/kick_client.txt" ] || [ -s "$APP/youtube_key.txt" ]; }; then
+  (cd "$APP" && timeout 120 "$DIR/venv/bin/python" platforms.py >/dev/null 2>&1) || echo "platform count failed"
+  chown clubfm:clubfm "$APP/platforms.json" 2>/dev/null
+fi
+
 # Report in, at most once an hour
 stamp="$DIR/.last_report"
 if [ -s "$APP/token.txt" ] && { [ ! -f "$stamp" ] || [ $(( $(date +%s) - $(stat -c %Y "$stamp") )) -ge 3300 ]; }; then
@@ -80,6 +86,11 @@ except Exception: pass
 out = {"at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "service": active,
        "status_at": st.get("at"), "watching": st.get("watching", []), "live_classic": st.get("live_classic", []),
        "shops_last_hour": shops_hour, "host": "cloud"}
+try:
+    sys.path.insert(0, app); os.chdir(app)
+    import platforms
+    out["platforms"] = platforms.summary()
+except Exception: pass
 try:
     out["load"] = [round(x, 2) for x in os.getloadavg()]; out["cpus"] = os.cpu_count()
     m = dict(l.split(":", 1) for l in open("/proc/meminfo"))
