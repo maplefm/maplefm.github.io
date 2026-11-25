@@ -565,6 +565,8 @@ def who_caught(docs, d):
             if str(r.get("s") or "").lower() == s and int(r.get("p") or 0) == p and r.get("x"): return who
     return "the board"
 
+MEGA_WORD = {"sm": "smega", "m": "megaphone", "im": "item megaphone"}
+
 def job_deals(data_dir, summary_path, state_path):
     st = load(state_path, {})
     seen = st.get("deals_seen") or {}
@@ -584,8 +586,9 @@ def job_deals(data_dir, summary_path, state_path):
     asks, docs, chats = {}, [], []
     for who, d in scan_docs(data_dir):
         src = str(d.get("src", ""))
+        # megaphones read off a stream count like a scanner's chat read: one more reader of the same post
+        if src in ("watcher-chat", "stream-chat"): chats.append((who, d)); continue
         if not src.startswith("watcher"): continue
-        if "chat" in src: chats.append((who, d)); continue
         docs.append((who, d))
         for r in d["rows"]:
             if r.get("so") or r.get("k") == "b" or now - int(r.get("t") or 0) > 86400: continue
@@ -678,10 +681,11 @@ def job_deals(data_dir, summary_path, state_path):
         roll = f" · **{plain(r['roll'], 40)}**, typical for this grade from {r['rolln']} sales" if r.get("roll") else ""
         line = (f'**{plain(shown(r.get("i")), 64)}**' + (f" ×{q}" if q > 1 else "") + f" listed at **{meso(int(r['p']))}** {coin()}" + (" each" if q > 1 else "")
                 + f"\n**+{meso(int(flip))}** {coin()} to flip · {int(round(off * 100))}% under typical {mz(int(it['typ']))}{roll}")
+        mgw = MEGA_WORD.get(r.get("mg") or "") if r.get("chat") else None
         if r.get("chat"):
-            where = ("Trade chat, CH " + str(int(r["c"]))) if str(r.get("c") or "").isdigit() else "Trade chat"
-            line += "\nPosted in trade chat: whisper the seller in game."
-        emb = {"title": "Mega deal" + (" in trade chat" if r.get("chat") else ""), "description": line, "color": GREEN,
+            where = (mgw.capitalize() if mgw else "Trade chat") + ((", CH " + str(int(r["c"]))) if str(r.get("c") or "").isdigit() else "")
+            line += "\nPosted " + ("by " + mgw if mgw else "in trade chat") + ": whisper the seller in game."
+        emb = {"title": "Mega deal" + ((" by " + mgw) if mgw else " in trade chat" if r.get("chat") else ""), "description": line, "color": GREEN,
                "fields": [{"name": "Seller", "value": ("`" + plain(r.get("s"), 24) + "`") if r.get("chat") else plain(r.get("s"), 24), "inline": True},
                           {"name": "Spot", "value": where.strip() or "?", "inline": True},
                           {"name": "Caught by", "value": plain(who, 24), "inline": True}],

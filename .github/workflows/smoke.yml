@@ -94,6 +94,9 @@ jobs:
         run: node tests/trainsim-check.cjs
       - name: Mega Deals repeat rules (one post per seller and item a day, a cap per item)
         run: python3 tests/deals-repeat.py
+      # Nov 25: megaphones and smegas read off streams: found by colour, read once, counted once, asks only
+      - name: Megaphones (stream reader, Discord, pulse, inbox, the board on a made-up market)
+        run: python3 tests/megaphones.py --board
       - name: Every indexable page names its canonical address
         run: |
           python3 - <<'PY'

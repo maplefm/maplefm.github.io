@@ -93,6 +93,7 @@ with sync_playwright() as p:
             print("board snapshot: %d bytes, %s" % (len(snap), r.status))
         except Exception as e: print("board snapshot upload", e)
     elif snap: print("board snapshot built, %d bytes (no key to upload)" % len(snap))
+    if snap and os.environ.get("SNAP_OUT"): open(os.environ["SNAP_OUT"], "w", encoding="utf-8").write(snap)   # tests read the whole board
     # the tidied spelling of every raw name, so visitors' first build skips that work
     nj = json.loads(names)
     print("names: %d, %d bytes" % (len(nj.get("cl") or {}), len(names)))
