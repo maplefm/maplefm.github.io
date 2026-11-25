@@ -68,6 +68,12 @@ jobs:
         run: |
           node tests/sitesearch-ux.cjs chromium phone
           node tests/sitesearch-ux.cjs chromium desktop
+      # Nov 25: scrolling the board felt choppy. Rows keep arriving while scrolling, icons load with their row, the Big
+      # sales strip holds still during a scroll, and a card opens and closes back to the same place.
+      - name: Board scrolls smoothly, phone and desktop
+        run: |
+          node tests/smooth-ux.cjs chromium phone
+          node tests/smooth-ux.cjs chromium desktop
       # Nov 18: the Zenith world opened with its own economy. One button switches the board; Zenith scans never
       # reach Windia's prices, reports or Discord posts.
       - name: World button shows one world's prices
