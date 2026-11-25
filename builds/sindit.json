@@ -3,17 +3,18 @@
  "header": {
   "class": "Thief",
   "job_path": "Thief (10) → Bandit (30)",
-  "build": "Sindit: claw and Lucky Seven, then dagger",
-  "pitch": "Throw Lucky Seven to 34, reset at 35, stab with a dagger from there.",
+  "build": "Sindit: Lucky Seven to 44, then Savage Blow",
+  "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, and switch to a dagger at 44. No reset needed.",
   "best_at": [
-   "Safe ranged start (10 to 34)",
-   "Single-target damage from 35",
-   "Cheap gear: shop claws and daggers to 50"
+   "Safe ranged training 10 to 43",
+   "Hits monsters on other platforms",
+   "Big single target damage from 44",
+   "No Cash Shop needed"
   ],
   "weak_spots": [
-   "One target at a time",
-   "Melee from 35: takes hits",
-   "Needs an SP Reset at 35",
+   "Bandit points do nothing until you switch",
+   "Melee from 44: takes hits",
+   "Stars cost mesos until 44",
    "DEX for daggers: 45 by 50, 65 by 70"
   ],
   "difficulty": "Medium",
@@ -21,10 +22,10 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2 (v2.0.0)",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 446846,
-    "shown": "about 447K"
+    "mesos": 539069,
+    "shown": "about 539K"
    },
-   "note": "weapons and stars at live typical prices, plus one SP Reset Scroll"
+   "note": "claws and daggers to 50 at live typical prices; stars extra"
   }
  },
  "stat_plan": {
@@ -42,12 +43,12 @@
    {
     "levels": "30",
     "ap": "DEX to 30, rest LUK",
-    "why": "level 30 claws and Halfmoon Zamadar need 30 DEX"
+    "why": "Mithril Guards, the level 30 claw, needs 30 DEX"
    },
    {
     "levels": "31 to 46",
     "ap": "all LUK",
-    "why": "Korean Fan at 40 needs no DEX"
+    "why": "Korean Fan, the switch dagger, needs no DEX"
    },
    {
     "levels": "47 to 49",
@@ -167,7 +168,7 @@
    "skill": "Lucky Seven",
    "id": 4001003,
    "to": 20,
-   "why": "main attack until 35: 2 stars a cast, uses LUK only"
+   "why": "main attack until 44: 2 stars a cast, 200 to 400 range with Keen Eyes"
   },
   {
    "level": 22,
@@ -199,83 +200,43 @@
    "skill": "Dark Sight",
    "id": 4001001,
    "to": 8,
-   "why": "spare points; all reset at 35"
+   "why": "last 1st job points"
   },
   {
-   "level": 34,
-   "book": "2nd job (before reset)",
-   "skill": "Haste",
-   "id": 4201001,
-   "to": 13,
-   "why": "comfort until the reset"
-  },
-  {
-   "level": 35,
-   "book": "1st job (after reset)",
-   "skill": "Double Stab",
-   "id": 4001002,
-   "to": 20,
-   "why": "main attack 35 to 43: 160% x 2, fast stab"
-  },
-  {
-   "level": 35,
-   "book": "1st job (after reset)",
-   "skill": "Nimble Body",
-   "id": 4000000,
-   "to": 15,
-   "why": "accuracy"
-  },
-  {
-   "level": 35,
-   "book": "1st job (after reset)",
-   "skill": "Disorder",
-   "id": 4001000,
-   "to": 6,
-   "why": "Dark Sight needs 3; 6 lowers monster defense by 2"
-  },
-  {
-   "level": 35,
-   "book": "1st job (after reset)",
-   "skill": "Dark Sight",
-   "id": 4001001,
-   "to": 20,
-   "why": "safety; 30 MP at max"
-  },
-  {
-   "level": 35,
-   "book": "2nd job (after reset)",
+   "level": 32,
+   "book": "2nd job",
    "skill": "Dagger Mastery",
    "id": 4200000,
    "to": 5,
-   "why": "opens Dagger Booster"
+   "why": "opens Dagger Booster; you keep throwing"
   },
   {
-   "level": 35,
-   "book": "2nd job (after reset)",
+   "level": 32,
+   "book": "2nd job",
    "skill": "Dagger Booster",
    "id": 4201000,
    "to": 1,
-   "why": "level 1 already gives the full 2-step speed up"
+   "why": "level 1 already gives the full speed up"
   },
   {
-   "level": 37,
-   "book": "2nd job (after reset)",
-   "skill": "Dagger Mastery",
-   "id": 4200000,
-   "to": 20,
-   "why": "mastery 10 in the game files: low rolls rise a lot"
-  },
-  {
-   "level": 44,
-   "book": "2nd job (after reset)",
+   "level": 39,
+   "book": "2nd job",
    "skill": "Savage Blow",
    "id": 4201003,
    "to": 21,
-   "why": "6 hits from 21 points: new main attack at 44"
+   "why": "6 hits from 21 points; ready before you switch"
+  },
+  {
+   "level": 44,
+   "book": "2nd job",
+   "skill": "Dagger Mastery",
+   "id": 4200000,
+   "to": 20,
+   "why": "switch to a dagger now: Savage Blow 21 and mastery 20"
   },
   {
    "level": 47,
-   "book": "2nd job (after reset)",
+   "book": "2nd job",
    "skill": "Savage Blow",
    "id": 4201003,
    "to": 30,
@@ -283,7 +244,7 @@
   },
   {
    "level": 53,
-   "book": "2nd job (after reset)",
+   "book": "2nd job",
    "skill": "Dagger Booster",
    "id": 4201000,
    "to": 20,
@@ -291,7 +252,7 @@
   },
   {
    "level": 55,
-   "book": "2nd job (after reset)",
+   "book": "2nd job",
    "skill": "Haste",
    "id": 4201001,
    "to": 5,
@@ -299,15 +260,15 @@
   },
   {
    "level": 65,
-   "book": "2nd job (after reset)",
+   "book": "2nd job",
    "skill": "Steal",
    "id": 4201002,
    "to": 30,
-   "why": "2 targets, stun; attack bonus not counted here"
+   "why": "2 targets, stun"
   },
   {
    "level": 70,
-   "book": "2nd job (after reset)",
+   "book": "2nd job",
    "skill": "Haste",
    "id": 4201001,
    "to": 20,
@@ -315,7 +276,7 @@
   },
   {
    "level": 77,
-   "book": "2nd job (after reset)",
+   "book": "2nd job",
    "skill": "Nimble Recovery",
    "id": 4200001,
    "to": 20,
@@ -335,9 +296,27 @@
     "typical": 3500,
     "shown": "3,500",
     "basis": "old",
-    "sales_seen": 12
+    "sales_seen": 3,
+    "rough": true
    },
    "why": "first claw"
+  },
+  {
+   "level": 10,
+   "slot": "Stars",
+   "item": "Subi Throwing Stars",
+   "id": 2070000,
+   "needs": "level only",
+   "attack": 15,
+   "speed": null,
+   "price": {
+    "typical": 449,
+    "shown": "449",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": false
+   },
+   "why": "500 a set"
   },
   {
    "level": 15,
@@ -348,10 +327,11 @@
    "attack": 13,
    "speed": 4,
    "price": {
-    "typical": 6500,
-    "shown": "6,500",
-    "basis": "ask",
-    "sales_seen": 5
+    "typical": 4399,
+    "shown": "4,399",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
    },
    "why": ""
   },
@@ -367,9 +347,27 @@
     "typical": 5999,
     "shown": "5,999",
     "basis": "old",
-    "sales_seen": 6
+    "sales_seen": 5,
+    "rough": true
    },
    "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Stars",
+   "item": "Wolbi Throwing Stars",
+   "id": 2070001,
+   "needs": "level only",
+   "attack": 17,
+   "speed": null,
+   "price": {
+    "typical": 1419,
+    "shown": "1,419",
+    "basis": "24h",
+    "sales_seen": 299,
+    "rough": false
+   },
+   "why": "+2 attack, 500 a set; your stars until 44"
   },
   {
    "level": 25,
@@ -383,41 +381,10 @@
     "typical": 8444,
     "shown": "8,444",
     "basis": "clean",
-    "sales_seen": 486
+    "sales_seen": 96,
+    "rough": false
    },
    "why": "speed 3: fastest claw"
-  },
-  {
-   "level": 10,
-   "slot": "Stars",
-   "item": "Subi Throwing Stars",
-   "id": 2070000,
-   "needs": "level only",
-   "attack": 15,
-   "speed": null,
-   "price": {
-    "typical": 499,
-    "shown": "499",
-    "basis": "ask",
-    "sales_seen": 19
-   },
-   "why": "500 a set"
-  },
-  {
-   "level": 20,
-   "slot": "Stars",
-   "item": "Wolbi Throwing Stars",
-   "id": 2070001,
-   "needs": "level only",
-   "attack": 17,
-   "speed": null,
-   "price": {
-    "typical": 1300,
-    "shown": "1,300",
-    "basis": "asks",
-    "sales_seen": 1285
-   },
-   "why": "+2 attack, 500 a set"
   },
   {
    "level": 30,
@@ -431,28 +398,13 @@
     "typical": 21728,
     "shown": "22K",
     "basis": "3d",
-    "sales_seen": 82
+    "sales_seen": 19,
+    "rough": true
    },
-   "why": "needs DEX 30"
+   "why": "needs DEX 30; your claw until 44"
   },
   {
-   "level": 35,
-   "slot": "Dagger",
-   "item": "Halfmoon Zamadar",
-   "id": 1332011,
-   "needs": "30 DEX, 70 LUK",
-   "attack": 53,
-   "speed": 4,
-   "price": {
-    "typical": 9988,
-    "shown": "9,988",
-    "basis": "clean",
-    "sales_seen": 230
-   },
-   "why": "needs DEX 30: wear it at the reset"
-  },
-  {
-   "level": 40,
+   "level": 44,
    "slot": "Dagger",
    "item": "Korean Fan",
    "id": 1332013,
@@ -460,12 +412,13 @@
    "attack": 55,
    "speed": 3,
    "price": {
-    "typical": 66666,
-    "shown": "67K",
+    "typical": 64999,
+    "shown": "65K",
     "basis": "24h",
-    "sales_seen": 663
+    "sales_seen": 72,
+    "rough": true
    },
-   "why": "speed 3, no DEX needed"
+   "why": "the switch weapon: speed 3, no DEX needed (wearable from 40)"
   },
   {
    "level": 50,
@@ -476,10 +429,11 @@
    "attack": 68,
    "speed": 4,
    "price": {
-    "typical": 322222,
-    "shown": "322K",
-    "basis": "3d",
-    "sales_seen": 184
+    "typical": 430000,
+    "shown": "430K",
+    "basis": "24h",
+    "sales_seen": 40,
+    "rough": true
    },
    "why": "needs DEX 45"
   },
@@ -524,15 +478,16 @@
    "attack": 19,
    "speed": null,
    "price": {
-    "typical": 219999,
-    "shown": "220K",
+    "typical": 225000,
+    "shown": "225K",
     "basis": "24h",
-    "sales_seen": 390
+    "sales_seen": 65,
+    "rough": false
    },
-   "why": "+2 attack over Wolbi for 5 levels; costly"
+   "why": "+2 attack over Wolbi; costly for 14 levels of throwing"
   },
   {
-   "level": 40,
+   "level": 44,
    "slot": "Dagger",
    "item": "Gephart",
    "id": 1332012,
@@ -543,7 +498,8 @@
     "typical": 24444,
     "shown": "24K",
     "basis": "clean",
-    "sales_seen": 306
+    "sales_seen": 34,
+    "rough": false
    },
    "why": "same damage as Korean Fan, needs DEX 35"
   }
@@ -574,24 +530,35 @@
  "resets": [
   {
    "what": "SP Reset Scroll",
-   "when": "level 35, the day you equip Halfmoon Zamadar",
+   "when": "not needed",
    "cost": {
     "nx": 7000,
     "mesos": {
-     "typical": null,
-     "shown": "no live price yet",
-     "basis": null
+     "typical": 188499,
+     "shown": "188K",
+     "basis": "24h",
+     "sales_seen": 68,
+     "rough": false
     }
    },
-   "worth_it": "Yes",
-   "why": "turns Lucky Seven's 20 points into Double Stab 20: 45% more damage per second at 35 (model)"
+   "worth_it": "No",
+   "why": "Lucky Seven's 20 points stay. They cost nothing once you stab"
   },
   {
    "what": "SP Reset Scroll",
-   "when": "no scroll",
-   "cost": null,
-   "worth_it": "Plan B",
-   "why": "keep throwing to 40, then Korean Fan with Savage Blow 21: 47% over Lucky Seven at 40 (model)"
+   "when": "only for bossing before 44",
+   "cost": {
+    "nx": 7000,
+    "mesos": {
+     "typical": 188499,
+     "shown": "188K",
+     "basis": "24h",
+     "sales_seen": 68,
+     "rough": false
+    }
+   },
+   "worth_it": "Maybe",
+   "why": "moves Lucky Seven's points into Double Stab for one big target. Throwing still trains faster"
   },
   {
    "what": "AP Reset Scroll",
@@ -599,9 +566,11 @@
    "cost": {
     "nx": 7000,
     "mesos": {
-     "typical": null,
-     "shown": "no live price yet",
-     "basis": null
+     "typical": 199999,
+     "shown": "200K",
+     "basis": "24h",
+     "sales_seen": 28,
+     "rough": false
     }
    },
    "worth_it": "Rarely",
@@ -725,7 +694,7 @@
      ]
     }
    ],
-   "tip": "still throwing"
+   "tip": "still throwing; Bandit points go to the dagger skills"
   },
   {
    "levels": "35 to 46",
@@ -753,7 +722,7 @@
      ]
     }
    ],
-   "tip": "Jr. Wraiths in the Kerning subway"
+   "tip": "throw to 43, stab from 44"
   },
   {
    "levels": "47 to 49",
@@ -921,36 +890,36 @@
   }
  ],
  "why": [
-  "**Reset at 35, not sooner:** with a level 30 dagger the gain is only 15 to 28% (levels 32 to 34); Halfmoon Zamadar at 35 makes it 45%",
-  "**Double Stab before Savage Blow:** Double Stab 20 does more until Savage Blow has 21 points (6 hits), which is level 44",
-  "**Shop gear to 50:** every weapon here is under 70K mesos except Shinkita",
-  "**Korean Fan at 40:** speed 3, no DEX need, within 3% of Gephart (35 DEX)",
-  "**Mastery first:** Dagger Mastery 20 is mastery 10 in the game files; your lowest hit at 37 is 2.7x higher"
+  "**Throw while you train:** Lucky Seven hits from 200 to 400 away, so you pick monsters off a platform without walking up or taking touch damage",
+  "**Switch at 44, not 35:** a dagger only wins on one monster standing still before then. Once Savage Blow has 21 points and mastery is 20, it wins by enough to cover the walking",
+  "**Dagger points first:** Bandit points can't help a claw, so they all go toward the switch and it lands as early as possible",
+  "**Korean Fan:** speed 3 and no DEX need, so the switch costs no AP",
+  "**No reset:** Lucky Seven's 20 points stay in the book. Nothing is lost by leaving them"
  ],
  "mistakes": [
-  "**Resetting before a level 35 dagger:** level 30 daggers lose to Lucky Seven",
-  "**Savage Blow before Dagger Mastery:** under 21 points it is weaker than Double Stab",
+  "**Switching to a dagger at 35:** melee before Savage Blow 21 trains slower than throwing",
+  "**Haste before the dagger skills:** it pushes the switch back several levels",
   "**More than 1 point in Dagger Booster early:** level 1 already gives the full speed up",
   "**Skipping DEX before 50:** Shinkita needs 45 DEX, Deadly Fin 55, Kandine 65",
-  "**Buying Kumbi or Tobi stars:** you stop throwing at 35"
+  "**Buying Kumbi or Tobi stars:** you stop throwing at 44"
  ],
  "compare": [
   {
    "build": "Sindit (this guide)",
-   "main_attack": "Lucky Seven, Double Stab, Savage Blow",
-   "best_at": "ranged start, cheap gear",
-   "weak": "needs a reset at 35"
+   "main_attack": "Lucky Seven to 43, Savage Blow from 44",
+   "best_at": "ranged training, no Cash Shop",
+   "weak": "Bandit points wait until 44"
   },
   {
-   "build": "Sindit, no reset",
-   "main_attack": "Lucky Seven to 39, Savage Blow from 40",
-   "best_at": "no Cash Shop",
-   "weak": "17% less damage at 40, 5 weaker levels 35 to 39"
+   "build": "Sindit, reset at 35",
+   "main_attack": "Lucky Seven, Double Stab, Savage Blow",
+   "best_at": "one big target 35 to 43",
+   "weak": "melee earlier, trains slower, costs a scroll"
   },
   {
    "build": "Pure Bandit (dagger from 10)",
    "main_attack": "Double Stab, Savage Blow",
-   "best_at": "no reset",
+   "best_at": "no stars to buy",
    "weak": "melee from 10",
    "note": "training page Typical build"
   },
@@ -959,7 +928,7 @@
    "main_attack": "Lucky Seven, Drain",
    "best_at": "range all the way",
    "weak": "stars cost: Kumbi to Steely",
-   "note": "training page Typical build; Typical claws need more DEX than it has"
+   "note": "training page Typical build"
   },
   {
    "build": "Dexless Bandit",
@@ -967,13 +936,6 @@
    "best_at": "highest LUK",
    "weak": "misses; can't wear DEX daggers",
    "note": "training page Typical build"
-  },
-  {
-   "build": "STR Bandit",
-   "main_attack": "Savage Blow with STR daggers",
-   "best_at": "faster daggers (Bazlud, Sai)",
-   "weak": "not in the engine yet",
-   "note": "waits for Adam's review; see str-bandit-engine.md"
   }
  ],
  "future": [
@@ -985,7 +947,7 @@
  ],
  "search": {
   "title": "Sindit Build Guide: AP, SP and When to Switch | Club FM",
-  "description": "MapleStory Classic sindit: Lucky Seven to 34, SP reset at 35, Double Stab then Savage Blow. AP, SP, gear and maps by level.",
+  "description": "MapleStory Classic sindit: throw Lucky Seven to 44, then Savage Blow with a dagger. No reset. AP, SP, gear and maps by level.",
   "slug": "/builds/sindit/",
   "keywords": [
    "sindit",
@@ -1009,7 +971,7 @@
    "dagger bandit",
    "maplestory classic sindit",
    "classic world bandit",
-   "sindit reset"
+   "sindit no reset"
   ],
   "sitesearch": [
    "Sindit build guide",
