@@ -63,7 +63,7 @@ CSS = r"""
 .gw-grid{display:grid;grid-template-columns:250px 1fr 330px;gap:14px;align-items:start}
 .win{background:linear-gradient(#2b3a67,#1b2546);border:2px solid #c9a24a;border-radius:10px;color:#eef2ff;box-shadow:0 0 0 2px #10172e,0 8px 24px rgba(16,23,46,.3);margin-bottom:14px}
 .win h2{margin:0;font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;background:linear-gradient(#f8d977,#c9a24a);color:#3b2a06;border-radius:7px 7px 0 0}
-.win .in{padding:12px}.win a{color:#fde047}
+.win .in{padding:12px}.gw .win table,.gw .win td,.gw .win th{color:#eef2ff}.gw .win td.gn{color:#fde047;text-align:left}.win a{color:#fde047}
 .srow{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;margin:5px 0;border-radius:6px;background:rgba(255,255,255,.06);font-weight:700}
 .srow span{color:#9fb0e8;font-size:12px;letter-spacing:.08em}.srow b{font-size:18px}.srow.hi{background:rgba(245,158,11,.22);outline:1px solid #f59e0b}
 .wtip{font-size:13px;color:#c7d2fe;margin-top:8px;line-height:1.45}
@@ -73,7 +73,7 @@ CSS = r"""
 .sk{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.05);margin:6px 0}
 .sk.off{opacity:.45}.sk .nm{font-weight:700}.sk .bar{height:6px;border-radius:6px;background:#0f1730;margin-top:5px;overflow:hidden}.sk .bar i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#fde047)}
 .sk .pt{font-weight:800;font-size:15px;color:#fde047}.sk small{color:#9fb0e8;font-size:12px}
-.need{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.need span{font-size:11px;font-weight:800;letter-spacing:.04em;border-radius:5px;padding:3px 7px;background:rgba(255,255,255,.1);color:#eef2ff}.need span em{font-style:normal;color:#9fb0e8;margin-right:4px}
+.gneed{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.gneed span{font-size:11px;font-weight:800;letter-spacing:.04em;border-radius:5px;padding:3px 7px;background:rgba(255,255,255,.1);color:#eef2ff}.gneed span em{font-style:normal;color:#9fb0e8;margin-right:4px}
 .wpn{display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:center}
 .wpn .slot{width:60px;height:60px;border-radius:10px;display:grid;place-items:center;background:rgba(245,158,11,.18);border:1px solid #f59e0b}
 .wpn .slot img{width:38px;height:38px;image-rendering:pixelated}.wpn b{font-size:17px}.wpn small{display:block;color:#9fb0e8}
@@ -86,20 +86,20 @@ a.way:hover{border-color:#fde047}.way .tg{font-size:10px;font-weight:900;letter-
 .next{margin-top:10px;font-size:13px;color:#c7d2fe}
 .mapc{display:flex;gap:10px;flex-wrap:wrap}
 .mp{flex:1 1 200px;position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 12px;color:#eef2ff!important;text-decoration:none;font-weight:700}
-.mp small{display:block;color:#9fb0e8;font-weight:500}.mp .mm{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;background:#10172e;border:2px solid #c9a24a;border-radius:10px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.45);width:max-content;max-width:min(340px,86vw)}
-.mp .mm img{display:block;max-width:100%;height:auto;image-rendering:pixelated;border-radius:4px;min-width:160px}.mp .mm span{display:block;font-size:12px;color:#c7d2fe;margin-top:6px;font-weight:600}
-.mp:hover .mm,.mp.open .mm{display:block}
-.box{max-height:min(1050px,72vh);overflow:auto;border-radius:8px;background:rgba(0,0,0,.12)}
-.box table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-.box th{position:sticky;top:0;z-index:2;background:#22305a;text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9fb0e8;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.15)}
-.box td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
-.box tr.ch td{background:rgba(245,158,11,.14)}.box tr.ch td:first-child{box-shadow:inset 3px 0 #f59e0b}
-.box td.n{font-weight:800;color:#fde047}.box td.v{font-variant-numeric:tabular-nums}.box td.up{color:#fde047;font-weight:800}
+.mp small{display:block;color:#9fb0e8;font-weight:500}.mp .gmm{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;background:#10172e;border:2px solid #c9a24a;border-radius:10px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.45);width:max-content;max-width:min(340px,86vw)}
+.mp .gmm img{display:block;max-width:100%;height:auto;image-rendering:pixelated;border-radius:4px;min-width:160px}.mp .gmm span{display:block;font-size:12px;color:#c7d2fe;margin-top:6px;font-weight:600}
+.mp:hover .gmm,.mp.open .gmm{display:block}
+.gbox{max-height:min(1050px,72vh);overflow:auto;border-radius:8px;background:rgba(0,0,0,.12)}
+.gbox table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+.gbox th{position:sticky;top:0;z-index:2;background:#22305a;text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9fb0e8;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.15)}
+.gbox td{color:#eef2ff;text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.gbox tr.gch td{background:rgba(245,158,11,.14)}.gbox tr.gch td:first-child{box-shadow:inset 3px 0 #f59e0b}
+.gbox td.gn{font-weight:800;color:#fde047}.gbox td.gv{font-variant-numeric:tabular-nums}.gbox td.gup{color:#fde047;font-weight:800}
 .boxbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
 .boxbar button{font:800 12px inherit;border-radius:7px;padding:6px 10px;border:1px solid rgba(255,255,255,.18);background:#33447a;color:#eef2ff;cursor:pointer}
 .boxbar label{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:13px;font-weight:700;color:#c7d2fe;cursor:pointer}
 .boxbar input{accent-color:#f59e0b;width:16px;height:16px}
-.box.only tr:not(.ch):not(.hd){display:none}
+.gbox.only tr:not(.gch):not(.thd){display:none}
 .spr td:nth-child(2){white-space:normal}.spr .si{display:inline-flex;align-items:center;gap:6px;margin:2px 12px 2px 0;font-weight:600}.spr .si .ski{width:24px;height:24px;border-radius:5px}.spr .si .ski img{width:24px;height:24px}
 .all{margin-top:4px}.all>summary{list-style:none;cursor:pointer}.all>summary::-webkit-details-marker{display:none}
 .all table.t{width:100%;border-collapse:collapse;font-size:14px}.all .t th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9fb0e8;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.15)}
@@ -110,7 +110,7 @@ a.way:hover{border-color:#fde047}.way .tg{font-size:10px;font-weight:900;letter-
 .cmp a,.cmp div.c{display:block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 12px;color:#eef2ff!important;text-decoration:none}
 .cmp a:hover{border-color:#fde047}.cmp b{display:block}.cmp small{display:block;color:#9fb0e8;margin-top:3px}.cmp .go{font-size:12px;font-weight:800;color:#fde047;margin-top:6px}.cmp .soon{font-size:12px;color:#9fb0e8;margin-top:6px}
 @media(max-width:1000px){.gw-grid{grid-template-columns:1fr 1fr}.gw-grid .skw{grid-column:1/-1;order:3}}
-@media(max-width:640px){.gw-grid,.gw-low{grid-template-columns:1fr}.gw-ctl{width:100%}.gw-lv{flex:1 1 100%}.gw-lv input{flex:1;width:auto}.gbtn{flex:1}.box{max-height:70vh}.boxbar label{margin-left:0}}
+@media(max-width:640px){.gw-grid,.gw-low{grid-template-columns:1fr}.gw-ctl{width:100%}.gw-lv{flex:1 1 100%}.gw-lv input{flex:1;width:auto}.gbtn{flex:1}.gbox{max-height:70vh}.boxbar label{margin-left:0}}
 """
 
 JS = r"""
@@ -120,7 +120,7 @@ const ab=n=>n.split(" ").map(w=>w[0]).join("").slice(0,2);
 function skFail(img){const b=document.createElement("b");b.textContent=img.dataset.ab;img.replaceWith(b)}
 const ski=n=>{const id=D.sid[n];return`<span class="ski">${id?`<img src="${D.skimg(id)}" alt="" data-ab="${ab(n)}" onerror="skFail(this)">`:`<b>${ab(n)}</b>`}</span>`};
 const S=D.stats;let book="1st job",touched=0;
-function needs(w){return`<div class="need">${w.needs.map(([k,v])=>`<span>${k?`<em>${E(k)}</em>`:""}${E(v)}</span>`).join("")}</div>`}
+function needs(w){return`<div class="gneed">${w.needs.map(([k,v])=>`<span>${k?`<em>${E(k)}</em>`:""}${E(v)}</span>`).join("")}</div>`}
 function waysHtml(w){const c=[],npcs=w.ways.filter(x=>x.k=="npc");
  const cheapest=Math.min(...npcs.map(x=>x.p),w.fmv||Infinity),both=npcs.length&&w.fmv;
  for(const x of npcs)c.push([`way npc${both&&x.p==cheapest?" best":""}`,x.u,"NPC",`${E(x.t)}<small>${E(x.s)}</small>`,`${both&&x.p==cheapest?'<span class="cheap">CHEAPEST</span>':""}${fmt(x.p)}`]);
@@ -137,14 +137,14 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):"starts at level "+D.first[n]}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
  eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b><a href="/item/${w.slug}/">${E(w.item)}</a></b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
- const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="mm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
+ const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
  try{history.replaceState(null,"",L==D.start?location.pathname:"#lv"+L)}catch(e){}
 }
 mpw.addEventListener("click",e=>{const a=e.target.closest(".mp");if(!a||!matchMedia("(hover:none)").matches)return;if(!a.classList.contains("open")){e.preventDefault();mpw.querySelectorAll(".mp.open").forEach(x=>x.classList.remove("open"));a.classList.add("open")}});
-stb.innerHTML='<table><tr class="hd"><th>Lv</th><th>AP this level</th><th>STR</th><th>DEX</th><th>INT</th><th>LUK</th></tr>'+S.map((s,i)=>{const p=S[i-1];return`<tr id="sv${s.l}" class="${s.ch?"ch":""}"><td class="n">${s.l}</td><td>${E(s.ap)}</td>${s.t.map((v,k)=>`<td class="v${p&&v!=p.t[k]?" up":""}">${v}</td>`).join("")}</tr>`}).join("")+"</table>";
+stb.innerHTML='<table><tr class="thd"><th>Lv</th><th>AP this level</th><th>STR</th><th>DEX</th><th>INT</th><th>LUK</th></tr>'+S.map((s,i)=>{const p=S[i-1];return`<tr id="sv${s.l}" class="${s.ch?"gch":""}"><td class="gn">${s.l}</td><td>${E(s.ap)}</td>${s.t.map((v,k)=>`<td class="gv${p&&v!=p.t[k]?" gup":""}">${v}</td>`).join("")}</tr>`}).join("")+"</table>";
 document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{if(chg.checked){chg.checked=false;stb.classList.remove("only")}const r=document.getElementById("sv"+b.dataset.jump);if(r)stb.scrollTop=r.offsetTop-stb.querySelector("th").offsetHeight});
 chg.onchange=()=>stb.classList.toggle("only",chg.checked);
-spb.innerHTML='<table><tr class="hd"><th>Lv</th><th>Where the points go</th></tr>'+D.spLevels.map(r=>`<tr class="spr${r.ch?" ch":""}"><td class="n">${r.l}</td><td>${r.note?`<b style="color:#fde047;margin-right:10px">${E(r.note)}</b>`:""}${r.put.map(([n,k])=>`<span class="si">${ski(n)}${E(n)} +${k}</span>`).join("")}${r.spare?`<span class="si" style="color:#9fb0e8">${r.spare} spare, save for 3rd job</span>`:""}</td></tr>`).join("")+"</table>";
+spb.innerHTML='<table><tr class="thd"><th>Lv</th><th>Where the points go</th></tr>'+D.spLevels.map(r=>`<tr class="spr${r.ch?" gch":""}"><td class="gn">${r.l}</td><td>${r.note?`<b style="color:#fde047;margin-right:10px">${E(r.note)}</b>`:""}${r.put.map(([n,k])=>`<span class="si">${ski(n)}${E(n)} +${k}</span>`).join("")}${r.spare?`<span class="si" style="color:#9fb0e8">${r.spare} spare, save for 3rd job</span>`:""}</td></tr>`).join("")+"</table>";
 const m=location.hash.match(/^#lv(\d+)$/);if(m)lv.value=Math.min(D.cap,Math.max(1,+m[1]));
 lv.oninput=draw;fin.onclick=()=>{lv.value=D.cap;draw()};
 allb.onclick=()=>{all.open=!all.open;if(all.open)all.scrollIntoView({behavior:"smooth"})};all.ontoggle=()=>allb.textContent=all.open?"Hide the whole guide":"See the whole guide";
@@ -251,7 +251,7 @@ def build(name):
             "gear": gear, "train": train, "ammo": ammo}
 
     def t_(head, rws): return '<div class="tw"><table class="t"><tr>' + "".join(f"<th>{x}</th>" for x in head) + "</tr>" + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rws) + "</table></div>"
-    def need_h(g): return '<div class="need">' + "".join(f"<span>{'<em>' + E(k) + '</em>' if k else ''}{E(v)}</span>" for k, v in g["needs"]) + "</div>"
+    def need_h(g): return '<div class="gneed">' + "".join(f"<span>{'<em>' + E(k) + '</em>' if k else ''}{E(v)}</span>" for k, v in g["needs"]) + "</div>"
     def ways_h(g):
         parts = []
         for w in g["ways"]:
@@ -283,8 +283,8 @@ def build(name):
             '<div class="win"><h2>Weapon</h2><div class="in" id="eqw"></div></div></div>'
             '<div class="win"><h2>Where to train</h2><div class="in"><div class="mapc" id="mpw"></div></div></div>'
             '<div class="win"><h2>Stats by level</h2><div class="in"><div class="boxbar">' + "".join(f'<button type="button" data-jump="{x}">Lv {x}</button>' for x in (1, 10, 30, 44, 50, 70)) +
-            '<label><input type="checkbox" id="chg"> Changes only</label></div><div class="box" id="stb"></div></div></div>'
-            '<div class="win"><h2>Skill points by level</h2><div class="in"><div class="box" id="spb"></div></div></div>'
+            '<label><input type="checkbox" id="chg"> Changes only</label></div><div class="gbox" id="stb"></div></div></div>'
+            '<div class="win"><h2>Skill points by level</h2><div class="in"><div class="gbox" id="spb"></div></div></div>'
             '<div class="win"><h2>Other ways to build it</h2><div class="in"><div class="cmp">' + "".join(cmp) + "</div></div></div>"
             f'<div class="gw-low"><div class="win"><h2>Why this way</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["why"])}</ol></div></div>'
             f'<div class="win"><h2>Common mistakes</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["mistakes"])}</ol></div></div></div>'
