@@ -28,6 +28,7 @@ def page_data(slug):
 
 def check(slug):
     D = page_data(slug); bad = []; n = 0
+    CAP = D.get("cap") or 70
     st = {r["l"]: r["t"] for r in D["stats"]}
     # stats
     c = st[1]; n += 1
@@ -41,7 +42,7 @@ def check(slug):
     J = json.load(open(os.path.join(B, slug + ".json"))); cr = J["creation"]; cls = J["header"]["class"]
     if not cr.get("raise") and cls in ARMOR_NEEDS:
         si = ["STR", "DEX", "INT", "LUK"].index(cr["sub"])
-        for L, need in ARMOR_NEEDS[cls][cr["sub"]]:
+        for L, need in [x for x in ARMOR_NEEDS[cls][cr["sub"]] if x[0] <= CAP]:
             n += 1
             if st[L][si] < need: bad.append((L, f"level {L} {cls.lower()} armor needs {need} {cr['sub']}, page has {st[L][si]}"))
     # weapons
