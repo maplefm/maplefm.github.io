@@ -29,8 +29,8 @@ CSS = G.CSS + r"""
 .stt{width:100%;border-collapse:collapse;font-size:14px}
 .gw .stt th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9fb0e8;padding:8px;border-bottom:1px solid rgba(255,255,255,.15);white-space:nowrap}
 .gw .stt td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:middle;color:#eef2ff;text-align:left}
-.stt .nm{display:flex;align-items:center;gap:10px;font-weight:700}.stt .nm img{width:32px;height:32px;image-rendering:pixelated;flex:none}
-.stt .nm small{display:block;font-weight:500;color:#9fb0e8}
+.stt .snm{display:flex;align-items:center;gap:10px;font-weight:700;white-space:nowrap}.gw .stt td.sit{min-width:280px}.stt .snm img{width:32px;height:32px;image-rendering:pixelated;flex:none}
+.stt .snm small{display:block;font-weight:500;color:#9fb0e8}
 .stt .atk{font-weight:900;color:#fde047;font-size:16px}.stt small{color:#9fb0e8}
 .stt .npc{color:#eef2ff}.stt .none{color:#9fb0e8}
 .stt tr.lux td{background:rgba(245,158,11,.06)}
@@ -38,9 +38,9 @@ CSS = G.CSS + r"""
 .pill.buy{background:#34d399;color:#06281c}.pill.lux{background:#f8d977;color:#3b2a06}
 .note{display:flex;gap:12px;align-items:flex-start}.gw .note p{color:#dbe2ff;font-size:15px;line-height:1.55}.note b{color:#fde047}
 .stw{overflow-x:auto}
-@media(max-width:700px){.stt,.stt tbody,.stt tr,.stt td{display:block;width:auto}.stt tr:first-child{display:none}
+@media(max-width:1000px){.gw .stt td.sit{min-width:0}.stt .snm{white-space:normal}.stt,.stt tbody,.stt tr,.stt td{display:block;width:auto}.stt tr:first-child{display:none}
 .stt tr{border-bottom:1px solid rgba(255,255,255,.12);padding:10px 0;display:grid;grid-template-columns:repeat(3,auto);gap:6px 14px;justify-content:start}
-.gw .stt td{border:0;padding:0}.stt td.it{grid-column:1/-1}.stt td[data-l="NPC"],.stt td[data-l="Free Market"]{grid-column:1/-1}
+.gw .stt td{border:0;padding:0}.stt td.sit{grid-column:1/-1}.stt td[data-l="NPC"],.stt td[data-l="Free Market"]{grid-column:1/-1}
 .stt tr.lux{background:rgba(245,158,11,.06)}.stt tr.lux td{background:none}.stt td[data-l]:before{content:attr(data-l);display:block;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9fb0e8}}
 """
 
@@ -69,7 +69,8 @@ def build():
             sh, f = shops(n), fm(n)
             slug = W.slug(n)
             link = os.path.exists(os.path.join(ROOT, "item", slug, "index.html"))
-            npc = (f'<span class="npc">{E(sh[0][0])}, {"<a href=\"/map/" + W.slug(sh[0][1]) + "/\">" + E(sh[0][1]) + "</a>" if G.exists("map", W.slug(sh[0][1])) else E(sh[0][1])}<br><b>{mesos(sh[0][2] * (1000 if unit == "each" else 1))}</b> {"per 1,000" if unit == "each" else unit}</span>'
+            nl = G.npc_link(sh[0][0]) if sh else ""
+            npc = (f'<span class="npc">{("<a href=" + chr(34) + nl + chr(34) + ">" + E(sh[0][0]) + "</a>") if nl else E(sh[0][0])}, {E(sh[0][1])}<br><b>{mesos(sh[0][2] * (1000 if unit == "each" else 1))}</b> {"per 1,000" if unit == "each" else unit}</span>'
                    + (f'<br><small>also {len(sh) - 1} more NPC{"s" if len(sh) > 2 else ""}</small>' if len(sh) > 1 else "")) if sh else '<span class="none">not sold by NPCs</span>'
             if f:
                 note = "asking prices only" if not f["sales"] else f'{f["sales"]} sale{"s" if f["sales"] != 1 else ""} seen' + (", mostly asking prices" if f["asks"] else "")
@@ -82,8 +83,8 @@ def build():
             lux = kind == "Claw" and not sh
             name = f'<img src="/i/{a["id"]}.png" alt="" width="32" height="32"><span>{E(n)}' + (
                 '<span class="pill buy">NPC</span>' if sh else '<span class="pill lux">Luxury</span>' if lux else "") + "</span>"
-            name = f'<a class="nm" href="/item/{slug}/">{name}</a>' if link else f'<span class="nm">{name}</span>'
-            out.append((lux, f'<tr class="{"lux" if lux else ""}"><td class="it">{name}</td><td class="atk" data-l="Attack">+{a["atk"]}</td><td data-l="Set size">{a["slotMax"]:,}</td>'
+            name = f'<a class="snm" href="/item/{slug}/">{name}</a>' if link else f'<span class="snm">{name}</span>'
+            out.append((lux, f'<tr class="{"lux" if lux else ""}"><td class="sit">{name}</td><td class="atk" data-l="Attack">+{a["atk"]}</td><td data-l="Set size">{a["slotMax"]:,}</td>'
                              f'<td data-l="Level">{a.get("reqLevel") or "any"}</td><td data-l="NPC">{npc}</td><td data-l="Free Market">{fmh}</td></tr>'))
         head = '<div class="stw"><table class="stt"><tr><th>Item</th><th>Attack</th><th>Set size</th><th>Level</th><th>NPC</th><th>Free Market</th></tr>'
         return head + "".join(r for _, r in out) + "</table></div>"

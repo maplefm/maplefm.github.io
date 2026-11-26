@@ -33,12 +33,34 @@ def rng(s):
     return (int(m.group(1)), int(m.group(2) or m.group(1))) if m else None
 
 
+_NPCMAP = None
+def npc_link(npc):
+    """the interactive map, opened where the NPC is, with the NPC flashing. Shop insides have no minimap, so for an
+    NPC indoors it opens the map outside and flashes the door in."""
+    global _NPCMAP
+    from urllib.parse import quote
+    maps = load("world.json")["maps"]
+    if _NPCMAP is None:
+        _NPCMAP = {}
+        for mn, m in maps.items():
+            for x in m.get("npcs") or []:
+                _NPCMAP.setdefault(x[0], mn)
+    mn = _NPCMAP.get(npc)
+    if not mn: return ""
+    m = maps[mn]
+    if m.get("mm") and any(x[0] == npc and x[1] is not None for x in m.get("npcs") or []):
+        return f"/map.html#map={quote(mn)}&npc={quote(npc)}"
+    outside = next((on for on, o in maps.items() if o.get("mm") and any(p[0] == mn for p in o.get("portals") or [])), None)
+    if outside: return f"/map.html#map={quote(outside)}&npc={quote(npc)}&door={quote(mn)}"
+    return f"/map.html#map={quote(mn)}"
+
+
 def ways(guide, name):
     g = guide.get(name) or {}
     out = []
     for npc, town, price in sorted({(s[0], s[1], s[2]) for s in g.get("s", []) if s[2]}, key=lambda s: s[2])[:2]:
         ts = W.slug(town)
-        out.append({"k": "npc", "t": npc, "s": town, "p": price, "u": f"/map/{ts}/" if exists("map", ts) else ""})
+        out.append({"k": "npc", "t": npc, "s": town, "p": price, "u": npc_link(npc) or (f"/map/{ts}/" if exists("map", ts) else "")})
     for mob, lv in sorted({(x[0], x[1]) for x in g.get("d", []) if x[1]}, key=lambda x: x[1])[:3]:
         ms = W.slug(mob)
         out.append({"k": "drop", "t": mob, "s": f"Lv {lv}", "u": f"/monster/{ms}/" if exists("monster", ms) else ""})
