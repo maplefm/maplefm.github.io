@@ -145,6 +145,30 @@ jobs:
               except Exception as e: miss.append(i); print("miss", i, e)
           print("item icons missing", miss)
           PY
+      - run: |
+          python3 - <<'PY'
+          # every armor piece up to level 70 with its stat requirements, so guides keep stats high enough to wear the gear
+          # players use, not only the weapon
+          import json, sys, urllib.request, concurrent.futures as cf
+          sys.path.insert(0, "tools")
+          import mcwver
+          IO = mcwver.base().rstrip("/")
+          UA = {"User-Agent": "maplefm.gg game data"}
+          db = json.loads(urllib.request.urlopen("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json", timeout=60).read())
+          K = db["kinds"]; want = {"Hat", "Top", "Overall", "Bottom", "Glove", "Shoes", "Shield", "Cape", "Earrings"}
+          rows = [r for r in db["items"] if r[5] < len(K) and K[r[5]].split(":")[-1] in want and (r[2] or 0) <= 70]
+          def get(r):
+              try:
+                  m = json.loads(urllib.request.urlopen(urllib.request.Request(f"{IO}/item/{r[1]}", headers=UA), timeout=40).read()).get("metaInfo") or {}
+                  return r[0], {"kind": K[r[5]].split(":")[-1], "id": r[1], **{k: m.get(k) for k in ("reqLevel", "reqSTR", "reqDEX", "reqINT", "reqLUK", "reqJob", "cash", "incPDD", "incMDD", "incSTR", "incDEX", "incINT", "incLUK", "incACC", "incEVA", "tuc")}}
+              except Exception as e:
+                  return r[0], {"kind": K[r[5]].split(":")[-1], "id": r[1], "err": str(e)[:80]}
+          out = {}
+          with cf.ThreadPoolExecutor(8) as ex:
+              for n, rec in ex.map(get, rows): out.setdefault(n, rec)
+          json.dump(out, open("builds/data/armor.json", "w"), indent=0, sort_keys=True)
+          print("armor", len(out), "errors", sum(1 for v in out.values() if "err" in v))
+          PY
       - run: python3 builds/tools/spotcheck.py
       - run: python3 builds/tools/checkguides.py
       - run: |
