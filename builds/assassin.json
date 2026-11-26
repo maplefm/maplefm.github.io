@@ -7,8 +7,8 @@
   "pitch": "LUK with DEX only to each claw's need. Lucky Seven from 10, then Claw Mastery, Critical Throw and Haste.",
   "best_at": [
    "Ranged from level 10",
-   "Hits mobs on other platforms",
-   "Lucky Seven carries you all the way to 70"
+   "Lucky Seven carries you all the way to 70",
+   "Claw Mastery gives stars back 25% of the time"
   ],
   "weak_spots": [
    "Stars cost mesos to recharge",
@@ -791,17 +791,18 @@
  ],
  "why": [
   "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it's your main attack all the way to 70.",
+  "Keen Eyes 15 adds range to Lucky Seven, 200 at 15, and needs Nimble Body 3. Nimble Body 15 is +15 accuracy and +15 avoid.",
   "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
-  "Critical Throw 30: 15% of your throws crit for 35% more damage. It's the main damage skill of 2nd job.",
-  "Haste 20 before Drain. Drain is a 240% single hit that heals you, Lucky Seven already does more, and Haste gets you around maps faster.",
+  "Critical Throw 30 is 15% critical rate for +35% damage on those hits. 2nd job gives a claw no new attack except Drain, so your damage gains come from this and Claw Mastery.",
+  "Haste 20 before Drain: +30 speed and +10 jump for 300 seconds. Drain is a 240% hit on one mob that heals you, and Lucky Seven already does more.",
   "Drain is locked until Critical Recovery is 3, so 3 points go there first.",
-  "Claws need DEX equal to their level. You only put AP in DEX in the levels right before each new claw, everything else goes into LUK."
+  "Claws need DEX equal to their level from Mithril Titans at 15. AP only goes into DEX in the levels right before each new claw, everything else goes into LUK."
  ],
  "mistakes": [
-  "Buying Kumbi or Tobi stars to level. Wolbi from Max in Kerning City is 1,000 a set and is all you need; the big stars are a luxury.",
-  "Skipping DEX before a new claw. Steel Slain at 50 needs 50 DEX and Blood Gigantic at 60 needs 60.",
-  "Maxing Claw Booster early. Level 1 is already the full speed boost; the other points only stretch it from 100 to 300 seconds.",
-  "Trying to put SP in Drain without Critical Recovery 3. The game won't let you, so plan those 3 points."
+  "Buying Kumbi or Tobi stars to level. Kumbi is +4 attack over Wolbi, 21 against 17, for a lot more mesos. Wolbi from Max in Kerning City is all you need.",
+  "Skipping DEX before a new claw. Steel Slain needs 50 DEX at 50, so put your AP from 49 and 50 into DEX, or you stay on Blood Avarice's 29 attack instead of 34. Same at 59 and 60 for Blood Gigantic.",
+  "Maxing Claw Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's up to 19 SP, over 6 levels, that belongs in Claw Mastery and Critical Throw.",
+  "Putting SP into Double Stab. It only works with a dagger, so a claw Assassin never uses it. Those points belong in Lucky Seven."
  ],
  "compare": [
   {

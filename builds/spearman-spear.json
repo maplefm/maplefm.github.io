@@ -4,11 +4,11 @@
   "class": "Warrior",
   "job_path": "Warrior (10) → Spearman (30)",
   "build": "Spearman, spear",
-  "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast 20 by level 23, then Spear Mastery, Final Attack and Rush.",
+  "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast 20 by level 23, then Spear Mastery, Final Attack, Booster and Rush.",
   "best_at": [
-   "Slash Blast hits 6 mobs from level 10",
-   "Spears are a step faster than polearms, speed 6 to 7",
-   "Final Attack: Spear hits for 350%"
+   "Slash Blast hits 6 mobs from level 17",
+   "Spears are a step faster than polearms",
+   "Spear Mastery 20 gives a 20% chance to ignore weapon defense"
   ],
   "weak_spots": [
    "Spears hit a little softer than polearms until 70",
@@ -191,13 +191,21 @@
   {
    "level": 32,
    "book": "2nd job",
+   "skill": "Final Attack: Spear",
+   "id": 1301000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
    "skill": "Rush",
    "id": 1301005,
    "to": 1,
    "why": ""
   },
   {
-   "level": 37,
+   "level": 38,
    "book": "2nd job",
    "skill": "Spear Mastery",
    "id": 1300000,
@@ -597,14 +605,6 @@
    "levels": "35 to 39",
    "maps": [
     {
-     "map": "The Land of Wild Boar II",
-     "monsters": [
-      "Wild Boar",
-      "Axe Stump",
-      "Dark Axe Stump"
-     ]
-    },
-    {
      "map": "Line 2 (Area 1)",
      "monsters": [
       "Jr. Wraith",
@@ -612,9 +612,17 @@
      ]
     },
     {
-     "map": "Tree Dungeon, Forest Up North VIII",
+     "map": "The Burnt Land III",
      "monsters": [
-      "Curse Eye"
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
      ]
     }
    ],
@@ -787,28 +795,28 @@
   }
  ],
  "why": [
-  "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
-  "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
-  "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
-  "Final Attack: Spear has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points raise that hit from 260% to 350% and the HP it drains from 5% to 10% of the damage, so it comes after Mastery 20.",
-  "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
-  "Spears need DEX equal to their level from 30. You only put AP in DEX in the levels right before each new spear, everything else goes into STR."
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Spear gives a 25% chance when you attack to open a 60 second window for one extra hit that heals you, up to 15% of your max HP. Level 1 is already a 260% hit with the full 25% chance, so 1 point goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
+  "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage.",
+  "Spears need DEX equal to their level from Forked Spear at 30, except Bamboo Spear at 45. AP only goes into DEX in the levels right before each new spear, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It only adds defense, and those points are better in Precise Strikes or your HP skills.",
-  "Maxing Spear Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds, which is 19 SP that should be in Mastery and Final Attack.",
-  "Forgetting DEX before 30. Forked Spear needs 30 DEX, so put 26 to 30 into DEX or you hit 30 with a spear you can't wear.",
-  "Buying a polearm with a spear build. Spear Mastery and Final Attack: Spear only work with a spear in your hands."
+  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Maxing Spear Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
+  "Forgetting DEX before 30. Forked Spear needs 30 DEX, so put your AP from 26 to 30 into DEX, or you stay on Fish Spear's 39 attack instead of 52.",
+  "Buying a polearm with a spear build. Spear Mastery, Spear Booster and Final Attack: Spear only work with a spear, so you lose most of 2nd job."
  ],
  "compare": [
   {
    "build": "Spearman, spear (this guide)",
-   "best_at": "faster weapons, cheap to 50",
-   "weak": "spears hit a little softer"
+   "best_at": "a step faster than polearms",
+   "weak": "spears hit a little softer until 70"
   },
   {
    "build": "Spearman, polearm",
-   "best_at": "harder hits up to 60",
+   "best_at": "harder hits until 70",
    "weak": "slowest weapons"
   },
   {

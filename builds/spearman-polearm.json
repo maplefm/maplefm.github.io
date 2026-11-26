@@ -4,15 +4,15 @@
   "class": "Warrior",
   "job_path": "Warrior (10) → Spearman (30)",
   "build": "Spearman, polearm",
-  "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast 20 by level 23, then Polearm Mastery, Final Attack and Rush.",
+  "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast 20 by level 23, then Polearm Mastery, Final Attack, Booster and Rush.",
   "best_at": [
-   "Slash Blast hits 6 mobs from level 10",
-   "Polearms hit harder than spears up to 60",
-   "Final Attack: Polearm hits for 350%"
+   "Slash Blast hits 6 mobs from level 17",
+   "Polearms hit harder than spears until 70",
+   "Polearm Mastery 20 also gives +20 speed"
   ],
   "weak_spots": [
-   "Slowest weapons, speed 7 to 8",
-   "DEX from 15, and equal to your level from 30"
+   "Polearms are the slowest weapons",
+   "DEX has to match your level from 15"
   ],
   "difficulty": "Medium",
   "level_range": "1 to 70",
@@ -201,13 +201,21 @@
   {
    "level": 32,
    "book": "2nd job",
+   "skill": "Final Attack: Polearm",
+   "id": 1301001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
    "skill": "Rush",
    "id": 1301005,
    "to": 1,
    "why": ""
   },
   {
-   "level": 37,
+   "level": 38,
    "book": "2nd job",
    "skill": "Polearm Mastery",
    "id": 1300001,
@@ -799,29 +807,29 @@
   }
  ],
  "why": [
-  "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
-  "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
-  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
-  "Final Attack: Polearm has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points raise that hit from 260% to 350% and the HP it drains from 5% to 10% of the damage, so it comes after Mastery 20.",
-  "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
-  "Polearms need DEX from 15, and DEX equal to their level from 30. You only put AP in DEX in the levels right before each new polearm, everything else goes into STR."
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Polearm gives a 25% chance when you attack to open a 60 second window for one extra hit that heals you, up to 15% of your max HP. Level 1 is already a 260% hit with the full 25% chance, so 1 point goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
+  "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage.",
+  "Polearms need DEX equal to their level from Iron Ball at 15, except Yellow Mop at 45. AP only goes into DEX in the levels right before each new polearm, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It only adds defense, and those points are better in Precise Strikes or your HP skills.",
-  "Maxing Polearm Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds, which is 19 SP that should be in Mastery and Final Attack.",
-  "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put 14 and 15 into DEX.",
-  "Buying a spear with a polearm build. Polearm Mastery and Final Attack: Polearm only work with a polearm in your hands."
+  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Maxing Polearm Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
+  "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put your AP from levels 14 and 15 into DEX, or you stay on the Pole Arm's 35 attack instead of 40.",
+  "Buying a spear with a polearm build. Polearm Mastery, Polearm Booster and Final Attack: Polearm only work with a polearm, so you lose most of 2nd job."
  ],
  "compare": [
   {
    "build": "Spearman, polearm (this guide)",
-   "best_at": "harder hits up to 60",
+   "best_at": "harder hits until 70",
    "weak": "slowest weapons"
   },
   {
    "build": "Spearman, spear",
-   "best_at": "faster weapons, cheap to 50",
-   "weak": "spears hit a little softer"
+   "best_at": "a step faster than polearms",
+   "weak": "spears hit a little softer until 70"
   },
   {
    "build": "Dexless spearman",

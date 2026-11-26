@@ -7,12 +7,12 @@
   "pitch": "DEX with STR only to each bow's need. Arrow Blow in 1st job, then Bow Mastery, Arrow Bomb and Final Attack.",
   "best_at": [
    "Ranged from level 10",
-   "Arrow Bomb hits 6 mobs",
-   "Arrows cost 1 meso each"
+   "Arrow Bomb hits up to 6 mobs",
+   "Arrows cost 1 meso each at the NPC"
   ],
   "weak_spots": [
-   "STR has to match your level for bows",
-   "Arrow Blow and Double Shot hit one or two mobs before 30"
+   "STR has to match your level for bows from 15",
+   "Arrow Blow hits one mob until 30"
   ],
   "difficulty": "Easy",
   "level_range": "1 to 70",
@@ -182,9 +182,9 @@
   {
    "level": 30,
    "book": "1st job",
-   "skill": "Double Shot",
-   "id": 3001002,
-   "to": 3,
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 6,
    "why": ""
   },
   {
@@ -196,23 +196,23 @@
    "why": ""
   },
   {
-   "level": 33,
+   "level": 32,
    "book": "2nd job",
    "skill": "Bow Booster",
    "id": 3101001,
-   "to": 5,
-   "why": ""
-  },
-  {
-   "level": 34,
-   "book": "2nd job",
-   "skill": "Soul Arrow: Bow",
-   "id": 3101003,
    "to": 1,
    "why": ""
   },
   {
-   "level": 39,
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Final Attack: Bow",
+   "id": 3101000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 37,
    "book": "2nd job",
    "skill": "Bow Mastery",
    "id": 3100000,
@@ -220,7 +220,7 @@
    "why": ""
   },
   {
-   "level": 49,
+   "level": 47,
    "book": "2nd job",
    "skill": "Arrow Bomb",
    "id": 3101004,
@@ -228,11 +228,27 @@
    "why": ""
   },
   {
-   "level": 59,
+   "level": 57,
    "book": "2nd job",
    "skill": "Final Attack: Bow",
    "id": 3101000,
    "to": 30,
+   "why": ""
+  },
+  {
+   "level": 58,
+   "book": "2nd job",
+   "skill": "Bow Booster",
+   "id": 3101001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 59,
+   "book": "2nd job",
+   "skill": "Soul Arrow: Bow",
+   "id": 3101003,
+   "to": 1,
    "why": ""
   },
   {
@@ -808,17 +824,19 @@
   }
  ],
  "why": [
-  "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot is 120% on up to 2, so Arrow Blow is your main attack until 30.",
-  "Critical Shot 15 is 20% crit. The Eye of Amazon 3 unlocks Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
-  "Bow Mastery 5 opens Bow Booster. Soul Arrow needs Booster 5, so those go in early. With arrows at 1 meso, Soul Arrow is convenience, not damage.",
-  "Arrow Bomb 30 hits 6 mobs for 130% and can stun. It's how a Hunter mobs, so it comes right after Mastery 20.",
-  "Bows need STR equal to their level from 15. You only put AP in STR in the levels right before each new bow, everything else goes into DEX."
+  "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+  "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+  "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every bow attack.",
+  "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full 2 steps of speed. Final Attack: Bow 1 opens a 25% chance of an extra hit on up to 3 mobs, so it goes in early too.",
+  "Arrow Bomb 30 hits up to 6 mobs for 130% with a 60% chance to stun. It's your only attack for groups, so it comes right after Mastery 20.",
+  "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
+  "Bows need STR equal to their level from Composite Bow at 15. AP only goes into STR in the levels right before each new bow, everything else goes into DEX."
  ],
  "mistakes": [
-  "Skipping STR before a new bow. Ryden at 30 needs 30 STR, Olympus at 50 needs 50.",
-  "Maxing Bow Booster early. The speed is the same at every level; the extra points only make it last longer.",
-  "Buying a crossbow. Hunter skills only work with a bow.",
-  "Trying to put SP in Focus without The Eye of Amazon 3. The game won't let you."
+  "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put that level's AP into STR, or you stay on Battle Bow's 44 attack instead of 50.",
+  "Maxing Bow Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that belong in Mastery, Arrow Bomb and Final Attack.",
+  "Buying a crossbow. Bow Mastery, Bow Booster, Soul Arrow, Arrow Bomb and Final Attack: Bow only work with a bow, so you lose all of 2nd job.",
+  "Leveling Double Shot before Arrow Blow. Double Shot 20 is 120% per mob, Arrow Blow 20 is 240% on one; max Arrow Blow first."
  ],
  "compare": [
   {
