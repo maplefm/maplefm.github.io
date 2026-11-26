@@ -110,7 +110,7 @@ a.way:hover{border-color:#fde047}.way .tg{font-size:10px;font-weight:900;letter-
 .cmp a,.cmp div.c{display:block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 12px;color:#eef2ff!important;text-decoration:none}
 .cmp a:hover{border-color:#fde047}.cmp b{display:block}.cmp small{display:block;color:#9fb0e8;margin-top:3px}.cmp .go{font-size:12px;font-weight:800;color:#fde047;margin-top:6px}.cmp .soon{font-size:12px;color:#9fb0e8;margin-top:6px}
 @media(max-width:1000px){.gw-grid{grid-template-columns:1fr 1fr}.gw-grid .skw{grid-column:1/-1;order:3}}
-@media(max-width:640px){.gw-grid,.gw-low{grid-template-columns:1fr}.gw-ctl{width:100%}.gw-lv{flex:1 1 100%}.gw-lv input{flex:1;width:auto}.gbtn{flex:1}.gbox{max-height:70vh}.boxbar label{margin-left:0}}
+@media(max-width:640px){.way{grid-template-columns:auto 1fr}.way .p{grid-column:2;text-align:left;white-space:normal}.way .cheap{display:inline;margin-right:6px}.gw-grid,.gw-low{grid-template-columns:1fr}.gw-ctl{width:100%}.gw-lv{flex:1 1 100%}.gw-lv input{flex:1;width:auto}.gbtn{flex:1}.gbox{max-height:70vh}.boxbar label{margin-left:0}}
 """
 
 JS = r"""

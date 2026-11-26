@@ -38,6 +38,10 @@ CSS = G.CSS + r"""
 .pill.buy{background:#34d399;color:#06281c}.pill.lux{background:#f8d977;color:#3b2a06}
 .note{display:flex;gap:12px;align-items:flex-start}.gw .note p{color:#dbe2ff;font-size:15px;line-height:1.55}.note b{color:#fde047}
 .stw{overflow-x:auto}
+@media(max-width:700px){.stt,.stt tbody,.stt tr,.stt td{display:block;width:auto}.stt tr:first-child{display:none}
+.stt tr{border-bottom:1px solid rgba(255,255,255,.12);padding:10px 0;display:grid;grid-template-columns:repeat(3,auto);gap:6px 14px;justify-content:start}
+.gw .stt td{border:0;padding:0}.stt td.it{grid-column:1/-1}.stt td[data-l="NPC"],.stt td[data-l="Free Market"]{grid-column:1/-1}
+.stt tr.lux{background:rgba(245,158,11,.06)}.stt tr.lux td{background:none}.stt td[data-l]:before{content:attr(data-l);display:block;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9fb0e8}}
 """
 
 
@@ -79,8 +83,8 @@ def build():
             name = f'<img src="/i/{a["id"]}.png" alt="" width="32" height="32"><span>{E(n)}' + (
                 '<span class="pill buy">NPC</span>' if sh else '<span class="pill lux">Luxury</span>' if lux else "") + "</span>"
             name = f'<a class="nm" href="/item/{slug}/">{name}</a>' if link else f'<span class="nm">{name}</span>'
-            out.append((lux, f'<tr class="{"lux" if lux else ""}"><td>{name}</td><td class="atk">+{a["atk"]}</td><td>{a["slotMax"]:,}</td>'
-                             f'<td>{a.get("reqLevel") or "any"}</td><td>{npc}</td><td>{fmh}</td></tr>'))
+            out.append((lux, f'<tr class="{"lux" if lux else ""}"><td class="it">{name}</td><td class="atk" data-l="Attack">+{a["atk"]}</td><td data-l="Set size">{a["slotMax"]:,}</td>'
+                             f'<td data-l="Level">{a.get("reqLevel") or "any"}</td><td data-l="NPC">{npc}</td><td data-l="Free Market">{fmh}</td></tr>'))
         head = '<div class="stw"><table class="stt"><tr><th>Item</th><th>Attack</th><th>Set size</th><th>Level</th><th>NPC</th><th>Free Market</th></tr>'
         return head + "".join(r for _, r in out) + "</table></div>"
 
