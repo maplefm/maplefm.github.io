@@ -3,7 +3,7 @@
  "header": {
   "class": "Thief",
   "job_path": "Thief (10) → Bandit (30)",
-  "build": "Sindit: Lucky Seven to 40, then Savage Blow",
+  "build": "Sindit",
   "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, then switch to a Korean Fan at 40 and use an SP Reset to move your Lucky Seven points into Double Stab.",
   "best_at": [
    "Safe ranged training 10 to 39",
