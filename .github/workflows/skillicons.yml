@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [build-guides]
-    paths: [.github/workflows/skillicons.yml, assets/classic-skills.json]
+    paths: [.github/workflows/skillicons.yml, assets/classic-skills.json, builds/*.json, builds/tools/spotcheck.py]
 permissions:
   contents: write
 concurrency: skillicons
@@ -87,10 +87,11 @@ jobs:
                   print(name, rec, flush=True)
           json.dump(out, open("builds/data/ammo.json", "w"), indent=1)
           PY
+      - run: python3 builds/tools/spotcheck.py
       - run: |
           git config user.name maplefm
           git config user.email maplefm@users.noreply.github.com
-          git add -A sk builds/data
+          git add -A sk builds/data builds/check
           git diff --cached --quiet && exit 0
           git commit -q -m "Skill icons"
           git push -q origin HEAD:build-guides

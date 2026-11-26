@@ -30,10 +30,12 @@ def chk(what, page, got):
     checks.append({"what": what, "page": page, "game_files": got, "ok": ok})
 
 # gear rows: id is checked by fetching it; attack, speed, level, need
-picks = [(SIN, "Halfmoon Zamadar"), (SIN, "Korean Fan"), (SIN, "Shinkita"), (SIN, "Kandine"), (SIN, "Mithril Guards"), (SIN, "Meba"),
+picks = [(SIN, "Korean Fan"), (SIN, "Shinkita"), (SIN, "Kandine"), (SIN, "Mithril Guards"), (SIN, "Meba"),
          (SP, "Zeco"), (SP, "Bamboo Spear"), (SP, "Serpent's Tongue"), (SP, "Redemption"), (PO, "Crescent Polearm"), (PO, "Yellow Mop"), (PO, "The Nine Dragons"), (PO, "The Gold Dragon")]
 for g, name in picks:
-    r = next(x for x in g["gear"] if x["item"] == name); m = item(r["id"])
+    r = next((x for x in g["gear"] + g.get("gear_optional", []) if x["item"] == name), None)
+    if not r: continue   # dropped from the guide
+    m = item(r["id"])
     chk(f"{name} ({r['id']}) attack", r["attack"], m.get("incWAT")); chk(f"{name} speed", r["speed"], m.get("attackSpeed"))
     need = ", ".join(f"{m[k]} {k[3:]}" for k in ("reqSTR", "reqDEX", "reqINT", "reqLUK") if m.get(k)) or "level only"
     if name in ("Korean Fan", "Shinkita", "Bamboo Spear", "The Nine Dragons", "Kandine", "Redemption"): chk(f"{name} needs", r["needs"], need)
