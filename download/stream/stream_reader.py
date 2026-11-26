@@ -51,6 +51,8 @@ STREAM_DEFAULTS = {
     "min_scale": 0.9,                 # a shop shown smaller than 90% of real size is too blurry to read
     "vod_days": 7,                    # past broadcasts newer than this are read by vods.bat
     "vod_channels": [],               # extra channels whose past broadcasts to read
+    "megaphones": True,               # read megaphones and smegas in the chat box while a stream is at full quality
+    "mega_every_seconds": 5,          # how often to look at a stream's chat box for megaphone lines
 }
 
 LOGNAME = "stream.log"
@@ -488,6 +490,367 @@ class Feed:
             try: p.kill()
             except Exception: pass
 
+# ------------------------------------------------------------------ megaphones in the chat box
+# Classic draws megaphones in the chat box on a solid colour: pink for megaphones (a red channel badge, like CH13, and a
+# heart when it is a super megaphone that every channel sees), teal and gold for item megaphones with the item linked
+# in brackets. Those colours stand out on any stream, so the lines are found by colour, each line is read three ways
+# and a post only counts when two of the three readings agree on the item and price. The same smega shows on every
+# stream at once: a line read once is remembered by its picture, so each stream (and each look) reuses that reading.
+MEGA_BG = {"sm": (220, 162, 182), "im": (90, 212, 195), "ig": (229, 179, 5)}
+MEGA_MIN_H = 18     # lines shorter than this (a game shown at its own size in a 1080p stream: 15 px) are too small to read
+
+def _runs(xs, gap):
+    """Runs of consecutive indexes (gaps up to gap allowed): [(start, end)], end exclusive."""
+    xs = list(xs)
+    if not xs: return []
+    out = []; s = p = xs[0]
+    for x in xs[1:]:
+        if x - p > gap: out.append((s, p + 1)); s = x
+        p = x
+    out.append((s, p + 1)); return out
+
+def mega_lines(frame, pitch=None):
+    """Megaphone lines in a full-size stream picture: [(kind, y0, y1, x0, x1)] top to bottom, and the line pitch seen.
+    kind is the line colour ("sm" pink, "im" teal, "ig" gold). Cheap: a coarse look first, full size only when a band
+    shows up."""
+    H, Wd = frame.shape[:2]; y0 = int(H * 0.3)
+    small = frame[y0::2, ::2].astype(np.int16)
+    hits = []
+    for kind, c in MEGA_BG.items():
+        m = np.abs(small - np.array(c, np.int16)).sum(2) < 45
+        if (m.sum(1) > max(60, Wd * 0.04)).sum() >= 4: hits.append(kind)
+    if not hits: return [], pitch
+    sub = frame[y0:].astype(np.int16); bands = []
+    for kind in hits:
+        m = np.abs(sub - np.array(MEGA_BG[kind], np.int16)).sum(2) < 45
+        for s, e in _runs(np.nonzero(m.sum(1) > max(120, Wd * 0.08))[0], 3):
+            if e - s < 9: continue
+            bm = m[s:e]
+            # the box's width: columns with the line colour in them; the channel badge (white) is a gap to jump
+            runs = _runs(np.nonzero(bm.mean(0) > 0.15)[0], 70)
+            x0, x1 = max(runs, key=lambda r: r[1] - r[0]) if runs else (0, 0)
+            if x1 - x0 < 200: continue
+            # scenery of the same colour left of the box joins it across the box's dark edge: start after that edge
+            # (a dark stretch with none of the line colour; letters never fill a whole column, the badge is white)
+            cf = bm[:, x0:x0 + (x1 - x0) // 2].mean(0)
+            lum = sub[s:e, x0:x0 + (x1 - x0) // 2].mean(axis=(0, 2))
+            for a, b in _runs(np.nonzero((cf < 0.05) & (lum < 110))[0], 1):
+                if b - a >= 3: x0 = x0 + b; break
+            # and on the right: the box ends at its scroll bar, whatever lies beyond in the same colour
+            c0 = x0 + int((x1 - x0) * 0.35)
+            cr = bm[:, c0:x1].mean(0)
+            for a, b in _runs(np.nonzero(cr < 0.05)[0], 1):
+                if b - a >= 3: x1 = c0 + a; break
+            if x1 - x0 < 200: continue
+            # lines of text in the band: runs of rows with letters, apart by at least a row of plain colour
+            rf = bm[:, x0:x1].mean(1)
+            tr = [r for r in _runs(np.nonzero(rf < 0.97)[0], 1) if r[1] - r[0] >= 4]
+            bands.append((kind, s, e, x0, x1, tr))
+    if not bands: return [], pitch
+    # every line of one chat box starts at the same x: a band that reached further left took scenery with it
+    xs = sorted(b[3] for b in bands); xm = xs[len(xs) // 2]
+    bands = [(k, s, e, xm if 0 < xm - x0 <= 400 and sum(abs(x - xm) <= 3 for x in xs) >= 2 else x0, x1, tr) for k, s, e, x0, x1, tr in bands]
+    # line pitch: the largest height every band is a whole number of (several lines of one colour make one band),
+    # and no taller than a band's height over its lines of text
+    hs = [e - s for _, s, e, _, _, _ in bands]
+    cap = min([(e - s) / max(1, len(tr)) for _, s, e, _, _, tr in bands] + [40])
+    best = None
+    for p in range(int(min(cap + 2, max(hs))), 11, -1):
+        if all(abs(h - round(h / p) * p) <= 2 and round(h / p) >= 1 for h in hs): best = p; break
+    if pitch and best and best > pitch * 1.5: best = pitch         # a frame with only two-line bands: keep the known pitch
+    p = best or pitch or min(hs)
+    out = []
+    for kind, s, e, x0, x1, tr in bands:
+        n = max(1, len(tr), int(round((e - s) / p)))
+        if n > 1 and len(tr) == n:
+            # each line of text seen apart: cut halfway between them, so no line takes half of its neighbour
+            cuts = [s] + [s + (tr[k][1] + tr[k + 1][0]) // 2 for k in range(n - 1)] + [e]
+        else:
+            cuts = [s + int(round(k * (e - s) / n)) for k in range(n + 1)]
+        for a, b in zip(cuts, cuts[1:]):
+            out.append((kind, int(y0 + a), int(y0 + b), int(x0), int(x1)))
+    out.sort(key=lambda o: o[1])
+    return out, p
+
+def _line_end(a, kind):
+    """Where a line's own text can be trusted to: (x, open). Something drawn over the line (another window, a stream
+    overlay: no line colour and not the white badge over the full height) cuts it there; text running into the box's
+    right edge carries on in the next line. Either way the post may go on past what is seen: "cut" or "edge", else
+    ""."""
+    h = a.shape[0]
+    bgc = (np.abs(a.astype(np.int16) - np.array(MEGA_BG[kind], np.int16)).sum(2) < 60).mean(0)
+    b = _mega_badge(a.astype(np.int16)); start = b[1] + 2 if b else 2 * h       # past the name and the channel badge
+    for s_, e_ in _runs(np.nonzero(bgc == 0)[0], 1):
+        if s_ >= start and e_ - s_ >= max(4, h // 3): return s_, "cut"
+    # the streamer's mouse pointer over the line (white; past the badge no letters are white): what's under it, a
+    # digit of the price perhaps, can't be read
+    wc = np.nonzero((a.min(axis=2) > 235).sum(0) >= 2)[0]
+    wc = wc[wc >= start + 2]
+    if len(wc): return int(wc[0]), "cut"
+    tail = bgc[-max(4, int(0.8 * h)) - 2:-2]          # the last two columns are the box's own edge
+    # letters in the last stretch: some rows off the line colour (two columns or more), not all (a border)
+    return a.shape[1], "edge" if ((tail < 0.9) & (tail > 0.2)).sum() >= 2 else ""
+
+def mega_posts(frame, lines):
+    """Lines joined into posts: a long post wraps onto the next line of the same colour, indented with no name.
+    Returns [(kind, crop)], each crop one long line (the wrapped part placed after the first). Left out: a wrapped
+    part whose first line scrolled away (no sender), and a post that may go on past what is seen (cut by an overlay
+    or running into the box's edge with no next line): its last price could be cut short."""
+    out = []; prev = None
+    for kind, y0, y1, x0, x1 in lines:
+        if y1 - y0 < MEGA_MIN_H: continue
+        a = frame[y0:y1, x0:x1]
+        h = y1 - y0; lead = a[:, 2:2 + max(14, int(1.3 * h))].astype(np.int16)
+        cont = (np.abs(lead - np.array(MEGA_BG[kind], np.int16)).sum(2) < 60).mean() > 0.95
+        if cont:
+            if prev is not None and out and prev[0] == kind and abs(prev[2] - y0) <= 2 and prev[3] == y1 - y0:
+                cols = np.nonzero((np.abs(a.astype(np.int16) - np.array(MEGA_BG[kind], np.int16)).sum(2) >= 60).any(0))[0]
+                if len(cols):
+                    end, opn = _line_end(a, kind)
+                    part = a[:, max(0, cols[0] - h // 2):end]
+                    gap = np.full((h, h // 2, 3), MEGA_BG[kind], np.uint8)
+                    # an overlay over the first part leaves a hole: the post stays open whatever follows
+                    out[-1] = (kind, np.concatenate([out[-1][1], gap, part], axis=1), "cut" if out[-1][2] == "cut" else opn)
+                prev = (kind, prev[1], y1, h)
+            continue
+        end, opn = _line_end(a, kind)
+        out.append((kind, np.ascontiguousarray(a[:, :end]), opn)); prev = (kind, y0, y1, h)
+    return [(k, c) for k, c, opn in out if not opn and c.shape[1] >= 4 * c.shape[0]]
+
+def _ink(a, bg, lo, hi):
+    """Black letters on white: how far each pixel is from the line colour."""
+    d = np.abs(a - bg).sum(2).astype(np.float32)
+    return (255 - np.clip((d - lo) * 255.0 / (hi - lo), 0, 255)).astype(np.uint8)
+
+def _mega_badge(a):
+    """x range of the channel badge and heart: white boxes with almost none of the line colour in them, right after the
+    name. None for a line without one (a megaphone that stays on its own channel)."""
+    h = a.shape[0]; bg = np.median(a.reshape(-1, 3), axis=0)
+    bf = (np.abs(a[int(h * .2):int(h * .8)] - bg).sum(2) < 60).mean(0)
+    runs = _runs(np.nonzero(bf < 0.3)[0], 2)
+    for i, (s, e) in enumerate(runs):
+        if s > a.shape[1] * 0.5: break
+        if h <= e - s <= 4 * h and s >= h // 2:
+            e2 = e
+            for s2, e3 in runs[i + 1:]:
+                if s2 - e2 <= h // 2 and e3 - s2 <= h: e2 = e3
+                else: break
+            return s, e2
+    return None
+
+_NICE = ["nice", "-n", "15"] if sys.platform != "win32" and __import__("shutil").which("nice") else []
+def _tess(img, psm=7, allow=None):
+    """One line of text, read at low priority so shops and video always come first."""
+    import io, ocrlib
+    buf = io.BytesIO(); img.save(buf, "PNG")
+    env = dict(os.environ); env["OMP_THREAD_LIMIT"] = "1"
+    cmd = _NICE + [ocrlib.TESS, "stdin", "stdout", "--psm", str(psm)] + (["-c", "tessedit_char_whitelist=" + allow] if allow else [])
+    p = None
+    try:
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=env,
+                             creationflags=0x08000000 if sys.platform == "win32" else 0)
+        if hasattr(os, "wait4"):
+            # read it by hand so this one run's CPU time can be counted (wait4 reports it per child)
+            kill = threading.Timer(20, p.kill); kill.start()      # a stuck run never holds up the next lines
+            try:
+                p.stdin.write(buf.getvalue()); p.stdin.close()
+                out = p.stdout.read(); p.stdout.close()
+                _, status, ru = os.wait4(p.pid, 0)
+            finally:
+                kill.cancel()
+            p.returncode = status; _KIDS[0] += ru.ru_utime + ru.ru_stime
+        else:
+            out = p.communicate(buf.getvalue(), timeout=20)[0]
+    except Exception:
+        try: p and p.kill()
+        except Exception: pass
+        return ""
+    return " ".join(out.decode("utf-8", "replace").split())
+
+_KIDS = [0.0]
+def _child_cpu():
+    """CPU seconds the megaphone tesseract runs used so far (counted per run, so shop reads are not mixed in)."""
+    return _KIDS[0]
+
+def _big(v, f, flt):
+    from PIL import ImageOps
+    im = Image.fromarray(v)
+    im = im.resize((max(1, int(im.width * f)), max(1, int(im.height * f))), flt)
+    return ImageOps.expand(im, border=12, fill=255)
+
+def il_rule(name):
+    """Capital I and small l look alike in the chat font, so the reader's choice means nothing: the same spelling rule
+    the watcher's exact chat names use. First letter I; after a capital or digit I unless a small letter follows;
+    otherwise l."""
+    cs = list(name); out = []
+    for i, c in enumerate(cs):
+        if c not in "Il": out.append(c); continue
+        a = out[-1] if out else ""; b = cs[i + 1] if i + 1 < len(cs) else ""
+        if not a: out.append("I")
+        elif (a.isupper() or a.isdigit()) and not (b and b not in "Il" and b.islower()): out.append("I")
+        else: out.append("l")
+    return "".join(out)
+
+MEGA_WAYS = [(3.0, Image.LANCZOS, 60, 220), (4.0, Image.BICUBIC, 80, 260), (2.5, Image.LANCZOS, 50, 200)]
+def _mega_rows(msgs):
+    """Posts the readings agree on: three or more readings name the same item and price, and no reading saw another
+    price for that item ("1.4M" read as "14M" twice is a blurred decimal point; "3.8m" read "3.6m" twice is a blurred
+    digit: either way some reading disagrees and the item is left out). The roll goes along when three agree on it."""
+    votes, prices, xs = {}, {}, {}
+    for m in msgs:
+        try: rows = fmparse.parse_chat_message_x(mega_text(m))
+        except Exception: rows = []
+        seen = {}
+        for r in rows: seen.setdefault((r[0], r[1], r[2]), set()).add(json.dumps(r[3], sort_keys=True))
+        for k, xv in seen.items():
+            votes[k] = votes.get(k, 0) + 1
+            for x in xv: xs[(k, x)] = xs.get((k, x), 0) + 1
+        per = {}
+        for side, item, price in seen: per.setdefault((side, item), set()).add(price)
+        for k, v in per.items(): prices.setdefault(k, []).append(frozenset(v))
+    out = []
+    for (side, item, price), n in votes.items():
+        if n < MEGA_NEED or len(set(prices[(side, item)])) != 1: continue
+        x = next((json.loads(xx) for (k, xx), c in xs.items() if k == (side, item, price) and c >= MEGA_NEED), None)
+        out.append((side, item, price, x))
+    return out
+
+MEGA_MORE = [(3.5, Image.LANCZOS, 70, 240), (2.0, Image.BICUBIC, 60, 220)]
+MEGA_NEED = 3       # of the five readings; measured Nov 25: 2 of 3 let "tobi 3.8m" through as 3.6m, 3 of 5 had no wrong post
+def read_mega_line(crop):
+    """One megaphone line, read three ways, and two more ways when any of the three names a priced post. Returns
+    {name, sure, votes, msgs, rows, ch, badge}: rows are the (side, item, price, roll) posts three readings agree on
+    (see _mega_rows); name is the sender's spelling most readings agree on (two or more), never marked sure (see
+    below). ch stays None: the channel badge is too small on a stream to read surely."""
+    a = np.asarray(crop.convert("RGB")).astype(np.int16)
+    bg = np.median(a.reshape(-1, 3), axis=0)
+    h = a.shape[0]; f0 = 24.0 / max(10, h)        # every line brought to about 24 px tall, then enlarged
+    b = _mega_badge(a)
+    names, msgs = {}, []; stamp = [None]      # stamp: how many digits a "[06:22]" timestamp puts before the name
+    def way(f, flt, lo, hi):
+        if b:
+            nm = re.sub(r"[^A-Za-z0-9]", "", _tess(_big(_ink(a[:, :max(1, b[0] - 2)], bg, lo, hi), f * f0, flt), 7, fmparse._IGN_CHARS))
+            m = _tess(_big(_ink(a[:, b[1] + 1:], bg, lo, hi), f * f0, flt), 7)
+            c = re.match(r"^[^A-Za-z0-9\[(]{0,6}?[:;]\s*", m)
+            m = m[c.end():] if c else re.sub(r"^[\s:;.,'\"|`~_-]+", "", m)
+        else:
+            t = _tess(_big(_ink(a, bg, lo, hi), f * f0, flt), 7)
+            mm = re.match(r"^\W*([A-Za-z0-9]{3,13})\s*[:;]\s*(.*)$", t)
+            nm, m = (mm.group(1), mm.group(2)) if mm else ("", "")
+        if nm and re.match(r"[jJlI|]?[0-9O]", nm) and b and stamp[0] is None:
+            # chat timestamps on ("[06:22] DocFrost"): read the name's stretch with brackets and colons allowed once
+            t = _tess(_big(_ink(a[:, :max(1, b[0] - 2)], bg, lo, hi), f * f0, flt), 7)
+            mm = re.match(r"^\W{0,2}\d{1,2}\s?[:.]\s?\d{2}\s?[\]|)}]\s*", t)
+            stamp[0] = len(re.sub(r"[^A-Za-z0-9]", "", mm.group(0))) if mm else 0
+        if nm and stamp[0]: nm = stamp_cut(nm, stamp[0])
+        if nm:
+            nm = il_rule(nm); names[nm] = names.get(nm, 0) + 1
+        msgs.append(m)
+    for w in MEGA_WAYS: way(*w)
+    try: priced = any(fmparse.parse_chat_message_x(mega_text(m)) for m in msgs)
+    except Exception: priced = False
+    if priced:
+        for w in MEGA_MORE: way(*w)
+    name, sure = None, False
+    if names:
+        top = max(names, key=lambda k: names[k])
+        if names[top] >= 2 and re.fullmatch(r"[A-Za-z0-9]{3,13}", top):
+            # never sure off a stream: on Nov 25 two of 23 names all three readings agreed on were still wrong
+            # (daddyfoo read daddytoo, beento read heento). The post goes up marked; a scanner's exact read of the
+            # same post, or the same spelling from another reader, is what makes the name stand
+            name = top; sure = False
+    rows = _mega_rows(msgs)
+    # the badge's channel number is 6 pixels tall on a stream: too small to read surely, so it is left out
+    ch = None
+    return {"name": name, "sure": sure, "votes": names, "msgs": msgs, "rows": rows, "ch": ch, "badge": b is not None}
+
+def stamp_cut(nm, n):
+    """The name without a chat timestamp's n digits in front, and the bracket the name reader took for a letter
+    ("j0956Sathona" with [09:56] is Sathona). Unchanged when those aren't digits."""
+    m = re.match(r"^[jJlI|]?([0-9O]{%d})(?=[A-Za-z0-9])" % n, nm)
+    return nm[m.end():] if m and len(nm) - m.end() >= 3 else nm
+
+def mega_text(m):
+    """What the text reader gets wrong on stream video, put back before the chat parser sees it: > read as = or the B
+    as a 6, the S as a 5 or 3 ("S= 900k", "6> claw", "5> 950k"), a scroll's tier in small letters ("Scroll: intermediate")."""
+    m = re.sub(r"(?<![A-Za-z0-9])([SB$])\s?=(?!=)", r"\1>", m)
+    m = re.sub(r"(?<![A-Za-z0-9.,])6\s?>", "B>", m)
+    m = re.sub(r"(?<![A-Za-z0-9.,+])[53]\s?(?:>|=(?=\s))", "S>", m)
+    return re.sub(r"Scroll:\s*(lesser|intermediate|greater|chaos)\b", lambda x: "Scroll: " + x.group(1).capitalize(), m, flags=re.I)
+
+def mega_kind(color, badge):
+    """sm: super megaphone (pink, with the channel badge), m: megaphone (pink, its own channel), im: item megaphone."""
+    return "im" if color in ("im", "ig") else "sm" if badge else "m"
+
+def _mega_sig(crop):
+    return np.asarray(crop.convert("L").resize((96, 6), Image.BILINEAR), dtype=np.int16)
+
+class MegaReader:
+    """Reads megaphone lines for every stream on one low-priority thread. A line already read (on this stream or any
+    other) is recognised by its picture and its reading reused, so a smega every stream shows is read once."""
+    def __init__(self, stores):
+        self.stores = stores; self.q = queue.Queue(maxsize=8); self.lock = threading.Lock()
+        self.cache = []          # [(kind, sig, reading, last seen)]
+        self.read = 0; self.reused = 0; self.posts = 0; self.dropped = 0
+        self.look_cpu = 0.0; self.read_cpu = 0.0     # seconds of CPU: finding lines (stream threads), reading them (incl. tesseract)
+        threading.Thread(target=self.run, daemon=True).start()
+
+    def _find(self, kind, sig):
+        for c in reversed(self.cache):
+            if c[0] == kind and np.abs(c[1] - sig).mean() < 10: return c
+        return None
+
+    def look(self, ch, frame):
+        """Called from a stream's own thread, at most every few seconds: find the lines, queue the new ones."""
+        c0 = time.thread_time()
+        with np.errstate(all="ignore"):                    # an empty slice at a picture's edge is no reason to log
+            lines, ch.mega_pitch = mega_lines(frame, getattr(ch, "mega_pitch", None))
+            posts = mega_posts(frame, lines)
+        for kind, arr in posts:
+            try: crop = Image.fromarray(arr); sig = _mega_sig(crop)
+            except Exception: continue
+            with self.lock: hit = self._find(kind, sig)
+            if hit is not None:
+                if hit[2] is not None:
+                    self.reused += 1; self.post(ch, kind, hit[2])
+                continue
+            try: self.q.put_nowait((ch, kind, sig, crop))
+            except queue.Full: self.dropped += 1
+        self.look_cpu += time.thread_time() - c0
+
+    def run(self):
+        while True:
+            ch, kind, sig, crop = self.q.get()
+            try:
+                with self.lock:
+                    if self._find(kind, sig) is not None: continue       # read meanwhile from another stream
+                    self.cache.append((kind, sig, None, time.time()))   # taken: nobody reads it twice
+                c0 = time.thread_time(); k0 = _child_cpu()
+                try: W.hover_wanted()        # the board's item names for the chat parser (fetched every 20 minutes)
+                except Exception: pass
+                r = read_mega_line(crop); self.read += 1
+                self.read_cpu += (time.thread_time() - c0) + max(0.0, _child_cpu() - k0)
+                with self.lock:
+                    i = next((k for k in range(len(self.cache) - 1, -1, -1) if self.cache[k][1] is sig), None)
+                    if i is not None: self.cache[i] = (kind, sig, r, time.time())
+                    if len(self.cache) > 400: del self.cache[:100]
+                if r["rows"]:
+                    log(f"{ch.name:<16} {mega_kind(kind, r['badge'])} {r['name'] or 'name ?'}{'' if r['sure'] else ' (unsure)'}" + (f" CH{r['ch']}" if r["ch"] else "") + ": " + ", ".join(f"{s} {i} {p:,}" for s, i, p, x in r["rows"]))
+                self.post(ch, kind, r)
+            except Exception:
+                log("megaphone error:", traceback.format_exc().splitlines()[-1])
+            finally:
+                self.q.task_done()
+
+    def post(self, ch, kind, r):
+        if not r["rows"] or not r["name"]: return
+        ch.megas = getattr(ch, "megas", 0) + 1
+        if self.stores is None: return        # --test: read and logged, never stored
+        self.posts += 1
+        self.stores.add_mega(ch.login, r["name"], r["sure"], r["rows"], mega_kind(kind, r["badge"]), r["ch"])
+
+MEGA = [None]     # the MegaReader, when megaphones are read
+
 # ------------------------------------------------------------------ watching
 
 class Channel(threading.Thread):
@@ -499,6 +862,7 @@ class Channel(threading.Thread):
         self.feed = None; self.title = ""; self.full = False; self.wants_full = False
         self.snooze_until = 0; self.last_small = None; self.last_sig = None; self.same = 0
         self.chan = ChannelTracker(); self.chan_logged = None
+        self.megas = 0; self.mega_pitch = None; self.last_mega = 0.0
 
     def run(self):
         url = self.test["url"] if self.test else "https://www.twitch.tv/" + self.login
@@ -565,6 +929,10 @@ class Channel(threading.Thread):
                 self.track_channel(frame)
                 if self.test and self.frames > self.test["seconds"] * st["frames_per_second"]:
                     break
+                if MEGA[0] is not None and time.time() - self.last_mega >= st.get("mega_every_seconds", 5):
+                    self.last_mega = time.time()
+                    try: MEGA[0].look(self, frame)
+                    except Exception: log(f"{self.name}: megaphone look error:", traceback.format_exc().splitlines()[-1])
                 if self.frames % 600 == 5:      # one small full picture every 10 minutes, for checking the setup
                     try:
                         d = os.path.join(HERE, "review_stream"); os.makedirs(d, exist_ok=True)
@@ -733,6 +1101,27 @@ class Stores:
             if s.dirty:
                 s.dirty = False; s.save()
 
+    def add_mega(self, login, name, sure, rows, mg, ch):
+        """A megaphone post read off a stream: stored as that stream's chat post, with the megaphone kind and the
+        sender's channel kept beside it. Chat posts go out with the regular publish, not straight away."""
+        s = self.get(login)
+        for side, item, price, x in rows:
+            item, price = W.chat_price(item, price)
+            # a decimal point the video blurred away makes 1.4M into 14M, the same in every reading: a price 3x off
+            # what the board says the item goes for is left out (the board drops chat asks far under it as well)
+            # (an equip with its roll written, like 79 att, is priced by that roll, not by the plain typical)
+            ref = W.BOARD_TYP.get(item)
+            if ref and not x and not ref / 3 <= price <= ref * 3: self.offboard = getattr(self, "offboard", 0) + 1; continue
+            hot = s.hot
+            s.add_chat(name, side, item, price, x or None, unsure=not sure)
+            s.hot = hot
+            key = json.dumps([datetime.date.today().isoformat(), name.lower(), side, item, price])
+            with s.lock:
+                o = s.d["chat"].get(key)
+                if o is not None:
+                    o["mg"] = mg
+                    if ch: o["c"] = ch
+
     def docs(self, names):
         out = []
         for login, s in self.d.items():
@@ -741,6 +1130,15 @@ class Stores:
                     doc["src"] = "stream-shop"; doc["by"] = names.get(login, login)
                     for r in doc["rows"]:
                         if r.get("s") not in SURE: r["su"] = 1      # the seller's name may be misread
+                    out.append(doc)
+                elif doc["src"] == "watcher-chat" and doc["rows"]:
+                    # megaphones read off the stream: the kind (sm smega, m megaphone, im item megaphone) and the
+                    # sender's channel from the badge ride on each row
+                    doc["src"] = "stream-chat"; doc["by"] = names.get(login, login)
+                    for r in doc["rows"]:
+                        o = s.d["chat"].get(json.dumps([doc["at"][:10], r["s"], "B" if r.get("k") == "b" else "S", r["i"], r["p"]])) or {}
+                        if o.get("mg"): r["mg"] = o["mg"]
+                        if o.get("c"): r["c"] = o["c"]
                     out.append(doc)
         return out
 
@@ -848,19 +1246,24 @@ def reader(cfg, jobs, stores, test):
 
 def write_status(chans, live, names):
     st = {"at": datetime.datetime.now().isoformat(timespec="seconds"),
-          "watching": [{"channel": c.name, "minutes": round((time.time() - c.started) / 60), "frames": c.frames, "shops": c.shops} for c in chans.values()],
+          "watching": [{"channel": c.name, "minutes": round((time.time() - c.started) / 60), "frames": c.frames, "shops": c.shops, "megas": getattr(c, "megas", 0)} for c in chans.values()],
           "live_classic": [names.get(l, l) for l in live]}
+    if MEGA[0] is not None:
+        m = MEGA[0]; st["mega"] = {"read": m.read, "reused": m.reused, "posts": m.posts, "dropped": m.dropped, "look_cpu_s": round(m.look_cpu, 1), "read_cpu_s": round(m.read_cpu, 1)}
     try: json.dump(st, open(os.path.join(HERE, "stream_status.json"), "w", encoding="utf-8"), indent=1)
     except OSError: pass
 
 def run_test(cfg, url, start, seconds):
     jobs = queue.Queue(maxsize=20)
     threading.Thread(target=reader, args=(cfg, jobs, None, True), daemon=True).start()
+    if cfg["streams"].get("megaphones", True): MEGA[0] = MegaReader(None)
     login = re.sub(r".*twitch\.tv/(videos/)?", "", url).strip("/").split("/")[0] or "test"
     ch = Channel(cfg, login, login, jobs, test={"url": url, "start": start, "seconds": seconds})
     log(f"test: reading {url} for {seconds}s" + (f" from {start}" if start else ""))
     ch.start(); ch.join(); jobs.join()
-    log(f"test done: {ch.frames} pictures, {ch.shops} shops read. See the review_stream folder.")
+    if MEGA[0] is not None: MEGA[0].q.join()
+    m = MEGA[0]
+    log(f"test done: {ch.frames} pictures, {ch.shops} shops read" + (f", megaphones: {m.read} lines read, {m.reused} looks reused a reading, {ch.megas} priced posts seen, {m.dropped} dropped, CPU {m.look_cpu:.1f}s finding and {m.read_cpu:.1f}s reading" if m else "") + ". See the review_stream folder.")
 
 
 # ------------------------------------------------------------------ past broadcasts
@@ -1151,10 +1554,11 @@ _BOOT = _stamp()
 def code_changed():
     now = _stamp()
     if now == _BOOT: return False
-    import py_compile
+    # only restart into code that at least compiles. (Until Nov 25 this used py_compile with cfile=/dev/null, which
+    # Linux Pythons refuse, so the stream server never restarted itself on a code change.)
     try:
         for f in _CODE:
-            if os.path.exists(f): py_compile.compile(f, doraise=True, cfile=os.devnull if os.name != "nt" else None)
+            if os.path.exists(f): compile(open(f, encoding="utf-8").read(), f, "exec")
     except Exception:
         return False
     return True
@@ -1219,6 +1623,7 @@ def main():
     threading.Thread(target=reader, args=(cfg, jobs, stores, False), daemon=True).start()
     threading.Thread(target=verifier, daemon=True).start()
     FULL_MAX[0] = st["max_full"]
+    if st.get("megaphones", True): MEGA[0] = MegaReader(stores)
     threading.Thread(target=reddit_loop, daemon=True).start()
     log("Stream Reader started. Watching up to", st["max_streams"], "streams at 360p, switching up to", st["max_full"], "to full quality when a shop opens. Publishing is", "ON" if cfg["publish"] else "OFF")
     chans, names, live = {}, {}, []

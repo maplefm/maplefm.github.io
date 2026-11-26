@@ -34,6 +34,8 @@ jobs:
           cp /tmp/live/data/itemdb.json /tmp/itemdb.json && python3 -c "import json,sys; d=json.load(open('/tmp/itemdb.json')); sys.exit(0 if len(d.get('items') or []) > 5000 and d.get('kinds') else 1)" && cp /tmp/itemdb.json data/itemdb.json || echo 'item list kept'
           python3 tools/itempages.py /tmp/summary.json . /tmp/itemguide.json /tmp/world.json assets/training-notes.json
           python3 tools/recap.py /tmp/summary.json . /tmp/recap.json
+          # the stars and arrows page: its luxury price line is baked in, so it is rebuilt with the rest
+          python3 builds/tools/starspage.py || echo 'stars page kept'
           # share images live on the data branch, redrawn only when an item's price line changes
           pip install -q pillow
           python3 tools/ogimages.py /tmp/summary.json /tmp/live /tmp/recap.json /tmp/world.json

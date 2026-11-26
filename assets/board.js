@@ -72,6 +72,13 @@
   function coin() { return el("span", "coin"); }
   function money(n, cls) { return el("span", "num mz" + (cls ? " " + cls : ""), short(n)); }
   function median(a) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+  // chat asks that agree with each other: with 3 or more, any 3x off their median goes; two that are 3x apart say nothing
+  function chatAsks(a) {
+    if (a.length < 2) return a;
+    var m = median(a.map(function (x) { return x.u; }));
+    if (a.length === 2) return Math.max(a[0].u, a[1].u) > 3 * Math.min(a[0].u, a[1].u) ? [] : a;
+    return a.filter(function (x) { return x.u <= m * 3 && x.u >= m / 3; });
+  }
   function quant(a, q) { if (!a.length) return 0; a = a.slice().sort(function (x, y) { return x - y; }); var i = (a.length - 1) * q, lo = Math.floor(i); return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); }
   // Older watcher versions saved half-read map names like "ee Market <1> p" for Free Market 1.
   var frCache = {};
@@ -148,8 +155,9 @@
     if (!(l.stream && l.ns)) return el(tag || "b", cls || null, l.s);
     var w = el("span", "unk"); w.appendChild(document.createTextNode("name not read · ")); var a = streamLink(l); a.textContent = "see it on " + a.textContent; w.appendChild(a); return w;
   }
+  function megaWord(l) { return l.mg === "sm" ? "smega" : l.mg === "im" ? "item megaphone" : l.mg === "m" ? "megaphone" : "chat"; }
   function buyWhere(l) {
-    if (l.chat) return "whisper them, posted in chat" + (l.ns ? " (name may be misread: check it in chat)" : "");
+    if (l.chat) return "whisper them, posted " + (l.mg ? "by " + megaWord(l) + (l.c ? " from CH " + l.c : "") : "in chat") + (l.sn > 1 ? " · seen by " + l.sn + " readers" : "") + (l.ns ? " (name may be misread: check it in chat)" : "");
     var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" || isMap(l.r) ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
     var warn = "";
@@ -180,6 +188,7 @@
     return med;
   }
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
+  var DBIDS = {};   // every game id under a name: two items can share one, and only one of them may have an icon
   var T0 = { rows: 0, live: 0 };   // startup timing, readable as FM_T0 in the console
   // ---------- the finished board, built on the server: a first visit shows live listings without building anything
   // The pump runs this same page on the server, calls fmSnap(), and the Worker serves the result at /data/snap.
@@ -383,7 +392,7 @@
       if (!j || !j.items) return; mark("dbIn");
       DBK = j.kinds || [];
       j.items.forEach(function (r) {
-        var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); }
+        var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; (DBIDS[k] || (DBIDS[k] = [])).push(r[1]); if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); }
         // one name in the game data, two items in the shop window: each colour is its own item with its own price
         var cv = COLOURS[r[0]] && COLOURS[r[0]][r[1]];
         if (cv) { var vn = r[0] + " (" + cv + ")", vk = vn.toLowerCase(), vr = r.slice(); vr[0] = vn; if (!DB[vk]) { DB[vk] = vr; (DBB[vk.slice(0, 2)] || (DBB[vk.slice(0, 2)] = [])).push(vk); } }
@@ -771,8 +780,9 @@
   // the site's own copy of the icon first (/i/<id>.png, same connection, long cached), then maplestory.io
   function iconSrcs(name) {
     var out = [], r = dbRow(name);
-    var none = r && NOICON[r[1]];
-    if (r && !none) { out.push("/i/" + r[1] + ".png"); out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
+    var id = r && r[1], none = r && NOICON[id];
+    if (none) { var alt = (DBIDS[String(name).toLowerCase()] || []).filter(function (x) { return !NOICON[x]; })[0]; if (alt) { id = alt; none = false; } }   // same name, another id with an icon
+    if (r && !none) { out.push("/i/" + id + ".png"); out.push(IO + id + "/icon"); out.push(IO + id + "/iconRaw"); }
     // a scanner's crop of the shop window only stands in for items the game data doesn't have: a crop is filed under the
     // name that was read, and a misread name (a scroll cut short to "Two-Handed Sword") puts the wrong picture on an item
     var v = ICONS[name]; if ((!r || none) && DBN && typeof v === "string") out.push(v);
@@ -794,9 +804,12 @@
     if (list.length) im.src = list[0]; else cap();
     return true;
   }
-  function iconBox(name, cls) {
+  // eager: board rows. Rows are added 600px before they scroll into view; lazy icons there each finished loading on
+  // their own frame mid-scroll, and every one repainted the whole page (phones: 150+ repaints per long scroll, the main
+  // cause of the choppy board). Loading a row's icon with the row puts them all in one burst before the reader gets there.
+  function iconBox(name, cls, eager) {
     var b = el("span", "itc" + (cls ? " " + cls : ""));
-    var im = new Image(); im.alt = ""; im.loading = "lazy"; loadIcon(im, name); b.appendChild(im);
+    var im = new Image(); im.alt = ""; im.decoding = "async"; if (!eager) im.loading = "lazy"; loadIcon(im, name); b.appendChild(im);
     return b;
   }
   function iconImg(name) { var im = new Image(); im.alt = ""; return loadIcon(im, name) ? im : null; }
@@ -819,7 +832,7 @@
     var raws = {};
     ordered.forEach(function (s) { s.rows.forEach(function (r) { raws[r.i] = (raws[r.i] || 0) + 1; }); });
     if (Object.keys(raws).some(function (r) { return !CN[r]; })) CN = canonAll(raws);
-    var seen = {}, L = [], who = {}, sellerLast = {}, itemLast = {};
+    var seen = {}, L = [], who = {}, sellerLast = {}, itemLast = {}, chatSrc = new Map();   // chatSrc: who read each chat post
     // A shop row read as "4 for 133,333" when the same seller's same item at the same price was also read
     // as "1 for 133,333" is a misread bundle size; equipment never comes in bundles.
     var oneSeen = {}, bundleSeen = {};
@@ -867,8 +880,15 @@
           return;
         }
         var prev = seen[key];
-        if (prev) { if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; } return; }
+        if (prev) {
+          if (r.so && !prev.so) prev.so = true; if (r.x && !prev.x) { prev.x = r.x; prev.xt = r.xt || []; prev.xj = r.xj || ""; }
+          // one megaphone, many readers: every scanner and every stream on the channel sees the same smega. It stays one
+          // post; each reader adds to who saw it, a sure reading of the name wins, and the kind and channel are kept
+          if (chat) { var sv = chatSrc.get(prev) || {}; if (!sv[by]) { sv[by] = 1; chatSrc.set(prev, sv); prev.sn = (prev.sn || 1) + 1; } if (prev.ns && !r.ns) prev.ns = false; if (!prev.mg && /^(sm|m|im)$/.test(r.mg || "")) prev.mg = r.mg; if (!prev.c && r.c) prev.c = r.c; }
+          return;
+        }
         L.push(seen[key] = mk(r, s, name, cn, qty, cat0, t, chat, by, stream, !!r.so));
+        if (chat) { var o0 = {}; o0[by] = 1; chatSrc.set(seen[key], o0); }
       });
     });
     GO.forEach(function (key) {
@@ -889,7 +909,7 @@
         var set = cat0 === "Stars";
         var sp0 = splitTier(name); if ((sp0.t || cn.tl) && !tieredBase(sp0.b)) { name = sp0.b; cn = { n: cn.n, tl: false }; }   // a tier pinned on a scroll that has none
         if (/^scroll$/i.test(name)) name = "Scroll\u2026";                                                                  // just "Scroll": the real name was cut off
-        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, ns: !!((chat && r.ns) || (stream && r.su)), who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "" };
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, ns: !!((chat && r.ns) || (stream && r.su)), who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "", mg: chat && /^(sm|m|im)$/.test(r.mg || "") ? r.mg : "", sn: chat ? 1 : 0 };
         return l;
     }
     // A shop seen without a channel (the scanner never opened Change Channel) inherits the channel another
@@ -1184,7 +1204,15 @@
         if (day.length >= 5) { set = day; basis = "24h"; }
         else if (d3.length >= 3) { set = d3.slice(0, 10); basis = "3d"; }
         else { set = it.sales.filter(function (x) { return !x.pricey; }).slice(0, 10); if (!set.length) set = it.sales.slice(0, 10); basis = "old"; }
-      } else { var plain = it.asks.filter(function (x) { return !x.pricey; }); set = plain.length ? plain.slice(0, 10) : it.asks.length ? it.asks.slice(0, 10) : it.sales.slice(0, 10); basis = "ask"; }
+      } else {
+        // asking prices: shop listings when there are any. Trade chat and megaphone posts are asks from a named seller,
+        // never sales, and only price an item nobody has seen in a shop; one typed or read wrong (3x off the rest) is left out
+        var plain = it.asks.filter(function (x) { return !x.pricey; }), shopA = plain.filter(function (x) { return !x.chat; });
+        basis = "ask";
+        if (shopA.length) set = shopA.slice(0, 10);
+        else if (plain.length) { set = chatAsks(plain.slice(0, 10)); basis = "chat"; }
+        else set = it.asks.length ? it.asks.slice(0, 10) : it.sales.slice(0, 10);
+      }
       var su = set.map(function (x) { return x.u; });
       it.typ = median(su); it.lo = quant(su, .25); it.hi = quant(su, .75); it.typN = su.length; it.typDay = basis === "24h";
       it.typSet = set; it.basis = basis; it.moved = false;
@@ -1270,7 +1298,7 @@
             it.typ = median(ku); it.lo = quant(ku, .25); it.hi = quant(ku, .75); it.typN = ku.length; it.typSet = keep;
           }
         }
-        var pts = it.all.filter(function (x) { return !x.b && !x.spot && !x.pricey && now - x.t <= 7 * DAY; }).map(function (x) { return x.u; }).sort(function (a, b) { return a - b; });
+        var pts = it.all.filter(function (x) { return !x.b && !x.chat && !x.spot && !x.pricey && now - x.t <= 7 * DAY; }).map(function (x) { return x.u; }).sort(function (a, b) { return a - b; });
         if (pts.length >= 6) {
           var q1 = quant(pts, .25), q3 = quant(pts, .75);
           it.bands = { lo: median(pts.filter(function (v) { return v <= q1; })), mid: it.typ, hi: median(pts.filter(function (v) { return v >= q3; })), n: pts.length, from: "prices" };
@@ -1314,7 +1342,9 @@
       // background. Club and Mega Deals also see chat posts there, since a seller's name is enough to whisper.
       // Where to buy lists every shop listing; ones without a room read sit below full locations (listRank). Cheapest
       // now is the cheapest shop listing seen in the last 24 hours that nobody has seen gone or sold since.
-      it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON; });
+      // a megaphone post with a sure name fills For sale now for everyone when no shop listing is up (last 3 hours)
+      var shopUp = fresh.some(function (x) { return !x.chat; });
+      it.buy = fresh.filter(function (x) { return !x.chat || DEALS_ON || (!shopUp && x.mg && !x.ns && now - x.t <= 3 * H); });
       // one shop spot, one price, the same stats, two seller names inside two hours ("Unread", "UnReaden"): one of the
       // readings is wrong, so neither name is shown as fact (a wrong name sends buyers to the wrong player)
       var spotN = {};
@@ -1893,6 +1923,24 @@
     run.style.setProperty("--dur", Math.max(30, ev.length * 8) + "s");
   }
   document.addEventListener("visibilitychange", function () { var b = $("tickbar"); if (b) b.classList.toggle("paused", document.hidden); });
+  // The Big sales strip's endless slide and pulsing dot made the browser redo its paint bookkeeping for the whole page on every
+  // frame of a scroll, even with the strip off screen: on a slowed phone that was 3 s of a 12 s scroll. It holds still
+  // while off screen and while the page or the board box is scrolling, and slides again 250 ms after the scroll stops.
+  (function () {
+    var b = $("tickbar"); if (!b) return;
+    var off = false, still = 0;
+    function set() { b.classList.toggle("still", off || !!still); }
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { off = !es[es.length - 1].isIntersecting; set(); }).observe(b);
+    // while scrolling, price rows don't light up or start a hover card under the pointer: a mouse wheel over the table
+    // repainted every row it passed, more than doubling the repaints of a desktop scroll. Clicks work as always.
+    var de = document.documentElement, sc = 0;
+    document.addEventListener("scroll", function () {
+      if (!still) { still = 1; set(); }
+      clearTimeout(still); still = setTimeout(function () { still = 0; set(); }, 250);
+      if (!sc) de.classList.add("fm-scrolling");
+      clearTimeout(sc); sc = setTimeout(function () { sc = 0; de.classList.remove("fm-scrolling"); }, 150);
+    }, { passive: true, capture: true });
+  })();
 
   // ---------- category chips
   var CATS = [["All", 0], ["Scrolls", 2040000], ["Weapons", 1302000], ["Equips", 1082002], ["Stars", 2070000], ["Use", 2000000], ["Etc", 4000019], ["Cash", 1007077], ["Other", 3010000]];
@@ -1993,7 +2041,7 @@
     b.title = CONFTXT[i.conf][0] + ": " + CONFTXT[i.conf][1]; return b;
   }
   function nameCell(i, extraTag) {
-    var td = el("td"), w = el("div", "nm"); w.appendChild(iconBox(i.item));
+    var td = el("td"), w = el("div", "nm"); w.appendChild(iconBox(i.item, null, true));
     var t = el("div", "t"); var b = el("b", null, i.baseName); b.title = i.item; t.appendChild(b);
     t.appendChild(el("small", null, CATNAME[i.cat] || i.cat));
     if (i.tier) { var tt = el("span", "tg tier", tierLabel(i.tier)); tt.title = i.tier + (TIERLBL[i.tier] && i.tier !== "Chaos" ? ": " + TIERLBL[i.tier] + " success" : ""); t.appendChild(tt); }
@@ -3339,11 +3387,12 @@
     if (y + hhgt > window.innerHeight - 8) y = Math.max(8, rc.top - hhgt - 4);
     h.style.left = x + "px"; h.style.top = y + "px";
   }
-  function hideHov() { clearTimeout(hovTimer); hovName = null; hovRow = null; $("hov").hidden = true; }
+  function hideHov() { clearTimeout(hovTimer); hovName = null; hovRow = null; var h = $("hov"); if (h && !h.hidden) h.hidden = true; }   // runs on every scroll: no write when already hidden
   document.addEventListener("mouseover", function (e) {
     var tr = e.target.closest && e.target.closest("#rows tr[data-item], #deal-rows tr[data-item]:not(.gtipable)");
     if (!tr) { if (hovName) hideHov(); return; }
     if (tr === hovRow) return;
+    if (document.documentElement.classList.contains("fm-scrolling")) { if (hovName) hideHov(); return; }   // rows passing under a wheel
     hideHov(); hovRow = tr; hovName = tr.dataset.item;
     hovTimer = setTimeout(function () { showHov(hovName); }, 260);
   });
@@ -3430,7 +3479,7 @@
     function row(l, kind) {
       var r = el("div", "rl " + kind); r.tabIndex = 0;
       var t = el("div", "rlt"); t.appendChild(sellerEl(l)); var c = statChip(i.item, l.x, l.xj); if (c) { var cw = el("span", "rlc"); cw.appendChild(c); t.appendChild(cw); }
-      t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? "trade chat" : "")) + " · " + ago(l.t)));
+      t.appendChild(el("small", null, (kind === "up" ? buyWhere(l) : where(l) || (l.chat ? (l.mg ? megaWord(l) : "trade chat") : "")) + " · " + ago(l.t)));
       r.appendChild(t);
       var p = el("div", "rlp"); p.appendChild(money(l.u)); p.appendChild(el("small", null, kind === "up" ? (l.st === "up" ? "likely still up" : "may be gone") : kind === "sold" ? "sold" : "seen, gone now")); r.appendChild(p);
       tipAttach(r, l, i.item);
@@ -3618,7 +3667,7 @@
     im.src = "https://api.maplefm.gg/tipimg/" + xi + ".png"; wrap.appendChild(im);
     var f = el("div", "gt-foot");
     var pl = el("div"); pl.appendChild(sellerEl(l)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
-    var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t)));
+    var w = l.chat ? (l.mg ? megaWord(l) + (l.c ? " from CH " + l.c : "") : "trade chat") : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t)));
     f.appendChild(el("div", "gt-dim", "The popup exactly as FM Watcher saw it in game"));
     wrap.appendChild(f);
     return wrap;
@@ -3666,7 +3715,7 @@
     if (l && l.s) {
       var f = el("div", "gt-foot");
       var pl = el("div"); pl.appendChild(sellerEl(l)); pl.appendChild(document.createTextNode(" · ")); pl.appendChild(money(l.u)); pl.appendChild(document.createTextNode(l.q > 1 ? " each" : "")); f.appendChild(pl);
-      var w = l.chat ? "trade chat" : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
+      var w = l.chat ? (l.mg ? megaWord(l) + (l.c ? " from CH " + l.c : "") : "trade chat") : where(l); f.appendChild(el("div", null, (w ? w + " · " : "") + (l.so ? "sold " : "seen ") + ago(l.t) + (l.stream ? " · on " + l.who + "'s stream" : "")));
       var spl = read ? scrollSplit(name, l) : null;
       if (spl && spl.ok && spl.su > 0) {
         var pw = spl.passed[0] === spl.passed[1] ? spl.passed[0] + " passed, " + (spl.su - spl.passed[0]) + " failed" : spl.passed[0] + " to " + spl.passed[1] + " passed";
@@ -3876,13 +3925,21 @@
     box.appendChild(src);
     return box;
   }
+  // the window width, read once before a card render writes anything: each read after a write made the browser lay out
+  // the half-built card on the spot (three times per open on a phone)
+  var RIW = 0;
+  function cardW() { return RIW || window.innerWidth; }
   function renderItem() {
+    RIW = window.innerWidth;
+    try { renderItem1(); } finally { RIW = 0; }
+  }
+  function renderItem1() {
     var r = $("ipr"); if (r) { r.textContent = ""; r.hidden = true; }
     $("ip").classList.remove("lclosed"); if ($("ipr")) $("ipr").classList.remove("lclosed");
     renderItem0();
     loadGuide();
     var gb = state.sel && guideBox(state.sel); if (gb) $("ip").appendChild(gb);
-    if (window.innerWidth <= 1180) { var pch = state.sel && D && D.byName && D.byName[state.sel] && !D.preview && bigChart(D.byName[state.sel]); if (pch) $("ip").appendChild(pch); }
+    if (cardW() <= 1180) { var pch = state.sel && D && D.byName && D.byName[state.sel] && !D.preview && bigChart(D.byName[state.sel]); if (pch) $("ip").appendChild(pch); }
     orderCard($("ip"));
     foldLists($("ip"));
     foldStats($("ip"));
@@ -3898,13 +3955,13 @@
   function ladItem() { var i = state.sel && D && D.byName && D.byName[state.sel]; return !!(i && i.equip && ladderOf(i)); }
   function foldStats(ip) {
     var lad = ladItem();
-    if (!ip || (window.innerWidth > 1180 && !lad)) return;
+    if (!ip || (cardW() > 1180 && !lad)) return;
     ip.querySelectorAll(":scope > .rollbox, :scope > .pbs").forEach(function (box) {
       var h = box.querySelector(":scope > h4"); if (!h) return;
       var open = STATOPEN === state.sel || (lad && !!OPENS.stats);
       box.classList.add("fold"); box.classList.toggle("open", open);
       h.setAttribute("role", "button"); h.tabIndex = 0; h.setAttribute("aria-expanded", open);
-      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : lad && window.innerWidth > 1180 ? "Open" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
+      if (!h.querySelector(".fhint")) { var hint = el("span", "fhint", open ? "Hide" : lad && cardW() > 1180 ? "Open" : "Tap to open"); h.insertBefore(hint, h.querySelector(".inf")); h.appendChild(el("span", "fchev")); }
       var go = function (e) {
         if (e.target.closest(".inf")) return; if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return; e.preventDefault();
         var now = !box.classList.contains("open"); STATOPEN = now ? state.sel : ""; if (lad) { OPENS.stats = now ? 1 : 0; saveLS("fm-open", OPENS); }
@@ -3942,7 +3999,7 @@
   // price by grade and everything else on the right, in the card's reading order
   function isBuy(k) { return BUYSIDE.some(function (c) { return k.classList.contains(c); }); }
   function splitCard() {
-    var r = $("ipr"), ip = $("ip"); if (!r || !ip || window.innerWidth <= 1180 || !state.sel) return;
+    var r = $("ipr"), ip = $("ip"); if (!r || !ip || cardW() <= 1180 || !state.sel) return;
     var i = D && D.byName && D.byName[state.sel];
     var kids = [].slice.call(ip.children); if (!kids.some(isBuy)) return;
     var ch = i && !D.preview && bigChart(i), at = 0;
@@ -4178,8 +4235,8 @@
       ip.appendChild(eb);
       eb.appendChild(el("span", "tg roll etg", HG.name.toLowerCase()));      // which grade this price is for
     }
-    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used", "hovered": "the last " + i.typN + " sales whose stats were read in game, scrolled and odd rolls left out" }[i.basis] || "recent sales";
-    var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "rolls": "average rolls", "asks": "asking prices" };
+    var why = { "24h": "sales in the last 24 hours", "3d": "the last " + i.typN + " sales in 3 days", "old": "the last " + i.typN + " sales, some older than 3 days", "asknow": "today's asking prices, since they sit well above older sales", "ask": "asking prices, not enough sales yet", "chat": "megaphone and trade chat asking prices: no shop listings or sales seen yet", "rolls": "listings with an average roll (within 1 of average)", "asks": "the third-cheapest ask up now, since the cheapest asks sit under the recent sales", "clean": "the last " + i.typN + " sales of plain copies: average roll, no scrolls used", "hovered": "the last " + i.typN + " sales whose stats were read in game, scrolled and odd rolls left out" }[i.basis] || "recent sales";
+    var SHORTWHY = { "24h": "24h sales", "3d": "3 days of sales", "old": "older sales", "asknow": "today's asks", "ask": "asking prices", "chat": "chat asks", "rolls": "average rolls", "asks": "asking prices" };
     var full = "Typical " + fmt(i.typ) + " from " + why + (i.typOff ? ", " + i.typOff + " scrolled or rolled " + (i.typOff === 1 ? "copy" : "copies") + " left out" : "") + "." + (i.equip ? " Equips are priced by roll, each against its own sales." : "");
     // the typical price once: when the big number already is the typical, this line only says where it comes from
     var tnote = el("p", "tline"), oneNum = !(i.hi > i.lo);
