@@ -357,3 +357,6 @@ if __name__ == "__main__":
     for n in sys.argv[1:] or ["sindit"]:
         p, data = build(n)
         print("wrote", p, "| spare SP at 70:", data["sp"][CAP]["spare"], "| level 1:", data["stats"][0]["t"], "| skills with icons:", len(data["sid"]), "of", len(data["first"]))
+    # the Discord /build command reads the same numbers from builds/discord.json
+    import subprocess
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "discordbuilds.py")], check=True)
