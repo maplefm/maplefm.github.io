@@ -47,13 +47,8 @@
     "why": "Level 20 warrior armor needs 10 DEX"
    },
    {
-    "levels": "22",
-    "ap": "DEX to 12, rest STR",
-    "why": "Level 22 warrior armor needs 12 DEX"
-   },
-   {
     "levels": "25",
-    "ap": "DEX to 15, rest STR",
+    "ap": "all DEX (to 15)",
     "why": "Level 25 warrior armor needs 15 DEX"
    },
    {
@@ -70,11 +65,6 @@
     "levels": "40",
     "ap": "all DEX (to 35)",
     "why": "Jacker at 40 needs 35 DEX"
-   },
-   {
-    "levels": "47",
-    "ap": "DEX to 37, rest STR",
-    "why": "Level 47 warrior armor needs 37 DEX"
    },
    {
     "levels": "49 to 50",
@@ -787,14 +777,14 @@
   "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
   "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
-  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 12 for level 22 warrior armor, 15 for level 25 warrior armor, 25 for War Hammer at 30, 30 for Heavy Hammer at 35, 35 for Jacker at 40, 37 for level 47 warrior armor and 45 for Knuckle Mace at 50. Everything else goes into STR.",
+  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 15 for level 25 warrior armor, 25 for War Hammer at 30, 30 for Heavy Hammer at 35, 35 for Jacker at 40 and 45 for Knuckle Mace at 50. Everything else goes into STR.",
   "A one-handed blunt weapon leaves room for a shield and its weapon defense, but at the same attack, with your stats at 40, it hits about 20% softer than a two-handed one. Some one-handed blunt weapons swing a speed step faster, which wins a little of that back. Pick it if you'd rather take less damage than kill faster."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Blunt Weapon Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
   "Buying a sword with a blunt build. Blunt Weapon Mastery, Booster and Final Attack: Blunt Weapon only work with a blunt weapon, so you lose most of 2nd job.",
-  "Forgetting DEX before War Hammer. It needs 25 DEX at 30, so put your AP at 29 and 30 into DEX on the levels up to it, or you stay on Plunger's 44 attack instead of 49."
+  "Forgetting DEX before War Hammer. It needs 25 DEX at 30, so put your AP at 29 and 30 into DEX, or you stay on Plunger's 44 attack instead of 49."
  ],
  "compare": [
   {

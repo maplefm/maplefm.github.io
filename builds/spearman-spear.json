@@ -49,13 +49,8 @@
     "why": "Level 20 warrior armor needs 10 DEX"
    },
    {
-    "levels": "22",
-    "ap": "DEX to 12, rest STR",
-    "why": "Level 22 warrior armor needs 12 DEX"
-   },
-   {
     "levels": "25",
-    "ap": "DEX to 15, rest STR",
+    "ap": "all DEX (to 15)",
     "why": "Level 25 warrior armor needs 15 DEX"
    },
    {
@@ -781,7 +776,7 @@
   "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
   "Final Attack: Spear gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds. While it's lit you can use it on one mob for 260%, and it heals you, up to 15% of your max HP. 1 point already gets the full 25% chance, so it goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
   "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage.",
-  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 12 for level 22 warrior armor, 15 for level 25 warrior armor, 30 for Forked Spear at 30, 35 for Nakamaki at 35, 40 for Zeco at 40 and 50 for Serpent's Tongue at 50. Everything else goes into STR."
+  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 15 for level 25 warrior armor, 30 for Forked Spear at 30, 35 for Nakamaki at 35, 40 for Zeco at 40 and 50 for Serpent's Tongue at 50. Everything else goes into STR."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 4 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",

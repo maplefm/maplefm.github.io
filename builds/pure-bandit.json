@@ -65,7 +65,12 @@
     "why": "Reef Claw at 30 needs 25 DEX"
    },
    {
-    "levels": "47 to 50",
+    "levels": "40",
+    "ap": "all DEX (to 30)",
+    "why": "Level 40 thief armor needs 30 DEX"
+   },
+   {
+    "levels": "48 to 50",
     "ap": "all DEX (to 45)",
     "why": "Shinkita at 50 needs 45 DEX"
    },
@@ -100,9 +105,9 @@
    {
     "level": 40,
     "STR": 4,
-    "DEX": 25,
+    "DEX": 30,
     "INT": 4,
-    "LUK": 187
+    "LUK": 182
    },
    {
     "level": 50,
@@ -748,14 +753,14 @@
   "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
   "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast.",
   "Savage Blow 22 to 30 only takes it from 390% to 450% a cast, so Dagger Mastery 20 comes first.",
-  "Korean Fan at 40 is a fast dagger that needs no DEX, so DEX stays at 25 through 46.",
+  "Korean Fan at 40 is a fast dagger that needs no DEX. The only DEX from 31 to 46 is 5 at 40, for level 40 thief armor.",
   "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster.",
-  "DEX only goes in when your gear needs it: 10 for Field Dagger at 15, 15 for Coconut Knife at 20, 22 for Forked Dagger at 27, 25 for Reef Claw at 30 and 45 for Shinkita at 50. Everything else goes into LUK."
+  "DEX only goes in when your gear needs it: 10 for Field Dagger at 15, 15 for Coconut Knife at 20, 22 for Forked Dagger at 27, 25 for Reef Claw at 30, 30 for level 40 thief armor and 45 for Shinkita at 50. Everything else goes into LUK."
  ],
  "mistakes": [
   "Putting SP in Keen Eyes. It only adds range to thrown stars, and a bandit never throws. Up to 15 SP that should be in Nimble Body and Dark Sight.",
   "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal.",
-  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put your AP from 47 to 50 into DEX, or you hit 50 and can't wear it.",
+  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put your AP from 48 to 50 into DEX, or you hit 50 and can't wear it.",
   "Maxing Dagger Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Savage Blow."
  ],
  "compare": [

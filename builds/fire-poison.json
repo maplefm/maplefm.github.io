@@ -49,13 +49,8 @@
     "why": "Metal Wand at 20 needs 10 LUK"
    },
    {
-    "levels": "22",
-    "ap": "LUK to 12, rest INT",
-    "why": "Level 22 magician armor needs 12 LUK"
-   },
-   {
     "levels": "25",
-    "ap": "LUK to 15, rest INT",
+    "ap": "all LUK (to 15)",
     "why": "Ice Wand at 25 needs 15 LUK"
    },
    {
@@ -766,7 +761,7 @@
   "Fire Arrow 30 first: damage 180 on one mob against Energy Bolt's 130, plus a burn every second for 3 seconds. In our damage engine it takes over from Energy Bolt by 40.",
   "Meditation 20 next, +25 magic attack for 300 seconds, then Poison Breath 30, damage 90 on up to 6 mobs.",
   "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions. Teleport takes the last points: more range and MP 55 down to 15 a cast.",
-  "LUK only goes in when your gear needs it: 10 for Metal Wand at 20, 12 for level 22 magician armor, 15 for Ice Wand at 25, 20 for Mithril Wand at 30, 25 for Wizard Wand at 35, 30 for Fairy Wand at 40 and 40 for level 50 magician armor. Everything else goes into INT.",
+  "LUK only goes in when your gear needs it: 10 for Metal Wand at 20, 15 for Ice Wand at 25, 20 for Mithril Wand at 30, 25 for Wizard Wand at 35, 30 for Fairy Wand at 40 and 40 for level 50 magician armor. Everything else goes into INT.",
   "Cromi at 50 is about 2% more damage than staying on Fairy Wand, because its 40 LUK costs you 10 INT, and it sells for millions on the FM. It's a luxury, so this guide keeps Fairy Wand."
  ],
  "mistakes": [

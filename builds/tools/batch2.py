@@ -125,13 +125,15 @@ JOBBIT = {"Warrior": 1, "Magician": 2, "Bowman": 4, "Thief": 8}
 
 def armor_needs(cls, stat):
     """(level, need) for the class's own armor that a player can get today (sold, dropped, crafted, a quest, or seen on the
-    FM), at every level it comes in up to 50: the lowest the stat can be to wear that level's armor. Game files, builds/data/armor.json."""
+    FM), at every level a set of it comes in up to 50. Game files, builds/data/armor.json."""
     tiers = {}
     for n, a in ARMOR.items():
         if a.get("cash") or a.get("reqJob") != JOBBIT[cls] or not obtainable(n): continue
         L = a.get("reqLevel") or 0
-        if 10 <= L <= 50: tiers.setdefault(L, []).append(a.get("req" + stat) or 0)
-    return sorted((L, min(v)) for L, v in tiers.items() if min(v) > 0)
+        if 10 <= L <= 50: tiers.setdefault(L, {}).setdefault(a["kind"], []).append(a.get("req" + stat) or 0)
+    # a full set: the stat that lets you wear something in every slot of that level's armor. Levels with fewer than 3
+    # slots (a lone hat at 22, say) aren't a set, so they don't drive AP.
+    return sorted((L, max(min(v) for v in sl.values())) for L, sl in tiers.items() if len(sl) >= 3 and max(min(v) for v in sl.values()) > 0)
 
 
 def plan_stats(b):
@@ -315,7 +317,7 @@ TEXT = {
             "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
             "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast.",
             "Savage Blow 22 to 30 only takes it from 390% to 450% a cast, so Dagger Mastery 20 comes first.",
-            "Korean Fan at 40 is a fast dagger that needs no DEX, so DEX stays at 25 through 46.",
+            "Korean Fan at 40 is a fast dagger that needs no DEX. The only DEX from 31 to 46 is 5 at 40, for level 40 thief armor.",
             "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster.",
         ],
         "mistakes": [

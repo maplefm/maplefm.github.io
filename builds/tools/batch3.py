@@ -273,7 +273,7 @@ TEXT3["str-bandit"] = {
             "STR only goes in for each dagger: 11 at 17, 17 at 22, 25 at 30, 40 at 45 and 45 at 50. Everything else goes into LUK, and DEX stays at 5.",
             "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast. Savage Blow 22 to 30 only takes it to 450%, so Dagger Mastery 20 comes first.",
             "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster."],
-    "mistakes": ["Putting AP into DEX out of habit. None of the STR daggers need DEX, so every point there is a point out of LUK.",
+    "mistakes": ["Putting AP into DEX out of habit. None of the STR daggers need DEX and you wear gear any job can, so every point there is a point out of LUK.",
                  "Forgetting STR before Bazlud. It needs 40 STR at 45, so put your AP from 43 to 45 into STR, or you stay on Korean Fan's 55 attack instead of 62.",
                  "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same speed 3, and needs no STR.",
                  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal."],
@@ -360,7 +360,7 @@ def text_for(b, st):
         (lv, nm), (plv, pn) = b["weapons"][i], b["weapons"][i - 1]
         w, pw = WPN[nm], WPN[pn]
         cost = f"{pn}'s {pw['watk']} attack instead of {w['watk']}" + (", and a speed step slower" if pw["spd"] > w["spd"] else "")
-        t["mistakes"].append(f"Forgetting DEX before {nm}. It needs {w['reqDEX']} DEX at {lv}, so put your AP into DEX on the levels up to it, or you stay on {cost}.")
+        t["mistakes"].append(f"Forgetting DEX before {nm}. It needs {w['reqDEX']} DEX at {lv}, so put your AP into DEX, or you stay on {cost}.")
         t["pitch"] = t["pitch"].replace("each sword's need", "each one-handed sword's need").replace("each axe's need", "each one-handed axe's need").replace("each blunt weapon's need", "each one-handed blunt weapon's need")
         t["weak"] = [x for x in t["weak"] if "DEX" not in x and "2-handed" not in x and "Two-handed" not in x] + ["Less damage than a two-handed weapon"]
         t["best"] = [x for x in t["best"] if "2-handed" not in x and "Two-handed" not in x]
@@ -400,7 +400,7 @@ def staff_text(b):
         "Staffs have no step between Wizard Staff at 25, magic attack 45, and Arc Staff at 45, 73. A wand mage has 55 to 69 over those levels, so a staff mage "
         "spends 30 to 44 with 10 to 24 less magic attack, then pulls ahead from 45."]
     t["mistakes"] = [x for x in t["mistakes"] if "Fairy Wand" not in x] + [
-        "Forgetting LUK for Arc Staff. It needs 40 LUK at 45, so put your AP on the levels up to it into LUK, or you stay on Wizard Staff's 45 magic attack instead of 73."]
+        "Forgetting LUK for Arc Staff. It needs 40 LUK at 45, so put your AP into LUK, or you stay on Wizard Staff's 45 magic attack instead of 73."]
     t["pitch"] = t["pitch"].replace("each wand's need", "each staff's need")
     return t
 VARIANTS = {s: [{"label": "Two-handed", "slug": s}, {"label": "One-handed and shield", "slug": s + "-1h"}] for s in ONE}
