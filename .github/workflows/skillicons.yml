@@ -11,29 +11,32 @@ concurrency: skillicons
 jobs:
   icons:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - run: |
           mkdir -p sk
           python3 - <<'PY'
-          import json, os, time, urllib.request
+          import json, os, urllib.request, concurrent.futures as cf
           ids = sorted(json.load(open("assets/classic-skills.json"))["skills"])
-          got, miss = 0, []
-          for i in ids:
+          URLS = ["https://maplestory.io/api/MCW/1/skill/{}/icon", "https://maplestory.io/api/MCW/1.2/skill/{}/icon", "https://maplestory.io/api/GMS/83/skill/{}/icon"]
+          def get(i):
               p = f"sk/{i}.png"
-              if os.path.exists(p): continue
-              for url in (f"https://maplestory.io/api/MCW/1/skill/{i}/icon", f"https://maplestory.io/api/MCW/1.2/skill/{i}/icon"):
+              if os.path.exists(p): return i, "have"
+              errs = []
+              for u in URLS:
                   try:
-                      b = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "maplefm.gg icon copy"}), timeout=30).read()
+                      b = urllib.request.urlopen(urllib.request.Request(u.format(i), headers={"User-Agent": "maplefm.gg icon copy"}), timeout=15).read()
                       if b[:8] == b"\x89PNG\r\n\x1a\n":
-                          open(p, "wb").write(b); got += 1; break
+                          open(p, "wb").write(b); return i, "ok " + u.split("/api/")[1].split("/skill")[0]
+                      errs.append("not png")
                   except Exception as e:
-                      err = str(e)
-                  time.sleep(0.3)
-              else:
-                  miss.append(i)
-          json.dump(sorted(miss), open("sk/missing.json", "w"))
-          print("copied", got, "missing", len(miss), miss[:20])
+                      errs.append(str(e)[:60])
+              return i, "miss " + " | ".join(errs)
+          res = list(cf.ThreadPoolExecutor(8).map(get, ids))
+          for i, r in res: print(i, r, flush=True)
+          json.dump(sorted(i for i, r in res if r.startswith("miss")), open("sk/missing.json", "w"))
+          print("copied", sum(r.startswith("ok") for _, r in res), "missing", sum(r.startswith("miss") for _, r in res))
           PY
       - run: |
           git config user.name maplefm
