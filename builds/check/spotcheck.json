@@ -1,7 +1,7 @@
 {
  "version": "https://maplestory.io/api/MCW/1.2",
- "checked": 54,
- "ok": 54,
+ "checked": 46,
+ "ok": 46,
  "accuracy_pct": 100.0,
  "rows": [
   {
@@ -38,24 +38,6 @@
    "what": "Shinkita needs",
    "page": "45 DEX, 100 LUK",
    "game_files": "45 DEX, 100 LUK",
-   "ok": true
-  },
-  {
-   "what": "Kandine (1332020) attack",
-   "page": 88,
-   "game_files": 88,
-   "ok": true
-  },
-  {
-   "what": "Kandine speed",
-   "page": 4,
-   "game_files": 4,
-   "ok": true
-  },
-  {
-   "what": "Kandine needs",
-   "page": "65 DEX, 140 LUK",
-   "game_files": "65 DEX, 140 LUK",
    "ok": true
   },
   {
@@ -125,24 +107,6 @@
    "ok": true
   },
   {
-   "what": "Redemption (1432008) attack",
-   "page": 95,
-   "game_files": 95,
-   "ok": true
-  },
-  {
-   "what": "Redemption speed",
-   "page": 7,
-   "game_files": 7,
-   "ok": true
-  },
-  {
-   "what": "Redemption needs",
-   "page": "145 STR, 70 DEX",
-   "game_files": "145 STR, 70 DEX",
-   "ok": true
-  },
-  {
    "what": "Crescent Polearm (1442006) attack",
    "page": 65,
    "game_files": 65,
@@ -182,18 +146,6 @@
    "what": "The Nine Dragons needs",
    "page": "105 STR, 50 DEX",
    "game_files": "105 STR, 50 DEX",
-   "ok": true
-  },
-  {
-   "what": "The Gold Dragon (1442009) attack",
-   "page": 95,
-   "game_files": 95,
-   "ok": true
-  },
-  {
-   "what": "The Gold Dragon speed",
-   "page": 8,
-   "game_files": 8,
    "ok": true
   },
   {
