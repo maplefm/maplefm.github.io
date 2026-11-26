@@ -15,7 +15,7 @@ import worldpages as W  # noqa: E402
 
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/"
 CAP = 70
-GUIDES = {"Sindit": "sindit", "Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm"}
+GUIDES = {"Sindit": "sindit", "Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter"}
 
 
 def E(s): return W.E(str(s if s is not None else ""))
@@ -55,13 +55,27 @@ def npc_link(npc):
     return f"/map.html#map={quote(mn)}"
 
 
+def _moblv():
+    import tempfile
+    p = os.path.join(tempfile.gettempdir(), "fm-world.json")
+    if not os.path.exists(p):
+        import urllib.request
+        open(p, "wb").write(urllib.request.urlopen("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/world.json", timeout=120).read())
+    return {n: m["lv"] for n, m in json.load(open(p, encoding="utf-8"))["mobs"].items() if not m.get("variant")}
+
+
+MOBLV = _moblv()
+
+
 def ways(guide, name):
     g = guide.get(name) or {}
     out = []
     for npc, town, price in sorted({(s[0], s[1], s[2]) for s in g.get("s", []) if s[2]}, key=lambda s: s[2])[:2]:
         ts = W.slug(town)
         out.append({"k": "npc", "t": npc, "s": town, "p": price, "u": npc_link(npc) or (f"/map/{ts}/" if exists("map", ts) else "")})
-    for mob, lv in sorted({(x[0], x[1]) for x in g.get("d", []) if x[1]}, key=lambda x: x[1])[:3]:
+    # the monster's own level from world.json; the drop list's level can be a job quest's copy of the monster
+    drops = {(x[0], MOBLV.get(x[0]) or x[1]) for x in g.get("d", []) if x[1]}
+    for mob, lv in sorted(drops, key=lambda x: x[1])[:3]:
         ms = W.slug(mob)
         out.append({"k": "drop", "t": mob, "s": f"Lv {lv}", "u": f"/monster/{ms}/" if exists("monster", ms) else ""})
     for c in g.get("c", [])[:1]:
@@ -158,7 +172,7 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
  skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):(D.reset&&L>=D.reset&&D.first[n]<D.reset?"reset at "+D.reset:"starts at level "+D.first[n])}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
- eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
+ eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}${w.slot=="Bow"&&D.ammoBow?`<div class="wtip">${D.ammoBow}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
  const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
  try{history.replaceState(null,"",L==D.start?location.pathname:"#lv"+L)}catch(e){}
 }
@@ -212,7 +226,7 @@ def build(name):
         s, p = st[L], st[L - 1] if L > 1 else None
         if L == 1: ap = "character creation: " + ", ".join(f"{v} {k}" for k, v in zip(K, s))
         else: ap = " ".join(f"+{s[i] - p[i]} {K[i]}" for i in range(4) if s[i] != p[i])
-        stats.append({"l": L, "t": s, "ap": ap, "ch": L in (1, 10, 30) or bool(p and s[1] != p[1])})
+        stats.append({"l": L, "t": s, "ap": ap, "ch": L in (1, 10, 30) or bool(p and s[si] != p[si])})
 
     # skill points every level, never more than the level allows or a skill's max
     order = [s for s in d["skill_order"] if s["level"] <= CAP]
@@ -279,10 +293,14 @@ def build(name):
             + (f"Subi for {subi[0][2]:,} a set at {E(subi[0][0])}" if subi else "")
             + (f", or Wolbi for {wolbi[0][2]:,} a set at {E(wolbi[0][0])} (+2 attack)" if wolbi else "")
             + '. Anything better is a luxury, not part of the build. <a href="/items/stars/">Every star and its price</a>') if subi else ""
+    arrows = npc("Arrows for Bows")
+    arrows = sorted(arrows, key=lambda x: (x[1] != "Henesys", x[2], x[0]))
+    ammo_bow = (f"Bows shoot Arrows for Bows. {E(arrows[0][0])} in {E(arrows[0][1])} sells them for {arrows[0][2]:,} each. "
+                '<a href="/items/stars/">Every arrow and its price</a>') if arrows else ""
 
     data = {"cap": CAP, "reset": (d.get("reset") or {}).get("level"), "start": d.get("switch") or 30, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
-            "book": {b: list(dict.fromkeys([s["skill"] for s in v] + (list(d["reset"]["to"]) if d.get("reset") and d["reset"]["book"] == b else []))) for b, v in books.items()}, "sid": {n: sid[n] for n in first if n in sid},
-            "gear": gear, "train": train, "ammo": ammo}
+            "book": {b: list(dict.fromkeys([s["skill"] for s in v] + (list(d["reset"]["to"]) if d.get("reset") and d["reset"]["book"] == b else []))) for b, v in books.items()}, "sid": {n: ({x["skill"]: x["id"] for x in d["skill_order"] if x.get("id")}.get(n) or sid.get(n)) for n in first if n in sid},
+            "gear": gear, "train": train, "ammo": ammo, "ammoBow": ammo_bow}
 
     def t_(head, rws): return '<div class="tw"><table class="t"><tr>' + "".join(f"<th>{x}</th>" for x in head) + "</tr>" + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rws) + "</table></div>"
     def need_h(g): return '<div class="gneed">' + "".join(f"<span>{'<em>' + E(k) + '</em>' if k else ''}{E(v)}</span>" for k, v in g["needs"]) + "</div>"

@@ -1,0 +1,864 @@
+{
+ "slug": "/builds/hunter/",
+ "header": {
+  "class": "Bowman",
+  "job_path": "Bowman (10) → Hunter (30)",
+  "build": "Hunter",
+  "pitch": "DEX with STR only to each bow's need. Arrow Blow in 1st job, then Bow Mastery, Arrow Bomb and Final Attack.",
+  "best_at": [
+   "Ranged from level 10",
+   "Arrow Bomb hits up to 6 mobs",
+   "Arrows cost 1 meso each at the NPC"
+  ],
+  "weak_spots": [
+   "STR has to match your level for bows from 15",
+   "Arrow Blow hits one mob until 30"
+  ],
+  "difficulty": "Easy",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 449642,
+    "shown": "about 450K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 5,
+   "DEX": 12,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "DEX",
+  "sub": "STR",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all DEX",
+    "why": "Bowman job advance needs 25 DEX at 10"
+   },
+   {
+    "levels": "14 to 15",
+    "ap": "all STR (to 15)",
+    "why": "Composite Bow at 15 needs 15 STR"
+   },
+   {
+    "levels": "20",
+    "ap": "all STR (to 20)",
+    "why": "Hunter's Bow at 20 needs 20 STR"
+   },
+   {
+    "levels": "25",
+    "ap": "all STR (to 25)",
+    "why": "Battle Bow at 25 needs 25 STR"
+   },
+   {
+    "levels": "30",
+    "ap": "all STR (to 30)",
+    "why": "Ryden at 30 needs 30 STR"
+   },
+   {
+    "levels": "35",
+    "ap": "all STR (to 35)",
+    "why": "Red Viper at 35 needs 35 STR"
+   },
+   {
+    "levels": "40",
+    "ap": "all STR (to 40)",
+    "why": "Vaulter 2000 at 40 needs 40 STR"
+   },
+   {
+    "levels": "49 to 50",
+    "ap": "all STR (to 50)",
+    "why": "Olympus at 50 needs 50 STR"
+   },
+   {
+    "levels": "59 to 60",
+    "ap": "all STR (to 60)",
+    "why": "Asianic Bow at 60 needs 60 STR"
+   },
+   {
+    "levels": "69 to 70",
+    "ap": "all STR (to 70)",
+    "why": "Red Hinkel at 70 needs 70 STR"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all DEX",
+    "why": "DEX is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 5,
+    "DEX": 57,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 20,
+    "DEX": 92,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 30,
+    "DEX": 132,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 40,
+    "STR": 40,
+    "DEX": 172,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 50,
+    "STR": 50,
+    "DEX": 212,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 60,
+    "STR": 60,
+    "DEX": 252,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 70,
+    "STR": 70,
+    "DEX": 292,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Arrow Blow",
+   "id": 3001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Critical Shot",
+   "id": 3000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 29,
+   "book": "1st job",
+   "skill": "Focus",
+   "id": 3001000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 6,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Bow Mastery",
+   "id": 3100000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Bow Booster",
+   "id": 3101001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Final Attack: Bow",
+   "id": 3101000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 37,
+   "book": "2nd job",
+   "skill": "Bow Mastery",
+   "id": 3100000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Arrow Bomb",
+   "id": 3101004,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 57,
+   "book": "2nd job",
+   "skill": "Final Attack: Bow",
+   "id": 3101000,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 58,
+   "book": "2nd job",
+   "skill": "Bow Booster",
+   "id": 3101001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 59,
+   "book": "2nd job",
+   "skill": "Soul Arrow: Bow",
+   "id": 3101003,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 64,
+   "book": "2nd job",
+   "skill": "Bow Booster",
+   "id": 3101001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Soul Arrow: Bow",
+   "id": 3101003,
+   "to": 20,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Bow",
+   "item": "War Bow",
+   "id": 1452000,
+   "needs": "25 DEX",
+   "attack": 30,
+   "speed": 6,
+   "price": {
+    "typical": 3600,
+    "shown": "3,600",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Bow",
+   "item": "Composite Bow",
+   "id": 1452001,
+   "needs": "15 STR, 35 DEX",
+   "attack": 35,
+   "speed": 6,
+   "price": {
+    "typical": 4099,
+    "shown": "4,099",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Bow",
+   "item": "Hunter's Bow",
+   "id": 1452002,
+   "needs": "20 STR, 45 DEX",
+   "attack": 42,
+   "speed": 6,
+   "price": {
+    "typical": 5000,
+    "shown": "5,000",
+    "basis": "3d",
+    "sales_seen": 6,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "Bow",
+   "item": "Battle Bow",
+   "id": 1452003,
+   "needs": "25 STR, 55 DEX",
+   "attack": 44,
+   "speed": 5,
+   "price": {
+    "typical": 7000,
+    "shown": "7,000",
+    "basis": "3d",
+    "sales_seen": 9,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Bow",
+   "item": "Ryden",
+   "id": 1452004,
+   "needs": "30 STR, 65 DEX",
+   "attack": 50,
+   "speed": 6,
+   "price": {
+    "typical": 18000,
+    "shown": "18K",
+    "basis": "24h",
+    "sales_seen": 16,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 35,
+   "slot": "Bow",
+   "item": "Red Viper",
+   "id": 1452005,
+   "needs": "35 STR, 75 DEX",
+   "attack": 52,
+   "speed": 5,
+   "price": {
+    "typical": 19444,
+    "shown": "19K",
+    "basis": "3d",
+    "sales_seen": 37,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "Bow",
+   "item": "Vaulter 2000",
+   "id": 1452006,
+   "needs": "40 STR, 85 DEX",
+   "attack": 60,
+   "speed": 6,
+   "price": {
+    "typical": 34999,
+    "shown": "35K",
+    "basis": "clean",
+    "sales_seen": 38,
+    "rough": false
+   },
+   "why": ""
+  },
+  {
+   "level": 50,
+   "slot": "Bow",
+   "item": "Olympus",
+   "id": 1452007,
+   "needs": "50 STR, 105 DEX",
+   "attack": 70,
+   "speed": 6,
+   "price": {
+    "typical": 357500,
+    "shown": "358K",
+    "basis": "24h",
+    "sales_seen": 43,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 60,
+   "slot": "Bow",
+   "item": "Asianic Bow",
+   "id": 1452009,
+   "needs": "60 STR, 125 DEX",
+   "attack": 80,
+   "speed": 6,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  },
+  {
+   "level": 70,
+   "slot": "Bow",
+   "item": "Red Hinkel",
+   "id": 1452010,
+   "needs": "70 STR, 145 DEX",
+   "attack": 90,
+   "speed": 6,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Bowman",
+   "where": "Henesys, Athena Pierce",
+   "needs": "Level 10 and 25 DEX",
+   "gets": "1 SP. Arrow Blow and Double Shot open."
+  },
+  {
+   "level": 30,
+   "job": "Hunter",
+   "where": "Henesys, Athena Pierce",
+   "needs": "Level 30",
+   "gets": "Pick Hunter. Bow skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Ranger",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Caution Falling Down",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site I",
+     "monsters": [
+      "Ghost Stump",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+  "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+  "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every bow attack.",
+  "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full 2 steps of speed. Final Attack: Bow 1 opens a 25% chance of an extra hit on up to 3 mobs, so it goes in early too.",
+  "Arrow Bomb 30 hits up to 6 mobs for 130% with a 60% chance to stun. It's your only attack for groups, so it comes right after Mastery 20.",
+  "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
+  "Bows need STR equal to their level from Composite Bow at 15. AP only goes into STR in the levels right before each new bow, everything else goes into DEX."
+ ],
+ "mistakes": [
+  "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put that level's AP into STR, or you stay on Battle Bow's 44 attack instead of 50.",
+  "Maxing Bow Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that belong in Mastery, Arrow Bomb and Final Attack.",
+  "Buying a crossbow. Bow Mastery, Bow Booster, Soul Arrow, Arrow Bomb and Final Attack: Bow only work with a bow, so you lose all of 2nd job.",
+  "Leveling Double Shot before Arrow Blow. Double Shot 20 is 120% per mob, Arrow Blow 20 is 240% on one; max Arrow Blow first."
+ ],
+ "compare": [
+  {
+   "build": "Hunter (this guide)",
+   "best_at": "bow, Arrow Bomb on 6 mobs",
+   "weak": "STR for bows"
+  },
+  {
+   "build": "Crossbowman",
+   "best_at": "crossbow instead of a bow",
+   "weak": "different 2nd job skills"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Ranger. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Hunter Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic hunter build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ }
+}

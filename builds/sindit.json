@@ -862,13 +862,6 @@
    "best_at": "range all the way",
    "weak": "stars cost: Kumbi to Steely",
    "note": "training page Typical build"
-  },
-  {
-   "build": "Dexless Bandit",
-   "main_attack": "Savage Blow",
-   "best_at": "highest LUK",
-   "weak": "misses; can't wear DEX daggers",
-   "note": "training page Typical build"
   }
  ],
  "future": [
