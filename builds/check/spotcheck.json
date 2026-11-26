@@ -1,21 +1,9 @@
 {
  "version": "https://maplestory.io/api/MCW/1.2",
- "checked": 56,
- "ok": 56,
+ "checked": 54,
+ "ok": 54,
  "accuracy_pct": 100.0,
  "rows": [
-  {
-   "what": "Halfmoon Zamadar (1332011) attack",
-   "page": 53,
-   "game_files": 53,
-   "ok": true
-  },
-  {
-   "what": "Halfmoon Zamadar speed",
-   "page": 4,
-   "game_files": 4,
-   "ok": true
-  },
   {
    "what": "Korean Fan (1332013) attack",
    "page": 55,
