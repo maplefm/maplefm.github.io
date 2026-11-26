@@ -17,7 +17,7 @@ DONE = {"sindit", "spearman-spear", "spearman-polearm", "assassin", "pure-bandit
 CLASSES = [
     ("Warrior", [("Fighter, sword", "fighter-sword"), ("Fighter, axe", "fighter-axe"), ("Page, sword", "page-sword"), ("Page, blunt weapon", "page-blunt"),
                  ("Spearman, spear", "spearman-spear"), ("Spearman, polearm", "spearman-polearm")]),
-    ("Magician", [("Fire Poison", "fire-poison"), ("Ice Lightning", "ice-lightning"), ("Cleric", "cleric"), ("LUK mage", "luk-mage")]),
+    ("Magician", [("Fire Poison", "fire-poison"), ("Ice Lightning", "ice-lightning"), ("Cleric", "cleric")]),
     ("Bowman", [("Hunter", "hunter"), ("Crossbowman", "crossbowman")]),
     ("Thief", [("Assassin", "assassin"), ("Pure Bandit", "pure-bandit"), ("Sindit", "sindit"),
                ("STR Bandit", "str-bandit")]),

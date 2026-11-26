@@ -32,132 +32,89 @@
   "rule": [
    {
     "levels": "1 to 9",
-    "ap": "DEX to 25, rest LUK",
-    "why": "Thief job advance needs 25 DEX at 10"
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
    },
    {
-    "levels": "10 to 29",
-    "ap": "all LUK, DEX stays 25",
-    "why": "LUK is the damage stat for claws and daggers"
+    "levels": "14 to 15",
+    "ap": "all DEX (to 15)",
+    "why": "Steel Titans at 15 needs 15 DEX"
+   },
+   {
+    "levels": "20",
+    "ap": "all DEX (to 20)",
+    "why": "Bronze Igor at 20 needs 20 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 25)",
+    "why": "Meba at 25 needs 25 DEX"
    },
    {
     "levels": "30",
-    "ap": "DEX to 30, rest LUK",
-    "why": "Mithril Guards, the level 30 claw, needs 30 DEX"
+    "ap": "all DEX (to 30)",
+    "why": "Mithril Guards at 30 needs 30 DEX"
    },
    {
-    "levels": "31 to 46",
-    "ap": "all LUK",
-    "why": "Korean Fan, the switch dagger, needs no DEX"
-   },
-   {
-    "levels": "47 to 49",
+    "levels": "48 to 50",
     "ap": "all DEX (to 45)",
     "why": "Shinkita at 50 needs 45 DEX"
    },
    {
-    "levels": "50 to 57",
+    "levels": "the rest",
     "ap": "all LUK",
-    "why": ""
-   },
-   {
-    "levels": "58 to 59",
-    "ap": "all DEX (to 55)",
-    "why": "Deadly Fin at 60 needs 55 DEX"
-   },
-   {
-    "levels": "60 to 67",
-    "ap": "all LUK",
-    "why": ""
-   },
-   {
-    "levels": "68 to 69",
-    "ap": "all DEX (to 65)",
-    "why": "Kandine at 70 needs 65 DEX"
-   },
-   {
-    "levels": "70 to 100",
-    "ap": "all LUK",
-    "why": "no higher dagger in the game yet"
-   },
-   {
-    "levels": "any",
-    "ap": "DEX from gear counts",
-    "why": "each DEX your gear gives is one more AP for LUK"
+    "why": "LUK is your damage stat"
    }
   ],
   "table": [
    {
     "level": 10,
     "STR": 4,
-    "DEX": 25,
-    "LUK": 37
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 57
    },
    {
     "level": 20,
     "STR": 4,
-    "DEX": 25,
-    "LUK": 87
+    "DEX": 20,
+    "INT": 4,
+    "LUK": 92
    },
    {
     "level": 30,
     "STR": 4,
     "DEX": 30,
+    "INT": 4,
     "LUK": 132
-   },
-   {
-    "level": 35,
-    "STR": 4,
-    "DEX": 30,
-    "LUK": 157
    },
    {
     "level": 40,
     "STR": 4,
     "DEX": 30,
+    "INT": 4,
     "LUK": 182
-   },
-   {
-    "level": 46,
-    "STR": 4,
-    "DEX": 30,
-    "LUK": 212
    },
    {
     "level": 50,
     "STR": 4,
     "DEX": 45,
+    "INT": 4,
     "LUK": 217
    },
    {
     "level": 60,
     "STR": 4,
-    "DEX": 55,
-    "LUK": 257
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 267
    },
    {
     "level": 70,
     "STR": 4,
-    "DEX": 65,
-    "LUK": 297
-   },
-   {
-    "level": 80,
-    "STR": 4,
-    "DEX": 65,
-    "LUK": 347
-   },
-   {
-    "level": 90,
-    "STR": 4,
-    "DEX": 65,
-    "LUK": 397
-   },
-   {
-    "level": 100,
-    "STR": 4,
-    "DEX": 65,
-    "LUK": 447
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 317
    }
   ]
  },
@@ -394,36 +351,6 @@
     "rough": true
    },
    "why": "needs DEX 45"
-  },
-  {
-   "level": 60,
-   "slot": "Dagger",
-   "item": "Deadly Fin",
-   "id": 1332018,
-   "needs": "55 DEX, 120 LUK",
-   "attack": 78,
-   "speed": 4,
-   "price": {
-    "typical": null,
-    "shown": "no live price yet",
-    "basis": null
-   },
-   "why": "needs DEX 55"
-  },
-  {
-   "level": 70,
-   "slot": "Dagger",
-   "item": "Kandine",
-   "id": 1332020,
-   "needs": "65 DEX, 140 LUK",
-   "attack": 88,
-   "speed": 4,
-   "price": {
-    "typical": null,
-    "shown": "no live price yet",
-    "basis": null
-   },
-   "why": "needs DEX 65"
   }
  ],
  "gear_optional": [
@@ -450,14 +377,14 @@
    "level": 10,
    "job": "Thief",
    "where": "Kerning City, Dark Lord",
-   "needs": "Level 10 and 25 DEX",
-   "gets": "1 SP; Lucky Seven and Double Stab open"
+   "needs": "Level 10",
+   "gets": "1 SP. Lucky Seven and Double Stab open."
   },
   {
    "level": 30,
    "job": "Bandit",
    "where": "Kerning City, Dark Lord",
-   "needs": "level 30",
+   "needs": "Level 30",
    "gets": "Pick Bandit, not Assassin. Dagger skills open."
   },
   {
@@ -819,14 +746,14 @@
   "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39, ready for the switch at 40.",
   "Steal comes right after Savage Blow 30. At 30 a successful steal is +35 attack for 60 seconds and works 90% of the time; on a 68 attack Shinkita that's about half again your weapon attack. The rest of Dagger Booster only stretches the speed buff from 100 to 300 seconds, so it waits.",
   "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. On our training engine the Korean Fan at 40 does about 1,235 damage a second against 838 with the claw, and about 86K EXP an hour against 64K. It doesn't count walking to mobs yet, so it hasn't been timed in game.",
-  "Korean Fan needs no DEX, so the switch costs you no AP. Your next DEX is at 47 to 49, for Shinkita at 50.",
+  "Korean Fan needs no DEX, so the switch costs you no AP. Your next DEX is at 48 to 50, for Shinkita at 50.",
   "Reset your 1st job SP the day you switch. Lucky Seven and Keen Eyes are 35 dead points once you hold a dagger. Moved into Double Stab 20 and Dark Sight 20, our engine has you at about 86K EXP an hour at 40 instead of 81K without the reset, because Double Stab finishes some mobs faster."
  ],
  "mistakes": [
   "Picking up a dagger at 35. You'd only have Savage Blow 10 and Mastery 5, about the same damage as Lucky Seven (707 vs 750 a second), and now you're walking into every mob. Stay on the claw until Savage Blow is 21.",
   "Putting SP in Haste right after the 2nd job advance. Haste 20 is 20 SP, close to 7 levels, and pushes your switch back by that much. Do it after the dagger skills.",
   "Putting more than 1 point in Dagger Booster before Savage Blow is 21. Level 1 is already the full speed boost; the other 19 points only stretch it from 100 to 300 seconds. That's over 6 levels of SP that should be in Savage Blow.",
-  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX or you hit 50 and can't wear it. Same at 58 to 59 for Deadly Fin and 68 to 69 for Kandine.",
+  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put your AP from 48 to 50 into DEX or you hit 50 and can't wear it.",
   "Switching to the dagger without the SP Reset. You'll never throw Lucky Seven again, so those 35 points in Lucky Seven and Keen Eyes do nothing. Reset at 40 and put them into Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20."
  ],
  "compare": [
@@ -837,24 +764,25 @@
    "weak": "Bandit points wait until 40"
   },
   {
-   "build": "Sindit, no reset",
-   "main_attack": "Lucky Seven to 39, Savage Blow only from 40",
-   "best_at": "no Cash Shop scroll",
-   "weak": "about 6% less EXP an hour at 40, no Double Stab"
-  },
-  {
-   "build": "Pure Bandit (dagger from 10)",
+   "build": "Pure Bandit",
    "main_attack": "Double Stab, Savage Blow",
    "best_at": "no stars to buy",
    "weak": "melee from 10",
    "note": "training page Typical build"
   },
   {
-   "build": "Assassin (claw)",
+   "build": "Assassin",
    "main_attack": "Lucky Seven, Drain",
    "best_at": "range all the way",
    "weak": "stars cost: Kumbi to Steely",
    "note": "training page Typical build"
+  },
+  {
+   "build": "STR Bandit",
+   "main_attack": "Savage Blow",
+   "best_at": "STR daggers, a speed step faster",
+   "weak": "less accuracy",
+   "note": ""
   }
  ],
  "future": [
@@ -935,5 +863,6 @@
    "Dark Sight": 20
   },
   "source": "Adam, Nov 25: the Classic SP Reset Scroll clears all your skills, both jobs; sindits reset at the switch so they have Double Stab"
- }
+ },
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70."
 }

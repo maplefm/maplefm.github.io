@@ -15,6 +15,9 @@ WEAP = json.load(open(os.path.join(B, "data", "weapons.json")))
 PRE = {int(k): {int(a): n for a, n in v.items()} for k, v in json.load(open(os.path.join(B, "data", "prereqs.json")))["skills"].items() if v}
 GAMEMAX = {int(k): int(v.get("masterLevel") or 0) for k, v in json.load(open(os.path.join(B, "data", "skilltext.json"))).items()}
 CAP = 70
+sys.path.insert(0, HERE)
+import batch2 as _B2  # noqa: E402  the same armor tiers the planner uses (game files, builds/data/armor.json)
+ARMOR_NEEDS = {c: {st: _B2.armor_needs(c, st)} for c, st in (("Warrior", "DEX"), ("Magician", "LUK"), ("Bowman", "STR"), ("Thief", "DEX"))}
 
 
 def page_data(slug):
@@ -34,6 +37,13 @@ def check(slug):
         if L not in st: bad.append((L, "no stats row")); continue
         if sum(st[L]) != 25 + 5 * (L - 1): bad.append((L, f"stat total {sum(st[L])}"))
         if L > 1 and any(a < b for a, b in zip(st[L], st[L - 1])): bad.append((L, "a stat went down"))
+    # class armor: the sub stat has to reach what that level's armor needs (STR Bandits wear gear any job can)
+    J = json.load(open(os.path.join(B, slug + ".json"))); cr = J["creation"]; cls = J["header"]["class"]
+    if not cr.get("raise") and cls in ARMOR_NEEDS:
+        si = ["STR", "DEX", "INT", "LUK"].index(cr["sub"])
+        for L, need in ARMOR_NEEDS[cls][cr["sub"]]:
+            n += 1
+            if st[L][si] < need: bad.append((L, f"level {L} {cls.lower()} armor needs {need} {cr['sub']}, page has {st[L][si]}"))
     # weapons
     for g in D["gear"]:
         n += 1; w = WEAP.get(g["item"])
@@ -45,7 +55,8 @@ def check(slug):
         shown = {a: int(b) for a, b in g["needs"]}
         want = {"LV": w["reqLevel"], **{k[3:]: w[k] for k in ("reqSTR", "reqDEX", "reqINT", "reqLUK") if w.get(k)}}
         if shown != {k: v for k, v in want.items() if v}: bad.append((L, f"{g['item']} needs badges {shown} vs game {want}"))
-        if g["attack"] != w["watk"]: bad.append((L, f"{g['item']} attack {g['attack']} vs game {w['watk']}"))
+        want_atk = (w.get("incMAD") or 0) if g.get("akind", "attack") != "attack" else w["watk"]
+        if g["attack"] != want_atk: bad.append((L, f"{g['item']} {g.get('akind', 'attack')} {g['attack']} vs game {want_atk}"))
     # skill points
     sid = D["sid"]; book1 = set(D["book"]["1st job"]); reset = D.get("reset")
     reset = {"level": reset} if isinstance(reset, int) else (reset or {})
@@ -75,7 +86,7 @@ def check(slug):
 
 
 if __name__ == "__main__":
-    slugs = sys.argv[1:] or ["sindit", "spearman-spear", "spearman-polearm", "assassin", "pure-bandit", "hunter"]
+    slugs = sys.argv[1:] or sorted(d for d in os.listdir(B) if os.path.exists(os.path.join(B, d, "index.html")) and os.path.exists(os.path.join(B, d + ".json")))
     tot = 0; probs = 0
     for s in slugs:
         n, bad = check(s); tot += n; probs += len(bad)

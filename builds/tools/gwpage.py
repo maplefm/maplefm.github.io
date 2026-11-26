@@ -15,7 +15,9 @@ import worldpages as W  # noqa: E402
 
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/"
 CAP = 70
-GUIDES = {"Sindit": "sindit", "Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter"}
+GUIDES = {"Sindit": "sindit", "Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter",
+          "Fighter, sword": "fighter-sword", "Fighter, axe": "fighter-axe", "Page, sword": "page-sword", "Page, blunt weapon": "page-blunt",
+          "Fire Poison": "fire-poison", "Ice Lightning": "ice-lightning", "Cleric": "cleric", "Crossbowman": "crossbowman", "STR Bandit": "str-bandit"}
 
 
 def E(s): return W.E(str(s if s is not None else ""))
@@ -92,6 +94,9 @@ CSS = r"""
 .gw-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:4px 0 14px}
 .gw-top h1{margin:0;font-size:clamp(26px,4vw,36px)}.gw-top p{margin:4px 0 0;color:var(--muted);max-width:620px}
 .gw-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.gvar{display:inline-flex;margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.gvar a{padding:8px 14px;font-weight:700;font-size:14px;color:inherit;text-decoration:none}.gvar a+a{border-left:1px solid var(--line)}
+.gvar a[aria-current]{background:linear-gradient(#f6d98b,#e4b85c);color:#3b2a06}
 .gw-lv{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
 .gw-lv input{width:200px;accent-color:#f59e0b}.gw-lv b{font-size:20px;min-width:66px}
 .gbtn{font:800 14px inherit;border-radius:12px;padding:11px 14px;cursor:pointer;border:2px solid #c9a24a;background:linear-gradient(#f8d977,#e3b94f);color:#3b2a06}
@@ -172,7 +177,7 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
  skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):(D.reset&&L>=D.reset&&D.first[n]<D.reset?"reset at "+D.reset:"starts at level "+D.first[n])}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
- eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}${w.slot=="Bow"&&D.ammoBow?`<div class="wtip">${D.ammoBow}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
+ eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · ${E(w.akind||"attack")} ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:D.gearNote?`<div class="wtip">${E(D.gearNote)}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}${w.slot=="Bow"&&D.ammoBow?`<div class="wtip">${D.ammoBow}</div>`:""}${w.slot=="Crossbow"&&D.ammoXbow?`<div class="wtip">${D.ammoXbow}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
  const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
  try{history.replaceState(null,"",L==D.start?location.pathname:"#lv"+L)}catch(e){}
 }
@@ -209,9 +214,9 @@ def build(name):
     assert sum(st1) == 25 and min(st1) >= 4 and cr["stats"][sub] == 5, ("creation breaks the Classic rules", cr)
     sub_to = []
     for r in sp["rule"]:
-        lr = rng(r["levels"]); m = re.search(sub + r" (?:\(to |to )(\d+)", r["ap"])
+        lr = rng(r["levels"]); m = re.search(cr.get("raise", sub) + r" (?:\(to |to )(\d+)", r["ap"])
         if lr and m: sub_to.append((lr[0], lr[1], int(m.group(1))))
-    si, mi = K.index(sub), K.index(main)
+    si, mi = K.index(cr.get("raise", sub)), K.index(main)   # raise: the stat bought for weapons (STR for a STR Bandit), if not the sub stat
     st = [None] * (CAP + 1); st[1] = st1; goal = st1[si]
     for L in range(2, CAP + 1):
         hit = next((v for a_, b_, v in sub_to if a_ <= L <= b_), None)
@@ -276,7 +281,7 @@ def build(name):
     for g in d["gear"]:
         if g["slot"] == "Stars" or g["level"] > CAP: continue
         p = g.get("price") or {}
-        gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "link": exists("item", W.slug(g["item"])), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "speed": g.get("speed"),
+        gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "link": exists("item", W.slug(g["item"])), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "akind": g.get("akind") or "attack", "speed": g.get("speed"),
                      "needs": [["LV", str(REQ.get(g["item"], g["level"]))]] + needs_list(g["needs"]), "fm": p.get("shown") if p.get("typical") else None, "fmv": p.get("typical"), "ways": ways(guide, g["item"])})
 
     train = []
@@ -298,9 +303,13 @@ def build(name):
     ammo_bow = (f"Bows shoot Arrows for Bows. {E(arrows[0][0])} in {E(arrows[0][1])} sells them for {arrows[0][2]:,} each. "
                 '<a href="/items/stars/">Every arrow and its price</a>') if arrows else ""
 
+    xb = sorted(npc("Arrows for Crossbows"), key=lambda x: (x[1] != "Henesys", x[2], x[0]))
+    ammo_xbow = (f"Crossbows shoot Arrows for Crossbows. {E(xb[0][0])} in {E(xb[0][1])} sells them for {xb[0][2]:,} each. "
+                 '<a href="/items/stars/">Every arrow and its price</a>') if xb else ""
+
     data = {"cap": CAP, "reset": (d.get("reset") or {}).get("level"), "start": d.get("switch") or 30, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
             "book": {b: list(dict.fromkeys([s["skill"] for s in v] + (list(d["reset"]["to"]) if d.get("reset") and d["reset"]["book"] == b else []))) for b, v in books.items()}, "sid": {n: ({x["skill"]: x["id"] for x in d["skill_order"] if x.get("id")}.get(n) or sid.get(n)) for n in first if n in sid},
-            "gear": gear, "train": train, "ammo": ammo, "ammoBow": ammo_bow}
+            "gear": gear, "train": train, "ammo": ammo, "ammoBow": ammo_bow, "ammoXbow": ammo_xbow, "gearNote": d.get("gear_note") or ""}
 
     def t_(head, rws): return '<div class="tw"><table class="t"><tr>' + "".join(f"<th>{x}</th>" for x in head) + "</tr>" + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rws) + "</table></div>"
     def need_h(g): return '<div class="gneed">' + "".join(f"<span>{'<em>' + E(k) + '</em>' if k else ''}{E(v)}</span>" for k, v in g["needs"]) + "</div>"
@@ -319,17 +328,20 @@ def build(name):
         nm = c["build"].replace(" (this guide)", "")
         this = "(this guide)" in c["build"]
         key = next((k for k in GUIDES if nm.lower() == k.lower()), None)
-        url = f"/builds/{GUIDES[key]}/" if key and GUIDES[key] != name else ""
+        url = f"/builds/{GUIDES[key]}/" if key and GUIDES[key] != name and not this and exists("builds", GUIDES[key]) else ""
         inner = f'<b>{E(nm)}</b><small>{E(c.get("main_attack") or c["best_at"])}</small>' + ('<div class="soon">You are here</div>' if this else '<div class="go">Open the guide →</div>' if url else '<div class="soon">Guide coming</div>')
         cmp.append(f'<a href="{url}">{inner}</a>' if url else f'<div class="c">{inner}</div>')
     allh = (
-        '<div class="win"><h2>Weapons</h2><div class="in">' + t_(["Level", "Weapon", "Needs", "Attack", "How to get it"], [[E(g["level"]), f'<img src="/i/{g["id"]}.png" alt="" width="28" height="28" style="vertical-align:middle"> ' + (f'<a href="/item/{g["slug"]}/">{E(g["item"])}</a>' if g["link"] else E(g["item"])) + f'<br><small>{E(g["slot"])}</small>', need_h(g), E(g["attack"]), ways_h(g)] for g in gear]) + "</div></div>"
+        '<div class="win"><h2>Weapons</h2><div class="in">' + t_(["Level", "Weapon", "Needs", "Attack", "How to get it"], [[E(g["level"]), f'<img src="/i/{g["id"]}.png" alt="" width="28" height="28" style="vertical-align:middle"> ' + (f'<a href="/item/{g["slug"]}/">{E(g["item"])}</a>' if g["link"] else E(g["item"])) + f'<br><small>{E(g["slot"])}</small>', need_h(g), E(g["attack"]) + (" magic" if g["akind"] != "attack" else ""), ways_h(g)] for g in gear]) + (f'<div class="wtip">{E(d["gear_note"])}</div>' if d.get("gear_note") else "") + "</div></div>"
         + '<div class="win"><h2>Job advancement</h2><div class="in">' + t_(["Level", "Job", "Where", "Needs", "You get"], [[E(a["level"]), f'<b>{E(a["job"])}</b>', E(a["where"]), E(a["needs"]), E(a["gets"])] for a in d["advancement"] if str(a["level"]).isdigit()]) + "</div></div>"
         + '<div class="win"><h2>Resets</h2><div class="in">' + t_(["Item", "When", "Worth it", "Why"], [[f'<b>{E(r["what"])}</b>', E(r["when"]), f'<b>{E(r["worth_it"])}</b>', E(r["why"])] for r in d["resets"]]) + "</div></div>"
         + '<div class="win"><h2>Where to train</h2><div class="in">' + t_(["Levels", "Maps"], [[E(t["levels"]), "<br>".join(f'<a href="/map/{m["slug"]}/">{E(m["map"])}</a> <small>{E(", ".join(m["monsters"]))}</small>' for m in t["maps"])] for t in train]) + "</div></div>")
     third = next((a for a in d["advancement"] if not str(a["level"]).isdigit()), None)
 
-    body = (f'<style>{CSS}</style><div class="gw"><div class="gw-top"><div><h1>{E(h["build"])}</h1><p>{md(h["pitch"])}</p></div>'
+    var = d.get("variants") or []
+    varh = ('<div class="gvar" role="group" aria-label="Weapon">' + "".join(
+        f'<a href="/builds/{v["slug"]}/"{" aria-current=" + chr(34) + "page" + chr(34) if v["slug"] == name else ""} onclick="this.href=this.href.split(\'#\')[0]+location.hash">{E(v["label"])}</a>' for v in var) + "</div>") if var else ""
+    body = (f'<style>{CSS}</style><div class="gw"><div class="gw-top"><div><h1>{E(h["build"])}</h1><p>{md(h["pitch"])}</p>{varh}</div>'
             f'<div class="gw-ctl"><label class="gw-lv">Level <b id="lvn">Lv {d.get("switch") or 30}</b><input id="lv" type="range" min="1" max="{CAP}" value="{d.get("switch") or 30}" aria-label="Character level"></label>'
             '<button type="button" class="gbtn" id="fin">Finished build</button><button type="button" class="gbtn alt" id="allb">See the whole guide</button></div></div>'
             '<div class="gw-grid"><div class="win"><h2>Stats</h2><div class="in" id="stw"></div></div><div class="win skw"><h2>Skills</h2><div class="tabsg" id="skt"></div><div class="in" id="skw"></div></div>'
