@@ -123,7 +123,7 @@ def plan_stats(b):
         assert lv >= (w.get("reqLevel") or 0), (n, lv)
         for i, k in enumerate(K): assert s[i] >= (w.get("req" + k) or 0), (b["slug"], n, lv, k, s)
     rules = [{"levels": "1 to 9", "ap": (f"{b['sub']} to {b['early']}, rest {b['main']}" if b["early"] else f"all {b['main']}"),
-              "why": {"Warrior": "Warrior job advance needs 35 STR at 10", "Thief": "Thief job advance needs 25 DEX at 10", "Bowman": "Bowman job advance needs 25 DEX at 10"}[b["cls"]]}]
+              "why": (f"{b['main']} is your damage stat" if not b["early"] else "Thief job advance needs 25 DEX at 10")}]
     for a, z, v in targets:
         if a < 10: continue
         n = next(n for lv, n in b["weapons"] if lv == z)

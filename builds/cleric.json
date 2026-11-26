@@ -1,0 +1,864 @@
+{
+ "slug": "/builds/cleric/",
+ "header": {
+  "class": "Magician",
+  "job_path": "Magician (10) → Cleric (30)",
+  "build": "Cleric",
+  "pitch": "INT with LUK only to each wand's need. Energy Bolt in 1st job, then Holy Arrow, Heal, and Bless for parties.",
+  "best_at": [
+   "Heal hurts undead mobs, up to 6",
+   "Holy Arrow hits undead harder",
+   "Parties want a Cleric"
+  ],
+  "weak_spots": [
+   "Heal only hurts undead mobs",
+   "No Meditation"
+  ],
+  "difficulty": "Easy",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 2629995,
+    "shown": "about 2.6M"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 4,
+   "INT": 12,
+   "LUK": 5
+  },
+  "main": "INT",
+  "sub": "LUK",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all INT",
+    "why": "INT is your damage stat"
+   },
+   {
+    "levels": "20",
+    "ap": "all LUK (to 10)",
+    "why": "Metal Wand at 20 needs 10 LUK"
+   },
+   {
+    "levels": "25",
+    "ap": "all LUK (to 15)",
+    "why": "Ice Wand at 25 needs 15 LUK"
+   },
+   {
+    "levels": "30",
+    "ap": "all LUK (to 20)",
+    "why": "Mithril Wand at 30 needs 20 LUK"
+   },
+   {
+    "levels": "35",
+    "ap": "all LUK (to 25)",
+    "why": "Wizard Wand at 35 needs 25 LUK"
+   },
+   {
+    "levels": "40",
+    "ap": "all LUK (to 30)",
+    "why": "Fairy Wand at 40 needs 30 LUK"
+   },
+   {
+    "levels": "44 to 45",
+    "ap": "all LUK (to 40)",
+    "why": "Arc Staff at 45 needs 40 LUK"
+   },
+   {
+    "levels": "58 to 60",
+    "ap": "all LUK (to 55)",
+    "why": "Evil Tale at 60 needs 55 LUK"
+   },
+   {
+    "levels": "69 to 70",
+    "ap": "all LUK (to 65)",
+    "why": "Angel Wings at 70 needs 65 LUK"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all INT",
+    "why": "INT is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 57,
+    "LUK": 5
+   },
+   {
+    "level": 20,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 102,
+    "LUK": 10
+   },
+   {
+    "level": 30,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 142,
+    "LUK": 20
+   },
+   {
+    "level": 40,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 182,
+    "LUK": 30
+   },
+   {
+    "level": 50,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 222,
+    "LUK": 40
+   },
+   {
+    "level": 60,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 257,
+    "LUK": 55
+   },
+   {
+    "level": 70,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 297,
+    "LUK": 65
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Energy Bolt",
+   "id": 2001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Improved MP Recovery",
+   "id": 2000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 27,
+   "book": "1st job",
+   "skill": "Max MP Increase",
+   "id": 2000001,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Magic Guard",
+   "id": 2001000,
+   "to": 11,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "2nd job",
+   "skill": "Teleport",
+   "id": 2301000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 31,
+   "book": "2nd job",
+   "skill": "Heal",
+   "id": 2301001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 41,
+   "book": "2nd job",
+   "skill": "Holy Arrow",
+   "id": 2301004,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 50,
+   "book": "2nd job",
+   "skill": "Heal",
+   "id": 2301001,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 57,
+   "book": "2nd job",
+   "skill": "MP Eater",
+   "id": 2300000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 59,
+   "book": "2nd job",
+   "skill": "Invincible",
+   "id": 2301002,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 65,
+   "book": "2nd job",
+   "skill": "Bless",
+   "id": 2301003,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Teleport",
+   "id": 2301000,
+   "to": 16,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Wand",
+   "item": "Wooden Wand",
+   "id": 1372000,
+   "needs": "20 INT",
+   "attack": 27,
+   "speed": null,
+   "price": {
+    "typical": 1361,
+    "shown": "1,361",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 15,
+   "slot": "Wand",
+   "item": "Hardwood Wand",
+   "id": 1372001,
+   "needs": "30 INT",
+   "attack": 34,
+   "speed": null,
+   "price": {
+    "typical": 2999,
+    "shown": "2,999",
+    "basis": "3d",
+    "sales_seen": 8,
+    "rough": true
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 20,
+   "slot": "Wand",
+   "item": "Metal Wand",
+   "id": 1372002,
+   "needs": "40 INT, 10 LUK",
+   "attack": 41,
+   "speed": null,
+   "price": {
+    "typical": 4444,
+    "shown": "4,444",
+    "basis": "clean",
+    "sales_seen": 18,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 25,
+   "slot": "Wand",
+   "item": "Ice Wand",
+   "id": 1372003,
+   "needs": "50 INT, 15 LUK",
+   "attack": 48,
+   "speed": null,
+   "price": {
+    "typical": 6900,
+    "shown": "6,900",
+    "basis": "24h",
+    "sales_seen": 39,
+    "rough": true
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 30,
+   "slot": "Wand",
+   "item": "Mithril Wand",
+   "id": 1372004,
+   "needs": "60 INT, 20 LUK",
+   "attack": 55,
+   "speed": null,
+   "price": {
+    "typical": 15394,
+    "shown": "15K",
+    "basis": "clean",
+    "sales_seen": 66,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 35,
+   "slot": "Wand",
+   "item": "Wizard Wand",
+   "id": 1372005,
+   "needs": "70 INT, 25 LUK",
+   "attack": 62,
+   "speed": null,
+   "price": {
+    "typical": 13900,
+    "shown": "14K",
+    "basis": "clean",
+    "sales_seen": 69,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 40,
+   "slot": "Wand",
+   "item": "Fairy Wand",
+   "id": 1372006,
+   "needs": "80 INT, 30 LUK",
+   "attack": 69,
+   "speed": null,
+   "price": {
+    "typical": 104999,
+    "shown": "105K",
+    "basis": "clean",
+    "sales_seen": 76,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 45,
+   "slot": "Staff",
+   "item": "Arc Staff",
+   "id": 1382005,
+   "needs": "90 INT, 40 LUK",
+   "attack": 73,
+   "speed": null,
+   "price": {
+    "typical": 179999,
+    "shown": "180K",
+    "basis": "clean",
+    "sales_seen": 40,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 50,
+   "slot": "Wand",
+   "item": "Cromi",
+   "id": 1372007,
+   "needs": "100 INT, 40 LUK",
+   "attack": 83,
+   "speed": null,
+   "price": {
+    "typical": 2299999,
+    "shown": "2.3M",
+    "basis": "hovered",
+    "sales_seen": 31,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 60,
+   "slot": "Wand",
+   "item": "Evil Tale",
+   "id": 1372009,
+   "needs": "120 INT, 55 LUK",
+   "attack": 97,
+   "speed": null,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 70,
+   "slot": "Wand",
+   "item": "Angel Wings",
+   "id": 1372010,
+   "needs": "140 INT, 65 LUK",
+   "attack": 111,
+   "speed": null,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": "",
+   "akind": "magic attack"
+  }
+ ],
+ "gear_optional": [],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Magician",
+   "where": "Ellinia, Grendel the Really Old",
+   "needs": "Level 10",
+   "gets": "1 SP. Energy Bolt and Magic Claw open."
+  },
+  {
+   "level": 30,
+   "job": "Cleric",
+   "where": "Ellinia, Grendel the Really Old",
+   "needs": "Level 30",
+   "gets": "Pick Cleric. Heal and Holy Arrow open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Priest",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "The Blue Mushroom Forest",
+     "monsters": [
+      "Blue Mushroom",
+      "Slime",
+      "Blue Snail"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "The Murky Swamp I",
+     "monsters": [
+      "Ligator",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Lorang Lorang Lorang",
+     "monsters": [
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 3)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "monsters": [
+      "Wraith"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Energy Bolt 20 is 130 magic on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
+  "Improved MP Recovery 15 makes MP potions heal 25% more, and Max MP Increase 15 is +25% max MP. Mages live on MP potions, so that's straight mesos saved every hour.",
+  "The last 11 points of 1st job go into Magic Guard: at 11 it sends 68% of the damage you take to MP instead of HP. Turn it on for mobs that hit hard, like Wraiths.",
+  "Teleport 1 and Heal 1 go in at 30 and 31: getting around, and a heal for you and your party.",
+  "Holy Arrow 30 first: 160 magic on one mob, more on undead. In our damage engine, Holy Arrow first trains about 22% faster at 40 than Heal first, 73.7K EXP an hour against 60.4K.",
+  "Heal 30 next: it hits every undead mob around you, up to 6, and heals your party. On Jr. Wraith and Zombie Mushroom maps that's your best attack.",
+  "Invincible 5 opens Bless. Bless 20 cuts the damage your whole party takes by 10% for 300 seconds.",
+  "Wands need LUK from Metal Wand at 20: 10 LUK there, 40 at 50 and 65 at 70. AP only goes into LUK in the levels right before each new wand, everything else goes into INT."
+ ],
+ "mistakes": [
+  "Maxing Magic Claw and Energy Bolt both. They do the same damage at max, so the second one is 19 SP wasted that should be in MP Recovery and Max MP.",
+  "Leveling Heal first and training off undead maps. Heal only hurts undead; anywhere else Holy Arrow is your attack.",
+  "Maxing Invincible. 5 points open Bless; the other 15 only cut physical damage from 5% to 20%.",
+  "Forgetting LUK before Cromi. It needs 40 LUK at 50, so keep LUK at 40 from Arc Staff at 45, or you can't wear it."
+ ],
+ "compare": [
+  {
+   "build": "Cleric (this guide)",
+   "best_at": "Heal on undead, parties",
+   "weak": "Heal only hurts undead"
+  },
+  {
+   "build": "Fire Poison",
+   "best_at": "Fire Arrow burn",
+   "weak": "fire-resistant mobs"
+  },
+  {
+   "build": "Ice Lightning",
+   "best_at": "Cold Beam slow",
+   "weak": "ice-resistant mobs"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Priest. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Cleric Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic cleric build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ }
+}

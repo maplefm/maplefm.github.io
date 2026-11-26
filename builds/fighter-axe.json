@@ -1,0 +1,844 @@
+{
+ "slug": "/builds/fighter-axe/",
+ "header": {
+  "class": "Warrior",
+  "job_path": "Warrior (10) → Fighter (30)",
+  "build": "Fighter, axe",
+  "pitch": "STR with DEX only to each axe's need. Power Strike and Slash Blast 20 by 23, then Axe Mastery, Rage and Final Attack.",
+  "best_at": [
+   "Rage is +40 attack for you and your party",
+   "Axe Mastery makes mobs bleed",
+   "Final Attack: Axe hits 3 mobs"
+  ],
+  "weak_spots": [
+   "No accuracy from Axe Mastery, unlike Sword Mastery",
+   "Rage lowers your own weapon defense by 40"
+  ],
+  "difficulty": "Medium",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 84007,
+    "shown": "about 84K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 12,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "STR",
+  "sub": "DEX",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   },
+   {
+    "levels": "18 to 20",
+    "ap": "all DEX (to 20)",
+    "why": "Iron Axe at 20 needs 20 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 25)",
+    "why": "Two-Handed Axe at 25 needs 25 DEX"
+   },
+   {
+    "levels": "30",
+    "ap": "all DEX (to 30)",
+    "why": "Blue Axe at 30 needs 30 DEX"
+   },
+   {
+    "levels": "35",
+    "ap": "all DEX (to 35)",
+    "why": "Niam at 35 needs 35 DEX"
+   },
+   {
+    "levels": "40",
+    "ap": "all DEX (to 40)",
+    "why": "Sabretooth at 40 needs 40 DEX"
+   },
+   {
+    "levels": "49 to 50",
+    "ap": "all DEX (to 50)",
+    "why": "The Rising at 50 needs 50 DEX"
+   },
+   {
+    "levels": "59 to 60",
+    "ap": "all DEX (to 60)",
+    "why": "The Shining at 60 needs 60 DEX"
+   },
+   {
+    "levels": "69 to 70",
+    "ap": "all DEX (to 70)",
+    "why": "Chrono at 70 needs 70 DEX"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 57,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 92,
+    "DEX": 20,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 132,
+    "DEX": 30,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 40,
+    "STR": 172,
+    "DEX": 40,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 50,
+    "STR": 212,
+    "DEX": 50,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 60,
+    "STR": 252,
+    "DEX": 60,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 70,
+    "STR": 292,
+    "DEX": 70,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Power Strike",
+   "id": 1001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Slash Blast",
+   "id": 1001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Precise Strikes",
+   "id": 1000002,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Axe Mastery",
+   "id": 1100001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Axe Booster",
+   "id": 1101003,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Rage",
+   "id": 1101004,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
+   "skill": "Final Attack: Axe",
+   "id": 1101001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1101005,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 38,
+   "book": "2nd job",
+   "skill": "Axe Mastery",
+   "id": 1100001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 48,
+   "book": "2nd job",
+   "skill": "Rage",
+   "id": 1101004,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 57,
+   "book": "2nd job",
+   "skill": "Final Attack: Axe",
+   "id": 1101001,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 64,
+   "book": "2nd job",
+   "skill": "Axe Booster",
+   "id": 1101003,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1101005,
+   "to": 20,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "2H Axe",
+   "item": "Metal Axe",
+   "id": 1412000,
+   "needs": "25 STR",
+   "attack": 30,
+   "speed": 5,
+   "price": {
+    "typical": 2999,
+    "shown": "2,999",
+    "basis": "ask",
+    "sales_seen": 1,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "2H Axe",
+   "item": "Iron Axe",
+   "id": 1412001,
+   "needs": "45 STR, 20 DEX",
+   "attack": 35,
+   "speed": 5,
+   "price": {
+    "typical": 4600,
+    "shown": "4,600",
+    "basis": "3d",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "2H Axe",
+   "item": "Two-Handed Axe",
+   "id": 1412003,
+   "needs": "55 STR, 25 DEX",
+   "attack": 45,
+   "speed": 5,
+   "price": {
+    "typical": 6999,
+    "shown": "6,999",
+    "basis": "old",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "2H Axe",
+   "item": "Blue Axe",
+   "id": 1412004,
+   "needs": "65 STR, 30 DEX",
+   "attack": 50,
+   "speed": 5,
+   "price": {
+    "typical": 10210,
+    "shown": "10K",
+    "basis": "3d",
+    "sales_seen": 12,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 35,
+   "slot": "2H Axe",
+   "item": "Niam",
+   "id": 1412005,
+   "needs": "75 STR, 35 DEX",
+   "attack": 55,
+   "speed": 5,
+   "price": {
+    "typical": 11750,
+    "shown": "12K",
+    "basis": "3d",
+    "sales_seen": 10,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "2H Axe",
+   "item": "Sabretooth",
+   "id": 1412006,
+   "needs": "85 STR, 40 DEX",
+   "attack": 60,
+   "speed": 5,
+   "price": {
+    "typical": 17450,
+    "shown": "17K",
+    "basis": "3d",
+    "sales_seen": 8,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 50,
+   "slot": "2H Axe",
+   "item": "The Rising",
+   "id": 1412007,
+   "needs": "105 STR, 50 DEX",
+   "attack": 73,
+   "speed": 6,
+   "price": {
+    "typical": 29999,
+    "shown": "30K",
+    "basis": "3d",
+    "sales_seen": 22,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 60,
+   "slot": "2H Axe",
+   "item": "The Shining",
+   "id": 1412008,
+   "needs": "125 STR, 60 DEX",
+   "attack": 80,
+   "speed": 5,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  },
+  {
+   "level": 70,
+   "slot": "2H Axe",
+   "item": "Chrono",
+   "id": 1412009,
+   "needs": "145 STR, 70 DEX",
+   "attack": 93,
+   "speed": 6,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Warrior",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 10",
+   "gets": "1 SP. Power Strike and Slash Blast open."
+  },
+  {
+   "level": 30,
+   "job": "Fighter",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 30",
+   "gets": "Pick Fighter. Axe skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Crusader",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Mushroom Garden (Victoria Island)",
+     "monsters": [
+      "Orange Mushroom",
+      "Shroom",
+      "Red Snail"
+     ]
+    },
+    {
+     "map": "The Tree That Grew II",
+     "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
+      "Pig",
+      "Shroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest II",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Blue Mushroom Forest",
+     "monsters": [
+      "Blue Mushroom",
+      "Slime",
+      "Blue Snail"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "The Burnt Land III",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North VIII",
+     "monsters": [
+      "Curse Eye"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "monsters": [
+      "Wraith"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "Axe Mastery 5 opens Axe Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Rage 1 goes in at 32: it's already +10 attack for 1 SP, about +20% damage on a 50 attack Blue Axe.",
+  "Axe Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 30%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Sabretooth. Per point Mastery is worth more, and at 20 your hits have a 25% chance to make the mob bleed.",
+  "Final Attack: Axe 1 goes in early: a 25% chance when you attack to open a 60 second window for one extra hit on up to 3 mobs, 140% at 1. Points 2 to 30 raise it to 200%.",
+  "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
+  "2-handed axes need DEX equal to their level from Iron Axe at 20. AP only goes into DEX in the levels right before each new axe, everything else goes into STR."
+ ],
+ "mistakes": [
+  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Maxing Axe Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
+  "Buying a sword with an axe build. Axe Mastery, Axe Booster and Final Attack: Axe only work with an axe, so you lose most of 2nd job.",
+  "Skipping DEX before Sabretooth. It needs 40 DEX at 40, so put your AP from 40 into DEX, or you stay on Niam's 55 attack instead of 60."
+ ],
+ "compare": [
+  {
+   "build": "Fighter, axe (this guide)",
+   "best_at": "Rage and bleeding",
+   "weak": "no accuracy from mastery"
+  },
+  {
+   "build": "Fighter, sword",
+   "best_at": "Rage and +20 accuracy",
+   "weak": "DEX from 20"
+  },
+  {
+   "build": "Page, blunt weapon",
+   "best_at": "+20% critical damage",
+   "weak": "no Rage"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Crusader. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Fighter, axe Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic fighter, axe build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ }
+}

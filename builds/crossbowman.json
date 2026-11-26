@@ -1,0 +1,866 @@
+{
+ "slug": "/builds/crossbowman/",
+ "header": {
+  "class": "Bowman",
+  "job_path": "Bowman (10) → Crossbowman (30)",
+  "build": "Crossbowman",
+  "pitch": "DEX with STR only to each crossbow's need. Arrow Blow in 1st job, then Crossbow Mastery, Iron Arrow and Final Attack.",
+  "best_at": [
+   "Ranged from level 10",
+   "Iron Arrow hits up to 6 mobs in a line",
+   "Arrows cost 1 meso each at the NPC"
+  ],
+  "weak_spots": [
+   "STR for crossbows from 20",
+   "Crossbows are slower than bows"
+  ],
+  "difficulty": "Easy",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 149996,
+    "shown": "about 150K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 5,
+   "DEX": 12,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "DEX",
+  "sub": "STR",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all DEX",
+    "why": "DEX is your damage stat"
+   },
+   {
+    "levels": "20",
+    "ap": "all STR (to 10)",
+    "why": "Balanche at 20 needs 10 STR"
+   },
+   {
+    "levels": "25",
+    "ap": "all STR (to 15)",
+    "why": "Mountain Crossbow at 25 needs 15 STR"
+   },
+   {
+    "levels": "30",
+    "ap": "all STR (to 20)",
+    "why": "Eagle Crow at 30 needs 20 STR"
+   },
+   {
+    "levels": "39 to 40",
+    "ap": "all STR (to 30)",
+    "why": "Heckler at 40 needs 30 STR"
+   },
+   {
+    "levels": "45",
+    "ap": "all STR (to 35)",
+    "why": "Silver Crow at 45 needs 35 STR"
+   },
+   {
+    "levels": "50",
+    "ap": "all STR (to 40)",
+    "why": "Rower at 50 needs 40 STR"
+   },
+   {
+    "levels": "59 to 60",
+    "ap": "all STR (to 50)",
+    "why": "Golden Crow at 60 needs 50 STR"
+   },
+   {
+    "levels": "69 to 70",
+    "ap": "all STR (to 60)",
+    "why": "Gross Jaeger at 70 needs 60 STR"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all DEX",
+    "why": "DEX is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 5,
+    "DEX": 57,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 10,
+    "DEX": 102,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 20,
+    "DEX": 142,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 40,
+    "STR": 30,
+    "DEX": 182,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 50,
+    "STR": 40,
+    "DEX": 222,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 60,
+    "STR": 50,
+    "DEX": 262,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 70,
+    "STR": 60,
+    "DEX": 302,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Arrow Blow",
+   "id": 3001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Critical Shot",
+   "id": 3000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 29,
+   "book": "1st job",
+   "skill": "Focus",
+   "id": 3001000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 6,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Crossbow Mastery",
+   "id": 3200000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Crossbow Booster",
+   "id": 3201001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Final Attack: Crossbow",
+   "id": 3201000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
+   "skill": "Iron Arrow",
+   "id": 3201004,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 38,
+   "book": "2nd job",
+   "skill": "Crossbow Mastery",
+   "id": 3200000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Iron Arrow",
+   "id": 3201004,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 57,
+   "book": "2nd job",
+   "skill": "Final Attack: Crossbow",
+   "id": 3201000,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 58,
+   "book": "2nd job",
+   "skill": "Crossbow Booster",
+   "id": 3201001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 59,
+   "book": "2nd job",
+   "skill": "Soul Arrow: Crossbow",
+   "id": 3201003,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 64,
+   "book": "2nd job",
+   "skill": "Crossbow Booster",
+   "id": 3201001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Soul Arrow: Crossbow",
+   "id": 3201003,
+   "to": 20,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Crossbow",
+   "item": "Crossbow",
+   "id": 1462000,
+   "needs": "25 DEX",
+   "attack": 32,
+   "speed": 7,
+   "price": {
+    "typical": 999,
+    "shown": "999",
+    "basis": "3d",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Crossbow",
+   "item": "Battle Crossbow",
+   "id": 1462001,
+   "needs": "35 DEX",
+   "attack": 37,
+   "speed": 7,
+   "price": {
+    "typical": 3999,
+    "shown": "3,999",
+    "basis": "old",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Crossbow",
+   "item": "Balanche",
+   "id": 1462002,
+   "needs": "10 STR, 45 DEX",
+   "attack": 39,
+   "speed": 6,
+   "price": {
+    "typical": 4999,
+    "shown": "4,999",
+    "basis": "old",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "Crossbow",
+   "item": "Mountain Crossbow",
+   "id": 1462003,
+   "needs": "15 STR, 55 DEX",
+   "attack": 47,
+   "speed": 7,
+   "price": {
+    "typical": 4999,
+    "shown": "4,999",
+    "basis": "3d",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Crossbow",
+   "item": "Eagle Crow",
+   "id": 1462004,
+   "needs": "20 STR, 65 DEX",
+   "attack": 52,
+   "speed": 7,
+   "price": {
+    "typical": 12000,
+    "shown": "12K",
+    "basis": "3d",
+    "sales_seen": 12,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "Crossbow",
+   "item": "Heckler",
+   "id": 1462005,
+   "needs": "30 STR, 85 DEX",
+   "attack": 59,
+   "speed": 6,
+   "price": {
+    "typical": 10000,
+    "shown": "10K",
+    "basis": "3d",
+    "sales_seen": 20,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 45,
+   "slot": "Crossbow",
+   "item": "Silver Crow",
+   "id": 1462006,
+   "needs": "35 STR, 95 DEX",
+   "attack": 67,
+   "speed": 7,
+   "price": {
+    "typical": 23000,
+    "shown": "23K",
+    "basis": "3d",
+    "sales_seen": 14,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 50,
+   "slot": "Crossbow",
+   "item": "Rower",
+   "id": 1462007,
+   "needs": "40 STR, 105 DEX",
+   "attack": 72,
+   "speed": 7,
+   "price": {
+    "typical": 90000,
+    "shown": "90K",
+    "basis": "24h",
+    "sales_seen": 23,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 60,
+   "slot": "Crossbow",
+   "item": "Golden Crow",
+   "id": 1462008,
+   "needs": "50 STR, 125 DEX",
+   "attack": 82,
+   "speed": 7,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  },
+  {
+   "level": 70,
+   "slot": "Crossbow",
+   "item": "Gross Jaeger",
+   "id": 1462009,
+   "needs": "60 STR, 145 DEX",
+   "attack": 92,
+   "speed": 7,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Bowman",
+   "where": "Henesys, Athena Pierce",
+   "needs": "Level 10",
+   "gets": "1 SP. Arrow Blow and Double Shot open."
+  },
+  {
+   "level": 30,
+   "job": "Crossbowman",
+   "where": "Henesys, Athena Pierce",
+   "needs": "Level 30",
+   "gets": "Pick Crossbowman. Crossbow skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Sniper",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Caution Falling Down",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+  "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+  "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every crossbow attack.",
+  "Crossbow Mastery 5 opens Crossbow Booster, and Booster 1 is already the full 2 steps of speed. Final Attack: Crossbow 1 is a 25% chance for an extra 270% hit, so it goes in early too.",
+  "Iron Arrow 1 at 33 already hits up to 6 mobs in a line for 120%. Mastery 20 comes next, then Iron Arrow to 30 for 180%.",
+  "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
+  "Crossbows need STR from Balanche at 20, about 10 under your level. AP only goes into STR in the levels right before each new crossbow, everything else goes into DEX."
+ ],
+ "mistakes": [
+  "Skipping STR before a new crossbow. Eagle Crow needs 20 STR at 30, so put your AP from 30 into STR, or you stay on Mountain Crossbow's 47 attack instead of 52.",
+  "Maxing Crossbow Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that belong in Mastery, Iron Arrow and Final Attack.",
+  "Buying a bow. Crossbow Mastery, Booster, Soul Arrow, Iron Arrow and Final Attack: Crossbow only work with a crossbow, so you lose all of 2nd job.",
+  "Leveling Double Shot before Arrow Blow. Double Shot 20 is 120% per mob, Arrow Blow 20 is 240% on one; max Arrow Blow first."
+ ],
+ "compare": [
+  {
+   "build": "Crossbowman (this guide)",
+   "best_at": "Iron Arrow on 6 in a line",
+   "weak": "slower weapons"
+  },
+  {
+   "build": "Hunter",
+   "best_at": "Arrow Bomb on 6",
+   "weak": "STR for bows from 15"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Sniper. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Crossbowman Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic crossbowman build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ }
+}

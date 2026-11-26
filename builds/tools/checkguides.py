@@ -45,7 +45,8 @@ def check(slug):
         shown = {a: int(b) for a, b in g["needs"]}
         want = {"LV": w["reqLevel"], **{k[3:]: w[k] for k in ("reqSTR", "reqDEX", "reqINT", "reqLUK") if w.get(k)}}
         if shown != {k: v for k, v in want.items() if v}: bad.append((L, f"{g['item']} needs badges {shown} vs game {want}"))
-        if g["attack"] != w["watk"]: bad.append((L, f"{g['item']} attack {g['attack']} vs game {w['watk']}"))
+        want_atk = (w.get("incMAD") or 0) if g.get("akind", "attack") != "attack" else w["watk"]
+        if g["attack"] != want_atk: bad.append((L, f"{g['item']} {g.get('akind', 'attack')} {g['attack']} vs game {want_atk}"))
     # skill points
     sid = D["sid"]; book1 = set(D["book"]["1st job"]); reset = D.get("reset")
     reset = {"level": reset} if isinstance(reset, int) else (reset or {})
@@ -75,7 +76,7 @@ def check(slug):
 
 
 if __name__ == "__main__":
-    slugs = sys.argv[1:] or ["sindit", "spearman-spear", "spearman-polearm", "assassin", "pure-bandit", "hunter"]
+    slugs = sys.argv[1:] or sorted(d for d in os.listdir(B) if os.path.exists(os.path.join(B, d, "index.html")) and os.path.exists(os.path.join(B, d + ".json")))
     tot = 0; probs = 0
     for s in slugs:
         n, bad = check(s); tot += n; probs += len(bad)
