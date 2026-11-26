@@ -19,8 +19,8 @@ CLASSES = [
                  ("Spearman, spear", "spearman-spear"), ("Spearman, polearm", "spearman-polearm")]),
     ("Magician", [("Fire Poison", "fire-poison"), ("Ice Lightning", "ice-lightning"), ("Cleric", "cleric"), ("LUK mage", "luk-mage")]),
     ("Bowman", [("Hunter", "hunter"), ("Crossbowman", "crossbowman")]),
-    ("Thief", [("Assassin", "assassin"), ("DEX Assassin", "dex-assassin"), ("Pure Bandit", "pure-bandit"), ("Sindit", "sindit"),
-               ("STR Bandit", "str-bandit"), ("DEX Bandit", "dex-bandit")]),
+    ("Thief", [("Assassin", "assassin"), ("Pure Bandit", "pure-bandit"), ("Sindit", "sindit"),
+               ("STR Bandit", "str-bandit")]),
 ]
 
 

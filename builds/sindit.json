@@ -243,15 +243,7 @@
    "why": "75% a hit at 30"
   },
   {
-   "level": 53,
-   "book": "2nd job",
-   "skill": "Dagger Booster",
-   "id": 4201000,
-   "to": 20,
-   "why": "longer buff only (100 to 300 s)"
-  },
-  {
-   "level": 55,
+   "level": 49,
    "book": "2nd job",
    "skill": "Haste",
    "id": 4201001,
@@ -259,12 +251,20 @@
    "why": "needed for Steal"
   },
   {
-   "level": 65,
+   "level": 59,
    "book": "2nd job",
    "skill": "Steal",
    "id": 4201002,
    "to": 30,
-   "why": "2 targets, stun"
+   "why": "+35 attack for 60 s on a successful steal, 90% at 30"
+  },
+  {
+   "level": 65,
+   "book": "2nd job",
+   "skill": "Dagger Booster",
+   "id": 4201000,
+   "to": 20,
+   "why": "longer buff only (100 to 300 s)"
   },
   {
    "level": 70,
@@ -273,14 +273,6 @@
    "id": 4201001,
    "to": 20,
    "why": "party speed"
-  },
-  {
-   "level": 77,
-   "book": "2nd job",
-   "skill": "Nimble Recovery",
-   "id": 4200001,
-   "to": 20,
-   "why": "last: recovery only"
   }
  ],
  "gear": [
@@ -825,6 +817,7 @@
  "why": [
   "Lucky Seven hits from range, so you clear mobs on the next platform from where you stand. Less walking, less touch damage and fewer pots, from 10 until you switch.",
   "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39, ready for the switch at 40.",
+  "Steal comes right after Savage Blow 30. At 30 a successful steal is +35 attack for 60 seconds and works 90% of the time; on a 68 attack Shinkita that's about half again your weapon attack. The rest of Dagger Booster only stretches the speed buff from 100 to 300 seconds, so it waits.",
   "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. On our training engine the Korean Fan at 40 does about 1,235 damage a second against 838 with the claw, and about 86K EXP an hour against 64K. It doesn't count walking to mobs yet, so it hasn't been timed in game.",
   "Korean Fan needs no DEX, so the switch costs you no AP. Your next DEX is at 47 to 49, for Shinkita at 50.",
   "Reset your 1st job SP the day you switch. Lucky Seven and Keen Eyes are 35 dead points once you hold a dagger. Moved into Double Stab 20 and Dark Sight 20, our engine has you at about 86K EXP an hour at 40 instead of 81K without the reset, because Double Stab finishes some mobs faster."

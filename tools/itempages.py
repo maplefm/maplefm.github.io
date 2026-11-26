@@ -693,8 +693,19 @@ def main():
            "Use": ("potions", "potion and use item prices", "Potions, food and other use items, next to their NPC prices."),
            "Stars": ("throwing-stars", "throwing star prices", "Throwing stars for thieves, from Subis to Ilbis.")}
     hubs = []
+    MOVED = {"Stars": ("/items/stars/", "Throwing stars and arrows")}   # categories with their own hand-built page
     for cat, (hs, what, intro) in HUB.items():
         lst = bycat.get(cat) or []
+        if cat in MOVED:
+            # the old price hub moved: keep the address working for links and Google, and send people to the new page
+            to, name = MOVED[cat]; d = os.path.join(out, "items", hs); os.makedirs(d, exist_ok=True)
+            body = (f'<div class="card"><h1>{html.escape(name)}</h1><p>This page moved to <a href="{to}">{html.escape(name)}</a>: every star and arrow '
+                    'with attack, set size, the NPC that sells it and today\'s Free Market price.</p></div>')
+            text = page(f"{name} · Club FM", f"{name} in MapleStory Classic moved to a new page.", SITE + to, body, robots="noindex, follow",
+                        crumbs=[("Prices", "/"), ("All items", "/items/"), (name, to)])
+            text = text.replace("<head>", f'<head><meta http-equiv="refresh" content="0; url={to}">', 1)
+            open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(text)
+            continue
         if len(lst) < 5: continue
         trs = ""
         for x in lst:
@@ -702,7 +713,8 @@ def main():
             ch = (f'<span class="chg {"up" if mv > 0 else "down"}">{"▲" if mv > 0 else "▼"} {abs(round(mv * 100))}%</span>' if isinstance(mv, (int, float)) and abs(mv) >= 0.01 else "")
             trs += (f'<tr><td><a href="/item/{slug(x["item"])}/"><img src="https://maplefm.gg/i/{ids[x["item"]]}.png" onerror="this.onerror=null;this.src=&#39;https://maplestory.io/api/MCW/1/item/{ids[x["item"]]}/icon&#39;" alt="{html.escape(shown(x["item"]))}" width="24" height="24" loading="lazy"> {html.escape(shown(x["item"]))}</a></td>'
                     f'<td class="n"><span class="mz">{meso(x["typ"])}</span> {ch}</td><td class="n">{full(x.get("salesN") or 0)}</td></tr>')
-        others = " · ".join(f'<a href="/items/{v[0]}/">{html.escape(v[1][0].upper() + v[1][1:])}</a>' for k, v in HUB.items() if k != cat and len(bycat.get(k) or []) >= 5)
+        others = " · ".join(f'<a href="/items/{v[0]}/">{html.escape(v[1][0].upper() + v[1][1:])}</a>' for k, v in HUB.items() if k != cat and k not in MOVED and len(bycat.get(k) or []) >= 5)
+        others += "".join(f' · <a href="{to}">{html.escape(name)}</a>' for to, name in MOVED.values())
         body = (f'<div class="card"><h1>MapleStory Classic {html.escape(what)}</h1><p class="sub">{len(lst)} items · updated {when}</p><p>{html.escape(intro)} '
                 f'Typical prices from watched Free Market sales, most traded first.</p>'
                 f'<table><tr><th>Item</th><th>Typical, mesos</th><th>Sales seen</th></tr>{trs}</table>'
@@ -721,7 +733,7 @@ def main():
     guide_paths = guidepages.build(out, rows, ids, dbrow, KINDS, GUIDE, vendor, when,
                                    {"page": page, "slug": slug, "shown": shown, "meso": meso, "full": full, "SITE": SITE, "BSLUG": BSLUG})
     print(len(guide_paths), "guide and class pages")
-    hublinks = '<p class="note" style="margin:6px 0 10px">By category: ' + " · ".join(f'<a href="/items/{h}/">{html.escape(w[0].upper() + w[1:])}</a>' for h, w in hubs) + (' · <a href="/items/class/">By class</a> · <a href="/guides/">Guides</a>' if guide_paths else "") + "</p>"
+    hublinks = '<p class="note" style="margin:6px 0 10px">By category: ' + " · ".join(f'<a href="/items/{h}/">{html.escape(w[0].upper() + w[1:])}</a>' for h, w in hubs) + "".join(f' · <a href="{to}">{html.escape(name)}</a>' for to, name in MOVED.values()) + (' · <a href="/items/class/">By class</a> · <a href="/guides/">Guides</a>' if guide_paths else "") + "</p>"
     idx = idx.replace('<input id="q"', hublinks + '<input id="q"', 1)
     os.makedirs(os.path.join(out, "items"), exist_ok=True)
     open(os.path.join(out, "items", "index.html"), "w", encoding="utf-8").write(page("MapleStory Classic item prices · Club FM", f"Free Market prices for {len(made)} MapleStory Classic items, from sales players watched happen.", SITE + "/items/", idx, crumbs=[("Prices", "/"), ("All items", "/items/")]))
