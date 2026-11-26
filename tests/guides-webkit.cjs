@@ -1,4 +1,4 @@
-// Opens every build guide on the live site in WebKit as an iPhone and on desktop: loads, slider works, icons load, no script errors.
+// Opens every live build guide in WebKit as an iPhone and on desktop: loads, slider works, icons load, no script errors. Run on demand.
 const {webkit,devices}=require('playwright');
 (async()=>{const b=await webkit.launch();let fail=0;
 for(const slug of ['sindit','spearman-spear','spearman-polearm','assassin','pure-bandit','hunter']){
