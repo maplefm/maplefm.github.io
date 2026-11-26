@@ -40,8 +40,23 @@
   "rule": [
    {
     "levels": "1 to 9",
-    "ap": "DEX to 25, rest LUK",
-    "why": "Thief job advance needs 25 DEX at 10"
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
+   },
+   {
+    "levels": "14 to 15",
+    "ap": "all DEX (to 15)",
+    "why": "Mithril Titans at 15 needs 15 DEX"
+   },
+   {
+    "levels": "20",
+    "ap": "all DEX (to 20)",
+    "why": "Adamantium Igor at 20 needs 20 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 25)",
+    "why": "Meba at 25 needs 25 DEX"
    },
    {
     "levels": "30",
@@ -64,16 +79,6 @@
     "why": "Steel Slain at 50 needs 50 DEX"
    },
    {
-    "levels": "59 to 60",
-    "ap": "all DEX (to 60)",
-    "why": "Blood Gigantic at 60 needs 60 DEX"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all DEX (to 70)",
-    "why": "Green Scarab at 70 needs 70 DEX"
-   },
-   {
     "levels": "the rest",
     "ap": "all LUK",
     "why": "LUK is your damage stat"
@@ -83,16 +88,16 @@
    {
     "level": 10,
     "STR": 4,
-    "DEX": 25,
+    "DEX": 5,
     "INT": 4,
-    "LUK": 37
+    "LUK": 57
    },
    {
     "level": 20,
     "STR": 4,
-    "DEX": 25,
+    "DEX": 20,
     "INT": 4,
-    "LUK": 87
+    "LUK": 92
    },
    {
     "level": 30,
@@ -118,16 +123,16 @@
    {
     "level": 60,
     "STR": 4,
-    "DEX": 60,
+    "DEX": 50,
     "INT": 4,
-    "LUK": 252
+    "LUK": 262
    },
    {
     "level": 70,
     "STR": 4,
-    "DEX": 70,
+    "DEX": 50,
     "INT": 4,
-    "LUK": 292
+    "LUK": 312
    }
   ]
  },
@@ -301,7 +306,7 @@
     "typical": 8250,
     "shown": "8,250",
     "basis": "clean",
-    "sales_seen": 96,
+    "sales_seen": 93,
     "rough": false
    },
    "why": ""
@@ -352,7 +357,7 @@
     "typical": 49999,
     "shown": "50K",
     "basis": "clean",
-    "sales_seen": 33,
+    "sales_seen": 32,
     "rough": false
    },
    "why": ""
@@ -369,49 +374,20 @@
     "typical": 2345000,
     "shown": "2.3M",
     "basis": "3d",
-    "sales_seen": 38,
+    "sales_seen": 37,
     "rough": true
-   },
-   "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "Claw",
-   "item": "Blood Gigantic",
-   "id": 1472024,
-   "needs": "60 DEX, 125 LUK",
-   "attack": 41,
-   "speed": 4,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "Claw",
-   "item": "Green Scarab",
-   "id": 1472028,
-   "needs": "70 DEX, 145 LUK",
-   "attack": 47,
-   "speed": 4,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
    },
    "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
    "job": "Thief",
    "where": "Kerning City, Dark Lord",
-   "needs": "Level 10 and 25 DEX",
+   "needs": "Level 10",
    "gets": "1 SP. Lucky Seven and Double Stab open."
   },
   {
@@ -472,9 +448,10 @@
      ]
     },
     {
-     "map": "Line 1 (Area 1)",
+     "map": "Dungeon, Southern Forest III",
      "monsters": [
-      "Bubbling"
+      "Green Mushroom",
+      "Slime"
      ]
     }
    ],
@@ -490,19 +467,18 @@
      ]
     },
     {
-     "map": "Northern Top of Construction Site",
+     "map": "The Forest of Wisdom",
      "monsters": [
-      "Octopus",
-      "Orange Mushroom",
-      "Blue Mushroom"
+      "Green Mushroom",
+      "Slime",
+      "Snail"
      ]
     },
     {
-     "map": "Caution Falling Down",
+     "map": "Tree Dungeon, Forest Up North IV",
      "monsters": [
-      "Octopus",
-      "Orange Mushroom",
-      "Blue Mushroom"
+      "Green Mushroom",
+      "Slime"
      ]
     }
    ],
@@ -737,18 +713,18 @@
    "levels": "60 to 64",
    "maps": [
     {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
      "map": "Remains (Tomb) III",
      "monsters": [
       "Mummydog",
       "Skeledog",
       "Skeleton Soldier"
-     ]
-    },
-    {
-     "map": "The Forest of Evil II",
-     "monsters": [
-      "Malady",
-      "Zombie Lupin"
      ]
     },
     {
@@ -792,15 +768,15 @@
  "why": [
   "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it's your main attack all the way to 70.",
   "Keen Eyes 15 adds range to Lucky Seven, 200 at 15, and needs Nimble Body 3. Nimble Body 15 is +15 accuracy and +15 avoid.",
-  "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
+  "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full attack speed boost. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
   "Critical Throw 30 is 15% critical rate for +35% damage on those hits. 2nd job gives a claw no new attack except Drain, so your damage gains come from this and Claw Mastery.",
   "Haste 20 before Drain: +30 speed and +10 jump for 300 seconds. Drain is a 240% hit on one mob that heals you, and Lucky Seven already does more.",
   "Drain is locked until Critical Recovery is 3, so 3 points go there first.",
-  "Claws need DEX equal to their level from Mithril Titans at 15. AP only goes into DEX in the levels right before each new claw, everything else goes into LUK."
+  "DEX only goes in when your gear needs it: 15 for Mithril Titans at 15, 20 for Adamantium Igor at 20, 25 for Meba at 25, 30 for Adamantium Guards at 30, 35 for Silver Guardian at 35, 40 for Blood Avarice at 40 and 50 for Steel Slain at 50. Everything else goes into LUK."
  ],
  "mistakes": [
   "Buying Kumbi or Tobi stars to level. Kumbi is +4 attack over Wolbi, 21 against 17, for a lot more mesos. Wolbi from Max in Kerning City is all you need.",
-  "Skipping DEX before a new claw. Steel Slain needs 50 DEX at 50, so put your AP from 49 and 50 into DEX, or you stay on Blood Avarice's 29 attack instead of 34. Same at 59 and 60 for Blood Gigantic.",
+  "Skipping DEX before a new claw. Steel Slain needs 50 DEX at 50, so put your AP at 49 and 50 into DEX, or you stay on Blood Avarice's 29 attack instead of 34.",
   "Maxing Claw Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's up to 19 SP, over 6 levels, that belongs in Claw Mastery and Critical Throw.",
   "Putting SP into Double Stab. It only works with a dagger, so a claw Assassin never uses it. Those points belong in Lucky Seven."
  ],

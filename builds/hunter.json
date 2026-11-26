@@ -41,7 +41,7 @@
    {
     "levels": "1 to 9",
     "ap": "all DEX",
-    "why": "Bowman job advance needs 25 DEX at 10"
+    "why": "DEX is your damage stat"
    },
    {
     "levels": "14 to 15",
@@ -77,16 +77,6 @@
     "levels": "49 to 50",
     "ap": "all STR (to 50)",
     "why": "Olympus at 50 needs 50 STR"
-   },
-   {
-    "levels": "59 to 60",
-    "ap": "all STR (to 60)",
-    "why": "Asianic Bow at 60 needs 60 STR"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all STR (to 70)",
-    "why": "Red Hinkel at 70 needs 70 STR"
    },
    {
     "levels": "the rest",
@@ -132,15 +122,15 @@
    },
    {
     "level": 60,
-    "STR": 60,
-    "DEX": 252,
+    "STR": 50,
+    "DEX": 262,
     "INT": 4,
     "LUK": 4
    },
    {
     "level": 70,
-    "STR": 70,
-    "DEX": 292,
+    "STR": 50,
+    "DEX": 312,
     "INT": 4,
     "LUK": 4
    }
@@ -349,7 +339,7 @@
     "typical": 18000,
     "shown": "18K",
     "basis": "24h",
-    "sales_seen": 16,
+    "sales_seen": 15,
     "rough": true
    },
    "why": ""
@@ -404,45 +394,16 @@
     "rough": true
    },
    "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "Bow",
-   "item": "Asianic Bow",
-   "id": 1452009,
-   "needs": "60 STR, 125 DEX",
-   "attack": 80,
-   "speed": 6,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "Bow",
-   "item": "Red Hinkel",
-   "id": 1452010,
-   "needs": "70 STR, 145 DEX",
-   "attack": 90,
-   "speed": 6,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
    "job": "Bowman",
    "where": "Henesys, Athena Pierce",
-   "needs": "Level 10 and 25 DEX",
+   "needs": "Level 10",
    "gets": "1 SP. Arrow Blow and Double Shot open."
   },
   {
@@ -785,11 +746,10 @@
      ]
     },
     {
-     "map": "Remains (Tomb) III",
+     "map": "Camp 1",
      "monsters": [
-      "Mummydog",
-      "Skeledog",
-      "Skeleton Soldier"
+      "Skeleton Soldier",
+      "Officer Skeleton"
      ]
     }
    ],
@@ -827,13 +787,13 @@
   "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
   "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
   "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every bow attack.",
-  "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full 2 steps of speed. Final Attack: Bow 1 opens a 25% chance of an extra hit on up to 3 mobs, so it goes in early too.",
+  "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full attack speed boost. Final Attack: Bow 1 gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds; while it's lit you can use it on up to 3 mobs for 90%, so it goes in early too.",
   "Arrow Bomb 30 hits up to 6 mobs for 130% with a 60% chance to stun. It's your only attack for groups, so it comes right after Mastery 20.",
   "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
-  "Bows need STR equal to their level from Composite Bow at 15. AP only goes into STR in the levels right before each new bow, everything else goes into DEX."
+  "STR only goes in when your gear needs it: 15 for Composite Bow at 15, 20 for Hunter's Bow at 20, 25 for Battle Bow at 25, 30 for Ryden at 30, 35 for Red Viper at 35, 40 for Vaulter 2000 at 40 and 50 for Olympus at 50. Everything else goes into DEX."
  ],
  "mistakes": [
-  "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put that level's AP into STR, or you stay on Battle Bow's 44 attack instead of 50.",
+  "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put your AP at 30 into STR, or you stay on Battle Bow's 44 attack instead of 50.",
   "Maxing Bow Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that belong in Mastery, Arrow Bomb and Final Attack.",
   "Buying a crossbow. Bow Mastery, Bow Booster, Soul Arrow, Arrow Bomb and Final Attack: Bow only work with a bow, so you lose all of 2nd job.",
   "Leveling Double Shot before Arrow Blow. Double Shot 20 is 120% per mob, Arrow Blow 20 is 240% on one; max Arrow Blow first."
