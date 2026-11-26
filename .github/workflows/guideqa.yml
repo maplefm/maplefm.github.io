@@ -1,0 +1,14 @@
+name: Guides in WebKit
+# One-off check of the live build guides in Safari's engine; runs on pushes to build-guides that touch it.
+on:
+  push:
+    branches: [build-guides]
+    paths: [.github/workflows/guideqa.yml, tests/guides-webkit.cjs]
+jobs:
+  webkit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm i -s playwright@1.56.0 && npx playwright install --with-deps webkit > /tmp/pw.log 2>&1 || tail -5 /tmp/pw.log
+      - run: node tests/guides-webkit.cjs
