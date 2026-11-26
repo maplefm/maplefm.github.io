@@ -17,26 +17,47 @@ jobs:
       - run: |
           mkdir -p sk
           python3 - <<'PY'
-          import json, os, urllib.request, concurrent.futures as cf
-          ids = sorted(json.load(open("assets/classic-skills.json"))["skills"])
-          URLS = ["https://maplestory.io/api/MCW/1/skill/{}/icon", "https://maplestory.io/api/MCW/1.2/skill/{}/icon", "https://maplestory.io/api/GMS/83/skill/{}/icon"]
-          def get(i):
-              p = f"sk/{i}.png"
-              if os.path.exists(p): return i, "have"
-              errs = []
-              for u in URLS:
-                  try:
-                      b = urllib.request.urlopen(urllib.request.Request(u.format(i), headers={"User-Agent": "maplefm.gg icon copy"}), timeout=15).read()
-                      if b[:8] == b"\x89PNG\r\n\x1a\n":
-                          open(p, "wb").write(b); return i, "ok " + u.split("/api/")[1].split("/skill")[0]
-                      errs.append("not png")
-                  except Exception as e:
-                      errs.append(str(e)[:60])
-              return i, "miss " + " | ".join(errs)
-          res = list(cf.ThreadPoolExecutor(8).map(get, ids))
-          for i, r in res: print(i, r, flush=True)
-          json.dump(sorted(i for i, r in res if r.startswith("miss")), open("sk/missing.json", "w"))
-          print("copied", sum(r.startswith("ok") for _, r in res), "missing", sum(r.startswith("miss") for _, r in res))
+          import base64, json, os, sys, urllib.request
+          sys.path.insert(0, "tools")
+          import mcwver
+          IO = mcwver.base().rstrip("/")
+          print("base", IO, flush=True)
+          UA = {"User-Agent": "maplefm.gg icon copy"}
+          def raw(u, t=25):
+              return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=t).read()
+          skills = json.load(open("assets/classic-skills.json"))["skills"]
+          jobs = sorted({v["job"] for v in skills.values()})
+          got, shown = 0, False
+          def save(sid, b):
+              global got
+              if b[:8] == b"\x89PNG\r\n\x1a\n":
+                  open(f"sk/{sid}.png", "wb").write(b); got += 1; return True
+              return False
+          for j in jobs:
+              try: book = json.loads(raw(f"{IO}/job/{j}/skillbook", 40))
+              except Exception as e: print("book", j, e); continue
+              for sk in book.get("skills", []):
+                  sid = str(sk["id"])
+                  if sid not in skills or os.path.exists(f"sk/{sid}.png"): continue
+                  if not shown:
+                      print("skill keys", sorted(sk.keys()), flush=True); shown = True
+                  done = False
+                  for k in ("iconRaw", "icon", "iconMouseOver", "iconDisabled"):
+                      v = sk.get(k)
+                      if isinstance(v, str) and len(v) > 100:
+                          try: done = save(sid, base64.b64decode(v.split(",")[-1]))
+                          except Exception: pass
+                      if done: break
+                  if done: continue
+                  for u in (f"{IO}/skill/{sid}/icon", f"{IO}/wz/Skill/{j:03d}.img/skill/{sid}/icon?export=true", f"{IO}/wz/Skill/{j}.img/skill/{sid}/icon?export=true",
+                            f"{IO}/job/{j}/skill/{sid}/icon"):
+                      try:
+                          if save(sid, raw(u)): done = True; print(sid, "via", u.split(IO)[1], flush=True); break
+                      except Exception as e: pass
+                  if not done: print(sid, "miss", flush=True)
+          miss = sorted(s for s in skills if not os.path.exists(f"sk/{s}.png"))
+          json.dump(miss, open("sk/missing.json", "w"))
+          print("copied", got, "missing", len(miss))
           PY
       - run: |
           git config user.name maplefm
