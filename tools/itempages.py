@@ -744,7 +744,7 @@ def main():
             try: os.rmdir(os.path.join(croot, s))
             except OSError: pass
     open(os.path.join(out, "item", "item.css"), "w").write(CSS + "\n")
-    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html", f"{SITE}/scan/"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [SITE + p for p in guide_paths] + [f"{SITE}/item/{s}/" for s, _, r in made if r is not None or s in SEO_KEEP] + [SITE + p for p in world_paths]
+    urls = [f"{SITE}/", f"{SITE}/items/", f"{SITE}/contribute.html", f"{SITE}/report.html", f"{SITE}/shortcuts.html", f"{SITE}/bot/", f"{SITE}/quests.html", f"{SITE}/map.html", f"{SITE}/market.html", f"{SITE}/shop.html", f"{SITE}/recap/", f"{SITE}/streamers.html", f"{SITE}/how-it-works.html", f"{SITE}/scan/", f"{SITE}/builds/", f"{SITE}/builds/sindit/", f"{SITE}/items/stars/"] + [f"{SITE}/items/{h}/" for h, _ in hubs] + [SITE + p for p in guide_paths] + [f"{SITE}/item/{s}/" for s, _, r in made if r is not None or s in SEO_KEEP] + [SITE + p for p in world_paths]
     # lastmod only moves when a page's content does: item prices daily, world pages when the game data changed
     wbuilt = (WBUILT[0] or today)[:10]
     world = {SITE + p for p in world_paths}
