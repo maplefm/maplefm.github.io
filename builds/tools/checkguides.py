@@ -15,6 +15,7 @@ WEAP = json.load(open(os.path.join(B, "data", "weapons.json")))
 PRE = {int(k): {int(a): n for a, n in v.items()} for k, v in json.load(open(os.path.join(B, "data", "prereqs.json")))["skills"].items() if v}
 GAMEMAX = {int(k): int(v.get("masterLevel") or 0) for k, v in json.load(open(os.path.join(B, "data", "skilltext.json"))).items()}
 CAP = 70
+SPEEDWORD = {2: "Faster", 3: "Faster", 4: "Fast", 5: "Fast", 6: "Normal", 7: "Slow", 8: "Slow", 9: "Slower"}
 sys.path.insert(0, HERE)
 import batch2 as _B2  # noqa: E402  the same armor tiers the planner uses (game files, builds/data/armor.json)
 ARMOR_NEEDS = {c: {st: _B2.armor_needs(c, st)} for c, st in (("Warrior", "DEX"), ("Magician", "LUK"), ("Bowman", "STR"), ("Thief", "DEX"))}
@@ -58,6 +59,10 @@ def check(slug):
         if shown != {k: v for k, v in want.items() if v}: bad.append((L, f"{g['item']} needs badges {shown} vs game {want}"))
         want_atk = (w.get("incMAD") or 0) if g.get("akind", "attack") != "attack" else w["watk"]
         if g["attack"] != want_atk: bad.append((L, f"{g['item']} {g.get('akind', 'attack')} {g['attack']} vs game {want_atk}"))
+        if g.get("speed") is not None:  # the speed shown, and the game's word for it
+            n += 1
+            if g["speed"] != w["attackSpeed"] or g.get("spw") != SPEEDWORD.get(w["attackSpeed"]):
+                bad.append((L, f"{g['item']} speed {g.get('spw')} ({g['speed']}) vs game {SPEEDWORD.get(w['attackSpeed'])} ({w['attackSpeed']})"))
     # skill points
     sid = D["sid"]; book1 = set(D["book"]["1st job"]); reset = D.get("reset")
     reset = {"level": reset} if isinstance(reset, int) else (reset or {})

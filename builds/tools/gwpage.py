@@ -15,6 +15,8 @@ import worldpages as W  # noqa: E402
 
 LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/"
 CAP = 70
+# the word the game shows for a weapon's attack speed number; checked against mapleclassic.wiki on 205 weapons, 0 off
+SPEEDWORD = {2: "Faster", 3: "Faster", 4: "Fast", 5: "Fast", 6: "Normal", 7: "Slow", 8: "Slow", 9: "Slower"}
 GUIDES = {"Sindit": "sindit", "Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter",
           "Fighter, sword": "fighter-sword", "Fighter, axe": "fighter-axe", "Page, sword": "page-sword", "Page, blunt weapon": "page-blunt",
           "Fire Poison": "fire-poison", "Ice Lightning": "ice-lightning", "Cleric": "cleric", "Crossbowman": "crossbowman", "STR Bandit": "str-bandit"}
@@ -177,7 +179,7 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
  skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):(D.reset&&L>=D.reset&&D.first[n]<D.reset?"reset at "+D.reset:"starts at level "+D.first[n])}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?(D.cap==70?", save for 3rd job":", your first 2nd job point: pick your build below"):""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
- eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · ${E(w.akind||"attack")} ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:D.gearNote?`<div class="wtip">${E(D.gearNote)}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}${w.slot=="Bow"&&D.ammoBow?`<div class="wtip">${D.ammoBow}</div>`:""}${w.slot=="Crossbow"&&D.ammoXbow?`<div class="wtip">${D.ammoXbow}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
+ eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · ${E(w.akind||"attack")} ${E(w.attack)}${w.speed?" · "+E(w.spw)+" (speed "+E(w.speed)+")":""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:D.gearNote?`<div class="wtip">${E(D.gearNote)}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}${w.slot=="Bow"&&D.ammoBow?`<div class="wtip">${D.ammoBow}</div>`:""}${w.slot=="Crossbow"&&D.ammoXbow?`<div class="wtip">${D.ammoXbow}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
  const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
  try{history.replaceState(null,"",L==D.start?location.pathname:"#lv"+L)}catch(e){}
 }
@@ -283,7 +285,7 @@ def build(name):
     for g in d["gear"]:
         if g["slot"] == "Stars" or g["level"] > CAP: continue
         p = g.get("price") or {}
-        gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "link": exists("item", W.slug(g["item"])), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "akind": g.get("akind") or "attack", "speed": g.get("speed"),
+        gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "link": exists("item", W.slug(g["item"])), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "akind": g.get("akind") or "attack", "speed": g.get("speed"), "spw": SPEEDWORD.get(g.get("speed"), ""),
                      "needs": [["LV", str(REQ.get(g["item"], g["level"]))]] + needs_list(g["needs"]), "fm": p.get("shown") if p.get("typical") else None, "fmv": p.get("typical"), "ways": ways(guide, g["item"])})
 
     train = []
