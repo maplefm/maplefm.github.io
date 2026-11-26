@@ -117,6 +117,7 @@ def build():
     if nav(ref) and nav(text):
         text = text[:nav(text).start()] + nav(ref).group(0) + text[nav(text).end():]
     text = text.replace('<a href="/map.html">Training</a> <i>›</i> ', '<a href="/">Prices</a> <i>›</i> ', 1)
+    text = text.replace('<div class="card">', '<div class="card wide">', 1)   # use the full width on desktop
     W.write(ROOT, "/items/stars/", text)
     return lux_txt
 

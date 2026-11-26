@@ -52,7 +52,7 @@ def ways(guide, name):
 
 
 CSS = r"""
-.gw{max-width:1100px;margin:0 auto}
+.gw{max-width:none;margin:0 auto}.gw-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.gw-two>.win{margin-bottom:0}.gw-two>*,.gw-grid>*,.gw-low>*{min-width:0}.gw-two{margin-bottom:14px}
 .gw-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:4px 0 14px}
 .gw-top h1{margin:0;font-size:clamp(26px,4vw,36px)}.gw-top p{margin:4px 0 0;color:var(--muted);max-width:620px}
 .gw-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -60,7 +60,7 @@ CSS = r"""
 .gw-lv input{width:200px;accent-color:#f59e0b}.gw-lv b{font-size:20px;min-width:66px}
 .gbtn{font:800 14px inherit;border-radius:12px;padding:11px 14px;cursor:pointer;border:2px solid #c9a24a;background:linear-gradient(#f8d977,#e3b94f);color:#3b2a06}
 .gbtn.alt{background:var(--panel);color:inherit;border-color:var(--line)}
-.gw-grid{display:grid;grid-template-columns:250px 1fr 330px;gap:14px;align-items:start}
+.gw-grid{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr) 380px;gap:14px;align-items:start}
 .win{background:linear-gradient(#2b3a67,#1b2546);border:2px solid #c9a24a;border-radius:10px;color:#eef2ff;box-shadow:0 0 0 2px #10172e,0 8px 24px rgba(16,23,46,.3);margin-bottom:14px}
 .win h2{margin:0;font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;background:linear-gradient(#f8d977,#c9a24a);color:#3b2a06;border-radius:7px 7px 0 0}
 .win .in{padding:12px}.gw .win table,.gw .win td,.gw .win th{color:#eef2ff}.gw .win td.gn{color:#fde047;text-align:left}.win a{color:#fde047}
@@ -84,7 +84,7 @@ a.way:hover{border-color:#fde047}.way .tg{font-size:10px;font-weight:900;letter-
 .way .t{font-weight:700;font-size:14px;min-width:0}.way .t small{display:block;font-weight:500;color:#9fb0e8;font-size:12px}.way .p{font-weight:800;color:#fde047;white-space:nowrap;text-align:right}
 .way.best{outline:1px solid #fde047}.way .cheap{display:block;font-size:10px;color:#fde047;font-weight:800;letter-spacing:.06em}
 .next{margin-top:10px;font-size:13px;color:#c7d2fe}
-.mapc{display:flex;gap:10px;flex-wrap:wrap}
+.mapc{display:flex;gap:10px;flex-wrap:wrap}.trw .mapc{flex-direction:column}.trw .mp{flex:0 0 auto}@media(max-width:1300px){.trw .mapc{flex-direction:row}}
 .mp{flex:1 1 200px;position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 12px;color:#eef2ff!important;text-decoration:none;font-weight:700}
 .mp small{display:block;color:#9fb0e8;font-weight:500}.mp .gmm{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;background:#10172e;border:2px solid #c9a24a;border-radius:10px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.45);width:max-content;max-width:min(340px,86vw)}
 .mp .gmm img{display:block;max-width:100%;height:auto;image-rendering:pixelated;border-radius:4px;min-width:160px}.mp .gmm span{display:block;font-size:12px;color:#c7d2fe;margin-top:6px;font-weight:600}
@@ -109,7 +109,7 @@ a.way:hover{border-color:#fde047}.way .tg{font-size:10px;font-weight:900;letter-
 .cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
 .cmp a,.cmp div.c{display:block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 12px;color:#eef2ff!important;text-decoration:none}
 .cmp a:hover{border-color:#fde047}.cmp b{display:block}.cmp small{display:block;color:#9fb0e8;margin-top:3px}.cmp .go{font-size:12px;font-weight:800;color:#fde047;margin-top:6px}.cmp .soon{font-size:12px;color:#9fb0e8;margin-top:6px}
-@media(max-width:1000px){.gw-grid{grid-template-columns:1fr 1fr}.gw-grid .skw{grid-column:1/-1;order:3}}
+@media(max-width:1300px){.gw-grid{grid-template-columns:250px 1fr 340px}.gw-grid .trw{grid-column:1/-1}}@media(max-width:1100px){.gw-two{grid-template-columns:1fr}}@media(max-width:1000px){.gw-grid{grid-template-columns:1fr 1fr}.gw-grid .skw{grid-column:1/-1;order:3}.gw-grid .trw{order:4}}
 @media(max-width:640px){.way{grid-template-columns:auto 1fr}.way .p{grid-column:2;text-align:left;white-space:normal}.way .cheap{display:inline;margin-right:6px}.gw-grid,.gw-low{grid-template-columns:1fr}.gw-ctl{width:100%}.gw-lv{flex:1 1 100%}.gw-lv input{flex:1;width:auto}.gbtn{flex:1}.gbox{max-height:70vh}.boxbar label{margin-left:0}}
 """
 
@@ -251,7 +251,7 @@ def build(name):
             + (f", or Wolbi for {wolbi[0][2]:,} a set at {E(wolbi[0][0])} (+2 attack)" if wolbi else "")
             + '. Anything better is a luxury, not part of the build. <a href="/items/stars/">Every star and its price</a>') if subi else ""
 
-    data = {"cap": CAP, "start": 44, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
+    data = {"cap": CAP, "start": d.get("switch") or 30, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
             "book": {b: list(dict.fromkeys(s["skill"] for s in v)) for b, v in books.items()}, "sid": {n: sid[n] for n in first if n in sid},
             "gear": gear, "train": train, "ammo": ammo}
 
@@ -283,14 +283,14 @@ def build(name):
     third = next((a for a in d["advancement"] if not str(a["level"]).isdigit()), None)
 
     body = (f'<style>{CSS}</style><div class="gw"><div class="gw-top"><div><h1>{E(h["build"])}</h1><p>{md(h["pitch"])}</p></div>'
-            f'<div class="gw-ctl"><label class="gw-lv">Level <b id="lvn">Lv 44</b><input id="lv" type="range" min="1" max="{CAP}" value="44" aria-label="Character level"></label>'
+            f'<div class="gw-ctl"><label class="gw-lv">Level <b id="lvn">Lv {d.get("switch") or 30}</b><input id="lv" type="range" min="1" max="{CAP}" value="{d.get("switch") or 30}" aria-label="Character level"></label>'
             '<button type="button" class="gbtn" id="fin">Finished build</button><button type="button" class="gbtn alt" id="allb">See the whole guide</button></div></div>'
             '<div class="gw-grid"><div class="win"><h2>Stats</h2><div class="in" id="stw"></div></div><div class="win skw"><h2>Skills</h2><div class="tabsg" id="skt"></div><div class="in" id="skw"></div></div>'
+            '<div class="win trw"><h2>Where to train</h2><div class="in"><div class="mapc" id="mpw"></div></div></div>'
             '<div class="win"><h2>Weapon</h2><div class="in" id="eqw"></div></div></div>'
-            '<div class="win"><h2>Where to train</h2><div class="in"><div class="mapc" id="mpw"></div></div></div>'
-            '<div class="win"><h2>Stats by level</h2><div class="in"><div class="boxbar">' + "".join(f'<button type="button" data-jump="{x}">Lv {x}</button>' for x in (1, 10, 30, 44, 50, 70)) +
-            '<label><input type="checkbox" id="chg"> Changes only</label></div><div class="gbox" id="stb"></div></div></div>'
-            '<div class="win"><h2>Skill points by level</h2><div class="in"><div class="gbox" id="spb"></div></div></div>'
+            '<div class="gw-two"><div class="win"><h2>Stats by level</h2><div class="in"><div class="boxbar">' + "".join(f'<button type="button" data-jump="{x}">Lv {x}</button>' for x in sorted({1, 10, 30, d.get("switch") or 30, 50, CAP})) +
+            '<label title="Hides the levels where every point just goes into your main stat"><input type="checkbox" id="chg"> Key levels only</label></div><div class="gbox" id="stb"></div></div></div>'
+            '<div class="win"><h2>Skill points by level</h2><div class="in"><div class="gbox" id="spb"></div></div></div></div>'
             '<div class="win"><h2>Other ways to build it</h2><div class="in"><div class="cmp">' + "".join(cmp) + "</div></div></div>"
             f'<div class="gw-low"><div class="win"><h2>Why this way</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["why"])}</ol></div></div>'
             f'<div class="win"><h2>Common mistakes</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["mistakes"])}</ol></div></div></div>'
@@ -301,6 +301,7 @@ def build(name):
     s = d["search"]
     text = W.page(s["title"], s["description"], d["slug"], [("Build guides", "/builds/"), (h["build"].split(":")[0], d["slug"])], body)
     text = text.replace('<a href="/training/">Training guides</a><a href="/maps/" aria-current="page">Maps</a>', '<a href="/training/" aria-current="page">Training guides</a><a href="/maps/">Maps</a>')
+    text = text.replace('<div class="card">', '<div class="card wide">', 1)   # use the full width on desktop
     W.write(ROOT, d["slug"], text)
     return d["slug"], data
 

@@ -3,17 +3,17 @@
  "header": {
   "class": "Thief",
   "job_path": "Thief (10) → Bandit (30)",
-  "build": "Sindit: Lucky Seven to 44, then Savage Blow",
-  "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, and switch to a dagger at 44. No reset needed.",
+  "build": "Sindit: Lucky Seven to 40, then Savage Blow",
+  "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, and switch to a Korean Fan at 40. No reset needed.",
   "best_at": [
-   "Safe ranged training 10 to 43",
+   "Safe ranged training 10 to 39",
    "Hits monsters on other platforms",
-   "Big single target damage from 44",
+   "Big single target damage from 40",
    "No Cash Shop needed"
   ],
   "weak_spots": [
    "Bandit points do nothing until you switch",
-   "Melee from 44: takes hits",
+   "Melee from 40: takes hits",
    "DEX for daggers: 45 by 50, 65 by 70"
   ],
   "difficulty": "Medium",
@@ -167,7 +167,7 @@
    "skill": "Lucky Seven",
    "id": 4001003,
    "to": 20,
-   "why": "main attack until 44: 2 stars a throw"
+   "why": "main attack until 40: 2 stars a throw"
   },
   {
    "level": 22,
@@ -223,7 +223,7 @@
    "skill": "Savage Blow",
    "id": 4201003,
    "to": 21,
-   "why": "6 hits from 21 points; ready before you switch"
+   "why": "6 hits from 21 points, ready for the switch at 40"
   },
   {
    "level": 44,
@@ -231,7 +231,7 @@
    "skill": "Dagger Mastery",
    "id": 4200000,
    "to": 20,
-   "why": "switch to a dagger now: Savage Blow 21 and mastery 20"
+   "why": "steadier damage after the switch"
   },
   {
    "level": 47,
@@ -366,10 +366,10 @@
     "sales_seen": 19,
     "rough": true
    },
-   "why": "needs DEX 30; your claw until 44"
+   "why": "needs DEX 30; your claw until 40"
   },
   {
-   "level": 44,
+   "level": 40,
    "slot": "Dagger",
    "item": "Korean Fan",
    "id": 1332013,
@@ -383,7 +383,7 @@
     "sales_seen": 72,
     "rough": true
    },
-   "why": "the switch weapon: speed 3, no DEX needed (wearable from 40)"
+   "why": "the switch weapon: speed 3, no DEX needed"
   },
   {
    "level": 50,
@@ -435,7 +435,7 @@
  ],
  "gear_optional": [
   {
-   "level": 44,
+   "level": 40,
    "slot": "Dagger",
    "item": "Gephart",
    "id": 1332012,
@@ -670,7 +670,7 @@
      ]
     }
    ],
-   "tip": "throw to 43, stab from 44"
+   "tip": "throw to 39, stab from 40"
   },
   {
    "levels": "47 to 49",
@@ -839,8 +839,8 @@
  ],
  "why": [
   "Lucky Seven hits from range, so you clear mobs on the next platform from where you stand. Less walking, less touch damage and fewer pots, from 10 until you switch.",
-  "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39 and Mastery 20 by 44.",
-  "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. With Mastery 20 it's far enough ahead to make up for walking to every mob. 44 is our estimate and hasn't been timed in game yet.",
+  "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39, ready for the switch at 40.",
+  "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. Our training engine has the Korean Fan at 40 doing about 1,235 damage a second against 838 with the claw, roughly 26% more EXP an hour. It doesn't count walking to mobs yet, so it hasn't been timed in game.",
   "Korean Fan needs no DEX, so the switch costs you no AP. Your next DEX is at 47 to 49, for Shinkita at 50.",
   "No SP Reset needed. Lucky Seven's 20 points just sit there after you switch, so the 7,000 NX scroll buys you nothing here."
  ],
@@ -853,14 +853,14 @@
  "compare": [
   {
    "build": "Sindit (this guide)",
-   "main_attack": "Lucky Seven to 43, Savage Blow from 44",
+   "main_attack": "Lucky Seven to 39, Savage Blow from 40",
    "best_at": "ranged training, no Cash Shop",
-   "weak": "Bandit points wait until 44"
+   "weak": "Bandit points wait until 40"
   },
   {
    "build": "Sindit, reset at 35",
    "main_attack": "Lucky Seven, Double Stab, Savage Blow",
-   "best_at": "one big target 35 to 43",
+   "best_at": "one big target 35 to 39",
    "weak": "melee earlier, trains slower, costs a scroll"
   },
   {
@@ -894,7 +894,7 @@
  ],
  "search": {
   "title": "Sindit Build Guide: AP, SP and When to Switch | Club FM",
-  "description": "MapleStory Classic sindit: throw Lucky Seven to 44, then Savage Blow with a dagger. No reset. AP, SP, gear and maps by level.",
+  "description": "MapleStory Classic sindit: throw Lucky Seven to 40, then Savage Blow with a Korean Fan. No reset. AP, SP, gear and maps by level.",
   "slug": "/builds/sindit/",
   "keywords": [
    "sindit",
@@ -951,5 +951,6 @@
   "main": "LUK",
   "sub": "DEX",
   "source": "Classic creation: no dice, 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026); 25 + 9 levels x 5 AP = 70 = the level 10 row"
- }
+ },
+ "switch": 40
 }

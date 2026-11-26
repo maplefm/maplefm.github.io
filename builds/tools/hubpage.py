@@ -39,6 +39,7 @@ def build():
     assert len(title) < 60 and len(desc) < 155
     text = W.page(title, desc, "/builds/", [("Build guides", "/builds/")], body)
     text = text.replace('<a href="/training/">Training guides</a><a href="/maps/" aria-current="page">Maps</a>', '<a href="/training/" aria-current="page">Training guides</a><a href="/maps/">Maps</a>')
+    text = text.replace('<div class="card">', '<div class="card wide">', 1)   # use the full width on desktop
     W.write(ROOT, "/builds/", text)
 
 
