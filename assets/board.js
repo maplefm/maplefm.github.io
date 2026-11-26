@@ -188,6 +188,7 @@
     return med;
   }
   function dbRow(name) { return DB[String(name).toLowerCase()] || null; }
+  var DBIDS = {};   // every game id under a name: two items can share one, and only one of them may have an icon
   var T0 = { rows: 0, live: 0 };   // startup timing, readable as FM_T0 in the console
   // ---------- the finished board, built on the server: a first visit shows live listings without building anything
   // The pump runs this same page on the server, calls fmSnap(), and the Worker serves the result at /data/snap.
@@ -391,7 +392,7 @@
       if (!j || !j.items) return; mark("dbIn");
       DBK = j.kinds || [];
       j.items.forEach(function (r) {
-        var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); }
+        var k = r[0].toLowerCase(); if (r[6] > (VEND[k] || 0)) VEND[k] = r[6]; (DBIDS[k] || (DBIDS[k] = [])).push(r[1]); if (!DB[k]) { DB[k] = r; var b = k.slice(0, 2); (DBB[b] || (DBB[b] = [])).push(k); }
         // one name in the game data, two items in the shop window: each colour is its own item with its own price
         var cv = COLOURS[r[0]] && COLOURS[r[0]][r[1]];
         if (cv) { var vn = r[0] + " (" + cv + ")", vk = vn.toLowerCase(), vr = r.slice(); vr[0] = vn; if (!DB[vk]) { DB[vk] = vr; (DBB[vk.slice(0, 2)] || (DBB[vk.slice(0, 2)] = [])).push(vk); } }
@@ -779,8 +780,9 @@
   // the site's own copy of the icon first (/i/<id>.png, same connection, long cached), then maplestory.io
   function iconSrcs(name) {
     var out = [], r = dbRow(name);
-    var none = r && NOICON[r[1]];
-    if (r && !none) { out.push("/i/" + r[1] + ".png"); out.push(IO + r[1] + "/icon"); out.push(IO + r[1] + "/iconRaw"); }
+    var id = r && r[1], none = r && NOICON[id];
+    if (none) { var alt = (DBIDS[String(name).toLowerCase()] || []).filter(function (x) { return !NOICON[x]; })[0]; if (alt) { id = alt; none = false; } }   // same name, another id with an icon
+    if (r && !none) { out.push("/i/" + id + ".png"); out.push(IO + id + "/icon"); out.push(IO + id + "/iconRaw"); }
     // a scanner's crop of the shop window only stands in for items the game data doesn't have: a crop is filed under the
     // name that was read, and a misread name (a scroll cut short to "Two-Handed Sword") puts the wrong picture on an item
     var v = ICONS[name]; if ((!r || none) && DBN && typeof v === "string") out.push(v);
