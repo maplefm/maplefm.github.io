@@ -14,7 +14,6 @@
   "weak_spots": [
    "Bandit points do nothing until you switch",
    "Melee from 44: takes hits",
-   "Stars cost mesos until 44",
    "DEX for daggers: 45 by 50, 65 by 70"
   ],
   "difficulty": "Medium",
@@ -25,7 +24,7 @@
     "mesos": 539069,
     "shown": "about 539K"
    },
-   "note": "claws and daggers to 50 at live typical prices; stars extra"
+   "note": "claws and daggers to 50 at typical FM prices"
   }
  },
  "stat_plan": {
@@ -302,23 +301,6 @@
    "why": "first claw"
   },
   {
-   "level": 10,
-   "slot": "Stars",
-   "item": "Subi Throwing Stars",
-   "id": 2070000,
-   "needs": "level only",
-   "attack": 15,
-   "speed": null,
-   "price": {
-    "typical": 449,
-    "shown": "449",
-    "basis": "ask",
-    "sales_seen": 2,
-    "rough": false
-   },
-   "why": "500 a set"
-  },
-  {
    "level": 15,
    "slot": "Claw",
    "item": "Steel Titans",
@@ -351,23 +333,6 @@
     "rough": true
    },
    "why": ""
-  },
-  {
-   "level": 20,
-   "slot": "Stars",
-   "item": "Wolbi Throwing Stars",
-   "id": 2070001,
-   "needs": "level only",
-   "attack": 17,
-   "speed": null,
-   "price": {
-    "typical": 1419,
-    "shown": "1,419",
-    "basis": "24h",
-    "sales_seen": 299,
-    "rough": false
-   },
-   "why": "+2 attack, 500 a set; your stars until 44"
   },
   {
    "level": 25,
@@ -469,23 +434,6 @@
   }
  ],
  "gear_optional": [
-  {
-   "level": 30,
-   "slot": "Stars",
-   "item": "Mokbi Throwing Stars",
-   "id": 2070002,
-   "needs": "level only",
-   "attack": 19,
-   "speed": null,
-   "price": {
-    "typical": 225000,
-    "shown": "225K",
-    "basis": "24h",
-    "sales_seen": 65,
-    "rough": false
-   },
-   "why": "+2 attack over Wolbi; costly for 14 levels of throwing"
-  },
   {
    "level": 44,
    "slot": "Dagger",
@@ -900,8 +848,7 @@
   "**Switching to a dagger at 35:** melee before Savage Blow 21 trains slower than throwing",
   "**Haste before the dagger skills:** it pushes the switch back several levels",
   "**More than 1 point in Dagger Booster early:** level 1 already gives the full speed up",
-  "**Skipping DEX before 50:** Shinkita needs 45 DEX, Deadly Fin 55, Kandine 65",
-  "**Buying Kumbi or Tobi stars:** you stop throwing at 44"
+  "**Skipping DEX before 50:** Shinkita needs 45 DEX, Deadly Fin 55, Kandine 65"
  ],
  "compare": [
   {
