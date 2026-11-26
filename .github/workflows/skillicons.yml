@@ -123,11 +123,34 @@ jobs:
           json.dump(out, open("builds/data/weapons.json", "w"), indent=0)
           print("weapons", len(out), sum(1 for v in out.values() if "reqLevel" in v))
           PY
+      - run: |
+          python3 - <<'PY'
+          # every weapon a guide shows needs its item icon in i/
+          import glob, json, os, sys, urllib.request
+          sys.path.insert(0, "tools")
+          import mcwver
+          IO = mcwver.base().rstrip("/")
+          UA = {"User-Agent": "maplefm.gg icon copy"}
+          ids = set()
+          for f in glob.glob("builds/*.json"):
+              for g in (json.load(open(f)).get("gear") or []):
+                  if g.get("id"): ids.add(int(g["id"]))
+          miss = []
+          for i in sorted(ids):
+              if os.path.exists(f"i/{i}.png"): continue
+              try:
+                  b = urllib.request.urlopen(urllib.request.Request(f"{IO}/item/{i}/icon", headers=UA), timeout=30).read()
+                  if b[:8] == b"\x89PNG\r\n\x1a\n": open(f"i/{i}.png", "wb").write(b); print("icon", i)
+                  else: miss.append(i)
+              except Exception as e: miss.append(i); print("miss", i, e)
+          print("item icons missing", miss)
+          PY
       - run: python3 builds/tools/spotcheck.py
+      - run: python3 builds/tools/checkguides.py
       - run: |
           git config user.name maplefm
           git config user.email maplefm@users.noreply.github.com
-          git add -A sk builds/data builds/check
+          git add -A sk i builds/data builds/check
           git diff --cached --quiet && exit 0
           git commit -q -m "Skill icons"
           git push -q origin HEAD:build-guides
