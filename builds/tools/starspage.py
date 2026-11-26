@@ -106,7 +106,7 @@ def build():
             '<div class="win"><h2>Throwing stars</h2><div class="in">' + table("Claw", "a set") + '<div class="wtip">Attack is added to your claw\'s attack while you throw. Set size is how many stars one set holds. FM prices are typical prices from scanned shops and update when the page opens.</div></div></div>'
             '<div class="win"><h2>Arrows for bows</h2><div class="in">' + table("Bow", "each") + "</div></div>"
             '<div class="win"><h2>Arrows for crossbows</h2><div class="in">' + table("Crossbow", "each") + "</div></div>"
-            '<div class="win"><h2>Build guides that use them</h2><div class="in"><div class="cmp"><a href="/builds/sindit/"><b>Sindit</b><small>Lucky Seven to 44, then Savage Blow</small><div class="go">Open the guide →</div></a></div></div></div>'
+            '<div class="win"><h2>Build guides that use them</h2><div class="in"><div class="cmp"><a href="/builds/assassin/"><b>Assassin</b><small>Lucky Seven with a claw, all the way to 70</small><div class="go">Open the guide →</div></a><a href="/builds/sindit/"><b>Sindit</b><small>Lucky Seven to 39, then a dagger</small><div class="go">Open the guide →</div></a><a href="/builds/hunter/"><b>Hunter</b><small>Arrows for bows</small><div class="go">Open the guide →</div></a></div></div></div>'
             '</div><script src="/assets/fmprice.js?v=2" defer></script>')
     title = "Throwing Star and Arrow Prices | MapleStory Classic"
     desc = "Every MapleStory Classic throwing star and arrow: attack, set size, which NPC sells it and today's Free Market price."
