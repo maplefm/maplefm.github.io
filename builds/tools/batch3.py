@@ -129,7 +129,7 @@ BOOST = "{w} Mastery 5 opens {w} Booster, and Booster 1 already gives the full a
 DEX2H = "Two-handed {w}s need DEX equal to their level from {first} at {lv}{skip}. AP only goes into DEX on the levels you need it for each new {w}, everything else goes into STR."
 MAGE_W = [
     "Energy Bolt 20 is damage 130 on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
-    "Magic Guard 1 goes in at 18: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
+    "Magic Guard 1 goes in at 17: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
     "Improved MP Recovery 15 makes MP potions heal 25% more, so every potion goes 25% further. Max MP Increase 15 is +25% max MP.",
     "The last 10 points of 1st job take Magic Guard to 11: 68% of the damage you take goes to MP. Magic Armor is skipped: it needs Magic Guard 3 and only adds defense, +40 at 1, which doesn't kill anything faster.",
     "MP Eater 3 opens Meditation, and Meditation 1 is already +5 magic attack for you and your party. Teleport 1 gets you around maps from 32.",
@@ -148,7 +148,8 @@ TEXT3 = {
                      MASTERY_VS.format(m="Sword", other="Rage", other_why="the other 29 points of Rage add 30 attack, about 43% on a 60 attack Zard. Per point Mastery is worth more, and it's +20 accuracy too."),
                      "Final Attack: Sword 1 goes in early: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on up to 3 mobs for 140%. Points 2 to 30 raise that to 200%.",
                      "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
-                     DEX2H.format(w="sword", first="Two-Handed Sword", lv=20, skip=", except the Wooden Baseball Bat at 15 and Aluminum Baseball Bat at 30")],
+                     DEX2H.format(w="sword", first="Two-Handed Sword", lv=20, skip=", except the Wooden Baseball Bat at 15 and Aluminum Baseball Bat at 30"),
+                     "Lion's Fang at 50 is 73 attack, 5 more than Blade of Harmony, about 7% more damage, but it sells for many times the price on the FM, so this guide keeps Blade of Harmony."],
         "mistakes": [IRONBODY,
                      "Maxing Sword Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
                      "Forgetting DEX before 20. Two-Handed Sword needs 20 DEX at 20, so put your AP from 18 to 20 into DEX, or you stay on the Wooden Baseball Bat's 35 attack instead of 40.",
@@ -179,11 +180,12 @@ TEXT3 = {
                      "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
                      "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
                      "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
-                     DEX2H.format(w="sword", first="Two-Handed Sword", lv=20, skip=", except the Wooden Baseball Bat at 15 and Aluminum Baseball Bat at 30")],
+                     DEX2H.format(w="sword", first="Two-Handed Sword", lv=20, skip=", except the Wooden Baseball Bat at 15 and Aluminum Baseball Bat at 30"),
+                     "Lion's Fang at 50 is 73 attack, 5 more than Blade of Harmony, about 7% more damage, but it sells for many times the price on the FM, so this guide keeps Blade of Harmony."],
         "mistakes": [IRONBODY,
                      "Maxing Sword Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
                      "Forgetting DEX before 20. Two-Handed Sword needs 20 DEX at 20, so put your AP from 18 to 20 into DEX, or you stay on the Wooden Baseball Bat's 35 attack instead of 40.",
-                     "Putting Threaten ahead of Final Attack. -10 weapon defense on 4 mobs is about +8% damage on a Jr. Wraith if it's flat defense; Final Attack 2 to 30 takes it from 270% to 360%."],
+                     "Putting Threaten ahead of Final Attack. -10 weapon defense on 4 mobs is about +8% damage on a Jr. Wraith, whose weapon defense drops from 30 to 20; Final Attack 2 to 30 takes it from 270% to 360%."],
     },
     "page-blunt": {
         "pitch": "STR with DEX only to each blunt weapon's need. Power Strike and Slash Blast 20 by 23, then Blunt Weapon Mastery and Final Attack.",
@@ -205,7 +207,7 @@ TEXT3 = {
         "pitch": "INT with LUK only to each wand's need. Energy Bolt in 1st job, then Fire Arrow, Meditation and Poison Breath.",
         "best": ["Fire Arrow burns mobs for 3 seconds", "Poison Breath hits up to 6 mobs", "Meditation is +25 magic attack for the party"],
         "weak": ["Fire-resistant mobs take less", "Lives on MP potions"],
-        "why": MAGE_W + ["Fire Arrow 30 first: damage 180 on one mob against Energy Bolt's 130, plus a burn every second for 3 seconds. In our damage engine it takes over from Energy Bolt by 40; Poison Breath first leaves you casting Energy Bolt until 55.",
+        "why": MAGE_W + ["Fire Arrow 30 first: damage 180 on one mob against Energy Bolt's 130, plus a burn every second for 3 seconds. In our damage engine it takes over from Energy Bolt by 40.",
                          "Meditation 20 next, +25 magic attack for 300 seconds, then Poison Breath 30, damage 90 on up to 6 mobs.",
                          "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions. Teleport takes the last points: more range and MP 55 down to 15 a cast.",
                          "Wands need LUK from Metal Wand at 20: 10 LUK there, 30 for Fairy Wand at 40. AP only goes into LUK on the levels you need it for each new wand, everything else goes into INT.",
@@ -218,7 +220,7 @@ TEXT3 = {
         "best": ["Cold Beam slows the mob it hits", "Thunder Bolt hits up to 6 mobs", "Meditation is +25 magic attack for the party"],
         "weak": ["Ice-resistant mobs take less", "Lives on MP potions"],
         "why": MAGE_W + ["Thunder Bolt 1 at 32 gives you a hit for 6 mobs, damage 50, from the start of 2nd job.",
-                         "Cold Beam 30 first: damage 170 on one mob against Energy Bolt's 130, and the mob is slowed. In our damage engine it takes over from Energy Bolt by 40; Thunder Bolt first leaves you casting Energy Bolt until 55.",
+                         "Cold Beam 30 first: damage 170 on one mob against Energy Bolt's 130, and the mob is slowed. In our damage engine it takes over from Energy Bolt by 40.",
                          "Meditation 20 next, +25 magic attack for 300 seconds, then Thunder Bolt to 30, damage 80 on up to 6 mobs with a 25% chance to stun.",
                          "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions. Teleport takes the last points: more range and MP 55 down to 15 a cast.",
                          "Wands need LUK from Metal Wand at 20: 10 LUK there, 30 for Fairy Wand at 40. AP only goes into LUK on the levels you need it for each new wand, everything else goes into INT.",
@@ -231,14 +233,14 @@ TEXT3 = {
         "best": ["Heal hurts undead mobs, up to 6", "Holy Arrow hits undead harder", "Heal and Bless help the whole party"],
         "weak": ["Heal only hurts undead mobs", "No Meditation"],
         "why": MAGE_W[:3] + ["Teleport 1 and Heal 1 go in at 30 and 31: getting around, and a heal for you and your party.",
-                             "Holy Arrow 30 first: damage 160 on one mob against Energy Bolt's 130, more on undead. In our damage engine it takes over from Energy Bolt by 40; Heal first leaves you casting Energy Bolt until 50.",
-                             "Heal 30 next: it hits up to 6 undead mobs around you and heals your party. On Jr. Wraith maps it hits every Wraith in range at once.",
+                             "Holy Arrow 30 first: damage 160 on one mob against Energy Bolt's 130, more on undead. In our damage engine it takes over from Energy Bolt by 40.",
+                             "Heal 30 next: it hits up to 6 undead mobs around you and heals your party. On Jr. Wraith maps it hits up to 6 Wraiths at once.",
                              "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions.",
                              "Invincible 5 opens Bless, and Bless 20 cuts the damage your whole party takes for 300 seconds. The last 15 points take Invincible to 20, 20% less physical damage for you.",
                              "Wands need LUK from Metal Wand at 20: 10 LUK there, 30 for Fairy Wand at 40. AP only goes into LUK on the levels you need it for each new wand, everything else goes into INT.",
                          "Cromi at 50 is about 2% more damage than staying on Fairy Wand, because its 40 LUK costs you 10 INT, and it sells for millions on the FM. It's a luxury, so this guide keeps Fairy Wand."],
         "mistakes": MAGE_M[:1] + ["Leveling Heal first and training off undead maps. Heal only hurts undead; anywhere else Holy Arrow is your attack.",
-                                   "Leaving MP Eater at 0. At 20 it's a 50% chance to drain MP from a mob every 5 seconds; without it a Cleric spends more on MP potions than any other mage.",
+                                   "Leaving MP Eater at 0. At 20 it's a 50% chance to drain MP from a mob every 5 seconds; without it you buy more MP potions.",
                                    "Forgetting LUK for Fairy Wand. It needs 30 LUK at 40, so put your AP at 40 into LUK, or you stay on Wizard Wand's 62 magic attack instead of 69."],
     },
     "crossbowman": {
@@ -247,7 +249,7 @@ TEXT3 = {
         "weak": ["STR for crossbows from 20", "Crossbows are slower than bows"],
         "why": ["Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
                 "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
-                "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every crossbow attack.",
+                "The last 3 points of 1st job go into The Eye of Amazon, 6 in all: 75 range, 15 more than at 3.",
                 "Crossbow Mastery 5 opens Crossbow Booster, and Booster 1 is already the full attack speed boost. Final Attack: Crossbow 1 gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds, 270% on one mob, so it goes in early too.",
                 "Iron Arrow 1 at 33 already hits up to 6 mobs in a line for 120%, less on each mob it passes through. Mastery 20 comes next, then Iron Arrow to 30 for 180%.",
                 "Amazon's Judgement is skipped: it only slows a mob when you crit. Power Knockback is skipped too: it always crits and hits up to 4 mobs, but it's a close-range swing that pushes mobs away.",
@@ -262,18 +264,19 @@ TEXT3 = {
 TEXT3["str-bandit"] = {
     "pitch": "LUK with STR only to each STR dagger's need. Double Stab in 1st job, then Savage Blow, on daggers one speed step faster than the DEX ones.",
     "best": ["STR daggers are speed 3, a step faster than DEX daggers", "STR adds to dagger damage the same as DEX", "Korean Fan at 40 needs no STR"],
-    "weak": ["Less accuracy: STR gives none, DEX does", "Melee: you walk to every mob and take hits"],
+    "weak": ["Less accuracy: STR gives none, DEX does", "No thief armor: it needs DEX", "Melee: you walk to every mob and take hits"],
     "why": ["Double Stab 20 hits twice for 160%. It's your only real attack until 30, so max it first.",
-            "Dark Sight needs Disorder 3. 1st job has nothing else that adds damage with a dagger, so the last points go there: Dark Sight levels cut its MP cost from 50 to 30.",
+            "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
             "STR daggers: Triple-Tipped Zamadar at 17, Stinger at 22, Cass at 30, Bazlud at 45 and Sai at 50 are all speed 3. The DEX daggers from 20 on, Coconut Knife, Reef Claw, Gephart and Shinkita, are speed 4, so you swing faster.",
-            "For a dagger your damage stat is LUK, and STR and DEX both count as the second stat, so the STR you put in for the dagger isn't lost damage. The cost is accuracy, which only DEX gives.",
+            "For a dagger your damage stat is LUK, and by the game data STR counts with DEX as your second stat, so the STR you put in for the dagger still adds damage. That hasn't been checked in game yet. The cost is accuracy: STR gives none, so you sit about 7 below a Pure Bandit at 30 and 13 below at 50.",
+            "No thief armor past 15: thief armor needs DEX, 10 at 20 up to 40 at 50, and a STR Bandit keeps DEX at 5. Wear gear any job can, like the Yellow Baseball Cap, Old Raggedy Cape and Squishy Shoes.",
             "STR only goes in for each dagger: 11 at 17, 17 at 22, 25 at 30, 40 at 45 and 45 at 50. Everything else goes into LUK, and DEX stays at 5.",
             "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast. Savage Blow 22 to 30 only takes it to 450%, so Dagger Mastery 20 comes first.",
             "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster."],
     "mistakes": ["Putting AP into DEX out of habit. None of the STR daggers need DEX, so every point there is a point out of LUK.",
                  "Forgetting STR before Bazlud. It needs 40 STR at 45, so put your AP from 43 to 45 into STR, or you stay on Korean Fan's 55 attack instead of 62.",
-                 "Buying a DEX dagger like Shinkita. It needs 45 DEX you don't have, and it's a speed step slower than Sai at the same level.",
-                 "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels of Savage Blow. Put only 5 in Haste after Savage Blow 30, to open Steal."],
+                 "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same speed 3, and needs no STR.",
+                 "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal."],
 }
 COMPARE3 = {
     "fighter-sword": [("Fighter, sword (this guide)", "Rage and +20 accuracy", "DEX from 20"), ("Fighter, axe", "Rage and bleeding", "no accuracy from mastery"), ("Page, sword", "360% Final Attack", "no Rage")],
@@ -283,7 +286,7 @@ COMPARE3 = {
     "fire-poison": [("Fire Poison (this guide)", "Fire Arrow burn", "fire-resistant mobs"), ("Ice Lightning", "Cold Beam slow, Thunder Bolt on 6", "ice-resistant mobs"), ("Cleric", "Heal on undead, parties", "Heal only hurts undead")],
     "ice-lightning": [("Ice Lightning (this guide)", "Cold Beam slow, Thunder Bolt on 6", "ice-resistant mobs"), ("Fire Poison", "Fire Arrow burn", "fire-resistant mobs"), ("Cleric", "Heal on undead, parties", "Heal only hurts undead")],
     "cleric": [("Cleric (this guide)", "Heal on undead, parties", "Heal only hurts undead"), ("Fire Poison", "Fire Arrow burn", "fire-resistant mobs"), ("Ice Lightning", "Cold Beam slow", "ice-resistant mobs")],
-    "str-bandit": [("STR Bandit (this guide)", "faster daggers, speed 3", "less accuracy"), ("Pure Bandit", "DEX daggers, more accuracy", "a speed step slower"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40")],
+    "str-bandit": [("STR Bandit (this guide)", "faster daggers, speed 3", "less accuracy, no thief armor"), ("Pure Bandit", "DEX daggers, thief armor", "a speed step slower"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40")],
     "crossbowman": [("Crossbowman (this guide)", "Iron Arrow on 6 in a line", "slower weapons"), ("Hunter", "Arrow Bomb on 6", "STR for bows from 15")],
 }
 
@@ -347,13 +350,21 @@ def text_for(b, st):
                    "1H Axe": "One-handed axes need DEX from Mithril Axe at 25, 20 there and 45 for Buck at 50, except the Scythe at 15, which needs none.",
                    "1H Blunt": "One-handed blunt weapons need no DEX until War Hammer at 30, 25 there and 45 for Knuckle Mace at 50."}[b["w"]]
         t["why"] = [dexline + " AP only goes into DEX on the levels you need it for each new " + kind + ", everything else goes into STR." if x.startswith("Two-handed") else x for x in t["why"]]
-        t["why"].append(f"A one-handed {kind} leaves room for a shield and its weapon defense, but at the same attack and stats it hits about "
-                        f"{round((1 - WMULT[b['w']] / WMULT[b['w'].replace('1H', '2H')]) * 100)}% softer than a two-handed one. Pick it if you'd rather take less damage than kill faster.")
+        P, Sec = st[40][0], st[40][1]; mf = (MS[20] / 10 + 0.1) * 0.7
+        avgm = lambda M: 0.9 + (P * (mf + 1) / 2 * M + Sec) / 100
+        soft = round((1 - avgm(WMULT[b["w"]]) / avgm(WMULT[b["w"].replace("1H", "2H")])) * 100)
+        t["why"].append(f"A one-handed {kind} leaves room for a shield and its weapon defense, but at the same attack, with your stats at 40, it hits about "
+                        f"{soft}% softer than a two-handed one. Some one-handed {kind}s swing a speed step faster, which wins a little of that back. Pick it if you'd rather take less damage than kill faster.")
         t["mistakes"] = [x for x in t["mistakes"] if "DEX before 20" not in x and "DEX for Heavy Mace" not in x and "DEX before Sabretooth" not in x]
-        first_dex = next((lv, nm, WPN[nm]["reqDEX"]) for lv, nm in b["weapons"] if WPN[nm].get("reqDEX"))
-        t["mistakes"].append(f"Forgetting DEX before {first_dex[1]}. It needs {first_dex[2]} DEX at {first_dex[0]}, so put your AP into DEX on the levels up to it, or you can't wear it and stay on your last {kind}.")
+        i = next(i for i, (lv, nm) in enumerate(b["weapons"]) if WPN[nm].get("reqDEX"))
+        (lv, nm), (plv, pn) = b["weapons"][i], b["weapons"][i - 1]
+        w, pw = WPN[nm], WPN[pn]
+        cost = f"{pn}'s {pw['watk']} attack instead of {w['watk']}" + (", and a speed step slower" if pw["spd"] > w["spd"] else "")
+        t["mistakes"].append(f"Forgetting DEX before {nm}. It needs {w['reqDEX']} DEX at {lv}, so put your AP into DEX on the levels up to it, or you stay on {cost}.")
         t["pitch"] = t["pitch"].replace("each sword's need", "each one-handed sword's need").replace("each axe's need", "each one-handed axe's need").replace("each blunt weapon's need", "each one-handed blunt weapon's need")
-        t["weak"] = [x for x in t["weak"] if "DEX" not in x] + ["Less damage than a two-handed weapon"]
+        t["weak"] = [x for x in t["weak"] if "DEX" not in x and "2-handed" not in x and "Two-handed" not in x] + ["Less damage than a two-handed weapon"]
+        t["best"] = [x for x in t["best"] if "2-handed" not in x and "Two-handed" not in x]
+        t["why"] = [x for x in t["why"] if "Lion's Fang" not in x]
     return t
 
 
@@ -376,8 +387,26 @@ BUILDS.append({"slug": "str-bandit", "name": "STR Bandit", "cls": "Thief", "job"
                                            (30, "Bandit", "Kerning City, Dark Lord", "Level 30", "Pick Bandit. Dagger skills open.")],
                "third": "Chief Bandit"})
 BUILDS += variants()
+STAFF = [(10, "Wooden Staff"), (15, "Emerald Staff"), (20, "Old Wooden Staff"), (25, "Wizard Staff"), (45, "Arc Staff"), (55, "Thorns"), (65, "Evil Wings")]
+MAGES = ("fire-poison", "ice-lightning", "cleric")
+BUILDS += [dict(next(b for b in BUILDS if b["slug"] == m), slug=m + "-staff", name=next(b for b in BUILDS if b["slug"] == m)["name"] + " (staff)", w="Staff",
+                weapons=STAFF, parent=m) for m in MAGES]
+
+
+def staff_text(b):
+    """a mage guide's words for the staff version"""
+    t = json.loads(json.dumps(TEXT3[b["parent"]]))
+    t["why"] = [x for x in t["why"] if not x.startswith("Cromi at 50")] + [
+        "Staffs have no step between Wizard Staff at 25, magic attack 45, and Arc Staff at 45, 73. A wand mage has 55 to 69 over those levels, so a staff mage "
+        "spends 30 to 44 with 10 to 24 less magic attack, then pulls ahead from 45."]
+    t["mistakes"] = [x for x in t["mistakes"] if "Fairy Wand" not in x] + [
+        "Forgetting LUK for Arc Staff. It needs 40 LUK at 45, so put your AP on the levels up to it into LUK, or you stay on Wizard Staff's 45 magic attack instead of 73."]
+    t["pitch"] = t["pitch"].replace("each wand's need", "each staff's need")
+    return t
 VARIANTS = {s: [{"label": "Two-handed", "slug": s}, {"label": "One-handed and shield", "slug": s + "-1h"}] for s in ONE}
 VARIANTS.update({s + "-1h": v for s, v in VARIANTS.items()})
+for m in ("fire-poison", "ice-lightning", "cleric"):
+    VARIANTS[m] = VARIANTS[m + "-staff"] = [{"label": "Wand", "slug": m}, {"label": "Staff", "slug": m + "-staff"}]
 
 
 def write(slugs=None):
@@ -387,6 +416,7 @@ def write(slugs=None):
     for b in bs:
         st, rules, table, order = out[b["slug"]]
         if b["cls"] == "Warrior": B2.TEXT[b["slug"]] = text_for(b, st)
+        if b["slug"].endswith("-staff"): B2.TEXT[b["slug"]] = staff_text(b)
         if b.get("parent"): B2.COMPARE[b["slug"]] = COMPARE3[b["parent"]]
         d = B2.build_json(b, st, rules, table, order, eng)
         if b["slug"] in VARIANTS: d["variants"] = VARIANTS[b["slug"]]

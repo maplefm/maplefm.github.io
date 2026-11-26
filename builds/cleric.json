@@ -49,8 +49,13 @@
     "why": "Metal Wand at 20 needs 10 LUK"
    },
    {
+    "levels": "22",
+    "ap": "LUK to 12, rest INT",
+    "why": "Level 22 magician armor needs 12 LUK"
+   },
+   {
     "levels": "25",
-    "ap": "all LUK (to 15)",
+    "ap": "LUK to 15, rest INT",
     "why": "Ice Wand at 25 needs 15 LUK"
    },
    {
@@ -67,6 +72,11 @@
     "levels": "40",
     "ap": "all LUK (to 30)",
     "why": "Fairy Wand at 40 needs 30 LUK"
+   },
+   {
+    "levels": "49 to 50",
+    "ap": "all LUK (to 40)",
+    "why": "Level 50 magician armor needs 40 LUK"
    },
    {
     "levels": "the rest",
@@ -107,22 +117,22 @@
     "level": 50,
     "STR": 4,
     "DEX": 4,
-    "INT": 232,
-    "LUK": 30
+    "INT": 222,
+    "LUK": 40
    },
    {
     "level": 60,
     "STR": 4,
     "DEX": 4,
-    "INT": 282,
-    "LUK": 30
+    "INT": 272,
+    "LUK": 40
    },
    {
     "level": 70,
     "STR": 4,
     "DEX": 4,
-    "INT": 332,
-    "LUK": 30
+    "INT": 322,
+    "LUK": 40
    }
   ]
  },
@@ -361,7 +371,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -650,11 +660,11 @@
      ]
     },
     {
-     "map": "Line 1 (Area 3)",
+     "map": "Clang and Lorang",
      "monsters": [
-      "Wraith",
-      "Jr. Wraith",
-      "Stirge"
+      "Clang",
+      "Lorang",
+      "Tortie"
      ]
     }
    ],
@@ -699,17 +709,16 @@
      ]
     },
     {
-     "map": "Remains (Tomb) III",
-     "monsters": [
-      "Mummydog",
-      "Skeledog",
-      "Skeleton Soldier"
-     ]
-    },
-    {
      "map": "Line 2 (Area 3)",
      "monsters": [
       "Wraith"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
      ]
     }
    ],
@@ -745,20 +754,20 @@
  ],
  "why": [
   "Energy Bolt 20 is damage 130 on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
-  "Magic Guard 1 goes in at 18: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
+  "Magic Guard 1 goes in at 17: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
   "Improved MP Recovery 15 makes MP potions heal 25% more, so every potion goes 25% further. Max MP Increase 15 is +25% max MP.",
   "Teleport 1 and Heal 1 go in at 30 and 31: getting around, and a heal for you and your party.",
-  "Holy Arrow 30 first: damage 160 on one mob against Energy Bolt's 130, more on undead. In our damage engine it takes over from Energy Bolt by 40; Heal first leaves you casting Energy Bolt until 50.",
-  "Heal 30 next: it hits up to 6 undead mobs around you and heals your party. On Jr. Wraith maps it hits every Wraith in range at once.",
+  "Holy Arrow 30 first: damage 160 on one mob against Energy Bolt's 130, more on undead. In our damage engine it takes over from Energy Bolt by 40.",
+  "Heal 30 next: it hits up to 6 undead mobs around you and heals your party. On Jr. Wraith maps it hits up to 6 Wraiths at once.",
   "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions.",
   "Invincible 5 opens Bless, and Bless 20 cuts the damage your whole party takes for 300 seconds. The last 15 points take Invincible to 20, 20% less physical damage for you.",
-  "Wands need LUK from Metal Wand at 20: 10 LUK there, 30 for Fairy Wand at 40. AP only goes into LUK on the levels you need it for each new wand, everything else goes into INT.",
+  "LUK only goes in when your gear needs it: 10 for Metal Wand at 20, 12 for level 22 magician armor, 15 for Ice Wand at 25, 20 for Mithril Wand at 30, 25 for Wizard Wand at 35, 30 for Fairy Wand at 40 and 40 for level 50 magician armor. Everything else goes into INT.",
   "Cromi at 50 is about 2% more damage than staying on Fairy Wand, because its 40 LUK costs you 10 INT, and it sells for millions on the FM. It's a luxury, so this guide keeps Fairy Wand."
  ],
  "mistakes": [
   "Maxing Magic Claw on top of Energy Bolt. Both are 130 at 20, so that's 20 SP for nothing, and Claw costs 20 MP a cast against 16. Put them in MP Recovery and Max MP.",
   "Leveling Heal first and training off undead maps. Heal only hurts undead; anywhere else Holy Arrow is your attack.",
-  "Leaving MP Eater at 0. At 20 it's a 50% chance to drain MP from a mob every 5 seconds; without it a Cleric spends more on MP potions than any other mage.",
+  "Leaving MP Eater at 0. At 20 it's a 50% chance to drain MP from a mob every 5 seconds; without it you buy more MP potions.",
   "Forgetting LUK for Fairy Wand. It needs 30 LUK at 40, so put your AP at 40 into LUK, or you stay on Wizard Wand's 62 magic attack instead of 69."
  ],
  "compare": [
@@ -788,5 +797,15 @@
  "search": {
   "title": "Cleric Build Guide: AP and SP | Club FM",
   "description": "MapleStory Classic cleric build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
- }
+ },
+ "variants": [
+  {
+   "label": "Wand",
+   "slug": "cleric"
+  },
+  {
+   "label": "Staff",
+   "slug": "cleric-staff"
+  }
+ ]
 }

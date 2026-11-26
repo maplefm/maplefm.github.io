@@ -59,7 +59,12 @@
     "why": "Eagle Crow at 30 needs 20 STR"
    },
    {
-    "levels": "39 to 40",
+    "levels": "35",
+    "ap": "all STR (to 25)",
+    "why": "Level 35 bowman armor needs 25 STR"
+   },
+   {
+    "levels": "40",
     "ap": "all STR (to 30)",
     "why": "Heckler at 40 needs 30 STR"
    },
@@ -400,7 +405,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -788,15 +793,15 @@
  "why": [
   "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
   "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
-  "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every crossbow attack.",
+  "The last 3 points of 1st job go into The Eye of Amazon, 6 in all: 75 range, 15 more than at 3.",
   "Crossbow Mastery 5 opens Crossbow Booster, and Booster 1 is already the full attack speed boost. Final Attack: Crossbow 1 gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds, 270% on one mob, so it goes in early too.",
   "Iron Arrow 1 at 33 already hits up to 6 mobs in a line for 120%, less on each mob it passes through. Mastery 20 comes next, then Iron Arrow to 30 for 180%.",
   "Amazon's Judgement is skipped: it only slows a mob when you crit. Power Knockback is skipped too: it always crits and hits up to 4 mobs, but it's a close-range swing that pushes mobs away.",
   "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
-  "Crossbows need STR from Balanche at 20, always 10 under the crossbow's level. AP only goes into STR on the levels you need it for each new crossbow, everything else goes into DEX."
+  "STR only goes in when your gear needs it: 10 for Balanche at 20, 15 for Mountain Crossbow at 25, 20 for Eagle Crow at 30, 25 for level 35 bowman armor, 30 for Heckler at 40, 35 for Silver Crow at 45 and 40 for Rower at 50. Everything else goes into DEX."
  ],
  "mistakes": [
-  "Skipping STR before a new crossbow. Eagle Crow needs 20 STR at 30, so put your AP from 30 into STR, or you stay on Mountain Crossbow's 47 attack instead of 52.",
+  "Skipping STR before a new crossbow. Eagle Crow needs 20 STR at 30, so put your AP at 30 into STR, or you stay on Mountain Crossbow's 47 attack instead of 52.",
   "Maxing Crossbow Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that belong in Mastery, Iron Arrow and Final Attack.",
   "Buying a bow. Crossbow Mastery, Booster, Soul Arrow, Iron Arrow and Final Attack: Crossbow only work with a crossbow, so you lose all of 2nd job.",
   "Maxing Double Shot before Arrow Blow. It's 120% per mob and uses 2 arrows a shot; Arrow Blow is 240% on one. Max Arrow Blow first."

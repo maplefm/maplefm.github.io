@@ -378,13 +378,13 @@
    "job": "Thief",
    "where": "Kerning City, Dark Lord",
    "needs": "Level 10",
-   "gets": "1 SP; Lucky Seven and Double Stab open"
+   "gets": "1 SP. Lucky Seven and Double Stab open."
   },
   {
    "level": 30,
    "job": "Bandit",
    "where": "Kerning City, Dark Lord",
-   "needs": "level 30",
+   "needs": "Level 30",
    "gets": "Pick Bandit, not Assassin. Dagger skills open."
   },
   {
@@ -864,5 +864,5 @@
   },
   "source": "Adam, Nov 25: the Classic SP Reset Scroll clears all your skills, both jobs; sindits reset at the switch so they have Double Stab"
  },
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70."
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70."
 }

@@ -15,6 +15,9 @@ WEAP = json.load(open(os.path.join(B, "data", "weapons.json")))
 PRE = {int(k): {int(a): n for a, n in v.items()} for k, v in json.load(open(os.path.join(B, "data", "prereqs.json")))["skills"].items() if v}
 GAMEMAX = {int(k): int(v.get("masterLevel") or 0) for k, v in json.load(open(os.path.join(B, "data", "skilltext.json"))).items()}
 CAP = 70
+sys.path.insert(0, HERE)
+import batch2 as _B2  # noqa: E402  the same armor tiers the planner uses (game files, builds/data/armor.json)
+ARMOR_NEEDS = {c: {st: _B2.armor_needs(c, st)} for c, st in (("Warrior", "DEX"), ("Magician", "LUK"), ("Bowman", "STR"), ("Thief", "DEX"))}
 
 
 def page_data(slug):
@@ -34,6 +37,13 @@ def check(slug):
         if L not in st: bad.append((L, "no stats row")); continue
         if sum(st[L]) != 25 + 5 * (L - 1): bad.append((L, f"stat total {sum(st[L])}"))
         if L > 1 and any(a < b for a, b in zip(st[L], st[L - 1])): bad.append((L, "a stat went down"))
+    # class armor: the sub stat has to reach what that level's armor needs (STR Bandits wear gear any job can)
+    J = json.load(open(os.path.join(B, slug + ".json"))); cr = J["creation"]; cls = J["header"]["class"]
+    if not cr.get("raise") and cls in ARMOR_NEEDS:
+        si = ["STR", "DEX", "INT", "LUK"].index(cr["sub"])
+        for L, need in ARMOR_NEEDS[cls][cr["sub"]]:
+            n += 1
+            if st[L][si] < need: bad.append((L, f"level {L} {cls.lower()} armor needs {need} {cr['sub']}, page has {st[L][si]}"))
     # weapons
     for g in D["gear"]:
         n += 1; w = WEAP.get(g["item"])

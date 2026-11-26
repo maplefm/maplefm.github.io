@@ -45,7 +45,17 @@
     "why": "STR is your damage stat"
    },
    {
-    "levels": "23 to 25",
+    "levels": "20",
+    "ap": "all DEX (to 10)",
+    "why": "Level 20 warrior armor needs 10 DEX"
+   },
+   {
+    "levels": "22",
+    "ap": "DEX to 12, rest STR",
+    "why": "Level 22 warrior armor needs 12 DEX"
+   },
+   {
+    "levels": "24 to 25",
     "ap": "all DEX (to 20)",
     "why": "Mithril Axe at 25 needs 20 DEX"
    },
@@ -90,8 +100,8 @@
    },
    {
     "level": 20,
-    "STR": 107,
-    "DEX": 5,
+    "STR": 102,
+    "DEX": 10,
     "INT": 4,
     "LUK": 4
    },
@@ -393,7 +403,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -789,14 +799,14 @@
   "Axe Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 29%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 45% on a 57 attack Blue Counter. Per point Mastery is worth more, and at 20 your hits have a 25% chance to make the mob bleed.",
   "Final Attack: Axe 1 goes in early: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on up to 3 mobs for 140%. Points 2 to 30 raise that to 200%.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
-  "One-handed axes need DEX from Mithril Axe at 25, 20 there and 45 for Buck at 50, except the Scythe at 15, which needs none. AP only goes into DEX on the levels you need it for each new axe, everything else goes into STR.",
-  "A one-handed axe leaves room for a shield and its weapon defense, but at the same attack and stats it hits about 26% softer than a two-handed one. Pick it if you'd rather take less damage than kill faster."
+  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 12 for level 22 warrior armor, 20 for Mithril Axe at 25, 25 for Fireman's Axe at 30, 30 for Dankke at 35, 35 for Blue Counter at 40, 40 for Green Paint Brush at 45 and 45 for Buck at 50. Everything else goes into STR.",
+  "A one-handed axe leaves room for a shield and its weapon defense, but at the same attack, with your stats at 40, it hits about 20% softer than a two-handed one. Some one-handed axes swing a speed step faster, which wins a little of that back. Pick it if you'd rather take less damage than kill faster."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Axe Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
   "Buying a sword with an axe build. Axe Mastery, Axe Booster and Final Attack: Axe only work with an axe, so you lose most of 2nd job.",
-  "Forgetting DEX before Mithril Axe. It needs 20 DEX at 25, so put your AP into DEX on the levels up to it, or you can't wear it and stay on your last axe."
+  "Forgetting DEX before Mithril Axe. It needs 20 DEX at 25, so put your AP at 24 and 25 into DEX on the levels up to it, or you stay on Scythe's 32 attack instead of 45."
  ],
  "compare": [
   {

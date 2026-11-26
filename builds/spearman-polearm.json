@@ -382,7 +382,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -777,12 +777,12 @@
   "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
   "Final Attack: Polearm gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds. While it's lit you can use it on one mob for 260%, and it heals you, up to 15% of your max HP. 1 point already gets the full 25% chance, so it goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
   "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage.",
-  "Polearms need DEX equal to their level from Iron Ball at 15, except Yellow Mop at 45. AP only goes into DEX in the levels right before each new polearm, everything else goes into STR."
+  "DEX only goes in when your gear needs it: 15 for Iron Ball at 15, 20 for Studded Polearm at 20, 30 for Mithril Pole Arm at 30, 35 for Axe Pole Arm at 35, 40 for Crescent Polearm at 40 and 50 for The Nine Dragons at 50. Everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 4 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Polearm Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
-  "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put your AP from levels 14 and 15 into DEX, or you stay on the Pole Arm's 35 attack instead of 40.",
+  "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put your AP at 14 and 15 into DEX, or you stay on the Pole Arm's 35 attack instead of 40.",
   "Buying a spear with a polearm build. Polearm Mastery, Polearm Booster and Final Attack: Polearm only work with a polearm, so you lose most of 2nd job."
  ],
  "compare": [

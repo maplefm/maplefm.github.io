@@ -328,7 +328,7 @@ def build(name):
         nm = c["build"].replace(" (this guide)", "")
         this = "(this guide)" in c["build"]
         key = next((k for k in GUIDES if nm.lower() == k.lower()), None)
-        url = f"/builds/{GUIDES[key]}/" if key and GUIDES[key] != name else ""
+        url = f"/builds/{GUIDES[key]}/" if key and GUIDES[key] != name and not this else ""
         inner = f'<b>{E(nm)}</b><small>{E(c.get("main_attack") or c["best_at"])}</small>' + ('<div class="soon">You are here</div>' if this else '<div class="go">Open the guide →</div>' if url else '<div class="soon">Guide coming</div>')
         cmp.append(f'<a href="{url}">{inner}</a>' if url else f'<div class="c">{inner}</div>')
     allh = (

@@ -49,8 +49,13 @@
     "why": "Metal Wand at 20 needs 10 LUK"
    },
    {
+    "levels": "22",
+    "ap": "LUK to 12, rest INT",
+    "why": "Level 22 magician armor needs 12 LUK"
+   },
+   {
     "levels": "25",
-    "ap": "all LUK (to 15)",
+    "ap": "LUK to 15, rest INT",
     "why": "Ice Wand at 25 needs 15 LUK"
    },
    {
@@ -67,6 +72,11 @@
     "levels": "40",
     "ap": "all LUK (to 30)",
     "why": "Fairy Wand at 40 needs 30 LUK"
+   },
+   {
+    "levels": "49 to 50",
+    "ap": "all LUK (to 40)",
+    "why": "Level 50 magician armor needs 40 LUK"
    },
    {
     "levels": "the rest",
@@ -107,22 +117,22 @@
     "level": 50,
     "STR": 4,
     "DEX": 4,
-    "INT": 232,
-    "LUK": 30
+    "INT": 222,
+    "LUK": 40
    },
    {
     "level": 60,
     "STR": 4,
     "DEX": 4,
-    "INT": 282,
-    "LUK": 30
+    "INT": 272,
+    "LUK": 40
    },
    {
     "level": 70,
     "STR": 4,
     "DEX": 4,
-    "INT": 332,
-    "LUK": 30
+    "INT": 322,
+    "LUK": 40
    }
   ]
  },
@@ -369,7 +379,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -680,19 +690,16 @@
      ]
     },
     {
-     "map": "Clang and Lorang",
+     "map": "Hot Sand",
      "monsters": [
-      "Clang",
-      "Lorang",
-      "Tortie"
+      "Tortie",
+      "Clang"
      ]
     },
     {
-     "map": "Remains (Tomb) III",
+     "map": "Line 1 (Area 4)",
      "monsters": [
-      "Mummydog",
-      "Skeledog",
-      "Skeleton Soldier"
+      "Wraith"
      ]
     }
    ],
@@ -757,15 +764,15 @@
  ],
  "why": [
   "Energy Bolt 20 is damage 130 on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
-  "Magic Guard 1 goes in at 18: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
+  "Magic Guard 1 goes in at 17: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
   "Improved MP Recovery 15 makes MP potions heal 25% more, so every potion goes 25% further. Max MP Increase 15 is +25% max MP.",
   "The last 10 points of 1st job take Magic Guard to 11: 68% of the damage you take goes to MP. Magic Armor is skipped: it needs Magic Guard 3 and only adds defense, +40 at 1, which doesn't kill anything faster.",
   "MP Eater 3 opens Meditation, and Meditation 1 is already +5 magic attack for you and your party. Teleport 1 gets you around maps from 32.",
   "Thunder Bolt 1 at 32 gives you a hit for 6 mobs, damage 50, from the start of 2nd job.",
-  "Cold Beam 30 first: damage 170 on one mob against Energy Bolt's 130, and the mob is slowed. In our damage engine it takes over from Energy Bolt by 40; Thunder Bolt first leaves you casting Energy Bolt until 55.",
+  "Cold Beam 30 first: damage 170 on one mob against Energy Bolt's 130, and the mob is slowed. In our damage engine it takes over from Energy Bolt by 40.",
   "Meditation 20 next, +25 magic attack for 300 seconds, then Thunder Bolt to 30, damage 80 on up to 6 mobs with a 25% chance to stun.",
   "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions. Teleport takes the last points: more range and MP 55 down to 15 a cast.",
-  "Wands need LUK from Metal Wand at 20: 10 LUK there, 30 for Fairy Wand at 40. AP only goes into LUK on the levels you need it for each new wand, everything else goes into INT.",
+  "LUK only goes in when your gear needs it: 10 for Metal Wand at 20, 12 for level 22 magician armor, 15 for Ice Wand at 25, 20 for Mithril Wand at 30, 25 for Wizard Wand at 35, 30 for Fairy Wand at 40 and 40 for level 50 magician armor. Everything else goes into INT.",
   "Cromi at 50 is about 2% more damage than staying on Fairy Wand, because its 40 LUK costs you 10 INT, and it sells for millions on the FM. It's a luxury, so this guide keeps Fairy Wand."
  ],
  "mistakes": [
@@ -801,5 +808,15 @@
  "search": {
   "title": "Ice Lightning Build Guide: AP and SP | Club FM",
   "description": "MapleStory Classic ice lightning build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
- }
+ },
+ "variants": [
+  {
+   "label": "Wand",
+   "slug": "ice-lightning"
+  },
+  {
+   "label": "Staff",
+   "slug": "ice-lightning-staff"
+  }
+ ]
 }

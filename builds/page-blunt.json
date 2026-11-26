@@ -360,7 +360,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -757,12 +757,12 @@
   "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
   "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
-  "Two-handed blunt weapons need DEX equal to their level from Heavy Mace at 15, except Monkey Wrench at 25. AP only goes into DEX on the levels you need it for each new blunt weapon, everything else goes into STR."
+  "DEX only goes in when your gear needs it: 15 for Heavy Mace at 15, 30 for Mithril Maul at 30, 35 for Sledgehammer at 35, 40 for Titan at 40 and 50 for Golden Mole at 50. Everything else goes into STR."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Blunt Weapon Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
-  "Forgetting DEX for Heavy Mace. It needs 15 DEX at 15, so put your AP from 14 and 15 into DEX, or you stay on the Wooden Mallet's 32 attack instead of 40.",
+  "Forgetting DEX for Heavy Mace. It needs 15 DEX at 15, so put your AP at 14 and 15 into DEX, or you stay on the Wooden Mallet's 32 attack instead of 40.",
   "Buying a sword with a blunt build. Blunt Weapon Mastery, Booster and Final Attack: Blunt Weapon only work with a blunt weapon, so you lose most of 2nd job."
  ],
  "compare": [

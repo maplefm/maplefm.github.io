@@ -363,7 +363,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -745,15 +745,16 @@
  ],
  "why": [
   "Double Stab 20 hits twice for 160%. It's your only real attack until 30, so max it first.",
-  "Dark Sight needs Disorder 3. 1st job has nothing else that adds damage with a dagger, so the last points go there: Dark Sight levels cut its MP cost from 50 to 30.",
+  "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
   "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast.",
   "Savage Blow 22 to 30 only takes it from 390% to 450% a cast, so Dagger Mastery 20 comes first.",
   "Korean Fan at 40 is a fast dagger that needs no DEX, so DEX stays at 25 through 46.",
-  "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster."
+  "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster.",
+  "DEX only goes in when your gear needs it: 10 for Field Dagger at 15, 15 for Coconut Knife at 20, 22 for Forked Dagger at 27, 25 for Reef Claw at 30 and 45 for Shinkita at 50. Everything else goes into LUK."
  ],
  "mistakes": [
   "Putting SP in Keen Eyes. It only adds range to thrown stars, and a bandit never throws. Up to 15 SP that should be in Nimble Body and Dark Sight.",
-  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels of Savage Blow. Put only 5 in Haste after Savage Blow 30, to open Steal.",
+  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal.",
   "Forgetting DEX before 50. Shinkita needs 45 DEX, so put your AP from 47 to 50 into DEX, or you hit 50 and can't wear it.",
   "Maxing Dagger Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Savage Blow."
  ],
@@ -772,6 +773,11 @@
    "build": "Assassin",
    "best_at": "claw all the way",
    "weak": "stars to recharge"
+  },
+  {
+   "build": "STR Bandit",
+   "best_at": "STR daggers, a speed step faster",
+   "weak": "less accuracy, no thief armor"
   }
  ],
  "future": [

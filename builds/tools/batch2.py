@@ -6,7 +6,7 @@ the job's order below; training maps from the site's damage engine (builds/tools
 prices from the board. Run:
     python3 builds/tools/batch2.py
 """
-import json, math, os, subprocess, sys, tempfile, urllib.request
+import json, math, os, re, subprocess, sys, tempfile, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 B = os.path.dirname(HERE)
@@ -24,13 +24,13 @@ GUIDE = json.loads(urllib.request.urlopen(LIVE + "itemguide.json", timeout=60).r
 
 def obtainable(n):
     """a weapon a player can get today: an NPC sells it, a mob drops it, it can be crafted or a quest gives it, or it has
-    been seen on the FM. Level 60 and 70 weapons have none of these in Classic World (that gear comes with Orbis and
-    El Nath, which aren't out), so a guide never sends anyone after them."""
+    been seen on the FM. Level 60 and 70 weapons have none of these in Classic World yet, so a guide never sends
+    anyone after them."""
     g = GUIDE.get(n) or {}
     return bool(g.get("s") or g.get("d") or g.get("c") or g.get("q") or (ROWS.get(n) or {}).get("typ"))
 
 
-GEAR_NOTE = "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70."
+GEAR_NOTE = "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70."
 
 
 def usable(b):
@@ -119,6 +119,21 @@ BUILDS = [SPEAR, POLE, ASSASSIN, BANDIT, HUNTER]
 
 
 # ------------------------------------------------------------------------------------------------ stats and SP
+ARMOR = json.load(open(os.path.join(B, "data", "armor.json")))
+JOBBIT = {"Warrior": 1, "Magician": 2, "Bowman": 4, "Thief": 8}
+
+
+def armor_needs(cls, stat):
+    """(level, need) for the class's own armor that a player can get today (sold, dropped, crafted, a quest, or seen on the
+    FM), at every level it comes in up to 50: the lowest the stat can be to wear that level's armor. Game files, builds/data/armor.json."""
+    tiers = {}
+    for n, a in ARMOR.items():
+        if a.get("cash") or a.get("reqJob") != JOBBIT[cls] or not obtainable(n): continue
+        L = a.get("reqLevel") or 0
+        if 10 <= L <= 50: tiers.setdefault(L, []).append(a.get("req" + stat) or 0)
+    return sorted((L, min(v)) for L, v in tiers.items() if min(v) > 0)
+
+
 def plan_stats(b):
     """AP for every level 1 to 70: the sub stat to the job's level 10 need first (thieves), then up to each weapon's
     requirement as late as possible, everything else into the main stat."""
@@ -127,10 +142,13 @@ def plan_stats(b):
     if b["early"]: targets.append((2, 9, b["early"]))
     rs = b.get("raise", b["sub"])
     have = b["creation"][rs] + (0 if not b["early"] else b["early"] - b["creation"][rs])
-    for lv, n in b["weapons"]:
-        need = WPN[n].get("req" + rs) or 0
+    needs = [(lv, WPN[n].get("req" + rs) or 0, f"{n} at {lv}") for lv, n in b["weapons"]]
+    if b.get("armor", True) and rs == b["sub"]:   # a STR Bandit raises STR for daggers and wears gear any job can
+        needs += [(lv, v, f"Level {lv} {b['cls'].lower()} armor") for lv, v in armor_needs(b["cls"], rs)]
+    why = {}
+    for lv, need, what in sorted(needs, key=lambda x: (x[0], -x[1])):
         if need > have:
-            k = math.ceil((need - have) / 5); targets.append((lv - k + 1, lv, need)); have = need
+            k = math.ceil((need - have) / 5); targets.append((lv - k + 1, lv, need)); have = need; why[(lv, need)] = what
     st = {1: [b["creation"][x] for x in K]}
     goal = st[1][sub]
     for L in range(2, CAP + 1):
@@ -146,9 +164,8 @@ def plan_stats(b):
               "why": (f"{b['main']} is your damage stat" if not b["early"] else "Thief job advance needs 25 DEX at 10")}]
     for a, z, v in targets:
         if a < 10: continue
-        n = next(n for lv, n in b["weapons"] if lv == z)
-        rules.append({"levels": f"{a} to {z}" if a != z else str(z), "ap": f"all {b.get('raise', b['sub'])} (to {v})" if z - a >= 1 or (v - st[a - 1][sub]) >= 5 else f"{b.get('raise', b['sub'])} to {v}, rest {b['main']}",
-                      "why": f"{n} at {z} needs {v} {b.get('raise', b['sub'])}"})
+        rules.append({"levels": f"{a} to {z}" if a != z else str(z), "ap": f"all {rs} (to {v})" if z - a >= 1 or (v - st[a - 1][sub]) >= 5 else f"{rs} to {v}, rest {b['main']}",
+                      "why": f"{why[(z, v)]} needs {v} {rs}"})
     rules.append({"levels": "the rest", "ap": f"all {b['main']}", "why": f"{b['main']} is your damage stat"})
     table = [{"level": L, "STR": st[L][0], "DEX": st[L][1], "INT": st[L][2], "LUK": st[L][3]} for L in (10, 20, 30, 40, 50, 60, 70)]
     return st, rules, table
@@ -229,7 +246,7 @@ def engine(builds, plans):
 FA = "Final Attack: {w} gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds. While it's lit you can use it on one mob for 260%, and it heals you, up to 15% of your max HP. 1 point already gets the full 25% chance, so it goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit."
 BOOST = "{w} Mastery 5 opens {w} Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait."
 RUSH = "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage."
-IRONBODY = "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15."
+IRONBODY = "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 4 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds."
 FIRST_W = [
     "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
     "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
@@ -243,7 +260,7 @@ TEXT = {
             BOOST.format(w="Spear"),
             FA.format(w="Spear"),
             RUSH,
-            "Spears need DEX equal to their level from Forked Spear at 30, except Bamboo Spear at 45. AP only goes into DEX in the levels right before each new spear, everything else goes into STR.",
+            "Spears need DEX equal to their level from Forked Spear at 30, except Bamboo Spear at 45. AP only goes into DEX on the levels you need it for each new spear, everything else goes into STR.",
         ],
         "mistakes": [
             IRONBODY,
@@ -260,7 +277,7 @@ TEXT = {
             BOOST.format(w="Polearm"),
             FA.format(w="Polearm"),
             RUSH,
-            "Polearms need DEX equal to their level from Iron Ball at 15, except Yellow Mop at 45. AP only goes into DEX in the levels right before each new polearm, everything else goes into STR.",
+            "Polearms need DEX equal to their level from Iron Ball at 15, except Yellow Mop at 45. AP only goes into DEX on the levels you need it for each new polearm, everything else goes into STR.",
         ],
         "mistakes": [
             IRONBODY,
@@ -280,7 +297,7 @@ TEXT = {
             "Critical Throw 30 is 15% critical rate for +35% damage on those hits. 2nd job gives a claw no new attack except Drain, so your damage gains come from this and Claw Mastery.",
             "Haste 20 before Drain: +30 speed and +10 jump for 300 seconds. Drain is a 240% hit on one mob that heals you, and Lucky Seven already does more.",
             "Drain is locked until Critical Recovery is 3, so 3 points go there first.",
-            "Claws need DEX equal to their level from Mithril Titans at 15. AP only goes into DEX in the levels right before each new claw, everything else goes into LUK.",
+            "Claws need DEX equal to their level from Mithril Titans at 15. AP only goes into DEX on the levels you need it for each new claw, everything else goes into LUK.",
         ],
         "mistakes": [
             "Buying Kumbi or Tobi stars to level. Kumbi is +4 attack over Wolbi, 21 against 17, for a lot more mesos. Wolbi from Max in Kerning City is all you need.",
@@ -295,7 +312,7 @@ TEXT = {
         "weak": ["Melee: you walk to every mob and take hits", "Savage Blow and Double Stab hit one mob", "DEX for daggers from 47"],
         "why": [
             "Double Stab 20 hits twice for 160%. It's your only real attack until 30, so max it first.",
-            "Dark Sight needs Disorder 3. 1st job has nothing else that adds damage with a dagger, so the last points go there: Dark Sight levels cut its MP cost from 50 to 30.",
+            "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
             "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast.",
             "Savage Blow 22 to 30 only takes it from 390% to 450% a cast, so Dagger Mastery 20 comes first.",
             "Korean Fan at 40 is a fast dagger that needs no DEX, so DEX stays at 25 through 46.",
@@ -303,7 +320,7 @@ TEXT = {
         ],
         "mistakes": [
             "Putting SP in Keen Eyes. It only adds range to thrown stars, and a bandit never throws. Up to 15 SP that should be in Nimble Body and Dark Sight.",
-            "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels of Savage Blow. Put only 5 in Haste after Savage Blow 30, to open Steal.",
+            "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal.",
             "Forgetting DEX before 50. Shinkita needs 45 DEX, so put your AP from 47 to 50 into DEX, or you hit 50 and can't wear it.",
             "Maxing Dagger Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Savage Blow.",
         ],
@@ -316,10 +333,10 @@ TEXT = {
             "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
             "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
             "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every bow attack.",
-            "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full attack speed boost. Final Attack: Bow 1 opens a 25% chance of an extra hit on up to 3 mobs, so it goes in early too.",
+            "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full attack speed boost. Final Attack: Bow 1 gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds; while it's lit you can use it on up to 3 mobs for 90%, so it goes in early too.",
             "Arrow Bomb 30 hits up to 6 mobs for 130% with a 60% chance to stun. It's your only attack for groups, so it comes right after Mastery 20.",
             "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
-            "Bows need STR equal to their level from Composite Bow at 15. AP only goes into STR in the levels right before each new bow, everything else goes into DEX.",
+            "Bows need STR equal to their level from Composite Bow at 15. AP only goes into STR on the levels you need it for each new bow, everything else goes into DEX.",
         ],
         "mistakes": [
             "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put that level's AP into STR, or you stay on Battle Bow's 44 attack instead of 50.",
@@ -333,14 +350,49 @@ COMPARE = {
     "spearman-spear": [("Spearman, spear (this guide)", "a step faster than polearms", "spears hit a little softer until 70"), ("Spearman, polearm", "harder hits until 70", "slowest weapons")],
     "spearman-polearm": [("Spearman, polearm (this guide)", "harder hits until 70", "slowest weapons"), ("Spearman, spear", "a step faster than polearms", "spears hit a little softer until 70")],
     "assassin": [("Assassin (this guide)", "ranged all the way", "stars to recharge"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Pure Bandit", "dagger from 10", "melee from the start")],
-    "pure-bandit": [("Pure Bandit (this guide)", "dagger from 10, no stars", "melee from the start"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Assassin", "claw all the way", "stars to recharge")],
+    "pure-bandit": [("Pure Bandit (this guide)", "dagger from 10, no stars", "melee from the start"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Assassin", "claw all the way", "stars to recharge"), ("STR Bandit", "STR daggers, a speed step faster", "less accuracy, no thief armor")],
     "hunter": [("Hunter (this guide)", "bow, Arrow Bomb on 6 mobs", "STR for bows"), ("Crossbowman", "crossbow instead of a bow", "different 2nd job skills")],
 }
 LINKS = {"Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter", "Sindit": "sindit"}
 
 
+STATLINE = ("Spears need", "Polearms need", "Claws need", "Bows need", "Two-handed", "One-handed", "Wands need", "Crossbows need", "STR only goes in")
+
+
+def stat_text(b, rules, t):
+    """the Why line about the sub stat and every 'put your AP from A to B' in the mistakes, written from the stat plan
+    itself so the words can never disagree with the table"""
+    rs = b.get("raise", b["sub"]); steps = []
+    for r in rules:
+        m = re.match(r"(.+) needs (\d+) " + rs + "$", r["why"])
+        if m: steps.append((rng_(r["levels"]), int(m.group(2)), m.group(1)))
+    if not steps: return t
+    def what(w):
+        m = re.match(r"Level (\d+) (\w+) armor$", w)
+        return f"level {m.group(1)} {m.group(2)} armor" if m else w
+    parts = [f"{v} for {what(w)}" for (a, z), v, w in steps]
+    line = (f"{rs} only goes in when your gear needs it: " + (", ".join(parts[:-1]) + " and " + parts[-1] if len(parts) > 1 else parts[0])
+            + f". Everything else goes into {b['main']}" + (f", and {b['sub']} stays at 5." if rs != b["sub"] else "."))
+    why = [line if x.startswith(STATLINE) else x for x in t["why"]]
+    if line not in why: why.append(line)
+    def fix(x):
+        for (a, z), v, w in steps:
+            nm = w.split(" at ")[0]
+            if nm in x and "into " + rs in x:
+                span = f"from {a} to {z}" if z - a > 1 else (f"at {a} and {z}" if z - a == 1 else f"at {z}")
+                x = re.sub(r"put (?:your AP|that level's AP) (?:from levels \d+ and \d+|from \d+ (?:to|and) \d+|from \d+|at \d+|)\s*into " + rs, f"put your AP {span} into {rs}", x)
+                x = x.replace("from levels", "from")
+        return x
+    return dict(t, why=why, mistakes=[fix(x) for x in t["mistakes"]])
+
+
+def rng_(s):
+    m = re.match(r"(\d+)(?: to (\d+))?$", s)
+    return (int(m.group(1)), int(m.group(2) or m.group(1)))
+
+
 def build_json(b, st, rules, table, order, eng):
-    t = TEXT[b["slug"]]
+    t = stat_text(b, rules, TEXT[b["slug"]])
     gear = []
     for lv, n in b["weapons"]:
         w = WPN[n]

@@ -375,7 +375,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -771,13 +771,13 @@
   "Axe Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 31%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Sabretooth. Per point Mastery is worth more, and at 20 your hits have a 25% chance to make the mob bleed.",
   "Final Attack: Axe 1 goes in early: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on up to 3 mobs for 140%. Points 2 to 30 raise that to 200%.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
-  "Two-handed axes need DEX equal to their level from Iron Axe at 20. AP only goes into DEX on the levels you need it for each new axe, everything else goes into STR."
+  "DEX only goes in when your gear needs it: 20 for Iron Axe at 20, 25 for Two-Handed Axe at 25, 30 for Blue Axe at 30, 35 for Niam at 35, 40 for Sabretooth at 40 and 50 for The Rising at 50. Everything else goes into STR."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Axe Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
   "Buying a sword with an axe build. Axe Mastery, Axe Booster and Final Attack: Axe only work with an axe, so you lose most of 2nd job.",
-  "Skipping DEX before Sabretooth. It needs 40 DEX at 40, so put your AP from 40 into DEX, or you stay on Niam's 55 attack instead of 60."
+  "Skipping DEX before Sabretooth. It needs 40 DEX at 40, so put your AP at 40 into DEX, or you stay on Niam's 55 attack instead of 60."
  ],
  "compare": [
   {

@@ -7,11 +7,9 @@
   "pitch": "STR with DEX only to each one-handed blunt weapon's need. Power Strike and Slash Blast 20 by 23, then Blunt Weapon Mastery and Final Attack.",
   "best_at": [
    "Blunt Weapon Mastery is +20% critical damage",
-   "Final Attack: Blunt Weapon hits for 360% at 30",
-   "2-handed blunt weapons have the most attack"
+   "Final Attack: Blunt Weapon hits for 360% at 30"
   ],
   "weak_spots": [
-   "2-handed blunt weapons are slow",
    "Less damage than a two-handed weapon"
   ],
   "difficulty": "Medium",
@@ -44,7 +42,22 @@
     "why": "STR is your damage stat"
    },
    {
-    "levels": "27 to 30",
+    "levels": "20",
+    "ap": "all DEX (to 10)",
+    "why": "Level 20 warrior armor needs 10 DEX"
+   },
+   {
+    "levels": "22",
+    "ap": "DEX to 12, rest STR",
+    "why": "Level 22 warrior armor needs 12 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "DEX to 15, rest STR",
+    "why": "Level 25 warrior armor needs 15 DEX"
+   },
+   {
+    "levels": "29 to 30",
     "ap": "all DEX (to 25)",
     "why": "War Hammer at 30 needs 25 DEX"
    },
@@ -57,6 +70,11 @@
     "levels": "40",
     "ap": "all DEX (to 35)",
     "why": "Jacker at 40 needs 35 DEX"
+   },
+   {
+    "levels": "47",
+    "ap": "DEX to 37, rest STR",
+    "why": "Level 47 warrior armor needs 37 DEX"
    },
    {
     "levels": "49 to 50",
@@ -79,8 +97,8 @@
    },
    {
     "level": 20,
-    "STR": 107,
-    "DEX": 5,
+    "STR": 102,
+    "DEX": 10,
     "INT": 4,
     "LUK": 4
    },
@@ -374,7 +392,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -509,11 +527,11 @@
    "levels": "25 to 29",
    "maps": [
     {
-     "map": "Dark Cave",
+     "map": "The Land of Wild Boar II",
      "monsters": [
-      "Stirge",
-      "Horny Mushroom",
-      "Zombie Mushroom"
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
      ]
     },
     {
@@ -524,10 +542,11 @@
      ]
     },
     {
-     "map": "Excavation Site I",
+     "map": "Dark Cave",
      "monsters": [
-      "Ghost Stump",
-      "Wooden Mask"
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
      ]
     }
    ],
@@ -768,14 +787,14 @@
   "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
   "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
-  "One-handed blunt weapons need no DEX until War Hammer at 30, 25 there and 45 for Knuckle Mace at 50. AP only goes into DEX on the levels you need it for each new blunt weapon, everything else goes into STR.",
-  "A one-handed blunt weapon leaves room for a shield and its weapon defense, but at the same attack and stats it hits about 26% softer than a two-handed one. Pick it if you'd rather take less damage than kill faster."
+  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 12 for level 22 warrior armor, 15 for level 25 warrior armor, 25 for War Hammer at 30, 30 for Heavy Hammer at 35, 35 for Jacker at 40, 37 for level 47 warrior armor and 45 for Knuckle Mace at 50. Everything else goes into STR.",
+  "A one-handed blunt weapon leaves room for a shield and its weapon defense, but at the same attack, with your stats at 40, it hits about 20% softer than a two-handed one. Some one-handed blunt weapons swing a speed step faster, which wins a little of that back. Pick it if you'd rather take less damage than kill faster."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Blunt Weapon Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
   "Buying a sword with a blunt build. Blunt Weapon Mastery, Booster and Final Attack: Blunt Weapon only work with a blunt weapon, so you lose most of 2nd job.",
-  "Forgetting DEX before War Hammer. It needs 25 DEX at 30, so put your AP into DEX on the levels up to it, or you can't wear it and stay on your last blunt weapon."
+  "Forgetting DEX before War Hammer. It needs 25 DEX at 30, so put your AP at 29 and 30 into DEX on the levels up to it, or you stay on Plunger's 44 attack instead of 49."
  ],
  "compare": [
   {

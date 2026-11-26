@@ -409,7 +409,7 @@
   }
  ],
  "gear_optional": [],
- "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -800,14 +800,14 @@
   "Sword Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 28%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Traus. Per point Mastery is worth more, and it's +20 accuracy too.",
   "Final Attack: Sword 1 goes in early: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on up to 3 mobs for 140%. Points 2 to 30 raise that to 200%.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
-  "One-handed swords need DEX from Viking Sword at 20, 15 there and 45 for Jeweled Katar at 50, except the Saw at 15 and Red Whip at 35, which need none. AP only goes into DEX on the levels you need it for each new sword, everything else goes into STR.",
-  "A one-handed sword leaves room for a shield and its weapon defense, but at the same attack and stats it hits about 28% softer than a two-handed one. Pick it if you'd rather take less damage than kill faster."
+  "DEX only goes in when your gear needs it: 15 for Viking Sword at 20, 20 for Eloon at 25, 30 for Gladius at 30, 35 for Traus at 40, 40 for Hero's Gladius at 45 and 45 for Jeweled Katar at 50. Everything else goes into STR.",
+  "A one-handed sword leaves room for a shield and its weapon defense, but at the same attack, with your stats at 40, it hits about 21% softer than a two-handed one. Some one-handed swords swing a speed step faster, which wins a little of that back. Pick it if you'd rather take less damage than kill faster."
  ],
  "mistakes": [
   "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Sword Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
   "Leaving Rage at 0 until later. Its first point is +10 attack, about 21% on a Gladius, for 1 SP.",
-  "Forgetting DEX before Viking Sword. It needs 15 DEX at 20, so put your AP into DEX on the levels up to it, or you can't wear it and stay on your last sword."
+  "Forgetting DEX before Viking Sword. It needs 15 DEX at 20, so put your AP at 19 and 20 into DEX on the levels up to it, or you stay on Saw's 36 attack instead of 37, and a speed step slower."
  ],
  "compare": [
   {
