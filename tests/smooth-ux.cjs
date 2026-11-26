@@ -50,7 +50,9 @@ const fs = require("fs"), R = require("path").join(__dirname, "..") + "/";
   await p.evaluate(() => window.scrollTo(0, 0)); if (!PHONE) await p.evaluate(() => { const t = document.querySelector("#prices-view .tbox"); if (t) t.scrollTop = 0; });
   // the strip slides again 250 ms after the scroll stops; a slow CI runner can take a few seconds to say it is back in view
   let still = true;
-  for (let k = 0; k < 10 && still !== false; k++) { await p.waitForTimeout(500); still = await p.evaluate(() => { const t = document.getElementById("tickbar"); return t ? t.classList.contains("still") : null; }); }
+  // a touch fling or rows still landing can carry the page a few px past the top again (CI saw y 35, strip fully above
+  // the screen, rightly still): put it back at the top on each look so the check is about the strip, not the scroll
+  for (let k = 0; k < 10 && still !== false; k++) { await p.waitForTimeout(500); still = await p.evaluate(() => { if (window.scrollY > 0) window.scrollTo(0, 0); const t = document.getElementById("tickbar"); return t ? t.classList.contains("still") : null; }); }
   const why = still === false ? "" : await p.evaluate(() => { const t = document.getElementById("tickbar"); const r = t && t.getBoundingClientRect(); return JSON.stringify({ y: window.scrollY, top: r && Math.round(r.top), h: r && Math.round(r.height), vh: innerHeight, scrolling: document.documentElement.classList.contains("fm-scrolling"), cls: t && t.className }); });
   ok(still === false, "Big sales strip slides again once the scroll stops and it is in view" + (why ? " | " + why : ""));
   // 4: a search typed while rows are still arriving
