@@ -764,24 +764,25 @@
    "weak": "Bandit points wait until 40"
   },
   {
-   "build": "Sindit, no reset",
-   "main_attack": "Lucky Seven to 39, Savage Blow only from 40",
-   "best_at": "no Cash Shop scroll",
-   "weak": "about 6% less EXP an hour at 40, no Double Stab"
-  },
-  {
-   "build": "Pure Bandit (dagger from 10)",
+   "build": "Pure Bandit",
    "main_attack": "Double Stab, Savage Blow",
    "best_at": "no stars to buy",
    "weak": "melee from 10",
    "note": "training page Typical build"
   },
   {
-   "build": "Assassin (claw)",
+   "build": "Assassin",
    "main_attack": "Lucky Seven, Drain",
    "best_at": "range all the way",
    "weak": "stars cost: Kumbi to Steely",
    "note": "training page Typical build"
+  },
+  {
+   "build": "STR Bandit",
+   "main_attack": "Savage Blow",
+   "best_at": "STR daggers, a speed step faster",
+   "weak": "less accuracy",
+   "note": ""
   }
  ],
  "future": [
