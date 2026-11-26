@@ -4,7 +4,7 @@
   "class": "Thief",
   "job_path": "Thief (10) → Bandit (30)",
   "build": "Pure Bandit",
-  "pitch": "LUK with 25 DEX and a dagger from 10. Double Stab in 1st job, then Savage Blow, and a Korean Fan at 40.",
+  "pitch": "LUK with DEX only to each dagger's need. Double Stab in 1st job, then Savage Blow, and a Korean Fan at 40.",
   "best_at": [
    "Double Stab from level 10",
    "Savage Blow hits 6 times a cast from 21 points",
@@ -20,8 +20,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 312808,
-    "shown": "about 313K"
+    "mesos": 246697,
+    "shown": "about 247K"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -41,23 +41,33 @@
   "rule": [
    {
     "levels": "1 to 9",
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
+   },
+   {
+    "levels": "15",
+    "ap": "all DEX (to 10)",
+    "why": "Field Dagger at 15 needs 10 DEX"
+   },
+   {
+    "levels": "20",
+    "ap": "all DEX (to 15)",
+    "why": "Coconut Knife at 20 needs 15 DEX"
+   },
+   {
+    "levels": "26 to 27",
+    "ap": "all DEX (to 22)",
+    "why": "Forked Dagger at 27 needs 22 DEX"
+   },
+   {
+    "levels": "30",
     "ap": "DEX to 25, rest LUK",
-    "why": "Thief job advance needs 25 DEX at 10"
+    "why": "Reef Claw at 30 needs 25 DEX"
    },
    {
     "levels": "47 to 50",
     "ap": "all DEX (to 45)",
     "why": "Shinkita at 50 needs 45 DEX"
-   },
-   {
-    "levels": "59 to 60",
-    "ap": "all DEX (to 55)",
-    "why": "Deadly Fin at 60 needs 55 DEX"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all DEX (to 65)",
-    "why": "Kandine at 70 needs 65 DEX"
    },
    {
     "levels": "the rest",
@@ -69,16 +79,16 @@
    {
     "level": 10,
     "STR": 4,
-    "DEX": 25,
+    "DEX": 5,
     "INT": 4,
-    "LUK": 37
+    "LUK": 57
    },
    {
     "level": 20,
     "STR": 4,
-    "DEX": 25,
+    "DEX": 15,
     "INT": 4,
-    "LUK": 87
+    "LUK": 97
    },
    {
     "level": 30,
@@ -104,16 +114,16 @@
    {
     "level": 60,
     "STR": 4,
-    "DEX": 55,
+    "DEX": 45,
     "INT": 4,
-    "LUK": 257
+    "LUK": 267
    },
    {
     "level": 70,
     "STR": 4,
-    "DEX": 65,
+    "DEX": 45,
     "INT": 4,
-    "LUK": 297
+    "LUK": 317
    }
   ]
  },
@@ -329,7 +339,7 @@
     "typical": 69000,
     "shown": "69K",
     "basis": "24h",
-    "sales_seen": 75,
+    "sales_seen": 74,
     "rough": true
    },
    "why": ""
@@ -343,52 +353,23 @@
    "attack": 68,
    "speed": 4,
    "price": {
-    "typical": 222222,
-    "shown": "222K",
+    "typical": 156111,
+    "shown": "156K",
     "basis": "24h",
-    "sales_seen": 39,
+    "sales_seen": 37,
     "rough": true
-   },
-   "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "Dagger",
-   "item": "Deadly Fin",
-   "id": 1332018,
-   "needs": "55 DEX, 120 LUK",
-   "attack": 78,
-   "speed": 4,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "Dagger",
-   "item": "Kandine",
-   "id": 1332020,
-   "needs": "65 DEX, 140 LUK",
-   "attack": 88,
-   "speed": 4,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
    },
    "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
    "job": "Thief",
    "where": "Kerning City, Dark Lord",
-   "needs": "Level 10 and 25 DEX",
+   "needs": "Level 10",
    "gets": "1 SP. Lucky Seven and Double Stab open."
   },
   {
@@ -441,13 +422,14 @@
      ]
     },
     {
-     "map": "Line 1 (Area 1)",
+     "map": "Dungeon, Southern Forest III",
      "monsters": [
-      "Bubbling"
+      "Green Mushroom",
+      "Slime"
      ]
     },
     {
-     "map": "Dungeon, Southern Forest III",
+     "map": "Dungeon, Southern Forest II",
      "monsters": [
       "Green Mushroom",
       "Slime"
@@ -466,15 +448,14 @@
      ]
     },
     {
-     "map": "The Blue Mushroom Forest",
+     "map": "Tree Dungeon, Forest Up North IV",
      "monsters": [
-      "Blue Mushroom",
-      "Slime",
-      "Blue Snail"
+      "Green Mushroom",
+      "Slime"
      ]
     },
     {
-     "map": "Tree Dungeon, Forest Up North IV",
+     "map": "Dungeon, Southern Forest III",
      "monsters": [
       "Green Mushroom",
       "Slime"

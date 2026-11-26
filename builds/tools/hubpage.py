@@ -14,11 +14,11 @@ import gwpage as G  # noqa: E402
 
 E = G.E
 DONE = {"sindit", "spearman-spear", "spearman-polearm", "assassin", "pure-bandit", "hunter", "fighter-sword", "fighter-axe", "page-sword", "page-blunt",
-        "fire-poison", "ice-lightning", "cleric", "crossbowman"}   # pages rebuilt in the approved look
+        "fire-poison", "ice-lightning", "cleric", "crossbowman", "str-bandit"}   # pages rebuilt in the approved look
 CLASSES = [
     ("Warrior", [("Fighter, sword", "fighter-sword"), ("Fighter, axe", "fighter-axe"), ("Page, sword", "page-sword"), ("Page, blunt weapon", "page-blunt"),
                  ("Spearman, spear", "spearman-spear"), ("Spearman, polearm", "spearman-polearm")]),
-    ("Magician", [("Fire Poison", "fire-poison"), ("Ice Lightning", "ice-lightning"), ("Cleric", "cleric"), ("LUK mage", "luk-mage")]),
+    ("Magician", [("Fire Poison", "fire-poison"), ("Ice Lightning", "ice-lightning"), ("Cleric", "cleric")]),
     ("Bowman", [("Hunter", "hunter"), ("Crossbowman", "crossbowman")]),
     ("Thief", [("Assassin", "assassin"), ("Pure Bandit", "pure-bandit"), ("Sindit", "sindit"),
                ("STR Bandit", "str-bandit")]),

@@ -41,7 +41,7 @@
    {
     "levels": "1 to 9",
     "ap": "all STR",
-    "why": "Warrior job advance needs 35 STR at 10"
+    "why": "STR is your damage stat"
    },
    {
     "levels": "14 to 15",
@@ -72,16 +72,6 @@
     "levels": "49 to 50",
     "ap": "all DEX (to 50)",
     "why": "The Nine Dragons at 50 needs 50 DEX"
-   },
-   {
-    "levels": "59 to 60",
-    "ap": "all DEX (to 60)",
-    "why": "Skylar at 60 needs 60 DEX"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all DEX (to 70)",
-    "why": "The Gold Dragon at 70 needs 70 DEX"
    },
    {
     "levels": "the rest",
@@ -127,15 +117,15 @@
    },
    {
     "level": 60,
-    "STR": 252,
-    "DEX": 60,
+    "STR": 262,
+    "DEX": 50,
     "INT": 4,
     "LUK": 4
    },
    {
     "level": 70,
-    "STR": 292,
-    "DEX": 70,
+    "STR": 312,
+    "DEX": 50,
     "INT": 4,
     "LUK": 4
    }
@@ -334,7 +324,7 @@
     "typical": 10999,
     "shown": "11K",
     "basis": "3d",
-    "sales_seen": 27,
+    "sales_seen": 26,
     "rough": true
    },
    "why": ""
@@ -389,45 +379,16 @@
     "rough": true
    },
    "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "Polearm",
-   "item": "Skylar",
-   "id": 1442008,
-   "needs": "125 STR, 60 DEX",
-   "attack": 85,
-   "speed": 8,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "Polearm",
-   "item": "The Gold Dragon",
-   "id": 1442009,
-   "needs": "145 STR, 70 DEX",
-   "attack": 95,
-   "speed": 8,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
    "job": "Warrior",
    "where": "Perion, Dances with Balrog",
-   "needs": "Level 10 and 35 STR",
+   "needs": "Level 10",
    "gets": "1 SP. Power Strike and Slash Blast open."
   },
   {
@@ -755,24 +716,25 @@
    "levels": "60 to 64",
    "maps": [
     {
-     "map": "The Forest of Evil II",
-     "monsters": [
-      "Malady",
-      "Zombie Lupin"
-     ]
-    },
-    {
-     "map": "The Forest of Evil I",
-     "monsters": [
-      "Malady",
-      "Zombie Lupin"
-     ]
-    },
-    {
      "map": "Hot Sand",
      "monsters": [
       "Tortie",
       "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
      ]
     }
    ],
@@ -782,24 +744,27 @@
    "levels": "65 to 70",
    "maps": [
     {
-     "map": "Camp 3",
+     "map": "Another Sanctuary",
      "monsters": [
-      "Officer Skeleton",
-      "Skeleton Soldier"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Jr. Boogie 1"
      ]
     },
     {
-     "map": "Camp 2",
+     "map": "Dilapidated Tomb",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Fairy 2"
      ]
     },
     {
-     "map": "Camp 1",
+     "map": "Dangerous Valley II",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Red Drake",
+      "Fire Boar",
+      "Copper Drake"
      ]
     }
    ],
@@ -809,8 +774,8 @@
  "why": [
   "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
   "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
-  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
-  "Final Attack: Polearm gives a 25% chance when you attack to open a 60 second window for one extra hit that heals you, up to 15% of your max HP. Level 1 is already a 260% hit with the full 25% chance, so 1 point goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
+  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Polearm gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds. While it's lit you can use it on one mob for 260%, and it heals you, up to 15% of your max HP. 1 point already gets the full 25% chance, so it goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
   "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage.",
   "Polearms need DEX equal to their level from Iron Ball at 15, except Yellow Mop at 45. AP only goes into DEX in the levels right before each new polearm, everything else goes into STR."
  ],

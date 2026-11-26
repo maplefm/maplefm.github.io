@@ -12,7 +12,7 @@
   ],
   "weak_spots": [
    "No accuracy from Axe Mastery, unlike Sword Mastery",
-   "Rage lowers your own weapon defense by 40"
+   "Rage also lowers weapon defense, by 40 at 30"
   ],
   "difficulty": "Medium",
   "level_range": "1 to 70",
@@ -74,16 +74,6 @@
     "why": "The Rising at 50 needs 50 DEX"
    },
    {
-    "levels": "59 to 60",
-    "ap": "all DEX (to 60)",
-    "why": "The Shining at 60 needs 60 DEX"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all DEX (to 70)",
-    "why": "Chrono at 70 needs 70 DEX"
-   },
-   {
     "levels": "the rest",
     "ap": "all STR",
     "why": "STR is your damage stat"
@@ -127,15 +117,15 @@
    },
    {
     "level": 60,
-    "STR": 252,
-    "DEX": 60,
+    "STR": 262,
+    "DEX": 50,
     "INT": 4,
     "LUK": 4
    },
    {
     "level": 70,
-    "STR": 292,
-    "DEX": 70,
+    "STR": 312,
+    "DEX": 50,
     "INT": 4,
     "LUK": 4
    }
@@ -382,39 +372,10 @@
     "rough": true
    },
    "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "2H Axe",
-   "item": "The Shining",
-   "id": 1412008,
-   "needs": "125 STR, 60 DEX",
-   "attack": 80,
-   "speed": 5,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "2H Axe",
-   "item": "Chrono",
-   "id": 1412009,
-   "needs": "145 STR, 70 DEX",
-   "attack": 93,
-   "speed": 6,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -754,16 +715,18 @@
      ]
     },
     {
-     "map": "Hot Sand",
+     "map": "The Forest of Evil I",
      "monsters": [
-      "Tortie",
-      "Clang"
+      "Malady",
+      "Zombie Lupin"
      ]
     },
     {
-     "map": "Line 2 (Area 3)",
+     "map": "Another Sanctuary",
      "monsters": [
-      "Wraith"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Jr. Boogie 1"
      ]
     }
    ],
@@ -773,24 +736,27 @@
    "levels": "65 to 70",
    "maps": [
     {
-     "map": "Camp 1",
+     "map": "Another Sanctuary",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Jr. Boogie 1"
      ]
     },
     {
-     "map": "Camp 2",
+     "map": "Dilapidated Tomb",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Fairy 2"
      ]
     },
     {
-     "map": "Camp 3",
+     "map": "Dangerous Valley II",
      "monsters": [
-      "Officer Skeleton",
-      "Skeleton Soldier"
+      "Red Drake",
+      "Fire Boar",
+      "Copper Drake"
      ]
     }
    ],
@@ -800,15 +766,15 @@
  "why": [
   "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
   "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
-  "Axe Mastery 5 opens Axe Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Axe Mastery 5 opens Axe Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
   "Rage 1 goes in at 32: it's already +10 attack for 1 SP, about +20% damage on a 50 attack Blue Axe.",
-  "Axe Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 30%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Sabretooth. Per point Mastery is worth more, and at 20 your hits have a 25% chance to make the mob bleed.",
-  "Final Attack: Axe 1 goes in early: a 25% chance when you attack to open a 60 second window for one extra hit on up to 3 mobs, 140% at 1. Points 2 to 30 raise it to 200%.",
+  "Axe Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 31%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Sabretooth. Per point Mastery is worth more, and at 20 your hits have a 25% chance to make the mob bleed.",
+  "Final Attack: Axe 1 goes in early: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on up to 3 mobs for 140%. Points 2 to 30 raise that to 200%.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
-  "2-handed axes need DEX equal to their level from Iron Axe at 20. AP only goes into DEX in the levels right before each new axe, everything else goes into STR."
+  "Two-handed axes need DEX equal to their level from Iron Axe at 20. AP only goes into DEX on the levels you need it for each new axe, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Axe Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
   "Buying a sword with an axe build. Axe Mastery, Axe Booster and Final Attack: Axe only work with an axe, so you lose most of 2nd job.",
   "Skipping DEX before Sabretooth. It needs 40 DEX at 40, so put your AP from 40 into DEX, or you stay on Niam's 55 attack instead of 60."
@@ -840,5 +806,15 @@
  "search": {
   "title": "Fighter, axe Build Guide: AP and SP | Club FM",
   "description": "MapleStory Classic fighter, axe build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
- }
+ },
+ "variants": [
+  {
+   "label": "Two-handed",
+   "slug": "fighter-axe"
+  },
+  {
+   "label": "One-handed and shield",
+   "slug": "fighter-axe-1h"
+  }
+ ]
 }

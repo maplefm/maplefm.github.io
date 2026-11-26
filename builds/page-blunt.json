@@ -49,12 +49,7 @@
     "why": "Heavy Mace at 15 needs 15 DEX"
    },
    {
-    "levels": "20",
-    "ap": "all DEX (to 20)",
-    "why": "Square Hammer at 20 needs 20 DEX"
-   },
-   {
-    "levels": "29 to 30",
+    "levels": "28 to 30",
     "ap": "all DEX (to 30)",
     "why": "Mithril Maul at 30 needs 30 DEX"
    },
@@ -74,16 +69,6 @@
     "why": "Golden Mole at 50 needs 50 DEX"
    },
    {
-    "levels": "59 to 60",
-    "ap": "all DEX (to 60)",
-    "why": "The Blessing at 60 needs 60 DEX"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all DEX (to 70)",
-    "why": "Gigantic Sledge at 70 needs 70 DEX"
-   },
-   {
     "levels": "the rest",
     "ap": "all STR",
     "why": "STR is your damage stat"
@@ -99,8 +84,8 @@
    },
    {
     "level": 20,
-    "STR": 92,
-    "DEX": 20,
+    "STR": 97,
+    "DEX": 15,
     "INT": 4,
     "LUK": 4
    },
@@ -127,15 +112,15 @@
    },
    {
     "level": 60,
-    "STR": 252,
-    "DEX": 60,
+    "STR": 262,
+    "DEX": 50,
     "INT": 4,
     "LUK": 4
    },
    {
     "level": 70,
-    "STR": 292,
-    "DEX": 70,
+    "STR": 312,
+    "DEX": 50,
     "INT": 4,
     "LUK": 4
    }
@@ -289,21 +274,6 @@
    "why": ""
   },
   {
-   "level": 20,
-   "slot": "2H Blunt",
-   "item": "Square Hammer",
-   "id": 1422002,
-   "needs": "45 STR, 20 DEX",
-   "attack": 42,
-   "speed": 7,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
    "level": 25,
    "slot": "2H Blunt",
    "item": "Monkey Wrench",
@@ -387,39 +357,10 @@
     "rough": true
    },
    "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "2H Blunt",
-   "item": "The Blessing",
-   "id": 1422008,
-   "needs": "125 STR, 60 DEX",
-   "attack": 85,
-   "speed": 7,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "2H Blunt",
-   "item": "Gigantic Sledge",
-   "id": 1422009,
-   "needs": "145 STR, 70 DEX",
-   "attack": 95,
-   "speed": 7,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -752,24 +693,25 @@
    "levels": "60 to 64",
    "maps": [
     {
-     "map": "The Forest of Evil II",
-     "monsters": [
-      "Malady",
-      "Zombie Lupin"
-     ]
-    },
-    {
-     "map": "The Forest of Evil I",
-     "monsters": [
-      "Malady",
-      "Zombie Lupin"
-     ]
-    },
-    {
      "map": "Hot Sand",
      "monsters": [
       "Tortie",
       "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
      ]
     }
    ],
@@ -779,24 +721,27 @@
    "levels": "65 to 70",
    "maps": [
     {
-     "map": "Camp 3",
+     "map": "Another Sanctuary",
      "monsters": [
-      "Officer Skeleton",
-      "Skeleton Soldier"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Jr. Boogie 1"
      ]
     },
     {
-     "map": "Camp 2",
+     "map": "Dilapidated Tomb",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Rotten Mushroom",
+      "Sporewood",
+      "Fairy 2"
      ]
     },
     {
-     "map": "Camp 1",
+     "map": "Dangerous Valley II",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Red Drake",
+      "Fire Boar",
+      "Copper Drake"
      ]
     }
    ],
@@ -806,15 +751,16 @@
  "why": [
   "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
   "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
-  "Blunt Weapon Mastery 5 opens Blunt Weapon Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
-  "Final Attack: Blunt Weapon 1 goes in at 32: a 25% chance when you attack to open a 60 second window for one extra 270% hit. 1 point already gets the full chance.",
-  "Blunt Weapon Mastery 20 comes next. At 40 those 15 points raise your average hit about 30%, because mastery lifts your lowest hits, and they're +20% critical damage.",
-  "Final Attack points 2 to 30 take that hit from 270% to 360%, so they come right after Mastery.",
+  "Blunt Weapon Mastery 5 opens Blunt Weapon Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Blunt Weapon 1 goes in at 32: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on one mob for 270%. 1 point already gets the full chance.",
+  "Blunt Weapon Mastery 20 comes next. At 40 those 15 points raise your average hit about 31%, because mastery lifts your lowest hits, and they're +20% critical damage.",
+  "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
+  "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
   "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
-  "2-handed blunt weapons need DEX equal to their level from Heavy Mace at 15, except Monkey Wrench at 25. AP only goes into DEX in the levels right before each new blunt weapon, everything else goes into STR."
+  "Two-handed blunt weapons need DEX equal to their level from Heavy Mace at 15, except Monkey Wrench at 25. AP only goes into DEX on the levels you need it for each new blunt weapon, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Blunt Weapon Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
   "Forgetting DEX for Heavy Mace. It needs 15 DEX at 15, so put your AP from 14 and 15 into DEX, or you stay on the Wooden Mallet's 32 attack instead of 40.",
   "Buying a sword with a blunt build. Blunt Weapon Mastery, Booster and Final Attack: Blunt Weapon only work with a blunt weapon, so you lose most of 2nd job."
@@ -833,7 +779,7 @@
   {
    "build": "Fighter, axe",
    "best_at": "Rage for the party",
-   "weak": "Final Attack only 200%"
+   "weak": "Final Attack 200% on 3 mobs, not 360% on 1"
   }
  ],
  "future": [
@@ -846,5 +792,15 @@
  "search": {
   "title": "Page, blunt weapon Build Guide: AP and SP | Club FM",
   "description": "MapleStory Classic page, blunt weapon build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
- }
+ },
+ "variants": [
+  {
+   "label": "Two-handed",
+   "slug": "page-blunt"
+  },
+  {
+   "label": "One-handed and shield",
+   "slug": "page-blunt-1h"
+  }
+ ]
 }

@@ -19,6 +19,25 @@ SK = json.load(open(os.path.join(ROOT, "assets", "classic-skills.json")))
 SKILL = {v["n"] + "|" + str(v["job"]): (int(k), v) for k, v in SK["skills"].items()}
 ROWS = {r["item"]: r for r in json.loads(urllib.request.urlopen(LIVE + "summary-public.json", timeout=60).read())["rows"]}
 K = ["STR", "DEX", "INT", "LUK"]
+GUIDE = json.loads(urllib.request.urlopen(LIVE + "itemguide.json", timeout=60).read())["items"]
+
+
+def obtainable(n):
+    """a weapon a player can get today: an NPC sells it, a mob drops it, it can be crafted or a quest gives it, or it has
+    been seen on the FM. Level 60 and 70 weapons have none of these in Classic World (that gear comes with Orbis and
+    El Nath, which aren't out), so a guide never sends anyone after them."""
+    g = GUIDE.get(n) or {}
+    return bool(g.get("s") or g.get("d") or g.get("c") or g.get("q") or (ROWS.get(n) or {}).get("typ"))
+
+
+GEAR_NOTE = "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70."
+
+
+def usable(b):
+    """the build with weapons nobody can get taken out of its ladder, and a note when that happened"""
+    keep = [(lv, n) for lv, n in b["weapons"] if obtainable(n)]
+    gone = [(lv, n) for lv, n in b["weapons"] if not obtainable(n)]
+    return dict(b, weapons=keep, gone=gone)
 
 
 def sid(name, job):
@@ -53,7 +72,7 @@ SPEAR = {
                 (45, "Bamboo Spear"), (50, "Serpent's Tongue"), (60, "Holy Spear"), (70, "Redemption")],
     "first": [("Power Strike", 20), ("Slash Blast", 20), ("Precise Strikes", 15), ("Improved HP Recovery", 5), ("Max HP Increase", 1)],
     "second": [("Spear Mastery", 5), ("Spear Booster", 1), ("Final Attack: Spear", 1), ("Rush", 1), ("Spear Mastery", 20), ("Final Attack: Spear", 30), ("Spear Booster", 20), ("Rush", 20), ("Iron Will", 30)],
-    "jobs": (100, 130), "adv": [(10, "Warrior", "Perion, Dances with Balrog", "Level 10 and 35 STR", "1 SP. Power Strike and Slash Blast open."),
+    "jobs": (100, 130), "adv": [(10, "Warrior", "Perion, Dances with Balrog", "Level 10", "1 SP. Power Strike and Slash Blast open."),
                                 (30, "Spearman", "Perion, Dances with Balrog", "Level 30", "Pick Spearman. Spear and polearm skills open.")],
     "third": "Dragon Knight",
 }
@@ -63,24 +82,24 @@ POLE = dict(SPEAR, slug="spearman-polearm", name="Spearman, polearm", w="Polearm
             second=[("Polearm Mastery", 5), ("Polearm Booster", 1), ("Final Attack: Polearm", 1), ("Rush", 1), ("Polearm Mastery", 20), ("Final Attack: Polearm", 30), ("Polearm Booster", 20), ("Rush", 20), ("Iron Will", 30)])
 ASSASSIN = {
     "slug": "assassin", "name": "Assassin", "cls": "Thief", "job": "Assassin", "w": "Claw", "main": "LUK", "sub": "DEX",
-    "creation": {"STR": 4, "DEX": 5, "INT": 4, "LUK": 12}, "early": 25,
+    "creation": {"STR": 4, "DEX": 5, "INT": 4, "LUK": 12}, "early": None,
     "weapons": [(10, "Garnier"), (15, "Mithril Titans"), (20, "Adamantium Igor"), (25, "Meba"), (30, "Adamantium Guards"), (35, "Silver Guardian"),
                 (40, "Blood Avarice"), (50, "Steel Slain"), (60, "Blood Gigantic"), (70, "Green Scarab")],
     "first": [("Lucky Seven", 20), ("Nimble Body", 15), ("Keen Eyes", 15), ("Disorder", 3), ("Dark Sight", 8)],
     "second": [("Claw Mastery", 5), ("Claw Booster", 1), ("Claw Mastery", 20), ("Critical Throw", 30), ("Haste", 20), ("Critical Recovery", 3), ("Drain", 30), ("Claw Booster", 18)],
-    "jobs": (400, 410), "adv": [(10, "Thief", "Kerning City, Dark Lord", "Level 10 and 25 DEX", "1 SP. Lucky Seven and Double Stab open."),
+    "jobs": (400, 410), "adv": [(10, "Thief", "Kerning City, Dark Lord", "Level 10", "1 SP. Lucky Seven and Double Stab open."),
                                 (30, "Assassin", "Kerning City, Dark Lord", "Level 30", "Pick Assassin. Claw skills open.")],
     "third": "Hermit",
 }
 BANDIT = {
     "slug": "pure-bandit", "name": "Pure Bandit", "cls": "Thief", "job": "Bandit", "w": "Dagger", "main": "LUK", "sub": "DEX",
-    "creation": {"STR": 4, "DEX": 5, "INT": 4, "LUK": 12}, "early": 25,
+    "creation": {"STR": 4, "DEX": 5, "INT": 4, "LUK": 12}, "early": None,
     "weapons": [(10, "Triangular Zamadar"), (15, "Field Dagger"), (20, "Coconut Knife"), (27, "Forked Dagger"), (30, "Reef Claw"), (40, "Korean Fan"),
                 (50, "Shinkita"), (60, "Deadly Fin"), (70, "Kandine")],
     "first": [("Double Stab", 20), ("Nimble Body", 15), ("Disorder", 3), ("Dark Sight", 20), ("Disorder", 6)],
     "second": [("Dagger Mastery", 5), ("Dagger Booster", 1), ("Savage Blow", 21), ("Dagger Mastery", 20), ("Savage Blow", 30), ("Haste", 5), ("Steal", 30),
                ("Dagger Booster", 20), ("Haste", 20)],
-    "jobs": (400, 420), "adv": [(10, "Thief", "Kerning City, Dark Lord", "Level 10 and 25 DEX", "1 SP. Lucky Seven and Double Stab open."),
+    "jobs": (400, 420), "adv": [(10, "Thief", "Kerning City, Dark Lord", "Level 10", "1 SP. Lucky Seven and Double Stab open."),
                                 (30, "Bandit", "Kerning City, Dark Lord", "Level 30", "Pick Bandit, not Assassin. Dagger skills open.")],
     "third": "Chief Bandit",
 }
@@ -92,7 +111,7 @@ HUNTER = {
     "first": [("Arrow Blow", 20), ("Critical Shot", 15), ("The Eye of Amazon", 3), ("Focus", 20), ("The Eye of Amazon", 6)],
     "second": [("Bow Mastery", 5), ("Bow Booster", 1), ("Final Attack: Bow", 1), ("Bow Mastery", 20), ("Arrow Bomb", 30), ("Final Attack: Bow", 30),
                ("Bow Booster", 5), ("Soul Arrow: Bow", 1), ("Bow Booster", 20), ("Soul Arrow: Bow", 20)],
-    "jobs": (300, 310), "adv": [(10, "Bowman", "Henesys, Athena Pierce", "Level 10 and 25 DEX", "1 SP. Arrow Blow and Double Shot open."),
+    "jobs": (300, 310), "adv": [(10, "Bowman", "Henesys, Athena Pierce", "Level 10", "1 SP. Arrow Blow and Double Shot open."),
                                 (30, "Hunter", "Henesys, Athena Pierce", "Level 30", "Pick Hunter. Bow skills open.")],
     "third": "Ranger",
 }
@@ -103,12 +122,13 @@ BUILDS = [SPEAR, POLE, ASSASSIN, BANDIT, HUNTER]
 def plan_stats(b):
     """AP for every level 1 to 70: the sub stat to the job's level 10 need first (thieves), then up to each weapon's
     requirement as late as possible, everything else into the main stat."""
-    main, sub = K.index(b["main"]), K.index(b["sub"])
+    main, sub = K.index(b["main"]), K.index(b.get("raise", b["sub"]))
     targets = []   # (first level, last level, value) for the sub stat
     if b["early"]: targets.append((2, 9, b["early"]))
-    have = b["creation"][b["sub"]] + (0 if not b["early"] else b["early"] - b["creation"][b["sub"]])
+    rs = b.get("raise", b["sub"])
+    have = b["creation"][rs] + (0 if not b["early"] else b["early"] - b["creation"][rs])
     for lv, n in b["weapons"]:
-        need = WPN[n].get("req" + b["sub"]) or 0
+        need = WPN[n].get("req" + rs) or 0
         if need > have:
             k = math.ceil((need - have) / 5); targets.append((lv - k + 1, lv, need)); have = need
     st = {1: [b["creation"][x] for x in K]}
@@ -117,7 +137,7 @@ def plan_stats(b):
         hit = next((v for a, z, v in targets if a <= L <= z), None)
         if hit: goal = hit
         s = list(st[L - 1]); a = max(0, min(5, goal - s[sub])); s[sub] += a; s[main] += 5 - a; st[L] = s
-    assert sum(st[1]) == 25 and min(st[1]) >= 4 and st[1][sub] == 5
+    assert sum(st[1]) == 25 and min(st[1]) >= 4 and st[1][K.index(b["sub"])] == 5
     for lv, n in b["weapons"]:   # every weapon wearable the level the guide hands it to you
         w = WPN[n]; s = st[lv]
         assert lv >= (w.get("reqLevel") or 0), (n, lv)
@@ -127,8 +147,8 @@ def plan_stats(b):
     for a, z, v in targets:
         if a < 10: continue
         n = next(n for lv, n in b["weapons"] if lv == z)
-        rules.append({"levels": f"{a} to {z}" if a != z else str(z), "ap": f"all {b['sub']} (to {v})" if z - a >= 1 or (v - st[a - 1][sub]) >= 5 else f"{b['sub']} to {v}, rest {b['main']}",
-                      "why": f"{n} at {z} needs {v} {b['sub']}"})
+        rules.append({"levels": f"{a} to {z}" if a != z else str(z), "ap": f"all {b.get('raise', b['sub'])} (to {v})" if z - a >= 1 or (v - st[a - 1][sub]) >= 5 else f"{b.get('raise', b['sub'])} to {v}, rest {b['main']}",
+                      "why": f"{n} at {z} needs {v} {b.get('raise', b['sub'])}"})
     rules.append({"levels": "the rest", "ap": f"all {b['main']}", "why": f"{b['main']} is your damage stat"})
     table = [{"level": L, "STR": st[L][0], "DEX": st[L][1], "INT": st[L][2], "LUK": st[L][3]} for L in (10, 20, 30, 40, 50, 60, 70)]
     return st, rules, table
@@ -206,8 +226,8 @@ def engine(builds, plans):
 
 
 # ------------------------------------------------------------------------------------------------ the words
-FA = "Final Attack: {w} gives a 25% chance when you attack to open a 60 second window for one extra hit that heals you, up to 15% of your max HP. Level 1 is already a 260% hit with the full 25% chance, so 1 point goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit."
-BOOST = "{w} Mastery 5 opens {w} Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait."
+FA = "Final Attack: {w} gives a 25% chance, when you use an attack skill, to unlock Final Attack for 60 seconds. While it's lit you can use it on one mob for 260%, and it heals you, up to 15% of your max HP. 1 point already gets the full 25% chance, so it goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit."
+BOOST = "{w} Mastery 5 opens {w} Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait."
 RUSH = "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage."
 IRONBODY = "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15."
 FIRST_W = [
@@ -256,7 +276,7 @@ TEXT = {
         "why": [
             "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it's your main attack all the way to 70.",
             "Keen Eyes 15 adds range to Lucky Seven, 200 at 15, and needs Nimble Body 3. Nimble Body 15 is +15 accuracy and +15 avoid.",
-            "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
+            "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full attack speed boost. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
             "Critical Throw 30 is 15% critical rate for +35% damage on those hits. 2nd job gives a claw no new attack except Drain, so your damage gains come from this and Claw Mastery.",
             "Haste 20 before Drain: +30 speed and +10 jump for 300 seconds. Drain is a 240% hit on one mob that heals you, and Lucky Seven already does more.",
             "Drain is locked until Critical Recovery is 3, so 3 points go there first.",
@@ -264,13 +284,13 @@ TEXT = {
         ],
         "mistakes": [
             "Buying Kumbi or Tobi stars to level. Kumbi is +4 attack over Wolbi, 21 against 17, for a lot more mesos. Wolbi from Max in Kerning City is all you need.",
-            "Skipping DEX before a new claw. Steel Slain needs 50 DEX at 50, so put your AP from 49 and 50 into DEX, or you stay on Blood Avarice's 29 attack instead of 34. Same at 59 and 60 for Blood Gigantic.",
+            "Skipping DEX before a new claw. Steel Slain needs 50 DEX at 50, so put your AP from 49 and 50 into DEX, or you stay on Blood Avarice's 29 attack instead of 34.",
             "Maxing Claw Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's up to 19 SP, over 6 levels, that belongs in Claw Mastery and Critical Throw.",
             "Putting SP into Double Stab. It only works with a dagger, so a claw Assassin never uses it. Those points belong in Lucky Seven.",
         ],
     },
     "pure-bandit": {
-        "pitch": "LUK with 25 DEX and a dagger from 10. Double Stab in 1st job, then Savage Blow, and a Korean Fan at 40.",
+        "pitch": "LUK with DEX only to each dagger's need. Double Stab in 1st job, then Savage Blow, and a Korean Fan at 40.",
         "best": ["Double Stab from level 10", "Savage Blow hits 6 times a cast from 21 points", "Korean Fan needs no DEX"],
         "weak": ["Melee: you walk to every mob and take hits", "Savage Blow and Double Stab hit one mob", "DEX for daggers from 47"],
         "why": [
@@ -296,7 +316,7 @@ TEXT = {
             "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
             "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
             "The last 3 points of 1st job go into The Eye of Amazon, 6 in all, for +15 range on every bow attack.",
-            "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full 2 steps of speed. Final Attack: Bow 1 opens a 25% chance of an extra hit on up to 3 mobs, so it goes in early too.",
+            "Bow Mastery 5 opens Bow Booster, and Booster 1 is already the full attack speed boost. Final Attack: Bow 1 opens a 25% chance of an extra hit on up to 3 mobs, so it goes in early too.",
             "Arrow Bomb 30 hits up to 6 mobs for 130% with a 60% chance to stun. It's your only attack for groups, so it comes right after Mastery 20.",
             "Soul Arrow needs Booster 5 and only saves arrows that cost 1 meso, so both wait until after Final Attack.",
             "Bows need STR equal to their level from Composite Bow at 15. AP only goes into STR in the levels right before each new bow, everything else goes into DEX.",
@@ -329,7 +349,7 @@ def build_json(b, st, rules, table, order, eng):
     train = []
     for a, z in BANDS:
         e = eng[b["slug"]].get(str(a)) or {}
-        maps = [{"map": m["map"], "monsters": m["monsters"][:3]} for m in (e.get("maps") or [])]
+        maps = [{"map": m["map"], "monsters": m["monsters"][:3]} for m in (e.get("maps") or [])[:3]]
         if maps: train.append({"levels": f"{a} to {z}", "maps": maps, "tip": ""})
     comp = []
     for nm, best, weak in COMPARE[b["slug"]]:
@@ -340,10 +360,10 @@ def build_json(b, st, rules, table, order, eng):
                    "best_at": t["best"], "weak_spots": t["weak"], "difficulty": "Easy" if b["w"] in ("Claw", "Bow") else "Medium",
                    "level_range": "1 to 70", "game_version": VERSION,
                    "gear_cost": {"to_level_50": {"mesos": cost, "shown": "about " + mesos(cost)}, "note": "weapons to 50 at typical FM prices"}},
-        "creation": {"stats": b["creation"], "main": b["main"], "sub": b["sub"], "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"},
+        "creation": {"stats": b["creation"], "main": b["main"], "sub": b["sub"], **({"raise": b["raise"]} if b.get("raise") else {}), "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"},
         "stat_plan": {"rule": rules, "table": table},
         "skill_order": [dict(s, why="") for s in order],
-        "gear": gear, "gear_optional": [],
+        "gear": gear, "gear_optional": [], "gear_note": GEAR_NOTE if b.get("gone") else "",
         "advancement": [{"level": a, "job": j, "where": w, "needs": n, "gets": g} for a, j, w, n, g in b["adv"]] + [{"level": "3rd job", "job": b["third"], "where": "not in Classic World yet", "needs": "", "gets": ""}],
         "resets": [{"what": "SP Reset Scroll", "when": "not needed", "cost": None, "worth_it": "No", "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."},
                    {"what": "AP Reset Scroll", "when": "only to fix a wrong stat", "cost": None, "worth_it": "Rarely", "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."},
@@ -356,6 +376,8 @@ def build_json(b, st, rules, table, order, eng):
 
 
 def main():
+    global BUILDS
+    BUILDS = [usable(b) for b in BUILDS]
     plans, out = {}, {}
     for b in BUILDS:
         st, rules, table = plan_stats(b)

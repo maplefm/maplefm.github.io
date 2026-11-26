@@ -11,7 +11,7 @@
    "Final Attack: Sword hits 3 mobs"
   ],
   "weak_spots": [
-   "Rage lowers your own weapon defense by 40",
+   "Rage also lowers weapon defense, by 40 at 30",
    "DEX has to match your level from 20"
   ],
   "difficulty": "Medium",
@@ -19,8 +19,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 638619,
-    "shown": "about 639K"
+    "mesos": 86175,
+    "shown": "about 86K"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -54,12 +54,7 @@
     "why": "Broadsword at 25 needs 25 DEX"
    },
    {
-    "levels": "30",
-    "ap": "all DEX (to 30)",
-    "why": "Scimitar at 30 needs 30 DEX"
-   },
-   {
-    "levels": "35",
+    "levels": "34 to 35",
     "ap": "all DEX (to 35)",
     "why": "Lionheart at 35 needs 35 DEX"
    },
@@ -72,21 +67,6 @@
     "levels": "45",
     "ap": "all DEX (to 45)",
     "why": "Blade of Harmony at 45 needs 45 DEX"
-   },
-   {
-    "levels": "50",
-    "ap": "all DEX (to 50)",
-    "why": "Lion's Fang at 50 needs 50 DEX"
-   },
-   {
-    "levels": "59 to 60",
-    "ap": "all DEX (to 60)",
-    "why": "Sparta at 60 needs 60 DEX"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all DEX (to 70)",
-    "why": "Doombringer at 70 needs 70 DEX"
    },
    {
     "levels": "the rest",
@@ -111,8 +91,8 @@
    },
    {
     "level": 30,
-    "STR": 132,
-    "DEX": 30,
+    "STR": 137,
+    "DEX": 25,
     "INT": 4,
     "LUK": 4
    },
@@ -125,22 +105,22 @@
    },
    {
     "level": 50,
-    "STR": 212,
-    "DEX": 50,
+    "STR": 217,
+    "DEX": 45,
     "INT": 4,
     "LUK": 4
    },
    {
     "level": 60,
-    "STR": 252,
-    "DEX": 60,
+    "STR": 267,
+    "DEX": 45,
     "INT": 4,
     "LUK": 4
    },
    {
     "level": 70,
-    "STR": 292,
-    "DEX": 70,
+    "STR": 317,
+    "DEX": 45,
     "INT": 4,
     "LUK": 4
    }
@@ -340,16 +320,16 @@
   {
    "level": 30,
    "slot": "2H Sword",
-   "item": "Scimitar",
-   "id": 1402005,
-   "needs": "65 STR, 30 DEX",
-   "attack": 53,
-   "speed": 6,
+   "item": "Aluminum Baseball Bat",
+   "id": 1402004,
+   "needs": "55 STR",
+   "attack": 50,
+   "speed": 5,
    "price": {
-    "typical": 8944,
-    "shown": "8,944",
+    "typical": 6500,
+    "shown": "6,500",
     "basis": "3d",
-    "sales_seen": 29,
+    "sales_seen": 15,
     "rough": true
    },
    "why": ""
@@ -404,56 +384,10 @@
     "rough": true
    },
    "why": ""
-  },
-  {
-   "level": 50,
-   "slot": "2H Sword",
-   "item": "Lion's Fang",
-   "id": 1402008,
-   "needs": "105 STR, 50 DEX",
-   "attack": 73,
-   "speed": 6,
-   "price": {
-    "typical": 550000,
-    "shown": "550K",
-    "basis": "3d",
-    "sales_seen": 14,
-    "rough": true
-   },
-   "why": ""
-  },
-  {
-   "level": 60,
-   "slot": "2H Sword",
-   "item": "Sparta",
-   "id": 1402009,
-   "needs": "125 STR, 60 DEX",
-   "attack": 83,
-   "speed": 6,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
-  },
-  {
-   "level": 70,
-   "slot": "2H Sword",
-   "item": "Doombringer",
-   "id": 1402010,
-   "needs": "145 STR, 70 DEX",
-   "attack": 93,
-   "speed": 6,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": ""
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -634,10 +568,10 @@
      ]
     },
     {
-     "map": "The Burnt Land III",
+     "map": "Excavation Site III",
      "monsters": [
-      "Fire Boar",
-      "Dark Axe Stump"
+      "Rocky Mask",
+      "Wooden Mask"
      ]
     }
    ],
@@ -774,11 +708,10 @@
      ]
     },
     {
-     "map": "Remains (Tomb) II",
+     "map": "Hot Sand",
      "monsters": [
-      "Skeledog",
-      "Mummydog",
-      "Skeleton Soldier"
+      "Tortie",
+      "Clang"
      ]
     }
    ],
@@ -788,24 +721,25 @@
    "levels": "60 to 64",
    "maps": [
     {
-     "map": "Camp 1",
+     "map": "The Forest of Evil II",
      "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
+      "Malady",
+      "Zombie Lupin"
      ]
     },
     {
-     "map": "Camp 3",
+     "map": "The Forest of Evil I",
      "monsters": [
-      "Officer Skeleton",
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) II",
+     "monsters": [
+      "Skeledog",
+      "Mummydog",
       "Skeleton Soldier"
-     ]
-    },
-    {
-     "map": "Camp 2",
-     "monsters": [
-      "Skeleton Soldier",
-      "Officer Skeleton"
      ]
     }
    ],
@@ -842,18 +776,18 @@
  "why": [
   "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
   "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
-  "Sword Mastery 5 opens Sword Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
-  "Rage 1 goes in at 32: it's already +10 attack for 150 seconds for 1 SP, about +20% damage on a 53 attack Scimitar.",
-  "Sword Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 30%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Zard. Per point Mastery is worth more, and it's +20 accuracy too.",
-  "Final Attack: Sword 1 goes in early: a 25% chance when you attack to open a 60 second window for one extra hit on up to 3 mobs, 140% at 1. Points 2 to 30 raise it to 200%.",
+  "Sword Mastery 5 opens Sword Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Rage 1 goes in at 32: it's already +10 attack for 150 seconds for 1 SP, about +20% damage on a 50 attack Aluminum Baseball Bat.",
+  "Sword Mastery 20 comes before the rest of Rage. At 40 those 15 points raise your average hit about 31%, because mastery lifts your lowest hits; the other 29 points of Rage add 30 attack, about 43% on a 60 attack Zard. Per point Mastery is worth more, and it's +20 accuracy too.",
+  "Final Attack: Sword 1 goes in early: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on up to 3 mobs for 140%. Points 2 to 30 raise that to 200%.",
   "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come last.",
-  "2-handed swords need DEX equal to their level from Two-Handed Sword at 20, except Wooden Baseball Bat at 15. AP only goes into DEX in the levels right before each new sword, everything else goes into STR."
+  "Two-handed swords need DEX equal to their level from Two-Handed Sword at 20, except the Wooden Baseball Bat at 15 and Aluminum Baseball Bat at 30. AP only goes into DEX on the levels you need it for each new sword, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
   "Maxing Sword Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Rage.",
   "Forgetting DEX before 20. Two-Handed Sword needs 20 DEX at 20, so put your AP from 18 to 20 into DEX, or you stay on the Wooden Baseball Bat's 35 attack instead of 40.",
-  "Leaving Rage at 0 until later. Its first point is +10 attack, about 20% on a Scimitar, for 1 SP."
+  "Leaving Rage at 0 until later. Its first point is +10 attack, about 20% on an Aluminum Baseball Bat, for 1 SP."
  ],
  "compare": [
   {
@@ -882,5 +816,15 @@
  "search": {
   "title": "Fighter, sword Build Guide: AP and SP | Club FM",
   "description": "MapleStory Classic fighter, sword build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
- }
+ },
+ "variants": [
+  {
+   "label": "Two-handed",
+   "slug": "fighter-sword"
+  },
+  {
+   "label": "One-handed and shield",
+   "slug": "fighter-sword-1h"
+  }
+ ]
 }

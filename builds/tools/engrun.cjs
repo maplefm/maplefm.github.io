@@ -20,7 +20,7 @@ for (const [build, list] of Object.entries(CH)) {
     if (b.maps) {
       const rk = E.rankMaps(b, W);
       // maps under 15 spawns rank well on paper but get crowded or empty fast, so they are left out
-      r.maps = rk.fit.filter((h) => (h.all || 0) >= 15).slice(0, 3).map((h) => ({ map: h.pg, exp_h: Math.round(h.eph), spawns: h.all, monsters: ((W.maps[h.pg] || {}).mobs || []).map((m) => m[0]) }));
+      r.maps = rk.fit.filter((h) => (h.all || 0) >= 15).slice(0, 6).map((h) => ({ map: h.pg, exp_h: Math.round(h.eph), spawns: h.all, monsters: ((W.maps[h.pg] || {}).mobs || []).map((m) => m[0]) }));
     }
     out[build][b.lv] = r;
   }

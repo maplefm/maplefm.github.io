@@ -8,7 +8,7 @@
   "best_at": [
    "Heal hurts undead mobs, up to 6",
    "Holy Arrow hits undead harder",
-   "Parties want a Cleric"
+   "Heal and Bless help the whole party"
   ],
   "weak_spots": [
    "Heal only hurts undead mobs",
@@ -19,8 +19,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 2629995,
-    "shown": "about 2.6M"
+    "mesos": 149997,
+    "shown": "about 150K"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -69,21 +69,6 @@
     "why": "Fairy Wand at 40 needs 30 LUK"
    },
    {
-    "levels": "44 to 45",
-    "ap": "all LUK (to 40)",
-    "why": "Arc Staff at 45 needs 40 LUK"
-   },
-   {
-    "levels": "58 to 60",
-    "ap": "all LUK (to 55)",
-    "why": "Evil Tale at 60 needs 55 LUK"
-   },
-   {
-    "levels": "69 to 70",
-    "ap": "all LUK (to 65)",
-    "why": "Angel Wings at 70 needs 65 LUK"
-   },
-   {
     "levels": "the rest",
     "ap": "all INT",
     "why": "INT is your damage stat"
@@ -122,22 +107,22 @@
     "level": 50,
     "STR": 4,
     "DEX": 4,
-    "INT": 222,
-    "LUK": 40
+    "INT": 232,
+    "LUK": 30
    },
    {
     "level": 60,
     "STR": 4,
     "DEX": 4,
-    "INT": 257,
-    "LUK": 55
+    "INT": 282,
+    "LUK": 30
    },
    {
     "level": 70,
     "STR": 4,
     "DEX": 4,
-    "INT": 297,
-    "LUK": 65
+    "INT": 332,
+    "LUK": 30
    }
   ]
  },
@@ -148,6 +133,14 @@
    "skill": "Energy Bolt",
    "id": 2001002,
    "to": 20,
+   "why": ""
+  },
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Magic Guard",
+   "id": 2001000,
+   "to": 1,
    "why": ""
   },
   {
@@ -233,9 +226,9 @@
   {
    "level": 70,
    "book": "2nd job",
-   "skill": "Teleport",
-   "id": 2301000,
-   "to": 16,
+   "skill": "Invincible",
+   "id": 2301002,
+   "to": 20,
    "why": ""
   }
  ],
@@ -365,77 +358,10 @@
    },
    "why": "",
    "akind": "magic attack"
-  },
-  {
-   "level": 45,
-   "slot": "Staff",
-   "item": "Arc Staff",
-   "id": 1382005,
-   "needs": "90 INT, 40 LUK",
-   "attack": 73,
-   "speed": null,
-   "price": {
-    "typical": 179999,
-    "shown": "180K",
-    "basis": "clean",
-    "sales_seen": 40,
-    "rough": false
-   },
-   "why": "",
-   "akind": "magic attack"
-  },
-  {
-   "level": 50,
-   "slot": "Wand",
-   "item": "Cromi",
-   "id": 1372007,
-   "needs": "100 INT, 40 LUK",
-   "attack": 83,
-   "speed": null,
-   "price": {
-    "typical": 2299999,
-    "shown": "2.3M",
-    "basis": "hovered",
-    "sales_seen": 31,
-    "rough": false
-   },
-   "why": "",
-   "akind": "magic attack"
-  },
-  {
-   "level": 60,
-   "slot": "Wand",
-   "item": "Evil Tale",
-   "id": 1372009,
-   "needs": "120 INT, 55 LUK",
-   "attack": 97,
-   "speed": null,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": "",
-   "akind": "magic attack"
-  },
-  {
-   "level": 70,
-   "slot": "Wand",
-   "item": "Angel Wings",
-   "id": 1372010,
-   "needs": "140 INT, 65 LUK",
-   "attack": 111,
-   "speed": null,
-   "price": {
-    "typical": null,
-    "shown": "not seen on the FM yet",
-    "basis": null
-   },
-   "why": "",
-   "akind": "magic attack"
   }
  ],
  "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear comes with Orbis and El Nath. Keep the last weapon on this list to 70.",
  "advancement": [
   {
    "level": 10,
@@ -818,20 +744,22 @@
   }
  ],
  "why": [
-  "Energy Bolt 20 is 130 magic on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
-  "Improved MP Recovery 15 makes MP potions heal 25% more, and Max MP Increase 15 is +25% max MP. Mages live on MP potions, so that's straight mesos saved every hour.",
-  "The last 11 points of 1st job go into Magic Guard: at 11 it sends 68% of the damage you take to MP instead of HP. Turn it on for mobs that hit hard, like Wraiths.",
+  "Energy Bolt 20 is damage 130 on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
+  "Magic Guard 1 goes in at 18: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
+  "Improved MP Recovery 15 makes MP potions heal 25% more, so every potion goes 25% further. Max MP Increase 15 is +25% max MP.",
   "Teleport 1 and Heal 1 go in at 30 and 31: getting around, and a heal for you and your party.",
-  "Holy Arrow 30 first: 160 magic on one mob, more on undead. In our damage engine, Holy Arrow first trains about 22% faster at 40 than Heal first, 73.7K EXP an hour against 60.4K.",
-  "Heal 30 next: it hits every undead mob around you, up to 6, and heals your party. On Jr. Wraith and Zombie Mushroom maps that's your best attack.",
-  "Invincible 5 opens Bless. Bless 20 cuts the damage your whole party takes by 10% for 300 seconds.",
-  "Wands need LUK from Metal Wand at 20: 10 LUK there, 40 at 50 and 65 at 70. AP only goes into LUK in the levels right before each new wand, everything else goes into INT."
+  "Holy Arrow 30 first: damage 160 on one mob against Energy Bolt's 130, more on undead. In our damage engine it takes over from Energy Bolt by 40; Heal first leaves you casting Energy Bolt until 50.",
+  "Heal 30 next: it hits up to 6 undead mobs around you and heals your party. On Jr. Wraith maps it hits every Wraith in range at once.",
+  "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions.",
+  "Invincible 5 opens Bless, and Bless 20 cuts the damage your whole party takes for 300 seconds. The last 15 points take Invincible to 20, 20% less physical damage for you.",
+  "Wands need LUK from Metal Wand at 20: 10 LUK there, 30 for Fairy Wand at 40. AP only goes into LUK on the levels you need it for each new wand, everything else goes into INT.",
+  "Cromi at 50 is about 2% more damage than staying on Fairy Wand, because its 40 LUK costs you 10 INT, and it sells for millions on the FM. It's a luxury, so this guide keeps Fairy Wand."
  ],
  "mistakes": [
-  "Maxing Magic Claw and Energy Bolt both. They do the same damage at max, so the second one is 19 SP wasted that should be in MP Recovery and Max MP.",
+  "Maxing Magic Claw on top of Energy Bolt. Both are 130 at 20, so that's 20 SP for nothing, and Claw costs 20 MP a cast against 16. Put them in MP Recovery and Max MP.",
   "Leveling Heal first and training off undead maps. Heal only hurts undead; anywhere else Holy Arrow is your attack.",
-  "Maxing Invincible. 5 points open Bless; the other 15 only cut physical damage from 5% to 20%.",
-  "Forgetting LUK before Cromi. It needs 40 LUK at 50, so keep LUK at 40 from Arc Staff at 45, or you can't wear it."
+  "Leaving MP Eater at 0. At 20 it's a 50% chance to drain MP from a mob every 5 seconds; without it a Cleric spends more on MP potions than any other mage.",
+  "Forgetting LUK for Fairy Wand. It needs 30 LUK at 40, so put your AP at 40 into LUK, or you stay on Wizard Wand's 62 magic attack instead of 69."
  ],
  "compare": [
   {
