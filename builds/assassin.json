@@ -12,8 +12,7 @@
   ],
   "weak_spots": [
    "Stars cost mesos to recharge",
-   "DEX has to match your level for claws",
-   "Steel Slain at 50 costs about 2.5M"
+   "DEX has to match your level for claws from 15"
   ],
   "difficulty": "Easy",
   "level_range": "1 to 70",

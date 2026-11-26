@@ -134,23 +134,21 @@ def plan_stats(b):
     return st, rules, table
 
 
-PRE = {"Focus": ("The Eye of Amazon", 3), "Drain": ("Critical Recovery", 3), "Slash Blast": ("Power Strike", 1), "Max HP Increase": ("Improved HP Recovery", 3),
-       "Final Attack: Spear": ("Spear Mastery", 3), "Final Attack: Polearm": ("Polearm Mastery", 3), "Final Attack: Bow": ("Bow Mastery", 3),
-       "Spear Booster": ("Spear Mastery", 5), "Polearm Booster": ("Polearm Mastery", 5), "Bow Booster": ("Bow Mastery", 5), "Claw Booster": ("Claw Mastery", 5),
-       "Dagger Booster": ("Dagger Mastery", 5), "Keen Eyes": ("Nimble Body", 3), "Dark Sight": ("Disorder", 3), "Critical Throw": ("Claw Mastery", 3),
-       "Steal": ("Haste", 5), "Soul Arrow: Bow": ("Bow Booster", 5), "Double Shot": ("Arrow Blow", 1)}   # game files, MCW 1.2 skill books
+# skill prerequisites straight from the game files (MCW skill books), saved by the Skill icons workflow
+PRE = {int(k): {int(a): n for a, n in v.items()} for k, v in json.load(open(os.path.join(os.path.dirname(HERE), "data", "prereqs.json")))["skills"].items() if v}
 
 
 def plan_sp(b):
     """the level each step of the order completes, and each skill's points at every level"""
     order = []
     for book, steps, job, start in (("1st job", b["first"], b["jobs"][0], 10), ("2nd job", b["second"], b["jobs"][1], 30)):
-        have, spent = {}, 0
+        have, haveid, spent = {}, {}, 0
         for n, to in steps:
             i, rec = SKILL[f"{n}|{job}"]
             assert to <= rec["max"], (n, to, rec["max"])
-            if n in PRE: assert have.get(PRE[n][0], 0) >= PRE[n][1], (b["slug"], n, "needs", PRE[n])
-            spent += to - have.get(n, 0); have[n] = to
+            for need, lvl in PRE.get(int(i), {}).items():
+                assert haveid.get(need, 0) >= lvl, (b["slug"], n, "needs skill", need, "at", lvl)
+            spent += to - have.get(n, 0); have[n] = to; haveid[int(i)] = to
             pts = lambda L: 1 + 3 * ((min(L, 30) if book == "1st job" else L) - start)
             L = next((L for L in range(start, CAP + 1) if pts(L) >= spent), None)
             assert L, (b["slug"], n, to, "needs more SP than 70 gives")
@@ -208,12 +206,12 @@ def engine(builds, plans):
 
 
 # ------------------------------------------------------------------------------------------------ the words
-FA = "Final Attack: {w} has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points only raise that hit from 260% to 350%, so it comes after Mastery 20."
+FA = "Final Attack: {w} has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points raise that hit from 260% to 350% and the HP it drains from 5% to 10% of the damage, so it comes after Mastery 20."
 TEXT = {
     "spearman-spear": {
         "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast 20 by level 23, then Spear Mastery, Final Attack and Rush.",
-        "best": ["Slash Blast hits 6 mobs from level 10", "Spears cost under 100K all the way to 50", "Final Attack: Spear hits for 350%"],
-        "weak": ["Spears are slow, speed 6 to 7", "DEX has to match your level from 30"],
+        "best": ["Slash Blast hits 6 mobs from level 10", "Spears are a step faster than polearms, speed 6 to 7", "Final Attack: Spear hits for 350%"],
+        "weak": ["Spears hit a little softer than polearms until 70", "DEX has to match your level from 30"],
         "why": [
             "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
             "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
@@ -232,7 +230,7 @@ TEXT = {
     "spearman-polearm": {
         "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast 20 by level 23, then Polearm Mastery, Final Attack and Rush.",
         "best": ["Slash Blast hits 6 mobs from level 10", "Polearms hit harder than spears up to 60", "Final Attack: Polearm hits for 350%"],
-        "weak": ["Slowest weapons, speed 7 to 8", "The Nine Dragons costs a lot at 50", "DEX has to match your level from 30"],
+        "weak": ["Slowest weapons, speed 7 to 8", "DEX from 15, and equal to your level from 30"],
         "why": [
             "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
             "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
@@ -251,7 +249,7 @@ TEXT = {
     "assassin": {
         "pitch": "LUK with DEX only to each claw's need. Lucky Seven from 10, then Claw Mastery, Critical Throw and Haste.",
         "best": ["Ranged from level 10", "Hits mobs on other platforms", "Lucky Seven carries you all the way to 70"],
-        "weak": ["Stars cost mesos to recharge", "DEX has to match your level for claws", "Steel Slain at 50 costs about 2.5M"],
+        "weak": ["Stars cost mesos to recharge", "DEX has to match your level for claws from 15"],
         "why": [
             "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it's your main attack all the way to 70.",
             "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",

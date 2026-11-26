@@ -7,11 +7,11 @@
   "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast 20 by level 23, then Spear Mastery, Final Attack and Rush.",
   "best_at": [
    "Slash Blast hits 6 mobs from level 10",
-   "Spears cost under 100K all the way to 50",
+   "Spears are a step faster than polearms, speed 6 to 7",
    "Final Attack: Spear hits for 350%"
   ],
   "weak_spots": [
-   "Spears are slow, speed 6 to 7",
+   "Spears hit a little softer than polearms until 70",
    "DEX has to match your level from 30"
   ],
   "difficulty": "Medium",
@@ -790,7 +790,7 @@
   "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
   "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
   "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
-  "Final Attack: Spear has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points only raise that hit from 260% to 350%, so it comes after Mastery 20.",
+  "Final Attack: Spear has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points raise that hit from 260% to 350% and the HP it drains from 5% to 10% of the damage, so it comes after Mastery 20.",
   "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
   "Spears need DEX equal to their level from 30. You only put AP in DEX in the levels right before each new spear, everything else goes into STR."
  ],
