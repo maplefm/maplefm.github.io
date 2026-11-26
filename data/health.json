@@ -1,5 +1,5 @@
 {
- "at": 1795656930382,
+ "at": 1795660323917,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -105,17 +105,17 @@
    "behind": 1
   },
   "meisvanni": {
-   "rows24": 159,
-   "room24": 142,
-   "ch24": 142,
+   "rows24": 5,
+   "room24": 5,
+   "ch24": 5,
    "rows7": 3132,
    "room7": 3108,
    "late7": 0,
    "chat24": 1,
    "last": 1795574145,
    "ver": "2026.11.21.1",
-   "lag_median_min": 25.4,
-   "room_rate24": 0.893,
+   "lag_median_min": 22.4,
+   "room_rate24": 1.0,
    "room_rate7": 0.992,
    "late_share7": 0.0,
    "behind": null
@@ -174,7 +174,7 @@
   "service": "active",
   "watching": 10,
   "live_classic": 76,
-  "shops_last_hour": 2231
+  "shops_last_hour": 2029
  },
  "drops": {
   "2026-11-20": {
@@ -196,7 +196,7 @@
    "incomplete upload": 602
   },
   "2026-11-26": {
-   "incomplete upload": 52
+   "incomplete upload": 82
   }
  },
  "rejects": {
