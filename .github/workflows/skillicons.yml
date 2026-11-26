@@ -87,6 +87,32 @@ jobs:
                   print(name, rec, flush=True)
           json.dump(out, open("builds/data/ammo.json", "w"), indent=1)
           PY
+      - run: |
+          python3 - <<'PY'
+          import json, sys, urllib.request
+          sys.path.insert(0, "tools")
+          import mcwver
+          IO = mcwver.base().rstrip("/")
+          UA = {"User-Agent": "maplefm.gg game data"}
+          db = {}
+          for r in json.loads(urllib.request.urlopen("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json", timeout=60).read())["items"]:
+              db.setdefault(r[0], r[1])
+          W = json.load(open("assets/classic-skills.json"))["weapons"]
+          out = {}
+          for kind, rows in W.items():
+              for w in rows:
+                  name = w[0]; iid = db.get(name)
+                  rec = {"kind": kind, "id": iid, "lv": w[1], "watk": w[2], "spd": w[4]}
+                  if iid:
+                      try:
+                          m = json.loads(urllib.request.urlopen(urllib.request.Request(f"{IO}/item/{iid}", headers=UA), timeout=40).read()).get("metaInfo") or {}
+                          rec.update({k: m.get(k) for k in ("reqLevel", "reqSTR", "reqDEX", "reqINT", "reqLUK", "reqJob", "incPAD", "incMAD", "attackSpeed", "tuc", "price", "cash")})
+                      except Exception as e:
+                          rec["err"] = str(e)[:80]
+                  out[name] = rec
+          json.dump(out, open("builds/data/weapons.json", "w"), indent=0)
+          print("weapons", len(out), sum(1 for v in out.values() if "reqLevel" in v))
+          PY
       - run: python3 builds/tools/spotcheck.py
       - run: |
           git config user.name maplefm
