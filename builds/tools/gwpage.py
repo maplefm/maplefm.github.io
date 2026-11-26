@@ -55,13 +55,27 @@ def npc_link(npc):
     return f"/map.html#map={quote(mn)}"
 
 
+def _moblv():
+    import tempfile
+    p = os.path.join(tempfile.gettempdir(), "fm-world.json")
+    if not os.path.exists(p):
+        import urllib.request
+        open(p, "wb").write(urllib.request.urlopen("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/world.json", timeout=120).read())
+    return {n: m["lv"] for n, m in json.load(open(p, encoding="utf-8"))["mobs"].items() if not m.get("variant")}
+
+
+MOBLV = _moblv()
+
+
 def ways(guide, name):
     g = guide.get(name) or {}
     out = []
     for npc, town, price in sorted({(s[0], s[1], s[2]) for s in g.get("s", []) if s[2]}, key=lambda s: s[2])[:2]:
         ts = W.slug(town)
         out.append({"k": "npc", "t": npc, "s": town, "p": price, "u": npc_link(npc) or (f"/map/{ts}/" if exists("map", ts) else "")})
-    for mob, lv in sorted({(x[0], x[1]) for x in g.get("d", []) if x[1]}, key=lambda x: x[1])[:3]:
+    # the monster's own level from world.json; the drop list's level can be a job quest's copy of the monster
+    drops = {(x[0], MOBLV.get(x[0]) or x[1]) for x in g.get("d", []) if x[1]}
+    for mob, lv in sorted(drops, key=lambda x: x[1])[:3]:
         ms = W.slug(mob)
         out.append({"k": "drop", "t": mob, "s": f"Lv {lv}", "u": f"/monster/{ms}/" if exists("monster", ms) else ""})
     for c in g.get("c", [])[:1]:

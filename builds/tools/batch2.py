@@ -51,7 +51,7 @@ SPEAR = {
     "creation": {"STR": 12, "DEX": 5, "INT": 4, "LUK": 4}, "early": None,
     "weapons": [(10, "Spear"), (15, "Fork on a Stick"), (20, "Fish Spear"), (30, "Forked Spear"), (35, "Nakamaki"), (40, "Zeco"),
                 (45, "Bamboo Spear"), (50, "Serpent's Tongue"), (60, "Holy Spear"), (70, "Redemption")],
-    "first": [("Power Strike", 20), ("Slash Blast", 20), ("Improved HP Recovery", 3), ("Max HP Increase", 1), ("Precise Strikes", 15), ("Improved HP Recovery", 5)],
+    "first": [("Power Strike", 20), ("Slash Blast", 20), ("Precise Strikes", 15), ("Improved HP Recovery", 5), ("Max HP Increase", 1)],
     "second": [("Spear Mastery", 5), ("Spear Booster", 1), ("Rush", 1), ("Spear Mastery", 20), ("Final Attack: Spear", 30), ("Spear Booster", 20), ("Rush", 20), ("Iron Will", 30)],
     "jobs": (100, 130), "adv": [(10, "Warrior", "Perion, Dances with Balrog", "Level 10 and 35 STR", "1 SP. Power Strike and Slash Blast open."),
                                 (30, "Spearman", "Perion, Dances with Balrog", "Level 30", "Pick Spearman. Spear and polearm skills open.")],
@@ -67,7 +67,7 @@ ASSASSIN = {
     "weapons": [(10, "Garnier"), (15, "Mithril Titans"), (20, "Adamantium Igor"), (25, "Meba"), (30, "Adamantium Guards"), (35, "Silver Guardian"),
                 (40, "Blood Avarice"), (50, "Steel Slain"), (60, "Blood Gigantic"), (70, "Green Scarab")],
     "first": [("Lucky Seven", 20), ("Nimble Body", 15), ("Keen Eyes", 15), ("Disorder", 3), ("Dark Sight", 8)],
-    "second": [("Claw Mastery", 5), ("Claw Booster", 1), ("Claw Mastery", 20), ("Critical Throw", 30), ("Haste", 20), ("Drain", 30), ("Claw Booster", 20)],
+    "second": [("Claw Mastery", 5), ("Claw Booster", 1), ("Claw Mastery", 20), ("Critical Throw", 30), ("Haste", 20), ("Critical Recovery", 3), ("Drain", 30), ("Claw Booster", 18)],
     "jobs": (400, 410), "adv": [(10, "Thief", "Kerning City, Dark Lord", "Level 10 and 25 DEX", "1 SP. Lucky Seven and Double Stab open."),
                                 (30, "Assassin", "Kerning City, Dark Lord", "Level 30", "Pick Assassin. Claw skills open.")],
     "third": "Hermit",
@@ -78,8 +78,8 @@ BANDIT = {
     "weapons": [(10, "Triangular Zamadar"), (15, "Field Dagger"), (20, "Coconut Knife"), (27, "Forked Dagger"), (30, "Reef Claw"), (40, "Korean Fan"),
                 (50, "Shinkita"), (60, "Deadly Fin"), (70, "Kandine")],
     "first": [("Double Stab", 20), ("Nimble Body", 15), ("Disorder", 3), ("Dark Sight", 20), ("Disorder", 6)],
-    "second": [("Dagger Mastery", 5), ("Dagger Booster", 1), ("Savage Blow", 21), ("Dagger Mastery", 20), ("Savage Blow", 30), ("Dagger Booster", 20),
-               ("Haste", 5), ("Steal", 30), ("Haste", 20)],
+    "second": [("Dagger Mastery", 5), ("Dagger Booster", 1), ("Savage Blow", 21), ("Dagger Mastery", 20), ("Savage Blow", 30), ("Haste", 5), ("Steal", 30),
+               ("Dagger Booster", 20), ("Haste", 20)],
     "jobs": (400, 420), "adv": [(10, "Thief", "Kerning City, Dark Lord", "Level 10 and 25 DEX", "1 SP. Lucky Seven and Double Stab open."),
                                 (30, "Bandit", "Kerning City, Dark Lord", "Level 30", "Pick Bandit, not Assassin. Dagger skills open.")],
     "third": "Chief Bandit",
@@ -89,7 +89,7 @@ HUNTER = {
     "creation": {"STR": 5, "DEX": 12, "INT": 4, "LUK": 4}, "early": None,
     "weapons": [(10, "War Bow"), (15, "Composite Bow"), (20, "Hunter's Bow"), (25, "Battle Bow"), (30, "Ryden"), (35, "Red Viper"), (40, "Vaulter 2000"),
                 (50, "Olympus"), (60, "Asianic Bow"), (70, "Red Hinkel")],
-    "first": [("Arrow Blow", 20), ("Critical Shot", 15), ("Focus", 20), ("Double Shot", 6)],
+    "first": [("Arrow Blow", 20), ("Critical Shot", 15), ("The Eye of Amazon", 3), ("Focus", 20), ("Double Shot", 3)],
     "second": [("Bow Mastery", 5), ("Bow Booster", 5), ("Soul Arrow: Bow", 1), ("Bow Mastery", 20), ("Arrow Bomb", 30), ("Final Attack: Bow", 30),
                ("Bow Booster", 20), ("Soul Arrow: Bow", 20)],
     "jobs": (300, 310), "adv": [(10, "Bowman", "Henesys, Athena Pierce", "Level 10 and 25 DEX", "1 SP. Arrow Blow and Double Shot open."),
@@ -134,6 +134,13 @@ def plan_stats(b):
     return st, rules, table
 
 
+PRE = {"Focus": ("The Eye of Amazon", 3), "Drain": ("Critical Recovery", 3), "Slash Blast": ("Power Strike", 1), "Max HP Increase": ("Improved HP Recovery", 3),
+       "Final Attack: Spear": ("Spear Mastery", 3), "Final Attack: Polearm": ("Polearm Mastery", 3), "Final Attack: Bow": ("Bow Mastery", 3),
+       "Spear Booster": ("Spear Mastery", 5), "Polearm Booster": ("Polearm Mastery", 5), "Bow Booster": ("Bow Mastery", 5), "Claw Booster": ("Claw Mastery", 5),
+       "Dagger Booster": ("Dagger Mastery", 5), "Keen Eyes": ("Nimble Body", 3), "Dark Sight": ("Disorder", 3), "Critical Throw": ("Claw Mastery", 3),
+       "Steal": ("Haste", 5), "Soul Arrow: Bow": ("Bow Booster", 5), "Double Shot": ("Arrow Blow", 1)}   # game files, MCW 1.2 skill books
+
+
 def plan_sp(b):
     """the level each step of the order completes, and each skill's points at every level"""
     order = []
@@ -142,6 +149,7 @@ def plan_sp(b):
         for n, to in steps:
             i, rec = SKILL[f"{n}|{job}"]
             assert to <= rec["max"], (n, to, rec["max"])
+            if n in PRE: assert have.get(PRE[n][0], 0) >= PRE[n][1], (b["slug"], n, "needs", PRE[n])
             spent += to - have.get(n, 0); have[n] = to
             pts = lambda L: 1 + 3 * ((min(L, 30) if book == "1st job" else L) - start)
             L = next((L for L in range(start, CAP + 1) if pts(L) >= spent), None)
@@ -200,104 +208,108 @@ def engine(builds, plans):
 
 
 # ------------------------------------------------------------------------------------------------ the words
+FA = "Final Attack: {w} has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points only raise that hit from 260% to 350%, so it comes after Mastery 20."
 TEXT = {
     "spearman-spear": {
-        "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast to 30, then Spear Mastery, Final Attack and Rush.",
-        "best": ["Slash Blast hits 6 mobs from level 10", "Cheap spears all the way to 50", "Final Attack: Spear hits for 350%"],
-        "weak": ["Misses a lot from 30 to 40", "Slow spears, speed 6 to 7", "DEX = your level from 30"],
+        "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast 20 by level 23, then Spear Mastery, Final Attack and Rush.",
+        "best": ["Slash Blast hits 6 mobs from level 10", "Spears cost under 100K all the way to 50", "Final Attack: Spear hits for 350%"],
+        "weak": ["Spears are slow, speed 6 to 7", "DEX has to match your level from 30"],
         "why": [
-            "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs at 130%. Max both before anything else and you have a single target attack and a mobbing attack by 23.",
-            "Precise Strikes 15 gives +20 accuracy and +5% crit. Warriors miss a lot from 30 to 40, so it goes in before you leave 1st job.",
-            "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer.",
-            "Final Attack: Spear 30 swings again for 350% on 25% of your hits. That's the biggest damage jump in 2nd job, so it comes right after Mastery 20.",
-            "Spears need DEX equal to their level from 30. You only buy DEX in the levels right before each new spear, so every other point goes to STR.",
+            "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
+            "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
+            "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
+            FA.format(w="Spear"),
+            "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
+            "Spears need DEX equal to their level from 30. You only put AP in DEX in the levels right before each new spear, everything else goes into STR.",
         ],
         "mistakes": [
-            "Putting points into Iron Body. It only adds defense and does nothing for your damage or accuracy.",
-            "Maxing Spear Booster early. Level 1 is the full speed boost; the rest only stretches it from 100 to 300 seconds, which costs you 19 SP that should be in Final Attack.",
+            "Putting points into Iron Body. It only adds defense, and those points are better in Precise Strikes or your HP skills.",
+            "Maxing Spear Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds, which is 19 SP that should be in Mastery and Final Attack.",
             "Forgetting DEX before 30. Forked Spear needs 30 DEX, so put 26 to 30 into DEX or you hit 30 with a spear you can't wear.",
-            "Buying a polearm with a spear build. Spear Mastery and Final Attack: Spear only work with a spear.",
+            "Buying a polearm with a spear build. Spear Mastery and Final Attack: Spear only work with a spear in your hands.",
         ],
     },
     "spearman-polearm": {
-        "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast to 30, then Polearm Mastery, Final Attack and Rush.",
-        "best": ["Slash Blast hits 6 mobs from level 10", "Polearms hit harder than spears at the same level", "Final Attack: Polearm hits for 350%"],
-        "weak": ["Slowest weapons, speed 7 to 8", "Misses a lot from 30 to 40", "The Nine Dragons costs a lot at 50"],
+        "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast 20 by level 23, then Polearm Mastery, Final Attack and Rush.",
+        "best": ["Slash Blast hits 6 mobs from level 10", "Polearms hit harder than spears up to 60", "Final Attack: Polearm hits for 350%"],
+        "weak": ["Slowest weapons, speed 7 to 8", "The Nine Dragons costs a lot at 50", "DEX has to match your level from 30"],
         "why": [
-            "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs at 130%. Max both before anything else and you have a single target attack and a mobbing attack by 23.",
-            "Precise Strikes 15 gives +20 accuracy and +5% crit. Warriors miss a lot from 30 to 40, so it goes in before you leave 1st job.",
-            "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer.",
-            "Final Attack: Polearm 30 swings again for 350% on 25% of your hits. That's the biggest damage jump in 2nd job, so it comes right after Mastery 20.",
-            "Polearms need DEX from 15 and DEX equal to their level from 30. You only buy DEX in the levels right before each new polearm, so every other point goes to STR.",
+            "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
+            "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
+            "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
+            FA.format(w="Polearm"),
+            "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
+            "Polearms need DEX from 15, and DEX equal to their level from 30. You only put AP in DEX in the levels right before each new polearm, everything else goes into STR.",
         ],
         "mistakes": [
-            "Putting points into Iron Body. It only adds defense and does nothing for your damage or accuracy.",
-            "Maxing Polearm Booster early. Level 1 is the full speed boost; the rest only stretches it from 100 to 300 seconds, which costs you 19 SP that should be in Final Attack.",
-            "Forgetting DEX for Iron Ball at 15. It needs 15 DEX, so put 13 to 15 into DEX first.",
-            "Buying a spear with a polearm build. Polearm Mastery and Final Attack: Polearm only work with a polearm.",
+            "Putting points into Iron Body. It only adds defense, and those points are better in Precise Strikes or your HP skills.",
+            "Maxing Polearm Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds, which is 19 SP that should be in Mastery and Final Attack.",
+            "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put 14 and 15 into DEX.",
+            "Buying a spear with a polearm build. Polearm Mastery and Final Attack: Polearm only work with a polearm in your hands.",
         ],
     },
     "assassin": {
         "pitch": "LUK with DEX only to each claw's need. Lucky Seven from 10, then Claw Mastery, Critical Throw and Haste.",
-        "best": ["Ranged from level 10", "Hits mobs on other platforms", "Critical Throw adds 15% crit at 35% extra damage"],
-        "weak": ["Stars cost mesos to recharge", "DEX = your level for claws", "Steel Slain at 50 is expensive"],
+        "best": ["Ranged from level 10", "Hits mobs on other platforms", "Lucky Seven carries you all the way to 70"],
+        "weak": ["Stars cost mesos to recharge", "DEX has to match your level for claws", "Steel Slain at 50 costs about 2.5M"],
         "why": [
-            "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it carries you all the way to 70.",
-            "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Mastery to 20 next for the accuracy and steadier damage.",
-            "Critical Throw 30 is 15% crit for 35% more damage on every throw. It's the main damage skill of 2nd job.",
-            "Haste 20 before Drain. Drain is a single target 240% hit that heals you, but Lucky Seven already does more, and Haste gets you around maps faster.",
-            "Claws need DEX equal to their level. You buy DEX only in the levels right before each new claw, everything else goes to LUK.",
+            "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it's your main attack all the way to 70.",
+            "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
+            "Critical Throw 30: 15% of your throws crit for 35% more damage. It's the main damage skill of 2nd job.",
+            "Haste 20 before Drain. Drain is a 240% single hit that heals you, Lucky Seven already does more, and Haste gets you around maps faster.",
+            "Drain is locked until Critical Recovery is 3, so 3 points go there first.",
+            "Claws need DEX equal to their level. You only put AP in DEX in the levels right before each new claw, everything else goes into LUK.",
         ],
         "mistakes": [
             "Buying Kumbi or Tobi stars to level. Wolbi from Max in Kerning City is 1,000 a set and is all you need; the big stars are a luxury.",
             "Skipping DEX before a new claw. Steel Slain at 50 needs 50 DEX and Blood Gigantic at 60 needs 60.",
-            "Maxing Claw Booster early. Level 1 is the full speed boost; the other 19 points only stretch it from 100 to 300 seconds.",
-            "Putting SP in Keen Eyes past 15. It's already maxed at 15.",
+            "Maxing Claw Booster early. Level 1 is already the full speed boost; the other points only stretch it from 100 to 300 seconds.",
+            "Trying to put SP in Drain without Critical Recovery 3. The game won't let you, so plan those 3 points.",
         ],
     },
     "pure-bandit": {
-        "pitch": "LUK with 25 DEX, a dagger from 10. Double Stab in 1st job, then Savage Blow and a Korean Fan at 40.",
-        "best": ["Double Stab from level 10", "Savage Blow 6 hits a cast from 21 points", "Korean Fan needs no DEX"],
-        "weak": ["Melee: you walk to every mob and take hits", "Single target until Steal", "DEX for daggers from 47"],
+        "pitch": "LUK with 25 DEX and a dagger from 10. Double Stab in 1st job, then Savage Blow, and a Korean Fan at 40.",
+        "best": ["Double Stab from level 10", "Savage Blow hits 6 times a cast from 21 points", "Korean Fan needs no DEX"],
+        "weak": ["Melee: you walk to every mob and take hits", "Savage Blow and Double Stab hit one mob", "DEX for daggers from 47"],
         "why": [
             "Double Stab 20 hits twice for 160%. It's your only attack until 30, so max it first.",
-            "Dark Sight 20 makes you invisible for longer and needs Disorder 3. The last 3 points finish Disorder at 6.",
+            "Dark Sight needs Disorder 3. Past that, 1st job has nothing that adds damage to a dagger, so the last points are filler. Dark Sight levels only cut its MP cost from 50 to 30.",
             "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast.",
-            "Korean Fan at 40 is speed 3 and needs no DEX, so DEX stays at 25 until 47.",
-            "Steal 30 hits 2 mobs and stuns. It comes after Savage Blow 30 so your main attack is maxed first.",
+            "Korean Fan at 40 is speed 3 and needs no DEX, so DEX stays at 25 through 46.",
+            "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, with a 90% chance, so it comes before the rest of Dagger Booster.",
         ],
         "mistakes": [
-            "Putting SP in Keen Eyes. It only lengthens Lucky Seven's range, and a bandit never throws.",
-            "Leveling Haste before Savage Blow. Haste 20 is 20 SP, close to 7 levels of Savage Blow.",
-            "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX.",
-            "Maxing Dagger Booster early. Level 1 is the full speed boost; the rest only stretches it from 100 to 300 seconds.",
+            "Putting SP in Keen Eyes. It only stretches Lucky Seven's range, and a bandit never throws.",
+            "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 character levels of Savage Blow.",
+            "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 50 into DEX.",
+            "Maxing Dagger Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds.",
         ],
     },
     "hunter": {
         "pitch": "DEX with STR only to each bow's need. Arrow Blow in 1st job, then Bow Mastery, Arrow Bomb and Final Attack.",
-        "best": ["Ranged from level 10", "Arrow Bomb hits 6 mobs", "Arrows cost almost nothing"],
-        "weak": ["STR = your level for bows", "Low HP", "Soul Arrow comes late"],
+        "best": ["Ranged from level 10", "Arrow Bomb hits 6 mobs", "Arrows cost 1 meso each"],
+        "weak": ["STR has to match your level for bows", "Arrow Blow and Double Shot hit one or two mobs before 30"],
         "why": [
-            "Arrow Blow 20 hits for 240% with one arrow. It's your main attack until 30, so max it first.",
-            "Critical Shot 15 is 20% crit, and Focus 20 adds 25 accuracy and avoid. Both help every shot you take.",
-            "Bow Mastery 5 opens Bow Booster. Booster 5 and Soul Arrow 1 early so you can stop carrying arrows sooner.",
+            "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+            "Critical Shot 15 is 20% crit. The Eye of Amazon 3 unlocks Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+            "Bow Mastery 5 opens Bow Booster. Soul Arrow needs Booster 5, so those go in early. With arrows at 1 meso, Soul Arrow is convenience, not damage.",
             "Arrow Bomb 30 hits 6 mobs for 130% and can stun. It's how a Hunter mobs, so it comes right after Mastery 20.",
-            "Bows need STR equal to their level from 15. You buy STR only in the levels right before each new bow, everything else goes to DEX.",
+            "Bows need STR equal to their level from 15. You only put AP in STR in the levels right before each new bow, everything else goes into DEX.",
         ],
         "mistakes": [
             "Skipping STR before a new bow. Ryden at 30 needs 30 STR, Olympus at 50 needs 50.",
             "Maxing Bow Booster early. The speed is the same at every level; the extra points only make it last longer.",
             "Buying a crossbow. Hunter skills only work with a bow.",
-            "Putting 1st job SP into Power Knockback before Arrow Blow is maxed. Arrow Blow is the attack you use the most.",
+            "Trying to put SP in Focus without The Eye of Amazon 3. The game won't let you.",
         ],
     },
 }
 COMPARE = {
-    "spearman-spear": [("Spearman, spear (this guide)", "best", "STR, DEX = weapon level"), ("Spearman, polearm", "harder hits, slower weapons", ""), ("Dexless spearman", "raw damage", "can't wear level 30+ weapons")],
-    "spearman-polearm": [("Spearman, polearm (this guide)", "", ""), ("Spearman, spear", "faster spears, cheaper at 50", ""), ("Dexless spearman", "raw damage", "can't wear level 30+ weapons")],
-    "assassin": [("Assassin (this guide)", "", ""), ("Sindit", "Lucky Seven to 40, then a dagger", ""), ("Pure Bandit", "dagger from 10", ""), ("Dexless Assassin", "all LUK", "misses more")],
-    "pure-bandit": [("Pure Bandit (this guide)", "", ""), ("Sindit", "Lucky Seven to 40, then a dagger", ""), ("Assassin", "claw from 10", ""), ("Dexless Bandit", "all LUK", "misses more")],
-    "hunter": [("Hunter (this guide)", "", ""), ("Crossbowman", "crossbow instead of a bow", "")],
+    "spearman-spear": [("Spearman, spear (this guide)", "faster weapons, cheap to 50", "spears hit a little softer"), ("Spearman, polearm", "harder hits up to 60", "slowest weapons"), ("Dexless spearman", "the most STR", "can't wear most level 30+ spears and misses more")],
+    "spearman-polearm": [("Spearman, polearm (this guide)", "harder hits up to 60", "slowest weapons"), ("Spearman, spear", "faster weapons, cheap to 50", "spears hit a little softer"), ("Dexless spearman", "the most STR", "can't wear most level 30+ polearms and misses more")],
+    "assassin": [("Assassin (this guide)", "ranged all the way", "stars to recharge"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Pure Bandit", "dagger from 10", "melee from the start"), ("Dexless Assassin", "the most LUK", "misses more")],
+    "pure-bandit": [("Pure Bandit (this guide)", "dagger from 10, no stars", "melee from the start"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Assassin", "claw all the way", "stars to recharge"), ("Dexless Bandit", "the most LUK", "misses more")],
+    "hunter": [("Hunter (this guide)", "bow, Arrow Bomb on 6 mobs", "STR for bows"), ("Crossbowman", "crossbow instead of a bow", "different 2nd job skills")],
 }
 LINKS = {"Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter", "Sindit": "sindit"}
 
@@ -316,7 +328,7 @@ def build_json(b, st, rules, table, order, eng):
         if maps: train.append({"levels": f"{a} to {z}", "maps": maps, "tip": ""})
     comp = []
     for nm, best, weak in COMPARE[b["slug"]]:
-        comp.append({"build": nm, "best_at": best or t["best"][0], "weak": weak or t["weak"][0]})
+        comp.append({"build": nm, "best_at": best, "weak": weak})
     return {
         "slug": f"/builds/{b['slug']}/",
         "header": {"class": b["cls"], "job_path": f"{b['cls']} (10) → {b['job']} (30)", "build": b["name"], "pitch": t["pitch"],
@@ -328,7 +340,7 @@ def build_json(b, st, rules, table, order, eng):
         "skill_order": [dict(s, why="") for s in order],
         "gear": gear, "gear_optional": [],
         "advancement": [{"level": a, "job": j, "where": w, "needs": n, "gets": g} for a, j, w, n, g in b["adv"]] + [{"level": "3rd job", "job": b["third"], "where": "not in Classic World yet", "needs": "", "gets": ""}],
-        "resets": [{"what": "SP Reset Scroll", "when": "not needed", "cost": None, "worth_it": "No", "why": "This build never changes its main attack, so there are no dead points to move."},
+        "resets": [{"what": "SP Reset Scroll", "when": "not needed", "cost": None, "worth_it": "No", "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."},
                    {"what": "AP Reset Scroll", "when": "only to fix a wrong stat", "cost": None, "worth_it": "Rarely", "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."},
                    {"what": "HP washing", "when": "never", "cost": None, "worth_it": "No", "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."}],
         "train_ranges": train,

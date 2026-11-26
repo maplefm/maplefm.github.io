@@ -4,15 +4,15 @@
   "class": "Thief",
   "job_path": "Thief (10) → Bandit (30)",
   "build": "Pure Bandit",
-  "pitch": "LUK with 25 DEX, a dagger from 10. Double Stab in 1st job, then Savage Blow and a Korean Fan at 40.",
+  "pitch": "LUK with 25 DEX and a dagger from 10. Double Stab in 1st job, then Savage Blow, and a Korean Fan at 40.",
   "best_at": [
    "Double Stab from level 10",
-   "Savage Blow 6 hits a cast from 21 points",
+   "Savage Blow hits 6 times a cast from 21 points",
    "Korean Fan needs no DEX"
   ],
   "weak_spots": [
    "Melee: you walk to every mob and take hits",
-   "Single target until Steal",
+   "Savage Blow and Double Stab hit one mob",
    "DEX for daggers from 47"
   ],
   "difficulty": "Medium",
@@ -199,15 +199,7 @@
    "why": ""
   },
   {
-   "level": 53,
-   "book": "2nd job",
-   "skill": "Dagger Booster",
-   "id": 4201000,
-   "to": 20,
-   "why": ""
-  },
-  {
-   "level": 55,
+   "level": 49,
    "book": "2nd job",
    "skill": "Haste",
    "id": 4201001,
@@ -215,11 +207,19 @@
    "why": ""
   },
   {
-   "level": 65,
+   "level": 59,
    "book": "2nd job",
    "skill": "Steal",
    "id": 4201002,
    "to": 30,
+   "why": ""
+  },
+  {
+   "level": 65,
+   "book": "2nd job",
+   "skill": "Dagger Booster",
+   "id": 4201000,
+   "to": 20,
    "why": ""
   },
   {
@@ -412,7 +412,7 @@
    "when": "not needed",
    "cost": null,
    "worth_it": "No",
-   "why": "This build never changes its main attack, so there are no dead points to move."
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
   },
   {
    "what": "AP Reset Scroll",
@@ -764,36 +764,36 @@
  ],
  "why": [
   "Double Stab 20 hits twice for 160%. It's your only attack until 30, so max it first.",
-  "Dark Sight 20 makes you invisible for longer and needs Disorder 3. The last 3 points finish Disorder at 6.",
+  "Dark Sight needs Disorder 3. Past that, 1st job has nothing that adds damage to a dagger, so the last points are filler. Dark Sight levels only cut its MP cost from 50 to 30.",
   "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast.",
-  "Korean Fan at 40 is speed 3 and needs no DEX, so DEX stays at 25 until 47.",
-  "Steal 30 hits 2 mobs and stuns. It comes after Savage Blow 30 so your main attack is maxed first."
+  "Korean Fan at 40 is speed 3 and needs no DEX, so DEX stays at 25 through 46.",
+  "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, with a 90% chance, so it comes before the rest of Dagger Booster."
  ],
  "mistakes": [
-  "Putting SP in Keen Eyes. It only lengthens Lucky Seven's range, and a bandit never throws.",
-  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, close to 7 levels of Savage Blow.",
-  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX.",
-  "Maxing Dagger Booster early. Level 1 is the full speed boost; the rest only stretches it from 100 to 300 seconds."
+  "Putting SP in Keen Eyes. It only stretches Lucky Seven's range, and a bandit never throws.",
+  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 character levels of Savage Blow.",
+  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 50 into DEX.",
+  "Maxing Dagger Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds."
  ],
  "compare": [
   {
    "build": "Pure Bandit (this guide)",
-   "best_at": "Double Stab from level 10",
-   "weak": "Melee: you walk to every mob and take hits"
+   "best_at": "dagger from 10, no stars",
+   "weak": "melee from the start"
   },
   {
    "build": "Sindit",
    "best_at": "Lucky Seven to 40, then a dagger",
-   "weak": "Melee: you walk to every mob and take hits"
+   "weak": "needs an SP Reset at 40"
   },
   {
    "build": "Assassin",
-   "best_at": "claw from 10",
-   "weak": "Melee: you walk to every mob and take hits"
+   "best_at": "claw all the way",
+   "weak": "stars to recharge"
   },
   {
    "build": "Dexless Bandit",
-   "best_at": "all LUK",
+   "best_at": "the most LUK",
    "weak": "misses more"
   }
  ],

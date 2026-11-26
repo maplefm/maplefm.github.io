@@ -28,6 +28,7 @@ jobs:
           skills = json.load(open("assets/classic-skills.json"))["skills"]
           jobs = sorted({v["job"] for v in skills.values()})
           got, shown = 0, False
+          PREREQ = {}
           def save(sid, b):
               global got
               if b[:8] == b"\x89PNG\r\n\x1a\n":
@@ -38,6 +39,10 @@ jobs:
               except Exception as e: print("book", j, e); continue
               for sk in book.get("skills", []):
                   sid = str(sk["id"])
+                  if sid in skills:
+                      rq = sk.get("requiredSkillLevels") or sk.get("requiredSkills") or {}
+                      if isinstance(rq, list): rq = {str(x.get("id") or x.get("skillId")): x.get("level") for x in rq if isinstance(x, dict)}
+                      PREREQ[sid] = {str(k): v for k, v in (rq or {}).items()}
                   if sid not in skills or os.path.exists(f"sk/{sid}.png"): continue
                   if not shown:
                       print("skill keys", sorted(sk.keys()), flush=True); shown = True
@@ -57,6 +62,9 @@ jobs:
                   if not done: print(sid, "miss", flush=True)
           miss = sorted(s for s in skills if not os.path.exists(f"sk/{s}.png"))
           json.dump(miss, open("sk/missing.json", "w"))
+          os.makedirs("builds/data", exist_ok=True)
+          json.dump({"source": IO + "/job/<job>/skillbook requiredSkillLevels", "skills": PREREQ}, open("builds/data/prereqs.json", "w"), indent=0, sort_keys=True)
+          print("prereqs", len(PREREQ), "with a requirement", sum(1 for v in PREREQ.values() if v))
           print("copied", got, "missing", len(miss))
           PY
       - run: |

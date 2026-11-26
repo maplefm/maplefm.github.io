@@ -4,16 +4,16 @@
   "class": "Warrior",
   "job_path": "Warrior (10) → Spearman (30)",
   "build": "Spearman, polearm",
-  "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast to 30, then Polearm Mastery, Final Attack and Rush.",
+  "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast 20 by level 23, then Polearm Mastery, Final Attack and Rush.",
   "best_at": [
    "Slash Blast hits 6 mobs from level 10",
-   "Polearms hit harder than spears at the same level",
+   "Polearms hit harder than spears up to 60",
    "Final Attack: Polearm hits for 350%"
   ],
   "weak_spots": [
    "Slowest weapons, speed 7 to 8",
-   "Misses a lot from 30 to 40",
-   "The Nine Dragons costs a lot at 50"
+   "The Nine Dragons costs a lot at 50",
+   "DEX has to match your level from 30"
   ],
   "difficulty": "Medium",
   "level_range": "1 to 70",
@@ -160,23 +160,7 @@
    "why": ""
   },
   {
-   "level": 24,
-   "book": "1st job",
-   "skill": "Improved HP Recovery",
-   "id": 1000000,
-   "to": 3,
-   "why": ""
-  },
-  {
-   "level": 25,
-   "book": "1st job",
-   "skill": "Max HP Increase",
-   "id": 1000001,
-   "to": 1,
-   "why": ""
-  },
-  {
-   "level": 30,
+   "level": 28,
    "book": "1st job",
    "skill": "Precise Strikes",
    "id": 1000002,
@@ -189,6 +173,14 @@
    "skill": "Improved HP Recovery",
    "id": 1000000,
    "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
    "why": ""
   },
   {
@@ -452,7 +444,7 @@
    "when": "not needed",
    "cost": null,
    "worth_it": "No",
-   "why": "This build never changes its main attack, so there are no dead points to move."
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
   },
   {
    "what": "AP Reset Scroll",
@@ -474,12 +466,6 @@
    "levels": "10 to 14",
    "maps": [
     {
-     "map": "An Empty House",
-     "monsters": [
-      "Orange Mushroom"
-     ]
-    },
-    {
      "map": "Mushroom Garden (Victoria Island)",
      "monsters": [
       "Orange Mushroom",
@@ -488,10 +474,19 @@
      ]
     },
     {
-     "map": "The Rain-Forest East of Henesys",
+     "map": "The Tree That Grew II",
      "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
       "Pig",
-      "Ribbon Pig"
+      "Shroom"
      ]
     }
    ],
@@ -805,33 +800,34 @@
   }
  ],
  "why": [
-  "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs at 130%. Max both before anything else and you have a single target attack and a mobbing attack by 23.",
-  "Precise Strikes 15 gives +20 accuracy and +5% crit. Warriors miss a lot from 30 to 40, so it goes in before you leave 1st job.",
-  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer.",
-  "Final Attack: Polearm 30 swings again for 350% on 25% of your hits. That's the biggest damage jump in 2nd job, so it comes right after Mastery 20.",
-  "Polearms need DEX from 15 and DEX equal to their level from 30. You only buy DEX in the levels right before each new polearm, so every other point goes to STR."
+  "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
+  "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
+  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
+  "Final Attack: Polearm has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points only raise that hit from 260% to 350%, so it comes after Mastery 20.",
+  "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
+  "Polearms need DEX from 15, and DEX equal to their level from 30. You only put AP in DEX in the levels right before each new polearm, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It only adds defense and does nothing for your damage or accuracy.",
-  "Maxing Polearm Booster early. Level 1 is the full speed boost; the rest only stretches it from 100 to 300 seconds, which costs you 19 SP that should be in Final Attack.",
-  "Forgetting DEX for Iron Ball at 15. It needs 15 DEX, so put 13 to 15 into DEX first.",
-  "Buying a spear with a polearm build. Polearm Mastery and Final Attack: Polearm only work with a polearm."
+  "Putting points into Iron Body. It only adds defense, and those points are better in Precise Strikes or your HP skills.",
+  "Maxing Polearm Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds, which is 19 SP that should be in Mastery and Final Attack.",
+  "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put 14 and 15 into DEX.",
+  "Buying a spear with a polearm build. Polearm Mastery and Final Attack: Polearm only work with a polearm in your hands."
  ],
  "compare": [
   {
    "build": "Spearman, polearm (this guide)",
-   "best_at": "Slash Blast hits 6 mobs from level 10",
-   "weak": "Slowest weapons, speed 7 to 8"
+   "best_at": "harder hits up to 60",
+   "weak": "slowest weapons"
   },
   {
    "build": "Spearman, spear",
-   "best_at": "faster spears, cheaper at 50",
-   "weak": "Slowest weapons, speed 7 to 8"
+   "best_at": "faster weapons, cheap to 50",
+   "weak": "spears hit a little softer"
   },
   {
    "build": "Dexless spearman",
-   "best_at": "raw damage",
-   "weak": "can't wear level 30+ weapons"
+   "best_at": "the most STR",
+   "weak": "can't wear most level 30+ polearms and misses more"
   }
  ],
  "future": [

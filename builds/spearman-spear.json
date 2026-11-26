@@ -4,16 +4,15 @@
   "class": "Warrior",
   "job_path": "Warrior (10) → Spearman (30)",
   "build": "Spearman, spear",
-  "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast to 30, then Spear Mastery, Final Attack and Rush.",
+  "pitch": "STR with DEX only to each spear's need. Power Strike and Slash Blast 20 by level 23, then Spear Mastery, Final Attack and Rush.",
   "best_at": [
    "Slash Blast hits 6 mobs from level 10",
-   "Cheap spears all the way to 50",
+   "Spears cost under 100K all the way to 50",
    "Final Attack: Spear hits for 350%"
   ],
   "weak_spots": [
-   "Misses a lot from 30 to 40",
-   "Slow spears, speed 6 to 7",
-   "DEX = your level from 30"
+   "Spears are slow, speed 6 to 7",
+   "DEX has to match your level from 30"
   ],
   "difficulty": "Medium",
   "level_range": "1 to 70",
@@ -150,23 +149,7 @@
    "why": ""
   },
   {
-   "level": 24,
-   "book": "1st job",
-   "skill": "Improved HP Recovery",
-   "id": 1000000,
-   "to": 3,
-   "why": ""
-  },
-  {
-   "level": 25,
-   "book": "1st job",
-   "skill": "Max HP Increase",
-   "id": 1000001,
-   "to": 1,
-   "why": ""
-  },
-  {
-   "level": 30,
+   "level": 28,
    "book": "1st job",
    "skill": "Precise Strikes",
    "id": 1000002,
@@ -179,6 +162,14 @@
    "skill": "Improved HP Recovery",
    "id": 1000000,
    "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
    "why": ""
   },
   {
@@ -444,7 +435,7 @@
    "when": "not needed",
    "cost": null,
    "worth_it": "No",
-   "why": "This build never changes its main attack, so there are no dead points to move."
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
   },
   {
    "what": "AP Reset Scroll",
@@ -466,12 +457,6 @@
    "levels": "10 to 14",
    "maps": [
     {
-     "map": "An Empty House",
-     "monsters": [
-      "Orange Mushroom"
-     ]
-    },
-    {
      "map": "Mushroom Garden (Victoria Island)",
      "monsters": [
       "Orange Mushroom",
@@ -480,10 +465,19 @@
      ]
     },
     {
-     "map": "The Rain-Forest East of Henesys",
+     "map": "The Tree That Grew II",
      "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
       "Pig",
-      "Ribbon Pig"
+      "Shroom"
      ]
     }
    ],
@@ -507,9 +501,10 @@
      ]
     },
     {
-     "map": "An Empty House",
+     "map": "Dungeon, Southern Forest II",
      "monsters": [
-      "Orange Mushroom"
+      "Green Mushroom",
+      "Slime"
      ]
     }
    ],
@@ -545,27 +540,25 @@
    "levels": "25 to 29",
    "maps": [
     {
-     "map": "Tree Dungeon, Forest Up North III",
+     "map": "Dark Cave",
      "monsters": [
-      "Green Mushroom",
+      "Stirge",
       "Horny Mushroom",
-      "Slime"
+      "Zombie Mushroom"
      ]
     },
     {
-     "map": "Dungeon, Southern Forest IV",
+     "map": "Ant Tunnel II",
      "monsters": [
-      "Horny Mushroom",
-      "Green Mushroom",
-      "Slime"
+      "Zombie Mushroom",
+      "Horny Mushroom"
      ]
     },
     {
-     "map": "West Rocky Mountain III",
+     "map": "Excavation Site I",
      "monsters": [
-      "Green Mushroom",
-      "Dark Axe Stump",
-      "Red Snail"
+      "Ghost Stump",
+      "Wooden Mask"
      ]
     }
    ],
@@ -794,33 +787,34 @@
   }
  ],
  "why": [
-  "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs at 130%. Max both before anything else and you have a single target attack and a mobbing attack by 23.",
-  "Precise Strikes 15 gives +20 accuracy and +5% crit. Warriors miss a lot from 30 to 40, so it goes in before you leave 1st job.",
-  "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer.",
-  "Final Attack: Spear 30 swings again for 350% on 25% of your hits. That's the biggest damage jump in 2nd job, so it comes right after Mastery 20.",
-  "Spears need DEX equal to their level from 30. You only buy DEX in the levels right before each new spear, so every other point goes to STR."
+  "Power Strike 20 hits for 260% and Slash Blast 20 hits 6 mobs for 130%. Max both first and you have a single target hit and a mobbing hit by 23.",
+  "Precise Strikes 15 is +20 accuracy and +5% crit. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3.",
+  "Spear Mastery 5 opens Spear Booster, and Booster 1 already gives the full 2 steps of speed. The other 19 points only make it last longer, so they wait.",
+  "Final Attack: Spear has a chance to open a 60 second window when you attack. In it you can press a 350% single hit that heals you, up to 15% of your max HP. Points only raise that hit from 260% to 350%, so it comes after Mastery 20.",
+  "Rush 20 is mostly for moving. It pushes you and up to 6 mobs along for 80% each, less than Slash Blast's 130%, so Iron Will comes last.",
+  "Spears need DEX equal to their level from 30. You only put AP in DEX in the levels right before each new spear, everything else goes into STR."
  ],
  "mistakes": [
-  "Putting points into Iron Body. It only adds defense and does nothing for your damage or accuracy.",
-  "Maxing Spear Booster early. Level 1 is the full speed boost; the rest only stretches it from 100 to 300 seconds, which costs you 19 SP that should be in Final Attack.",
+  "Putting points into Iron Body. It only adds defense, and those points are better in Precise Strikes or your HP skills.",
+  "Maxing Spear Booster early. Level 1 is already the full speed boost; the rest only stretches it from 100 to 300 seconds, which is 19 SP that should be in Mastery and Final Attack.",
   "Forgetting DEX before 30. Forked Spear needs 30 DEX, so put 26 to 30 into DEX or you hit 30 with a spear you can't wear.",
-  "Buying a polearm with a spear build. Spear Mastery and Final Attack: Spear only work with a spear."
+  "Buying a polearm with a spear build. Spear Mastery and Final Attack: Spear only work with a spear in your hands."
  ],
  "compare": [
   {
    "build": "Spearman, spear (this guide)",
-   "best_at": "best",
-   "weak": "STR, DEX = weapon level"
+   "best_at": "faster weapons, cheap to 50",
+   "weak": "spears hit a little softer"
   },
   {
    "build": "Spearman, polearm",
-   "best_at": "harder hits, slower weapons",
-   "weak": "Misses a lot from 30 to 40"
+   "best_at": "harder hits up to 60",
+   "weak": "slowest weapons"
   },
   {
    "build": "Dexless spearman",
-   "best_at": "raw damage",
-   "weak": "can't wear level 30+ weapons"
+   "best_at": "the most STR",
+   "weak": "can't wear most level 30+ spears and misses more"
   }
  ],
  "future": [

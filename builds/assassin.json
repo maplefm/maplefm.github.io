@@ -8,12 +8,12 @@
   "best_at": [
    "Ranged from level 10",
    "Hits mobs on other platforms",
-   "Critical Throw adds 15% crit at 35% extra damage"
+   "Lucky Seven carries you all the way to 70"
   ],
   "weak_spots": [
    "Stars cost mesos to recharge",
-   "DEX = your level for claws",
-   "Steel Slain at 50 is expensive"
+   "DEX has to match your level for claws",
+   "Steel Slain at 50 costs about 2.5M"
   ],
   "difficulty": "Easy",
   "level_range": "1 to 70",
@@ -214,7 +214,15 @@
    "why": ""
   },
   {
-   "level": 64,
+   "level": 55,
+   "book": "2nd job",
+   "skill": "Critical Recovery",
+   "id": 4100002,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 65,
    "book": "2nd job",
    "skill": "Drain",
    "id": 4101002,
@@ -226,7 +234,7 @@
    "book": "2nd job",
    "skill": "Claw Booster",
    "id": 4101000,
-   "to": 20,
+   "to": 18,
    "why": ""
   }
  ],
@@ -428,7 +436,7 @@
    "when": "not needed",
    "cost": null,
    "worth_it": "No",
-   "why": "This build never changes its main attack, so there are no dead points to move."
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
   },
   {
    "what": "AP Reset Scroll",
@@ -783,37 +791,38 @@
   }
  ],
  "why": [
-  "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it carries you all the way to 70.",
-  "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Mastery to 20 next for the accuracy and steadier damage.",
-  "Critical Throw 30 is 15% crit for 35% more damage on every throw. It's the main damage skill of 2nd job.",
-  "Haste 20 before Drain. Drain is a single target 240% hit that heals you, but Lucky Seven already does more, and Haste gets you around maps faster.",
-  "Claws need DEX equal to their level. You buy DEX only in the levels right before each new claw, everything else goes to LUK."
+  "Lucky Seven throws 2 stars for 140% each at 20. Max it first and it's your main attack all the way to 70.",
+  "Claw Mastery 5 opens Claw Booster, and Booster 1 already gives the full 2 steps of speed. Then Claw Mastery 20: +20 attack and a 25% chance to get each star back, so you recharge less.",
+  "Critical Throw 30: 15% of your throws crit for 35% more damage. It's the main damage skill of 2nd job.",
+  "Haste 20 before Drain. Drain is a 240% single hit that heals you, Lucky Seven already does more, and Haste gets you around maps faster.",
+  "Drain is locked until Critical Recovery is 3, so 3 points go there first.",
+  "Claws need DEX equal to their level. You only put AP in DEX in the levels right before each new claw, everything else goes into LUK."
  ],
  "mistakes": [
   "Buying Kumbi or Tobi stars to level. Wolbi from Max in Kerning City is 1,000 a set and is all you need; the big stars are a luxury.",
   "Skipping DEX before a new claw. Steel Slain at 50 needs 50 DEX and Blood Gigantic at 60 needs 60.",
-  "Maxing Claw Booster early. Level 1 is the full speed boost; the other 19 points only stretch it from 100 to 300 seconds.",
-  "Putting SP in Keen Eyes past 15. It's already maxed at 15."
+  "Maxing Claw Booster early. Level 1 is already the full speed boost; the other points only stretch it from 100 to 300 seconds.",
+  "Trying to put SP in Drain without Critical Recovery 3. The game won't let you, so plan those 3 points."
  ],
  "compare": [
   {
    "build": "Assassin (this guide)",
-   "best_at": "Ranged from level 10",
-   "weak": "Stars cost mesos to recharge"
+   "best_at": "ranged all the way",
+   "weak": "stars to recharge"
   },
   {
    "build": "Sindit",
    "best_at": "Lucky Seven to 40, then a dagger",
-   "weak": "Stars cost mesos to recharge"
+   "weak": "needs an SP Reset at 40"
   },
   {
    "build": "Pure Bandit",
    "best_at": "dagger from 10",
-   "weak": "Stars cost mesos to recharge"
+   "weak": "melee from the start"
   },
   {
    "build": "Dexless Assassin",
-   "best_at": "all LUK",
+   "best_at": "the most LUK",
    "weak": "misses more"
   }
  ],

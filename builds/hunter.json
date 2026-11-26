@@ -8,12 +8,11 @@
   "best_at": [
    "Ranged from level 10",
    "Arrow Bomb hits 6 mobs",
-   "Arrows cost almost nothing"
+   "Arrows cost 1 meso each"
   ],
   "weak_spots": [
-   "STR = your level for bows",
-   "Low HP",
-   "Soul Arrow comes late"
+   "STR has to match your level for bows",
+   "Arrow Blow and Double Shot hit one or two mobs before 30"
   ],
   "difficulty": "Easy",
   "level_range": "1 to 70",
@@ -165,7 +164,15 @@
    "why": ""
   },
   {
-   "level": 28,
+   "level": 23,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 29,
    "book": "1st job",
    "skill": "Focus",
    "id": 3001000,
@@ -177,7 +184,7 @@
    "book": "1st job",
    "skill": "Double Shot",
    "id": 3001002,
-   "to": 6,
+   "to": 3,
    "why": ""
   },
   {
@@ -443,7 +450,7 @@
    "when": "not needed",
    "cost": null,
    "worth_it": "No",
-   "why": "This build never changes its main attack, so there are no dead points to move."
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
   },
   {
    "what": "AP Reset Scroll",
@@ -801,28 +808,28 @@
   }
  ],
  "why": [
-  "Arrow Blow 20 hits for 240% with one arrow. It's your main attack until 30, so max it first.",
-  "Critical Shot 15 is 20% crit, and Focus 20 adds 25 accuracy and avoid. Both help every shot you take.",
-  "Bow Mastery 5 opens Bow Booster. Booster 5 and Soul Arrow 1 early so you can stop carrying arrows sooner.",
+  "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+  "Critical Shot 15 is 20% crit. The Eye of Amazon 3 unlocks Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+  "Bow Mastery 5 opens Bow Booster. Soul Arrow needs Booster 5, so those go in early. With arrows at 1 meso, Soul Arrow is convenience, not damage.",
   "Arrow Bomb 30 hits 6 mobs for 130% and can stun. It's how a Hunter mobs, so it comes right after Mastery 20.",
-  "Bows need STR equal to their level from 15. You buy STR only in the levels right before each new bow, everything else goes to DEX."
+  "Bows need STR equal to their level from 15. You only put AP in STR in the levels right before each new bow, everything else goes into DEX."
  ],
  "mistakes": [
   "Skipping STR before a new bow. Ryden at 30 needs 30 STR, Olympus at 50 needs 50.",
   "Maxing Bow Booster early. The speed is the same at every level; the extra points only make it last longer.",
   "Buying a crossbow. Hunter skills only work with a bow.",
-  "Putting 1st job SP into Power Knockback before Arrow Blow is maxed. Arrow Blow is the attack you use the most."
+  "Trying to put SP in Focus without The Eye of Amazon 3. The game won't let you."
  ],
  "compare": [
   {
    "build": "Hunter (this guide)",
-   "best_at": "Ranged from level 10",
-   "weak": "STR = your level for bows"
+   "best_at": "bow, Arrow Bomb on 6 mobs",
+   "weak": "STR for bows"
   },
   {
    "build": "Crossbowman",
    "best_at": "crossbow instead of a bow",
-   "weak": "STR = your level for bows"
+   "weak": "different 2nd job skills"
   }
  ],
  "future": [
