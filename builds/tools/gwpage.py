@@ -123,9 +123,9 @@ const S=D.stats;let book="1st job",touched=0;
 function needs(w){return`<div class="gneed">${w.needs.map(([k,v])=>`<span>${k?`<em>${E(k)}</em>`:""}${E(v)}</span>`).join("")}</div>`}
 function waysHtml(w){const c=[],npcs=w.ways.filter(x=>x.k=="npc");
  const cheapest=Math.min(...npcs.map(x=>x.p),w.fmv||Infinity),both=npcs.length&&w.fmv;
- for(const x of npcs)c.push([`way npc${both&&x.p==cheapest?" best":""}`,x.u,"NPC",`${E(x.t)}<small>${E(x.s)}</small>`,`${both&&x.p==cheapest?'<span class="cheap">CHEAPEST</span>':""}${fmt(x.p)}`]);
- if(w.fmv)c.push([`way fm${both&&w.fmv==cheapest?" best":""}`,"/item/"+w.slug+"/","FM",`Free Market<small>every listing seen today</small>`,`${both&&w.fmv==cheapest?'<span class="cheap">CHEAPEST</span>':""}<span data-fmi="${E(w.item)}"><b class="mz">${E(w.fm)}</b></span>`]);
- for(const k of ["drop","craft","quest"])for(const x of w.ways.filter(x=>x.k==k))c.push([`way ${k}`,x.u,k.toUpperCase(),`${E(x.t)}<small>${E(x.s)}</small>`,""]);
+ for(const x of npcs)c.push([`way npc${both&&x.p==cheapest?" best":""}`,x.u,"NPC",`${E(x.t)}<small>${E(x.s)}</small>`,`${both&&x.p==cheapest?'<span class="cheap">Cheapest</span>':""}${fmt(x.p)}`]);
+ if(w.fmv)c.push([`way fm${both&&w.fmv==cheapest?" best":""}`,w.link?"/item/"+w.slug+"/":"","FM",`Free Market<small>typical FM price</small>`,`${both&&w.fmv==cheapest?'<span class="cheap">Cheapest</span>':""}<span data-fmi="${E(w.item)}"><b class="mz">${E(w.fm)}</b></span>`]);
+ for(const k of ["drop","craft","quest"])for(const x of w.ways.filter(x=>x.k==k))c.push([`way ${k}`,x.u,k[0].toUpperCase()+k.slice(1),`${E(x.t)}<small>${E(x.s)}</small>`,""]);
  if(!c.length)return'<div class="ways"><div class="way"><span class="tg"></span><span class="t">No NPC sells it and it hasn\'t shown up on the Free Market yet.</span><span></span></div></div>';
  return'<div class="ways">'+c.map(([cl,u,tg,t,p])=>`<${u?"a":"div"} class="${cl}"${u?` href="${u}"`:""}><span class="tg">${tg}</span><span class="t">${t}</span><span class="p">${p}</span></${u?"a":"div"}>`).join("")+"</div>"}
 function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Math.max(0,L-2)],sk=D.sp[L];
@@ -136,7 +136,7 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
  skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):"starts at level "+D.first[n]}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
- eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b><a href="/item/${w.slug}/">${E(w.item)}</a></b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
+ eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
  const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
  try{history.replaceState(null,"",L==D.start?location.pathname:"#lv"+L)}catch(e){}
 }
@@ -233,7 +233,7 @@ def build(name):
     for g in d["gear"]:
         if g["slot"] == "Stars" or g["level"] > CAP: continue
         p = g.get("price") or {}
-        gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "speed": g.get("speed"),
+        gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "link": exists("item", W.slug(g["item"])), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "speed": g.get("speed"),
                      "needs": [["LV", str(REQ.get(g["item"], g["level"]))]] + needs_list(g["needs"]), "fm": p.get("shown") if p.get("typical") else None, "fmv": p.get("typical"), "ways": ways(guide, g["item"])})
 
     train = []
@@ -243,9 +243,13 @@ def build(name):
         train.append({"a": a, "b": min(b, CAP), "levels": f"{a} to {min(b, CAP)}",
                       "maps": [{"map": m["map"], "slug": W.slug(m["map"]), "monsters": m["monsters"], "mm": (maps.get(m["map"]) or {}).get("id")} for m in t["maps"]]})
 
-    subi = sorted({(s[0], s[1], s[2]) for s in (guide.get("Subi Throwing Stars") or {}).get("s", [])}, key=lambda s: (s[1] != "Kerning City", s[0]))
-    ammo = (f'Lucky Seven throws stars. Buy Subi from an NPC for {subi[0][2]:,} a set: {E(subi[0][0])} in {E(subi[0][1])}'
-            + (f' or {E(subi[1][0])} in {E(subi[1][1])}' if len(subi) > 1 else "") + '. Better stars are a luxury, not part of the build. <a href="/items/stars/">Every star and its price</a>') if subi else ""
+    def npc(n):
+        return sorted({(s[0], s[1], s[2]) for s in (guide.get(n) or {}).get("s", []) if s[2]}, key=lambda s: (s[1] != "Kerning City", s[2], s[0]))
+    subi, wolbi = npc("Subi Throwing Stars"), npc("Wolbi Throwing Stars")
+    ammo = ("Lucky Seven throws 2 stars a cast. Buy them from an NPC in Kerning City: "
+            + (f"Subi for {subi[0][2]:,} a set at {E(subi[0][0])}" if subi else "")
+            + (f", or Wolbi for {wolbi[0][2]:,} a set at {E(wolbi[0][0])} (+2 attack)" if wolbi else "")
+            + '. Anything better is a luxury, not part of the build. <a href="/items/stars/">Every star and its price</a>') if subi else ""
 
     data = {"cap": CAP, "start": 44, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
             "book": {b: list(dict.fromkeys(s["skill"] for s in v)) for b, v in books.items()}, "sid": {n: sid[n] for n in first if n in sid},
@@ -260,7 +264,8 @@ def build(name):
             txt = f'{label}: {E(w["t"])}' + (f', {E(w["s"])}' if w.get("s") else "") + (f' · {w["p"]:,}' if w.get("p") else "")
             parts.append(f'<a href="{w["u"]}">{txt}</a>' if w.get("u") else txt)
         if g["fm"]:
-            parts.insert(len([w for w in g["ways"] if w["k"] == "npc"]), f'<a href="/item/{g["slug"]}/">Free Market · <span data-fmi="{E(g["item"])}"><b class="mz">{E(g["fm"])}</b></span></a>')
+            fmx = f'Free Market · <span data-fmi="{E(g["item"])}"><b class="mz">{E(g["fm"])}</b></span>'
+            parts.insert(len([w for w in g["ways"] if w["k"] == "npc"]), f'<a href="/item/{g["slug"]}/">{fmx}</a>' if g["link"] else fmx)
         return "<br>".join(parts) or "not sold by NPCs, not seen on the FM yet"
     cmp = []
     for c in d["compare"]:
@@ -271,9 +276,9 @@ def build(name):
         inner = f'<b>{E(nm)}</b><small>{E(c.get("main_attack") or c["best_at"])}</small>' + ('<div class="soon">You are here</div>' if this else '<div class="go">Open the guide →</div>' if url else '<div class="soon">Guide coming</div>')
         cmp.append(f'<a href="{url}">{inner}</a>' if url else f'<div class="c">{inner}</div>')
     allh = (
-        '<div class="win"><h2>Weapons</h2><div class="in">' + t_(["Level", "Weapon", "Needs", "Attack", "How to get it"], [[E(g["level"]), f'<img src="/i/{g["id"]}.png" alt="" width="28" height="28" style="vertical-align:middle"> <a href="/item/{g["slug"]}/">{E(g["item"])}</a><br><small>{E(g["slot"])}</small>', need_h(g), E(g["attack"]), ways_h(g)] for g in gear]) + "</div></div>"
+        '<div class="win"><h2>Weapons</h2><div class="in">' + t_(["Level", "Weapon", "Needs", "Attack", "How to get it"], [[E(g["level"]), f'<img src="/i/{g["id"]}.png" alt="" width="28" height="28" style="vertical-align:middle"> ' + (f'<a href="/item/{g["slug"]}/">{E(g["item"])}</a>' if g["link"] else E(g["item"])) + f'<br><small>{E(g["slot"])}</small>', need_h(g), E(g["attack"]), ways_h(g)] for g in gear]) + "</div></div>"
         + '<div class="win"><h2>Job advancement</h2><div class="in">' + t_(["Level", "Job", "Where", "Needs", "You get"], [[E(a["level"]), f'<b>{E(a["job"])}</b>', E(a["where"]), E(a["needs"]), E(a["gets"])] for a in d["advancement"] if str(a["level"]).isdigit()]) + "</div></div>"
-        + '<div class="win"><h2>Resets</h2><div class="in">' + t_(["Item", "When", "Worth it"], [[f'<b>{E(r["what"])}</b>', E(r["when"]), f'<b>{E(r["worth_it"])}</b>'] for r in d["resets"]]) + "</div></div>"
+        + '<div class="win"><h2>Resets</h2><div class="in">' + t_(["Item", "When", "Worth it", "Why"], [[f'<b>{E(r["what"])}</b>', E(r["when"]), f'<b>{E(r["worth_it"])}</b>', E(r["why"])] for r in d["resets"]]) + "</div></div>"
         + '<div class="win"><h2>Where to train</h2><div class="in">' + t_(["Levels", "Maps"], [[E(t["levels"]), "<br>".join(f'<a href="/map/{m["slug"]}/">{E(m["map"])}</a> <small>{E(", ".join(m["monsters"]))}</small>' for m in t["maps"])] for t in train]) + "</div></div>")
     third = next((a for a in d["advancement"] if not str(a["level"]).isdigit()), None)
 
@@ -289,7 +294,7 @@ def build(name):
             '<div class="win"><h2>Other ways to build it</h2><div class="in"><div class="cmp">' + "".join(cmp) + "</div></div></div>"
             f'<div class="gw-low"><div class="win"><h2>Why this way</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["why"])}</ol></div></div>'
             f'<div class="win"><h2>Common mistakes</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["mistakes"])}</ol></div></div></div>'
-            + (f'<div class="win"><h2>3rd job at 70</h2><div class="in third"><span class="badge">NOT OUT YET</span><div><b>{E(third["job"])}</b><div class="wtip">This guide stops at 70. It gets extended when Nexon releases 3rd job in Classic World.</div></div></div></div>' if third else "")
+            + (f'<div class="win"><h2>3rd job at 70</h2><div class="in third"><span class="badge">Not out yet</span><div><b>{E(third["job"])}</b><div class="wtip">This guide stops at 70. It gets extended when Nexon releases 3rd job in Classic World.</div></div></div></div>' if third else "")
             + f'<details class="all" id="all"><summary></summary>{allh}</details></div>'
             f'<script>const D={json.dumps(data).replace("</", "<\\/")};D.icon=id=>"/i/"+id+".png";D.skimg=id=>"/sk/"+id+".png";D.mm=id=>"{LIVE}minimap/"+id+".png";{JS}</script>'
             '<script src="/assets/fmprice.js?v=2" defer></script>')

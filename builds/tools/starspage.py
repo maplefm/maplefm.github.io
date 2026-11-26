@@ -47,14 +47,16 @@ def build():
     rows = {r["item"]: r for r in json.loads(urllib.request.urlopen(G.LIVE + "summary-public.json", timeout=60).read())["rows"]}
 
     def shops(n):
-        return sorted({(s[0], s[1], s[2]) for s in (guide.get(n) or {}).get("s", []) if s[2]}, key=lambda s: (s[2], s[1] != "Kerning City", s[0]))
+        home = "Henesys" if "Arrow" in n else "Kerning City"   # archers start in Henesys, thieves in Kerning City
+        return sorted({(s[0], s[1], s[2]) for s in (guide.get(n) or {}).get("s", []) if s[2]}, key=lambda s: (s[2], s[1] != home, s[0]))
 
     def fm(n):
         r = rows.get(n) or {}
         if not r.get("typ"): return None
         sales = r.get("salesN") or 0
         from_asks = (r.get("basis") or "").startswith("ask") or sales < 3
-        return {"shown": mesos(r["typ"]), "v": r["typ"], "sales": sales, "asks": from_asks, "flags": r.get("flags") or []}
+        per = 1000 if "Arrow" in n else 1   # arrows trade in bundles; a price for one arrow reads as nonsense
+        return {"shown": mesos(r["typ"] * per) + (" per 1,000" if per > 1 else ""), "v": r["typ"], "sales": sales, "asks": from_asks, "flags": r.get("flags") or []}
 
     def table(kind, unit):
         out = []
@@ -63,17 +65,19 @@ def build():
             sh, f = shops(n), fm(n)
             slug = W.slug(n)
             link = os.path.exists(os.path.join(ROOT, "item", slug, "index.html"))
-            npc = (f'<span class="npc">{E(sh[0][0])}, {"<a href=\"/map/" + W.slug(sh[0][1]) + "/\">" + E(sh[0][1]) + "</a>" if G.exists("map", W.slug(sh[0][1])) else E(sh[0][1])}<br><b>{mesos(sh[0][2])}</b> {unit}</span>'
+            npc = (f'<span class="npc">{E(sh[0][0])}, {"<a href=\"/map/" + W.slug(sh[0][1]) + "/\">" + E(sh[0][1]) + "</a>" if G.exists("map", W.slug(sh[0][1])) else E(sh[0][1])}<br><b>{mesos(sh[0][2] * (1000 if unit == "each" else 1))}</b> {"per 1,000" if unit == "each" else unit}</span>'
                    + (f'<br><small>also {len(sh) - 1} more NPC{"s" if len(sh) > 2 else ""}</small>' if len(sh) > 1 else "")) if sh else '<span class="none">not sold by NPCs</span>'
             if f:
-                note = f'{f["sales"]} sale{"s" if f["sales"] != 1 else ""} seen' + (", mostly asking prices" if f["asks"] else "")
+                note = "asking prices only" if not f["sales"] else f'{f["sales"]} sale{"s" if f["sales"] != 1 else ""} seen' + (", mostly asking prices" if f["asks"] else "")
+                if sh and f["v"] > sh[0][2] and "Arrow" not in n: note += ", the NPC is cheaper"
                 if any("bundle" in x for x in f["flags"]): note += ", bundle sizes vary"
-                fmh = f'<span data-fmi="{E(n)}"><b class="mz">{E(f["shown"])}</b></span><br><small>{note}</small>'
+                live = "" if "Arrow" in n else f' data-fmi="{E(n)}"'   # the live swap would show the price of one arrow
+                fmh = f'<span{live}><b class="mz">{E(f["shown"])}</b></span><br><small>{note}</small>'
             else:
                 fmh = '<span class="none">not seen on the FM yet</span>'
             lux = kind == "Claw" and not sh
             name = f'<img src="/i/{a["id"]}.png" alt="" width="32" height="32"><span>{E(n)}' + (
-                '<span class="pill buy">NPC</span>' if sh else '<span class="pill lux">LUXURY</span>' if lux else "") + "</span>"
+                '<span class="pill buy">NPC</span>' if sh else '<span class="pill lux">Luxury</span>' if lux else "") + "</span>"
             name = f'<a class="nm" href="/item/{slug}/">{name}</a>' if link else f'<span class="nm">{name}</span>'
             out.append((lux, f'<tr class="{"lux" if lux else ""}"><td>{name}</td><td class="atk">+{a["atk"]}</td><td>{a["slotMax"]:,}</td>'
                              f'<td>{a.get("reqLevel") or "any"}</td><td>{npc}</td><td>{fmh}</td></tr>'))
@@ -85,7 +89,7 @@ def build():
     stars = [n for n, a in ammo.items() if a["kind"] == "Claw"]
     npc_stars = [n for n in stars if shops(n)]
     lux = [n for n in stars if not shops(n) and fm(n)]
-    lux_txt = ", ".join(f"{n.split()[0]} about {price_of(n)}" for n in lux)
+    lux_txt = ", ".join(f"{n.split()[0]} about {price_of(n)}" + (" from asking prices" if fm(n)["sales"] < 3 else "") for n in lux)
     first = shops(npc_stars[0])[0] if npc_stars else None
 
     body = (f'<style>{CSS}</style><div class="gw"><div class="st-hero"><div><h1>Throwing stars and arrows</h1>'
