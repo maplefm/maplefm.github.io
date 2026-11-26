@@ -1,0 +1,413 @@
+{
+ "slug": "/builds/warrior/",
+ "header": {
+  "class": "Warrior",
+  "job_path": "Warrior (10) → Warrior (30)",
+  "build": "Warrior, 1 to 30",
+  "pitch": "Warrior from 1 to the 2nd job advance at 30.",
+  "best_at": [],
+  "weak_spots": [],
+  "difficulty": "Medium",
+  "level_range": "1 to 30",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 27788,
+    "shown": "about 28K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 12,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "STR",
+  "sub": "DEX",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   },
+   {
+    "levels": "18 to 20",
+    "ap": "all DEX (to 20)",
+    "why": "Two-Handed Sword at 20 needs 20 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 25)",
+    "why": "Broadsword at 25 needs 25 DEX"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 57,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 92,
+    "DEX": 20,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 137,
+    "DEX": 25,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Power Strike",
+   "id": 1001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Slash Blast",
+   "id": 1001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Precise Strikes",
+   "id": 1000002,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "2H Sword",
+   "item": "Wooden Sword",
+   "id": 1402000,
+   "needs": "25 STR",
+   "attack": 30,
+   "speed": 5,
+   "price": {
+    "typical": 2888,
+    "shown": "2,888",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "2H Sword",
+   "item": "Wooden Baseball Bat",
+   "id": 1402001,
+   "needs": "25 STR",
+   "attack": 35,
+   "speed": 5,
+   "price": {
+    "typical": 4200,
+    "shown": "4,200",
+    "basis": "3d",
+    "sales_seen": 10,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "2H Sword",
+   "item": "Two-Handed Sword",
+   "id": 1402002,
+   "needs": "45 STR, 20 DEX",
+   "attack": 40,
+   "speed": 5,
+   "price": {
+    "typical": 6750,
+    "shown": "6,750",
+    "basis": "old",
+    "sales_seen": 8,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "2H Sword",
+   "item": "Broadsword",
+   "id": 1402003,
+   "needs": "55 STR, 25 DEX",
+   "attack": 45,
+   "speed": 5,
+   "price": {
+    "typical": 7450,
+    "shown": "7,450",
+    "basis": "3d",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "2H Sword",
+   "item": "Aluminum Baseball Bat",
+   "id": 1402004,
+   "needs": "55 STR",
+   "attack": 50,
+   "speed": 5,
+   "price": {
+    "typical": 6500,
+    "shown": "6,500",
+    "basis": "3d",
+    "sales_seen": 15,
+    "rough": true
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Warrior",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 10",
+   "gets": "1 SP. Power Strike and Slash Blast open."
+  },
+  {
+   "level": 30,
+   "job": "2nd job",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 30",
+   "gets": "Pick Fighter, Page or Spearman. Your build guide takes over from here."
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Mushroom Garden (Victoria Island)",
+     "monsters": [
+      "Orange Mushroom",
+      "Shroom",
+      "Red Snail"
+     ]
+    },
+    {
+     "map": "The Tree That Grew II",
+     "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
+      "Pig",
+      "Shroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest II",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Blue Mushroom Forest",
+     "monsters": [
+      "Blue Mushroom",
+      "Slime",
+      "Blue Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "DEX only goes in when your gear needs it: 20 for Two-Handed Sword at 20, 25 for Broadsword at 25, 30 for level 40 warrior armor and 40 for level 50 warrior armor. Everything else goes into STR.",
+  "Every warrior job uses this 1st job plan, so nothing here is wasted whichever 2nd job you pick at 30."
+ ],
+ "mistakes": [
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
+  "Forgetting DEX before 20. Two-Handed Sword needs 20 DEX at 20, so put your AP from 18 to 20 into DEX, or you stay on the Wooden Baseball Bat's 35 attack instead of 40."
+ ],
+ "compare": [],
+ "future": [],
+ "search": {
+  "title": "Warrior Guide 1 to 30: AP and SP | Club FM",
+  "description": "MapleStory Classic warrior from level 1 to 30: AP and SP for every level, weapons and where to get them, where to train, and which 2nd job to pick."
+ },
+ "cap": 30,
+ "next_guides": [
+  {
+   "name": "Fighter, sword",
+   "slug": "fighter-sword",
+   "blurb": "Rage for the party, two-handed or one-handed swords"
+  },
+  {
+   "name": "Fighter, axe",
+   "slug": "fighter-axe",
+   "blurb": "Rage, and axes that make mobs bleed"
+  },
+  {
+   "name": "Page, sword",
+   "slug": "page-sword",
+   "blurb": "Final Attack 360% on one mob"
+  },
+  {
+   "name": "Page, blunt weapon",
+   "slug": "page-blunt",
+   "blurb": "+20% critical damage"
+  },
+  {
+   "name": "Spearman, spear",
+   "slug": "spearman-spear",
+   "blurb": "spears, a step faster than polearms"
+  },
+  {
+   "name": "Spearman, polearm",
+   "slug": "spearman-polearm",
+   "blurb": "polearms, the hardest hits until 70"
+  }
+ ]
+}

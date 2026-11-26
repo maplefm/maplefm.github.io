@@ -428,5 +428,85 @@ def write(slugs=None):
         print("wrote", b["slug"], "| lv70", st[CAP], "| maps", len(d["train_ranges"]))
 
 
+
+
+
+# ------------------------------------------------------------------------------------------------ 1 to 30 class guides
+# For a player who only wants to get to 2nd job: one per class, the same rules, stopping at the 30 job advance with
+# links to every 2nd job guide for that class.
+def class_guide(cls, slug, weapons, first, jobs, skills_open):
+    m, s = MAINSUB.get(cls, ("LUK", "DEX"))
+    return {"slug": slug, "name": f"{cls}, 1 to 30", "cls": cls, "job": cls, "w": WPN[weapons[0][1]]["kind"], "main": m, "sub": s,
+            "creation": CREATE.get(cls, {"STR": 4, "DEX": 5, "INT": 4, "LUK": 12}), "early": None, "weapons": [w for w in weapons if w[0] <= 30],
+            "first": first, "second": [], "jobs": jobs, "cap": 30,
+            "adv": [(10, cls, HOME.get(cls, "Kerning City, Dark Lord"), "Level 10", f"1 SP. {skills_open} open.")], "third": None}
+
+
+CLASS30 = [
+    class_guide("Warrior", "warrior", SWORD2, WARRIOR_1, (100, 110), "Power Strike and Slash Blast"),
+    class_guide("Magician", "magician", WAND, MAGE_1, (200, 210), "Energy Bolt and Magic Claw"),
+    class_guide("Bowman", "bowman", B2.HUNTER["weapons"], BOW_1, (300, 310), "Arrow Blow and Double Shot"),
+    class_guide("Thief", "thief", B2.ASSASSIN["weapons"], B2.ASSASSIN["first"], (400, 410), "Lucky Seven and Double Stab"),
+]
+NEXT30 = {
+    "warrior": [("Fighter, sword", "fighter-sword", "Rage for the party, two-handed or one-handed swords"), ("Fighter, axe", "fighter-axe", "Rage, and axes that make mobs bleed"),
+                ("Page, sword", "page-sword", "Final Attack 360% on one mob"), ("Page, blunt weapon", "page-blunt", "+20% critical damage"),
+                ("Spearman, spear", "spearman-spear", "spears, a step faster than polearms"), ("Spearman, polearm", "spearman-polearm", "polearms, the hardest hits until 70")],
+    "magician": [("Fire Poison", "fire-poison", "Fire Arrow and Poison Breath"), ("Ice Lightning", "ice-lightning", "Cold Beam and Thunder Bolt on 6"), ("Cleric", "cleric", "Heal on undead, Bless for parties")],
+    "bowman": [("Hunter", "hunter", "bow, Arrow Bomb on 6"), ("Crossbowman", "crossbowman", "crossbow, Iron Arrow through 6")],
+    "thief": [("Assassin", "assassin", "claw and Lucky Seven all the way"), ("Sindit", "sindit", "Lucky Seven to 40, then a dagger"),
+              ("Pure Bandit", "pure-bandit", "dagger from 10"), ("STR Bandit", "str-bandit", "STR daggers, a speed step faster")],
+}
+JOBADV30 = {"warrior": "Fighter, Page or Spearman", "magician": "Fire Poison, Ice Lightning or Cleric", "bowman": "Hunter or Crossbowman", "thief": "Assassin or Bandit"}
+TEXT30 = {
+    "warrior": {"pitch": "Warrior from 1 to the 2nd job advance at 30.", "best": [], "weak": [],
+                "why": W1 + ["Two-handed swords are the easiest warrior weapons to get to 30: the Wooden Sword at 10, the Wooden Baseball Bat at 15 with no DEX, then a step every 5 levels.",
+                             "Every warrior job uses this 1st job plan, so nothing here is wasted whichever 2nd job you pick at 30."],
+                "mistakes": [IRONBODY, "Forgetting DEX before 20. Two-Handed Sword needs 20 DEX at 20, so put your AP from 18 to 20 into DEX, or you stay on the Wooden Baseball Bat's 35 attack instead of 40."]},
+    "magician": {"pitch": "Magician from 1 to the 2nd job advance at 30.", "best": [], "weak": [],
+                 "why": MAGE_W[:4] + ["Every mage job uses this 1st job plan, so nothing here is wasted whichever 2nd job you pick at 30."],
+                 "mistakes": MAGE_M[:1]},
+    "bowman": {"pitch": "Bowman from 1 to the 2nd job advance at 30.", "best": [], "weak": [],
+               "why": ["Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+                       "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+                       "The last 3 points go into The Eye of Amazon, 6 in all: 75 range, 15 more than at 3.",
+                       "This guide uses a bow to 30. If you'll be a Crossbowman, a crossbow works with every 1st job skill too, and the Crossbowman guide covers it."],
+               "mistakes": ["Maxing Double Shot before Arrow Blow. It's 120% per mob and uses 2 arrows a shot; Arrow Blow is 240% on one. Max Arrow Blow first.",
+                            "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put your AP at 30 into STR, or you stay on Battle Bow's 44 attack instead of 50."]},
+    "thief": {"pitch": "Thief from 1 to the 2nd job advance at 30.", "best": [], "weak": [],
+              "why": ["Lucky Seven throws 2 stars for 140% each at 20. Max it first and you hit from range from level 10.",
+                      "Keen Eyes 15 adds range to Lucky Seven, 200 at 15, and needs Nimble Body 3. Nimble Body 15 is +15 accuracy and +15 avoid.",
+                      "Disorder 3 opens Dark Sight, and the last points go there.",
+                      "This plan is the claw start most thieves use. If you want a dagger and Double Stab from 10, the Pure Bandit and STR Bandit guides start that way from level 1."],
+              "mistakes": ["Buying Kumbi or Tobi stars to level. Kumbi is +4 attack over Wolbi, 21 against 17, for a lot more mesos. Wolbi from Max in Kerning City is all you need."]},
+}
+
+
+def write30():
+    B2.TEXT.update(TEXT30); B2.COMPARE.update({k: [] for k in TEXT30})
+    bs = [B2.usable(b) for b in CLASS30]
+    plans, out = {}, {}
+    for b in bs:
+        st, rules, table = plan_stats(b); order = plan_sp(b)
+        plans[b["slug"]] = (st, order); out[b["slug"]] = (st, rules, table, order)
+    eng = engine(bs, plans)
+    for b in bs:
+        st, rules, table, order = out[b["slug"]]
+        d = B2.build_json(b, st, rules, table, order, eng)
+        d["cap"] = 30
+        d["stat_plan"]["table"] = [r for r in d["stat_plan"]["table"] if r["level"] <= 30]
+        d["stat_plan"]["rule"] = [r for r in d["stat_plan"]["rule"] if not re.match(r"(\d+)", r["levels"]) or int(re.match(r"(\d+)", r["levels"]).group(1)) <= 30]
+        d["train_ranges"] = [t for t in d["train_ranges"] if int(t["levels"].split()[0]) < 30]
+        d["gear_note"] = ""; d["compare"] = []; d["future"] = []
+        d["advancement"] = [a for a in d["advancement"] if str(a["level"]).isdigit()] + [
+            {"level": 30, "job": "2nd job", "where": HOME.get(b["cls"], "Kerning City, Dark Lord"), "needs": "Level 30", "gets": f"Pick {JOBADV30[b['slug']]}. Your build guide takes over from here."}]
+        d["next_guides"] = [{"name": n, "slug": s, "blurb": x} for n, s, x in NEXT30[b["slug"]]]
+        d["header"]["level_range"] = "1 to 30"
+        d["search"] = {"title": f"{b['cls']} Guide 1 to 30: AP and SP | Club FM", "description": f"MapleStory Classic {b['cls'].lower()} from level 1 to 30: AP and SP for every level, weapons and where to get them, where to train, and which 2nd job to pick."[:155]}
+        json.dump(d, open(os.path.join(B, b["slug"] + ".json"), "w"), indent=1, ensure_ascii=False)
+        print("wrote", b["slug"], "| lv30", st[30])
+
+
 if __name__ == "__main__":
-    write(sys.argv[1:])
+    if sys.argv[1:] == ["class30"]: write30()
+    else: write(sys.argv[1:])

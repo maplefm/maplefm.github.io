@@ -1,0 +1,412 @@
+{
+ "slug": "/builds/thief/",
+ "header": {
+  "class": "Thief",
+  "job_path": "Thief (10) → Thief (30)",
+  "build": "Thief, 1 to 30",
+  "pitch": "Thief from 1 to the 2nd job advance at 30.",
+  "best_at": [],
+  "weak_spots": [],
+  "difficulty": "Easy",
+  "level_range": "1 to 30",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 38803,
+    "shown": "about 39K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 12
+  },
+  "main": "LUK",
+  "sub": "DEX",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
+   },
+   {
+    "levels": "14 to 15",
+    "ap": "all DEX (to 15)",
+    "why": "Mithril Titans at 15 needs 15 DEX"
+   },
+   {
+    "levels": "20",
+    "ap": "all DEX (to 20)",
+    "why": "Adamantium Igor at 20 needs 20 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 25)",
+    "why": "Meba at 25 needs 25 DEX"
+   },
+   {
+    "levels": "30",
+    "ap": "all DEX (to 30)",
+    "why": "Adamantium Guards at 30 needs 30 DEX"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 4,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 57
+   },
+   {
+    "level": 20,
+    "STR": 4,
+    "DEX": 20,
+    "INT": 4,
+    "LUK": 92
+   },
+   {
+    "level": 30,
+    "STR": 4,
+    "DEX": 30,
+    "INT": 4,
+    "LUK": 132
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Lucky Seven",
+   "id": 4001003,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Nimble Body",
+   "id": 4000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 27,
+   "book": "1st job",
+   "skill": "Keen Eyes",
+   "id": 4000001,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Disorder",
+   "id": 4001000,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Dark Sight",
+   "id": 4001001,
+   "to": 8,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Claw",
+   "item": "Garnier",
+   "id": 1472000,
+   "needs": "25 LUK",
+   "attack": 10,
+   "speed": 5,
+   "price": {
+    "typical": 3500,
+    "shown": "3,500",
+    "basis": "old",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Claw",
+   "item": "Mithril Titans",
+   "id": 1472002,
+   "needs": "15 DEX, 35 LUK",
+   "attack": 14,
+   "speed": 4,
+   "price": {
+    "typical": 3999,
+    "shown": "3,999",
+    "basis": "3d",
+    "sales_seen": 12,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Claw",
+   "item": "Adamantium Igor",
+   "id": 1472006,
+   "needs": "20 DEX, 45 LUK",
+   "attack": 17,
+   "speed": 4,
+   "price": {
+    "typical": 5555,
+    "shown": "5,555",
+    "basis": "3d",
+    "sales_seen": 6,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "Claw",
+   "item": "Meba",
+   "id": 1472007,
+   "needs": "25 DEX, 55 LUK",
+   "attack": 19,
+   "speed": 3,
+   "price": {
+    "typical": 8250,
+    "shown": "8,250",
+    "basis": "clean",
+    "sales_seen": 93,
+    "rough": false
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Claw",
+   "item": "Adamantium Guards",
+   "id": 1472010,
+   "needs": "30 DEX, 65 LUK",
+   "attack": 23,
+   "speed": 4,
+   "price": {
+    "typical": 17499,
+    "shown": "17K",
+    "basis": "3d",
+    "sales_seen": 17,
+    "rough": true
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Thief",
+   "where": "Kerning City, Dark Lord",
+   "needs": "Level 10",
+   "gets": "1 SP. Lucky Seven and Double Stab open."
+  },
+  {
+   "level": 30,
+   "job": "2nd job",
+   "where": "Kerning City, Dark Lord",
+   "needs": "Level 30",
+   "gets": "Pick Assassin or Bandit. Your build guide takes over from here."
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Lucky Seven throws 2 stars for 140% each at 20. Max it first and you hit from range from level 10.",
+  "Keen Eyes 15 adds range to Lucky Seven, 200 at 15, and needs Nimble Body 3. Nimble Body 15 is +15 accuracy and +15 avoid.",
+  "Disorder 3 opens Dark Sight, and the last points go there.",
+  "This plan is the claw start most thieves use. If you want a dagger and Double Stab from 10, the Pure Bandit and STR Bandit guides start that way from level 1.",
+  "DEX only goes in when your gear needs it: 15 for Mithril Titans at 15, 20 for Adamantium Igor at 20, 25 for Meba at 25, 30 for Adamantium Guards at 30 and 40 for level 50 thief armor. Everything else goes into LUK."
+ ],
+ "mistakes": [
+  "Buying Kumbi or Tobi stars to level. Kumbi is +4 attack over Wolbi, 21 against 17, for a lot more mesos. Wolbi from Max in Kerning City is all you need."
+ ],
+ "compare": [],
+ "future": [],
+ "search": {
+  "title": "Thief Guide 1 to 30: AP and SP | Club FM",
+  "description": "MapleStory Classic thief from level 1 to 30: AP and SP for every level, weapons and where to get them, where to train, and which 2nd job to pick."
+ },
+ "cap": 30,
+ "next_guides": [
+  {
+   "name": "Assassin",
+   "slug": "assassin",
+   "blurb": "claw and Lucky Seven all the way"
+  },
+  {
+   "name": "Sindit",
+   "slug": "sindit",
+   "blurb": "Lucky Seven to 40, then a dagger"
+  },
+  {
+   "name": "Pure Bandit",
+   "slug": "pure-bandit",
+   "blurb": "dagger from 10"
+  },
+  {
+   "name": "STR Bandit",
+   "slug": "str-bandit",
+   "blurb": "STR daggers, a speed step faster"
+  }
+ ]
+}

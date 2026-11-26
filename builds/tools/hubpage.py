@@ -25,6 +25,10 @@ CLASSES = [
 ]
 
 
+CLASS30 = [("Warrior", "warrior", "to the job advance at 30, then pick Fighter, Page or Spearman"), ("Magician", "magician", "to 30, then pick Fire Poison, Ice Lightning or Cleric"),
+           ("Bowman", "bowman", "to 30, then pick Hunter or Crossbowman"), ("Thief", "thief", "to 30, then pick Assassin or Bandit")]
+
+
 def build():
     wins = []
     for cls, builds in CLASSES:
@@ -32,9 +36,12 @@ def build():
             f'<a href="/builds/{s}/"><b>{E(n)}</b><div class="go">Open the guide →</div></a>' if s in DONE and G.exists("builds", s)
             else f'<div class="c"><b>{E(n)}</b><div class="soon">Guide coming</div></div>' for n, s in builds)
         wins.append(f'<div class="win"><h2>{E(cls)}</h2><div class="in"><div class="cmp">{cards}</div></div></div>')
+    starts = "".join(f'<a href="/builds/{s}/"><b>{E(n)}, 1 to 30</b><small>{E(x)}</small><div class="go">Open the guide →</div></a>'
+                     for n, s, x in CLASS30 if G.exists("builds", s))
+    start = (f'<div class="win"><h2>Just starting? 1 to 30</h2><div class="in"><div class="cmp">{starts}</div></div></div>') if starts else ""
     body = (f'<style>{G.CSS}</style><div class="gw"><div class="gw-top"><div><h1>Build guides</h1>'
             '<p>Stats and SP for every level from 1 to 70, the weapon to use at each level and where to get it, and where to train. Pick your build.</p></div></div>'
-            + "".join(wins) + '<div class="win"><h2>Stars and arrows</h2><div class="in"><div class="cmp"><a href="/items/stars/"><b>Every star and arrow</b><small>attack, set size, NPC and FM prices</small><div class="go">Open →</div></a></div></div></div></div>')
+            + start + "".join(wins) + '<div class="win"><h2>Stars and arrows</h2><div class="in"><div class="cmp"><a href="/items/stars/"><b>Every star and arrow</b><small>attack, set size, NPC and FM prices</small><div class="go">Open →</div></a></div></div></div></div>')
     title = "MapleStory Classic Build Guides | Club FM"
     desc = "MapleStory Classic build guides: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
     assert len(title) < 60 and len(desc) < 155

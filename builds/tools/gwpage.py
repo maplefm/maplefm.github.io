@@ -175,7 +175,7 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  if(!touched||!books.includes(book))book=books[books.length-1];
  skt.innerHTML=books.map(b=>`<button type="button" aria-pressed="${b==book}" data-b="${b}">${b}</button>`).join("");
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
- skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):(D.reset&&L>=D.reset&&D.first[n]<D.reset?"reset at "+D.reset:"starts at level "+D.first[n])}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
+ skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):(D.reset&&L>=D.reset&&D.first[n]<D.reset?"reset at "+D.reset:"starts at level "+D.first[n])}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?(D.cap==70?", save for 3rd job":", your first 2nd job point: pick your build below"):""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
  eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · ${E(w.akind||"attack")} ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:D.gearNote?`<div class="wtip">${E(D.gearNote)}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}${w.slot=="Bow"&&D.ammoBow?`<div class="wtip">${D.ammoBow}</div>`:""}${w.slot=="Crossbow"&&D.ammoXbow?`<div class="wtip">${D.ammoXbow}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
  const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
@@ -185,7 +185,7 @@ mpw.addEventListener("click",e=>{const a=e.target.closest(".mp");if(!a||!matchMe
 stb.innerHTML='<table><tr class="thd"><th>Lv</th><th>AP this level</th><th>STR</th><th>DEX</th><th>INT</th><th>LUK</th></tr>'+S.map((s,i)=>{const p=S[i-1];return`<tr id="sv${s.l}" class="${s.ch?"gch":""}"><td class="gn">${s.l}</td><td>${E(s.ap)}</td>${s.t.map((v,k)=>`<td class="gv${p&&v!=p.t[k]?" gup":""}">${v}</td>`).join("")}</tr>`}).join("")+"</table>";
 document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{if(chg.checked){chg.checked=false;stb.classList.remove("only")}const r=document.getElementById("sv"+b.dataset.jump);if(r)stb.scrollTop=r.offsetTop-stb.querySelector("th").offsetHeight});
 chg.onchange=()=>stb.classList.toggle("only",chg.checked);
-spb.innerHTML='<table><tr class="thd"><th>Lv</th><th>Where the points go</th></tr>'+D.spLevels.map(r=>`<tr class="spr${r.ch?" gch":""}"><td class="gn">${r.l}</td><td>${r.note?`<b style="color:#fde047;margin-right:10px">${E(r.note)}</b>`:""}${(r.gone||[]).map(([n,k])=>`<span class="si" style="color:#9fb0e8;text-decoration:line-through">${ski(n)}${E(n)} ${k}</span>`).join("")}${r.put.map(([n,k])=>`<span class="si">${ski(n)}${E(n)} +${k}</span>`).join("")}${r.spare?`<span class="si" style="color:#9fb0e8">${r.spare} spare, save for 3rd job</span>`:""}</td></tr>`).join("")+"</table>";
+spb.innerHTML='<table><tr class="thd"><th>Lv</th><th>Where the points go</th></tr>'+D.spLevels.map(r=>`<tr class="spr${r.ch?" gch":""}"><td class="gn">${r.l}</td><td>${r.note?`<b style="color:#fde047;margin-right:10px">${E(r.note)}</b>`:""}${(r.gone||[]).map(([n,k])=>`<span class="si" style="color:#9fb0e8;text-decoration:line-through">${ski(n)}${E(n)} ${k}</span>`).join("")}${r.put.map(([n,k])=>`<span class="si">${ski(n)}${E(n)} +${k}</span>`).join("")}${r.spare?`<span class="si" style="color:#9fb0e8">${r.spare} spare${D.cap==70?", save for 3rd job":", your first 2nd job point"}</span>`:""}</td></tr>`).join("")+"</table>";
 const m=location.hash.match(/^#lv(\d+)$/);if(m)lv.value=Math.min(D.cap,Math.max(1,+m[1]));
 lv.oninput=draw;fin.onclick=()=>{lv.value=D.cap;draw()};
 allb.onclick=()=>{all.open=!all.open;if(all.open)all.scrollIntoView({behavior:"smooth"})};all.ontoggle=()=>allb.textContent=all.open?"Hide the whole guide":"See the whole guide";
@@ -194,7 +194,9 @@ draw();
 
 
 def build(name):
+    global CAP
     d = json.load(open(os.path.join(ROOT, "builds", name + ".json"), encoding="utf-8"))
+    CAP = d.get("cap") or 70   # the 1 to 30 class guides stop at the 2nd job advance
     guide = load("itemguide.json")["items"]
     maps = load("world.json")["maps"]
     skills = json.load(open(os.path.join(ROOT, "assets", "classic-skills.json")))["skills"]
@@ -341,18 +343,21 @@ def build(name):
     var = d.get("variants") or []
     varh = ('<div class="gvar" role="group" aria-label="Weapon">' + "".join(
         f'<a href="/builds/{v["slug"]}/"{" aria-current=" + chr(34) + "page" + chr(34) if v["slug"] == name else ""} onclick="this.href=this.href.split(\'#\')[0]+location.hash">{E(v["label"])}</a>' for v in var) + "</div>") if var else ""
-    body = (f'<style>{CSS}</style><div class="gw"><div class="gw-top"><div><h1>{E(h["build"])}</h1><p>{md(h["pitch"])}</p>{varh}</div>'
+    body = (f'<style>{CSS}</style><div class="gw"><div class="gw-top"><div><h1>{E(h["build"])}</h1>{varh}</div>'
             f'<div class="gw-ctl"><label class="gw-lv">Level <b id="lvn">Lv {d.get("switch") or 30}</b><input id="lv" type="range" min="1" max="{CAP}" value="{d.get("switch") or 30}" aria-label="Character level"></label>'
             '<button type="button" class="gbtn" id="fin">Finished build</button><button type="button" class="gbtn alt" id="allb">See the whole guide</button></div></div>'
             '<div class="gw-grid"><div class="win"><h2>Stats</h2><div class="in" id="stw"></div></div><div class="win skw"><h2>Skills</h2><div class="tabsg" id="skt"></div><div class="in" id="skw"></div></div>'
             '<div class="win trw"><h2>Where to train</h2><div class="in"><div class="mapc" id="mpw"></div></div></div>'
             '<div class="win"><h2>Weapon</h2><div class="in" id="eqw"></div></div></div>'
-            '<div class="gw-two"><div class="win"><h2>Stats by level</h2><div class="in"><div class="boxbar">' + "".join(f'<button type="button" data-jump="{x}">Lv {x}</button>' for x in sorted({1, 10, 30, d.get("switch") or 30, 50, CAP})) +
+            '<div class="gw-two"><div class="win"><h2>Stats by level</h2><div class="in"><div class="boxbar">' + "".join(f'<button type="button" data-jump="{x}">Lv {x}</button>' for x in sorted({1, 10, 30, d.get("switch") or 30, 50, CAP}) if x <= CAP) +
             '<label title="Hides the levels where every point just goes into your main stat"><input type="checkbox" id="chg"> Key levels only</label></div><div class="gbox" id="stb"></div></div></div>'
             '<div class="win"><h2>Skill points by level</h2><div class="in"><div class="gbox" id="spb"></div></div></div></div>'
-            '<div class="win"><h2>Other ways to build it</h2><div class="in"><div class="cmp">' + "".join(cmp) + "</div></div></div>"
-            f'<div class="gw-low"><div class="win"><h2>Why this way</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["why"])}</ol></div></div>'
+            + ('<div class="win"><h2>Other ways to build it</h2><div class="in"><div class="cmp">' + "".join(cmp) + "</div></div></div>" if cmp else "")
+            + f'<div class="gw-low"><div class="win"><h2>Why this way</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["why"])}</ol></div></div>'
             f'<div class="win"><h2>Common mistakes</h2><div class="in"><ol>{"".join("<li>" + md(x) + "</li>" for x in d["mistakes"])}</ol></div></div></div>'
+            + (f'<div class="win"><h2>2nd job at 30: pick your build</h2><div class="in"><div class="cmp">' + "".join(
+                (f'<a href="/builds/{g["slug"]}/"><b>{E(g["name"])}</b><small>{E(g["blurb"])}</small><div class="go">Open the guide →</div></a>' if exists("builds", g["slug"])
+                 else f'<div class="c"><b>{E(g["name"])}</b><small>{E(g["blurb"])}</small><div class="soon">Guide coming</div></div>') for g in d["next_guides"]) + "</div></div></div>" if d.get("next_guides") else "")
             + (f'<div class="win"><h2>3rd job at 70</h2><div class="in third"><span class="badge">Not out yet</span><div><b>{E(third["job"])}</b><div class="wtip">This guide stops at 70. It gets extended when Nexon releases 3rd job in Classic World.</div></div></div></div>' if third else "")
             + f'<details class="all" id="all"><summary></summary>{allh}</details></div>'
             f'<script>const D={json.dumps(data).replace("</", "<\\/")};D.icon=id=>"/i/"+id+".png";D.skimg=id=>"/sk/"+id+".png";D.mm=id=>"{LIVE}minimap/"+id+".png";{JS}</script>'
@@ -368,7 +373,7 @@ def build(name):
 if __name__ == "__main__":
     for n in sys.argv[1:] or ["sindit"]:
         p, data = build(n)
-        print("wrote", p, "| spare SP at 70:", data["sp"][CAP]["spare"], "| level 1:", data["stats"][0]["t"], "| skills with icons:", len(data["sid"]), "of", len(data["first"]))
+        print("wrote", p, f"| spare SP at {CAP}:", data["sp"][CAP]["spare"], "| level 1:", data["stats"][0]["t"], "| skills with icons:", len(data["sid"]), "of", len(data["first"]))
     # the Discord /build command reads the same numbers from builds/discord.json
     import subprocess
     subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "discordbuilds.py")], check=True)
