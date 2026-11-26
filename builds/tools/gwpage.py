@@ -134,7 +134,7 @@ function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Ma
  if(!touched||!books.includes(book))book=books[books.length-1];
  skt.innerHTML=books.map(b=>`<button type="button" aria-pressed="${b==book}" data-b="${b}">${b}</button>`).join("");
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
- skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):"starts at level "+D.first[n]}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
+ skw.innerHTML=D.book[book].map(n=>{const p=sk.have[n]||0,m=D.max[n]||20;return`<div class="sk${p?"":" off"}">${ski(n)}<div><div class="nm">${E(n)}</div><div class="bar"><i style="width:${p/m*100}%"></i></div><small>${p?(p>=m?"maxed":p+" of "+m):(D.reset&&L>=D.reset&&D.first[n]<D.reset?"reset at "+D.reset:"starts at level "+D.first[n])}</small></div><div class="pt">${p}/${m}</div></div>`}).join("")+(sk.spare?`<div class="wtip">${sk.spare} spare point${sk.spare>1?"s":""}${L==D.cap?", save for 3rd job":""}</div>`:"")}
  let w=null;for(const g of D.gear)if(g.level<=L)w=g;const nx=D.gear.find(g=>g.level>L);
  eqw.innerHTML=w?`<div class="wpn"><div class="slot"><img src="${D.icon(w.id)}" alt="" width="38" height="38"></div><div><b>${w.link?`<a href="/item/${w.slug}/">${E(w.item)}</a>`:E(w.item)}</b><small>${E(w.slot)} · attack ${E(w.attack)}${w.speed?" · speed "+E(w.speed):""}</small>${needs(w)}</div></div>${waysHtml(w)}${nx?`<div class="next">Next: <b>${E(nx.item)}</b> at level ${nx.level}</div>`:""}${w.slot=="Claw"&&D.ammo?`<div class="wtip">${D.ammo}</div>`:""}`:`<div class="wtip">No weapon yet. ${D.gear[0]?`Your first is <b>${E(D.gear[0].item)}</b> at level ${D.gear[0].level}.`:""}</div>`;
  const t=D.train.find(t=>L>=t.a&&L<=t.b);mpw.innerHTML=t?t.maps.map(m=>`<a class="mp" href="/map/${m.slug}/">${E(m.map)}<small>${E(m.monsters.join(", "))}</small>${m.mm?`<span class="gmm"><img src="${D.mm(m.mm)}" alt="Minimap of ${E(m.map)}" loading="lazy"><span>${E(m.map)}</span></span>`:""}</a>`).join(""):'<div class="wtip">Train on Maple Island and around your starting town until 10.</div>';
@@ -144,7 +144,7 @@ mpw.addEventListener("click",e=>{const a=e.target.closest(".mp");if(!a||!matchMe
 stb.innerHTML='<table><tr class="thd"><th>Lv</th><th>AP this level</th><th>STR</th><th>DEX</th><th>INT</th><th>LUK</th></tr>'+S.map((s,i)=>{const p=S[i-1];return`<tr id="sv${s.l}" class="${s.ch?"gch":""}"><td class="gn">${s.l}</td><td>${E(s.ap)}</td>${s.t.map((v,k)=>`<td class="gv${p&&v!=p.t[k]?" gup":""}">${v}</td>`).join("")}</tr>`}).join("")+"</table>";
 document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{if(chg.checked){chg.checked=false;stb.classList.remove("only")}const r=document.getElementById("sv"+b.dataset.jump);if(r)stb.scrollTop=r.offsetTop-stb.querySelector("th").offsetHeight});
 chg.onchange=()=>stb.classList.toggle("only",chg.checked);
-spb.innerHTML='<table><tr class="thd"><th>Lv</th><th>Where the points go</th></tr>'+D.spLevels.map(r=>`<tr class="spr${r.ch?" gch":""}"><td class="gn">${r.l}</td><td>${r.note?`<b style="color:#fde047;margin-right:10px">${E(r.note)}</b>`:""}${r.put.map(([n,k])=>`<span class="si">${ski(n)}${E(n)} +${k}</span>`).join("")}${r.spare?`<span class="si" style="color:#9fb0e8">${r.spare} spare, save for 3rd job</span>`:""}</td></tr>`).join("")+"</table>";
+spb.innerHTML='<table><tr class="thd"><th>Lv</th><th>Where the points go</th></tr>'+D.spLevels.map(r=>`<tr class="spr${r.ch?" gch":""}"><td class="gn">${r.l}</td><td>${r.note?`<b style="color:#fde047;margin-right:10px">${E(r.note)}</b>`:""}${(r.gone||[]).map(([n,k])=>`<span class="si" style="color:#9fb0e8;text-decoration:line-through">${ski(n)}${E(n)} ${k}</span>`).join("")}${r.put.map(([n,k])=>`<span class="si">${ski(n)}${E(n)} +${k}</span>`).join("")}${r.spare?`<span class="si" style="color:#9fb0e8">${r.spare} spare, save for 3rd job</span>`:""}</td></tr>`).join("")+"</table>";
 const m=location.hash.match(/^#lv(\d+)$/);if(m)lv.value=Math.min(D.cap,Math.max(1,+m[1]));
 lv.oninput=draw;fin.onclick=()=>{lv.value=D.cap;draw()};
 allb.onclick=()=>{all.open=!all.open;if(all.open)all.scrollIntoView({behavior:"smooth"})};all.ontoggle=()=>allb.textContent=all.open?"Hide the whole guide":"See the whole guide";
@@ -200,6 +200,10 @@ def build(name):
         for bk, start in (("1st job", 10), ("2nd job", 30)):
             if L < start: continue
             pts = 1 + 3 * ((min(L, 30) if bk == "1st job" else L) - start)
+            rs = d.get("reset")
+            if rs and bk == rs["book"] and L >= rs["level"]:   # after an SP Reset the book is rebuilt as the guide says
+                assert sum(rs["to"].values()) == pts, ("reset spends a different number of SP than the book has", sum(rs["to"].values()), pts)
+                hv.update(rs["to"]); continue
             for s in books[bk]:
                 need = s["to"] - hv.get(s["skill"], 0)
                 if need <= 0: continue
@@ -214,8 +218,11 @@ def build(name):
         spd[L] = {"have": hv, "spare": spare}
         if L >= 10:
             put = [[k, v - prev.get(k, 0)] for k, v in hv.items() if v - prev.get(k, 0) > 0]
+            gone = [[k, v] for k, v in prev.items() if hv.get(k, 0) < v]
+            rs = d.get("reset")
             note = next((f"Job advance to {a['job']}" for a in d["advancement"] if str(a["level"]) == str(L)), "")
-            sp_lv.append({"l": L, "put": put, "spare": spare if L == CAP else 0, "note": note, "ch": bool(note)})
+            if rs and L == rs["level"]: note = (note + " · " if note else "") + "Use an SP Reset Scroll"
+            sp_lv.append({"l": L, "put": put, "gone": gone, "spare": spare if L == CAP else 0, "note": note, "ch": bool(note)})
         prev = hv
     first = {}
     for r in sp_lv:
@@ -251,8 +258,8 @@ def build(name):
             + (f", or Wolbi for {wolbi[0][2]:,} a set at {E(wolbi[0][0])} (+2 attack)" if wolbi else "")
             + '. Anything better is a luxury, not part of the build. <a href="/items/stars/">Every star and its price</a>') if subi else ""
 
-    data = {"cap": CAP, "start": d.get("switch") or 30, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
-            "book": {b: list(dict.fromkeys(s["skill"] for s in v)) for b, v in books.items()}, "sid": {n: sid[n] for n in first if n in sid},
+    data = {"cap": CAP, "reset": (d.get("reset") or {}).get("level"), "start": d.get("switch") or 30, "stats": stats, "sp": spd, "spLevels": sp_lv, "first": first, "max": {n: smax.get(n, 20) for n in first},
+            "book": {b: list(dict.fromkeys([s["skill"] for s in v] + (list(d["reset"]["to"]) if d.get("reset") and d["reset"]["book"] == b else []))) for b, v in books.items()}, "sid": {n: sid[n] for n in first if n in sid},
             "gear": gear, "train": train, "ammo": ammo}
 
     def t_(head, rws): return '<div class="tw"><table class="t"><tr>' + "".join(f"<th>{x}</th>" for x in head) + "</tr>" + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rws) + "</table></div>"

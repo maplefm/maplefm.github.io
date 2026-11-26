@@ -4,14 +4,15 @@
   "class": "Thief",
   "job_path": "Thief (10) → Bandit (30)",
   "build": "Sindit: Lucky Seven to 40, then Savage Blow",
-  "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, and switch to a Korean Fan at 40. No reset needed.",
+  "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, then switch to a Korean Fan at 40 and use an SP Reset to move your Lucky Seven points into Double Stab.",
   "best_at": [
    "Safe ranged training 10 to 39",
    "Hits monsters on other platforms",
    "Big single target damage from 40",
-   "No Cash Shop needed"
+   "Double Stab and Savage Blow after the switch"
   ],
   "weak_spots": [
+   "Needs an SP Reset Scroll at 40",
    "Bandit points do nothing until you switch",
    "Melee from 40: takes hits",
    "DEX for daggers: 45 by 50, 65 by 70"
@@ -478,7 +479,7 @@
  "resets": [
   {
    "what": "SP Reset Scroll",
-   "when": "not needed",
+   "when": "level 40, the day you equip Korean Fan",
    "cost": {
     "nx": 7000,
     "mesos": {
@@ -489,24 +490,8 @@
      "rough": false
     }
    },
-   "worth_it": "No",
-   "why": "Lucky Seven's 20 points just sit there after you switch. Nothing to fix."
-  },
-  {
-   "what": "SP Reset Scroll",
-   "when": "only for bossing before you switch",
-   "cost": {
-    "nx": 7000,
-    "mesos": {
-     "typical": 188499,
-     "shown": "188K",
-     "basis": "24h",
-     "sales_seen": 68,
-     "rough": false
-    }
-   },
-   "worth_it": "Maybe",
-   "why": "Moves Lucky Seven's points into Double Stab for one big target before you switch. For leveling, Lucky Seven is still better."
+   "worth_it": "Yes",
+   "why": "Lucky Seven and Keen Eyes are dead once you hold a dagger. Put your 1st job SP back as Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20. If the scroll also clears your Bandit points, put them back the way they were."
   },
   {
    "what": "AP Reset Scroll",
@@ -840,15 +825,16 @@
  "why": [
   "Lucky Seven hits from range, so you clear mobs on the next platform from where you stand. Less walking, less touch damage and fewer pots, from 10 until you switch.",
   "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39, ready for the switch at 40.",
-  "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. Our training engine has the Korean Fan at 40 doing about 1,235 damage a second against 838 with the claw, roughly 26% more EXP an hour. It doesn't count walking to mobs yet, so it hasn't been timed in game.",
+  "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. On our training engine the Korean Fan at 40 does about 1,235 damage a second against 838 with the claw, and about 86K EXP an hour against 64K. It doesn't count walking to mobs yet, so it hasn't been timed in game.",
   "Korean Fan needs no DEX, so the switch costs you no AP. Your next DEX is at 47 to 49, for Shinkita at 50.",
-  "No SP Reset needed. Lucky Seven's 20 points just sit there after you switch, so the 7,000 NX scroll buys you nothing here."
+  "Reset your 1st job SP the day you switch. Lucky Seven and Keen Eyes are 35 dead points once you hold a dagger. Moved into Double Stab 20 and Dark Sight 20, our engine has you at about 86K EXP an hour at 40 instead of 81K without the reset, because Double Stab finishes some mobs faster."
  ],
  "mistakes": [
   "Picking up a dagger at 35. You'd only have Savage Blow 10 and Mastery 5, about the same damage as Lucky Seven (707 vs 750 a second), and now you're walking into every mob. Stay on the claw until Savage Blow is 21.",
   "Putting SP in Haste right after the 2nd job advance. Haste 20 is 20 SP, close to 7 levels, and pushes your switch back by that much. Do it after the dagger skills.",
   "Putting more than 1 point in Dagger Booster before Savage Blow is 21. Level 1 is already the full speed boost; the other 19 points only stretch it from 100 to 300 seconds. That's over 6 levels of SP that should be in Savage Blow.",
-  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX or you hit 50 and can't wear it. Same at 58 to 59 for Deadly Fin and 68 to 69 for Kandine."
+  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX or you hit 50 and can't wear it. Same at 58 to 59 for Deadly Fin and 68 to 69 for Kandine.",
+  "Switching to the dagger without the SP Reset. You'll never throw Lucky Seven again, so those 35 points in Lucky Seven and Keen Eyes do nothing. Reset at 40 and put them into Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20."
  ],
  "compare": [
   {
@@ -858,10 +844,10 @@
    "weak": "Bandit points wait until 40"
   },
   {
-   "build": "Sindit, reset at 35",
-   "main_attack": "Lucky Seven, Double Stab, Savage Blow",
-   "best_at": "one big target 35 to 39",
-   "weak": "melee earlier, trains slower, costs a scroll"
+   "build": "Sindit, no reset",
+   "main_attack": "Lucky Seven to 39, Savage Blow only from 40",
+   "best_at": "no Cash Shop scroll",
+   "weak": "about 6% less EXP an hour at 40, no Double Stab"
   },
   {
    "build": "Pure Bandit (dagger from 10)",
@@ -894,7 +880,7 @@
  ],
  "search": {
   "title": "Sindit Build Guide: AP, SP and When to Switch | Club FM",
-  "description": "MapleStory Classic sindit: throw Lucky Seven to 40, then Savage Blow with a Korean Fan. No reset. AP, SP, gear and maps by level.",
+  "description": "MapleStory Classic sindit: Lucky Seven to 40, then a Korean Fan, SP Reset into Double Stab, and Savage Blow. AP, SP, gear and maps by level.",
   "slug": "/builds/sindit/",
   "keywords": [
    "sindit",
@@ -952,5 +938,16 @@
   "sub": "DEX",
   "source": "Classic creation: no dice, 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026); 25 + 9 levels x 5 AP = 70 = the level 10 row"
  },
- "switch": 40
+ "switch": 40,
+ "reset": {
+  "level": 40,
+  "book": "1st job",
+  "to": {
+   "Double Stab": 20,
+   "Nimble Body": 15,
+   "Disorder": 6,
+   "Dark Sight": 20
+  },
+  "source": "Adam, Nov 25: sindits reset their 1st job SP at the switch so they have Double Stab; plan from the Nov 25 audit model"
+ }
 }
