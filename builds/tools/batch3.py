@@ -263,11 +263,11 @@ TEXT3 = {
 }
 TEXT3["str-bandit"] = {
     "pitch": "LUK with STR only to each STR dagger's need. Double Stab in 1st job, then Savage Blow, on daggers one speed step faster than the DEX ones.",
-    "best": ["STR daggers are speed 3, a step faster than DEX daggers", "STR adds to dagger damage the same as DEX", "Korean Fan at 40 needs no STR"],
+    "best": ["STR daggers are Faster (speed 3), a step above DEX daggers", "STR adds to dagger damage the same as DEX", "Korean Fan at 40 needs no STR"],
     "weak": ["Less accuracy: STR gives none, DEX does", "No thief armor: it needs DEX", "Melee: you walk to every mob and take hits"],
     "why": ["Double Stab 20 hits twice for 160%. It's your only real attack until 30, so max it first.",
             "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
-            "STR daggers: Triple-Tipped Zamadar at 17, Stinger at 22, Cass at 30, Bazlud at 45 and Sai at 50 are all speed 3. The DEX daggers from 20 on, Coconut Knife, Reef Claw, Gephart and Shinkita, are speed 4, so you swing faster.",
+            "STR daggers: Triple-Tipped Zamadar at 17, Stinger at 22, Cass at 30, Bazlud at 45 and Sai at 50 are all Faster (speed 3). The DEX daggers from 20 on, Coconut Knife, Reef Claw, Gephart and Shinkita, are Fast (speed 4), so you swing faster.",
             "For a dagger your damage stat is LUK, and by the game data STR counts with DEX as your second stat, so the STR you put in for the dagger still adds damage. That hasn't been checked in game yet. The cost is accuracy: STR gives none, so you sit about 7 below a Pure Bandit at 30 and 13 below at 50.",
             "No thief armor past 15: thief armor needs DEX, 10 at 20 up to 40 at 50, and a STR Bandit keeps DEX at 5. Wear gear any job can, like the Yellow Baseball Cap, Old Raggedy Cape and Squishy Shoes.",
             "STR only goes in for each dagger: 11 at 17, 17 at 22, 25 at 30, 40 at 45 and 45 at 50. Everything else goes into LUK, and DEX stays at 5.",
@@ -275,7 +275,7 @@ TEXT3["str-bandit"] = {
             "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster."],
     "mistakes": ["Putting AP into DEX out of habit. None of the STR daggers need DEX and you wear gear any job can, so every point there is a point out of LUK.",
                  "Forgetting STR before Bazlud. It needs 40 STR at 45, so put your AP from 43 to 45 into STR, or you stay on Korean Fan's 55 attack instead of 62.",
-                 "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same speed 3, and needs no STR.",
+                 "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same Faster speed, and needs no STR.",
                  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal."],
 }
 COMPARE3 = {
@@ -286,7 +286,7 @@ COMPARE3 = {
     "fire-poison": [("Fire Poison (this guide)", "Fire Arrow burn", "fire-resistant mobs"), ("Ice Lightning", "Cold Beam slow, Thunder Bolt on 6", "ice-resistant mobs"), ("Cleric", "Heal on undead, parties", "Heal only hurts undead")],
     "ice-lightning": [("Ice Lightning (this guide)", "Cold Beam slow, Thunder Bolt on 6", "ice-resistant mobs"), ("Fire Poison", "Fire Arrow burn", "fire-resistant mobs"), ("Cleric", "Heal on undead, parties", "Heal only hurts undead")],
     "cleric": [("Cleric (this guide)", "Heal on undead, parties", "Heal only hurts undead"), ("Fire Poison", "Fire Arrow burn", "fire-resistant mobs"), ("Ice Lightning", "Cold Beam slow", "ice-resistant mobs")],
-    "str-bandit": [("STR Bandit (this guide)", "faster daggers, speed 3", "less accuracy, no thief armor"), ("Pure Bandit", "DEX daggers, thief armor", "a speed step slower"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40")],
+    "str-bandit": [("STR Bandit (this guide)", "Faster daggers (speed 3)", "less accuracy, no thief armor"), ("Pure Bandit", "DEX daggers, thief armor", "a speed step slower"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40")],
     "crossbowman": [("Crossbowman (this guide)", "Iron Arrow on 6 in a line", "slower weapons"), ("Hunter", "Arrow Bomb on 6", "STR for bows from 15")],
 }
 

@@ -6,7 +6,7 @@
   "build": "STR Bandit",
   "pitch": "LUK with STR only to each STR dagger's need. Double Stab in 1st job, then Savage Blow, on daggers one speed step faster than the DEX ones.",
   "best_at": [
-   "STR daggers are speed 3, a step faster than DEX daggers",
+   "STR daggers are Faster (speed 3), a step above DEX daggers",
    "STR adds to dagger damage the same as DEX",
    "Korean Fan at 40 needs no STR"
   ],
@@ -753,7 +753,7 @@
  "why": [
   "Double Stab 20 hits twice for 160%. It's your only real attack until 30, so max it first.",
   "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
-  "STR daggers: Triple-Tipped Zamadar at 17, Stinger at 22, Cass at 30, Bazlud at 45 and Sai at 50 are all speed 3. The DEX daggers from 20 on, Coconut Knife, Reef Claw, Gephart and Shinkita, are speed 4, so you swing faster.",
+  "STR daggers: Triple-Tipped Zamadar at 17, Stinger at 22, Cass at 30, Bazlud at 45 and Sai at 50 are all Faster (speed 3). The DEX daggers from 20 on, Coconut Knife, Reef Claw, Gephart and Shinkita, are Fast (speed 4), so you swing faster.",
   "For a dagger your damage stat is LUK, and by the game data STR counts with DEX as your second stat, so the STR you put in for the dagger still adds damage. That hasn't been checked in game yet. The cost is accuracy: STR gives none, so you sit about 7 below a Pure Bandit at 30 and 13 below at 50.",
   "No thief armor past 15: thief armor needs DEX, 10 at 20 up to 40 at 50, and a STR Bandit keeps DEX at 5. Wear gear any job can, like the Yellow Baseball Cap, Old Raggedy Cape and Squishy Shoes.",
   "STR only goes in when your gear needs it: 11 for Triple-Tipped Zamadar at 17, 17 for Stinger at 22, 25 for Cass at 30, 40 for Bazlud at 45 and 45 for Sai at 50. Everything else goes into LUK, and DEX stays at 5.",
@@ -763,13 +763,13 @@
  "mistakes": [
   "Putting AP into DEX out of habit. None of the STR daggers need DEX and you wear gear any job can, so every point there is a point out of LUK.",
   "Forgetting STR before Bazlud. It needs 40 STR at 45, so put your AP from 43 to 45 into STR, or you stay on Korean Fan's 55 attack instead of 62.",
-  "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same speed 3, and needs no STR.",
+  "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same Faster speed, and needs no STR.",
   "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal."
  ],
  "compare": [
   {
    "build": "STR Bandit (this guide)",
-   "best_at": "faster daggers, speed 3",
+   "best_at": "Faster daggers (speed 3)",
    "weak": "less accuracy, no thief armor"
   },
   {
