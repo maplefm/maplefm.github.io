@@ -19,8 +19,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 919353,
-    "shown": "about 919K"
+    "mesos": 1051380,
+    "shown": "about 1.1M"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -265,10 +265,10 @@
    "attack": 35,
    "speed": 8,
    "price": {
-    "typical": 2750,
-    "shown": "2,750",
+    "typical": 2500,
+    "shown": "2,500",
     "basis": "old",
-    "sales_seen": 4,
+    "sales_seen": 3,
     "rough": true
    },
    "why": ""
@@ -299,8 +299,8 @@
    "price": {
     "typical": 6495,
     "shown": "6,495",
-    "basis": "3d",
-    "sales_seen": 5,
+    "basis": "old",
+    "sales_seen": 4,
     "rough": true
    },
    "why": ""
@@ -316,8 +316,8 @@
    "price": {
     "typical": 9999,
     "shown": "9,999",
-    "basis": "3d",
-    "sales_seen": 19,
+    "basis": "24h",
+    "sales_seen": 23,
     "rough": true
    },
    "why": ""
@@ -331,10 +331,10 @@
    "attack": 60,
    "speed": 8,
    "price": {
-    "typical": 11999,
-    "shown": "12K",
+    "typical": 10999,
+    "shown": "11K",
     "basis": "3d",
-    "sales_seen": 25,
+    "sales_seen": 27,
     "rough": true
    },
    "why": ""
@@ -348,10 +348,10 @@
    "attack": 65,
    "speed": 8,
    "price": {
-    "typical": 28610,
-    "shown": "29K",
-    "basis": "24h",
-    "sales_seen": 30,
+    "typical": 47499,
+    "shown": "47K",
+    "basis": "3d",
+    "sales_seen": 28,
     "rough": true
    },
    "why": ""
@@ -368,7 +368,7 @@
     "typical": 85000,
     "shown": "85K",
     "basis": "ask",
-    "sales_seen": 1,
+    "sales_seen": 2,
     "rough": true
    },
    "why": ""
@@ -382,10 +382,10 @@
    "attack": 75,
    "speed": 8,
    "price": {
-    "typical": 774500,
-    "shown": "774K",
+    "typical": 888888,
+    "shown": "889K",
     "basis": "3d",
-    "sales_seen": 17,
+    "sales_seen": 15,
     "rough": true
    },
    "why": ""
@@ -830,11 +830,6 @@
    "build": "Spearman, spear",
    "best_at": "a step faster than polearms",
    "weak": "spears hit a little softer until 70"
-  },
-  {
-   "build": "Dexless spearman",
-   "best_at": "the most STR",
-   "weak": "can't wear most level 30+ polearms and misses more"
   }
  ],
  "future": [

@@ -19,8 +19,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 266714,
-    "shown": "about 267K"
+    "mesos": 449642,
+    "shown": "about 450K"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -278,8 +278,8 @@
    "attack": 30,
    "speed": 6,
    "price": {
-    "typical": 3750,
-    "shown": "3,750",
+    "typical": 3600,
+    "shown": "3,600",
     "basis": "ask",
     "sales_seen": 2,
     "rough": true
@@ -295,10 +295,10 @@
    "attack": 35,
    "speed": 6,
    "price": {
-    "typical": 4321,
-    "shown": "4,321",
-    "basis": "ask",
-    "sales_seen": 2,
+    "typical": 4099,
+    "shown": "4,099",
+    "basis": "old",
+    "sales_seen": 3,
     "rough": true
    },
    "why": ""
@@ -312,8 +312,8 @@
    "attack": 42,
    "speed": 6,
    "price": {
-    "typical": 5200,
-    "shown": "5,200",
+    "typical": 5000,
+    "shown": "5,000",
     "basis": "3d",
     "sales_seen": 6,
     "rough": true
@@ -332,7 +332,7 @@
     "typical": 7000,
     "shown": "7,000",
     "basis": "3d",
-    "sales_seen": 12,
+    "sales_seen": 9,
     "rough": true
    },
    "why": ""
@@ -346,10 +346,10 @@
    "attack": 50,
    "speed": 6,
    "price": {
-    "typical": 12000,
-    "shown": "12K",
-    "basis": "3d",
-    "sales_seen": 20,
+    "typical": 18000,
+    "shown": "18K",
+    "basis": "24h",
+    "sales_seen": 16,
     "rough": true
    },
    "why": ""
@@ -366,7 +366,7 @@
     "typical": 19444,
     "shown": "19K",
     "basis": "3d",
-    "sales_seen": 39,
+    "sales_seen": 37,
     "rough": true
    },
    "why": ""
@@ -383,7 +383,7 @@
     "typical": 34999,
     "shown": "35K",
     "basis": "clean",
-    "sales_seen": 36,
+    "sales_seen": 38,
     "rough": false
    },
    "why": ""
@@ -397,10 +397,10 @@
    "attack": 70,
    "speed": 6,
    "price": {
-    "typical": 180000,
-    "shown": "180K",
-    "basis": "3d",
-    "sales_seen": 35,
+    "typical": 357500,
+    "shown": "358K",
+    "basis": "24h",
+    "sales_seen": 43,
     "rough": true
    },
    "why": ""

@@ -19,8 +19,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 183147,
-    "shown": "about 183K"
+    "mesos": 179998,
+    "shown": "about 180K"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -255,10 +255,10 @@
    "attack": 32,
    "speed": 7,
    "price": {
-    "typical": 3399,
-    "shown": "3,399",
-    "basis": "ask",
-    "sales_seen": 2,
+    "typical": 3000,
+    "shown": "3,000",
+    "basis": "3d",
+    "sales_seen": 3,
     "rough": true
    },
    "why": ""
@@ -275,7 +275,7 @@
     "typical": 3000,
     "shown": "3,000",
     "basis": "3d",
-    "sales_seen": 12,
+    "sales_seen": 11,
     "rough": true
    },
    "why": ""
@@ -289,10 +289,10 @@
    "attack": 39,
    "speed": 6,
    "price": {
-    "typical": 11250,
-    "shown": "11K",
+    "typical": 12999,
+    "shown": "13K",
     "basis": "3d",
-    "sales_seen": 7,
+    "sales_seen": 9,
     "rough": true
    },
    "why": ""
@@ -306,10 +306,10 @@
    "attack": 52,
    "speed": 7,
    "price": {
-    "typical": 11999,
-    "shown": "12K",
+    "typical": 9500,
+    "shown": "9,500",
     "basis": "3d",
-    "sales_seen": 21,
+    "sales_seen": 17,
     "rough": true
    },
    "why": ""
@@ -323,10 +323,10 @@
    "attack": 57,
    "speed": 7,
    "price": {
-    "typical": 14500,
-    "shown": "14K",
+    "typical": 12000,
+    "shown": "12K",
     "basis": "3d",
-    "sales_seen": 10,
+    "sales_seen": 11,
     "rough": true
    },
    "why": ""
@@ -340,10 +340,10 @@
    "attack": 59,
    "speed": 6,
    "price": {
-    "typical": 20000,
-    "shown": "20K",
+    "typical": 13000,
+    "shown": "13K",
     "basis": "3d",
-    "sales_seen": 12,
+    "sales_seen": 10,
     "rough": true
    },
    "why": ""
@@ -357,8 +357,8 @@
    "attack": 64,
    "speed": 6,
    "price": {
-    "typical": 35000,
-    "shown": "35K",
+    "typical": 42500,
+    "shown": "42K",
     "basis": "3d",
     "sales_seen": 19,
     "rough": true
@@ -377,7 +377,7 @@
     "typical": 83999,
     "shown": "84K",
     "basis": "3d",
-    "sales_seen": 16,
+    "sales_seen": 18,
     "rough": true
    },
    "why": ""
@@ -818,11 +818,6 @@
    "build": "Spearman, polearm",
    "best_at": "harder hits until 70",
    "weak": "slowest weapons"
-  },
-  {
-   "build": "Dexless spearman",
-   "best_at": "the most STR",
-   "weak": "can't wear most level 30+ spears and misses more"
   }
  ],
  "future": [

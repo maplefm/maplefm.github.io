@@ -19,8 +19,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 2673607,
-    "shown": "about 2.7M"
+    "mesos": 2493801,
+    "shown": "about 2.5M"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -250,7 +250,7 @@
     "typical": 3500,
     "shown": "3,500",
     "basis": "old",
-    "sales_seen": 3,
+    "sales_seen": 4,
     "rough": true
    },
    "why": ""
@@ -264,8 +264,8 @@
    "attack": 14,
    "speed": 4,
    "price": {
-    "typical": 4110,
-    "shown": "4,110",
+    "typical": 3999,
+    "shown": "3,999",
     "basis": "3d",
     "sales_seen": 12,
     "rough": true
@@ -298,10 +298,10 @@
    "attack": 19,
    "speed": 3,
    "price": {
-    "typical": 8444,
-    "shown": "8,444",
+    "typical": 8250,
+    "shown": "8,250",
     "basis": "clean",
-    "sales_seen": 99,
+    "sales_seen": 96,
     "rough": false
    },
    "why": ""
@@ -315,8 +315,8 @@
    "attack": 23,
    "speed": 4,
    "price": {
-    "typical": 18000,
-    "shown": "18K",
+    "typical": 17499,
+    "shown": "17K",
     "basis": "3d",
     "sales_seen": 17,
     "rough": true
@@ -332,11 +332,11 @@
    "attack": 26,
    "speed": 4,
    "price": {
-    "typical": 34499,
-    "shown": "34K",
-    "basis": "3d",
+    "typical": 59999,
+    "shown": "60K",
+    "basis": "clean",
     "sales_seen": 22,
-    "rough": true
+    "rough": false
    },
    "why": ""
   },
@@ -352,7 +352,7 @@
     "typical": 49999,
     "shown": "50K",
     "basis": "clean",
-    "sales_seen": 29,
+    "sales_seen": 33,
     "rough": false
    },
    "why": ""
@@ -366,8 +366,8 @@
    "attack": 34,
    "speed": 4,
    "price": {
-    "typical": 2549500,
-    "shown": "2.5M",
+    "typical": 2345000,
+    "shown": "2.3M",
     "basis": "3d",
     "sales_seen": 38,
     "rough": true
@@ -819,11 +819,6 @@
    "build": "Pure Bandit",
    "best_at": "dagger from 10",
    "weak": "melee from the start"
-  },
-  {
-   "build": "Dexless Assassin",
-   "best_at": "the most LUK",
-   "weak": "misses more"
   }
  ],
  "future": [

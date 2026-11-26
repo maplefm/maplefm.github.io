@@ -20,8 +20,8 @@
   "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
   "gear_cost": {
    "to_level_50": {
-    "mesos": 533199,
-    "shown": "about 533K"
+    "mesos": 312808,
+    "shown": "about 313K"
    },
    "note": "weapons to 50 at typical FM prices"
   }
@@ -241,8 +241,8 @@
    "attack": 28,
    "speed": 4,
    "price": {
-    "typical": 1800,
-    "shown": "1,800",
+    "typical": 1999,
+    "shown": "1,999",
     "basis": "ask",
     "sales_seen": 0,
     "rough": true
@@ -261,7 +261,7 @@
     "typical": 2722,
     "shown": "2,722",
     "basis": "ask",
-    "sales_seen": 0,
+    "sales_seen": 1,
     "rough": true
    },
    "why": ""
@@ -275,10 +275,10 @@
    "attack": 38,
    "speed": 4,
    "price": {
-    "typical": 4399,
-    "shown": "4,399",
+    "typical": 4422,
+    "shown": "4,422",
     "basis": "old",
-    "sales_seen": 9,
+    "sales_seen": 6,
     "rough": true
    },
    "why": ""
@@ -292,8 +292,8 @@
    "attack": 45,
    "speed": 4,
    "price": {
-    "typical": 4778,
-    "shown": "4,778",
+    "typical": 4555,
+    "shown": "4,555",
     "basis": "3d",
     "sales_seen": 8,
     "rough": true
@@ -309,10 +309,10 @@
    "attack": 48,
    "speed": 4,
    "price": {
-    "typical": 9500,
-    "shown": "9,500",
-    "basis": "3d",
-    "sales_seen": 16,
+    "typical": 7888,
+    "shown": "7,888",
+    "basis": "24h",
+    "sales_seen": 19,
     "rough": true
    },
    "why": ""
@@ -326,10 +326,10 @@
    "attack": 55,
    "speed": 3,
    "price": {
-    "typical": 60000,
-    "shown": "60K",
+    "typical": 69000,
+    "shown": "69K",
     "basis": "24h",
-    "sales_seen": 74,
+    "sales_seen": 75,
     "rough": true
    },
    "why": ""
@@ -343,10 +343,10 @@
    "attack": 68,
    "speed": 4,
    "price": {
-    "typical": 450000,
-    "shown": "450K",
+    "typical": 222222,
+    "shown": "222K",
     "basis": "24h",
-    "sales_seen": 42,
+    "sales_seen": 39,
     "rough": true
    },
    "why": ""
@@ -791,11 +791,6 @@
    "build": "Assassin",
    "best_at": "claw all the way",
    "weak": "stars to recharge"
-  },
-  {
-   "build": "Dexless Bandit",
-   "best_at": "the most LUK",
-   "weak": "misses more"
   }
  ],
  "future": [

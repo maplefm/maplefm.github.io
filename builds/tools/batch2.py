@@ -310,10 +310,10 @@ TEXT = {
     },
 }
 COMPARE = {
-    "spearman-spear": [("Spearman, spear (this guide)", "a step faster than polearms", "spears hit a little softer until 70"), ("Spearman, polearm", "harder hits until 70", "slowest weapons"), ("Dexless spearman", "the most STR", "can't wear most level 30+ spears and misses more")],
-    "spearman-polearm": [("Spearman, polearm (this guide)", "harder hits until 70", "slowest weapons"), ("Spearman, spear", "a step faster than polearms", "spears hit a little softer until 70"), ("Dexless spearman", "the most STR", "can't wear most level 30+ polearms and misses more")],
-    "assassin": [("Assassin (this guide)", "ranged all the way", "stars to recharge"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Pure Bandit", "dagger from 10", "melee from the start"), ("Dexless Assassin", "the most LUK", "misses more")],
-    "pure-bandit": [("Pure Bandit (this guide)", "dagger from 10, no stars", "melee from the start"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Assassin", "claw all the way", "stars to recharge"), ("Dexless Bandit", "the most LUK", "misses more")],
+    "spearman-spear": [("Spearman, spear (this guide)", "a step faster than polearms", "spears hit a little softer until 70"), ("Spearman, polearm", "harder hits until 70", "slowest weapons")],
+    "spearman-polearm": [("Spearman, polearm (this guide)", "harder hits until 70", "slowest weapons"), ("Spearman, spear", "a step faster than polearms", "spears hit a little softer until 70")],
+    "assassin": [("Assassin (this guide)", "ranged all the way", "stars to recharge"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Pure Bandit", "dagger from 10", "melee from the start")],
+    "pure-bandit": [("Pure Bandit (this guide)", "dagger from 10, no stars", "melee from the start"), ("Sindit", "Lucky Seven to 40, then a dagger", "needs an SP Reset at 40"), ("Assassin", "claw all the way", "stars to recharge")],
     "hunter": [("Hunter (this guide)", "bow, Arrow Bomb on 6 mobs", "STR for bows"), ("Crossbowman", "crossbow instead of a bow", "different 2nd job skills")],
 }
 LINKS = {"Spearman, spear": "spearman-spear", "Spearman, polearm": "spearman-polearm", "Assassin": "assassin", "Pure Bandit": "pure-bandit", "Hunter": "hunter", "Sindit": "sindit"}
