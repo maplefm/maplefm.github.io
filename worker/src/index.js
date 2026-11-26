@@ -1296,6 +1296,7 @@ async function interactions(req, env) {
   if (it.type === 1) return json({ type: 1 });
   const opt = ((it.data && it.data.options) || []).find((o) => o.name === "item");
   const q = opt ? String(opt.value || "") : "";
+  if (it.type === 4 && it.data && it.data.name === "build") return json(await buildChoices(it));
   if (it.type === 4) {                                   // autocomplete: the closest item names
     const rows = await mkRows(env), ab = await abbrMap();
     // nothing typed yet: the busiest items, so the list shows as soon as the box opens
@@ -1305,11 +1306,63 @@ async function interactions(req, env) {
   }
   if (it.type === 2 && it.data && (it.data.name === "market" || it.data.name === "sell"))
     return json(await marketCommand(env, it, Object.assign(mkCtx(env), { rows: await mkRows(env), abbr: await abbrMap() })));
+  if (it.type === 2 && it.data && it.data.name === "build") {
+    logHit(env, "#dbuild", String(it.guild_id || "dm"), "", "dc:" + String((it.member && it.member.user && it.member.user.id) || (it.user && it.user.id) || "")).catch(() => {});
+    return json(await discordBuild(it));
+  }
   if (it.type === 2 && it.data && it.data.name === "price") {
     logHit(env, "#dprice", String(it.guild_id || "dm"), "", "dc:" + String((it.member && it.member.user && it.member.user.id) || (it.user && it.user.id) || "")).catch(() => {});
     return json(await discordPrice(env, q));
   }
   return json({ type: 4, data: { content: "Unknown command", flags: 64 } });
+}
+
+// ---------------------------------------------------------------- /build: a build guide at one level
+// builds/discord.json is written from the guide pages themselves (builds/tools/discordbuilds.py), so the bot and the site
+// always say the same thing. Cached an hour, like the shortcut list.
+let BUILDS = null, BUILDS_AT = 0;
+async function buildData() {
+  if (BUILDS && Date.now() - BUILDS_AT < 3600e3) return BUILDS;
+  const r = await fetch("https://maplefm.gg/builds/discord.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).catch(() => null);
+  const d = r && r.ok ? await r.json().catch(() => null) : null;
+  if (d && d.builds) { BUILDS = d.builds; BUILDS_AT = Date.now(); }
+  return BUILDS || {};
+}
+const buildKey = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+function findBuild(B, q) {
+  const k = buildKey(q);
+  if (!k) return null;
+  if (B[q]) return q;
+  return Object.keys(B).find((s) => buildKey(s) === k || buildKey(B[s].name) === k) ||
+    Object.keys(B).find((s) => buildKey(B[s].name).includes(k) || buildKey(s).includes(k)) || null;
+}
+async function buildChoices(it) {
+  const B = await buildData(), f = ((it.data.options || []).find((o) => o.focused) || {}).value || "";
+  const k = buildKey(f);
+  const list = Object.keys(B).filter((s) => !k || buildKey(B[s].name).includes(k) || buildKey(s).includes(k));
+  return { type: 8, data: { choices: list.slice(0, 25).map((s) => ({ name: B[s].name, value: s })) } };
+}
+async function discordBuild(it) {
+  const B = await buildData(), opts = it.data.options || [];
+  const q = String((opts.find((o) => o.name === "build") || {}).value || ""), slug = findBuild(B, q);
+  const names = Object.values(B).map((b) => b.name).join(" · ");
+  if (!slug) return { type: 4, data: { content: "No guide for " + (q || "that") + " yet. Guides so far: " + names + ". All builds: https://maplefm.gg/builds/", flags: 64 } };
+  const b = B[slug], cap = b.cap || 70;
+  const lvOpt = opts.find((o) => o.name === "level"), want = lvOpt ? Number(lvOpt.value) : cap;
+  if (want > cap) return { type: 4, data: { content: b.name + " guides stop at " + cap + ": 3rd job isn't in Classic World yet. Try a level from 1 to " + cap + ".", flags: 64 } };
+  const L = Math.max(1, Math.min(cap, Math.round(want) || cap)), x = b.levels[String(L)];
+  if (!x) return { type: 4, data: { content: "Couldn't read that level of the " + b.name + " guide. The full guide: " + b.url, flags: 64 } };
+  const K = ["STR", "DEX", "INT", "LUK"];
+  const stats = x.s.map((v, i) => "**" + K[i] + "** " + v).join(" · ");
+  const skills = x.have.length ? x.have.map(([n, v]) => n + " " + v).join(", ") + (x.spare ? "\n" + x.spare + " SP spare" + (L === cap ? ", save for 3rd job" : "") : "")
+    : (L < 10 ? "No skills before the job advance at 10." : "None yet.");
+  const sp = [x.note ? "**" + x.note + "**" : "", x.put.map(([n, v]) => n + " +" + v).join(", "), x.gone.length ? "Taken out: " + x.gone.map(([n, v]) => n + " " + v).join(", ") : ""]
+    .filter(Boolean).join("\n") || (L < 10 ? "No SP before 10." : "Nothing new this level.");
+  const fields = [{ name: "AP this level", value: x.ap, inline: true }, { name: "SP this level", value: sp.slice(0, 1024), inline: true },
+    { name: "Skills at " + L, value: skills.slice(0, 1024) }];
+  if (x.w || x.next) fields.push({ name: "Weapon", value: (x.w ? x.w[0] : "None yet") + (x.next ? "\nNext: " + x.next[0] + " at " + x.next[1] : ""), inline: true });
+  return { type: 4, data: { embeds: [{ title: b.name + " at level " + L, url: b.url + "#lv" + L, color: 0xf2c14e, description: stats,
+    fields, footer: { text: "Club FM build guide · stats and skills by level, 1 to " + cap + " · maplefm.gg/builds" } }] } };
 }
 
 // A price the board states as a fact: 3+ sales, nothing flagged, not rough, not a lead (same rule as the site and the
@@ -2856,6 +2909,9 @@ async function setupCommands(env) {
   const cmds = [{ name: "price", description: "Price check a MapleStory Classic item from Club FM's watched sales",
     integration_types: [0, 1], contexts: [0, 1, 2],
     options: [{ type: 3, name: "item", description: "Item name or chat shortcut (gfa 60, wg), start typing for suggestions", required: true, autocomplete: true }] },
+    { name: "build", description: "A Club FM build guide at any level: stats, AP, skills and SP", integration_types: [0, 1], contexts: [0, 1, 2],
+      options: [{ type: 3, name: "build", description: "The build, start typing for suggestions (Sindit, Assassin, Hunter...)", required: true, autocomplete: true },
+        { type: 4, name: "level", description: "Character level, 1 to 70 (empty shows the finished build at 70)", required: false, min_value: 1, max_value: 70 }] },
     { name: "market", description: "What Club FM members are selling, cheapest first", integration_types: [0, 1], contexts: [0, 1, 2],
       options: [{ type: 3, name: "item", description: "An item, or leave empty for the newest listings", required: false, autocomplete: true }] },
     { name: "sell", description: "List an item for sale on maplefm.gg and in #selling", integration_types: [0], contexts: [0],
