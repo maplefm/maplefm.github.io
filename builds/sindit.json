@@ -1,0 +1,953 @@
+{
+ "slug": "/builds/sindit/",
+ "header": {
+  "class": "Thief",
+  "job_path": "Thief (10) → Bandit (30)",
+  "build": "Sindit: Lucky Seven to 40, then Savage Blow",
+  "pitch": "Throw Lucky Seven while you train, put Bandit points into the dagger skills, then switch to a Korean Fan at 40 and use an SP Reset to move your Lucky Seven points into Double Stab.",
+  "best_at": [
+   "Safe ranged training 10 to 39",
+   "Hits monsters on other platforms",
+   "Big single target damage from 40",
+   "Double Stab and Savage Blow after the switch"
+  ],
+  "weak_spots": [
+   "Needs an SP Reset Scroll at 40",
+   "Bandit points do nothing until you switch",
+   "Melee from 40: takes hits",
+   "DEX for daggers: 45 by 50, 65 by 70"
+  ],
+  "difficulty": "Medium",
+  "level_range": "10 to 100",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2 (v2.0.0)",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 539069,
+    "shown": "about 539K"
+   },
+   "note": "claws and daggers to 50 at typical FM prices"
+  }
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "DEX to 25, rest LUK",
+    "why": "Thief job advance needs 25 DEX at 10"
+   },
+   {
+    "levels": "10 to 29",
+    "ap": "all LUK, DEX stays 25",
+    "why": "LUK is the damage stat for claws and daggers"
+   },
+   {
+    "levels": "30",
+    "ap": "DEX to 30, rest LUK",
+    "why": "Mithril Guards, the level 30 claw, needs 30 DEX"
+   },
+   {
+    "levels": "31 to 46",
+    "ap": "all LUK",
+    "why": "Korean Fan, the switch dagger, needs no DEX"
+   },
+   {
+    "levels": "47 to 49",
+    "ap": "all DEX (to 45)",
+    "why": "Shinkita at 50 needs 45 DEX"
+   },
+   {
+    "levels": "50 to 57",
+    "ap": "all LUK",
+    "why": ""
+   },
+   {
+    "levels": "58 to 59",
+    "ap": "all DEX (to 55)",
+    "why": "Deadly Fin at 60 needs 55 DEX"
+   },
+   {
+    "levels": "60 to 67",
+    "ap": "all LUK",
+    "why": ""
+   },
+   {
+    "levels": "68 to 69",
+    "ap": "all DEX (to 65)",
+    "why": "Kandine at 70 needs 65 DEX"
+   },
+   {
+    "levels": "70 to 100",
+    "ap": "all LUK",
+    "why": "no higher dagger in the game yet"
+   },
+   {
+    "levels": "any",
+    "ap": "DEX from gear counts",
+    "why": "each DEX your gear gives is one more AP for LUK"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 4,
+    "DEX": 25,
+    "LUK": 37
+   },
+   {
+    "level": 20,
+    "STR": 4,
+    "DEX": 25,
+    "LUK": 87
+   },
+   {
+    "level": 30,
+    "STR": 4,
+    "DEX": 30,
+    "LUK": 132
+   },
+   {
+    "level": 35,
+    "STR": 4,
+    "DEX": 30,
+    "LUK": 157
+   },
+   {
+    "level": 40,
+    "STR": 4,
+    "DEX": 30,
+    "LUK": 182
+   },
+   {
+    "level": 46,
+    "STR": 4,
+    "DEX": 30,
+    "LUK": 212
+   },
+   {
+    "level": 50,
+    "STR": 4,
+    "DEX": 45,
+    "LUK": 217
+   },
+   {
+    "level": 60,
+    "STR": 4,
+    "DEX": 55,
+    "LUK": 257
+   },
+   {
+    "level": 70,
+    "STR": 4,
+    "DEX": 65,
+    "LUK": 297
+   },
+   {
+    "level": 80,
+    "STR": 4,
+    "DEX": 65,
+    "LUK": 347
+   },
+   {
+    "level": 90,
+    "STR": 4,
+    "DEX": 65,
+    "LUK": 397
+   },
+   {
+    "level": 100,
+    "STR": 4,
+    "DEX": 65,
+    "LUK": 447
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Lucky Seven",
+   "id": 4001003,
+   "to": 20,
+   "why": "main attack until 40: 2 stars a throw"
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Nimble Body",
+   "id": 4000000,
+   "to": 15,
+   "why": "+15 accuracy and avoid"
+  },
+  {
+   "level": 27,
+   "book": "1st job",
+   "skill": "Keen Eyes",
+   "id": 4000001,
+   "to": 15,
+   "why": "longer Lucky Seven range"
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Disorder",
+   "id": 4001000,
+   "to": 3,
+   "why": "needed for Dark Sight"
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Dark Sight",
+   "id": 4001001,
+   "to": 8,
+   "why": "last 1st job points"
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Dagger Mastery",
+   "id": 4200000,
+   "to": 5,
+   "why": "opens Dagger Booster; you keep throwing"
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Dagger Booster",
+   "id": 4201000,
+   "to": 1,
+   "why": "level 1 already gives the full speed up"
+  },
+  {
+   "level": 39,
+   "book": "2nd job",
+   "skill": "Savage Blow",
+   "id": 4201003,
+   "to": 21,
+   "why": "6 hits from 21 points, ready for the switch at 40"
+  },
+  {
+   "level": 44,
+   "book": "2nd job",
+   "skill": "Dagger Mastery",
+   "id": 4200000,
+   "to": 20,
+   "why": "steadier damage after the switch"
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Savage Blow",
+   "id": 4201003,
+   "to": 30,
+   "why": "75% a hit at 30"
+  },
+  {
+   "level": 53,
+   "book": "2nd job",
+   "skill": "Dagger Booster",
+   "id": 4201000,
+   "to": 20,
+   "why": "longer buff only (100 to 300 s)"
+  },
+  {
+   "level": 55,
+   "book": "2nd job",
+   "skill": "Haste",
+   "id": 4201001,
+   "to": 5,
+   "why": "needed for Steal"
+  },
+  {
+   "level": 65,
+   "book": "2nd job",
+   "skill": "Steal",
+   "id": 4201002,
+   "to": 30,
+   "why": "2 targets, stun"
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Haste",
+   "id": 4201001,
+   "to": 20,
+   "why": "party speed"
+  },
+  {
+   "level": 77,
+   "book": "2nd job",
+   "skill": "Nimble Recovery",
+   "id": 4200001,
+   "to": 20,
+   "why": "last: recovery only"
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Claw",
+   "item": "Garnier",
+   "id": 1472000,
+   "needs": "25 LUK",
+   "attack": 10,
+   "speed": 5,
+   "price": {
+    "typical": 3500,
+    "shown": "3,500",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": "first claw"
+  },
+  {
+   "level": 15,
+   "slot": "Claw",
+   "item": "Steel Titans",
+   "id": 1472001,
+   "needs": "15 DEX, 35 LUK",
+   "attack": 13,
+   "speed": 4,
+   "price": {
+    "typical": 4399,
+    "shown": "4,399",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Claw",
+   "item": "Bronze Igor",
+   "id": 1472004,
+   "needs": "20 DEX, 45 LUK",
+   "attack": 16,
+   "speed": 4,
+   "price": {
+    "typical": 5999,
+    "shown": "5,999",
+    "basis": "old",
+    "sales_seen": 5,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "Claw",
+   "item": "Meba",
+   "id": 1472007,
+   "needs": "25 DEX, 55 LUK",
+   "attack": 19,
+   "speed": 3,
+   "price": {
+    "typical": 8444,
+    "shown": "8,444",
+    "basis": "clean",
+    "sales_seen": 96,
+    "rough": false
+   },
+   "why": "speed 3: fastest claw"
+  },
+  {
+   "level": 30,
+   "slot": "Claw",
+   "item": "Mithril Guards",
+   "id": 1472009,
+   "needs": "30 DEX, 65 LUK",
+   "attack": 23,
+   "speed": 4,
+   "price": {
+    "typical": 21728,
+    "shown": "22K",
+    "basis": "3d",
+    "sales_seen": 19,
+    "rough": true
+   },
+   "why": "needs DEX 30; your claw until 40"
+  },
+  {
+   "level": 40,
+   "slot": "Dagger",
+   "item": "Korean Fan",
+   "id": 1332013,
+   "needs": "70 LUK",
+   "attack": 55,
+   "speed": 3,
+   "price": {
+    "typical": 64999,
+    "shown": "65K",
+    "basis": "24h",
+    "sales_seen": 72,
+    "rough": true
+   },
+   "why": "the switch weapon: speed 3, no DEX needed"
+  },
+  {
+   "level": 50,
+   "slot": "Dagger",
+   "item": "Shinkita",
+   "id": 1332015,
+   "needs": "45 DEX, 100 LUK",
+   "attack": 68,
+   "speed": 4,
+   "price": {
+    "typical": 430000,
+    "shown": "430K",
+    "basis": "24h",
+    "sales_seen": 40,
+    "rough": true
+   },
+   "why": "needs DEX 45"
+  },
+  {
+   "level": 60,
+   "slot": "Dagger",
+   "item": "Deadly Fin",
+   "id": 1332018,
+   "needs": "55 DEX, 120 LUK",
+   "attack": 78,
+   "speed": 4,
+   "price": {
+    "typical": null,
+    "shown": "no live price yet",
+    "basis": null
+   },
+   "why": "needs DEX 55"
+  },
+  {
+   "level": 70,
+   "slot": "Dagger",
+   "item": "Kandine",
+   "id": 1332020,
+   "needs": "65 DEX, 140 LUK",
+   "attack": 88,
+   "speed": 4,
+   "price": {
+    "typical": null,
+    "shown": "no live price yet",
+    "basis": null
+   },
+   "why": "needs DEX 65"
+  }
+ ],
+ "gear_optional": [
+  {
+   "level": 40,
+   "slot": "Dagger",
+   "item": "Gephart",
+   "id": 1332012,
+   "needs": "35 DEX, 80 LUK",
+   "attack": 58,
+   "speed": 4,
+   "price": {
+    "typical": 24444,
+    "shown": "24K",
+    "basis": "clean",
+    "sales_seen": 34,
+    "rough": false
+   },
+   "why": "same damage as Korean Fan, needs DEX 35"
+  }
+ ],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Thief",
+   "where": "Kerning City, Dark Lord",
+   "needs": "Level 10 and 25 DEX",
+   "gets": "1 SP; Lucky Seven and Double Stab open"
+  },
+  {
+   "level": 30,
+   "job": "Bandit",
+   "where": "Kerning City, Dark Lord",
+   "needs": "level 30",
+   "gets": "Pick Bandit, not Assassin. Dagger skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Chief Bandit",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "level 40, the day you equip Korean Fan",
+   "cost": {
+    "nx": 7000,
+    "mesos": {
+     "typical": 188499,
+     "shown": "188K",
+     "basis": "24h",
+     "sales_seen": 68,
+     "rough": false
+    }
+   },
+   "worth_it": "Yes",
+   "why": "Lucky Seven and Keen Eyes are dead once you hold a dagger. The scroll clears every skill, both jobs. Put your 1st job SP back as Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20, and your Bandit SP back as Dagger Mastery 9, Dagger Booster 1 and Savage Blow 21."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": {
+    "nx": 7000,
+    "mesos": {
+     "typical": 199999,
+     "shown": "200K",
+     "basis": "24h",
+     "sales_seen": 28,
+     "rough": false
+    }
+   },
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    }
+   ],
+   "tip": "Lucky Seven from range"
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Caution Falling Down",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": "boars and masks: easy hits"
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land III",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": "still throwing; Bandit points go to the dagger skills"
+  },
+  {
+   "levels": "35 to 46",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    },
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": "throw to 39, stab from 40"
+  },
+  {
+   "levels": "47 to 49",
+   "maps": [
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Hanging Gardens of Rot",
+     "monsters": [
+      "Aqumander",
+      "Glowshroom",
+      "Rafflesia"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 59",
+   "maps": [
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "monsters": [
+      "Wraith"
+     ]
+    }
+   ],
+   "tip": "Wraiths and Clangs"
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 74",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": "Excavation camps"
+  },
+  {
+   "levels": "75 to 89",
+   "maps": [
+    {
+     "map": "Remains (Cliff)",
+     "monsters": [
+      "Commander Skeleton",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) IV",
+     "monsters": [
+      "Officer Skeleton",
+      "Commander Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "90 to 100",
+   "maps": [
+    {
+     "map": "Sanctuary Entrance IV",
+     "monsters": [
+      "Cold Eye",
+      "Taurospear",
+      "Tauromacis"
+     ]
+    },
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Remains (Cliff)",
+     "monsters": [
+      "Commander Skeleton",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Lucky Seven hits from range, so you clear mobs on the next platform from where you stand. Less walking, less touch damage and fewer pots, from 10 until you switch.",
+  "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39, ready for the switch at 40.",
+  "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. On our training engine the Korean Fan at 40 does about 1,235 damage a second against 838 with the claw, and about 86K EXP an hour against 64K. It doesn't count walking to mobs yet, so it hasn't been timed in game.",
+  "Korean Fan needs no DEX, so the switch costs you no AP. Your next DEX is at 47 to 49, for Shinkita at 50.",
+  "Reset your 1st job SP the day you switch. Lucky Seven and Keen Eyes are 35 dead points once you hold a dagger. Moved into Double Stab 20 and Dark Sight 20, our engine has you at about 86K EXP an hour at 40 instead of 81K without the reset, because Double Stab finishes some mobs faster."
+ ],
+ "mistakes": [
+  "Picking up a dagger at 35. You'd only have Savage Blow 10 and Mastery 5, about the same damage as Lucky Seven (707 vs 750 a second), and now you're walking into every mob. Stay on the claw until Savage Blow is 21.",
+  "Putting SP in Haste right after the 2nd job advance. Haste 20 is 20 SP, close to 7 levels, and pushes your switch back by that much. Do it after the dagger skills.",
+  "Putting more than 1 point in Dagger Booster before Savage Blow is 21. Level 1 is already the full speed boost; the other 19 points only stretch it from 100 to 300 seconds. That's over 6 levels of SP that should be in Savage Blow.",
+  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX or you hit 50 and can't wear it. Same at 58 to 59 for Deadly Fin and 68 to 69 for Kandine.",
+  "Switching to the dagger without the SP Reset. You'll never throw Lucky Seven again, so those 35 points in Lucky Seven and Keen Eyes do nothing. Reset at 40 and put them into Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20."
+ ],
+ "compare": [
+  {
+   "build": "Sindit (this guide)",
+   "main_attack": "Lucky Seven to 39, Savage Blow from 40",
+   "best_at": "ranged training, no Cash Shop",
+   "weak": "Bandit points wait until 40"
+  },
+  {
+   "build": "Sindit, no reset",
+   "main_attack": "Lucky Seven to 39, Savage Blow only from 40",
+   "best_at": "no Cash Shop scroll",
+   "weak": "about 6% less EXP an hour at 40, no Double Stab"
+  },
+  {
+   "build": "Pure Bandit (dagger from 10)",
+   "main_attack": "Double Stab, Savage Blow",
+   "best_at": "no stars to buy",
+   "weak": "melee from 10",
+   "note": "training page Typical build"
+  },
+  {
+   "build": "Assassin (claw)",
+   "main_attack": "Lucky Seven, Drain",
+   "best_at": "range all the way",
+   "weak": "stars cost: Kumbi to Steely",
+   "note": "training page Typical build"
+  },
+  {
+   "build": "Dexless Bandit",
+   "main_attack": "Savage Blow",
+   "best_at": "highest LUK",
+   "weak": "misses; can't wear DEX daggers",
+   "note": "training page Typical build"
+  }
+ ],
+ "future": [
+  {
+   "when": "3rd job (Chief Bandit)",
+   "status": "not in Classic World yet; no date from Nexon",
+   "plan": "keep LUK as the main stat; no change to this guide until skill data is out"
+  }
+ ],
+ "search": {
+  "title": "Sindit Build Guide: AP, SP and When to Switch | Club FM",
+  "description": "MapleStory Classic sindit: Lucky Seven to 40, then a Korean Fan, SP Reset into Double Stab, and Savage Blow. AP, SP, gear and maps by level.",
+  "slug": "/builds/sindit/",
+  "keywords": [
+   "sindit",
+   "sindit build",
+   "sin build",
+   "assassin build",
+   "bandit build",
+   "lucky seven bandit",
+   "claw bandit",
+   "sin bandit",
+   "thief build",
+   "bandit sp build",
+   "bandit ap build",
+   "sindit skill build",
+   "when to switch to dagger",
+   "savage blow build",
+   "double stab build",
+   "best thief build",
+   "best bandit build",
+   "lucky seven build",
+   "dagger bandit",
+   "maplestory classic sindit",
+   "classic world bandit",
+   "sindit no reset"
+  ],
+  "sitesearch": [
+   "Sindit build guide",
+   "sindit-build",
+   "Thief",
+   "Bandit",
+   "/builds/sindit/"
+  ]
+ },
+ "phone_tabs": [
+  "Overview",
+  "Stats",
+  "Skills",
+  "Gear",
+  "Job",
+  "Resets",
+  "Train",
+  "Why",
+  "Mistakes",
+  "Compare",
+  "3rd job"
+ ],
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 12
+  },
+  "main": "LUK",
+  "sub": "DEX",
+  "source": "Classic creation: no dice, 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026); 25 + 9 levels x 5 AP = 70 = the level 10 row"
+ },
+ "switch": 40,
+ "reset": {
+  "level": 40,
+  "book": "1st job",
+  "to": {
+   "Double Stab": 20,
+   "Nimble Body": 15,
+   "Disorder": 6,
+   "Dark Sight": 20
+  },
+  "source": "Adam, Nov 25: the Classic SP Reset Scroll clears all your skills, both jobs; sindits reset at the switch so they have Double Stab"
+ }
+}
