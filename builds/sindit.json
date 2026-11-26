@@ -167,7 +167,7 @@
    "skill": "Lucky Seven",
    "id": 4001003,
    "to": 20,
-   "why": "main attack until 44: 2 stars a cast, 200 to 400 range with Keen Eyes"
+   "why": "main attack until 44: 2 stars a throw"
   },
   {
    "level": 22,
@@ -183,7 +183,7 @@
    "skill": "Keen Eyes",
    "id": 4000001,
    "to": 15,
-   "why": "Lucky Seven reach 200 to 400"
+   "why": "longer Lucky Seven range"
   },
   {
    "level": 28,
@@ -838,17 +838,17 @@
   }
  ],
  "why": [
-  "**Throw while you train:** Lucky Seven hits from 200 to 400 away, so you pick monsters off a platform without walking up or taking touch damage",
-  "**Switch at 44, not 35:** a dagger only wins on one monster standing still before then. Once Savage Blow has 21 points and mastery is 20, it wins by enough to cover the walking",
-  "**Dagger points first:** Bandit points can't help a claw, so they all go toward the switch and it lands as early as possible",
-  "**Korean Fan:** speed 3 and no DEX need, so the switch costs no AP",
-  "**No reset:** Lucky Seven's 20 points stay in the book. Nothing is lost by leaving them"
+  "Lucky Seven hits from range, and maxed Keen Eyes pushes that range out further, so you clear a platform from where you stand. Less walking, less touch damage and fewer pots than any dagger before 44.",
+  "Bandit SP does nothing for a claw, so every point from 30 goes toward the dagger. Dagger Mastery 5 and Booster 1 first, then Savage Blow 21 by 39 and Mastery 20 by 44.",
+  "At 21 Savage Blow hits 6 times for 65%, so 390% a cast against 280% for a maxed Lucky Seven. With Mastery 20 it's far enough ahead to make up for walking to every mob. 44 is our estimate and hasn't been timed in game yet.",
+  "Korean Fan needs no DEX, so the switch costs you no AP. You only start putting AP in DEX at 47, for Shinkita at 50.",
+  "No SP Reset needed. Lucky Seven's 20 points just sit there after you switch, so the 7,000 NX scroll buys you nothing here."
  ],
  "mistakes": [
-  "**Switching to a dagger at 35:** melee before Savage Blow 21 trains slower than throwing",
-  "**Haste before the dagger skills:** it pushes the switch back several levels",
-  "**More than 1 point in Dagger Booster early:** level 1 already gives the full speed up",
-  "**Skipping DEX before 50:** Shinkita needs 45 DEX, Deadly Fin 55, Kandine 65"
+  "Picking up a dagger at 35. Double Stab and a low Savage Blow fall behind a maxed Lucky Seven, and now you're walking into every mob. Stay on the claw until Savage Blow is 21 and Mastery is 20.",
+  "Putting SP in Haste right after the 2nd job advance. Haste 20 is 20 SP, close to 7 levels, and pushes your switch back by that much. Do it after the dagger skills.",
+  "More than 1 point in Dagger Booster early. Level 1 already gives the full speed boost. The rest only stretches it from 100 to 300 seconds.",
+  "Forgetting DEX before 50. Shinkita needs 45 DEX, so put 47 to 49 into DEX or you hit 50 and can't wear it. Same at 58 to 59 for Deadly Fin and 68 to 69 for Kandine."
  ],
  "compare": [
   {

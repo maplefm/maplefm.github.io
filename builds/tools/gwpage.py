@@ -228,12 +228,13 @@ def build(name):
             if m: out.append([m.group(2), m.group(1)])
             elif part.strip() and part.strip() != "level only": out.append(["", part.strip()])
         return out
+    REQ = {r[0]: r[2] for r in load("itemdb.json")["items"] if r[2]}
     gear = []
     for g in d["gear"]:
         if g["slot"] == "Stars" or g["level"] > CAP: continue
         p = g.get("price") or {}
         gear.append({"level": g["level"], "item": g["item"], "slug": W.slug(g["item"]), "id": g["id"], "slot": g["slot"], "attack": g["attack"], "speed": g.get("speed"),
-                     "needs": [["LV", str(g["level"])]] + needs_list(g["needs"]), "fm": p.get("shown") if p.get("typical") else None, "fmv": p.get("typical"), "ways": ways(guide, g["item"])})
+                     "needs": [["LV", str(REQ.get(g["item"], g["level"]))]] + needs_list(g["needs"]), "fm": p.get("shown") if p.get("typical") else None, "fmv": p.get("typical"), "ways": ways(guide, g["item"])})
 
     train = []
     for t in d["train_ranges"]:
