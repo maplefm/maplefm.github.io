@@ -221,7 +221,7 @@ def build(name):
             gone = [[k, v] for k, v in prev.items() if hv.get(k, 0) < v]
             rs = d.get("reset")
             note = next((f"Job advance to {a['job']}" for a in d["advancement"] if str(a["level"]) == str(L)), "")
-            if rs and L == rs["level"]: note = (note + " · " if note else "") + "Use an SP Reset Scroll"
+            if rs and L == rs["level"]: note = (note + " · " if note else "") + "Use an SP Reset Scroll (it clears every skill, put them back like this)"
             sp_lv.append({"l": L, "put": put, "gone": gone, "spare": spare if L == CAP else 0, "note": note, "ch": bool(note)})
         prev = hv
     first = {}

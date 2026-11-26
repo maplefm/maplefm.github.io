@@ -491,7 +491,7 @@
     }
    },
    "worth_it": "Yes",
-   "why": "Lucky Seven and Keen Eyes are dead once you hold a dagger. Put your 1st job SP back as Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20. If the scroll also clears your Bandit points, put them back the way they were."
+   "why": "Lucky Seven and Keen Eyes are dead once you hold a dagger. The scroll clears every skill, both jobs. Put your 1st job SP back as Double Stab 20, Nimble Body 15, Disorder 6 and Dark Sight 20, and your Bandit SP back as Dagger Mastery 9, Dagger Booster 1 and Savage Blow 21."
   },
   {
    "what": "AP Reset Scroll",
@@ -948,6 +948,6 @@
    "Disorder": 6,
    "Dark Sight": 20
   },
-  "source": "Adam, Nov 25: sindits reset their 1st job SP at the switch so they have Double Stab; plan from the Nov 25 audit model"
+  "source": "Adam, Nov 25: the Classic SP Reset Scroll clears all your skills, both jobs; sindits reset at the switch so they have Double Stab"
  }
 }
