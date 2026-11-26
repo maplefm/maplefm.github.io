@@ -32,7 +32,7 @@
    {
     "levels": "1 to 9",
     "ap": "DEX to 25, rest LUK",
-    "why": "Thief needs 25 DEX at 10"
+    "why": "Thief job advance needs 25 DEX at 10"
    },
    {
     "levels": "10 to 29",
@@ -940,5 +940,16 @@
   "Mistakes",
   "Compare",
   "3rd job"
- ]
+ ],
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 12
+  },
+  "main": "LUK",
+  "sub": "DEX",
+  "source": "Classic creation: no dice, 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026); 25 + 9 levels x 5 AP = 70 = the level 10 row"
+ }
 }

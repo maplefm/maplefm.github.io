@@ -60,9 +60,37 @@ jobs:
           print("copied", got, "missing", len(miss))
           PY
       - run: |
+          mkdir -p builds/data
+          python3 - <<'PY'
+          import json, sys, urllib.request
+          sys.path.insert(0, "tools")
+          import mcwver
+          IO = mcwver.base().rstrip("/")
+          UA = {"User-Agent": "maplefm.gg game data"}
+          db = {r[0]: r[1] for r in json.load(open("data/itemdb.json"))["items"]} if __import__("os").path.exists("data/itemdb.json") else {}
+          if not db:
+              db = {r[0]: r[1] for r in json.loads(urllib.request.urlopen("https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/data/itemdb.json", timeout=60).read())["items"]}
+          ammo = json.load(open("assets/classic-skills.json"))["ammo"]
+          out = {}
+          for kind, rows in ammo.items():
+              for name, atk in rows:
+                  iid = db.get(name)
+                  rec = {"kind": kind, "id": iid, "atk": atk}
+                  if iid:
+                      try:
+                          j = json.loads(urllib.request.urlopen(urllib.request.Request(f"{IO}/item/{iid}", headers=UA), timeout=40).read())
+                          m = j.get("metaInfo") or {}
+                          rec.update({"reqLevel": m.get("reqLevel"), "slotMax": m.get("slotMax"), "incPAD": m.get("incPAD"), "price": m.get("price"), "unitPrice": m.get("unitPrice"), "keys": sorted(m)[:40]})
+                      except Exception as e:
+                          rec["err"] = str(e)[:80]
+                  out[name] = rec
+                  print(name, rec, flush=True)
+          json.dump(out, open("builds/data/ammo.json", "w"), indent=1)
+          PY
+      - run: |
           git config user.name maplefm
           git config user.email maplefm@users.noreply.github.com
-          git add -A sk
+          git add -A sk builds/data
           git diff --cached --quiet && exit 0
           git commit -q -m "Skill icons"
           git push -q origin HEAD:build-guides

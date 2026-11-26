@@ -130,7 +130,7 @@ function waysHtml(w){const c=[],npcs=w.ways.filter(x=>x.k=="npc");
  return'<div class="ways">'+c.map(([cl,u,tg,t,p])=>`<${u?"a":"div"} class="${cl}"${u?` href="${u}"`:""}><span class="tg">${tg}</span><span class="t">${t}</span><span class="p">${p}</span></${u?"a":"div"}>`).join("")+"</div>"}
 function draw(){const L=+lv.value;lvn.textContent="Lv "+L;const s=S[L-1],pv=S[Math.max(0,L-2)],sk=D.sp[L];
  stw.innerHTML=["STR","DEX","INT","LUK"].map((k,i)=>`<div class="srow${L>1&&s.t[i]!=pv.t[i]?" hi":""}"><span>${k}</span><b>${s.t[i]}</b></div>`).join("")+`<div class="wtip">This level: ${E(s.ap)}</div>`;
- const books=["1st job"].concat(L>=30?["2nd job"]:[]);if(L<10){skt.innerHTML="";skw.innerHTML='<div class="wtip">Skills start at level 10, when you become a Thief.</div>'}else{
+ const books=["1st job"].concat(L>=30?["2nd job"]:[]);if(L<10){skt.innerHTML="";skw.innerHTML='<div class="wtip">Skills start at level 10, when you job advance.</div>'}else{
  if(!touched||!books.includes(book))book=books[books.length-1];
  skt.innerHTML=books.map(b=>`<button type="button" aria-pressed="${b==book}" data-b="${b}">${b}</button>`).join("");
  skt.querySelectorAll("button").forEach(x=>x.onclick=()=>{book=x.dataset.b;touched=1;draw()});
@@ -164,32 +164,32 @@ def build(name):
     t10 = {k: int(v) for k, v in rows[0].items()}
     assert t10["level"] == 10
 
-    # stats for every level. 10 and up follow the guide's rules exactly and must match its table; 1 to 9 are worked
-    # back from level 10 (5 AP a level, DEX bought first) and flagged until the Classic creation rules are checked.
-    dex_to = []
+    # stats for every level, forward from the creation picks. Classic creation (Adam, Nov 25): no dice, 25 points,
+    # 4 in every stat at least, and the sub stat starts at exactly 5. Each level after gives 5 AP; the sub stat is
+    # bought up to each target in the guide's rules, everything else goes into the main stat.
+    K = ["STR", "DEX", "INT", "LUK"]
+    cr = d["creation"]; main, sub = cr["main"], cr["sub"]
+    st1 = [cr["stats"][k] for k in K]
+    assert sum(st1) == 25 and min(st1) >= 4 and cr["stats"][sub] == 5, ("creation breaks the Classic rules", cr)
+    sub_to = []
     for r in sp["rule"]:
-        lr = rng(r["levels"]); m = re.search(r"DEX (?:\(to |to )(\d+)", r["ap"])
-        if lr and m: dex_to.append((lr[0], lr[1], int(m.group(1))))
-    INT = t10.get("INT", 4)
-    st = [None] * (CAP + 1)
-    st[10] = [t10["STR"], t10["DEX"], INT, t10["LUK"]]
-    goal = t10["DEX"]
-    for L in range(11, CAP + 1):
-        hit = next((v for a, b, v in dex_to if a <= L <= b), None)
+        lr = rng(r["levels"]); m = re.search(sub + r" (?:\(to |to )(\d+)", r["ap"])
+        if lr and m: sub_to.append((lr[0], lr[1], int(m.group(1))))
+    si, mi = K.index(sub), K.index(main)
+    st = [None] * (CAP + 1); st[1] = st1; goal = st1[si]
+    for L in range(2, CAP + 1):
+        hit = next((v for a_, b_, v in sub_to if a_ <= L <= b_), None)
         if hit: goal = hit
-        s = list(st[L - 1]); a = max(0, min(5, goal - s[1])); s[1] += a; s[3] += 5 - a; st[L] = s
-    for L in range(9, 0, -1):
-        s = list(st[L + 1]); take = 5; lk = min(take, s[3] - 4); s[3] -= lk; take -= lk; s[1] -= take; st[L] = s
+        s_ = list(st[L - 1]); a_ = max(0, min(5, goal - s_[si])); s_[si] += a_; s_[mi] += 5 - a_; st[L] = s_
+    INT = st[10][2]
     for r in rows:
         L = int(r["level"])
-        if L <= CAP: assert st[L] == [int(r["STR"]), int(r["DEX"]), INT, int(r["LUK"])], ("stats disagree with the guide table", L, st[L], r)
+        if L <= CAP: assert st[L] == [int(r["STR"]), int(r["DEX"]), int(r.get("INT", INT)), int(r["LUK"])], ("stats disagree with the guide table", L, st[L], r)
     stats = []
     for L in range(1, CAP + 1):
         s, p = st[L], st[L - 1] if L > 1 else None
-        if L == 1: ap = "starting picks (being checked)"
-        else:
-            dd, dl = s[1] - p[1], s[3] - p[3]
-            ap = " ".join(x for x in (f"+{dd} DEX" if dd else "", f"+{dl} LUK" if dl else "") if x)
+        if L == 1: ap = "character creation: " + ", ".join(f"{v} {k}" for k, v in zip(K, s))
+        else: ap = " ".join(f"+{s[i] - p[i]} {K[i]}" for i in range(4) if s[i] != p[i])
         stats.append({"l": L, "t": s, "ap": ap, "ch": L in (1, 10, 30) or bool(p and s[1] != p[1])})
 
     # skill points every level, never more than the level allows or a skill's max
@@ -214,7 +214,7 @@ def build(name):
         spd[L] = {"have": hv, "spare": spare}
         if L >= 10:
             put = [[k, v - prev.get(k, 0)] for k, v in hv.items() if v - prev.get(k, 0) > 0]
-            note = {10: "Become a Thief", 30: "Become a Bandit"}.get(L, "")
+            note = next((f"Job advance to {a['job']}" for a in d["advancement"] if str(a["level"]) == str(L)), "")
             sp_lv.append({"l": L, "put": put, "spare": spare if L == CAP else 0, "note": note, "ch": bool(note)})
         prev = hv
     first = {}
