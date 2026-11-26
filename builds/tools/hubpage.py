@@ -13,14 +13,14 @@ import worldpages as W  # noqa: E402
 import gwpage as G  # noqa: E402
 
 E = G.E
-DONE = {"sindit"}   # pages rebuilt in the approved look
+DONE = {"sindit", "spearman-spear", "spearman-polearm", "assassin", "pure-bandit", "hunter"}   # pages rebuilt in the approved look
 CLASSES = [
     ("Warrior", [("Fighter, sword", "fighter-sword"), ("Fighter, axe", "fighter-axe"), ("Page, sword", "page-sword"), ("Page, blunt weapon", "page-blunt"),
-                 ("Spearman, spear", "spearman-spear"), ("Spearman, polearm", "spearman-polearm"), ("Dexless warrior", "dexless-warrior")]),
+                 ("Spearman, spear", "spearman-spear"), ("Spearman, polearm", "spearman-polearm")]),
     ("Magician", [("Fire Poison", "fire-poison"), ("Ice Lightning", "ice-lightning"), ("Cleric", "cleric"), ("LUK mage", "luk-mage")]),
     ("Bowman", [("Hunter", "hunter"), ("Crossbowman", "crossbowman")]),
     ("Thief", [("Assassin", "assassin"), ("DEX Assassin", "dex-assassin"), ("Pure Bandit", "pure-bandit"), ("Sindit", "sindit"),
-               ("STR Bandit", "str-bandit"), ("DEX Bandit", "dex-bandit"), ("Dexless Bandit", "dexless-bandit")]),
+               ("STR Bandit", "str-bandit"), ("DEX Bandit", "dex-bandit")]),
 ]
 
 

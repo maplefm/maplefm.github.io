@@ -1,0 +1,846 @@
+{
+ "slug": "/builds/spearman-polearm/",
+ "header": {
+  "class": "Warrior",
+  "job_path": "Warrior (10) → Spearman (30)",
+  "build": "Spearman, polearm",
+  "pitch": "STR with DEX only to each polearm's need. Power Strike and Slash Blast 20 by level 23, then Polearm Mastery, Final Attack, Booster and Rush.",
+  "best_at": [
+   "Slash Blast hits 6 mobs from level 17",
+   "Polearms hit harder than spears until 70",
+   "Polearm Mastery 20 also gives +20 speed"
+  ],
+  "weak_spots": [
+   "Polearms are the slowest weapons",
+   "DEX has to match your level from 15"
+  ],
+  "difficulty": "Medium",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 1051380,
+    "shown": "about 1.1M"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 12,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "STR",
+  "sub": "DEX",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all STR",
+    "why": "Warrior job advance needs 35 STR at 10"
+   },
+   {
+    "levels": "14 to 15",
+    "ap": "all DEX (to 15)",
+    "why": "Iron Ball at 15 needs 15 DEX"
+   },
+   {
+    "levels": "20",
+    "ap": "all DEX (to 20)",
+    "why": "Studded Polearm at 20 needs 20 DEX"
+   },
+   {
+    "levels": "29 to 30",
+    "ap": "all DEX (to 30)",
+    "why": "Mithril Pole Arm at 30 needs 30 DEX"
+   },
+   {
+    "levels": "35",
+    "ap": "all DEX (to 35)",
+    "why": "Axe Pole Arm at 35 needs 35 DEX"
+   },
+   {
+    "levels": "40",
+    "ap": "all DEX (to 40)",
+    "why": "Crescent Polearm at 40 needs 40 DEX"
+   },
+   {
+    "levels": "49 to 50",
+    "ap": "all DEX (to 50)",
+    "why": "The Nine Dragons at 50 needs 50 DEX"
+   },
+   {
+    "levels": "59 to 60",
+    "ap": "all DEX (to 60)",
+    "why": "Skylar at 60 needs 60 DEX"
+   },
+   {
+    "levels": "69 to 70",
+    "ap": "all DEX (to 70)",
+    "why": "The Gold Dragon at 70 needs 70 DEX"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 57,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 92,
+    "DEX": 20,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 132,
+    "DEX": 30,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 40,
+    "STR": 172,
+    "DEX": 40,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 50,
+    "STR": 212,
+    "DEX": 50,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 60,
+    "STR": 252,
+    "DEX": 60,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 70,
+    "STR": 292,
+    "DEX": 70,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Power Strike",
+   "id": 1001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Slash Blast",
+   "id": 1001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Precise Strikes",
+   "id": 1000002,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Polearm Mastery",
+   "id": 1300001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Polearm Booster",
+   "id": 1301003,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Final Attack: Polearm",
+   "id": 1301001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1301005,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 38,
+   "book": "2nd job",
+   "skill": "Polearm Mastery",
+   "id": 1300001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Final Attack: Polearm",
+   "id": 1301001,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 54,
+   "book": "2nd job",
+   "skill": "Polearm Booster",
+   "id": 1301003,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 60,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1301005,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Iron Will",
+   "id": 1301004,
+   "to": 30,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Polearm",
+   "item": "Pole Arm",
+   "id": 1442000,
+   "needs": "15 STR",
+   "attack": 35,
+   "speed": 8,
+   "price": {
+    "typical": 2500,
+    "shown": "2,500",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Polearm",
+   "item": "Iron Ball",
+   "id": 1442001,
+   "needs": "35 STR, 15 DEX",
+   "attack": 40,
+   "speed": 8,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Polearm",
+   "item": "Studded Polearm",
+   "id": 1442002,
+   "needs": "45 STR, 20 DEX",
+   "attack": 42,
+   "speed": 7,
+   "price": {
+    "typical": 6495,
+    "shown": "6,495",
+    "basis": "old",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Polearm",
+   "item": "Mithril Pole Arm",
+   "id": 1442004,
+   "needs": "65 STR, 30 DEX",
+   "attack": 55,
+   "speed": 8,
+   "price": {
+    "typical": 9999,
+    "shown": "9,999",
+    "basis": "24h",
+    "sales_seen": 23,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 35,
+   "slot": "Polearm",
+   "item": "Axe Pole Arm",
+   "id": 1442005,
+   "needs": "75 STR, 35 DEX",
+   "attack": 60,
+   "speed": 8,
+   "price": {
+    "typical": 10999,
+    "shown": "11K",
+    "basis": "3d",
+    "sales_seen": 27,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "Polearm",
+   "item": "Crescent Polearm",
+   "id": 1442006,
+   "needs": "85 STR, 40 DEX",
+   "attack": 65,
+   "speed": 8,
+   "price": {
+    "typical": 47499,
+    "shown": "47K",
+    "basis": "3d",
+    "sales_seen": 28,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 45,
+   "slot": "Polearm",
+   "item": "Yellow Mop",
+   "id": 1442010,
+   "needs": "85 STR",
+   "attack": 67,
+   "speed": 7,
+   "price": {
+    "typical": 85000,
+    "shown": "85K",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 50,
+   "slot": "Polearm",
+   "item": "The Nine Dragons",
+   "id": 1442007,
+   "needs": "105 STR, 50 DEX",
+   "attack": 75,
+   "speed": 8,
+   "price": {
+    "typical": 888888,
+    "shown": "889K",
+    "basis": "3d",
+    "sales_seen": 15,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 60,
+   "slot": "Polearm",
+   "item": "Skylar",
+   "id": 1442008,
+   "needs": "125 STR, 60 DEX",
+   "attack": 85,
+   "speed": 8,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  },
+  {
+   "level": 70,
+   "slot": "Polearm",
+   "item": "The Gold Dragon",
+   "id": 1442009,
+   "needs": "145 STR, 70 DEX",
+   "attack": 95,
+   "speed": 8,
+   "price": {
+    "typical": null,
+    "shown": "not seen on the FM yet",
+    "basis": null
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Warrior",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 10 and 35 STR",
+   "gets": "1 SP. Power Strike and Slash Blast open."
+  },
+  {
+   "level": 30,
+   "job": "Spearman",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 30",
+   "gets": "Pick Spearman. Spear and polearm skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Dragon Knight",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Mushroom Garden (Victoria Island)",
+     "monsters": [
+      "Orange Mushroom",
+      "Shroom",
+      "Red Snail"
+     ]
+    },
+    {
+     "map": "The Tree That Grew II",
+     "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
+      "Pig",
+      "Shroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "The Blue Mushroom Forest",
+     "monsters": [
+      "Blue Mushroom",
+      "Slime",
+      "Blue Snail"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site I",
+     "monsters": [
+      "Ghost Stump",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "Polearm Mastery 5 opens Polearm Booster, and Booster 1 already gives the full 2 steps of speed. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Polearm gives a 25% chance when you attack to open a 60 second window for one extra hit that heals you, up to 15% of your max HP. Level 1 is already a 260% hit with the full 25% chance, so 1 point goes in next to Booster 1. Points 2 to 30 raise it to 350% and the heal from 5% to 10% of the damage, so they wait for Mastery 20, which helps every hit.",
+  "Rush 1 goes in at 33 for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80% and cut its MP from 35 to 15. Iron Will comes last: at 30 it's +50 weapon defense and a 35% chance to ignore knockback, but no damage.",
+  "Polearms need DEX equal to their level from Iron Ball at 15, except Yellow Mop at 45. AP only goes into DEX in the levels right before each new polearm, everything else goes into STR."
+ ],
+ "mistakes": [
+  "Putting points into Iron Body. It needs Max HP Increase 3 first, so it costs 2 extra points before it does anything, and then it's only +20% weapon defense. Those points do more in Precise Strikes, +20 accuracy at 15.",
+  "Maxing Polearm Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
+  "Forgetting DEX for Iron Ball. It needs 15 DEX at 15, so put your AP from levels 14 and 15 into DEX, or you stay on the Pole Arm's 35 attack instead of 40.",
+  "Buying a spear with a polearm build. Polearm Mastery, Polearm Booster and Final Attack: Polearm only work with a polearm, so you lose most of 2nd job."
+ ],
+ "compare": [
+  {
+   "build": "Spearman, polearm (this guide)",
+   "best_at": "harder hits until 70",
+   "weak": "slowest weapons"
+  },
+  {
+   "build": "Spearman, spear",
+   "best_at": "a step faster than polearms",
+   "weak": "spears hit a little softer until 70"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Dragon Knight. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Spearman, polearm Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic spearman, polearm build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ }
+}
