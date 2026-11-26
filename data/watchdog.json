@@ -1,166 +1,168 @@
 {
- "at": 1795653860,
- "ok": true,
- "failing": [],
+ "at": 1795675270,
+ "ok": false,
+ "failing": [
+  "Scheduled jobs"
+ ],
  "checks": [
   {
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 87,
+   "ms": 130,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 101,
+   "ms": 41,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 65,
+   "ms": 55,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 51,
+   "ms": 43,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 51,
+   "ms": 44,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 55,
+   "ms": 41,
    "fix": null
   },
   {
    "name": "Player market",
-   "ok": true,
-   "detail": "loads",
-   "ms": 56,
-   "fix": null
-  },
-  {
-   "name": "Shops",
    "ok": true,
    "detail": "loads",
    "ms": 43,
    "fix": null
   },
   {
+   "name": "Shops",
+   "ok": true,
+   "detail": "loads",
+   "ms": 32,
+   "fix": null
+  },
+  {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 39,
+   "ms": 26,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 57,
+   "ms": 47,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 45,
+   "ms": 44,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 48,
+   "ms": 56,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 79,
+   "ms": 29,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 70,
+   "ms": 45,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 49,
+   "ms": 32,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 60,
+   "ms": 45,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 37,
+   "ms": 36,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
    "detail": "Work Gloves: clean 1,971 to 2,750 (4 sold) · clean +1 crit rate 450K to 790K (6 sold) · +4",
-   "ms": 299,
+   "ms": 566,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
    "detail": "uploaded 1 min ago",
-   "ms": 137,
+   "ms": 71,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "60 open listings, #selling synced 4 min ago",
-   "ms": 673,
+   "detail": "61 open listings, #selling synced 1 min ago",
+   "ms": 454,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "5 visits, 0 crashed",
-   "ms": 304,
+   "detail": "2 visits, 0 crashed",
+   "ms": 230,
    "fix": null
   },
   {
    "name": "Board on a phone",
    "ok": true,
-   "detail": "loads, card and search work (33s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (34s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (32s, 45 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (32s, 48 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -168,27 +170,27 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 86,
+   "ms": 61,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
-   "detail": "1578 items",
-   "ms": 60,
+   "detail": "1579 items",
+   "ms": 70,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": true,
    "detail": "all scanners within the bars",
-   "ms": 69,
+   "ms": 73,
    "fix": null
   },
   {
    "name": "Scheduled jobs",
-   "ok": true,
-   "detail": "all passing",
+   "ok": false,
+   "detail": "failed: Smoke test",
    "ms": null,
    "fix": null
   },
@@ -207,15 +209,13 @@
    "fix": null
   }
  ],
- "repairs": [],
- "history": [
+ "repairs": [
   {
-   "at": 1793931042,
-   "failing": [
-    "Board on a phone"
-   ],
-   "repairs": []
-  },
+   "what": "re-ran failed job: Smoke test",
+   "ok": true
+  }
+ ],
+ "history": [
   {
    "at": 1793932805,
    "failing": [],
@@ -625,7 +625,19 @@
    "at": 1795579262,
    "failing": [],
    "repairs": []
+  },
+  {
+   "at": 1795675270,
+   "failing": [
+    "Scheduled jobs"
+   ],
+   "repairs": [
+    {
+     "what": "re-ran failed job: Smoke test",
+     "ok": true
+    }
+   ]
   }
  ],
- "beat": 1795653860
+ "beat": 1795675270
 }
