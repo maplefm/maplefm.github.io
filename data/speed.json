@@ -1,80 +1,80 @@
 {
- "at": 1795734899357,
+ "at": 1795820181936,
  "pages": {
   "chromium phone /": {
-   "load": 813,
-   "ltMax": 384,
-   "ltSum": 1060,
-   "cls": 0.01,
-   "heapMB": 54,
-   "kb": 545
+   "load": 659,
+   "ltMax": 266,
+   "ltSum": 912,
+   "cls": 0.011,
+   "heapMB": 57,
+   "kb": 526
   },
   "chromium phone /market.html": {
-   "load": 370,
-   "ltMax": 76,
-   "ltSum": 26,
+   "load": 254,
+   "ltMax": 72,
+   "ltSum": 22,
    "cls": 0,
    "heapMB": 10,
    "kb": 176
   },
   "chromium phone /quests.html": {
-   "load": 412,
-   "ltMax": 82,
-   "ltSum": 61,
+   "load": 410,
+   "ltMax": 74,
+   "ltSum": 45,
    "cls": 0,
    "heapMB": 10,
    "kb": 83
   },
   "chromium phone /quest/pios-collecting-recycled-goods/": {
-   "load": 251,
-   "ltMax": 50,
-   "ltSum": 0,
+   "load": 324,
+   "ltMax": 60,
+   "ltSum": 10,
    "cls": 0,
    "heapMB": 10,
    "kb": 55
   },
   "chromium phone /map.html": {
-   "load": 411,
-   "ltMax": 99,
-   "ltSum": 85,
+   "load": 298,
+   "ltMax": 98,
+   "ltSum": 73,
    "cls": 0,
    "heapMB": 10,
    "kb": 77
   },
   "chromium phone /training/level-30-40/": {
-   "load": 236,
-   "ltMax": 62,
-   "ltSum": 12,
+   "load": 223,
+   "ltMax": 50,
+   "ltSum": 0,
    "cls": 0,
    "heapMB": 10,
    "kb": 54
   },
   "chromium phone /item/work-gloves/": {
-   "load": 261,
-   "ltMax": 68,
-   "ltSum": 18,
+   "load": 252,
+   "ltMax": 60,
+   "ltSum": 10,
    "cls": 0,
    "heapMB": 10,
-   "kb": 36
+   "kb": 51
   },
   "chromium phone /contribute.html": {
-   "load": 476,
-   "ltMax": 113,
-   "ltSum": 64,
-   "cls": 0.007,
+   "load": 386,
+   "ltMax": 101,
+   "ltSum": 51,
+   "cls": 0,
    "heapMB": 10,
    "kb": 43
   },
   "chromium desktop /": {
-   "load": 332,
-   "ltMax": 83,
-   "ltSum": 47,
-   "cls": 0.055,
+   "load": 306,
+   "ltMax": 58,
+   "ltSum": 8,
+   "cls": 0.052,
    "heapMB": 54,
-   "kb": 400
+   "kb": 524
   },
   "chromium desktop /market.html": {
-   "load": 320,
+   "load": 168,
    "ltMax": 0,
    "ltSum": 0,
    "cls": 0.001,
@@ -82,15 +82,15 @@
    "kb": 165
   },
   "chromium desktop /quests.html": {
-   "load": 339,
+   "load": 327,
    "ltMax": 0,
    "ltSum": 0,
-   "cls": 0.029,
+   "cls": 0.032,
    "heapMB": 10,
    "kb": 76
   },
   "chromium desktop /quest/pios-collecting-recycled-goods/": {
-   "load": 171,
+   "load": 164,
    "ltMax": 0,
    "ltSum": 0,
    "cls": 0.003,
@@ -98,7 +98,7 @@
    "kb": 58
   },
   "chromium desktop /map.html": {
-   "load": 340,
+   "load": 170,
    "ltMax": 0,
    "ltSum": 0,
    "cls": 0.008,
@@ -106,7 +106,7 @@
    "kb": 78
   },
   "chromium desktop /training/level-30-40/": {
-   "load": 146,
+   "load": 107,
    "ltMax": 0,
    "ltSum": 0,
    "cls": 0,
@@ -114,7 +114,7 @@
    "kb": 54
   },
   "chromium desktop /item/work-gloves/": {
-   "load": 182,
+   "load": 175,
    "ltMax": 0,
    "ltSum": 0,
    "cls": 0.004,
@@ -122,73 +122,71 @@
    "kb": 51
   },
   "chromium desktop /contribute.html": {
-   "load": 331,
+   "load": 180,
    "ltMax": 0,
    "ltSum": 0,
-   "cls": 0.236,
+   "cls": 0.105,
    "heapMB": 10,
-   "kb": 41
+   "kb": 43
   },
   "webkit phone /": {
-   "load": 669
+   "load": 962
   },
   "webkit phone /market.html": {
-   "load": 372
+   "load": 230
   },
   "webkit phone /quests.html": {
-   "load": 396
+   "load": 277
   },
   "webkit phone /quest/pios-collecting-recycled-goods/": {
-   "load": 319
+   "load": 265
   },
   "webkit phone /map.html": {
-   "load": 375
+   "load": 260
   },
   "webkit phone /training/level-30-40/": {
-   "load": 297
+   "load": 242
   },
   "webkit phone /item/work-gloves/": {
-   "load": 363
+   "load": 282
   },
   "webkit phone /contribute.html": {
-   "load": 534
+   "load": 396
   },
   "firefox desktop /": {
-   "load": 532,
-   "kb": 621
+   "load": 417,
+   "kb": 624
   },
   "firefox desktop /market.html": {
-   "load": 419,
-   "kb": 329
+   "load": 275,
+   "kb": 373
   },
   "firefox desktop /quests.html": {
-   "load": 491,
+   "load": 352,
    "kb": 284
   },
   "firefox desktop /quest/pios-collecting-recycled-goods/": {
-   "load": 235,
+   "load": 208,
    "kb": 61
   },
   "firefox desktop /map.html": {
-   "load": 488,
-   "kb": 242
+   "load": 282,
+   "kb": 286
   },
   "firefox desktop /training/level-30-40/": {
-   "load": 262,
+   "load": 202,
    "kb": 57
   },
   "firefox desktop /item/work-gloves/": {
-   "load": 254,
+   "load": 206,
    "kb": 54
   },
   "firefox desktop /contribute.html": {
-   "load": 479,
+   "load": 300,
    "kb": 216
   }
  },
- "streak": {
-  "chromium desktop /contribute.html cls": 1
- },
+ "streak": {},
  "over": [],
  "history": [
   {
@@ -333,6 +331,10 @@
   },
   {
    "at": 1795734899357,
+   "over": 0
+  },
+  {
+   "at": 1795820181936,
    "over": 0
   }
  ]
