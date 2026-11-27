@@ -1,168 +1,166 @@
 {
- "at": 1795817927,
- "ok": false,
- "failing": [
-  "Board on a phone"
- ],
+ "at": 1795821753,
+ "ok": true,
+ "failing": [],
  "checks": [
   {
    "name": "Price board",
    "ok": true,
    "detail": "loads",
-   "ms": 212,
+   "ms": 294,
    "fix": null
   },
   {
    "name": "For streamers",
    "ok": true,
    "detail": "loads",
-   "ms": 197,
+   "ms": 133,
    "fix": null
   },
   {
    "name": "How it works",
    "ok": true,
    "detail": "loads",
-   "ms": 189,
+   "ms": 118,
    "fix": null
   },
   {
    "name": "Quest log",
    "ok": true,
    "detail": "loads",
-   "ms": 185,
+   "ms": 127,
    "fix": null
   },
   {
    "name": "Earn by scanning",
    "ok": true,
    "detail": "loads",
-   "ms": 127,
+   "ms": 191,
    "fix": null
   },
   {
    "name": "Maps and training",
    "ok": true,
    "detail": "loads",
-   "ms": 208,
+   "ms": 125,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
    "detail": "loads",
-   "ms": 305,
+   "ms": 129,
    "fix": null
   },
   {
    "name": "Shops",
    "ok": true,
    "detail": "loads",
-   "ms": 147,
+   "ms": 119,
    "fix": null
   },
   {
    "name": "Training guide",
    "ok": true,
    "detail": "loads",
-   "ms": 169,
+   "ms": 142,
    "fix": null
   },
   {
    "name": "Quest page",
    "ok": true,
    "detail": "loads",
-   "ms": 136,
+   "ms": 125,
    "fix": null
   },
   {
    "name": "Training level page",
    "ok": true,
    "detail": "loads",
-   "ms": 118,
+   "ms": 122,
    "fix": null
   },
   {
    "name": "Map page",
    "ok": true,
    "detail": "loads",
-   "ms": 298,
+   "ms": 164,
    "fix": null
   },
   {
    "name": "Weekly recap",
    "ok": true,
    "detail": "loads",
-   "ms": 157,
+   "ms": 121,
    "fix": null
   },
   {
    "name": "Item list",
    "ok": true,
    "detail": "loads",
-   "ms": 198,
+   "ms": 205,
    "fix": null
   },
   {
    "name": "Item page",
    "ok": true,
    "detail": "loads",
-   "ms": 142,
+   "ms": 116,
    "fix": null
   },
   {
    "name": "Sitemap",
    "ok": true,
    "detail": "loads",
-   "ms": 226,
+   "ms": 149,
    "fix": null
   },
   {
    "name": "Partner link",
    "ok": true,
    "detail": "loads",
-   "ms": 145,
+   "ms": 116,
    "fix": null
   },
   {
    "name": "!price (api.maplefm.gg)",
    "ok": true,
    "detail": "Work Gloves: clean 1,999 to 4,999 (5 sold) · clean +1 crit rate 774K to 793K (4 sold) · +2",
-   "ms": 728,
+   "ms": 669,
    "fix": null
   },
   {
    "name": "Server-built board",
    "ok": true,
    "detail": "uploaded 1 min ago",
-   "ms": 307,
+   "ms": 107,
    "fix": null
   },
   {
    "name": "Player market",
    "ok": true,
-   "detail": "53 open listings, #selling synced 1 min ago",
-   "ms": 919,
+   "detail": "64 open listings, #selling synced 2 min ago",
+   "ms": 916,
    "fix": null
   },
   {
    "name": "Visitors' browsers",
    "ok": true,
-   "detail": "5 visits, 0 crashed",
-   "ms": 445,
+   "detail": "2 visits, 0 crashed",
+   "ms": 421,
    "fix": null
   },
   {
    "name": "Board on a phone",
-   "ok": false,
-   "detail": "script error: /api.maplefm.gg/public/supporters due to access control checks. (36s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "ok": true,
+   "detail": "loads, card and search work (34s, 0 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
   {
    "name": "Board on a desktop",
    "ok": true,
-   "detail": "loads, card and search work (33s, 49 MB, 1 listing pulls, 0.0 MB, 0 full)",
+   "detail": "loads, card and search work (32s, 49 MB, 1 listing pulls, 0.0 MB, 0 full)",
    "ms": null,
    "fix": null
   },
@@ -170,21 +168,21 @@
    "name": "Fresh prices",
    "ok": true,
    "detail": "updated 1 min ago",
-   "ms": 147,
+   "ms": 117,
    "fix": null
   },
   {
    "name": "Price data",
    "ok": true,
    "detail": "1580 items",
-   "ms": 363,
+   "ms": 145,
    "fix": null
   },
   {
    "name": "Scanner health",
    "ok": true,
    "detail": "all scanners within the bars",
-   "ms": 177,
+   "ms": 149,
    "fix": null
   },
   {
@@ -211,11 +209,6 @@
  ],
  "repairs": [],
  "history": [
-  {
-   "at": 1793945470,
-   "failing": [],
-   "repairs": []
-  },
   {
    "at": 1793964286,
    "failing": [
@@ -632,7 +625,12 @@
     "Board on a phone"
    ],
    "repairs": []
+  },
+  {
+   "at": 1795821753,
+   "failing": [],
+   "repairs": []
   }
  ],
- "beat": 1795817927
+ "beat": 1795821753
 }
