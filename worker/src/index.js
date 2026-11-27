@@ -1810,7 +1810,7 @@ async function refStats(env, url) {
 // Every 5 minutes: new posts on the Classic subreddits that talk prices or the Free Market get DMed to the admins,
 // so Maya can answer while the post is fresh. Reads Reddit's public feeds only; nothing is posted or voted.
 const REDDIT_CRON = "2-59/5 * * * *";
-// Off since Nov 15 2026: Adam asked for no more Reddit DMs. The watch, the PC push and the Sunday recap draft all stop.
+// Off since Nov 15 2026: the owner asked for no more Reddit DMs. The watch, the PC push and the Sunday recap draft all stop.
 // Set true to bring them back.
 const REDDIT_ON = false;
 const REDDIT_SUBS = ["MSClassicWorld", "MapleStoryClassic"];

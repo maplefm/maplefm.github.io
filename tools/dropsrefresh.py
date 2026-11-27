@@ -3,7 +3,7 @@ items, drops and mesos), kept when the report's score is 1 or more. Names come f
   python3 tools/dropsrefresh.py [world.json]
 One request every 1.5 s. Monsters MeowDB has no reports for keep what the file had."""
 import json, os, sys, time, urllib.request
-# MeowDB blocked our requests on Nov 19 2026 and withdrew earlier permission; no calls until Adam has it again.
+# MeowDB blocked our requests on Nov 19 2026 and withdrew earlier permission; no calls until the owner has it again.
 if os.environ.get("MEOWDB_FETCH") != "1":
     sys.exit("MeowDB calls are paused (blocked Nov 19 2026, permission withdrawn). Set MEOWDB_FETCH=1 only once permission is back.")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

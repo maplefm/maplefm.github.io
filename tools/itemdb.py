@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import mcwver
 from concurrent.futures import ThreadPoolExecutor
 
 # MeowDB blocked our requests on Nov 19 2026 ("faster than one every 10 seconds ... any earlier permission no longer
-# applies"). Until Adam has its owners' permission again, nothing here calls MeowDB: what it gave before (equip stats,
+# applies"). Until the owner has its owners' permission again, nothing here calls MeowDB: what it gave before (equip stats,
 # the v2.0 items maplestory.io lacks) is carried over from the last item list. MEOWDB_FETCH=1 turns calls back on.
 MEOWDB_FETCH = os.environ.get("MEOWDB_FETCH") == "1"
 PREV = os.environ.get("PREV_ITEMDB") or (sys.argv[1] if len(sys.argv) > 1 else "data/itemdb.json")

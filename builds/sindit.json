@@ -850,7 +850,7 @@
   },
   "main": "LUK",
   "sub": "DEX",
-  "source": "Classic creation: no dice, 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026); 25 + 9 levels x 5 AP = 70 = the level 10 row"
+  "source": "Classic creation: no dice, 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026); 25 + 9 levels x 5 AP = 70 = the level 10 row"
  },
  "switch": 40,
  "reset": {
@@ -862,7 +862,7 @@
    "Disorder": 6,
    "Dark Sight": 20
   },
-  "source": "Adam, Nov 25: the Classic SP Reset Scroll clears all your skills, both jobs; sindits reset at the switch so they have Double Stab"
+  "source": "Club FM, Nov 25: the Classic SP Reset Scroll clears all your skills, both jobs; sindits reset at the switch so they have Double Stab"
  },
  "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70."
 }
