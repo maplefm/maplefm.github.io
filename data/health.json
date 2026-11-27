@@ -1,5 +1,5 @@
 {
- "at": 1795758703111,
+ "at": 1795762033725,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -9,16 +9,16 @@
  "current": "2026.11.21.1",
  "scanners": {
   "Zik": {
-   "rows24": 14545,
-   "room24": 14543,
-   "ch24": 14545,
-   "rows7": 95612,
-   "room7": 95073,
+   "rows24": 15938,
+   "room24": 15936,
+   "ch24": 15938,
+   "rows7": 96676,
+   "room7": 96137,
    "late7": 0,
-   "chat24": 173,
-   "last": 1795757133,
+   "chat24": 188,
+   "last": 1795761920,
    "ver": "2026.11.21.1",
-   "lag_median_min": 2.9,
+   "lag_median_min": 2.8,
    "room_rate24": 1.0,
    "room_rate7": 0.994,
    "late_share7": 0.0,
@@ -89,17 +89,17 @@
    "behind": 1
   },
   "meisvanni": {
-   "rows24": 433,
-   "room24": 428,
-   "ch24": 433,
+   "rows24": 252,
+   "room24": 247,
+   "ch24": 252,
    "rows7": 4356,
    "room7": 4327,
    "late7": 0,
-   "chat24": 2,
+   "chat24": 0,
    "last": 1795718120,
    "ver": "2026.11.21.1",
    "lag_median_min": 2.4,
-   "room_rate24": 0.988,
+   "room_rate24": 0.98,
    "room_rate7": 0.993,
    "late_share7": 0.0,
    "behind": null
@@ -170,11 +170,11 @@
   }
  },
  "stream": {
-  "age_h": 0.2,
+  "age_h": 0.1,
   "service": "active",
   "watching": 10,
-  "live_classic": 76,
-  "shops_last_hour": 1415
+  "live_classic": 73,
+  "shops_last_hour": 1299
  },
  "drops": {
   "2026-11-21": {
@@ -196,7 +196,7 @@
    "incomplete upload": 638
   },
   "2026-11-27": {
-   "incomplete upload": 154
+   "incomplete upload": 184
   }
  },
  "rejects": {},
