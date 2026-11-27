@@ -1,5 +1,5 @@
 {
- "at": 1795734668183,
+ "at": 1795738550220,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -8,22 +8,6 @@
  },
  "current": "2026.11.21.1",
  "scanners": {
-  "Guest-bcea": {
-   "rows24": 0,
-   "room24": 0,
-   "ch24": 0,
-   "rows7": 0,
-   "room7": 0,
-   "late7": 0,
-   "chat24": 0,
-   "last": 0,
-   "ver": "2026.11.11.1",
-   "lag_median_min": null,
-   "room_rate24": null,
-   "room_rate7": null,
-   "late_share7": null,
-   "behind": 6
-  },
   "Zik": {
    "rows24": 15320,
    "room24": 15312,
@@ -37,22 +21,6 @@
    "lag_median_min": 2.7,
    "room_rate24": 0.999,
    "room_rate7": 0.976,
-   "late_share7": 0.0,
-   "behind": null
-  },
-  "laclac": {
-   "rows24": 12338,
-   "room24": 12114,
-   "ch24": 12116,
-   "rows7": 68656,
-   "room7": 64984,
-   "late7": 0,
-   "chat24": 96,
-   "last": 1795719954,
-   "ver": "2026.11.21.1",
-   "lag_median_min": 2.6,
-   "room_rate24": 0.982,
-   "room_rate7": 0.947,
    "late_share7": 0.0,
    "behind": null
   },
@@ -72,6 +40,22 @@
    "late_share7": null,
    "behind": 5
   },
+  "laclac": {
+   "rows24": 12338,
+   "room24": 12114,
+   "ch24": 12116,
+   "rows7": 68656,
+   "room7": 64984,
+   "late7": 0,
+   "chat24": 96,
+   "last": 1795719954,
+   "ver": "2026.11.21.1",
+   "lag_median_min": 2.6,
+   "room_rate24": 0.982,
+   "room_rate7": 0.947,
+   "late_share7": 0.0,
+   "behind": null
+  },
   "Gola": {
    "rows24": 0,
    "room24": 0,
@@ -88,7 +72,7 @@
    "late_share7": null,
    "behind": 4
   },
-  "PityPocket": {
+  "PityPocket-39f2": {
    "rows24": 0,
    "room24": 0,
    "ch24": 0,
@@ -168,34 +152,31 @@
    "late_share7": null,
    "behind": 1
   },
-  "Guest-028a": {
+  "PityPocket": {
    "rows24": 12,
-   "room24": 11,
-   "ch24": 11,
+   "room24": 12,
+   "ch24": 12,
    "rows7": 12,
-   "room7": 11,
+   "room7": 12,
    "late7": 0,
    "chat24": 0,
-   "last": 1795730239,
+   "last": 1795730280,
    "ver": "2026.11.18.1",
-   "lag_median_min": 2.1,
-   "room_rate24": 0.917,
-   "room_rate7": 0.917,
+   "lag_median_min": 1.3,
+   "room_rate24": 1.0,
+   "room_rate7": 1.0,
    "late_share7": 0.0,
    "behind": 1
   }
  },
  "stream": {
-  "age_h": 0.8,
+  "age_h": 0.9,
   "service": "active",
   "watching": 10,
-  "live_classic": 58,
-  "shops_last_hour": 98
+  "live_classic": 59,
+  "shops_last_hour": 26
  },
  "drops": {
-  "2026-11-20": {
-   "incomplete upload": 406
-  },
   "2026-11-21": {
    "incomplete upload": 374
   },
@@ -212,13 +193,12 @@
    "incomplete upload": 602
   },
   "2026-11-26": {
-   "incomplete upload": 616
+   "incomplete upload": 638
+  },
+  "2026-11-27": {
+   "incomplete upload": 8
   }
  },
- "rejects": {
-  "2026-11-20": {
-   "bad post": 1
-  }
- },
+ "rejects": {},
  "flags": []
 }
