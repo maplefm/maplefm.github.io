@@ -1349,12 +1349,14 @@ async function discordBuild(it) {
   if (!slug) return { type: 4, data: { content: "No guide for " + (q || "that") + " yet. Guides so far: " + names + ". All builds: https://maplefm.gg/builds/", flags: 64 } };
   const b = B[slug], cap = b.cap || 70;
   const lvOpt = opts.find((o) => o.name === "level"), want = lvOpt ? Number(lvOpt.value) : cap;
-  if (want > cap) return { type: 4, data: { content: b.name + " guides stop at " + cap + ": 3rd job isn't in Classic World yet. Try a level from 1 to " + cap + ".", flags: 64 } };
+  if (want > cap) return { type: 4, data: { content: cap < 70 && b.next && b.next.length
+    ? b.name + " stops at " + cap + ", the 2nd job advance. For later levels pick your 2nd job guide in /build: " + b.next.join(" · ") + "."
+    : b.name + " guides stop at " + cap + ": 3rd job isn't in Classic World yet. Try a level from 1 to " + cap + ".", flags: 64 } };
   const L = Math.max(1, Math.min(cap, Math.round(want) || cap)), x = b.levels[String(L)];
   if (!x) return { type: 4, data: { content: "Couldn't read that level of the " + b.name + " guide. The full guide: " + b.url, flags: 64 } };
   const K = ["STR", "DEX", "INT", "LUK"];
   const stats = x.s.map((v, i) => "**" + K[i] + "** " + v).join(" · ");
-  const skills = x.have.length ? x.have.map(([n, v]) => n + " " + v).join(", ") + (x.spare ? "\n" + x.spare + " SP spare" + (L === cap ? ", save for 3rd job" : "") : "")
+  const skills = x.have.length ? x.have.map(([n, v]) => n + " " + v).join(", ") + (x.spare ? "\n" + x.spare + " SP spare" + (L === cap && cap >= 70 ? ", save for 3rd job" : "") : "")
     : (L < 10 ? "No skills before the job advance at 10." : "None yet.");
   const sp = [x.note ? "**" + x.note + "**" : "", x.put.map(([n, v]) => n + " +" + v).join(", "), x.gone.length ? "Taken out: " + x.gone.map(([n, v]) => n + " " + v).join(", ") : ""]
     .filter(Boolean).join("\n") || (L < 10 ? "No SP before 10." : "Nothing new this level.");

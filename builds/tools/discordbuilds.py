@@ -27,7 +27,8 @@ for slug in sorted(d for d in os.listdir(B) if os.path.exists(os.path.join(B, d,
         lv[L] = {"s": s["t"], "ap": s["ap"], "have": sorted(sp["have"].items(), key=lambda kv: -kv[1]), "spare": sp["spare"],
                  "put": row.get("put") or [], "gone": row.get("gone") or [], "note": row.get("note") or "",
                  "w": [w["item"], w["level"]] if w else None, "next": [nxt["item"], nxt["level"]] if nxt else None}
-    out[slug] = {"name": name, "cap": D["cap"], "url": f"https://maplefm.gg/builds/{slug}/", "levels": lv}
+    nx = [g["name"] for g in json.load(open(os.path.join(B, slug + ".json"), encoding="utf-8")).get("next_guides") or []]
+    out[slug] = {"name": name, "cap": D["cap"], "url": f"https://maplefm.gg/builds/{slug}/", "levels": lv, **({"next": nx} if nx else {})}
 json.dump({"note": "made by builds/tools/discordbuilds.py from the guide pages; read by the Worker's /build command", "builds": out},
           open(os.path.join(B, "discord.json"), "w", encoding="utf-8"), separators=(",", ":"))
 print("builds/discord.json:", ", ".join(f"{k} ({v['name']})" for k, v in out.items()), os.path.getsize(os.path.join(B, "discord.json")) // 1024, "KB")
