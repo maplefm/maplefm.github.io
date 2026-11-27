@@ -225,7 +225,7 @@ sin["compare"] = [
     {"build": "Dexless Bandit", "main_attack": "Savage Blow", "dmg_per_s": {L: ct("dexbandit", L)["dps"] for L in (40, 60, CAP)},
      "best_at": "highest LUK", "weak": "misses; can't wear DEX daggers", "note": "training page Typical build"},
     {"build": "STR Bandit", "main_attack": "Savage Blow with STR daggers", "dmg_per_s": None, "best_at": "faster daggers (Bazlud, Sai)", "weak": "not in the engine yet",
-     "note": "waits for Adam's review; see str-bandit-engine.md"}]
+     "note": "waits for the owner's review; see str-bandit-engine.md"}]
 REVIEW["sindit_typical_vs_guide"] = typical_vs_plan(S)
 REVIEW["sindit_switch_table"] = [{"level": r["lv"], "claw": {"attack": r["claw"][0], "dmg_per_s": r["claw"][1], "exp_hour": r["claw"][2]},
                          "reset_dagger": {"attack": r["reset_dagger"][0], "dmg_per_s": r["reset_dagger"][1], "exp_hour": r["reset_dagger"][2], "weapon": r["reset_dagger"][3]},
@@ -376,7 +376,7 @@ hub = {
     "links_in": ["menu: Training sub-bar gets a Builds link", "each /training/<job>/ page links its build guides", "map.html build picker links the matching guide"],
     "search": {"keywords": ["build guide", "builds", "ap build", "sp build", "skill build", "best build", "class guide", "job guide", "maplestory classic builds"],
                "sitesearch": ["Build guides", "builds", "", "", "/builds/"]},
-    "sitesearch_note": "data/sitesearch.json has no build list yet (keys v, built, m, i, q, p). Proposed: a new key b, rows [name, slug, class, job, path, keywords]; tools/sitesearch.py and assets/sitesearch.js would need a small change, so it waits for Adam.",
+    "sitesearch_note": "data/sitesearch.json has no build list yet (keys v, built, m, i, q, p). Proposed: a new key b, rows [name, slug, class, job, path, keywords]; tools/sitesearch.py and assets/sitesearch.js would need a small change, so it waits for the owner.",
 }
 write("hub.json", hub)
 write("check/review-numbers.json", REVIEW)

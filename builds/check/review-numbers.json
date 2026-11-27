@@ -1251,7 +1251,7 @@
    "dmg_per_s": null,
    "best_at": "faster daggers (Bazlud, Sai)",
    "weak": "not in the engine yet",
-   "note": "waits for Adam's review; see str-bandit-engine.md"
+   "note": "waits for the owner's review; see str-bandit-engine.md"
   }
  ],
  "spearman_spear_compare": [

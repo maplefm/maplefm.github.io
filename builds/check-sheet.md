@@ -94,7 +94,7 @@ Lucky Seven keeps Mithril Guards and Wolbi stars. Reset dagger: Double Stab 20 p
 | Pure Bandit (dagger from 10) | 1045 | 3209 | 5665 | training page Typical build |
 | Assassin (claw) | 1366 | 2751 | 4680 | training page Typical build; Typical claws need more DEX than it has |
 | Dexless Bandit | 1054 | 3292 | 5759 | training page Typical build |
-| STR Bandit | — | — | — | waits for Adam's review; see str-bandit-engine.md |
+| STR Bandit | — | — | — | waits for the owner's review; see str-bandit-engine.md |
 
 ### spearman_spear
 

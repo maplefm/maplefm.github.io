@@ -48,7 +48,7 @@ node builds/tools/realcheck.cjs
 
 Each section is a tab (phone_tabs), like the map and training pages: Overview, Stats, Skills, Gear, Job, Resets, Train, Why, Mistakes, Compare, 3rd job.
 
-## Waiting for Adam
+## Waiting for the owner
 
 1. DEX and STR Bandit, every other 2nd job and variants.
 2. Site search: a new "b" list in data/sitesearch.json needs small changes to tools/sitesearch.py and assets/sitesearch.js (hub.json sitesearch_note).

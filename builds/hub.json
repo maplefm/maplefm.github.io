@@ -116,5 +116,5 @@
    "/builds/"
   ]
  },
- "sitesearch_note": "data/sitesearch.json has no build list yet (keys v, built, m, i, q, p). Proposed: a new key b, rows [name, slug, class, job, path, keywords]; tools/sitesearch.py and assets/sitesearch.js would need a small change, so it waits for Adam."
+ "sitesearch_note": "data/sitesearch.json has no build list yet (keys v, built, m, i, q, p). Proposed: a new key b, rows [name, slug, class, job, path, keywords]; tools/sitesearch.py and assets/sitesearch.js would need a small change, so it waits for the owner."
 }
