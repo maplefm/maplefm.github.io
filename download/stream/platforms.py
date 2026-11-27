@@ -1,7 +1,7 @@
-"""Count live MapleStory Classic streams on Kick and YouTube, without watching them, so Adam can decide with real
+"""Count live MapleStory Classic streams on Kick and YouTube, without watching them, so the owner can decide with real
 numbers whether the stream server should read those sites too. Run every 15 minutes by update.sh.
 
-Keys (made by Adam, put on the server by keys.sh, never in the repo):
+Keys (made by the owner, put on the server by keys.sh, never in the repo):
   kick_client.txt    Kick app client id and secret, one per line (kick.com, Settings, Developer)
   youtube_key.txt    YouTube Data API key (Google Cloud console)
 Both are optional: a site without a key is skipped and reported as "no key".

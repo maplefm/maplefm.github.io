@@ -1,0 +1,402 @@
+{
+ "slug": "/builds/bowman/",
+ "header": {
+  "class": "Bowman",
+  "job_path": "Bowman (10) → Bowman (30)",
+  "build": "Bowman, 1 to 30",
+  "pitch": "Bowman from 1 to the 2nd job advance at 30.",
+  "best_at": [],
+  "weak_spots": [],
+  "difficulty": "Easy",
+  "level_range": "1 to 30",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 37699,
+    "shown": "about 38K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 5,
+   "DEX": 12,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "DEX",
+  "sub": "STR",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all DEX",
+    "why": "DEX is your damage stat"
+   },
+   {
+    "levels": "14 to 15",
+    "ap": "all STR (to 15)",
+    "why": "Composite Bow at 15 needs 15 STR"
+   },
+   {
+    "levels": "20",
+    "ap": "all STR (to 20)",
+    "why": "Hunter's Bow at 20 needs 20 STR"
+   },
+   {
+    "levels": "25",
+    "ap": "all STR (to 25)",
+    "why": "Battle Bow at 25 needs 25 STR"
+   },
+   {
+    "levels": "30",
+    "ap": "all STR (to 30)",
+    "why": "Ryden at 30 needs 30 STR"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all DEX",
+    "why": "DEX is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 5,
+    "DEX": 57,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 20,
+    "DEX": 92,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 30,
+    "DEX": 132,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Arrow Blow",
+   "id": 3001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Critical Shot",
+   "id": 3000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 29,
+   "book": "1st job",
+   "skill": "Focus",
+   "id": 3001000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "The Eye of Amazon",
+   "id": 3000001,
+   "to": 6,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Bow",
+   "item": "War Bow",
+   "id": 1452000,
+   "needs": "25 DEX",
+   "attack": 30,
+   "speed": 6,
+   "price": {
+    "typical": 3600,
+    "shown": "3,600",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Bow",
+   "item": "Composite Bow",
+   "id": 1452001,
+   "needs": "15 STR, 35 DEX",
+   "attack": 35,
+   "speed": 6,
+   "price": {
+    "typical": 4099,
+    "shown": "4,099",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Bow",
+   "item": "Hunter's Bow",
+   "id": 1452002,
+   "needs": "20 STR, 45 DEX",
+   "attack": 42,
+   "speed": 6,
+   "price": {
+    "typical": 5000,
+    "shown": "5,000",
+    "basis": "3d",
+    "sales_seen": 6,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "Bow",
+   "item": "Battle Bow",
+   "id": 1452003,
+   "needs": "25 STR, 55 DEX",
+   "attack": 44,
+   "speed": 5,
+   "price": {
+    "typical": 7000,
+    "shown": "7,000",
+    "basis": "3d",
+    "sales_seen": 9,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Bow",
+   "item": "Ryden",
+   "id": 1452004,
+   "needs": "30 STR, 65 DEX",
+   "attack": 50,
+   "speed": 6,
+   "price": {
+    "typical": 18000,
+    "shown": "18K",
+    "basis": "24h",
+    "sales_seen": 15,
+    "rough": true
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Bowman",
+   "where": "Henesys, Athena Pierce",
+   "needs": "Level 10",
+   "gets": "1 SP. Arrow Blow and Double Shot open."
+  },
+  {
+   "level": 30,
+   "job": "2nd job",
+   "where": "Henesys, Athena Pierce",
+   "needs": "Level 30",
+   "gets": "Pick Hunter or Crossbowman. Your build guide takes over from here."
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Caution Falling Down",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site I",
+     "monsters": [
+      "Ghost Stump",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Arrow Blow 20 hits one mob for 240% with one arrow. Double Shot 20 is 120% on up to 2, so Arrow Blow is your main attack until 30.",
+  "Critical Shot 15 is 20% critical rate and +15% critical damage. The Eye of Amazon 3 opens Focus, and Focus 20 is +25 accuracy and +25 avoid for 300 seconds.",
+  "The last 3 points go into The Eye of Amazon, 6 in all: 75 range, 15 more than at 3.",
+  "This guide uses a bow to 30. If you'll be a Crossbowman, a crossbow works with every 1st job skill too, and the Crossbowman guide covers it.",
+  "STR only goes in when your gear needs it: 15 for Composite Bow at 15, 20 for Hunter's Bow at 20, 25 for Battle Bow at 25, 30 for Ryden at 30 and 40 for level 50 bowman armor. Everything else goes into DEX."
+ ],
+ "mistakes": [
+  "Maxing Double Shot before Arrow Blow. It's 120% per mob and uses 2 arrows a shot; Arrow Blow is 240% on one. Max Arrow Blow first.",
+  "Skipping STR before a new bow. Ryden needs 30 STR at 30, so put your AP at 30 into STR, or you stay on Battle Bow's 44 attack instead of 50."
+ ],
+ "compare": [],
+ "future": [],
+ "search": {
+  "title": "Bowman Guide 1 to 30: AP and SP | Club FM",
+  "description": "MapleStory Classic bowman from level 1 to 30: AP and SP for every level, weapons and where to get them, where to train, and which 2nd job to pick."
+ },
+ "cap": 30,
+ "next_guides": [
+  {
+   "name": "Hunter",
+   "slug": "hunter",
+   "blurb": "bow, Arrow Bomb on 6"
+  },
+  {
+   "name": "Crossbowman",
+   "slug": "crossbowman",
+   "blurb": "crossbow, Iron Arrow through 6"
+  }
+ ]
+}

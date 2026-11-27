@@ -1,0 +1,824 @@
+{
+ "slug": "/builds/page-sword/",
+ "header": {
+  "class": "Warrior",
+  "job_path": "Warrior (10) → Page (30)",
+  "build": "Page, sword",
+  "pitch": "STR with DEX only to each sword's need. Power Strike and Slash Blast 20 by 23, then Sword Mastery and Final Attack.",
+  "best_at": [
+   "Final Attack: Sword hits for 360% at 30",
+   "Sword Mastery is +20 accuracy",
+   "Final Attack is 270% from its first point"
+  ],
+  "weak_spots": [
+   "No attack buff like Rage",
+   "DEX has to match your level from 20"
+  ],
+  "difficulty": "Medium",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 86175,
+    "shown": "about 86K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 12,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "STR",
+  "sub": "DEX",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   },
+   {
+    "levels": "18 to 20",
+    "ap": "all DEX (to 20)",
+    "why": "Two-Handed Sword at 20 needs 20 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 25)",
+    "why": "Broadsword at 25 needs 25 DEX"
+   },
+   {
+    "levels": "34 to 35",
+    "ap": "all DEX (to 35)",
+    "why": "Lionheart at 35 needs 35 DEX"
+   },
+   {
+    "levels": "40",
+    "ap": "all DEX (to 40)",
+    "why": "Zard at 40 needs 40 DEX"
+   },
+   {
+    "levels": "45",
+    "ap": "all DEX (to 45)",
+    "why": "Blade of Harmony at 45 needs 45 DEX"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 57,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 92,
+    "DEX": 20,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 137,
+    "DEX": 25,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 40,
+    "STR": 172,
+    "DEX": 40,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 50,
+    "STR": 217,
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 60,
+    "STR": 267,
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 70,
+    "STR": 317,
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Power Strike",
+   "id": 1001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Slash Blast",
+   "id": 1001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Precise Strikes",
+   "id": 1000002,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Sword Mastery",
+   "id": 1200000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Sword Booster",
+   "id": 1201002,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Final Attack: Sword",
+   "id": 1201000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1201005,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 38,
+   "book": "2nd job",
+   "skill": "Sword Mastery",
+   "id": 1200000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Final Attack: Sword",
+   "id": 1201000,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 54,
+   "book": "2nd job",
+   "skill": "Sword Booster",
+   "id": 1201002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 60,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1201005,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Threaten",
+   "id": 1201004,
+   "to": 30,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "2H Sword",
+   "item": "Wooden Sword",
+   "id": 1402000,
+   "needs": "25 STR",
+   "attack": 30,
+   "speed": 5,
+   "price": {
+    "typical": 2888,
+    "shown": "2,888",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "2H Sword",
+   "item": "Wooden Baseball Bat",
+   "id": 1402001,
+   "needs": "25 STR",
+   "attack": 35,
+   "speed": 5,
+   "price": {
+    "typical": 4200,
+    "shown": "4,200",
+    "basis": "3d",
+    "sales_seen": 10,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "2H Sword",
+   "item": "Two-Handed Sword",
+   "id": 1402002,
+   "needs": "45 STR, 20 DEX",
+   "attack": 40,
+   "speed": 5,
+   "price": {
+    "typical": 6750,
+    "shown": "6,750",
+    "basis": "old",
+    "sales_seen": 8,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "2H Sword",
+   "item": "Broadsword",
+   "id": 1402003,
+   "needs": "55 STR, 25 DEX",
+   "attack": 45,
+   "speed": 5,
+   "price": {
+    "typical": 7450,
+    "shown": "7,450",
+    "basis": "3d",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "2H Sword",
+   "item": "Aluminum Baseball Bat",
+   "id": 1402004,
+   "needs": "55 STR",
+   "attack": 50,
+   "speed": 5,
+   "price": {
+    "typical": 6500,
+    "shown": "6,500",
+    "basis": "3d",
+    "sales_seen": 15,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 35,
+   "slot": "2H Sword",
+   "item": "Lionheart",
+   "id": 1402006,
+   "needs": "75 STR, 35 DEX",
+   "attack": 55,
+   "speed": 5,
+   "price": {
+    "typical": 12500,
+    "shown": "12K",
+    "basis": "3d",
+    "sales_seen": 12,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "2H Sword",
+   "item": "Zard",
+   "id": 1402007,
+   "needs": "85 STR, 40 DEX",
+   "attack": 60,
+   "speed": 5,
+   "price": {
+    "typical": 23110,
+    "shown": "23K",
+    "basis": "24h",
+    "sales_seen": 25,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 45,
+   "slot": "2H Sword",
+   "item": "Blade of Harmony",
+   "id": 1402011,
+   "needs": "95 STR, 45 DEX",
+   "attack": 68,
+   "speed": 6,
+   "price": {
+    "typical": 22777,
+    "shown": "23K",
+    "basis": "24h",
+    "sales_seen": 26,
+    "rough": true
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Warrior",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 10",
+   "gets": "1 SP. Power Strike and Slash Blast open."
+  },
+  {
+   "level": 30,
+   "job": "Page",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 30",
+   "gets": "Pick Page. Sword skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "White Knight",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Mushroom Garden (Victoria Island)",
+     "monsters": [
+      "Orange Mushroom",
+      "Shroom",
+      "Red Snail"
+     ]
+    },
+    {
+     "map": "The Tree That Grew II",
+     "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
+      "Pig",
+      "Shroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest II",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Blue Mushroom Forest",
+     "monsters": [
+      "Blue Mushroom",
+      "Slime",
+      "Blue Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Line 2 (Area 3)",
+     "monsters": [
+      "Wraith"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) II",
+     "monsters": [
+      "Skeledog",
+      "Mummydog",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "Sword Mastery 5 opens Sword Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Sword 1 goes in at 32: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on one mob for 270%. 1 point already gets the full chance.",
+  "Sword Mastery 20 comes next. At 40 those 15 points raise your average hit about 31%, because mastery lifts your lowest hits, and they're +20 accuracy.",
+  "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
+  "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
+  "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
+  "DEX only goes in when your gear needs it: 20 for Two-Handed Sword at 20, 25 for Broadsword at 25, 35 for Lionheart at 35, 40 for Zard at 40 and 45 for Blade of Harmony at 45. Everything else goes into STR.",
+  "Lion's Fang at 50 is 73 attack, 5 more than Blade of Harmony, about 7% more damage, but it sells for many times the price on the FM, so this guide keeps Blade of Harmony."
+ ],
+ "mistakes": [
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
+  "Maxing Sword Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
+  "Forgetting DEX before 20. Two-Handed Sword needs 20 DEX at 20, so put your AP from 18 to 20 into DEX, or you stay on the Wooden Baseball Bat's 35 attack instead of 40.",
+  "Putting Threaten ahead of Final Attack. -10 weapon defense on 4 mobs is about +8% damage on a Jr. Wraith, whose weapon defense drops from 30 to 20; Final Attack 2 to 30 takes it from 270% to 360%."
+ ],
+ "compare": [
+  {
+   "build": "Page, sword (this guide)",
+   "best_at": "360% Final Attack, +20 accuracy",
+   "weak": "no Rage"
+  },
+  {
+   "build": "Page, blunt weapon",
+   "best_at": "+20% critical damage",
+   "weak": "slow weapons"
+  },
+  {
+   "build": "Fighter, sword",
+   "best_at": "Rage for the party",
+   "weak": "Final Attack 200% on 3 mobs, not 360% on 1"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to White Knight. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Page, sword Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic page, sword build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ },
+ "variants": [
+  {
+   "label": "Two-handed",
+   "slug": "page-sword"
+  },
+  {
+   "label": "One-handed and shield",
+   "slug": "page-sword-1h"
+  }
+ ]
+}

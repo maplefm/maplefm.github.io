@@ -7,7 +7,7 @@ const pw = require("playwright"), fs = require("fs");
 const WHICH = process.argv[2] || "both", OUT = (process.argv[3] || require("os").tmpdir() + "/wayfinding") + "/"; fs.mkdirSync(OUT, { recursive: true });
 const S = process.env.BASE || "https://maplefm.gg", log = [], trips = [];
 const ok = (n, c, note) => log.push((c ? "ok   " : "FAIL ") + n + (note ? " | " + String(note).slice(0, 300) : ""));
-// ideas waiting on Adam's OK (Nov 19 2026): reported, not failed
+// ideas waiting on the owner's OK (Nov 19 2026): reported, not failed
 const idea = (n, c, note) => log.push((c ? "ok   " : "idea ") + n + (note ? " | " + String(note).slice(0, 300) : ""));
 const wait = (p, ms) => p.waitForTimeout(ms);
 const path = (p) => decodeURIComponent(new URL(p.url()).pathname + new URL(p.url()).hash);

@@ -1,0 +1,783 @@
+{
+ "slug": "/builds/ice-lightning-staff/",
+ "header": {
+  "class": "Magician",
+  "job_path": "Magician (10) → Ice Lightning Wizard (30)",
+  "build": "Ice Lightning (staff)",
+  "pitch": "INT with LUK only to each staff's need. Energy Bolt in 1st job, then Cold Beam, Meditation and Thunder Bolt.",
+  "best_at": [
+   "Cold Beam slows the mob it hits",
+   "Thunder Bolt hits up to 6 mobs",
+   "Meditation is +25 magic attack for the party"
+  ],
+  "weak_spots": [
+   "Ice-resistant mobs take less",
+   "Lives on MP potions"
+  ],
+  "difficulty": "Easy",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 194296,
+    "shown": "about 194K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 4,
+   "INT": 12,
+   "LUK": 5
+  },
+  "main": "INT",
+  "sub": "LUK",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all INT",
+    "why": "INT is your damage stat"
+   },
+   {
+    "levels": "15",
+    "ap": "all LUK (to 10)",
+    "why": "Emerald Staff at 15 needs 10 LUK"
+   },
+   {
+    "levels": "20",
+    "ap": "all LUK (to 15)",
+    "why": "Old Wooden Staff at 20 needs 15 LUK"
+   },
+   {
+    "levels": "25",
+    "ap": "all LUK (to 20)",
+    "why": "Wizard Staff at 25 needs 20 LUK"
+   },
+   {
+    "levels": "35",
+    "ap": "all LUK (to 25)",
+    "why": "Level 35 magician armor needs 25 LUK"
+   },
+   {
+    "levels": "40",
+    "ap": "all LUK (to 30)",
+    "why": "Level 40 magician armor needs 30 LUK"
+   },
+   {
+    "levels": "44 to 45",
+    "ap": "all LUK (to 40)",
+    "why": "Arc Staff at 45 needs 40 LUK"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all INT",
+    "why": "INT is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 57,
+    "LUK": 5
+   },
+   {
+    "level": 20,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 97,
+    "LUK": 15
+   },
+   {
+    "level": 30,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 142,
+    "LUK": 20
+   },
+   {
+    "level": 40,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 182,
+    "LUK": 30
+   },
+   {
+    "level": 50,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 222,
+    "LUK": 40
+   },
+   {
+    "level": 60,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 272,
+    "LUK": 40
+   },
+   {
+    "level": 70,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 322,
+    "LUK": 40
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Energy Bolt",
+   "id": 2001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Magic Guard",
+   "id": 2001000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Improved MP Recovery",
+   "id": 2000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 27,
+   "book": "1st job",
+   "skill": "Max MP Increase",
+   "id": 2000001,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Magic Guard",
+   "id": 2001000,
+   "to": 11,
+   "why": ""
+  },
+  {
+   "level": 31,
+   "book": "2nd job",
+   "skill": "MP Eater",
+   "id": 2200000,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 31,
+   "book": "2nd job",
+   "skill": "Meditation",
+   "id": 2201000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Teleport",
+   "id": 2201001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Thunder Bolt",
+   "id": 2201004,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 42,
+   "book": "2nd job",
+   "skill": "Cold Beam",
+   "id": 2201003,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 48,
+   "book": "2nd job",
+   "skill": "Meditation",
+   "id": 2201000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 58,
+   "book": "2nd job",
+   "skill": "Thunder Bolt",
+   "id": 2201004,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 64,
+   "book": "2nd job",
+   "skill": "MP Eater",
+   "id": 2200000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Teleport",
+   "id": 2201001,
+   "to": 20,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Staff",
+   "item": "Wooden Staff",
+   "id": 1382000,
+   "needs": "20 INT",
+   "attack": 24,
+   "speed": null,
+   "price": {
+    "typical": 1999,
+    "shown": "1,999",
+    "basis": "ask",
+    "sales_seen": 1,
+    "rough": true
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 15,
+   "slot": "Staff",
+   "item": "Emerald Staff",
+   "id": 1382002,
+   "needs": "30 INT, 10 LUK",
+   "attack": 31,
+   "speed": null,
+   "price": {
+    "typical": 2299,
+    "shown": "2,299",
+    "basis": "24h",
+    "sales_seen": 12,
+    "rough": true
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 20,
+   "slot": "Staff",
+   "item": "Old Wooden Staff",
+   "id": 1382003,
+   "needs": "40 INT, 15 LUK",
+   "attack": 38,
+   "speed": null,
+   "price": {
+    "typical": 2999,
+    "shown": "2,999",
+    "basis": "clean",
+    "sales_seen": 7,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 25,
+   "slot": "Staff",
+   "item": "Wizard Staff",
+   "id": 1382004,
+   "needs": "50 INT, 20 LUK",
+   "attack": 45,
+   "speed": null,
+   "price": {
+    "typical": 7000,
+    "shown": "7,000",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": "",
+   "akind": "magic attack"
+  },
+  {
+   "level": 45,
+   "slot": "Staff",
+   "item": "Arc Staff",
+   "id": 1382005,
+   "needs": "90 INT, 40 LUK",
+   "attack": 73,
+   "speed": null,
+   "price": {
+    "typical": 179999,
+    "shown": "180K",
+    "basis": "clean",
+    "sales_seen": 40,
+    "rough": false
+   },
+   "why": "",
+   "akind": "magic attack"
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Magician",
+   "where": "Ellinia, Grendel the Really Old",
+   "needs": "Level 10",
+   "gets": "1 SP. Energy Bolt and Magic Claw open."
+  },
+  {
+   "level": 30,
+   "job": "Ice Lightning Wizard",
+   "where": "Ellinia, Grendel the Really Old",
+   "needs": "Level 30",
+   "gets": "Pick Ice Lightning Wizard. Cold Beam and Thunder Bolt open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Ice Lightning Mage",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Caution Falling Down",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "The Murky Swamp I",
+     "monsters": [
+      "Ligator",
+      "Jr. Necki"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "The Burnt Land III",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land V",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Line 2 (Area 2)",
+     "monsters": [
+      "Wraith",
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "Line 2 (Area 3)",
+     "monsters": [
+      "Wraith"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Clang and Lorang",
+     "monsters": [
+      "Clang",
+      "Lorang",
+      "Tortie"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Camp 3",
+     "monsters": [
+      "Officer Skeleton",
+      "Skeleton Soldier"
+     ]
+    },
+    {
+     "map": "Camp 2",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    },
+    {
+     "map": "Camp 1",
+     "monsters": [
+      "Skeleton Soldier",
+      "Officer Skeleton"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Energy Bolt 20 is damage 130 on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
+  "Magic Guard 1 goes in at 17: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
+  "Improved MP Recovery 15 makes MP potions heal 25% more, so every potion goes 25% further. Max MP Increase 15 is +25% max MP.",
+  "The last 10 points of 1st job take Magic Guard to 11: 68% of the damage you take goes to MP. Magic Armor is skipped: it needs Magic Guard 3 and only adds defense, +40 at 1, which doesn't kill anything faster.",
+  "MP Eater 3 opens Meditation, and Meditation 1 is already +5 magic attack for you and your party. Teleport 1 gets you around maps from 32.",
+  "Thunder Bolt 1 at 32 gives you a hit for 6 mobs, damage 50, from the start of 2nd job.",
+  "Cold Beam 30 first: damage 170 on one mob against Energy Bolt's 130, and the mob is slowed. In our damage engine it takes over from Energy Bolt by 40.",
+  "Meditation 20 next, +25 magic attack for 300 seconds, then Thunder Bolt to 30, damage 80 on up to 6 mobs with a 25% chance to stun.",
+  "MP Eater 20 after that: a 50% chance to drain MP from a mob, once every 5 seconds, so fewer MP potions. Teleport takes the last points: more range and MP 55 down to 15 a cast.",
+  "LUK only goes in when your gear needs it: 10 for Emerald Staff at 15, 15 for Old Wooden Staff at 20, 20 for Wizard Staff at 25, 25 for level 35 magician armor, 30 for level 40 magician armor and 40 for Arc Staff at 45. Everything else goes into INT.",
+  "Staffs have no step between Wizard Staff at 25, magic attack 45, and Arc Staff at 45, 73. A wand mage has 55 to 69 over those levels, so a staff mage spends 30 to 44 with 10 to 24 less magic attack, then pulls ahead from 45."
+ ],
+ "mistakes": [
+  "Maxing Magic Claw on top of Energy Bolt. Both are 130 at 20, so that's 20 SP for nothing, and Claw costs 20 MP a cast against 16. Put them in MP Recovery and Max MP.",
+  "Putting 2nd job points into Slow. It only slows mobs and drops their avoid by 5 at 20; those points do more in Meditation, +25 magic attack at 20.",
+  "Training on ice-resistant mobs. The game files mark Ligators, Cold Eyes, Drakes and Crocos resistant to ice, so Cold Beam hits them softer; lightning-weak mobs like Lorangs and Clangs take more from Thunder Bolt.",
+  "Forgetting LUK for Arc Staff. It needs 40 LUK at 45, so put your AP at 44 and 45 into LUK, or you stay on Wizard Staff's 45 magic attack instead of 73."
+ ],
+ "compare": [
+  {
+   "build": "Ice Lightning (this guide)",
+   "best_at": "Cold Beam slow, Thunder Bolt on 6",
+   "weak": "ice-resistant mobs"
+  },
+  {
+   "build": "Fire Poison",
+   "best_at": "Fire Arrow burn",
+   "weak": "fire-resistant mobs"
+  },
+  {
+   "build": "Cleric",
+   "best_at": "Heal on undead, parties",
+   "weak": "Heal only hurts undead"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Ice Lightning Mage. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Ice Lightning (staff) Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic ice lightning (staff) build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ },
+ "variants": [
+  {
+   "label": "Wand",
+   "slug": "ice-lightning"
+  },
+  {
+   "label": "Staff",
+   "slug": "ice-lightning-staff"
+  }
+ ]
+}
