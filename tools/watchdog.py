@@ -141,6 +141,10 @@ if PW:
         def perr(e):
             m = str(e)
             if re.search(r"https?:/+|/[a-z0-9.-]+\.[a-z]{2,}/", m) and not re.search(r"maplefm\.gg|localhost", m): return
+            # WebKit also reports a blocked or dropped fetch as a page error even when the board catches it (Nov 27 2026:
+            # one api.maplefm.gg/public/supporters hiccup, "due to access control checks"). That is a network blip the
+            # board already survives, and the API checks above catch a real API outage, so it isn't a board error
+            if re.search(r"due to access control checks|Fetch API cannot load|^TypeError: Load failed", m): return
             errs.append(m[:120])
         pg.on("pageerror", perr)
         pulls = [0]
