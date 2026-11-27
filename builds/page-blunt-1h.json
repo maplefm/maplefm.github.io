@@ -1,0 +1,827 @@
+{
+ "slug": "/builds/page-blunt-1h/",
+ "header": {
+  "class": "Warrior",
+  "job_path": "Warrior (10) → Page (30)",
+  "build": "Page, blunt weapon (one-handed)",
+  "pitch": "STR with DEX only to each one-handed blunt weapon's need. Power Strike and Slash Blast 20 by 23, then Blunt Weapon Mastery and Final Attack.",
+  "best_at": [
+   "Blunt Weapon Mastery is +20% critical damage",
+   "Final Attack: Blunt Weapon hits for 360% at 30"
+  ],
+  "weak_spots": [
+   "Less damage than a two-handed weapon"
+  ],
+  "difficulty": "Medium",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 204832,
+    "shown": "about 205K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 12,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 4
+  },
+  "main": "STR",
+  "sub": "DEX",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   },
+   {
+    "levels": "20",
+    "ap": "all DEX (to 10)",
+    "why": "Level 20 warrior armor needs 10 DEX"
+   },
+   {
+    "levels": "25",
+    "ap": "all DEX (to 15)",
+    "why": "Level 25 warrior armor needs 15 DEX"
+   },
+   {
+    "levels": "29 to 30",
+    "ap": "all DEX (to 25)",
+    "why": "War Hammer at 30 needs 25 DEX"
+   },
+   {
+    "levels": "35",
+    "ap": "all DEX (to 30)",
+    "why": "Heavy Hammer at 35 needs 30 DEX"
+   },
+   {
+    "levels": "40",
+    "ap": "all DEX (to 35)",
+    "why": "Jacker at 40 needs 35 DEX"
+   },
+   {
+    "levels": "49 to 50",
+    "ap": "all DEX (to 45)",
+    "why": "Knuckle Mace at 50 needs 45 DEX"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all STR",
+    "why": "STR is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 57,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 20,
+    "STR": 102,
+    "DEX": 10,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 30,
+    "STR": 137,
+    "DEX": 25,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 40,
+    "STR": 177,
+    "DEX": 35,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 50,
+    "STR": 217,
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 60,
+    "STR": 267,
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 4
+   },
+   {
+    "level": 70,
+    "STR": 317,
+    "DEX": 45,
+    "INT": 4,
+    "LUK": 4
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Power Strike",
+   "id": 1001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Slash Blast",
+   "id": 1001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 28,
+   "book": "1st job",
+   "skill": "Precise Strikes",
+   "id": 1000002,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Improved HP Recovery",
+   "id": 1000000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Max HP Increase",
+   "id": 1000001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Blunt Weapon Mastery",
+   "id": 1200001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Blunt Weapon Booster",
+   "id": 1201003,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Final Attack: Blunt Weapon",
+   "id": 1201001,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 33,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1201005,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 38,
+   "book": "2nd job",
+   "skill": "Blunt Weapon Mastery",
+   "id": 1200001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Final Attack: Blunt Weapon",
+   "id": 1201001,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 54,
+   "book": "2nd job",
+   "skill": "Blunt Weapon Booster",
+   "id": 1201003,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 60,
+   "book": "2nd job",
+   "skill": "Rush",
+   "id": 1201005,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Threaten",
+   "id": 1201004,
+   "to": 30,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "1H Blunt",
+   "item": "Steel Pipe",
+   "id": 1322001,
+   "needs": "level only",
+   "attack": 29,
+   "speed": 5,
+   "price": {
+    "typical": 1500,
+    "shown": "1,500",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "1H Blunt",
+   "item": "Mace",
+   "id": 1322003,
+   "needs": "20 STR",
+   "attack": 34,
+   "speed": 5,
+   "price": {
+    "typical": 3000,
+    "shown": "3,000",
+    "basis": "asknow",
+    "sales_seen": 4,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "1H Blunt",
+   "item": "Iron Mace",
+   "id": 1322008,
+   "needs": "30 STR",
+   "attack": 39,
+   "speed": 5,
+   "price": {
+    "typical": 4500,
+    "shown": "4,500",
+    "basis": "ask",
+    "sales_seen": 0,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "1H Blunt",
+   "item": "Plunger",
+   "id": 1322010,
+   "needs": "40 STR",
+   "attack": 44,
+   "speed": 5,
+   "price": {
+    "typical": 6833,
+    "shown": "6,833",
+    "basis": "3d",
+    "sales_seen": 7,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "1H Blunt",
+   "item": "War Hammer",
+   "id": 1322013,
+   "needs": "60 STR, 25 DEX",
+   "attack": 49,
+   "speed": 5,
+   "price": {
+    "typical": 8000,
+    "shown": "8,000",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 35,
+   "slot": "1H Blunt",
+   "item": "Heavy Hammer",
+   "id": 1322015,
+   "needs": "70 STR, 30 DEX",
+   "attack": 54,
+   "speed": 5,
+   "price": {
+    "typical": 10999,
+    "shown": "11K",
+    "basis": "old",
+    "sales_seen": 5,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "1H Blunt",
+   "item": "Jacker",
+   "id": 1322016,
+   "needs": "80 STR, 35 DEX",
+   "attack": 59,
+   "speed": 5,
+   "price": {
+    "typical": 70000,
+    "shown": "70K",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 50,
+   "slot": "1H Blunt",
+   "item": "Knuckle Mace",
+   "id": 1322017,
+   "needs": "100 STR, 45 DEX",
+   "attack": 69,
+   "speed": 5,
+   "price": {
+    "typical": 100000,
+    "shown": "100K",
+    "basis": "ask",
+    "sales_seen": 1,
+    "rough": true
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Warrior",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 10",
+   "gets": "1 SP. Power Strike and Slash Blast open."
+  },
+  {
+   "level": 30,
+   "job": "Page",
+   "where": "Perion, Dances with Balrog",
+   "needs": "Level 30",
+   "gets": "Pick Page. Blunt skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "White Knight",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Mushroom Garden (Victoria Island)",
+     "monsters": [
+      "Orange Mushroom",
+      "Shroom",
+      "Red Snail"
+     ]
+    },
+    {
+     "map": "The Tree That Grew II",
+     "monsters": [
+      "Slime",
+      "Stump",
+      "Dark Stump"
+     ]
+    },
+    {
+     "map": "L Forest I",
+     "monsters": [
+      "Ribbon Pig",
+      "Pig",
+      "Shroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest II",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "The Burnt Land III",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land II",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    },
+    {
+     "map": "The Cave of Evil Eye II",
+     "monsters": [
+      "Evil Eye",
+      "Jr. Boogie 2"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Hanging Gardens of Rot",
+     "monsters": [
+      "Aqumander",
+      "Glowshroom",
+      "Rafflesia"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) III",
+     "monsters": [
+      "Mummydog",
+      "Skeledog",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Another Sanctuary",
+     "monsters": [
+      "Rotten Mushroom",
+      "Sporewood",
+      "Jr. Boogie 1"
+     ]
+    },
+    {
+     "map": "Dilapidated Tomb",
+     "monsters": [
+      "Rotten Mushroom",
+      "Sporewood",
+      "Fairy 2"
+     ]
+    },
+    {
+     "map": "Dangerous Valley II",
+     "monsters": [
+      "Red Drake",
+      "Fire Boar",
+      "Copper Drake"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Power Strike 20 hits one mob for 260% and Slash Blast 20 hits up to 6 for 130%. Max both first and by 23 you have a hit for one mob and a hit for groups.",
+  "Precise Strikes 15 is +20 accuracy and +5% critical rate. The last 6 points of 1st job go into HP: Improved HP Recovery 5, then Max HP Increase 1, which needs it at 3 and is +10% max HP from its first point.",
+  "Blunt Weapon Mastery 5 opens Blunt Weapon Booster, and Booster 1 already gives the full attack speed boost. Points 2 to 20 only make it last 300 seconds instead of 100 and cut its HP and MP cost from 30 to 10, so they wait.",
+  "Final Attack: Blunt Weapon 1 goes in at 32: when you use an attack skill there's a 25% chance it unlocks Final Attack for 60 seconds, and while it's lit you can use it on one mob for 270%. 1 point already gets the full chance.",
+  "Blunt Weapon Mastery 20 comes next. At 40 those 15 points raise your average hit about 29%, because mastery lifts your lowest hits, and they're +20% critical damage.",
+  "Final Attack points 2 to 30 take it from 270% to 360%, so they come right after Mastery.",
+  "Rush 1 at 33 is for getting around: it carries you forward and hits up to 6 mobs for 60%. Points 2 to 20 only raise that to 80%, so they come after Booster.",
+  "Threaten goes last, with the 30 points nothing else needs by then: at 30 it lowers up to 4 mobs' weapon defense by 10 and slows them for 30 seconds.",
+  "DEX only goes in when your gear needs it: 10 for level 20 warrior armor, 15 for level 25 warrior armor, 25 for War Hammer at 30, 30 for Heavy Hammer at 35, 35 for Jacker at 40 and 45 for Knuckle Mace at 50. Everything else goes into STR.",
+  "A one-handed blunt weapon leaves room for a shield and its weapon defense, but at the same attack, with your stats at 40, it hits about 20% softer than a two-handed one. Some one-handed blunt weapons swing a speed step faster, which wins a little of that back. Pick it if you'd rather take less damage than kill faster."
+ ],
+ "mistakes": [
+  "Putting points into Iron Body. It needs Max HP Increase 3, so the 3 points come out of Precise Strikes: 3 less accuracy and 1% less critical rate, for +20% weapon defense you recast every 300 seconds.",
+  "Maxing Blunt Weapon Booster early. Points 2 to 20 only stretch it from 100 to 300 seconds. That's 19 SP, over 6 levels, that should be in Mastery and Final Attack.",
+  "Buying a sword with a blunt build. Blunt Weapon Mastery, Booster and Final Attack: Blunt Weapon only work with a blunt weapon, so you lose most of 2nd job.",
+  "Forgetting DEX before War Hammer. It needs 25 DEX at 30, so put your AP at 29 and 30 into DEX, or you stay on Plunger's 44 attack instead of 49."
+ ],
+ "compare": [
+  {
+   "build": "Page, blunt weapon (this guide)",
+   "best_at": "+20% critical damage",
+   "weak": "slow weapons"
+  },
+  {
+   "build": "Page, sword",
+   "best_at": "+20 accuracy",
+   "weak": "less attack"
+  },
+  {
+   "build": "Fighter, axe",
+   "best_at": "Rage for the party",
+   "weak": "Final Attack 200% on 3 mobs, not 360% on 1"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to White Knight. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "Page, blunt weapon (one-handed) Build Guide: AP and SP | Cl",
+  "description": "MapleStory Classic page, blunt weapon (one-handed) build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ },
+ "variants": [
+  {
+   "label": "Two-handed",
+   "slug": "page-blunt"
+  },
+  {
+   "label": "One-handed and shield",
+   "slug": "page-blunt-1h"
+  }
+ ]
+}

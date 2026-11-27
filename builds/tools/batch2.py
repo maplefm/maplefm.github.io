@@ -414,7 +414,7 @@ def build_json(b, st, rules, table, order, eng):
                    "best_at": t["best"], "weak_spots": t["weak"], "difficulty": "Easy" if b["w"] in ("Claw", "Bow") else "Medium",
                    "level_range": "1 to 70", "game_version": VERSION,
                    "gear_cost": {"to_level_50": {"mesos": cost, "shown": "about " + mesos(cost)}, "note": "weapons to 50 at typical FM prices"}},
-        "creation": {"stats": b["creation"], "main": b["main"], "sub": b["sub"], **({"raise": b["raise"]} if b.get("raise") else {}), "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Adam, Nov 25 2026)"},
+        "creation": {"stats": b["creation"], "main": b["main"], "sub": b["sub"], **({"raise": b["raise"]} if b.get("raise") else {}), "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"},
         "stat_plan": {"rule": rules, "table": table},
         "skill_order": [dict(s, why="") for s in order],
         "gear": gear, "gear_optional": [], "gear_note": GEAR_NOTE if b.get("gone") else "",

@@ -1,0 +1,797 @@
+{
+ "slug": "/builds/str-bandit/",
+ "header": {
+  "class": "Thief",
+  "job_path": "Thief (10) → Bandit (30)",
+  "build": "STR Bandit",
+  "pitch": "LUK with STR only to each STR dagger's need. Double Stab in 1st job, then Savage Blow, on daggers one speed step faster than the DEX ones.",
+  "best_at": [
+   "STR daggers are Faster (speed 3), a step above DEX daggers",
+   "STR adds to dagger damage the same as DEX",
+   "Korean Fan at 40 needs no STR"
+  ],
+  "weak_spots": [
+   "Less accuracy: STR gives none, DEX does",
+   "No thief armor: it needs DEX",
+   "Melee: you walk to every mob and take hits"
+  ],
+  "difficulty": "Medium",
+  "level_range": "1 to 70",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 585992,
+    "shown": "about 586K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 5,
+   "INT": 4,
+   "LUK": 12
+  },
+  "main": "LUK",
+  "sub": "DEX",
+  "raise": "STR",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
+   },
+   {
+    "levels": "16 to 17",
+    "ap": "all STR (to 11)",
+    "why": "Triple-Tipped Zamadar at 17 needs 11 STR"
+   },
+   {
+    "levels": "21 to 22",
+    "ap": "all STR (to 17)",
+    "why": "Stinger at 22 needs 17 STR"
+   },
+   {
+    "levels": "29 to 30",
+    "ap": "all STR (to 25)",
+    "why": "Cass at 30 needs 25 STR"
+   },
+   {
+    "levels": "43 to 45",
+    "ap": "all STR (to 40)",
+    "why": "Bazlud at 45 needs 40 STR"
+   },
+   {
+    "levels": "50",
+    "ap": "all STR (to 45)",
+    "why": "Sai at 50 needs 45 STR"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all LUK",
+    "why": "LUK is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 4,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 57
+   },
+   {
+    "level": 20,
+    "STR": 11,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 100
+   },
+   {
+    "level": 30,
+    "STR": 25,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 136
+   },
+   {
+    "level": 40,
+    "STR": 25,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 186
+   },
+   {
+    "level": 50,
+    "STR": 45,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 216
+   },
+   {
+    "level": 60,
+    "STR": 45,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 266
+   },
+   {
+    "level": 70,
+    "STR": 45,
+    "DEX": 5,
+    "INT": 4,
+    "LUK": 316
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Double Stab",
+   "id": 4001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Nimble Body",
+   "id": 4000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 23,
+   "book": "1st job",
+   "skill": "Disorder",
+   "id": 4001000,
+   "to": 3,
+   "why": ""
+  },
+  {
+   "level": 29,
+   "book": "1st job",
+   "skill": "Dark Sight",
+   "id": 4001001,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Disorder",
+   "id": 4001000,
+   "to": 6,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Dagger Mastery",
+   "id": 4200000,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 32,
+   "book": "2nd job",
+   "skill": "Dagger Booster",
+   "id": 4201000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 39,
+   "book": "2nd job",
+   "skill": "Savage Blow",
+   "id": 4201003,
+   "to": 21,
+   "why": ""
+  },
+  {
+   "level": 44,
+   "book": "2nd job",
+   "skill": "Dagger Mastery",
+   "id": 4200000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 47,
+   "book": "2nd job",
+   "skill": "Savage Blow",
+   "id": 4201003,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 49,
+   "book": "2nd job",
+   "skill": "Haste",
+   "id": 4201001,
+   "to": 5,
+   "why": ""
+  },
+  {
+   "level": 59,
+   "book": "2nd job",
+   "skill": "Steal",
+   "id": 4201002,
+   "to": 30,
+   "why": ""
+  },
+  {
+   "level": 65,
+   "book": "2nd job",
+   "skill": "Dagger Booster",
+   "id": 4201000,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 70,
+   "book": "2nd job",
+   "skill": "Haste",
+   "id": 4201001,
+   "to": 20,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Dagger",
+   "item": "Triangular Zamadar",
+   "id": 1332002,
+   "needs": "20 LUK",
+   "attack": 28,
+   "speed": 4,
+   "price": {
+    "typical": 1999,
+    "shown": "1,999",
+    "basis": "ask",
+    "sales_seen": 0,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 17,
+   "slot": "Dagger",
+   "item": "Triple-Tipped Zamadar",
+   "id": 1332004,
+   "needs": "11 STR, 31 LUK",
+   "attack": 34,
+   "speed": 3,
+   "price": {
+    "typical": 4050,
+    "shown": "4,050",
+    "basis": "ask",
+    "sales_seen": 2,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 22,
+   "slot": "Dagger",
+   "item": "Stinger",
+   "id": 1332006,
+   "needs": "17 STR, 44 LUK",
+   "attack": 39,
+   "speed": 3,
+   "price": {
+    "typical": 3999,
+    "shown": "3,999",
+    "basis": "3d",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Dagger",
+   "item": "Cass",
+   "id": 1332009,
+   "needs": "25 STR, 60 LUK",
+   "attack": 47,
+   "speed": 3,
+   "price": {
+    "typical": 10000,
+    "shown": "10K",
+    "basis": "3d",
+    "sales_seen": 14,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 40,
+   "slot": "Dagger",
+   "item": "Korean Fan",
+   "id": 1332013,
+   "needs": "70 LUK",
+   "attack": 55,
+   "speed": 3,
+   "price": {
+    "typical": 69000,
+    "shown": "69K",
+    "basis": "24h",
+    "sales_seen": 74,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 45,
+   "slot": "Dagger",
+   "item": "Bazlud",
+   "id": 1332014,
+   "needs": "40 STR, 90 LUK",
+   "attack": 62,
+   "speed": 3,
+   "price": {
+    "typical": 126944,
+    "shown": "127K",
+    "basis": "24h",
+    "sales_seen": 45,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 50,
+   "slot": "Dagger",
+   "item": "Sai",
+   "id": 1332016,
+   "needs": "45 STR, 100 LUK",
+   "attack": 67,
+   "speed": 3,
+   "price": {
+    "typical": 370000,
+    "shown": "370K",
+    "basis": "24h",
+    "sales_seen": 49,
+    "rough": true
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "No level 60 or 70 weapon can be had in Classic World yet: no mob drops one, no NPC sells one and none has been seen on the FM. That gear isn't in the game yet. Keep the last weapon on this list to 70.",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Thief",
+   "where": "Kerning City, Dark Lord",
+   "needs": "Level 10",
+   "gets": "1 SP. Lucky Seven and Double Stab open."
+  },
+  {
+   "level": 30,
+   "job": "Bandit",
+   "where": "Kerning City, Dark Lord",
+   "needs": "Level 30",
+   "gets": "Pick Bandit. Dagger skills open."
+  },
+  {
+   "level": "3rd job",
+   "job": "Chief Bandit",
+   "where": "not in Classic World yet",
+   "needs": "",
+   "gets": ""
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest II",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    },
+    {
+     "map": "Dungeon, Southern Forest III",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Excavation Site I",
+     "monsters": [
+      "Ghost Stump",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "30 to 34",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "35 to 39",
+   "maps": [
+    {
+     "map": "The Burnt Land III",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "The Burnt Land II",
+     "monsters": [
+      "Fire Boar",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "40 to 44",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    },
+    {
+     "map": "Forgotten Entrance III",
+     "monsters": [
+      "Glowshroom",
+      "Raffle",
+      "Curse Eye"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "45 to 49",
+   "maps": [
+    {
+     "map": "Line 2 (Area 1)",
+     "monsters": [
+      "Jr. Wraith",
+      "Jr. Necki"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 2)",
+     "monsters": [
+      "Jr. Wraith",
+      "Stirge"
+     ]
+    },
+    {
+     "map": "The Burnt Land IV",
+     "monsters": [
+      "Fire Boar",
+      "Lupin",
+      "Dark Axe Stump"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "50 to 54",
+   "maps": [
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Hanging Gardens of Rot",
+     "monsters": [
+      "Aqumander",
+      "Glowshroom",
+      "Rafflesia"
+     ]
+    },
+    {
+     "map": "Drake Hunting Ground",
+     "monsters": [
+      "Drake",
+      "Horny Mushroom",
+      "Jr. Boogie 2"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "55 to 59",
+   "maps": [
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) I",
+     "monsters": [
+      "Skeledog",
+      "Mummydog"
+     ]
+    },
+    {
+     "map": "Remains (Tomb) II",
+     "monsters": [
+      "Skeledog",
+      "Mummydog",
+      "Skeleton Soldier"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "60 to 64",
+   "maps": [
+    {
+     "map": "The Forest of Evil II",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "The Forest of Evil I",
+     "monsters": [
+      "Malady",
+      "Zombie Lupin"
+     ]
+    },
+    {
+     "map": "Hot Sand",
+     "monsters": [
+      "Tortie",
+      "Clang"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "65 to 70",
+   "maps": [
+    {
+     "map": "Another Sanctuary",
+     "monsters": [
+      "Rotten Mushroom",
+      "Sporewood",
+      "Jr. Boogie 1"
+     ]
+    },
+    {
+     "map": "Dilapidated Tomb",
+     "monsters": [
+      "Rotten Mushroom",
+      "Sporewood",
+      "Fairy 2"
+     ]
+    },
+    {
+     "map": "Dangerous Valley II",
+     "monsters": [
+      "Red Drake",
+      "Fire Boar",
+      "Copper Drake"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Double Stab 20 hits twice for 160%. It's your only real attack until 30, so max it first.",
+  "Dark Sight needs Disorder 3, and the rest of 1st job goes into Dark Sight: at 20 it costs 30 MP instead of 50.",
+  "STR daggers: Triple-Tipped Zamadar at 17, Stinger at 22, Cass at 30, Bazlud at 45 and Sai at 50 are all Faster (speed 3). The DEX daggers from 20 on, Coconut Knife, Reef Claw, Gephart and Shinkita, are Fast (speed 4), so you swing faster.",
+  "For a dagger your damage stat is LUK, and by the game data STR counts with DEX as your second stat, so the STR you put in for the dagger still adds damage. That hasn't been checked in game yet. The cost is accuracy: STR gives none, so you sit about 7 below a Pure Bandit at 30 and 13 below at 50.",
+  "No thief armor past 15: thief armor needs DEX, 10 at 20 up to 40 at 50, and a STR Bandit keeps DEX at 5. Wear gear any job can, like the Yellow Baseball Cap, Old Raggedy Cape and Squishy Shoes.",
+  "STR only goes in when your gear needs it: 11 for Triple-Tipped Zamadar at 17, 17 for Stinger at 22, 25 for Cass at 30, 40 for Bazlud at 45 and 45 for Sai at 50. Everything else goes into LUK, and DEX stays at 5.",
+  "Dagger Mastery 5 and Booster 1 first, then straight into Savage Blow. At 21 it hits 6 times for 65%, 390% a cast. Savage Blow 22 to 30 only takes it to 450%, so Dagger Mastery 20 comes first.",
+  "Steal needs Haste 5. At 30 a successful steal is +35 attack for 60 seconds, and it works 90% of the time, so it comes before the rest of Dagger Booster."
+ ],
+ "mistakes": [
+  "Putting AP into DEX out of habit. None of the STR daggers need DEX and you wear gear any job can, so every point there is a point out of LUK.",
+  "Forgetting STR before Bazlud. It needs 40 STR at 45, so put your AP from 43 to 45 into STR, or you stay on Korean Fan's 55 attack instead of 62.",
+  "Keeping Cass past 40. Korean Fan is 55 attack against 47, the same Faster speed, and needs no STR.",
+  "Leveling Haste before Savage Blow. Haste 20 is 20 SP, almost 7 levels' worth that Savage Blow needs. Put only 5 in Haste after Savage Blow 30, to open Steal."
+ ],
+ "compare": [
+  {
+   "build": "STR Bandit (this guide)",
+   "best_at": "Faster daggers (speed 3)",
+   "weak": "less accuracy, no thief armor"
+  },
+  {
+   "build": "Pure Bandit",
+   "best_at": "DEX daggers, thief armor",
+   "weak": "a speed step slower"
+  },
+  {
+   "build": "Sindit",
+   "best_at": "Lucky Seven to 40, then a dagger",
+   "weak": "needs an SP Reset at 40"
+  }
+ ],
+ "future": [
+  {
+   "when": "70",
+   "status": "3rd job is not in Classic World yet",
+   "plan": "Job advance to Chief Bandit. This guide gets extended when it releases."
+  }
+ ],
+ "search": {
+  "title": "STR Bandit Build Guide: AP and SP | Club FM",
+  "description": "MapleStory Classic str bandit build: AP and SP for every level from 1 to 70, weapons and where to get them, and where to train."
+ }
+}

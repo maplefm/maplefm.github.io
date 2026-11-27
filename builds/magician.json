@@ -1,0 +1,402 @@
+{
+ "slug": "/builds/magician/",
+ "header": {
+  "class": "Magician",
+  "job_path": "Magician (10) → Magician (30)",
+  "build": "Magician, 1 to 30",
+  "pitch": "Magician from 1 to the 2nd job advance at 30.",
+  "best_at": [],
+  "weak_spots": [],
+  "difficulty": "Medium",
+  "level_range": "1 to 30",
+  "game_version": "Classic World v2.1.0 (Nov 24, 2026). Skill numbers: game files MCW 1.2",
+  "gear_cost": {
+   "to_level_50": {
+    "mesos": 31098,
+    "shown": "about 31K"
+   },
+   "note": "weapons to 50 at typical FM prices"
+  }
+ },
+ "creation": {
+  "stats": {
+   "STR": 4,
+   "DEX": 4,
+   "INT": 12,
+   "LUK": 5
+  },
+  "main": "INT",
+  "sub": "LUK",
+  "source": "Classic creation: 25 points, 4 minimum each, sub stat starts at exactly 5 (Club FM, Nov 25 2026)"
+ },
+ "stat_plan": {
+  "rule": [
+   {
+    "levels": "1 to 9",
+    "ap": "all INT",
+    "why": "INT is your damage stat"
+   },
+   {
+    "levels": "20",
+    "ap": "all LUK (to 10)",
+    "why": "Metal Wand at 20 needs 10 LUK"
+   },
+   {
+    "levels": "25",
+    "ap": "all LUK (to 15)",
+    "why": "Ice Wand at 25 needs 15 LUK"
+   },
+   {
+    "levels": "30",
+    "ap": "all LUK (to 20)",
+    "why": "Mithril Wand at 30 needs 20 LUK"
+   },
+   {
+    "levels": "the rest",
+    "ap": "all INT",
+    "why": "INT is your damage stat"
+   }
+  ],
+  "table": [
+   {
+    "level": 10,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 57,
+    "LUK": 5
+   },
+   {
+    "level": 20,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 102,
+    "LUK": 10
+   },
+   {
+    "level": 30,
+    "STR": 4,
+    "DEX": 4,
+    "INT": 142,
+    "LUK": 20
+   }
+  ]
+ },
+ "skill_order": [
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Energy Bolt",
+   "id": 2001002,
+   "to": 20,
+   "why": ""
+  },
+  {
+   "level": 17,
+   "book": "1st job",
+   "skill": "Magic Guard",
+   "id": 2001000,
+   "to": 1,
+   "why": ""
+  },
+  {
+   "level": 22,
+   "book": "1st job",
+   "skill": "Improved MP Recovery",
+   "id": 2000000,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 27,
+   "book": "1st job",
+   "skill": "Max MP Increase",
+   "id": 2000001,
+   "to": 15,
+   "why": ""
+  },
+  {
+   "level": 30,
+   "book": "1st job",
+   "skill": "Magic Guard",
+   "id": 2001000,
+   "to": 11,
+   "why": ""
+  }
+ ],
+ "gear": [
+  {
+   "level": 10,
+   "slot": "Wand",
+   "item": "Wooden Wand",
+   "id": 1372000,
+   "needs": "20 INT",
+   "attack": 18,
+   "speed": 6,
+   "price": {
+    "typical": 1361,
+    "shown": "1,361",
+    "basis": "old",
+    "sales_seen": 3,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 15,
+   "slot": "Wand",
+   "item": "Hardwood Wand",
+   "id": 1372001,
+   "needs": "30 INT",
+   "attack": 23,
+   "speed": 6,
+   "price": {
+    "typical": 2999,
+    "shown": "2,999",
+    "basis": "3d",
+    "sales_seen": 8,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 20,
+   "slot": "Wand",
+   "item": "Metal Wand",
+   "id": 1372002,
+   "needs": "40 INT, 10 LUK",
+   "attack": 21,
+   "speed": 6,
+   "price": {
+    "typical": 4444,
+    "shown": "4,444",
+    "basis": "clean",
+    "sales_seen": 18,
+    "rough": false
+   },
+   "why": ""
+  },
+  {
+   "level": 25,
+   "slot": "Wand",
+   "item": "Ice Wand",
+   "id": 1372003,
+   "needs": "50 INT, 15 LUK",
+   "attack": 24,
+   "speed": 6,
+   "price": {
+    "typical": 6900,
+    "shown": "6,900",
+    "basis": "24h",
+    "sales_seen": 39,
+    "rough": true
+   },
+   "why": ""
+  },
+  {
+   "level": 30,
+   "slot": "Wand",
+   "item": "Mithril Wand",
+   "id": 1372004,
+   "needs": "60 INT, 20 LUK",
+   "attack": 27,
+   "speed": 6,
+   "price": {
+    "typical": 15394,
+    "shown": "15K",
+    "basis": "clean",
+    "sales_seen": 66,
+    "rough": false
+   },
+   "why": ""
+  }
+ ],
+ "gear_optional": [],
+ "gear_note": "",
+ "advancement": [
+  {
+   "level": 10,
+   "job": "Magician",
+   "where": "Ellinia, Grendel the Really Old",
+   "needs": "Level 10",
+   "gets": "1 SP. Energy Bolt and Magic Claw open."
+  },
+  {
+   "level": 30,
+   "job": "2nd job",
+   "where": "Ellinia, Grendel the Really Old",
+   "needs": "Level 30",
+   "gets": "Pick Fire Poison, Ice Lightning or Cleric. Your build guide takes over from here."
+  }
+ ],
+ "resets": [
+  {
+   "what": "SP Reset Scroll",
+   "when": "not needed",
+   "cost": null,
+   "worth_it": "No",
+   "why": "Nothing to move: a reset can't put 1st job points into 2nd job skills."
+  },
+  {
+   "what": "AP Reset Scroll",
+   "when": "only to fix a wrong stat",
+   "cost": null,
+   "worth_it": "Rarely",
+   "why": "Gives back all your AP at once. Only worth it if you put AP in the wrong stat."
+  },
+  {
+   "what": "HP washing",
+   "when": "never",
+   "cost": null,
+   "worth_it": "No",
+   "why": "An AP Reset gives back the HP AP too, so washing gains nothing in Classic."
+  }
+ ],
+ "train_ranges": [
+  {
+   "levels": "10 to 14",
+   "maps": [
+    {
+     "map": "The Forest of Wisdom",
+     "monsters": [
+      "Green Mushroom",
+      "Slime",
+      "Snail"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    },
+    {
+     "map": "Tree Dungeon, Forest Up North IV",
+     "monsters": [
+      "Green Mushroom",
+      "Slime"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "15 to 19",
+   "maps": [
+    {
+     "map": "The Blue Mushroom Forest",
+     "monsters": [
+      "Blue Mushroom",
+      "Slime",
+      "Blue Snail"
+     ]
+    },
+    {
+     "map": "Northern Top of Construction Site",
+     "monsters": [
+      "Octopus",
+      "Orange Mushroom",
+      "Blue Mushroom"
+     ]
+    },
+    {
+     "map": "Line 1 (Area 1)",
+     "monsters": [
+      "Bubbling"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "20 to 24",
+   "maps": [
+    {
+     "map": "Dark Cave",
+     "monsters": [
+      "Stirge",
+      "Horny Mushroom",
+      "Zombie Mushroom"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  },
+  {
+   "levels": "25 to 29",
+   "maps": [
+    {
+     "map": "The Land of Wild Boar II",
+     "monsters": [
+      "Wild Boar",
+      "Axe Stump",
+      "Dark Axe Stump"
+     ]
+    },
+    {
+     "map": "Excavation Site III",
+     "monsters": [
+      "Rocky Mask",
+      "Wooden Mask"
+     ]
+    },
+    {
+     "map": "Ant Tunnel II",
+     "monsters": [
+      "Zombie Mushroom",
+      "Horny Mushroom"
+     ]
+    }
+   ],
+   "tip": ""
+  }
+ ],
+ "why": [
+  "Energy Bolt 20 is damage 130 on one mob for 16 MP. Magic Claw 20 is the same 130 split into two 65 hits for 20 MP and less range, 300 against 350, so Energy Bolt is the one to max.",
+  "Magic Guard 1 goes in at 17: it's a toggle, and even 1 point sends 30% of the damage you take to MP instead of HP. Mage HP is small, so it pays off early.",
+  "Improved MP Recovery 15 makes MP potions heal 25% more, so every potion goes 25% further. Max MP Increase 15 is +25% max MP.",
+  "The last 10 points of 1st job take Magic Guard to 11: 68% of the damage you take goes to MP. Magic Armor is skipped: it needs Magic Guard 3 and only adds defense, +40 at 1, which doesn't kill anything faster.",
+  "Every mage job uses this 1st job plan, so nothing here is wasted whichever 2nd job you pick at 30.",
+  "LUK only goes in when your gear needs it: 10 for Metal Wand at 20, 15 for Ice Wand at 25, 20 for Mithril Wand at 30, 25 for level 35 magician armor, 30 for level 40 magician armor and 40 for level 50 magician armor. Everything else goes into INT."
+ ],
+ "mistakes": [
+  "Maxing Magic Claw on top of Energy Bolt. Both are 130 at 20, so that's 20 SP for nothing, and Claw costs 20 MP a cast against 16. Put them in MP Recovery and Max MP."
+ ],
+ "compare": [],
+ "future": [],
+ "search": {
+  "title": "Magician Guide 1 to 30: AP and SP | Club FM",
+  "description": "MapleStory Classic magician from level 1 to 30: AP and SP for every level, weapons and where to get them, where to train, and which 2nd job to pick."
+ },
+ "cap": 30,
+ "next_guides": [
+  {
+   "name": "Fire Poison",
+   "slug": "fire-poison",
+   "blurb": "Fire Arrow and Poison Breath"
+  },
+  {
+   "name": "Ice Lightning",
+   "slug": "ice-lightning",
+   "blurb": "Cold Beam and Thunder Bolt on 6"
+  },
+  {
+   "name": "Cleric",
+   "slug": "cleric",
+   "blurb": "Heal on undead, Bless for parties"
+  }
+ ]
+}

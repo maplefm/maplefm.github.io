@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build guide page in the "game window" look Adam picked (Nov 25), with his Nov 25 evening changes:
+"""Build guide page in the "game window" look the owner picked (Nov 25), with his Nov 25 evening changes:
 levels 1 to 70 only (70 is 3rd job, not out yet), stats for every level in a scroll box with jump buttons and a
 "Changes only" toggle, skill points for every level with skill icons, no "why" columns, needs shown as stat badges,
 ways to get each weapon as linked cards (NPC, Free Market, drop, craft, quest), minimap on hover or tap for training
@@ -209,7 +209,7 @@ def build(name):
     t10 = {k: int(v) for k, v in rows[0].items()}
     assert t10["level"] == 10
 
-    # stats for every level, forward from the creation picks. Classic creation (Adam, Nov 25): no dice, 25 points,
+    # stats for every level, forward from the creation picks. Classic creation (Club FM, Nov 25): no dice, 25 points,
     # 4 in every stat at least, and the sub stat starts at exactly 5. Each level after gives 5 AP; the sub stat is
     # bought up to each target in the guide's rules, everything else goes into the main stat.
     K = ["STR", "DEX", "INT", "LUK"]
