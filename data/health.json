@@ -1,5 +1,5 @@
 {
- "at": 1795738550220,
+ "at": 1795742458785,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -153,14 +153,14 @@
    "behind": 1
   },
   "PityPocket": {
-   "rows24": 12,
-   "room24": 12,
-   "ch24": 12,
-   "rows7": 12,
-   "room7": 12,
+   "rows24": 15,
+   "room24": 15,
+   "ch24": 15,
+   "rows7": 15,
+   "room7": 15,
    "late7": 0,
    "chat24": 0,
-   "last": 1795730280,
+   "last": 1795738514,
    "ver": "2026.11.18.1",
    "lag_median_min": 1.3,
    "room_rate24": 1.0,
@@ -170,11 +170,11 @@
   }
  },
  "stream": {
-  "age_h": 0.9,
+  "age_h": 1.0,
   "service": "active",
   "watching": 10,
-  "live_classic": 59,
-  "shops_last_hour": 26
+  "live_classic": 70,
+  "shops_last_hour": 30
  },
  "drops": {
   "2026-11-21": {
@@ -196,7 +196,7 @@
    "incomplete upload": 638
   },
   "2026-11-27": {
-   "incomplete upload": 8
+   "incomplete upload": 38
   }
  },
  "rejects": {},
