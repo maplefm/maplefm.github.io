@@ -37,7 +37,9 @@ jobs:
           git fetch -q origin main && git worktree add -q /tmp/main origin/main
           # Working data (listings, sellers, pay, bot state) lives in the private repository, in plain JSON so git
           # stores each 5-minute change as a small difference. The public branch only gets the price-only files.
-          git clone -q -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
+          # shallow: the full history (every 4-minute pass of a 70 MB state file) took 35 minutes to clone, so each new
+          # run left the board without new scans for that long; the pump only needs the latest copy (Nov 28 2026)
+          git clone -q --depth 5 -b live "https://x-access-token:${ARCHIVE_TOKEN}@github.com/maplefm/clubfm-archive.git" /tmp/arch
           end=$(( $(date +%s) + 330*60 ))
           n=0; lastsig=""; lastwd=0; lastjob=0; lastcov=$(date +%s)
           while [ $(date +%s) -lt $end ]; do
