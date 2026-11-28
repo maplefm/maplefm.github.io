@@ -150,7 +150,8 @@ def drop(why, n=1): DROPS[why] = DROPS.get(why, 0) + n
 
 # Posts from /inbox/simple made before Nov 28 2026 (ver "simple.1") stored the partner's per-item price as if it were
 # the whole stack's: "12 at 1.9M each" became 12 for 1.9M, 158K each. Read back, those rows get price x quantity, as
-# the Worker writes them from "simple.2" on. Throwing stars and bullets are priced per set, so theirs stay.
+# the Worker writes them from "simple.2" on. Throwing stars and bullets are priced per set, so theirs stay. Stats sent
+# at 0 are dropped, as the Worker does from "simple.2" on.
 SET_ITEMS = {"hwabi throwing stars", "icicle", "ilbi throwing stars", "kumbi throwing stars", "mokbi throwing stars", "snowball",
              "steely throwing knives", "subi throwing stars", "tobi throwing stars", "wolbi throwing stars", "wooden top"}
 
@@ -159,6 +160,9 @@ def simple1_fix(docs):
     n = 0
     for d in docs:
         for r in (d.get("rows") or []) if isinstance(d, dict) else []:
+            if isinstance(r, dict) and isinstance(r.get("x"), dict):   # stats at 0 aren't on the game's popup: dropped
+                r["x"] = {k: v for k, v in r["x"].items() if v != 0 or k in ("SLOTS", "UP")}
+                if not r["x"]: del r["x"]
             if isinstance(r, dict) and isinstance(r.get("p"), int) and isinstance(r.get("q"), int) and r["q"] > 1 \
                     and str(r.get("i") or "").lower() not in SET_ITEMS and r["p"] * r["q"] <= 10**11:
                 r["p"] *= r["q"]; n += 1
