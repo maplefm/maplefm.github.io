@@ -103,7 +103,7 @@ def observations(data_dir):
                 look[(key, t)][1 if r.get("so") else 0] += 1
                 if not stream and re.match(r"^FM\d+$", str(r.get("r") or "")) and r.get("c") and not r.get("ri"):   # a room actually read: a misread or an inferred room is no spot
                     spot = (str(r["r"]), int(r["c"])); SPOTS[spot].append((t, who)); KEYSPOT[key] = spot
-                if not stream and isinstance(r.get("x"), dict) and r["x"] and (key not in HOVERS or t < HOVERS[key][0]):
+                if not stream and not unpaid(who) and isinstance(r.get("x"), dict) and r["x"] and (key not in HOVERS or t < HOVERS[key][0]):
                     HOVERS[key] = (t, who)
             for (key, t), (u, sld) in look.items():
                 obs[key].append((t, who, sld, u))
@@ -161,6 +161,7 @@ def credits(obs, start, end):
         cur, hi_t, first_open, sold_by = 0, 0, {}, {}
         for t, who, sld, u in looks:
             if who.startswith("stream:") and who.lower() not in EARN_STREAMS: continue   # unverified streams witness, they don't earn
+            if unpaid(who): continue                     # paid outside Club FM: witnesses, never earns
             if u and who not in first_open: first_open[who] = t
             if sld < cur and t - hi_t > REOPEN_GAP: cur = 0
             if sld > cur:
@@ -170,7 +171,7 @@ def credits(obs, start, end):
                     others = {w for (t2, w, s2, u2) in looks if person(w) != me and abs(t2 - t) <= WITNESS_WINDOW}
                     saw_open = who in first_open and first_open[who] < t
                     saw_sold = any(person(w) != me and s2 >= sld and abs(t2 - t) <= WITNESS_WINDOW for (t2, w, s2, u2) in looks)
-                    wit = sorted({person(w) for (t2, w, s2, u2) in looks if not w.startswith("stream:") and person(w) != me and abs(t2 - t) <= WITNESS_WINDOW})[:WITNESS_MAX]
+                    wit = sorted({person(w) for (t2, w, s2, u2) in looks if not w.startswith("stream:") and not unpaid(w) and person(w) != me and abs(t2 - t) <= WITNESS_WINDOW})[:WITNESS_MAX]
                     cold = (1 if is_cold(key, t, who) else 0) + (2 if GAP_MULT != 1 and is_gap(key, t) else 0)   # bit 1 cold room, bit 2 gap hour
                     for _ in range(n): out.append((t, who, seller, price, others, saw_open or saw_sold, wit, cold))
             if sld >= cur: hi_t = t
@@ -201,6 +202,11 @@ def lifetime_verified(kept, ledger, window_start):
     return collections.Counter({p: sum(d.values()) for p, d in days.items()})
 
 DIRECT = set()               # people paid by hand, not through PayPal (pay.json direct_pay)
+# pay.json unpaid_tags: inbox tags of scanners the owner pays outside Club FM. Their scans still witness other
+# people's sales and count for the board, but they never take a credit: a sale or hover they saw first goes to the
+# next scanner who saw it, they hold no witness slot, and they are left off the Earn list.
+UNPAID = set()
+def unpaid(who): return bool(UNPAID) and TAGS.get(who) in UNPAID
 KOFI = {}                    # /public/kofi-income from the Worker: {"total": dollars over 28 days}
 STRICT = False   # pay only for sales the scanner watched happen (saw it open first, or someone else saw it sold too)
 
@@ -375,6 +381,7 @@ if __name__ == "__main__":
     if "hover_credit" in pool: HOVER_RATE = float(pool.get("hover_credit") or 0)
     if "hover_min_price" in pool: HOVER_MIN = int(pool.get("hover_min_price") or 0)
     DIRECT.update(str(x).lower() for x in (pool.get("direct_pay") or []))
+    UNPAID.update(str(x).lower()[:4] for x in (pool.get("unpaid_tags") or []) if re.fullmatch(r"[0-9a-f]{4,16}", str(x).lower()))
     if "witness_credit" in pool: WITNESS_RATE = float(pool.get("witness_credit") or 0)
     if "self_to_bar" in pool: SELF_TO_BAR = float(pool.get("self_to_bar") or 0)
     if "cold_bonus" in pool: COLD_BONUS = float(pool.get("cold_bonus") or 0)
