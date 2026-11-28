@@ -620,6 +620,9 @@ async function inboxSimple(req, env) {
   if (bad.length) { await inboxReject(env, "simple: bad post: " + bad.join("; "), { tool: "partner", id: SID, nm: b && b.source }); return json({ error: "bad post", problems: bad }, 400); }
   const ids = await simpleIds();
   const t = Math.floor(Date.now() / 1000), rows = [], held = [], occ = new Map();
+  const TOP = ["source", "world", "channel", "room", "seller", "items"], ITEM = ["name", "price", "quantity", "item_id", "stats", "sold"];
+  const unknown = { post: Object.keys(b).filter((k) => !TOP.includes(k)).slice(0, 20), items: {} };
+  b.items.forEach((it) => { if (it && typeof it === "object") Object.keys(it).forEach((k) => { if (!ITEM.includes(k)) unknown.items[k] = (unknown.items[k] || 0) + 1; }); });
   b.items.forEach((it, n) => {
     const why = [];
     if (!it || typeof it !== "object") { held.push({ index: n, why: ["not an object"] }); return; }
@@ -676,12 +679,15 @@ async function inboxSimple(req, env) {
   for (let k = 0; k < parts.length; k++) {
     const m = { v: 3, id: sid, nm: b.source, ign: "", ver: "simple.2", seq, k, n: parts.length, z: parts[k],
       sig: await hmacHexKey(key, [sid, seq, k, parts.length, parts[k]].join("|")), reg: key };
+    if (k === 0 && (unknown.post.length || Object.keys(unknown.items).length)) m.unk = [...new Set(unknown.post.concat(Object.keys(unknown.items)))].slice(0, 20);   // for the admin feed, not signed
     const msg = JSON.stringify(m);
     await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
     await fastPut(env, msg, blocked);
     if (k === 0) await scannerSeen(env, m, blocked, "s");
   }
-  return json({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) });
+  const unk = unknown.post.length || Object.keys(unknown.items).length
+    ? { unknown_fields: { post: unknown.post, items: unknown.items, note: "these fields aren't read; a sold slot is \"sold\": true on the item" } } : {};
+  return json(Object.assign({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) }, unk));
 }
 // ---------------------------------------------------------------- the admin live feed (GET /admin/live-feed)
 // Owner only. Every upload of the last 2 hours as it arrived, newest first, read straight from the inbox (D1 posts):
@@ -703,7 +709,8 @@ async function liveDecode(rows) {
     if (LIVE_DEC.has(id)) { out.push(LIVE_DEC.get(id)); continue; }
     const tag = /^[0-9a-f]{16}$/.test(String(m.id || "")) ? (await sha256hex("fm-inbox:" + m.id)).slice(0, 4) : "????";
     const ver = String(m.ver || ""), tool = /^simple/.test(ver) ? "partner" : m.via === "b" ? "browser" : "watcher";
-    const o = { id, t: g.t, tag, name: String(m.nm || m.ign || "").slice(0, 16) || "Guest-" + tag, tool, ver: ver.slice(0, 16), parts: g.n, docs: null, error: "" };
+    const o = { id, t: g.t, tag, name: String(m.nm || m.ign || "").slice(0, 16) || "Guest-" + tag, tool, ver: ver.slice(0, 16), parts: g.n, docs: null, error: "",
+      unk: Array.isArray(m.unk) ? m.unk.map((x) => String(x).slice(0, 24)).slice(0, 20) : [] };
     if (Object.keys(g.parts).length < g.n) o.error = "waiting for " + (g.n - Object.keys(g.parts).length) + " more part(s)";
     else {
       try {
@@ -757,7 +764,7 @@ async function adminLiveFeed(env, url) {
       worlds[lr.world] = 1; if (lr.ch) chs[lr.ch] = 1; if (lr.room) rooms[lr.room] = 1; if (lr.seller) sellers[lr.seller] = (sellers[lr.seller] || 0) + 1;
     }));
     const kinds = [...new Set((p.docs || []).map((d) => /chat/.test(d.src) ? "chat" : "shops"))];
-    return { id: p.id, t: p.t, name: p.name, tag: p.tag, tool: p.tool, ver: p.ver, error: p.error, rows: n, kinds, worlds: Object.keys(worlds), chs: Object.keys(chs).map(Number).sort((a, b) => a - b).slice(0, 12),
+    return { id: p.id, t: p.t, name: p.name, tag: p.tag, tool: p.tool, ver: p.ver, error: p.error, unk: p.unk || [], rows: n, kinds, worlds: Object.keys(worlds), chs: Object.keys(chs).map(Number).sort((a, b) => a - b).slice(0, 12),
       rooms: Object.keys(rooms).slice(0, 8), sellers: Object.keys(sellers).length, sellerTop: Object.keys(sellers).slice(0, 4), flags };
   });
   // scanning now: every sender in the last hour, active when heard from in the last 15 minutes
