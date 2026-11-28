@@ -148,6 +148,27 @@ DROPS = {}   # why uploads or rows were dropped this run, folded into the state 
 def drop(why, n=1): DROPS[why] = DROPS.get(why, 0) + n
 
 
+# Posts from /inbox/simple made before Nov 28 2026 (ver "simple.1") stored the partner's per-item price as if it were
+# the whole stack's: "12 at 1.9M each" became 12 for 1.9M, 158K each. Read back, those rows get price x quantity, as
+# the Worker writes them from "simple.2" on. Throwing stars and bullets are priced per set, so theirs stay.
+SET_ITEMS = {"hwabi throwing stars", "icicle", "ilbi throwing stars", "kumbi throwing stars", "mokbi throwing stars", "snowball",
+             "steely throwing knives", "subi throwing stars", "tobi throwing stars", "wolbi throwing stars", "wooden top"}
+
+
+def simple1_fix(docs):
+    n = 0
+    for d in docs:
+        for r in (d.get("rows") or []) if isinstance(d, dict) else []:
+            if isinstance(r, dict) and isinstance(r.get("p"), int) and isinstance(r.get("q"), int) and r["q"] > 1 \
+                    and str(r.get("i") or "").lower() not in SET_ITEMS and r["p"] * r["q"] <= 10**11:
+                r["p"] *= r["q"]; n += 1
+    return n
+
+
+SIMPLE1_FIXED = [0]
+SIMPLE1_SIDS = set()
+
+
 def payloads(rows, block, now):
     """Complete uploads from the sheet, oldest first: [(sid, name, docs)]"""
     parts = {}
@@ -169,7 +190,7 @@ def payloads(rows, block, now):
         if m.get("v") == 3:
             if not (isinstance(reg, str) and re.fullmatch(r"[0-9a-f]{64}", reg)) or not sig_ok(reg, m):
                 drop("bad signature"); continue             # a v3 post that doesn't verify against its own key is junk
-        p = parts.setdefault((sid, seq), {"n": n, "nm": m.get("nm") or m.get("ign"), "v": m.get("v"), "k": {}, "reg": reg,
+        p = parts.setdefault((sid, seq), {"n": n, "nm": m.get("nm") or m.get("ign"), "v": m.get("v"), "k": {}, "reg": reg, "raw_ver": str(m.get("ver") or ""),
                                           "ver": str(m.get("ver") or "")[:24] if re.fullmatch(r"[0-9.]{4,24}", str(m.get("ver") or "")) else ""})
         if p["reg"] != reg:
             continue
@@ -186,6 +207,7 @@ def payloads(rows, block, now):
         except Exception:
             continue
         if isinstance(docs, list):
+            if p.get("raw_ver") == "simple.1": SIMPLE1_FIXED[0] += simple1_fix(docs); SIMPLE1_SIDS.add(sid)
             out.append((sid, p["nm"], p["v"], docs, p["reg"], p["ver"]))
     return out
 
@@ -202,7 +224,18 @@ def merge(state, rows, block=()):
     for h in ids:
         if not ids[h].get("nm") and h in NAMES:
             ids[h]["nm"] = NAMES[h]
-    for sid, nm, v, docs, reg, ver in payloads(rows, block, now):
+    got = payloads(rows, block, now)
+    # once per sender: the rows stored from its "simple.1" posts carry the wrong price, so its stored rows are dropped
+    # and rebuilt from its posts, which the Worker keeps 15 days (longer than the 14 days of rows kept here). The fetch
+    # returns every post or none, so this only runs when all of them are in hand.
+    redo = state.setdefault("simple1_rebuilt", [])
+    for sid in sorted(SIMPLE1_SIDS):
+        h = hid(sid)
+        if h not in redo and h in ids:
+            print("rebuilding", h[:4], "from its posts:", sum(len(d.get("rows") or {}) for d in ids[h].get("docs", {}).values()), "stored rows dropped")
+            ids[h]["docs"] = {}
+            redo.append(h)
+    for sid, nm, v, docs, reg, ver in got:
         h = hid(sid)
         me = ids.setdefault(h, {"nm": "", "docs": {}, "h": 1})
         # the first key a watcher registers is pinned; a post under this id with another key, or with none once
@@ -370,6 +403,7 @@ def main():
         json.dump(wd, open(out.replace(".json", "-" + w.lower() + ".json"), "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
         if wd: print(w + ":", len(wd), "documents,", sum(len(d["rows"]) for d in wd), "rows")
     print(len(docs), "documents,", sum(len(d["rows"]) for d in docs), "rows, from", len(state.get("ids", {})), "watchers")
+    if SIMPLE1_FIXED[0]: print("simple.1 rows given price x quantity:", SIMPLE1_FIXED[0])
 
 
 if __name__ == "__main__":

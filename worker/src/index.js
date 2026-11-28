@@ -575,8 +575,8 @@ async function simpleIds() {
   const r = await fetch("https://maplefm.gg/data/itemdb.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).catch(() => null);
   const d = r && r.ok ? await r.json().catch(() => null) : null;
   if (!d || !Array.isArray(d.items)) return SIMPLE_IDS;
-  const m = new Map(); d.items.forEach((x) => m.set(Number(x[1]), String(x[0])));
-  SIMPLE_IDS = m; simpleIdsAt = Date.now();
+  const m = new Map(), byName = new Map(); d.items.forEach((x) => { m.set(Number(x[1]), String(x[0])); byName.set(String(x[0]).toLowerCase(), Number(x[1])); });
+  m.byName = byName; SIMPLE_IDS = m; simpleIdsAt = Date.now();
   return m;
 }
 const hexBytes = (h) => new Uint8Array(h.match(/../g).map((x) => parseInt(x, 16)));
@@ -637,9 +637,16 @@ async function inboxSimple(req, env) {
       }
     }
     if (why.length) { held.push({ index: n, name: typeof it.name === "string" ? it.name.slice(0, 64) : null, why }); return; }
-    const q = it.quantity || 1, base = JSON.stringify([b.seller, it.name, it.price, q]);
+    // "price" is mesos per item. A listing row holds the price of the whole stack (p for q items, as FM Watcher reads a
+    // shop), so p = price x quantity. Throwing stars and bullets are priced per set on the board (p is the set's price,
+    // q how many are in it), so for them price stays as sent.
+    const q = it.quantity || 1, gid = it.item_id || (ids && ids.byName ? ids.byName.get(it.name.toLowerCase()) : 0) || 0;
+    const set = [207, 233].includes(Math.floor(gid / 10000)) || /throwing stars?$|^wooden top$/i.test(it.name);
+    const p = set ? it.price : it.price * q;
+    if (!set && p > 1e11) { held.push({ index: n, name: it.name, why: ["price x quantity is over 100,000,000,000"] }); return; }
+    const base = JSON.stringify([b.seller, it.name, p, q]);
     const o = occ.get(base) || 0; occ.set(base, o + 1);
-    const row = { s: b.seller, i: it.name, p: it.price, q, t, _o: o };
+    const row = { s: b.seller, i: it.name, p, q, t, _o: o };
     if (b.channel != null) row.c = b.channel;
     if (b.room != null) row.r = simpleRoom(b.room);
     if (b.world === "Zenith") row.w = "Zenith";
@@ -659,7 +666,7 @@ async function inboxSimple(req, env) {
   const sid = (await sha256hex("fm-simple:" + key)).slice(0, 16), seq = Date.now();
   const blocked = await blockedIds(env);
   for (let k = 0; k < parts.length; k++) {
-    const m = { v: 3, id: sid, nm: b.source, ign: "", ver: "simple.1", seq, k, n: parts.length, z: parts[k],
+    const m = { v: 3, id: sid, nm: b.source, ign: "", ver: "simple.2", seq, k, n: parts.length, z: parts[k],
       sig: await hmacHexKey(key, [sid, seq, k, parts.length, parts[k]].join("|")), reg: key };
     const msg = JSON.stringify(m);
     await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
