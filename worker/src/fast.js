@@ -45,6 +45,8 @@ function clean(r) {
   if (I(r._o, 0, 100)) o._o = r._o;
   if (S(r.r, 40)) o.r = r.r;
   if (I(r.c, 1, 40)) o.c = r.c;
+  if (S(r.sh, 60)) o.sh = r.sh;
+  if (I(r.sx, -100000, 100000) && I(r.sy, -100000, 100000)) { o.sx = r.sx; o.sy = r.sy; }
   if (r.x && typeof r.x === "object" && Object.keys(r.x).length <= 30 && Object.entries(r.x).every(([k, v]) => S(k, 12) && (I(v, -9999, 99999) || S(v, 40)))) o.x = r.x;
   return o;
 }

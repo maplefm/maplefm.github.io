@@ -152,17 +152,20 @@
   function sname(l) { return (l.stream && l.ns) || l.nu ? "name not read" : l.s; }
   function sellerEl(l, tag, cls) {
     if (l.nu && !l.stream) { var u = el("span", "unk", "seller name not read clearly"); u.title = "This shop was read under two different names. Check the name at the shop."; return u; }
-    if (!(l.stream && l.ns)) return el(tag || "b", cls || null, l.s);
+    if (!(l.stream && l.ns)) { var sb = el(tag || "b", cls || null, l.s); var st = shopTip(l); if (st) sb.title = st; return sb; }
     var w = el("span", "unk"); w.appendChild(document.createTextNode("name not read · ")); var a = streamLink(l); a.textContent = "see it on " + a.textContent; w.appendChild(a); return w;
   }
+  // the shop's title and spot on the map, when the scanner sent them (partner feed: store_name, x, y)
+  function shopTip(l) { return [l.sh ? "Shop: " + l.sh : "", typeof l.sx === "number" ? "at x " + l.sx + ", y " + l.sy : ""].filter(Boolean).join(" · "); }
   function megaWord(l) { return l.mg === "sm" ? "smega" : l.mg === "im" ? "item megaphone" : l.mg === "m" ? "megaphone" : "chat"; }
   function buyWhere(l) {
     if (l.chat) return "whisper them, posted " + (l.mg ? "by " + megaWord(l) + (l.c ? " from CH " + l.c : "") : "in chat") + (l.sn > 1 ? " · seen by " + l.sn + " readers" : "") + (l.ns ? " (name may be misread: check it in chat)" : "");
     var room = /^FM\d+$/.test(l.r || "") || l.r === "FM Entrance" || isMap(l.r) ? roomLabel(l.r) + (l.ri ? " (likely)" : "") : "";
     var ch = l.c ? "CH " + l.c + (l.ci ? " (likely)" : "") : "";
     var warn = "";
-    if (!ch && !room) return "location not read" + warn;
-    return [ch || "channel not read", room || "room not read"].join(", ") + warn;
+    var shop = l.sh ? " · \u201c" + l.sh + "\u201d" : "";
+    if (!ch && !room) return "location not read" + shop + warn;
+    return [ch || "channel not read", room || "room not read"].join(", ") + shop + warn;
   }
   function hue(s) { var h = 0; for (var k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) % 360; return h; }
   function avatar(name, cls) { var a = el("span", "av" + (cls ? " " + cls : ""), (name || "?").replace(/[^A-Za-z0-9]/g, "").charAt(0).toUpperCase() || "?"); a.style.background = "hsl(" + hue(name || "") + " 55% 48%)"; a.setAttribute("aria-hidden", "true"); return a; }
@@ -910,6 +913,8 @@
         var sp0 = splitTier(name); if ((sp0.t || cn.tl) && !tieredBase(sp0.b)) { name = sp0.b; cn = { n: cn.n, tl: false }; }   // a tier pinned on a scroll that has none
         if (/^scroll$/i.test(name)) name = "Scroll\u2026";                                                                  // just "Scroll": the real name was cut off
         var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: set ? r.p : r.p / qty, n: set ? r.q || 0 : 0, so: so, b: r.k === "b", r: room, c: r.c || 0, t: t, tx: !!r.t, chat: chat, ns: !!((chat && r.ns) || (stream && r.su)), who: by, stream: stream, sk: by + "|" + r.s + "|" + s.at, x: r.x || null, xt: r.xt || null, v: r.v || "", vt: r.vt || 0, xn: r.xn || "", xj: r.xj || "", mg: chat && /^(sm|m|im)$/.test(r.mg || "") ? r.mg : "", sn: chat ? 1 : 0 };
+        if (r.sh && !chat) l.sh = String(r.sh).slice(0, 60);                                  // the shop's title (partner feed)
+        if (typeof r.sx === "number" && typeof r.sy === "number" && !chat) { l.sx = r.sx; l.sy = r.sy; }   // where it stands (map x, y)
         return l;
     }
     // A shop seen without a channel (the scanner never opened Change Channel) inherits the channel another
@@ -5951,6 +5956,8 @@
         var room = fixRoom(r.r) || "";
         var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: u, n: set ? qty : 0, so: false, b: false, r: room, c: r.c || 0, t: t, tx: !!r.t, chat: false, ns: false,
           who: by, stream: false, sk: by + "|" + r.s + "|" + d.at, x: r.x || null, xt: r.xt || null, v: "", vt: 0, xn: r.xn || "", xj: r.xj || "", mg: "", sn: 0, st: "up", sold: 0, live: true };
+        if (r.sh) l.sh = String(r.sh).slice(0, 60);
+        if (typeof r.sx === "number" && typeof r.sy === "number") { l.sx = r.sx; l.sy = r.sy; }
         FRESH_KEYS[k] = 1; added++;
         i.asks.unshift(l); if (i.all) i.all.push(l); if (D.L) D.L.push(l);
         if (i.asksN != null) i.asksN++;
