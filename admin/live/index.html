@@ -122,6 +122,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
     w.appendChild(el("small", null, where || (p.kinds.indexOf("chat") >= 0 ? "trade chat" : "")));
     if (p.unk && p.unk.length) w.appendChild(el("small", "f-away", "fields not read: " + p.unk.join(", ")));
     w.appendChild(el("small", null, p.error ? p.error : p.sellers + (p.sellers === 1 ? " seller" : " sellers") + (p.sellerTop.length ? ": " + p.sellerTop.join(", ") + (p.sellers > p.sellerTop.length ? "…" : "") : "")));
+    if (p.stores && p.stores.length) w.appendChild(el("small", null, "shop: " + p.stores.map(function (x) { return "\u201c" + x + "\u201d"; }).join(", ")));
     h.appendChild(w);
     var c = el("div", "cnt"); c.appendChild(el("div", null, p.rows.toLocaleString() + " rows"));
     ["held", "check", "away", "sold"].forEach(function (k) { if (p.flags[k]) c.appendChild(el("div", "f-" + k, p.flags[k] + " " + FLAG[k])); });
@@ -141,7 +142,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
       j.rows.forEach(function (r) {
         var tr = el("tr"); tr.appendChild(el("td", null, r.item + (r.sold ? " (sold)" : "")));
         tr.appendChild(el("td", "n", money(r.each) + (r.typ ? " · typ " + money(r.typ) : ""))); tr.appendChild(el("td", "n", r.set ? "set of " + r.stack : String(r.stack)));
-        tr.appendChild(el("td", null, r.seller)); tr.appendChild(el("td", null, [r.world !== "Windia" ? r.world : "", r.ch ? "Ch " + r.ch : "", r.room].filter(Boolean).join(" · ")));
+        var sc = el("td", null, r.seller); if (r.store || r.xy) { sc.appendChild(el("small", null, " " + [r.store ? "\u201c" + r.store + "\u201d" : "", r.xy ? "x " + r.xy[0] + ", y " + r.xy[1] : ""].filter(Boolean).join(" · "))); sc.title = [r.store ? "Shop: " + r.store : "", r.xy ? "at x " + r.xy[0] + ", y " + r.xy[1] : ""].filter(Boolean).join(" · "); } tr.appendChild(sc); tr.appendChild(el("td", null, [r.world !== "Windia" ? r.world : "", r.ch ? "Ch " + r.ch : "", r.room].filter(Boolean).join(" · ")));
         tr.appendChild(el("td", null, stats(r.stats)));
         var f = el("td", "f-" + r.flag, (FLAG[r.flag] ? FLAG[r.flag] : "") + (r.why ? (FLAG[r.flag] ? ": " : "") + r.why : "")); tr.appendChild(f);
         t.appendChild(tr);

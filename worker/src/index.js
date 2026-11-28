@@ -617,11 +617,21 @@ async function inboxSimple(req, env) {
     if (b.room != null && !str(b.room, 40)) bad.push("room: 1 to 40 characters");
     if (!Array.isArray(b.items) || !b.items.length || b.items.length > 1500) bad.push("items: a list of 1 to 1,500");
   }
+  // optional shop fields: the shop's title and where it stands on the map. A bad value is left out and named in the
+  // reply (shop_fields_ignored); it never turns the post away
+  const shopIgn = [];
+  let shopName = "", shopX = null, shopY = null;
+  if (b && typeof b === "object") {
+    if (b.store_name != null) { const v = typeof b.store_name === "string" ? b.store_name.replace(/[\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim() : ""; if (v && v.length <= 60) shopName = v; else if (v || b.store_name !== "") shopIgn.push("store_name: text up to 60 characters"); }
+    const coord = (v, k) => { if (v == null) return null; if (typeof v === "number" && Number.isFinite(v) && Math.abs(v) <= 100000) return Math.round(v); shopIgn.push(k + ": a number"); return null; };
+    shopX = coord(b.x, "x"); shopY = coord(b.y, "y");
+    if ((shopX == null) !== (shopY == null)) { if (shopX != null || shopY != null) shopIgn.push("x and y: send both"); shopX = shopY = null; }
+  }
   if (bad.length) { await inboxReject(env, "simple: bad post: " + bad.join("; "), { tool: "partner", id: SID, nm: b && b.source }); return json({ error: "bad post", problems: bad }, 400); }
   const ids = await simpleIds();
   const t = Math.floor(Date.now() / 1000), rows = [], held = [], occ = new Map();
   let blankStats = 0;
-  const TOP = ["source", "world", "channel", "room", "seller", "items"], ITEM = ["name", "price", "quantity", "item_id", "stats", "sold"];
+  const TOP = ["source", "world", "channel", "room", "seller", "items", "store_name", "x", "y"], ITEM = ["name", "price", "quantity", "item_id", "stats", "sold"];
   const unknown = { post: Object.keys(b).filter((k) => !TOP.includes(k)).slice(0, 20), items: {} };
   b.items.forEach((it) => { if (it && typeof it === "object") Object.keys(it).forEach((k) => { if (!ITEM.includes(k)) unknown.items[k] = (unknown.items[k] || 0) + 1; }); });
   b.items.forEach((it, n) => {
@@ -661,6 +671,8 @@ async function inboxSimple(req, env) {
     if (it.sold === true) row.so = true;   // a sold slot still showing in the shop (greyed out): how sales are caught
     if (b.channel != null) row.c = b.channel;
     if (b.room != null) row.r = simpleRoom(b.room);
+    if (shopName) row.sh = shopName;                       // the shop's title, as the sender read it
+    if (shopX != null) { row.sx = shopX; row.sy = shopY; } // where the shop stands in the room (map x, y)
     if (b.world === "Zenith") row.w = "Zenith";
     // only upgrade slots and upgrades, both 0, says the popup wasn't read: kept, it reads as "every slot used, every
     // scroll failed" and prices the copy as a ruined one (tools/inbox.py blank_slots drops the same from stored rows)
@@ -693,7 +705,7 @@ async function inboxSimple(req, env) {
   const blank = blankStats ? { blank_stats: { items: blankStats, note: "upgrade_slots and upgrade_count both 0 with no other stats were dropped as not read: leave stats out when the popup wasn't read" } } : {};
   const unk = unknown.post.length || Object.keys(unknown.items).length
     ? { unknown_fields: { post: unknown.post, items: unknown.items, note: "these fields aren't read; a sold slot is \"sold\": true on the item" } } : {};
-  return json(Object.assign({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) }, blank, unk));
+  return json(Object.assign({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) }, blank, shopIgn.length ? { shop_fields_ignored: shopIgn } : {}, unk));
 }
 // ---------------------------------------------------------------- the admin live feed (GET /admin/live-feed)
 // Owner only. Every upload of the last 2 hours as it arrived, newest first, read straight from the inbox (D1 posts):
@@ -751,7 +763,7 @@ function liveRow(r, d, typ, names, nowS) {
   else if (ty && !equip && each < ty * 0.15) { flag = "check"; why = "under 15% of typical, likely a misread: listed, never cheapest or a deal"; }
   else if (ty && !equip && each > ty * 10) { flag = "check"; why = "over 10x typical: likely a spot holder, hidden on the board unless spot holders are shown"; }
   else if (ty && each < ty * HOLD_CUT && age < HOLD_S) { flag = "held"; why = "deal, public at " + new Date((r.t + HOLD_S) * 1000).toISOString().slice(11, 16) + " UTC"; }
-  return { item: r.i, each, stack: q, set, sold: !!r.so, seller: r.s, ch: r.c || 0, room: r.r || "", world: r.w || "Windia", stats: r.x || null, t: r.t || 0, typ: ty || 0, flag, why };
+  return { item: r.i, each, stack: q, set, sold: !!r.so, seller: r.s, ch: r.c || 0, room: r.r || "", store: r.sh || "", xy: r.sx != null ? [r.sx, r.sy] : null, world: r.w || "Windia", stats: r.x || null, t: r.t || 0, typ: ty || 0, flag, why };
 }
 // the pump's hourly accuracy report (tools/accuracy.py, private archive): per source, the share of the last 24 hours'
 // rows the board holds back as likely wrong, and the cross-check between scanners
@@ -774,15 +786,15 @@ async function adminLiveFeed(env, url) {
   }
   const after = Number(url.searchParams.get("after") || 0);
   const list = posts.filter((p) => p.id > after).slice(0, 300).map((p) => {
-    const worlds = {}, chs = {}, rooms = {}, sellers = {}, flags = { live: 0, held: 0, away: 0, sold: 0, info: 0, check: 0 };
+    const worlds = {}, chs = {}, rooms = {}, sellers = {}, stores = {}, flags = { live: 0, held: 0, away: 0, sold: 0, info: 0, check: 0 };
     let n = 0;
     (p.docs || []).forEach((d) => d.rows.forEach((x) => {
       n++; const lr = liveRow(x, d, typ, names, nowS); flags[lr.flag]++;
-      worlds[lr.world] = 1; if (lr.ch) chs[lr.ch] = 1; if (lr.room) rooms[lr.room] = 1; if (lr.seller) sellers[lr.seller] = (sellers[lr.seller] || 0) + 1;
+      worlds[lr.world] = 1; if (lr.ch) chs[lr.ch] = 1; if (lr.room) rooms[lr.room] = 1; if (lr.seller) sellers[lr.seller] = (sellers[lr.seller] || 0) + 1; if (lr.store) stores[lr.store] = 1;
     }));
     const kinds = [...new Set((p.docs || []).map((d) => /chat/.test(d.src) ? "chat" : "shops"))];
     return { id: p.id, t: p.t, name: p.name, tag: p.tag, tool: p.tool, ver: p.ver, error: p.error, unk: p.unk || [], rows: n, kinds, worlds: Object.keys(worlds), chs: Object.keys(chs).map(Number).sort((a, b) => a - b).slice(0, 12),
-      rooms: Object.keys(rooms).slice(0, 8), sellers: Object.keys(sellers).length, sellerTop: Object.keys(sellers).slice(0, 4), flags };
+      rooms: Object.keys(rooms).slice(0, 8), sellers: Object.keys(sellers).length, sellerTop: Object.keys(sellers).slice(0, 4), stores: Object.keys(stores).slice(0, 4), flags };
   });
   // scanning now: every sender in the last hour, active when heard from in the last 15 minutes
   const who = {};

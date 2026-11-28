@@ -131,6 +131,10 @@ def clean_row(r, now):
         o["xn"] = r["xn"]
     if r.get("w") in WORLDS:
         o["w"] = r["w"]
+    if s_(r.get("sh"), 60):
+        o["sh"] = r["sh"]                                  # the shop's title (partner feed store_name)
+    if i_(r.get("sx"), -100000, 100000) and i_(r.get("sy"), -100000, 100000):
+        o["sx"], o["sy"] = r["sx"], r["sy"]                # where the shop stands in the room (map x, y)
     return o
 
 
