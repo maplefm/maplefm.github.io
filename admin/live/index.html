@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Live Feed · Club FM admin</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<style>
+:root{--bg:#f6f4fb;--card:#fff;--fg:#1d1830;--mut:#6b6684;--line:#e4dff2;--acc:#6d3fd1;--live:#16794a;--held:#a8650a;--away:#b42318;--sold:#2453b0;--info:#6b6684;--new:#efe8ff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#120e1d;--card:#1c1730;--fg:#efe9ff;--mut:#a59fbf;--line:#2e2747;--acc:#a78bfa;--live:#4ade80;--held:#fbbf24;--away:#f87171;--sold:#93b4ff;--info:#a59fbf;--new:#2a2050;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:env(safe-area-inset-top,0) max(12px,env(safe-area-inset-right,0)) 40px max(12px,env(safe-area-inset-left,0))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+h1{font-size:1.15rem;margin:0}
+h2{font-size:.95rem;margin:18px 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.st{font-size:.85rem;color:var(--mut)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--live);margin-right:6px;vertical-align:middle}
+.dot.off{background:var(--away)}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;padding:5px 10px;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.sc{flex:0 0 auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:150px}
+.sc b{display:block}
+.sc.idle{opacity:.55}
+.chip{display:inline-block;font-size:.75rem;border-radius:999px;padding:1px 7px;border:1px solid var(--line);color:var(--mut);margin-right:4px;white-space:nowrap}
+.chip.partner{color:var(--acc);border-color:var(--acc)}
+.up{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;transition:background 2s}
+.up.new{background:var(--new)}
+.uh{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;padding:8px 10px;cursor:pointer;align-items:start}
+.uh .t{font-variant-numeric:tabular-nums;color:var(--mut);font-size:.85rem;padding-top:2px}
+.uh .w{min-width:0}
+.uh .w small{display:block;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnt{text-align:right;font-size:.85rem;white-space:nowrap}
+.f-live{color:var(--live)}.f-held{color:var(--held)}.f-away{color:var(--away)}.f-sold{color:var(--sold)}.f-info{color:var(--info)}
+.rows{border-top:1px solid var(--line);padding:6px 10px 10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rej{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.rej div{padding:4px 0;border-bottom:1px solid var(--line);font-size:.85rem}
+.rej div:last-child{border:0}
+.msg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:20px}
+.msg a{color:var(--acc)}
+.empty{color:var(--mut);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>Live Feed</h1><span class="st"><span class="dot off" id="dot"></span><span id="status">connecting…</span></span><span style="flex:1"></span><button id="pause" type="button">Pause</button></header>
+<div id="gate" class="msg" hidden>Admin only. <a id="signin" href="https://api.maplefm.gg/login?back=admin">Sign in with your Discord admin account</a>.</div>
+<div id="main" hidden>
+<h2>Scanning now</h2>
+<div class="strip" id="strip"></div>
+<h2>Uploads, newest first <span class="st">· last 2 hours · tap one for its rows</span></h2>
+<div id="feed"></div>
+<h2>Turned away</h2>
+<div class="rej" id="rej"></div>
+</div>
+</div>
+<script>
+(function () {
+  var API = "https://api.maplefm.gg/admin/live-feed", POLL = 5000, WIN = 2 * 36e5;
+  var posts = [], seen = {}, last = 0, paused = false, open = {}, timer = null, okAt = 0;
+  function $(id) { return document.getElementById(id); }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function money(n) { n = +n || 0; if (n >= 1e9) return (n / 1e9).toFixed(n >= 1e10 ? 0 : 2).replace(/\.?0+$/, "") + "B"; if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.?0+$/, "") + "M"; if (n >= 1e4) return (n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, "") + "K"; return n.toLocaleString(); }
+  function hm(t) { var d = new Date(t); return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }); }
+  function ago(t) { var s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? s + "s ago" : s < 3600 ? Math.round(s / 60) + "m ago" : Math.floor(s / 3600) + "h " + Math.round(s % 3600 / 60) + "m ago"; }
+  var TOOL = { watcher: "FM Watcher", browser: "Browser scanner", partner: "Partner feed" };
+  var FLAG = { live: "on the board", held: "held", away: "turned away", sold: "sale", info: "" };
+  function stats(x) { if (!x) return ""; return Object.keys(x).filter(function (k) { return k[0] !== "_" && !/_b$|_c$/.test(k); }).map(function (k) { return k + " " + x[k]; }).join(", "); }
+  function strip(list) {
+    var s = $("strip"); s.textContent = "";
+    if (!list.length) { s.appendChild(el("div", "empty", "Nobody has uploaded in the last hour.")); return; }
+    list.forEach(function (w) {
+      var c = el("div", "sc" + (w.active ? "" : " idle"));
+      c.appendChild(el("b", null, w.name)); var ch = el("span", "chip" + (w.tool === "partner" ? " partner" : ""), TOOL[w.tool] || w.tool); c.appendChild(ch); c.appendChild(el("span", "chip", w.tag));
+      c.appendChild(el("div", "st", w.uploads + " uploads · " + w.rows.toLocaleString() + " rows in 1h"));
+      c.appendChild(el("div", "st", (w.active ? "active · " : "idle · ") + "last " + ago(w.last)));
+      s.appendChild(c);
+    });
+  }
+  function rejects(list) {
+    var r = $("rej"); r.textContent = "";
+    if (!list.length) { r.appendChild(el("div", "empty", "Nothing turned away in the last 2 hours.")); return; }
+    list.forEach(function (x) {
+      var d = el("div"); d.appendChild(el("b", null, hm(x.t) + " ")); d.appendChild(document.createTextNode((x.nm || (x.tag ? "tag " + x.tag : "unknown sender")) + (x.tool ? " · " + (TOOL[x.tool] || x.tool) : "") + " · "));
+      d.appendChild(el("span", "f-away", x.why)); r.appendChild(d);
+    });
+  }
+  function card(p, fresh) {
+    var u = el("div", "up" + (fresh ? " new" : "")); u.id = "p" + p.id;
+    var h = el("div", "uh"); h.setAttribute("role", "button"); h.tabIndex = 0;
+    h.appendChild(el("div", "t", hm(p.t)));
+    var w = el("div", "w"); var nm = el("b", null, p.name + " "); w.appendChild(nm);
+    w.appendChild(el("span", "chip" + (p.tool === "partner" ? " partner" : ""), TOOL[p.tool] || p.tool)); w.appendChild(el("span", "chip", p.tag));
+    var where = [p.worlds.join(", "), p.chs.length ? "Ch " + p.chs.join(", ") : "", p.rooms.join(", ")].filter(Boolean).join(" · ");
+    w.appendChild(el("small", null, where || (p.kinds.indexOf("chat") >= 0 ? "trade chat" : "")));
+    w.appendChild(el("small", null, p.error ? p.error : p.sellers + (p.sellers === 1 ? " seller" : " sellers") + (p.sellerTop.length ? ": " + p.sellerTop.join(", ") + (p.sellers > p.sellerTop.length ? "…" : "") : "")));
+    h.appendChild(w);
+    var c = el("div", "cnt"); c.appendChild(el("div", null, p.rows.toLocaleString() + " rows"));
+    ["held", "away", "sold"].forEach(function (k) { if (p.flags[k]) c.appendChild(el("div", "f-" + k, p.flags[k] + " " + FLAG[k])); });
+    h.appendChild(c); u.appendChild(h);
+    var body = el("div", "rows"); body.hidden = true; u.appendChild(body);
+    function toggle() { body.hidden = !body.hidden; open[p.id] = !body.hidden; if (!body.hidden && !body.childElementCount) loadRows(p.id, body); }
+    h.addEventListener("click", toggle); h.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    if (fresh) setTimeout(function () { u.classList.remove("new"); }, 2500);
+    return u;
+  }
+  function loadRows(id, body) {
+    body.appendChild(el("div", "empty", "Loading…"));
+    fetch(API + "?post=" + id, { credentials: "include", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      body.textContent = "";
+      if (!j || !j.rows) { body.appendChild(el("div", "empty", "This upload is older than 2 hours or couldn't be read.")); return; }
+      var t = el("table"), hd = el("tr"); ["Item", "Each", "Stack", "Seller", "Where", "Stats", "What the site does"].forEach(function (x) { hd.appendChild(el("th", null, x)); }); t.appendChild(hd);
+      j.rows.forEach(function (r) {
+        var tr = el("tr"); tr.appendChild(el("td", null, r.item + (r.sold ? " (sold)" : "")));
+        tr.appendChild(el("td", "n", money(r.each) + (r.typ ? " · typ " + money(r.typ) : ""))); tr.appendChild(el("td", "n", r.set ? "set of " + r.stack : String(r.stack)));
+        tr.appendChild(el("td", null, r.seller)); tr.appendChild(el("td", null, [r.world !== "Windia" ? r.world : "", r.ch ? "Ch " + r.ch : "", r.room].filter(Boolean).join(" · ")));
+        tr.appendChild(el("td", null, stats(r.stats)));
+        var f = el("td", "f-" + r.flag, (FLAG[r.flag] ? FLAG[r.flag] : "") + (r.why ? (FLAG[r.flag] ? ": " : "") + r.why : "")); tr.appendChild(f);
+        t.appendChild(tr);
+      });
+      body.appendChild(t);
+    }).catch(function () { body.textContent = ""; body.appendChild(el("div", "empty", "Couldn't load the rows. Tap again to retry.")); open = {}; });
+  }
+  function render(newIds) {
+    var f = $("feed"), cut = Date.now() - WIN;
+    posts = posts.filter(function (p) { return p.t >= cut; });
+    // newest on top; existing cards are kept as they are so an open one never collapses while new uploads arrive
+    var have = {}; [].forEach.call(f.children, function (c) { have[c.id] = c; });
+    posts.forEach(function (p, i) {
+      var c = have["p" + p.id]; if (!c) c = card(p, newIds[p.id]);
+      if (f.children[i] !== c) f.insertBefore(c, f.children[i] || null);
+      delete have["p" + p.id];
+    });
+    Object.keys(have).forEach(function (k) { if (have[k].parentNode === f) f.removeChild(have[k]); });
+    if (!posts.length && !f.childElementCount) f.appendChild(el("div", "empty", "No uploads in the last 2 hours."));
+  }
+  function tick() {
+    clearTimeout(timer);
+    if (paused || document.hidden) { timer = setTimeout(tick, POLL); return; }
+    var url = API + (last ? "?after=" + last : "");
+    fetch(url, { credentials: "include", cache: "no-store" }).then(function (r) {
+      if (r.status === 401 || r.status === 403) { $("gate").hidden = false; $("main").hidden = true; $("status").textContent = "not signed in as admin"; return null; }
+      return r.ok ? r.json() : Promise.reject(r.status);
+    }).then(function (j) {
+      if (!j) return;
+      $("gate").hidden = true; $("main").hidden = false;
+      var newIds = {}, first = !last;
+      var empty = $("feed").querySelector(".empty"); if (empty) empty.remove();
+      j.posts.forEach(function (p) { if (seen[p.id]) return; seen[p.id] = 1; if (!first) newIds[p.id] = 1; posts.push(p); last = Math.max(last, p.id); });
+      posts.sort(function (a, b) { return b.id - a.id; });
+      render(newIds); strip(j.scanners || []); rejects(j.rejects || []);
+      okAt = Date.now(); $("dot").className = "dot"; upd();
+    }).catch(function () { $("dot").className = "dot off"; $("status").textContent = "can't reach the server, retrying"; })
+      .then(function () { timer = setTimeout(tick, POLL); });
+  }
+  function upd() { if (okAt) $("status").textContent = (paused ? "paused · " : "live · ") + "checked " + ago(okAt) + " · " + posts.length + " uploads"; }
+  setInterval(upd, 1000);
+  $("pause").addEventListener("click", function () { paused = !paused; this.textContent = paused ? "Resume" : "Pause"; upd(); if (!paused) tick(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) tick(); });
+  tick();
+})();
+</script>
+</body>
+</html>
