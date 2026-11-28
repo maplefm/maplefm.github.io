@@ -169,6 +169,24 @@ def simple1_fix(docs):
     return n
 
 
+def blank_slots(r):
+    """True for stats that say nothing: only upgrade slots and upgrades, both 0, and no exact-read mark. The partner's
+    tool sends these when it didn't read the popup; kept, they read as "every slot used, every scroll failed" and
+    price the copy as a ruined one."""
+    x = r.get("x") if isinstance(r, dict) else None
+    if not isinstance(x, dict) or x.get("_ok") or x.get("_ex"): return False
+    keys = [k for k in x if not str(k).startswith("_")]
+    return bool(keys) and set(keys) <= {"SLOTS", "UP"} and all(x[k] == 0 for k in keys)
+
+
+def slots_fix(docs):
+    n = 0
+    for d in docs if isinstance(docs, list) else []:
+        for r in (d.get("rows") or []) if isinstance(d, dict) else []:
+            if blank_slots(r): del r["x"]; n += 1
+    return n
+
+
 SIMPLE1_FIXED = [0]
 SIMPLE1_SIDS = set()
 
@@ -214,6 +232,7 @@ def payloads(rows, block, now):
             continue
         if isinstance(docs, list):
             if p.get("raw_ver") == "simple.1": SIMPLE1_FIXED[0] += simple1_fix(docs); SIMPLE1_SIDS.add(sid)
+            if str(p.get("raw_ver") or "").startswith("simple."): slots_fix(docs)
             out.append((sid, p["nm"], p["v"], docs, p["reg"], p["ver"], p.get("arr") or 0))
     return out
 
@@ -231,6 +250,14 @@ def merge(state, rows, block=()):
         if not ids[h].get("nm") and h in NAMES:
             ids[h]["nm"] = NAMES[h]
     got = payloads(rows, block, now)
+    # once: stored rows with blank slot stats (see blank_slots) lose them; new posts are cleaned as they're read
+    if not state.get("slots0_cleaned"):
+        n = 0
+        for h in ids:
+            for doc in ids[h].get("docs", {}).values():
+                for r in (doc.get("rows") or {}).values():
+                    if blank_slots(r): del r["x"]; n += 1
+        state["slots0_cleaned"] = int(now); print("blank slot stats dropped from", n, "stored rows")
     # once per sender: the rows stored from its "simple.1" posts carry the wrong price, so its stored rows are dropped
     # and rebuilt from its posts, which the Worker keeps 15 days (longer than the 14 days of rows kept here). The fetch
     # returns every post or none, so this only runs when all of them are in hand.

@@ -620,6 +620,7 @@ async function inboxSimple(req, env) {
   if (bad.length) { await inboxReject(env, "simple: bad post: " + bad.join("; "), { tool: "partner", id: SID, nm: b && b.source }); return json({ error: "bad post", problems: bad }, 400); }
   const ids = await simpleIds();
   const t = Math.floor(Date.now() / 1000), rows = [], held = [], occ = new Map();
+  let blankStats = 0;
   const TOP = ["source", "world", "channel", "room", "seller", "items"], ITEM = ["name", "price", "quantity", "item_id", "stats", "sold"];
   const unknown = { post: Object.keys(b).filter((k) => !TOP.includes(k)).slice(0, 20), items: {} };
   b.items.forEach((it) => { if (it && typeof it === "object") Object.keys(it).forEach((k) => { if (!ITEM.includes(k)) unknown.items[k] = (unknown.items[k] || 0) + 1; }); });
@@ -661,7 +662,11 @@ async function inboxSimple(req, env) {
     if (b.channel != null) row.c = b.channel;
     if (b.room != null) row.r = simpleRoom(b.room);
     if (b.world === "Zenith") row.w = "Zenith";
-    if (Object.keys(x).length) row.x = x;
+    // only upgrade slots and upgrades, both 0, says the popup wasn't read: kept, it reads as "every slot used, every
+    // scroll failed" and prices the copy as a ruined one (tools/inbox.py blank_slots drops the same from stored rows)
+    const xk = Object.keys(x);
+    if (xk.length && xk.every((k) => k === "SLOTS" || k === "UP") && xk.every((k) => x[k] === 0)) blankStats++;
+    else if (xk.length) row.x = x;
     rows.push(ignored.length ? Object.assign(row, { _ign: ignored }) : row);
   });
   const notes = rows.filter((r) => r._ign).map((r) => ({ name: r.i, stats_ignored: r._ign }));
@@ -685,9 +690,10 @@ async function inboxSimple(req, env) {
     await fastPut(env, msg, blocked);
     if (k === 0) await scannerSeen(env, m, blocked, "s");
   }
+  const blank = blankStats ? { blank_stats: { items: blankStats, note: "upgrade_slots and upgrade_count both 0 with no other stats were dropped as not read: leave stats out when the popup wasn't read" } } : {};
   const unk = unknown.post.length || Object.keys(unknown.items).length
     ? { unknown_fields: { post: unknown.post, items: unknown.items, note: "these fields aren't read; a sold slot is \"sold\": true on the item" } } : {};
-  return json(Object.assign({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) }, unk));
+  return json(Object.assign({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) }, blank, unk));
 }
 // ---------------------------------------------------------------- the admin live feed (GET /admin/live-feed)
 // Owner only. Every upload of the last 2 hours as it arrived, newest first, read straight from the inbox (D1 posts):
