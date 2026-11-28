@@ -39,7 +39,7 @@ export default {
     ctx.waitUntil(kofiRoleWatch(env).catch(() => {}));
     ctx.waitUntil(trafficPost(env).catch(() => {}));
     ctx.waitUntil(marketSync(env, mkCtx(env)).catch(() => {}));
-    ctx.waitUntil(statReport(env, { dm: (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") }).catch(() => {}));
+    ctx.waitUntil(statReport(env, { dm: (m) => mkCtx(env).dmAdmins(m, "Club FM stat check"), acc: () => accuracyReport(env) }).catch(() => {}));
     if (!ev.cron || /^17 /.test(ev.cron)) ctx.waitUntil(syncRoles(env));
   },
   async fetch(req, env) {
@@ -82,7 +82,7 @@ async function route(req, env, url) {
   if (p.startsWith("/l/") && req.method === "GET") return marketShare(env, p.slice(3));
   if (p === "/shop" && req.method === "GET") return shopGet(env, url);
   if (p === "/market" || p.startsWith("/market/")) return marketRoute(req, env, url, p, Object.assign(mkCtx(env), { rows: await mkRows(env) }));
-  if (p === "/admin/stats-report") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await statReport(env, { force: true, dm: url.searchParams.get("dm") ? (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") : null }), 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/stats-report") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await statReport(env, { force: true, acc: () => accuracyReport(env), dm: url.searchParams.get("dm") ? (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") : null }), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketCheck(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market/sync" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketSync(env, mkCtx(env))); }
   if (p === "/data/fast" && req.method === "GET") return publicFast(env);
@@ -731,16 +731,27 @@ const LIVE_SETS = /throwing stars?$|^wooden top$|^icicle$|^snowball$|^steely thr
 function liveRow(r, d, typ, names, nowS) {
   const chat = /chat/.test(d.src), q = Math.max(1, r.q || 1), set = LIVE_SETS.test(String(r.i || ""));
   const each = set ? r.p : Math.round((r.p || 0) / q), ty = typ[String(r.i || "").toLowerCase()] || 0, age = nowS - (r.t || nowS);
+  // equipment is never priced against typical alone: one copy's rolls move its price 10 times or more
+  const gid = names ? names.get(String(r.i || "").toLowerCase()) : 0, equip = gid > 0 && gid < 2000000;
   let flag = "live", why = "";
   if (r.k === "b") { flag = "info"; why = "buy post, not a listing"; }
   else if (r.w && r.w !== "Windia") { flag = "info"; why = r.w + " board"; }
   else if (names && !names.has(String(r.i || "").toLowerCase())) { flag = "away"; why = "name isn't in the game's item list"; }
   else if (!(r.p > 0) || !r.s) { flag = "away"; why = "no price or seller"; }
   else if (chat) { flag = "info"; why = "trade chat post"; }
+  else if (r.so && ty && !equip && each > ty * 30) { flag = "check"; why = "sold at over 30x typical: likely a spot swapped out, not counted as a sale"; }
   else if (r.so) { flag = "sold"; why = "sold slot: counts as a sale"; }
   else if (ty >= 2000 && each < ty * 0.03) { flag = "away"; why = "under 3% of typical: read as a misread"; }
+  else if (ty && !equip && each < ty * 0.15) { flag = "check"; why = "under 15% of typical, likely a misread: listed, never cheapest or a deal"; }
+  else if (ty && !equip && each > ty * 10) { flag = "check"; why = "over 10x typical: likely a spot holder, hidden on the board unless spot holders are shown"; }
   else if (ty && each < ty * HOLD_CUT && age < HOLD_S) { flag = "held"; why = "deal, public at " + new Date((r.t + HOLD_S) * 1000).toISOString().slice(11, 16) + " UTC"; }
   return { item: r.i, each, stack: q, set, sold: !!r.so, seller: r.s, ch: r.c || 0, room: r.r || "", world: r.w || "Windia", stats: r.x || null, t: r.t || 0, typ: ty || 0, flag, why };
+}
+// the pump's hourly accuracy report (tools/accuracy.py, private archive): per source, the share of the last 24 hours'
+// rows the board holds back as likely wrong, and the cross-check between scanners
+async function accuracyReport(env) {
+  const r = await archFetch(env, "data/accuracy.json", 300).catch(() => null);
+  return r ? await r.clone().json().catch(() => null) : null;
 }
 async function adminLiveFeed(env, url) {
   const now = Date.now(), from = now - 2 * 3600e3, nowS = Math.floor(now / 1000);
@@ -757,7 +768,7 @@ async function adminLiveFeed(env, url) {
   }
   const after = Number(url.searchParams.get("after") || 0);
   const list = posts.filter((p) => p.id > after).slice(0, 300).map((p) => {
-    const worlds = {}, chs = {}, rooms = {}, sellers = {}, flags = { live: 0, held: 0, away: 0, sold: 0, info: 0 };
+    const worlds = {}, chs = {}, rooms = {}, sellers = {}, flags = { live: 0, held: 0, away: 0, sold: 0, info: 0, check: 0 };
     let n = 0;
     (p.docs || []).forEach((d) => d.rows.forEach((x) => {
       n++; const lr = liveRow(x, d, typ, names, nowS); flags[lr.flag]++;
@@ -776,7 +787,8 @@ async function adminLiveFeed(env, url) {
   const scanners = Object.values(who).map((w) => Object.assign(w, { active: now - w.last <= 15 * 6e4 })).sort((a, b) => b.last - a.last);
   let rejects = [];
   try { rejects = ((await env.INBOX_DB.prepare("SELECT t, why, tool, tag, nm, n FROM rejlog WHERE t > ? ORDER BY t DESC LIMIT 100").bind(from).all()).results) || []; } catch (e) {}
-  return json({ at: now, window: "2h", posts: list, scanners, rejects }, 200, { "Cache-Control": "no-store" });
+  const accuracy = await accuracyReport(env).catch(() => null);   // cached 5 minutes
+  return json({ at: now, window: "2h", posts: list, scanners, rejects, accuracy }, 200, { "Cache-Control": "no-store" });
 }
 // Scanners active right now, FM Watcher and the browser scanner alike: one row per scanner with its last upload
 // time. A named scanner counts once even when it runs both; guests count by their hashed id. Blocked ids never count.

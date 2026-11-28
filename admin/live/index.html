@@ -7,8 +7,8 @@
 <title>Live Feed · Club FM admin</title>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <style>
-:root{--bg:#f6f4fb;--card:#fff;--fg:#1d1830;--mut:#6b6684;--line:#e4dff2;--acc:#6d3fd1;--live:#16794a;--held:#a8650a;--away:#b42318;--sold:#2453b0;--info:#6b6684;--new:#efe8ff;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#120e1d;--card:#1c1730;--fg:#efe9ff;--mut:#a59fbf;--line:#2e2747;--acc:#a78bfa;--live:#4ade80;--held:#fbbf24;--away:#f87171;--sold:#93b4ff;--info:#a59fbf;--new:#2a2050;color-scheme:dark}}
+:root{--bg:#f6f4fb;--card:#fff;--fg:#1d1830;--mut:#6b6684;--line:#e4dff2;--acc:#6d3fd1;--live:#16794a;--held:#a8650a;--away:#b42318;--sold:#2453b0;--info:#6b6684;--check:#8a4b00;--new:#efe8ff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#120e1d;--card:#1c1730;--fg:#efe9ff;--mut:#a59fbf;--line:#2e2747;--acc:#a78bfa;--live:#4ade80;--held:#fbbf24;--away:#f87171;--sold:#93b4ff;--info:#a59fbf;--check:#fdba74;--new:#2a2050;color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:env(safe-area-inset-top,0) max(12px,env(safe-area-inset-right,0)) 40px max(12px,env(safe-area-inset-left,0))}
 header{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
@@ -32,7 +32,9 @@ button{font:inherit;border:1px solid var(--line);background:var(--card);color:va
 .uh .w{min-width:0}
 .uh .w small{display:block;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cnt{text-align:right;font-size:.85rem;white-space:nowrap}
-.f-live{color:var(--live)}.f-held{color:var(--held)}.f-away{color:var(--away)}.f-sold{color:var(--sold)}.f-info{color:var(--info)}
+.f-live{color:var(--live)}.f-held{color:var(--held)}.f-away{color:var(--away)}.f-sold{color:var(--sold)}.f-info{color:var(--info)}.f-check{color:var(--check)}
+.acc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 10px;overflow-x:auto}
+.acc td.bad{color:var(--away);font-weight:600}
 .rows{border-top:1px solid var(--line);padding:6px 10px 10px;overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:.85rem}
 th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -55,6 +57,8 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <div class="strip" id="strip"></div>
 <h2>Uploads, newest first <span class="st">· last 2 hours · tap one for its rows</span></h2>
 <div id="feed"></div>
+<h2>Accuracy <span class="st" id="accst">· last 24 hours · rows the board holds back as likely wrong</span></h2>
+<div class="acc" id="acc"></div>
 <h2>Turned away</h2>
 <div class="rej" id="rej"></div>
 </div>
@@ -69,7 +73,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   function hm(t) { var d = new Date(t); return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }); }
   function ago(t) { var s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? s + "s ago" : s < 3600 ? Math.round(s / 60) + "m ago" : Math.floor(s / 3600) + "h " + Math.round(s % 3600 / 60) + "m ago"; }
   var TOOL = { watcher: "FM Watcher", browser: "Browser scanner", partner: "Partner feed" };
-  var FLAG = { live: "on the board", held: "held", away: "turned away", sold: "sale", info: "" };
+  var FLAG = { live: "on the board", held: "held", away: "turned away", sold: "sale", info: "", check: "check" };
   function stats(x) { if (!x) return ""; return Object.keys(x).filter(function (k) { return k[0] !== "_" && !/_b$|_c$/.test(k); }).map(function (k) { return k + " " + x[k]; }).join(", "); }
   function strip(list) {
     var s = $("strip"); s.textContent = "";
@@ -81,6 +85,24 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
       c.appendChild(el("div", "st", (w.active ? "active · " : "idle · ") + "last " + ago(w.last)));
       s.appendChild(c);
     });
+  }
+  // the pump's hourly report: one row per source. Accuracy = rows not held back as likely wrong (under 15% of
+  // typical, or equipment in a stack). "Spot holders" and "unknown names" are counted, not wrong.
+  function accuracy(a) {
+    var box = $("acc"); box.textContent = "";
+    if (!a || !a.sources) { box.appendChild(el("div", "empty f-away", "The accuracy report couldn't be read. Counts as not checked.")); return; }
+    var made = Date.parse(a.made); $("accst").textContent = "· last " + (a.hours || 24) + " hours · made " + ago(made) + (Date.now() - made > 3 * 36e5 ? " (stale: the pump makes it hourly)" : "");
+    var t = el("table"), hd = el("tr"); ["Source", "Rows", "Accuracy", "Likely wrong", "Spot holders", "Unknown names", "Seller misreads", "Cross-check"].forEach(function (x) { hd.appendChild(el("th", null, x)); }); t.appendChild(hd);
+    Object.keys(a.sources).forEach(function (w) {
+      var c = a.sources[w], x = (a.cross || {})[w], tr = el("tr");
+      if (c.rows < 50) return;
+      tr.appendChild(el("td", null, w)); tr.appendChild(el("td", "n", c.rows.toLocaleString()));
+      tr.appendChild(el("td", "n" + (c.accuracy < (a.target || 0.99) ? " bad" : ""), (100 * c.accuracy).toFixed(2) + "%"));
+      [c.wrong, c.high, c.name, c.seller].forEach(function (v) { tr.appendChild(el("td", "n", (v || 0).toLocaleString())); });
+      tr.appendChild(el("td", null, x ? (x.rate == null ? x.matched + " of " + x.compared + ", " + x.note : (100 * x.rate).toFixed(1) + "% of " + x.compared) : "no overlap"));
+      t.appendChild(tr);
+    });
+    box.appendChild(t);
   }
   function rejects(list) {
     var r = $("rej"); r.textContent = "";
@@ -102,7 +124,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
     w.appendChild(el("small", null, p.error ? p.error : p.sellers + (p.sellers === 1 ? " seller" : " sellers") + (p.sellerTop.length ? ": " + p.sellerTop.join(", ") + (p.sellers > p.sellerTop.length ? "…" : "") : "")));
     h.appendChild(w);
     var c = el("div", "cnt"); c.appendChild(el("div", null, p.rows.toLocaleString() + " rows"));
-    ["held", "away", "sold"].forEach(function (k) { if (p.flags[k]) c.appendChild(el("div", "f-" + k, p.flags[k] + " " + FLAG[k])); });
+    ["held", "check", "away", "sold"].forEach(function (k) { if (p.flags[k]) c.appendChild(el("div", "f-" + k, p.flags[k] + " " + FLAG[k])); });
     h.appendChild(c); u.appendChild(h);
     var body = el("div", "rows"); body.hidden = true; u.appendChild(body);
     function toggle() { body.hidden = !body.hidden; open[p.id] = !body.hidden; if (!body.hidden && !body.childElementCount) loadRows(p.id, body); }
@@ -154,7 +176,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
       var empty = $("feed").querySelector(".empty"); if (empty) empty.remove();
       j.posts.forEach(function (p) { if (seen[p.id]) return; seen[p.id] = 1; if (!first) newIds[p.id] = 1; posts.push(p); last = Math.max(last, p.id); });
       posts.sort(function (a, b) { return b.id - a.id; });
-      render(newIds); strip(j.scanners || []); rejects(j.rejects || []);
+      render(newIds); strip(j.scanners || []); rejects(j.rejects || []); accuracy(j.accuracy);
       okAt = Date.now(); $("dot").className = "dot"; upd();
     }).catch(function () { $("dot").className = "dot off"; $("status").textContent = "can't reach the server, retrying"; })
       .then(function () { timer = setTimeout(tick, POLL); });

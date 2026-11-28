@@ -64,6 +64,9 @@ jobs:
             # scanner health (room read rate, late rows, watcher version, dropped uploads) for the watchdog's alert
             if [ $(( n % 15 )) -eq 0 ]; then python3 $T/health.py data data/health.json /tmp/main/download/version.json || true; fi
             if [ $(( n % 15 )) -eq 0 ]; then timeout 120 python3 $T/misspull.py data || true; fi
+            # accuracy, last 24 hours: each source's rows the board holds back as likely wrong, and the cross-check between
+            # scanners (data/accuracy.json stays private; the owner sees it in the Live Feed and the daily stat check DM)
+            if [ $(( n % 15 )) -eq 0 ]; then timeout 120 python3 $T/accuracy.py report data data/accuracy.json || true; fi
             git add -A data
             # the finished price board, built by the page itself (the full copy stays private, a price-only copy goes public)
             if ! git diff --cached --quiet || [ $(( n % 15 )) -eq 0 ]; then timeout 300 python3 $T/snapshot.py /tmp/main . data/summary.json || true; git add -A data; git add -f data/hoverwanted.json 2>/dev/null || true; fi
