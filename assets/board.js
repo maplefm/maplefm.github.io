@@ -2959,7 +2959,7 @@
     }
     if (LADQ.length) { LADQ_T = setTimeout(ladRun, 0); if (moved) LADQ_MOVED = true; return; }
     LADQ_T = null;
-    if ((moved || LADQ_MOVED) && D && !ENGINE) { LADQ_MOVED = false; keepRows = $("rows").childElementCount; render(); keepRows = 0; }
+    if ((moved || LADQ_MOVED) && D && !ENGINE) { LADQ_MOVED = false; keepRows = shownRows(); render(); keepRows = 0; }
     LADQ_MOVED = false;
   }
   var LADQ_MOVED = false;
@@ -4806,6 +4806,9 @@
       D = pv; lastBuild = Date.now(); DIRTY = false; SIDX = null; render(); mark("pv");
     }).catch(function () {});
   }
+  // how many item rows the price table shows now (not the "Loading more" row), so a refresh keeps the reader's place
+  // without growing the table by the extra rows each time
+  function shownRows() { var r = $("rows"); return r ? r.querySelectorAll("tr[data-item]").length : 0; }
   function hasRaw() { return scans.length > base.length; }
   function render(rebuild) {
     if (ENGINE) return;   // the engine only builds; the page draws
@@ -5717,7 +5720,7 @@
       var all = base.slice(); FILES.forEach(function (f) { if (live[f[0]]) all = all.concat(live[f[0]]); });
       var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
       if (sig === lastSig) return;
-      lastSig = sig; scans = all; DIRTY = true; keepRows = $("rows").childElementCount; render(); keepRows = 0;
+      lastSig = sig; scans = all; DIRTY = true; keepRows = shownRows(); render(); keepRows = 0;
     });
   }
   function poll() {
@@ -5737,7 +5740,7 @@
       var sig = FILES.map(function (f) { var x = live[f[0]]; return x ? x.length + ":" + (x[x.length - 1] || {}).at : "-"; }).join("|");
       var changed = sig !== lastSig; lastSig = sig; scans = all;
       loadGame().then(function () {
-        if (changed) { DIRTY = true; keepRows = $("rows").childElementCount; render(); keepRows = 0; } else livePill();
+        if (changed) { DIRTY = true; keepRows = shownRows(); render(); keepRows = 0; } else livePill();
         armed = true; wArmed = true;
       });
     });
@@ -5802,7 +5805,7 @@
           if (!d || !DEALS_ON || seq !== ENG.seq) return;   // a newer board came in while this one was unpacked
           d.engine = true; clearTimeout(ENG_WAIT); ENG_ON = true; mark("engine");
           D = d; MEMBER = true; $("gate").hidden = true; lastBuild = Date.now(); DIRTY = false; SIDX = null;
-          keepRows = $("rows").childElementCount; render(); keepRows = 0;
+          keepRows = shownRows(); render(); keepRows = 0;
         });
       } else if (m.type === "sell") { ENG_SELL = m.sell || {}; if (state.tab === "sell") loadGame().then(function () { render(); }); }
       else if (m.type === "denied") { engineStop(true); MEMBER = false; gateText(!!ME_ACCT); $("gate").hidden = false; }
@@ -5904,7 +5907,7 @@
       if (!j || !D || !D.snap || j.at <= D.snapAt || hasRaw()) return;
       return snapDecodeAsync(j).then(function (d) {
       if (!d || !D || !D.snap || D.engine || DEALS_ON || hasRaw()) return;
-      D = d; lastBuild = Date.now(); DIRTY = false; SIDX = null; keepRows = $("rows").childElementCount; render(); keepRows = 0;
+      D = d; lastBuild = Date.now(); DIRTY = false; SIDX = null; keepRows = shownRows(); render(); keepRows = 0;
       FRESH_KEYS = {}; FRESH_T = 0; freshPoll();
       });
     }).catch(function () {});
@@ -5961,7 +5964,7 @@
     if (added || touched.length) {
       FRESH_N += added;
       D.latest = Math.max(D.latest || 0, now);
-      keepRows = $("rows").childElementCount; render(); keepRows = 0;
+      keepRows = shownRows(); render(); keepRows = 0;
     }
     return added;
   }
