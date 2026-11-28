@@ -24,5 +24,8 @@
  "trial": false,
  "gap_mult": 1.5,
  "gap_from": "2026-10-28",
- "gap_min_days": 5
+ "gap_min_days": 5,
+ "unpaid_tags": [
+  "7dae"
+ ]
 }
