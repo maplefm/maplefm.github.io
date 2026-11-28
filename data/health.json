@@ -1,5 +1,5 @@
 {
- "at": 1795874066321,
+ "at": 1795877574455,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -25,18 +25,18 @@
    "behind": null
   },
   "laclac": {
-   "rows24": 9709,
-   "room24": 9709,
-   "ch24": 9709,
-   "rows7": 76220,
-   "room7": 74241,
+   "rows24": 7962,
+   "room24": 7962,
+   "ch24": 7962,
+   "rows7": 73923,
+   "room7": 71944,
    "late7": 0,
-   "chat24": 10,
+   "chat24": 2,
    "last": 1795808124,
    "ver": "2026.11.21.1",
-   "lag_median_min": 3.2,
+   "lag_median_min": 3.3,
    "room_rate24": 1.0,
-   "room_rate7": 0.974,
+   "room_rate7": 0.973,
    "late_share7": 0.0,
    "behind": null
   },
@@ -153,18 +153,18 @@
    "behind": 1
   },
   "VioletScanner": {
-   "rows24": 3916,
-   "room24": 3593,
-   "ch24": 3916,
-   "rows7": 3916,
-   "room7": 3593,
+   "rows24": 7890,
+   "room24": 5949,
+   "ch24": 7890,
+   "rows7": 7890,
+   "room7": 5949,
    "late7": 0,
    "chat24": 0,
-   "last": 1795849737,
+   "last": 1795877396,
    "ver": "",
    "lag_median_min": 0.0,
-   "room_rate24": 0.918,
-   "room_rate7": 0.918,
+   "room_rate24": 0.754,
+   "room_rate7": 0.754,
    "late_share7": 0.0,
    "behind": null
   }
@@ -173,8 +173,8 @@
   "age_h": 0.9,
   "service": "active",
   "watching": 10,
-  "live_classic": 61,
-  "shops_last_hour": 933
+  "live_classic": 52,
+  "shops_last_hour": 810
  },
  "drops": {
   "2026-11-22": {
@@ -196,7 +196,7 @@
    "incomplete upload": 862
   },
   "2026-11-28": {
-   "incomplete upload": 850
+   "incomplete upload": 910
   }
  },
  "rejects": {
@@ -204,8 +204,11 @@
    "simple: no key": 4,
    "simple: bad post": 1,
    "simple: nothing kept": 1,
-   "bad post": 1
+   "bad post": 1,
+   "simple: nothing kept: Work Gloves (sold: true or false); Work Gloves (item_id 2000005 is Power Elixir, not Work Gloves)": 1
   }
  },
- "flags": []
+ "flags": [
+  "VioletScanner: 75% of shops placed in a room in the last 24 hours (7890 shop rows)"
+ ]
 }
