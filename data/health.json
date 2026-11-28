@@ -1,5 +1,5 @@
 {
- "at": 1795852374200,
+ "at": 1795855590453,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -9,16 +9,16 @@
  "current": "2026.11.21.1",
  "scanners": {
   "Zik": {
-   "rows24": 7291,
-   "room24": 7291,
-   "ch24": 7291,
+   "rows24": 5758,
+   "room24": 5758,
+   "ch24": 5758,
    "rows7": 95928,
    "room7": 95906,
    "late7": 0,
-   "chat24": 189,
+   "chat24": 164,
    "last": 1795850767,
    "ver": "2026.11.21.1",
-   "lag_median_min": 2.2,
+   "lag_median_min": 2.3,
    "room_rate24": 1.0,
    "room_rate7": 1.0,
    "late_share7": 0.0,
@@ -158,23 +158,23 @@
    "ch24": 3916,
    "rows7": 3916,
    "room7": 3593,
-   "late7": 429,
+   "late7": 0,
    "chat24": 0,
    "last": 1795849737,
    "ver": "",
-   "lag_median_min": 38.3,
+   "lag_median_min": 0.0,
    "room_rate24": 0.918,
    "room_rate7": 0.918,
-   "late_share7": 0.11,
+   "late_share7": 0.0,
    "behind": null
   }
  },
  "stream": {
-  "age_h": 0.9,
+  "age_h": 0.8,
   "service": "active",
   "watching": 10,
-  "live_classic": 71,
-  "shops_last_hour": 1373
+  "live_classic": 66,
+  "shops_last_hour": 1307
  },
  "drops": {
   "2026-11-22": {
@@ -196,7 +196,7 @@
    "incomplete upload": 862
   },
   "2026-11-28": {
-   "incomplete upload": 497
+   "incomplete upload": 557
   }
  },
  "rejects": {
@@ -207,7 +207,5 @@
    "bad post": 1
   }
  },
- "flags": [
-  "VioletScanner: 11.0% of rows reached us over an hour late this week"
- ]
+ "flags": []
 }
