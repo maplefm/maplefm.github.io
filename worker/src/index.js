@@ -633,6 +633,7 @@ async function inboxSimple(req, env) {
       else for (const [k, v] of Object.entries(it.stats)) {
         const kk = SIMPLE_STATS[String(k).toLowerCase()] || (Object.values(SIMPLE_STATS).includes(String(k).toUpperCase()) ? String(k).toUpperCase() : "");
         if (!kk || !int(v, -9999, 99999)) { ignored.push(k); continue; }
+        if (v === 0 && kk !== "SLOTS" && kk !== "UP") continue;   // the game's popup never shows a stat at 0: kept as the watcher reads it
         x[kk] = v;
       }
     }
