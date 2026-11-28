@@ -45,6 +45,9 @@ jobs:
           mkdir -p /tmp/ip/item && cp item/*.css item/*.js /tmp/ip/item/
           python3 tools/itempages.py /tmp/summary-public.json /tmp/ip /tmp/itemguide.json /tmp/world.json assets/training-notes.json
           test "$(ls /tmp/ip/item | wc -l)" -gt 500
+      # Nov 28 2026: the accuracy report counts rows by the board's own limits; fixed cases catch a limit that drifts
+      - name: Accuracy checks
+        run: python3 tests/accuracy.py
       # Nov 19 2026: the pages use the width of the screen; every link on them must land, and the map tools must work
       - name: Built pages link only to pages that exist
         run: python3 tests/links.py /tmp/ip

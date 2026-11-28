@@ -87,9 +87,22 @@ export async function statReport(env, opts) {
   if (foreignN >= 5) lines.push("**Hovers thrown out as another item's popup:** " + foreignN + " (" + rep.foreign.slice(0, 5).map((f) => f.item + " " + f.reads).join(", ") + ")" + (rep.scanners.length ? "\nMost from: " + rep.scanners.map((s) => s.who + " " + s.foreign).join(", ") : ""));
   const slotsN = rep.slotsOff.reduce((a, f) => a + f.reads, 0);
   if (slotsN >= 3) lines.push("**Upgrades-left reads that can't be right, set aside:** " + slotsN + " (" + rep.slotsOff.slice(0, 6).map((f) => f.item + " " + f.reads).join(", ") + ")");
+  // accuracy of every source, from the pump's hourly report: only a source under 99% (or a cross-check under half)
+  // goes in the DM, with the counts that put it there
+  const acc = opts.acc ? await opts.acc().catch(() => null) : null;
+  if (acc && acc.sources) {
+    rep.accuracy = { made: acc.made, off: acc.off || [] };
+    const off = (acc.off || []).filter((w) => !/cross-check/.test(w));
+    if (off.length) lines.push("**Sources under 99% accurate** (last " + (acc.hours || 24) + " hours, rows the board holds back as likely wrong):\n" + off.map((w) => {
+      const c = acc.sources[w] || {};
+      return "1. " + w + ": " + (100 * (c.accuracy || 0)).toFixed(2) + "% (" + (c.wrong || 0) + " of " + (c.rows || 0).toLocaleString() + " rows: " + ["low", "stack"].filter((k) => c[k]).map((k) => c[k] + " " + k).join(", ") + ")";
+    }).join("\n"));
+    const cx = (acc.off || []).filter((w) => /cross-check/.test(w)).map((w) => w.replace(" (cross-check)", ""));
+    if (cx.length) lines.push("**Cross-check under half:** " + cx.map((w) => { const x = (acc.cross || {})[w] || {}; return w + " " + x.matched + " of " + x.compared + " rows seen by another scanner"; }).join(", "));
+  } else if (opts.acc) lines.push("**Accuracy report missing:** the pump's data/accuracy.json couldn't be read, so accuracy wasn't checked today.");
   if (!lines.length) return Object.assign({ dm: false }, rep);
   fresh.forEach((m) => seen.add(m.item + "|" + m.stat));
   await env.ACCOUNTS.put("stataudit:seen", JSON.stringify([...seen].slice(-2000)));
-  const sent = opts.dm ? await opts.dm("Stat accuracy report, " + day + "\n\n" + lines.join("\n\n") + "\n\nNothing here changes prices on its own: impossible stats are already kept off the board.") : 0;
+  const sent = opts.dm ? await opts.dm("Stat accuracy report, " + day + "\n\n" + lines.join("\n\n") + "\n\nNothing here changes prices on its own: impossible stats and likely-wrong prices are already kept off the board.") : 0;
   return Object.assign({ dm: !!sent }, rep);
 }
