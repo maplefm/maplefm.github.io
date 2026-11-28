@@ -621,6 +621,7 @@ async function inboxSimple(req, env) {
     if (!str(it.name, 64)) why.push("name: 1 to 64 characters");
     if (!int(it.price, 1, 1e11)) why.push("price: a whole number of mesos from 1 to 100,000,000,000");
     if (it.quantity != null && !int(it.quantity, 1, 32767)) why.push("quantity: 1 to 32,767");
+    if (it.sold != null && typeof it.sold !== "boolean") why.push("sold: true or false");
     if (it.item_id != null) {
       if (!int(it.item_id, 1, 99999999)) why.push("item_id: a game item id");
       else if (!ids) why.push("item_id can't be checked right now, try again");
@@ -645,9 +646,10 @@ async function inboxSimple(req, env) {
     const set = [207, 233].includes(Math.floor(gid / 10000)) || /throwing stars?$|^wooden top$/i.test(it.name);
     const p = set ? it.price : it.price * q;
     if (!set && p > 1e11) { held.push({ index: n, name: it.name, why: ["price x quantity is over 100,000,000,000"] }); return; }
-    const base = JSON.stringify([b.seller, it.name, p, q]);
+    const base = JSON.stringify([b.seller, it.name, p, q, it.sold === true]);
     const o = occ.get(base) || 0; occ.set(base, o + 1);
     const row = { s: b.seller, i: it.name, p, q, t, _o: o };
+    if (it.sold === true) row.so = true;   // a sold slot still showing in the shop (greyed out): how sales are caught
     if (b.channel != null) row.c = b.channel;
     if (b.room != null) row.r = simpleRoom(b.room);
     if (b.world === "Zenith") row.w = "Zenith";
