@@ -98,6 +98,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
     w.appendChild(el("span", "chip" + (p.tool === "partner" ? " partner" : ""), TOOL[p.tool] || p.tool)); w.appendChild(el("span", "chip", p.tag));
     var where = [p.worlds.join(", "), p.chs.length ? "Ch " + p.chs.join(", ") : "", p.rooms.join(", ")].filter(Boolean).join(" · ");
     w.appendChild(el("small", null, where || (p.kinds.indexOf("chat") >= 0 ? "trade chat" : "")));
+    if (p.unk && p.unk.length) w.appendChild(el("small", "f-away", "fields not read: " + p.unk.join(", ")));
     w.appendChild(el("small", null, p.error ? p.error : p.sellers + (p.sellers === 1 ? " seller" : " sellers") + (p.sellerTop.length ? ": " + p.sellerTop.join(", ") + (p.sellers > p.sellerTop.length ? "…" : "") : "")));
     h.appendChild(w);
     var c = el("div", "cnt"); c.appendChild(el("div", null, p.rows.toLocaleString() + " rows"));
