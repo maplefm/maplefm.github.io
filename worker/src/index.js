@@ -91,6 +91,7 @@ async function route(req, env, url) {
   if (p === "/snap" && req.method === "POST") return snapPut(req, env);
   if (p === "/data/sig" && req.method === "GET") return dataSig(env);
   if (p === "/inbox" && req.method === "POST") return inboxPost(req, env);
+  if (p === "/inbox/simple" && req.method === "POST") return inboxSimple(req, env);
   if (p === "/tipimg" && req.method === "POST") return tipImgPut(req, env);
   if (p.startsWith("/tipimg/") && req.method === "GET") return tipImgGet(p, env);
   if (p === "/missimg" && req.method === "POST") return missPut(req, env);
@@ -557,6 +558,114 @@ async function inboxPost(req, env) {
   await fastPut(env, msg, blocked);
   await scannerSeen(env, m, blocked, new URL(req.url).searchParams.get("via") === "browser" ? "b" : "w");
   return json({ ok: true });
+}
+// ---------------------------------------------------------------- the simple inbox (POST /inbox/simple)
+// For a partner's own price tool: plain JSON, no compression or signing. The sender makes one random key once
+// (64 hex) and sends it as X-Source-Key on every post. Its hash is the sender's id, so posts can be traced, blocked
+// and kept off scanner pay (pay.json unpaid_tags) like a watcher's. Each post becomes the same signed, compressed
+// inbox post a watcher sends, so tools/inbox.py checks and stores it exactly the same way.
+// Names are kept exactly as sent. An item_id that names a different item than "name" holds that item back.
+const SIMPLE_STATS = { watk: "ATT", att: "ATT", matk: "MATT", matt: "MATT", wdef: "WDEF", mdef: "MDEF", hp: "HP", mp: "MP",
+  acc: "ACC", accuracy: "ACC", avoid: "AVOID", avoidability: "AVOID", speed: "SPEED", jump: "JUMP", str: "STR", dex: "DEX",
+  int: "INT", luk: "LUK", upgrade_slots: "SLOTS", slots: "SLOTS", upgrade_count: "UP", up: "UP" };
+let SIMPLE_IDS = null, simpleIdsAt = 0;
+async function simpleIds() {
+  if (SIMPLE_IDS && Date.now() - simpleIdsAt < 3600e3) return SIMPLE_IDS;
+  const r = await fetch("https://maplefm.gg/data/itemdb.json", { cf: { cacheTtl: 3600, cacheEverything: true } }).catch(() => null);
+  const d = r && r.ok ? await r.json().catch(() => null) : null;
+  if (!d || !Array.isArray(d.items)) return SIMPLE_IDS;
+  const m = new Map(); d.items.forEach((x) => m.set(Number(x[1]), String(x[0])));
+  SIMPLE_IDS = m; simpleIdsAt = Date.now();
+  return m;
+}
+const hexBytes = (h) => new Uint8Array(h.match(/../g).map((x) => parseInt(x, 16)));
+async function hmacHexKey(keyHex, msg) {
+  const k = await crypto.subtle.importKey("raw", hexBytes(keyHex), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return [...new Uint8Array(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(msg)))].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+// rooms the way the watcher writes them, so the board shows them: "Free Market Room 3" -> "FM3", "Free Market Entrance" -> "FM Entrance"
+function simpleRoom(r) {
+  const m = /^(?:free\s*market|fm)?\s*(?:room)?\s*(\d{1,2})$/i.exec(r.trim());
+  if (m && +m[1] >= 1 && +m[1] <= 40) return "FM" + +m[1];
+  if (/^(free\s*market|fm)\s*entrance$/i.test(r.trim())) return "FM Entrance";
+  return r;
+}
+async function inboxSimple(req, env) {
+  if (!env.INBOX_DB) return json({ error: "inbox offline" }, 503);
+  const ip = req.headers.get("CF-Connecting-IP") || "";
+  if (overLimit("p:" + ip, 200, 600) || await edgeOver(env, "p:" + ip)) { await inboxReject(env, "simple: slow down"); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
+  const key = String(req.headers.get("X-Source-Key") || "").toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(key)) { await inboxReject(env, "simple: no key"); return json({ error: "X-Source-Key header must be 64 hex characters you made once and keep" }, 401); }
+  const body = await req.text();
+  if (body.length > 200000) { await inboxReject(env, "simple: too big"); return json({ error: "too big: send at most 200,000 characters, split bigger batches" }, 413); }
+  let b = null; try { b = JSON.parse(body); } catch (e) {}
+  const str = (v, n) => typeof v === "string" && v.length > 0 && v.length <= n;
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
+  const bad = [];
+  if (!b || typeof b !== "object") bad.push("body is not JSON");
+  else {
+    if (!str(b.source, 16)) bad.push("source: 1 to 16 characters");
+    if (b.world != null && !["Windia", "Zenith"].includes(b.world)) bad.push("world: Windia or Zenith");
+    if (!str(b.seller, 24)) bad.push("seller: 1 to 24 characters");
+    if (b.channel != null && !int(b.channel, 1, 40)) bad.push("channel: a whole number from 1 to 40");
+    if (b.room != null && !str(b.room, 40)) bad.push("room: 1 to 40 characters");
+    if (!Array.isArray(b.items) || !b.items.length || b.items.length > 1500) bad.push("items: a list of 1 to 1,500");
+  }
+  if (bad.length) { await inboxReject(env, "simple: bad post"); return json({ error: "bad post", problems: bad }, 400); }
+  const ids = await simpleIds();
+  const t = Math.floor(Date.now() / 1000), rows = [], held = [], occ = new Map();
+  b.items.forEach((it, n) => {
+    const why = [];
+    if (!it || typeof it !== "object") { held.push({ index: n, why: ["not an object"] }); return; }
+    if (!str(it.name, 64)) why.push("name: 1 to 64 characters");
+    if (!int(it.price, 1, 1e11)) why.push("price: a whole number of mesos from 1 to 100,000,000,000");
+    if (it.quantity != null && !int(it.quantity, 1, 32767)) why.push("quantity: 1 to 32,767");
+    if (it.item_id != null) {
+      if (!int(it.item_id, 1, 99999999)) why.push("item_id: a game item id");
+      else if (!ids) why.push("item_id can't be checked right now, try again");
+      else if (!ids.has(it.item_id)) why.push("item_id " + it.item_id + " is not in the game's item list");
+      else if (str(it.name, 64) && ids.get(it.item_id).toLowerCase() !== it.name.toLowerCase()) why.push("item_id " + it.item_id + " is " + ids.get(it.item_id) + ", not " + it.name);
+    }
+    const x = {}, ignored = [];
+    if (it.stats != null) {
+      if (typeof it.stats !== "object" || Array.isArray(it.stats)) why.push("stats: an object");
+      else for (const [k, v] of Object.entries(it.stats)) {
+        const kk = SIMPLE_STATS[String(k).toLowerCase()] || (Object.values(SIMPLE_STATS).includes(String(k).toUpperCase()) ? String(k).toUpperCase() : "");
+        if (!kk || !int(v, -9999, 99999)) { ignored.push(k); continue; }
+        x[kk] = v;
+      }
+    }
+    if (why.length) { held.push({ index: n, name: typeof it.name === "string" ? it.name.slice(0, 64) : null, why }); return; }
+    const q = it.quantity || 1, base = JSON.stringify([b.seller, it.name, it.price, q]);
+    const o = occ.get(base) || 0; occ.set(base, o + 1);
+    const row = { s: b.seller, i: it.name, p: it.price, q, t, _o: o };
+    if (b.channel != null) row.c = b.channel;
+    if (b.room != null) row.r = simpleRoom(b.room);
+    if (b.world === "Zenith") row.w = "Zenith";
+    if (Object.keys(x).length) row.x = x;
+    rows.push(ignored.length ? Object.assign(row, { _ign: ignored }) : row);
+  });
+  const notes = rows.filter((r) => r._ign).map((r) => ({ name: r.i, stats_ignored: r._ign }));
+  rows.forEach((r) => delete r._ign);
+  if (!rows.length) { await inboxReject(env, "simple: nothing kept"); return json({ error: "no item could be kept", held }, 400); }
+  const batch = [{ at: new Date(t * 1000).toISOString().replace(".000Z", "+00:00"), src: "watcher-shop", rows }];
+  const raw = new TextEncoder().encode(JSON.stringify(batch));
+  const zb = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer());
+  let bin = ""; for (let i = 0; i < zb.length; i += 8192) bin += String.fromCharCode.apply(null, zb.subarray(i, i + 8192));
+  const z = btoa(bin), parts = [];
+  for (let i = 0; i < z.length; i += 24000) parts.push(z.slice(i, i + 24000));
+  if (parts.length > 8) return json({ error: "too many items in one post, split it" }, 413);
+  const sid = (await sha256hex("fm-simple:" + key)).slice(0, 16), seq = Date.now();
+  const blocked = await blockedIds(env);
+  for (let k = 0; k < parts.length; k++) {
+    const m = { v: 3, id: sid, nm: b.source, ign: "", ver: "simple.1", seq, k, n: parts.length, z: parts[k],
+      sig: await hmacHexKey(key, [sid, seq, k, parts.length, parts[k]].join("|")), reg: key };
+    const msg = JSON.stringify(m);
+    await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
+    await fastPut(env, msg, blocked);
+    if (k === 0) await scannerSeen(env, m, blocked, "s");
+  }
+  return json({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) });
 }
 // Scanners active right now, FM Watcher and the browser scanner alike: one row per scanner with its last upload
 // time. A named scanner counts once even when it runs both; guests count by their hashed id. Blocked ids never count.
