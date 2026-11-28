@@ -5905,9 +5905,76 @@
       return snapDecodeAsync(j).then(function (d) {
       if (!d || !D || !D.snap || D.engine || DEALS_ON || hasRaw()) return;
       D = d; lastBuild = Date.now(); DIRTY = false; SIDX = null; keepRows = $("rows").childElementCount; render(); keepRows = 0;
+      FRESH_KEYS = {}; FRESH_T = 0; freshPoll();
       });
     }).catch(function () {});
   }
+  // ---------- live listings on the server's board
+  // The server's board is rebuilt after each pump pass (every 4 to 6 minutes). New shop listings reach the Worker's fast
+  // lane within seconds, so every 20 seconds the page asks for them (/data/fast, a few KB) and puts each one into its
+  // item: Where to buy, Cheapest now, the listing count. Typical prices and sales wait for the next board, which has
+  // them for sure. Deals 20%+ under typical stay back for their first 10 minutes for non-members (the server holds them
+  // too). An item the board doesn't have yet, buy posts, chat and other worlds wait for the next board.
+  var FRESH_KEYS = {}, FRESH_N = 0;
+  function freshKey(s, i, u, q) { return String(s).toLowerCase() + "|" + i + "|" + u + "|" + q; }
+  function freshApply(docs) {
+    if (!D || !D.snap || D.engine || DEALS_ON || hasRaw() || ALTW || !Array.isArray(docs)) return 0;
+    var now = Date.now(), touched = [], added = 0;
+    docs.forEach(function (d) {
+      if (!d || d.src !== "watcher-shop" || !Array.isArray(d.rows)) return;
+      var by = String(d.who || "Guest").slice(0, 16);
+      d.rows.forEach(function (r) {
+        if (!r || r.so || r.k === "b" || r.w || !r.s || !r.i || !(r.p > 0)) return;
+        var sl = String(r.s).toLowerCase(); if (ownShop(sl)) return;
+        var cn = canon(r.i), name = snapScroll(cn.n), i = D.byName[name];
+        if (!i || !Array.isArray(i.asks)) return;
+        var set = i.cat === "Stars", qty = r.q || 1, u = set ? r.p : r.p / qty, t = (r.t || 0) * 1000 || now;
+        if (now - t > DAY || t > now + 120e3) return;
+        if (i.typ && u < i.typ * 0.8 && now - t < HOLD) return;                         // the members' head start
+        if (i.typ >= 2000 && u < i.typ * 0.03) return;                                  // "1 for 1 mesos": a misread
+        var k = freshKey(r.s, name, u, set ? 1 : qty);
+        // already on the board: the same seller, item, price and bundle seen in the last day is the same listing, now seen again
+        var same = null; (i.buy || i.asks).some(function (x) { if (!x.chat && freshKey(x.s, x.i, x.u, x.q) === k && Math.abs(x.t - t) < DAY) { same = x; return true; } return false; });
+        if (same) { if (t > same.t) { same.t = t; if (same.st !== "sold") same.st = "up"; touched.push(i); } return; }   // seen in the shop again: still up
+        if (FRESH_KEYS[k]) return;
+        var room = fixRoom(r.r) || "";
+        var l = { i: name, raw: r.i, tl: cn.tl, s: r.s, p: r.p, q: set ? 1 : qty, u: u, n: set ? qty : 0, so: false, b: false, r: room, c: r.c || 0, t: t, tx: !!r.t, chat: false, ns: false,
+          who: by, stream: false, sk: by + "|" + r.s + "|" + d.at, x: r.x || null, xt: r.xt || null, v: "", vt: 0, xn: r.xn || "", xj: r.xj || "", mg: "", sn: 0, st: "up", sold: 0, live: true };
+        FRESH_KEYS[k] = 1; added++;
+        i.asks.unshift(l); if (i.all) i.all.push(l); if (D.L) D.L.push(l);
+        if (i.asksN != null) i.asksN++;
+        i.buy = (i.buy || []).concat([l]).sort(function (a, b) { return a.u - b.u || b.t - a.t; });
+        touched.push(i);
+      });
+    });
+    touched.forEach(function (i) {
+      // Cheapest now, by the build's own rule: the cheapest shop listing still up, never a price at a small slice of typical
+      var floorU = i.typ > 0 ? i.typ * (i.equip ? 0.08 : 0.15) : 0;
+      var still = i.buy.filter(function (x) { return x.st !== "gone" && x.st !== "sold" && !x.chat && !(floorU && x.u < floorU); });
+      if (still[0] && still[0] !== i.bestL) {
+        i.bestL = still[0]; i.best = i.bestL.u;
+        // equips: deals are judged per roll, which the next board works out; everything else against typical, as the build does
+        if (!i.equip) { var solid = i.basis === "24h" || i.basis === "3d"; i.deal = solid && i.typ ? 1 - i.bestL.u / i.typ : -1; }
+      }
+      i._lad = null;   // equips: the roll ladder and its Where to buy work themselves out again from the new list
+    });
+    if (added || touched.length) {
+      FRESH_N += added;
+      D.latest = Math.max(D.latest || 0, now);
+      keepRows = $("rows").childElementCount; render(); keepRows = 0;
+    }
+    return added;
+  }
+  var FRESH_T = 0;
+  function freshPoll() {
+    if (!D || !D.snap || hasRaw() || DEALS_ON || ALTW || document.hidden || Date.now() - FRESH_T < 15e3) return;
+    FRESH_T = Date.now();
+    fetch("https://api.maplefm.gg/data/fast", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && Array.isArray(j.docs)) { window.FM_FRESH = { at: Date.now(), n: freshApply(j.docs), total: FRESH_N }; }
+    }).catch(function () {});
+  }
+  setInterval(freshPoll, 20000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) freshPoll(); });
   if (!ALTW) fetch("https://api.maplefm.gg/data/snap-status", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (st) { if (st && st.at && !SNAP_SEEN) SNAP_SEEN = st.at; }).catch(function () {});
   SNAP_DONE = SNAP_P.then(function (j) { return snapDecodeAsync(j); }).then(function (d) {
     if (D && D.engine) return;   // the club engine's board already landed
@@ -5915,6 +5982,7 @@
     if (Date.now() - d.snapAt > 90 * 6e4) { getBundle(); return; }   // stale copy: build it here instead
     D = d; SNAP_OK = true; lastBuild = Date.now(); DIRTY = false; SIDX = null; mark("snap"); render(); mark("live");
     setInterval(snapRefresh, 90000);
+    freshPoll();
   });
   dbReady.then(function () { poll(); setInterval(poll, 60000); }); setInterval(renderMaint, 60000);
 })();

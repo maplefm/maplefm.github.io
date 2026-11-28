@@ -85,6 +85,7 @@ async function route(req, env, url) {
   if (p === "/admin/stats-report") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await statReport(env, { force: true, dm: url.searchParams.get("dm") ? (m) => mkCtx(env).dmAdmins(m, "Club FM stat check") : null }), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketCheck(env), 200, { "Cache-Control": "no-store" }); }
   if (p === "/admin/market/sync" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await marketSync(env, mkCtx(env))); }
+  if (p === "/data/fast" && req.method === "GET") return publicFast(env);
   if (p === "/data/live" && req.method === "GET") return dataLive(req, env);
   if (p === "/data/snap" && req.method === "GET") return dataSnap(env);
   if (p === "/data/snap-status" && req.method === "GET") return json((await env.ACCOUNTS.get("snap:last", "json")) || {}, 200, { "Cache-Control": "no-store" });
@@ -905,6 +906,19 @@ async function dataSnap(env) {
 // Mega Deals holders see a deal first; everyone else gets it 10 minutes later. The board hides those listings on
 // the page too, but the raw data now leaves them out as well, so nobody can read them out of the download.
 const HOLD_S = 600, HOLD_CUT = 0.8;
+// GET /data/fast: shop listings that came in during the last 20 minutes and aren't in the board yet (the fast lane),
+// for visitors on the server-built board, which only refreshes after a pump pass. Deals 20%+ under typical are held
+// back for their first 10 minutes, as on the board, so Club and Mega Deals keep their head start. Shop rows only,
+// Windia only (the fast lane's own rule). One read of the fast lane per 10 seconds, whoever asks.
+let FAST_PUB = null;
+async function publicFast(env) {
+  if (!FAST_PUB || Date.now() - FAST_PUB.at > 10e3) {
+    const docs = ((await fastDocs(env)).docs || []).filter((d) => d && d.src === "watcher-shop");
+    holdDeals(docs, await holdPrices(env).catch(() => ({})));
+    FAST_PUB = { at: Date.now(), body: JSON.stringify({ at: Date.now(), docs: docs.filter((d) => d.rows && d.rows.length) }) };
+  }
+  return new Response(FAST_PUB.body, { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=10", "Access-Control-Allow-Origin": "*" } });
+}
 async function holdPrices(env) {
   const rows = await summaryRows(env).catch(() => []), m = {};
   rows.forEach((r) => { if (r.typ > 0) { m[r.item.toLowerCase()] = r.typ; m[shown(r.item).toLowerCase()] = r.typ; } });
