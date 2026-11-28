@@ -194,7 +194,9 @@ def payloads(rows, block, now):
         if m.get("v") == 3:
             if not (isinstance(reg, str) and re.fullmatch(r"[0-9a-f]{64}", reg)) or not sig_ok(reg, m):
                 drop("bad signature"); continue             # a v3 post that doesn't verify against its own key is junk
-        p = parts.setdefault((sid, seq), {"n": n, "nm": m.get("nm") or m.get("ign"), "v": m.get("v"), "k": {}, "reg": reg, "raw_ver": str(m.get("ver") or ""),
+        try: arr = int(datetime.datetime.fromisoformat(str(row[0]).replace("Z", "+00:00")).timestamp())   # when the server received it
+        except Exception: arr = 0
+        p = parts.setdefault((sid, seq), {"n": n, "nm": m.get("nm") or m.get("ign"), "v": m.get("v"), "k": {}, "reg": reg, "raw_ver": str(m.get("ver") or ""), "arr": arr,
                                           "ver": str(m.get("ver") or "")[:24] if re.fullmatch(r"[0-9.]{4,24}", str(m.get("ver") or "")) else ""})
         if p["reg"] != reg:
             continue
@@ -212,7 +214,7 @@ def payloads(rows, block, now):
             continue
         if isinstance(docs, list):
             if p.get("raw_ver") == "simple.1": SIMPLE1_FIXED[0] += simple1_fix(docs); SIMPLE1_SIDS.add(sid)
-            out.append((sid, p["nm"], p["v"], docs, p["reg"], p["ver"]))
+            out.append((sid, p["nm"], p["v"], docs, p["reg"], p["ver"], p.get("arr") or 0))
     return out
 
 
@@ -239,7 +241,7 @@ def merge(state, rows, block=()):
             print("rebuilding", h[:4], "from its posts:", sum(len(d.get("rows") or {}) for d in ids[h].get("docs", {}).values()), "stored rows dropped")
             ids[h]["docs"] = {}
             redo.append(h)
-    for sid, nm, v, docs, reg, ver in got:
+    for sid, nm, v, docs, reg, ver, arr in got:
         h = hid(sid)
         me = ids.setdefault(h, {"nm": "", "docs": {}, "h": 1})
         # the first key a watcher registers is pinned; a post under this id with another key, or with none once
@@ -296,6 +298,11 @@ def merge(state, rows, block=()):
                 c["fs"] = (old or {}).get("fs") or now
                 if c.get("so"):
                     c["ss"] = (old or {}).get("ss") or now
+                # a sender rebuilt from its posts (simple1_rebuilt): its rows were stored again at rebuild time, so first
+                # seen is the post's own arrival at the server, never later (scanner health read them as an hour late)
+                if arr and h in redo:
+                    c["fs"] = min(c["fs"], arr)
+                    if c.get("so"): c["ss"] = min(c["ss"], arr)
                 elif old and old.get("ss"):
                     c["ss"] = old["ss"]
                 if old is None or c.get("t", 0) >= old.get("t", 0):
