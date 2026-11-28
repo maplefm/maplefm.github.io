@@ -1,5 +1,5 @@
 {
- "at": 1795860390633,
+ "at": 1795863822019,
  "bars": {
   "room": 0.8,
   "late": 0.02,
@@ -12,8 +12,8 @@
    "rows24": 3417,
    "room24": 3417,
    "ch24": 3417,
-   "rows7": 93309,
-   "room7": 93287,
+   "rows7": 91104,
+   "room7": 91082,
    "late7": 0,
    "chat24": 124,
    "last": 1795850767,
@@ -173,8 +173,8 @@
   "age_h": 0.1,
   "service": "active",
   "watching": 10,
-  "live_classic": 56,
-  "shops_last_hour": 1219
+  "live_classic": 53,
+  "shops_last_hour": 1209
  },
  "drops": {
   "2026-11-22": {
@@ -196,7 +196,7 @@
    "incomplete upload": 862
   },
   "2026-11-28": {
-   "incomplete upload": 609
+   "incomplete upload": 669
   }
  },
  "rejects": {
