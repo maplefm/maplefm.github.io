@@ -1,0 +1,19 @@
+name: Live listings in WebKit
+# One-off check of live listings on the live board in Safari's engine (iPhone) and Chromium; runs on pushes to qa-live.
+# /data/fast is answered with test listings inside the browser only: nothing is posted to the real board.
+on:
+  push:
+    branches: [qa-live]
+    paths: [.github/workflows/liveqa.yml, tests/live-fresh.cjs, tests/livecheck.cjs]
+jobs:
+  webkit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm i -s playwright@1.56.0 && npx playwright install --with-deps webkit chromium > /tmp/pw.log 2>&1 || tail -5 /tmp/pw.log
+      - run: node tests/live-fresh.cjs webkit https://maplefm.gg/
+      - run: node tests/live-fresh.cjs chromium https://maplefm.gg/
+      # board, item, search, errors and memory on the live site, iPhone in WebKit and desktop in Chromium (Nov 28 2026)
+      - run: IT=gloves-attack-scroll-60 node tests/livecheck.cjs webkit
+      - run: IT=gloves-attack-scroll-60 node tests/livecheck.cjs chromium
