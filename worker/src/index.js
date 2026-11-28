@@ -109,6 +109,7 @@ async function route(req, env, url) {
   if (p === "/hit" && req.method === "POST") return hit(req, env);
   if (p === "/reddit/push" && req.method === "POST") return redditPush(req, env);
   if (p === "/admin/reddit" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const st = (await env.ACCOUNTS.get("reddit:state", "json")) || {}; if (url.searchParams.get("log")) return json((await env.ACCOUNTS.get("reddit:log", "json")) || []); return json({ at: st.at, lastOk: st.lastOk, status: st.status, fails: st.fails, seen: (st.seen || []).length }, 200, { "Cache-Control": "no-store" }); }
+  if (p === "/admin/live-feed" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return adminLiveFeed(env, url); }
   if (p === "/admin/traffic" && req.method === "GET") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); const h = Number(url.searchParams.get("h") || 24); return json(await trafficStats(env, Date.now() - h * 3600e3, Date.now()), 200, { "Cache-Control": "no-store" }); }
   if (p === "/me/digest/test" && req.method === "POST") { const me = await whoami(req, env); if (!me) return json({ error: "sign in" }, 401); if (overLimit("dg:" + me.id, 3, 3600)) return json({ error: "slow down" }, 429); return json(await watchDigest(env, String(me.id))); }
   if (p === "/admin/score/post" && req.method === "POST") { const me = await whoami(req, env); if (!isAdmin(me, env)) return json({ error: "admin only" }, 403); return json(await morningScore(env, true)); }
@@ -162,7 +163,7 @@ function login(req, env, url) {
   back.searchParams.set("prompt", "none");
   const h = new Headers({ Location: back.toString() });
   h.append("Set-Cookie", `fm_state=${state}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
-  h.append("Set-Cookie", `fm_back=${["home", "quests", "market", "shop", "scan"].includes(url.searchParams.get("back")) ? url.searchParams.get("back") : "earn"}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
+  h.append("Set-Cookie", `fm_back=${["home", "quests", "market", "shop", "scan", "admin"].includes(url.searchParams.get("back")) ? url.searchParams.get("back") : "earn"}; Path=/; Max-Age=600; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
 }
 
@@ -193,7 +194,7 @@ async function callback(req, env, url) {
   if (!acct.code) acct.code = await newCode(env, u.id);
   await env.ACCOUNTS.put(key, JSON.stringify(acct));
   const session = await sign(env.SESSION_SECRET, u.id + "|" + (now() + 30 * DAY));
-  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in", market: "/market.html#signed-in", shop: "/shop.html#signed-in", scan: "/scan/#signed-in" }[cookie(req, "fm_back")] || "/earn.html#signed-in") + "&fmt=" + encodeURIComponent(session) });
+  const h = new Headers({ Location: env.SITE + ({ home: "/#signed-in", quests: "/quests.html#signed-in", market: "/market.html#signed-in", shop: "/shop.html#signed-in", scan: "/scan/#signed-in", admin: "/admin/live/" }[cookie(req, "fm_back")] || "/earn.html#signed-in") + "&fmt=" + encodeURIComponent(session) });
   h.append("Set-Cookie", `${COOKIE}=${session}; Path=/; Max-Age=${30 * DAY}; Secure; HttpOnly; SameSite=None`);
   h.append("Set-Cookie", `fm_state=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`);
   return new Response(null, { status: 302, headers: h });
@@ -545,14 +546,17 @@ async function sessionId(req, env) {
 // them). Posts sit in D1 for 15 days and only the pump can read them back, with INBOX_PULL_KEY.
 async function inboxPost(req, env) {
   if (!env.INBOX_DB) return json({ error: "inbox offline" }, 503);
+  const TOOL = () => new URL(req.url).searchParams.get("via") === "browser" ? "browser" : "watcher";
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if (overLimit("p:" + ip, 200, 600) || await edgeOver(env, "p:" + ip)) { await inboxReject(env, "slow down"); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
+  if (overLimit("p:" + ip, 200, 600) || await edgeOver(env, "p:" + ip)) { await inboxReject(env, "slow down", { tool: TOOL() }); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
   const body = await req.text();
-  if (body.length > 60000) { await inboxReject(env, "too big"); return json({ error: "too big" }, 413); }
+  if (body.length > 60000) { await inboxReject(env, "too big", { tool: TOOL() }); return json({ error: "too big" }, 413); }
   let msg = "";
   try { msg = /json/.test(req.headers.get("Content-Type") || "") ? String(JSON.parse(body).m || "") : String(new URLSearchParams(body).get("m") || ""); } catch (e) {}
   let m = null; try { m = JSON.parse(msg); } catch (e) {}
-  if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") { await inboxReject(env, "bad post"); return json({ error: "bad post" }, 400); }
+  if (!m || ![1, 2, 3].includes(m.v) || !/^[0-9a-f]{16}$/.test(String(m.id || "")) || typeof m.z !== "string") { await inboxReject(env, "bad post", { tool: TOOL(), id: m && /^[0-9a-f]{16}$/.test(String(m.id || "")) ? m.id : "", nm: m && (m.nm || m.ign) }); return json({ error: "bad post" }, 400); }
+  const viaB = new URL(req.url).searchParams.get("via") === "browser";
+  if (viaB) { m.via = "b"; msg = JSON.stringify(m); }   // the browser scanner: kept with the post for the admin feed (not signed, never trusted)
   await env.INBOX_DB.prepare("INSERT INTO posts (t, msg) VALUES (?, ?)").bind(Date.now(), msg).run();
   // new shop rows also go to the fast lane, so a deal reaches the board in seconds instead of at the next pump pass
   const blocked = await blockedIds(env);
@@ -594,11 +598,12 @@ function simpleRoom(r) {
 async function inboxSimple(req, env) {
   if (!env.INBOX_DB) return json({ error: "inbox offline" }, 503);
   const ip = req.headers.get("CF-Connecting-IP") || "";
-  if (overLimit("p:" + ip, 200, 600) || await edgeOver(env, "p:" + ip)) { await inboxReject(env, "simple: slow down"); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
+  if (overLimit("p:" + ip, 200, 600) || await edgeOver(env, "p:" + ip)) { await inboxReject(env, "simple: slow down", { tool: "partner" }); return json({ error: "slow down" }, 429, { "Retry-After": "120" }); }
   const key = String(req.headers.get("X-Source-Key") || "").toLowerCase();
-  if (!/^[0-9a-f]{64}$/.test(key)) { await inboxReject(env, "simple: no key"); return json({ error: "X-Source-Key header must be 64 hex characters you made once and keep" }, 401); }
+  const SID = /^[0-9a-f]{64}$/.test(key) ? (await sha256hex("fm-simple:" + key)).slice(0, 16) : "";
+  if (!/^[0-9a-f]{64}$/.test(key)) { await inboxReject(env, "simple: no key", { tool: "partner" }); return json({ error: "X-Source-Key header must be 64 hex characters you made once and keep" }, 401); }
   const body = await req.text();
-  if (body.length > 200000) { await inboxReject(env, "simple: too big"); return json({ error: "too big: send at most 200,000 characters, split bigger batches" }, 413); }
+  if (body.length > 200000) { await inboxReject(env, "simple: too big", { tool: "partner", id: SID }); return json({ error: "too big: send at most 200,000 characters, split bigger batches" }, 413); }
   let b = null; try { b = JSON.parse(body); } catch (e) {}
   const str = (v, n) => typeof v === "string" && v.length > 0 && v.length <= n;
   const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
@@ -612,7 +617,7 @@ async function inboxSimple(req, env) {
     if (b.room != null && !str(b.room, 40)) bad.push("room: 1 to 40 characters");
     if (!Array.isArray(b.items) || !b.items.length || b.items.length > 1500) bad.push("items: a list of 1 to 1,500");
   }
-  if (bad.length) { await inboxReject(env, "simple: bad post"); return json({ error: "bad post", problems: bad }, 400); }
+  if (bad.length) { await inboxReject(env, "simple: bad post: " + bad.join("; "), { tool: "partner", id: SID, nm: b && b.source }); return json({ error: "bad post", problems: bad }, 400); }
   const ids = await simpleIds();
   const t = Math.floor(Date.now() / 1000), rows = [], held = [], occ = new Map();
   b.items.forEach((it, n) => {
@@ -658,7 +663,7 @@ async function inboxSimple(req, env) {
   });
   const notes = rows.filter((r) => r._ign).map((r) => ({ name: r.i, stats_ignored: r._ign }));
   rows.forEach((r) => delete r._ign);
-  if (!rows.length) { await inboxReject(env, "simple: nothing kept"); return json({ error: "no item could be kept", held }, 400); }
+  if (!rows.length) { await inboxReject(env, "simple: nothing kept: " + held.slice(0, 3).map((h) => (h.name || "#" + h.index) + " (" + h.why.join(", ") + ")").join("; "), { tool: "partner", id: SID, nm: b.source, n: held.length }); return json({ error: "no item could be kept", held }, 400); }
   const batch = [{ at: new Date(t * 1000).toISOString().replace(".000Z", "+00:00"), src: "watcher-shop", rows }];
   const raw = new TextEncoder().encode(JSON.stringify(batch));
   const zb = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer());
@@ -666,7 +671,7 @@ async function inboxSimple(req, env) {
   const z = btoa(bin), parts = [];
   for (let i = 0; i < z.length; i += 24000) parts.push(z.slice(i, i + 24000));
   if (parts.length > 8) return json({ error: "too many items in one post, split it" }, 413);
-  const sid = (await sha256hex("fm-simple:" + key)).slice(0, 16), seq = Date.now();
+  const sid = SID, seq = Date.now();
   const blocked = await blockedIds(env);
   for (let k = 0; k < parts.length; k++) {
     const m = { v: 3, id: sid, nm: b.source, ign: "", ver: "simple.2", seq, k, n: parts.length, z: parts[k],
@@ -677,6 +682,94 @@ async function inboxSimple(req, env) {
     if (k === 0) await scannerSeen(env, m, blocked, "s");
   }
   return json({ ok: true, kept: rows.length, held, notes, tag: (await sha256hex("fm-inbox:" + sid)).slice(0, 4) });
+}
+// ---------------------------------------------------------------- the admin live feed (GET /admin/live-feed)
+// Owner only. Every upload of the last 2 hours as it arrived, newest first, read straight from the inbox (D1 posts):
+// who sent it (name and tag, never the raw id or key), with which tool, the world, channels, rooms and sellers, and each
+// row with what the site does with it. Read only. ?post=<id> gives one upload's rows; ?after=<id> only newer uploads.
+const LIVE_DEC = new Map();   // post id -> decoded summary and rows (a post never changes once stored)
+async function liveDecode(rows) {
+  // a big upload comes in parts (k of n): put the parts together, then unpack
+  const groups = new Map();
+  for (const x of rows) {
+    let m; try { m = JSON.parse(x.msg); } catch (e) { continue; }
+    if (!m || typeof m !== "object") continue;
+    const g = groups.get(m.id + "|" + m.seq) || { ids: [], parts: {}, n: m.n || 1, m, t: x.t };
+    g.ids.push(x.id); g.parts[m.k || 0] = m.z; g.t = Math.max(g.t, x.t); groups.set(m.id + "|" + m.seq, g);
+  }
+  const out = [];
+  for (const g of groups.values()) {
+    const id = Math.max(...g.ids), m = g.m;
+    if (LIVE_DEC.has(id)) { out.push(LIVE_DEC.get(id)); continue; }
+    const tag = /^[0-9a-f]{16}$/.test(String(m.id || "")) ? (await sha256hex("fm-inbox:" + m.id)).slice(0, 4) : "????";
+    const ver = String(m.ver || ""), tool = /^simple/.test(ver) ? "partner" : m.via === "b" ? "browser" : "watcher";
+    const o = { id, t: g.t, tag, name: String(m.nm || m.ign || "").slice(0, 16) || "Guest-" + tag, tool, ver: ver.slice(0, 16), parts: g.n, docs: null, error: "" };
+    if (Object.keys(g.parts).length < g.n) o.error = "waiting for " + (g.n - Object.keys(g.parts).length) + " more part(s)";
+    else {
+      try {
+        const z = Array.from({ length: g.n }, (_, k) => g.parts[k]).join("");
+        const bin = Uint8Array.from(atob(z), (c) => c.charCodeAt(0));
+        const txt = await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("deflate"))).text();
+        const docs = JSON.parse(txt);
+        o.docs = (Array.isArray(docs) ? docs : []).filter((d) => d && Array.isArray(d.rows)).map((d) => ({ src: String(d.src || ""), at: d.at, rows: d.rows.slice(0, 3000) }));
+      } catch (e) { o.error = "couldn't unpack: " + String(e).slice(0, 60); }
+    }
+    if (LIVE_DEC.size > 3000) LIVE_DEC.delete(LIVE_DEC.keys().next().value);
+    if (!o.error) LIVE_DEC.set(id, o);
+    out.push(o);
+  }
+  return out;
+}
+const LIVE_SETS = /throwing stars?$|^wooden top$|^icicle$|^snowball$|^steely throwing knives$/i;
+function liveRow(r, d, typ, names, nowS) {
+  const chat = /chat/.test(d.src), q = Math.max(1, r.q || 1), set = LIVE_SETS.test(String(r.i || ""));
+  const each = set ? r.p : Math.round((r.p || 0) / q), ty = typ[String(r.i || "").toLowerCase()] || 0, age = nowS - (r.t || nowS);
+  let flag = "live", why = "";
+  if (r.k === "b") { flag = "info"; why = "buy post, not a listing"; }
+  else if (r.w && r.w !== "Windia") { flag = "info"; why = r.w + " board"; }
+  else if (names && !names.has(String(r.i || "").toLowerCase())) { flag = "away"; why = "name isn't in the game's item list"; }
+  else if (!(r.p > 0) || !r.s) { flag = "away"; why = "no price or seller"; }
+  else if (chat) { flag = "info"; why = "trade chat post"; }
+  else if (r.so) { flag = "sold"; why = "sold slot: counts as a sale"; }
+  else if (ty >= 2000 && each < ty * 0.03) { flag = "away"; why = "under 3% of typical: read as a misread"; }
+  else if (ty && each < ty * HOLD_CUT && age < HOLD_S) { flag = "held"; why = "deal, public at " + new Date((r.t + HOLD_S) * 1000).toISOString().slice(11, 16) + " UTC"; }
+  return { item: r.i, each, stack: q, set, sold: !!r.so, seller: r.s, ch: r.c || 0, room: r.r || "", world: r.w || "Windia", stats: r.x || null, t: r.t || 0, typ: ty || 0, flag, why };
+}
+async function adminLiveFeed(env, url) {
+  const now = Date.now(), from = now - 2 * 3600e3, nowS = Math.floor(now / 1000);
+  const r = await env.INBOX_DB.prepare("SELECT id, t, msg FROM posts WHERE t > ? ORDER BY id DESC LIMIT 1500").bind(from).all();
+  const posts = (await liveDecode(r.results || [])).sort((a, b) => b.id - a.id);
+  const typ = await holdPrices(env).catch(() => ({}));
+  const ids = await simpleIds(); const names = ids && ids.byName ? ids.byName : null;
+  const want = Number(url.searchParams.get("post") || 0);
+  if (want) {
+    const p = posts.find((x) => x.id === want);
+    if (!p) return json({ error: "not in the last 2 hours" }, 404, { "Cache-Control": "no-store" });
+    const rows = []; (p.docs || []).forEach((d) => d.rows.forEach((x) => rows.push(Object.assign(liveRow(x, d, typ, names, nowS), { src: d.src }))));
+    return json({ id: p.id, name: p.name, tag: p.tag, tool: p.tool, rows }, 200, { "Cache-Control": "no-store" });
+  }
+  const after = Number(url.searchParams.get("after") || 0);
+  const list = posts.filter((p) => p.id > after).slice(0, 300).map((p) => {
+    const worlds = {}, chs = {}, rooms = {}, sellers = {}, flags = { live: 0, held: 0, away: 0, sold: 0, info: 0 };
+    let n = 0;
+    (p.docs || []).forEach((d) => d.rows.forEach((x) => {
+      n++; const lr = liveRow(x, d, typ, names, nowS); flags[lr.flag]++;
+      worlds[lr.world] = 1; if (lr.ch) chs[lr.ch] = 1; if (lr.room) rooms[lr.room] = 1; if (lr.seller) sellers[lr.seller] = (sellers[lr.seller] || 0) + 1;
+    }));
+    const kinds = [...new Set((p.docs || []).map((d) => /chat/.test(d.src) ? "chat" : "shops"))];
+    return { id: p.id, t: p.t, name: p.name, tag: p.tag, tool: p.tool, ver: p.ver, error: p.error, rows: n, kinds, worlds: Object.keys(worlds), chs: Object.keys(chs).map(Number).sort((a, b) => a - b).slice(0, 12),
+      rooms: Object.keys(rooms).slice(0, 8), sellers: Object.keys(sellers).length, sellerTop: Object.keys(sellers).slice(0, 4), flags };
+  });
+  // scanning now: every sender in the last hour, active when heard from in the last 15 minutes
+  const who = {};
+  posts.filter((p) => p.t > now - 3600e3).forEach((p) => {
+    const k = p.tag + "|" + p.tool, w = who[k] || (who[k] = { name: p.name, tag: p.tag, tool: p.tool, uploads: 0, rows: 0, last: 0 });
+    w.uploads++; w.rows += (p.docs || []).reduce((a, d) => a + d.rows.length, 0); w.last = Math.max(w.last, p.t); if (p.name && !/^Guest-/.test(p.name)) w.name = p.name;
+  });
+  const scanners = Object.values(who).map((w) => Object.assign(w, { active: now - w.last <= 15 * 6e4 })).sort((a, b) => b.last - a.last);
+  let rejects = [];
+  try { rejects = ((await env.INBOX_DB.prepare("SELECT t, why, tool, tag, nm, n FROM rejlog WHERE t > ? ORDER BY t DESC LIMIT 100").bind(from).all()).results) || []; } catch (e) {}
+  return json({ at: now, window: "2h", posts: list, scanners, rejects }, 200, { "Cache-Control": "no-store" });
 }
 // Scanners active right now, FM Watcher and the browser scanner alike: one row per scanner with its last upload
 // time. A named scanner counts once even when it runs both; guests count by their hashed id. Blocked ids never count.
@@ -736,7 +829,20 @@ async function blockedIds(env) {
   } catch (e) { return new Set(); }
 }
 // Rejected uploads, counted per UTC day and reason (KV inbox:rej:<day>, kept 15 days) for the daily scanner check.
-async function inboxReject(env, why) {
+let rejMade = false;
+async function inboxReject(env, why, info) {
+  // the admin live feed's detail: when, why, which tool and which scanner when the post says (kept 2 hours)
+  try {
+    if (env.INBOX_DB) {
+      if (!rejMade) { await env.INBOX_DB.prepare("CREATE TABLE IF NOT EXISTS rejlog (t INTEGER NOT NULL, why TEXT, tool TEXT, tag TEXT, nm TEXT, n INTEGER)").run(); rejMade = true; }
+      const i = info || {};
+      const tag = i.id ? (await sha256hex("fm-inbox:" + i.id)).slice(0, 4) : "";
+      await env.INBOX_DB.batch([
+        env.INBOX_DB.prepare("INSERT INTO rejlog (t, why, tool, tag, nm, n) VALUES (?, ?, ?, ?, ?, ?)").bind(Date.now(), String(why).slice(0, 120), i.tool || "", tag, String(i.nm || "").slice(0, 16), i.n || 0),
+        env.INBOX_DB.prepare("DELETE FROM rejlog WHERE t < ?").bind(Date.now() - 3 * 3600e3),
+      ]);
+    }
+  } catch (e) {}
   try {
     const k = "inbox:rej:" + new Date().toISOString().slice(0, 10), o = (await env.ACCOUNTS.get(k, "json")) || {};
     o[why] = (o[why] || 0) + 1;
