@@ -26,7 +26,7 @@
     return (OWNC[sl] = !!OWNH[("0000000" + x.toString(16)).slice(-8)]);
   }
   var LIVE = "https://raw.githubusercontent.com/maplefm/maplefm.github.io/live/";
-  var CREW = ["Maya", "Jack", "Matt", "Jimmy"];
+  var CREW = ["Maya", "Jack", "Matt", "Jimmy", "VioletScanner"];   // VioletScanner: the owner's partner, scanning full time
   // trade chat rows read wrong before a reader fix, corrected by hand: seller|item as read|price -> real item
   var CHATFIX = { "videogame|Claw Attack Scroll: Intermediate|140000": "Earring LUK Scroll: Intermediate" };
   var FILES = [["data/watcher.json", "Maya"], ["data/watcher-2.json", "Jack"], ["data/watcher-3.json", "Matt"], ["data/watcher-4.json", "Jimmy"], ["data/streams.json", "Streams"], ["data/streams-vods.json", "Streams"], ["data/inbox.json", null], ["data/fast.json", null], ["data/inbox-zenith.json", null, "Zenith"]];   // fast.json: new rows from the Worker before the pump folds them in
